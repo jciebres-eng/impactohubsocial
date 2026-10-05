@@ -55,7 +55,7 @@ def seed(state, force: bool = False) -> dict:
         u_comp = user(DEMO_EMAILS["company"], "Bruno Exemplo (Empresa)", comp)
         u_prov = user(DEMO_EMAILS["provider"], "Carla Exemplo (Contadora)", prov)
         user(DEMO_EMAILS["government"], "Davi Exemplo (Governo)", gov)
-        user(DEMO_EMAILS["admin"], "Admin Demo", plat, admin=True)
+        u_admin = user(DEMO_EMAILS["admin"], "Admin Demo", plat, admin=True)
         c.run("INSERT INTO funder_profiles(org_id, causes, ods, territories, ticket_min_cents, ticket_max_cents, required_document_types, min_org_age_months)"
               " VALUES ($1,'{educacao,cultura}','{4}','{BR-MT}', 100000, 5000000, '{estatuto_social}', 24)", comp)
         c.run("INSERT INTO provider_profiles(org_id, services, categories, territories) VALUES ($1,'{Prestação de contas,Contabilidade para OSC}',"
@@ -107,6 +107,7 @@ def seed(state, force: bool = False) -> dict:
         c.run("INSERT INTO materials(org_id, title, summary, category, url, status, published_at) VALUES ($1,'[EXEMPLO] Guia de prestação de contas',"
               " 'Material fictício de demonstração.','guide','https://example.org/guia-ficticio','published', now())", gov)
         _seed_solutions(c, osc, u_osc)
+        _seed_institutional(c, osc, u_osc, u_admin, org, user)
     return {"status": "seeded", "password_env": "DEMO_PASSWORD", "users": DEMO_EMAILS}
 
 
@@ -137,3 +138,26 @@ def _seed_solutions(c, osc_org: str, user: str) -> None:
               " $10::smallint[],$11,$12::bigint,$13::bool,$14::bigint,$15,$16::bool,$16::bool,'published',true,'author','Dados de demonstração','organization',true,'DEMO')",
               osc_org, user, kind, stage, title, summary, themes, pop, inst, ods, uf, budget, fund, int(budget * 0.5) if fund and budget else None,
               "cc_by" if fund else "all_rights_reserved", bool(fund))
+
+
+def _seed_institutional(c, osc: str, u_osc: str, u_admin: str, org, user) -> None:
+    """Dados institucionais de DEMONSTRAÇÃO (v0.10.1). Tudo fictício e rotulado [DEMO]; a verificação abaixo é FICTÍCIA e só existe para exibir o estado
+    'verificada' no ambiente local — nunca representa verificação real."""
+    c.run("UPDATE organizations SET legal_nature_code = 'association', institutional_profile = 'cultural', mission = '[DEMO] Missão fictícia: formar crianças em música.',"
+          " geographic_scope = 'municipal' WHERE id = $1", osc)
+    qid = c.scalar("INSERT INTO organization_qualifications(org_id, qualification_type, issuing_authority, certificate_number, issue_date, expiration_date, verification_url,"
+                   " notes, declared_by, areas) VALUES ($1,'osc','[DEMO] Órgão fictício','DEMO-0001', current_date - 200, current_date + 160, 'https://example.org/demo-consulta',"
+                   " '[DEMO] qualificação fictícia', $2, '{cultura,educacao}') RETURNING id::text", osc, u_osc)
+    c.run("UPDATE organization_qualifications SET verification_status = 'verified', validated_by = $2, validation_date = current_date,"
+          " validation_note = '[DEMO] verificação FICTÍCIA para demonstração' WHERE id = $1", qid, u_admin)
+    c.run("INSERT INTO organization_qualifications(org_id, qualification_type, issuing_authority, notes, declared_by) VALUES ($1,'oscip','[DEMO] Autoridade fictícia',"
+          " '[DEMO] declarada, sem comprovante (exemplo de estado DECLARADA)', $2)", osc, u_osc)
+    c.run("INSERT INTO organization_agreements(org_id, agreement_type, counterpart_name, counterpart_authority, instrument_number, object_summary, start_date, end_date,"
+          " value_cents, qualification_id, created_by) VALUES ($1,'partnership_term','[DEMO] Prefeitura Exemplo','[DEMO] Secretaria fictícia','DEMO-TP-001',"
+          " '[DEMO] Instrumento fictício de exemplo.', current_date - 120, current_date + 60, 8000000, $2, $3)", osc, qid, u_osc)
+    c.run("INSERT INTO formalization_steps(org_id, step_code, state, note, updated_by) VALUES ($1,'define_purpose','done_declared','[DEMO]', $2)", osc, u_osc)
+    c.run("INSERT INTO mentoring_requests(org_id, topic, message, created_by) VALUES ($1,'documentation','[DEMO] Pedido fictício de mentoria sobre documentos.', $2)", osc, u_osc)
+    col = c.scalar("INSERT INTO organizations(kind, legal_name, uf, city, legal_nature_code, description, compliance_status) VALUES ('osc',"
+                   " '[DEMO] Coletivo Exemplo Fictício (em estruturação)','MT','Lucas do Rio Verde','collective','Iniciativa fictícia sem CNPJ, para demonstrar a trilha de formalização.',"
+                   " 'pending') RETURNING id::text")
+    user("coletivo@demo.impacto.local", "Elisa Exemplo (Coletivo)", col)

@@ -14,3 +14,6 @@ Regras:
 - Sem regra publicada ⇒ "Não foi possível confirmar."; sem valor ⇒ sem estimativa.
 - Nada de benefício fiscal inventado: o catálogo de regras iniciais continua como **candidatas** (`config/fiscal_rules.candidates.json`) até publicação com 2 aprovadores.
 - **Não integrado nesta versão:** a rota de estimativas fiscais não recebe ainda o `osc_org_id` opcional para cruzar com a elegibilidade institucional (pendência registrada).
+
+## v0.10.1 — integração com a rota de estimativas
+Resolvido o pendente do v0.10.0: `fiscal-estimates` cruza com a elegibilidade institucional da OSC (apenas alvo OSC). A estimativa continua **não sendo** direito a benefício.

@@ -1,0 +1,18 @@
+{
+  "version": "formalization@1.0",
+  "status": "HIPÓTESE inicial — a ordem e as exigências variam conforme a natureza jurídica, o município e o tipo de oportunidade; validar com assessoria jurídica/contábil antes de usar como orientação oficial",
+  "disclaimer": "Trilha de apoio. Não é parecer jurídico, não substitui advogado, contador ou o órgão competente, e concluir etapas não garante elegibilidade a nenhuma oportunidade.",
+  "steps": [
+    {"code": "define_purpose", "label": "Definir finalidade, público e território de atuação", "kind": "manual", "help": "Escreva em poucas linhas quem você atende, onde e para quê. Isso orienta todas as próximas etapas."},
+    {"code": "gather_people", "label": "Reunir as pessoas que vão compor a organização", "kind": "manual", "help": "Liste quem participa e com que papel. A forma de organização depende da natureza escolhida."},
+    {"code": "choose_nature", "label": "Escolher a forma jurídica com apoio profissional", "kind": "manual", "help": "Associação, fundação, cooperativa e outras formas têm exigências diferentes. Converse com um profissional antes de decidir."},
+    {"code": "statute_assembly", "label": "Redigir e aprovar o estatuto em assembleia", "kind": "manual", "help": "O estatuto e a ata da assembleia são a base dos documentos institucionais."},
+    {"code": "registration", "label": "Registrar a organização nos órgãos competentes", "kind": "manual", "help": "O registro e os órgãos variam conforme a forma jurídica e o município. Confirme com profissional habilitado."},
+    {"code": "cnpj", "label": "Possuir CNPJ cadastrado na plataforma", "kind": "auto", "check": "cnpj_present", "help": "Informe o CNPJ no cadastro da organização."},
+    {"code": "doc_statute", "label": "Enviar o estatuto social", "kind": "auto", "check": "doc:estatuto_social", "help": "Envie o arquivo em Documentos; a administração valida."},
+    {"code": "doc_cnpj", "label": "Enviar o cartão CNPJ", "kind": "auto", "check": "doc:cartao_cnpj", "help": "Envie o arquivo em Documentos; a administração valida."},
+    {"code": "compliance", "label": "Concluir a análise de compliance", "kind": "auto", "check": "compliance_approved", "help": "Complete o perfil e responda às pendências da análise."},
+    {"code": "first_project", "label": "Cadastrar o primeiro projeto", "kind": "auto", "check": "has_project", "help": "Registre o projeto com objetivos, orçamento e indicadores."},
+    {"code": "study_qualifications", "label": "Avaliar com assessoria quais qualificações se aplicam", "kind": "manual", "help": "Qualificações como OSC, OSCIP, OS ou CEBAS têm requisitos próprios. Registre as que obtiver em Instituição > Qualificações."}
+  ]
+}

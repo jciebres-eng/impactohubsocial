@@ -10,3 +10,6 @@ Evolui `SOLUTION_LIBRARY.md` (v0.9.0). Mudanças:
 - **Busca:** filtros por natureza jurídica, qualificações verificadas, modalidades, compartilhamento e "prontas para financiamento"; interpretação de intenção continua sem IA.
 - **Necessidades do proponente** (`/v1/institutional/needs`): financiamento, parceria, voluntariado etc., persistidas.
 - Resultado nunca prometido: "pode participar" ≠ "vai receber".
+
+## v0.10.1
+Novos: `backend/impacto/api/institutional_extra_routes.py`, `engines/institutional/{persona,formalization}.py`, `config/formalization_path.json`, `migrations/0007_*.sql`, `web/src/pages/institution_extra.tsx`, `tests/test_v0101_institutional.py`, `tests/test_e2e_v0101.py`.

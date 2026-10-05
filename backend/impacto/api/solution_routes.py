@@ -409,6 +409,47 @@ def aggregates(ctx: Ctx):
         return c.scalar("SELECT solution_aggregates()")
 
 
+@route("GET", "/v1/solutions/{solution_id}/network", min_role="viewer", tags=T,
+       summary="Rede de impacto da solução (autor, território, ODS, temas, soluções relacionadas e demanda agregada). Sem identidades privadas de financiadores/replicadores.")
+def network(ctx: Ctx):
+    """Grafo pequeno e determinístico (≤ ~40 nós): só relações JÁ cadastradas. Interesse/replicação aparecem apenas como contagens agregadas."""
+    sid = ctx.path["solution_id"]
+    with ctx.tx(readonly=True) as c:
+        s = _readable(c, sid)
+        author = c.one("SELECT legal_name, trade_name, kind FROM organizations WHERE id = $1", s["org_id"]) or {}
+        rels = c.query("SELECT r.rel_type, o.id::text AS id, o.title FROM solution_relationships r JOIN solutions o ON o.id = r.to_id AND o.visibility = 'published' WHERE r.from_id = $1"
+                       " UNION ALL SELECT r.rel_type || '_by', o.id::text, o.title FROM solution_relationships r JOIN solutions o ON o.id = r.from_id AND o.visibility = 'published'"
+                       " WHERE r.to_id = $1 LIMIT 12", sid)
+        stats = c.scalar("SELECT solution_public_stats($1)", sid) or {}
+    ods_names = {int(k): v for k, v in svc.ODS_NAMES.items()} if hasattr(svc, "ODS_NAMES") else {}
+    nodes = [{"id": "sol", "type": "solution", "label": s["title"], "detail": "Solução em foco"}]
+    edges = []
+
+    def add(nid, typ, label, rel, detail=None):
+        nodes.append({"id": nid, "type": typ, "label": label, "detail": detail})
+        edges.append({"source": "sol", "target": nid, "label": rel})
+
+    add("org", "organization", author.get("trade_name") or author.get("legal_name") or "Organização autora", "criada por", "Autoria declarada" if s.get("trust_level") in (None, "self_declared") else "Autoria conforme verificação")
+    if s.get("uf"):
+        add("terr", "territory", f"{s['city'] + '/' if s.get('city') else ''}{s['uf']}", "realizada em")
+    for o in (s.get("ods") or [])[:17]:
+        add(f"ods{o}", "ods", f"ODS {o}" + (f" · {ods_names[o]}" if o in ods_names else ""), "contribui para")
+    for t in (s.get("themes") or [])[:8]:
+        add(f"th:{t}", "theme", t.replace("_", " "), "tema")
+    labels = {"derived_from": "derivada de", "replicates": "replica", "complements": "complementa", "combined_with": "combinada com",
+              "derived_from_by": "originou", "replicates_by": "replicada por", "complements_by": "complementada por", "combined_with_by": "combinada com"}
+    for r in rels:
+        add(f"rel:{r['id']}", "related", r["title"], labels.get(r["rel_type"], r["rel_type"]), "Solução publicada")
+    demand = {k: stats.get(k, 0) for k in ("interested_orgs", "requested_info_orgs", "in_evaluation_orgs", "adaptation_requests", "saves")}
+    rep = stats.get("replications") or {}
+    if any(demand.values()) or any((rep.get("interested"), rep.get("started"), rep.get("completed_confirmed"))):
+        nodes.append({"id": "demand", "type": "demand", "label": "Demanda agregada", "detail": "Contagens sem identificar organizações; replicação concluída só conta se confirmada pelo autor"})
+        edges.append({"source": "sol", "target": "demand", "label": "interesse"})
+    return {"nodes": nodes, "edges": edges, "demand": {**demand, "replications": {"interested": rep.get("interested", 0), "started": rep.get("started", 0),
+                                                                                 "completed_confirmed": rep.get("completed_confirmed", 0), "destinations": rep.get("destinations", [])}},
+            "note": "Mostra apenas relações cadastradas. Não indica causalidade nem garante replicabilidade; identidades de interessados permanecem privadas."}
+
+
 @route("GET", "/v1/solutions/{solution_id}/similar", min_role="viewer", tags=T, summary="“Quero algo como este”: soluções parecidas, com filtro opcional pelo meu território")
 def similar(ctx: Ctx):
     sid = ctx.path["solution_id"]

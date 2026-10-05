@@ -30,3 +30,6 @@ DRAFT → REVIEW → APPROVED → PUBLISHED → ARCHIVED. **Quatro olhos**: cria
 
 ## Limitações
 Qualidade depende das regras cadastradas; sem regras publicadas o resultado é PENDENTE. Não substitui o edital nem profissional habilitado.
+
+## v0.10.1
+A estimativa fiscal de projeto (`/v1/insights/fiscal-estimates?osc_org_id=`) passou a incluir o resultado deste motor para a modalidade `incentive_law`, em bloco **separado** (`institutional_eligibility`). Sem regra publicada ⇒ PENDENTE.

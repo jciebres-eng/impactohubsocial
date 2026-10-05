@@ -6,6 +6,7 @@ import { Link } from "../router";
 import { useSession } from "../session";
 import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad } from "../ui/kit";
 import { UploadButton } from "./documents";
+import { AdminAgreements, AdminMentoring, AgreementsTab, FormalizationTab, PersonaTab } from "./institution_extra";
 
 // ------------------------------------------------------------------------------------------------ rótulos e tons
 const ELIG_TONE: Record<string, string> = { eligible: "good", probably_eligible: "good", pending: "warn", needs_professional_validation: "warn", not_eligible: "bad" };
@@ -57,7 +58,7 @@ export function Institution() {
   const proponent = kind === "osc";
   const tabs: [string, string][] = [["resumo", "Resumo"], ["perfil", "Perfil"]];
   if (proponent || kind === "company" || kind === "government") tabs.push(["documentos", "Documentos"]);
-  if (proponent) tabs.push(["qualificacoes", "Qualificações"], ["elegibilidade", "Elegibilidade"], ["necessidades", "Necessidades"]);
+  if (proponent) tabs.push(["qualificacoes", "Qualificações"], ["perfis", "OS / OSCIP"], ["instrumentos", "Instrumentos"], ["elegibilidade", "Elegibilidade"], ["formalizacao", "Formalização e mentoria"], ["necessidades", "Necessidades"]);
   tabs.push(["conquistas", "Conquistas"]);
   if (proponent) tabs.push(["declaracao", "Declaração"]);
   const [tab, setTab] = useState("resumo");
@@ -71,6 +72,9 @@ export function Institution() {
       {tab === "perfil" && <ProfileTab kind={kind} />}
       {tab === "documentos" && <DocumentsTab />}
       {tab === "qualificacoes" && <QualificationsTab />}
+      {tab === "perfis" && <PersonaTab />}
+      {tab === "instrumentos" && <AgreementsTab />}
+      {tab === "formalizacao" && <FormalizationTab />}
       {tab === "elegibilidade" && <EligibilityTab />}
       {tab === "necessidades" && <NeedsTab />}
       {tab === "conquistas" && <BadgesTab />}
@@ -235,15 +239,16 @@ function QualificationsTab() {
   const { data, error, loading, reload } = useLoad<any>("/v1/institutional/qualifications");
   const cat = useLoad<any>("/v1/institutional/catalogs");
   const docs = useLoad<any>("/v1/documents?limit=100");
-  const f = useForm<any>({ qualification_type: "", issuing_authority: "", certificate_number: "", protocol: "", issue_date: "", expiration_date: "", verification_url: "", document_id: "", notes: "" });
+  const f = useForm<any>({ qualification_type: "", issuing_authority: "", certificate_number: "", protocol: "", issue_date: "", expiration_date: "", verification_url: "", document_id: "", notes: "", areas: "" });
   const { busy, run } = useAction();
   const [events, setEvents] = useState<{ id: string; items: any[] } | null>(null);
   async function add(e: any) {
     e.preventDefault();
     const b: any = {};
-    for (const [k, v] of Object.entries(f.v)) if (v !== "") b[k] = v;
+    for (const [k, v] of Object.entries(f.v)) if (v !== "" && k !== "areas") b[k] = v;
+    if (f.v.areas) b.areas = String(f.v.areas).split(",").map((x) => x.trim().toLowerCase().replace(/\s+/g, "_")).filter(Boolean);
     const r = await run(() => api.post("/v1/institutional/qualifications", b), "Qualificação registrada como declarada");
-    if (r) { f.setV({ qualification_type: "", issuing_authority: "", certificate_number: "", protocol: "", issue_date: "", expiration_date: "", verification_url: "", document_id: "", notes: "" }); reload(); }
+    if (r) { f.setV({ qualification_type: "", issuing_authority: "", certificate_number: "", protocol: "", issue_date: "", expiration_date: "", verification_url: "", document_id: "", notes: "", areas: "" }); reload(); }
   }
   async function remove(id: string) { await run(() => api.del(`/v1/institutional/qualifications/${id}`), "Removida"); reload(); }
   async function showEvents(id: string) { const r = await run(() => api.get(`/v1/institutional/qualifications/${id}/events`)); if (r) setEvents({ id, items: r.items }); }
@@ -279,6 +284,7 @@ function QualificationsTab() {
           <Field label="Validade"><Input type="date" value={f.v.expiration_date} onChange={f.set("expiration_date")} /></Field>
           <Field label="Endereço de verificação oficial" hint="https://… (consulta pública do órgão)"><Input value={f.v.verification_url} onChange={f.set("verification_url")} /></Field>
           <Field label="Documento comprobatório"><Select value={f.v.document_id} onChange={f.set("document_id")} placeholder="Nenhum" options={(docs.data?.items || []).map((d: any) => [d.id, `${d.title || d.filename}`])} /></Field>
+          <Field label="Áreas de atuação" hint="Separe por vírgula (ex.: saude, educacao) — para OS/OSCIP"><Input value={f.v.areas} onChange={f.set("areas")} /></Field>
           <Field label="Observações" wide><TextArea rows={2} value={f.v.notes} onChange={f.set("notes")} /></Field>
           <Button type="submit" variant="primary" busy={busy} disabled={!f.v.qualification_type}>Registrar</Button>
         </form>
@@ -469,7 +475,7 @@ const WF_LABEL: Record<string, string> = { draft: "Rascunho", review: "Em revis�
 
 export function InstitutionAdmin() {
   const [tab, setTab] = useState("visao");
-  const tabs: [string, string][] = [["visao", "Visão geral"], ["qualificacoes", "Qualificações"], ["documentos", "Documentos"], ["regras", "Regras"], ["catalogo", "Catálogos"], ["organizacao", "Situação da organização"]];
+  const tabs: [string, string][] = [["visao", "Visão geral"], ["qualificacoes", "Qualificações"], ["documentos", "Documentos"], ["instrumentos", "Instrumentos"], ["mentoria", "Mentoria"], ["regras", "Regras"], ["catalogo", "Catálogos"], ["organizacao", "Situação da organização"]];
   return (
     <AdminGate>
       <PageHead title="Institucional" sub="Verificação de qualificações e documentos, regras de elegibilidade e catálogos — com fluxo rascunho → revisão → aprovação (outra pessoa) → publicação." />
@@ -479,6 +485,8 @@ export function InstitutionAdmin() {
       {tab === "visao" && <AdminOverview />}
       {tab === "qualificacoes" && <AdminQualifications />}
       {tab === "documentos" && <AdminDocuments />}
+      {tab === "instrumentos" && <AdminAgreements />}
+      {tab === "mentoria" && <AdminMentoring />}
       {tab === "regras" && <AdminRules />}
       {tab === "catalogo" && <AdminCatalog />}
       {tab === "organizacao" && <AdminOrgStatus />}

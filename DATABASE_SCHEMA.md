@@ -23,3 +23,11 @@ Todas as tabelas novas têm RLS (teste `test_every_table_has_rls`). Política de
 
 ## Migração e reversão
 Só para frente, com checksum. Reversão = restaurar backup (`scripts/restore_test.sh`); não há migração `down`. Reset de desenvolvimento: `scripts/dev_reset_db.sh`.
+
+## v0.10.1 — migração 0007
+| Tabela | Finalidade | Proteções |
+|---|---|---|
+| `organization_agreements` | instrumentos (contrato de gestão, termos, acordos) | `agreement_guard`: org não promove verificação; RLS |
+| `formalization_steps` | etapas manuais declaradas (PK org+etapa) | RLS |
+| `mentoring_requests` | pedidos de mentoria | `mentoring_guard`: org só cancela; RLS |
+Coluna nova: `organization_qualifications.areas text[]`. Banco de desenvolvimento: 114 tabelas, 237 políticas RLS.

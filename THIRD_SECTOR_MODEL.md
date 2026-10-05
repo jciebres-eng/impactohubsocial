@@ -28,3 +28,8 @@ Calculados (nunca estáticos), com critério, fonte, data de verificação e val
 
 ## Limites (o que NÃO fazemos)
 Não consultamos bases governamentais em tempo real; não emitimos certidões; não garantimos elegibilidade, captação ou benefício fiscal; não substituímos assessoria jurídica/contábil.
+
+## v0.10.1 — perfis, instrumentos, trilha e mentoria
+- **Perfis** (OS, OSCIP, OSC, estruturação) são visões derivadas do que está cadastrado (`GET /v1/institutional/persona`); não afirmam qualificação ausente.
+- **Instrumentos** (`organization_agreements`): declarados até verificação humana; alertas de vigência 30/90 dias.
+- **Trilha de formalização** (`config/formalization_path.json`, *HIPÓTESE inicial*): etapas automáticas × declaradas; mentoria é atendimento humano sem prazo garantido.

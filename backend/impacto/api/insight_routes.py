@@ -4,6 +4,7 @@ from __future__ import annotations
 from ..http import ApiError, Ctx, not_found, route
 from ..engines.fiscal.engine import evaluate as fiscal_evaluate
 from ..services import compliance
+from ..services import institutional as inst_svc
 from . import schemas as S
 
 
@@ -68,6 +69,7 @@ def gov_stats(ctx: Ctx, q: GovQ):
 # ------------------------------------------------------------------------------------------------ fiscal
 class FiscalQ(S.In):
     project_id: S.Uuid | None = None
+    osc_org_id: S.Uuid | None = None   # v0.10.1: cruza a estimativa com a elegibilidade institucional da OSC beneficiária
 
 
 @route("GET", "/v1/fiscal/estimates", kinds=("company",), query=FiscalQ, min_role="analyst", feature="fiscal.estimates", tags=("fiscal",),
@@ -78,10 +80,26 @@ def fiscal_estimates(ctx: Ctx, q: FiscalQ):
         tp = c.one("SELECT * FROM company_tax_profiles WHERE org_id = $1", ctx.org_id)
         proj = None
         if q.project_id:
-            proj = c.one("SELECT causes FROM projects WHERE id = $1", q.project_id)
+            proj = c.one("SELECT causes, org_id::text AS org_id FROM projects WHERE id = $1", q.project_id)
             if not proj:
                 raise not_found("Projeto")
+        inst = None
+        osc_id = q.osc_org_id or (proj or {}).get("org_id")
+        if osc_id:
+            facts = inst_svc.facts(c, osc_id)
+            if facts and facts.get("kind") == "osc":
+                m = inst_svc.maturity(c, osc_id, facts)
+                ev = inst_svc.evaluate_for_modality(c, osc_id, "incentive_law", f=facts, m=m)
+                inst = {"organization_id": osc_id, "state": ev["state"], "state_label": ev["state_label"], "summary": ev.get("summary"),
+                        "missing": [r["label"] for r in ev["requirements"] if r["status"] != "met"],
+                        "layers": inst_svc.fiscal_layers(c, ev, {"causes": (proj or {}).get("causes") or []}),
+                        "note": "Elegibilidade institucional da OSC é uma camada SEPARADA da estimativa fiscal da empresa. Nenhuma das duas garante benefício; "
+                                "ambas exigem validação profissional."}
     res = fiscal_evaluate(rules, tp, proj)
+    if inst is not None:
+        res["institutional_eligibility"] = inst
+        if inst["state"] == "not_eligible":
+            res["warning"] = "A OSC avaliada não atende a requisitos institucionais para esta modalidade: as estimativas abaixo não devem ser tratadas como aplicáveis a ela."
     if not rules:
         res["notice"] = "Nenhuma regra fiscal aprovada nesta instalação. Regras candidatas aguardam revisão de dois especialistas."
     return res

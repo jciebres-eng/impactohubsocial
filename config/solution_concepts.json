@@ -1,5 +1,5 @@
 {
- "version": "concepts@1.0",
+ "version": "concepts@1.0+0.10.1",
  "note": "Tesauro PRÓPRIO da plataforma (sinônimos, siglas, expansões). Não é um modelo de embeddings: aproxima semântica por conceitos declarados. Revisão editorial contínua é necessária.",
  "concepts": {
   "caps": {
@@ -900,6 +900,466 @@
    "expands": [],
    "themes": [],
    "ods": [],
+   "esg": []
+  },
+  "primeira_infancia": {
+   "label": "Primeira infância",
+   "dim": "population",
+   "terms": [
+    "bebes",
+    "bebe",
+    "criancas pequenas",
+    "creches"
+   ],
+   "expands": [
+    "criancas"
+   ],
+   "themes": [
+    "criancas_adolescentes"
+   ],
+   "ods": [
+    4,
+    3
+   ],
+   "esg": []
+  },
+  "gestantes": {
+   "label": "Gestantes e puérperas",
+   "dim": "population",
+   "terms": [
+    "gestante",
+    "puerperas",
+    "pre natal",
+    "pre-natal"
+   ],
+   "expands": [
+    "saude"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3,
+    5
+   ],
+   "esg": []
+  },
+  "migrantes_refugiados": {
+   "label": "Migrantes e refugiados",
+   "dim": "population",
+   "terms": [
+    "migrantes",
+    "imigrantes",
+    "refugiados",
+    "refugio"
+   ],
+   "expands": [],
+   "themes": [
+    "direitos_humanos"
+   ],
+   "ods": [
+    10
+   ],
+   "esg": []
+  },
+  "cuidadores": {
+   "label": "Cuidadores",
+   "dim": "population",
+   "terms": [
+    "cuidadores",
+    "cuidador",
+    "cuidado familiar"
+   ],
+   "expands": [
+    "idosos"
+   ],
+   "themes": [
+    "saude",
+    "assistencia_social"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "autismo": {
+   "label": "Autismo (TEA)",
+   "dim": "population",
+   "terms": [
+    "autista",
+    "autistas"
+   ],
+   "expands": [
+    "pcd"
+   ],
+   "themes": [
+    "pessoa_com_deficiencia",
+    "saude"
+   ],
+   "ods": [
+    3,
+    10
+   ],
+   "esg": []
+  },
+  "dependencia_quimica": {
+   "label": "Álcool e outras drogas",
+   "dim": "theme",
+   "terms": [
+    "drogas",
+    "alcool",
+    "dependencia quimica",
+    "uso de substancias",
+    "redução de danos",
+    "reducao de danos"
+   ],
+   "expands": [
+    "saude_mental"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "musica": {
+   "label": "Música",
+   "dim": "theme",
+   "terms": [
+    "orquestra",
+    "coral",
+    "canto",
+    "instrumentos musicais"
+   ],
+   "expands": [
+    "artes"
+   ],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [
+    4,
+    11
+   ],
+   "esg": []
+  },
+  "teatro_danca": {
+   "label": "Teatro, dança e circo",
+   "dim": "theme",
+   "terms": [
+    "circo",
+    "performance"
+   ],
+   "expands": [
+    "artes"
+   ],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [
+    4,
+    11
+   ],
+   "esg": []
+  },
+  "leitura": {
+   "label": "Leitura e literatura",
+   "dim": "theme",
+   "terms": [
+    "leitura",
+    "literatura",
+    "livros",
+    "livro",
+    "contacao de historias"
+   ],
+   "expands": [
+    "biblioteca"
+   ],
+   "themes": [
+    "educacao",
+    "cultura"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "alfabetizacao": {
+   "label": "Alfabetização e EJA",
+   "dim": "theme",
+   "terms": [
+    "eja",
+    "educacao de jovens e adultos"
+   ],
+   "expands": [],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "contraturno": {
+   "label": "Atividades no contraturno",
+   "dim": "theme",
+   "terms": [
+    "contraturno",
+    "apoio escolar"
+   ],
+   "expands": [
+    "escola"
+   ],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "educacao_ambiental": {
+   "label": "Educação ambiental",
+   "dim": "theme",
+   "terms": [
+    "reciclagem escolar",
+    "consciencia ambiental"
+   ],
+   "expands": [
+    "meio_ambiente"
+   ],
+   "themes": [
+    "meio_ambiente",
+    "educacao"
+   ],
+   "ods": [
+    4,
+    13
+   ],
+   "esg": []
+  },
+  "formacao_professores": {
+   "label": "Formação de professores",
+   "dim": "theme",
+   "terms": [
+    "formacao de professores",
+    "formacao docente",
+    "professores",
+    "docentes"
+   ],
+   "expands": [
+    "escola"
+   ],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "educacao_inclusiva": {
+   "label": "Educação inclusiva",
+   "dim": "theme",
+   "terms": [
+    "educacao inclusiva",
+    "inclusao escolar",
+    "atendimento educacional especializado",
+    "aee",
+    "inclusiva",
+    "escola inclusiva",
+    "inclusao"
+   ],
+   "expands": [
+    "pcd",
+    "escola"
+   ],
+   "themes": [
+    "educacao",
+    "pessoa_com_deficiencia"
+   ],
+   "ods": [
+    4,
+    10
+   ],
+   "esg": []
+  },
+  "agricultura_familiar": {
+   "label": "Agricultura familiar e agroecologia",
+   "dim": "theme",
+   "terms": [
+    "agroecologia",
+    "quintais produtivos"
+   ],
+   "expands": [
+    "alimentacao",
+    "rural"
+   ],
+   "themes": [
+    "seguranca_alimentar",
+    "geracao_renda"
+   ],
+   "ods": [
+    2,
+    8,
+    12
+   ],
+   "esg": []
+  },
+  "empreendedorismo": {
+   "label": "Empreendedorismo e economia solidária",
+   "dim": "theme",
+   "terms": [
+    "microempreendedor",
+    "mei",
+    "cooperativismo",
+    "economia solidaria"
+   ],
+   "expands": [
+    "geracao_renda"
+   ],
+   "themes": [
+    "geracao_renda"
+   ],
+   "ods": [
+    8
+   ],
+   "esg": []
+  },
+  "primeiro_emprego": {
+   "label": "Primeiro emprego e aprendizagem",
+   "dim": "theme",
+   "terms": [
+    "primeiro emprego",
+    "jovem aprendiz",
+    "estagio"
+   ],
+   "expands": [
+    "jovens",
+    "capacitacao_profissional"
+   ],
+   "themes": [
+    "geracao_renda",
+    "juventude"
+   ],
+   "ods": [
+    8,
+    4
+   ],
+   "esg": []
+  },
+  "energia_limpa": {
+   "label": "Energia limpa",
+   "dim": "theme",
+   "terms": [
+    "energia solar",
+    "energia limpa",
+    "energia renovavel",
+    "fotovoltaica"
+   ],
+   "expands": [
+    "clima"
+   ],
+   "themes": [
+    "meio_ambiente"
+   ],
+   "ods": [
+    7,
+    13
+   ],
+   "esg": []
+  },
+  "cultura_paz": {
+   "label": "Cultura de paz e mediação",
+   "dim": "theme",
+   "terms": [
+    "cultura de paz",
+    "mediacao de conflitos",
+    "justica restaurativa",
+    "prevencao da violencia",
+    "prevencao a violencia"
+   ],
+   "expands": [],
+   "themes": [
+    "direitos_humanos"
+   ],
+   "ods": [
+    16
+   ],
+   "esg": []
+  },
+  "acesso_justica": {
+   "label": "Acesso à justiça",
+   "dim": "theme",
+   "terms": [
+    "assistencia juridica",
+    "orientacao juridica"
+   ],
+   "expands": [],
+   "themes": [
+    "direitos_humanos"
+   ],
+   "ods": [
+    16
+   ],
+   "esg": []
+  },
+  "protecao_animal": {
+   "label": "Proteção animal",
+   "dim": "theme",
+   "terms": [
+    "animais",
+    "resgate animal",
+    "protecao animal",
+    "castracao"
+   ],
+   "expands": [],
+   "themes": [
+    "protecao_animal"
+   ],
+   "ods": [
+    15
+   ],
+   "esg": []
+  },
+  "hospital": {
+   "label": "Hospital / pronto atendimento",
+   "dim": "institution",
+   "terms": [
+    "hospital",
+    "hospitais",
+    "santa casa",
+    "upa",
+    "pronto atendimento"
+   ],
+   "expands": [],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "creche": {
+   "label": "Creche / educação infantil",
+   "dim": "institution",
+   "terms": [
+    "cmei",
+    "pre escola",
+    "educacao infantil"
+   ],
+   "expands": [
+    "primeira_infancia"
+   ],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
    "esg": []
   }
  },

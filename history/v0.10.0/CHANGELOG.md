@@ -1,23 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.10.1] — 2026-10-05 — Pendências institucionais (cumulativo; snapshot do v0.10.0 em `history/v0.10.0/`)
-### Adicionado
-- **Cruzamento fiscal × elegibilidade institucional**: `GET /v1/insights/fiscal-estimates` aceita `osc_org_id` e devolve `institutional_eligibility` (estado, resumo, o que falta, camadas fiscais) como camada **separada** da estimativa; aviso quando a OSC é NÃO ELEGÍVEL.
-- **Perfis OS / OSCIP / OSC / iniciativa em estruturação** (`GET /v1/institutional/persona`): qualificações, autoridade qualificadora, **áreas de atuação** (`areas` em qualificações), instrumentos, alertas de validade (30/90 dias) e próximos passos.
-- **Instrumentos** (contrato de gestão, termo de parceria/colaboração/fomento, acordo de cooperação): cadastro **declarado**; verificação só pela administração (número + comprovante validado ou URL oficial + nota).
-- **Trilha de formalização** (11 etapas; automáticas derivadas dos dados, manuais só declaradas; `config/formalization_path.json`, hipótese a validar) e **pedidos de mentoria** (limite de taxa e de abertos; atendimento humano).
-- **Rede da solução** (`GET /v1/solutions/{id}/network`): autor, território, ODS, temas, soluções relacionadas e demanda **agregada** (sem identidades); visão em lista acessível.
-- **Tesauro** de 44 → 67 conceitos (`concepts@1.0+0.10.1`). Alguns termos comuns continuam resolvendo para conceitos mais amplos já existentes (ex.: "creche" → crianças; "primeira infância" → crianças; "teatro" → artes; "alfabetização" → educação) — termos conflitantes foram retirados dos conceitos novos de propósito.
-- **Dados DEMO institucionais** no seed (rotulados `[DEMO]`, qualificação **fictícia**; coletivo sem CNPJ).
-- Frontend: abas Instituição "OS / OSCIP", "Instrumentos", "Formalização e mentoria"; campo "Áreas de atuação"; admin Institucional "Instrumentos" e "Mentoria"; botão "Ver rede de relações" na solução.
-- Migração `0007_v0101_institutional_extras.sql` (3 tabelas: `organization_agreements`, `formalization_steps`, `mentoring_requests`; coluna `areas`; RLS e gatilhos de proteção). API: **358** operações; **114** tabelas.
-- +23 testes (256 no total): 17 institucionais, 2 de rede, 1 de tesauro, 3 E2E (inclui **painel admin com MFA real** no Chromium).
-### Alterado (comportamento)
-- Verificar instrumento sem número/comprovante validado/URL oficial é recusado (422).
-### Não feito / pendente (inalterado ou declarado)
-- Validação jurídica de catálogos/regras/trilha; **IA sobre documentos não implementada** (só regras); Android/iOS não construídos; sem linter (só `tsc` e `compileall`); embeddings, intenção por LLM, tiles de mapa externos e importação Lattes/Plataforma Brasil dependem de infraestrutura externa.
-
 ## [0.10.0] — 2026-10-05 — Camada institucional do terceiro setor (cumulativo; snapshot do v0.9.0 em `history/v0.9.0/`)
 ### Adicionado
 - **Modelo em 5 camadas** (natureza jurídica × qualificações × perfil de atuação × situação institucional × elegibilidade calculada) — `THIRD_SECTOR_MODEL.md`. Migração `0006_v0100_institutional.sql` (6 tabelas novas: `inst_catalog_items`, `eligibility_rules`, `organization_qualifications`, `organization_qualification_events`, `proponent_needs`, `eligibility_evaluations`; colunas novas em `organizations`, `documents`, `calls`, `funder_profiles`, `solutions`; RLS em todas).

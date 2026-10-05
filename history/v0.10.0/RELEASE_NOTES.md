@@ -1,20 +1,4 @@
-# Release notes — v0.10.1
-
-**Resumo:** fecha as pendências da camada institucional do v0.10.0 que podiam ser resolvidas sem infraestrutura externa. Nada aqui é parecer jurídico nem certificação governamental.
-
-## Para OSCs, OS, OSCIP e coletivos
-- Abas novas em **Instituição**: *OS / OSCIP* (qualificações, autoridade, áreas, alertas de validade, próximos passos), *Instrumentos* (contratos de gestão e termos — **declarados** até a administração verificar) e *Formalização e mentoria* (trilha de 11 etapas e pedido de mentoria humana).
-- Qualificações aceitam **áreas de atuação**.
-## Para financiadores
-- Estimativa fiscal de um projeto mostra, **em separado**, se a OSC proponente está elegível institucionalmente.
-- Nas soluções, **“Ver rede de relações”**: autoria, território, ODS, temas, soluções relacionadas e demanda agregada (sem identificar organizações).
-## Para a administração
-- Filas de **instrumentos** e de **mentoria** no painel institucional (testadas no navegador com MFA real).
-## Limites honestos
-- Trilha, catálogos e regras seguem como hipótese sem revisão jurídica; IA sobre documentos **não existe**; Android/iOS não construídos; sem linter além de `tsc`/`compileall`.
-
----
-# Release notes — v0.10.0 (anterior)
+# Release notes — v0.10.0
 
 **Resumo:** adiciona a **camada institucional do terceiro setor**: a plataforma passa a distinguir o que a organização *é* (natureza jurídica), o que *declara* e o que *comprovou* (qualificações e documentos), em que **situação** está e se **pode concorrer a uma oportunidade específica** — sempre com explicação, fonte e o que falta, e sem prometer recurso nem benefício fiscal.
 

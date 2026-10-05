@@ -33,8 +33,5 @@ Dívidas: `search()` pontua em Python até 200 candidatos; tesauro curado à mã
 9. Assinatura qualificada ICP-Brasil (se editais exigirem), modelo formal de contribuição (após parecer).
 **E. Dívidas técnicas conhecidas:** driver libpq próprio (avaliar psycopg 3); rotação de `FIELD_ENCRYPTION_KEY` sem recriptografia automática; `compliance` rules em código; consolidar `docs/API.md` no CI (`scripts/gen_api_docs.py`); `frontend` sem testes unitários de componentes.
 
-## Estado após o v0.10.1
-Fechadas as pendências institucionais factíveis (ver `FINAL_RELEASE_AUDIT.md` §3-C). **Próximo:** v0.11.0 — Central de Conhecimento, Operação, Capacitação, Suporte, Eventos, Parcerias e Trial (auditar notificações/documentos/materiais/suporte/eventos/planos antes de criar; migração `0008`). Fluxo de trabalho: `docs/WORKFLOW_GIT.md`; savepoints são **branches** (`savepoint/…`), pois tags não sobem pelo proxy.
-
 ## Como validar rapidamente
 `make db && make web && make test` · `python3 scripts/make_release.py --verify` · `curl localhost:8080/readyz`.

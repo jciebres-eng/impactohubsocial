@@ -1,4 +1,4 @@
-# LGPD_AUDIT — v0.10.1 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.10.0 (técnico; não é parecer jurídico)
 
 | Requisito | Estado | Evidência | Pendência |
 |---|---|---|---|
@@ -16,7 +16,6 @@
 | Crianças/adolescentes e sensíveis | YELLOW | não coletados pela plataforma; OSC é controladora de dados em documentos | orientação às OSCs; verificação de uploads |
 | Dados institucionais (v0.10.0): qualificações, documentos, necessidades, situação | YELLOW (técnico) | acesso restrito à organização e à administração (RLS); perfil público só com campos públicos/verificados; histórico de eventos | definir retenção e base legal; documentos podem conter dados pessoais de dirigentes — orientar OSCs |
 | Decisão automatizada (v0.10.0) | GREEN (técnico) | elegibilidade e maturidade são **indicadores explicáveis**, sem efeito jurídico; situação institucional é decisão humana justificada; sem IA | direito de revisão: canal à administração (processo a definir) |
-| Instrumentos, trilha e mentoria (v0.10.1): contratos/termos, etapas declaradas, mensagens de mentoria | YELLOW (técnico) | RLS por organização e administração; mensagens de mentoria só visíveis à org e à equipe; rede da solução só com agregados | definir retenção; orientar a não incluir dados pessoais sensíveis nas mensagens; contratos podem citar pessoas |
 | Titularidade/IP e autorização de contato em soluções (v0.10.0) | YELLOW | campos declarados; `summary_only` quando restrito | verificação de titularidade é do autor; cláusulas nos termos |
 | Governança | RED | — | DPO nomeado, RIPD/DPIA, registro de operações (ROPA), plano de resposta a incidentes |
 | Logs sem dados desnecessários | GREEN | logs sem corpo; IA logada por hash | — |

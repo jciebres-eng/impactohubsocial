@@ -16,7 +16,7 @@ from .document_routes import DOC_COLS, with_state
 T = ("institutional",)
 FUNDER_KINDS = ("company", "government", "individual", "platform")
 QUAL_COLS = ("q.id::text AS id, q.org_id::text AS org_id, q.qualification_type, q.issuing_authority, q.protocol, q.certificate_number, q.issue_date, q.expiration_date,"
-             " q.verification_url, q.verification_status, q.document_id::text AS document_id, q.validation_date, q.validation_note, q.notes, q.created_at, q.updated_at")
+             " q.verification_url, q.verification_status, q.document_id::text AS document_id, q.validation_date, q.validation_note, q.notes, q.areas, q.created_at, q.updated_at")
 
 
 def _qual_view(q: dict, cat: dict, today: date | None = None) -> dict:
@@ -137,9 +137,9 @@ def add_qualification(ctx: Ctx, body: S.QualificationIn):
         if dup:
             raise ApiError(409, "qualification_exists", "Já existe uma qualificação deste tipo e número. Edite a existente.")
         qid = c.scalar("INSERT INTO organization_qualifications(org_id, qualification_type, issuing_authority, protocol, certificate_number, issue_date, expiration_date,"
-                       " verification_url, document_id, notes, declared_by) VALUES ($1,$2,$3,$4,$5,$6::date,$7::date,$8,$9::uuid,$10,$11) RETURNING id::text",
+                       " verification_url, document_id, notes, declared_by, areas) VALUES ($1,$2,$3,$4,$5,$6::date,$7::date,$8,$9::uuid,$10,$11,$12::text[]) RETURNING id::text",
                        ctx.org_id, d["qualification_type"], d["issuing_authority"], d["protocol"], d["certificate_number"], d["issue_date"], d["expiration_date"],
-                       d["verification_url"], d["document_id"], d["notes"], ctx.user_id)
+                       d["verification_url"], d["document_id"], d["notes"], ctx.user_id, d.get("areas") or [])
         _sync_certifications(c, ctx.org_id)
         ctx.audit(c, "inst.qualification_declared", "qualification", qid, {"type": d["qualification_type"]})
         row = c.one(f"SELECT {QUAL_COLS} FROM organization_qualifications q WHERE q.id = $1", qid)
@@ -169,8 +169,8 @@ def patch_qualification(ctx: Ctx, body: S.QualificationPatch):
         _check_qualification(c, ctx, {"issue_date": cur["issue_date"], "expiration_date": cur["expiration_date"], **d}, creating=False)
         sets, vals = [], [qid]
         for k, v in d.items():
-            vals.append(v)
-            sets.append(f"{k} = ${len(vals)}" + {"issue_date": "::date", "expiration_date": "::date", "document_id": "::uuid"}.get(k, ""))
+            vals.append([] if (k == "areas" and v is None) else v)
+            sets.append(f"{k} = ${len(vals)}" + {"issue_date": "::date", "expiration_date": "::date", "document_id": "::uuid", "areas": "::text[]"}.get(k, ""))
         c.run(f"UPDATE organization_qualifications SET {', '.join(sets)} WHERE id = $1", *vals)
         ctx.audit(c, "inst.qualification_edited", "qualification", qid, {"fields": sorted(d)})
         row = c.one(f"SELECT {QUAL_COLS} FROM organization_qualifications q WHERE q.id = $1", qid)

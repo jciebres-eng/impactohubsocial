@@ -64,17 +64,6 @@ Body validado antes da autorização (vazava esquema) · UUID inválido gerava 5
 | Titularidade/IP declarada não é verificada | YELLOW (limite assumido) | aviso na publicação; ADR-051 |
 Sem pentest. Nenhum segredo no pacote (varredura em `make_release.py`).
 
-## Pendências institucionais (v0.10.1)
-| Controle | Estado | Evidência |
-|---|---|---|
-| RLS nas 3 tabelas novas (`organization_agreements`, `formalization_steps`, `mentoring_requests`) | GREEN | `test_every_table_has_rls` + isolamento entre organizações |
-| Org não promove verificação de instrumento (API e SQL direto); mentoria: org só cancela | GREEN | gatilhos `agreement_guard`, `mentoring_guard`; testes |
-| Verificação de instrumento exige admin + MFA e critérios | GREEN | testes (403/422) e E2E admin com MFA real |
-| Limites de taxa e de pedidos abertos de mentoria | GREEN | 429 testado |
-| Rede da solução sem identidades de interessados/replicadores; rascunho de outra org inacessível | GREEN | `NetworkGraphTests` |
-| Terceiros autenticados só enxergam instrumentos VERIFICADOS (RLS `oa_read`); declarados ficam privados | GREEN | `AgreementTests` (SQL direto como financiador) |
-Sem pentest. Não há linter Python nesta construção.
-
 ## Lacunas / recomendações antes de produção
 1. Pentest independente e varredura de dependências. 2. Restrição de *egress* de rede do contêiner (complementa o bloqueio SSRF da aplicação). 3. KMS/cofre de segredos e rotação. 4. Armazenamento seguro de tokens no app móvel. 5. WAF/CDN e DDoS. 6. Revisão do CSP quando adicionar mapas/analytics. 7. Política de retenção de logs e acesso. 8. Teste de carga e de resiliência. 9. Plano de resposta a incidentes (ANPD art. 48). 10. Revisão do usuário `postgres`/rede do banco (somente rede privada).
 

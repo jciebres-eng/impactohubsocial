@@ -1,13 +1,4 @@
-# TEST_REPORT — v0.10.1 (2026-10-05)
-
-**Resultado: 256 testes, 0 falhas, 0 ignorados** (233 herdados do v0.10.0 + 17 em `test_v0101_institutional.py` (instrumentos, perfis, trilha, mentoria, cruzamento fiscal) + 2 de rede da solução + 1 de tesauro + 3 E2E em `test_e2e_v0101.py`). Log integral: `docs/evidence/test_run_v0.10.1.log` (anteriores preservados). Ambiente: PostgreSQL 16 real, servidor HTTP real, Chromium (Playwright).
-
-**Novo no v0.10.1:** o E2E do **painel administrativo** (antes não testado no navegador) agora roda com **login MFA real (TOTP)** e prova que verificar um instrumento sem comprovante é recusado pelo servidor e que a fila de mentoria atualiza o estado no banco. Verificações de acessibilidade são **próprias** (não substituem axe/leitor de tela).
-**Verificações estáticas:** `tsc --noEmit` (frontend) e `python -m compileall` — **não há linter Python instalado** (ruff/pyflakes ausentes); não afirmar lint.
-**Ainda não testado:** Android/iOS; carga concorrente das novas rotas; axe/leitor de tela; validade jurídica de catálogos/regras/trilha; qualidade da busca fora das frases testadas (conceitos novos não passaram por avaliação com usuários).
-
----
-# TEST_REPORT — v0.10.0 (anterior, 2026-10-05)
+# TEST_REPORT — v0.10.0 (2026-10-05)
 
 **Resultado: 233 testes, 0 falhas** (182 herdados do v0.9.0 + 48 de `test_v0100_institutional.py` + 3 E2E em `test_e2e_v0100.py`) — log integral em `docs/evidence/test_run_v0.10.0.log` (v0.9.0 preservado em `docs/evidence/test_run_v0.9.0.log`). Descrição do ambiente do v0.9.0 (ainda válida): Banco PostgreSQL 16 **real** descartável + servidor HTTP real (uvicorn) + Chromium (Playwright) para E2E. Nada é simulado exceto onde indicado.
 

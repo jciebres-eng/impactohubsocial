@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -33,7 +33,7 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "SOLUTION_LIBRARY.md", "SOLUTION_SEARCH.md", "SOLUTION_MATCH_ENGINE.md", "REPLICATION_ENGINE.md", "INTENT_ENGINE.md", "AI_SEARCH_ARCHITECTURE.md",
             "SOLUTION_DATA_MODEL.md", "API_DOCUMENTATION.md", "TEST_REPORT.md", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/search_perf_v0.9.0.json",
             "docs/evidence/weights_sensitivity_v0.9.0.json",
-            "docs/evidence/test_run_v0.10.0.log", "THIRD_SECTOR_MODEL.md", "INSTITUTIONAL_ELIGIBILITY_ENGINE.md", "FISCAL_RULE_ENGINE.md", "MATCH_ENGINE.md",
+            "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "config/formalization_path.json", "history/v0.10.0/VERSION", "THIRD_SECTOR_MODEL.md", "INSTITUTIONAL_ELIGIBILITY_ENGINE.md", "FISCAL_RULE_ENGINE.md", "MATCH_ENGINE.md",
             "REPOSITORY_PROJECTS.md", "DATABASE_SCHEMA.md", "config/institutional_rules.candidates.json", "history/v0.9.0/VERSION"]
 
 

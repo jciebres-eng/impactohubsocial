@@ -1,6 +1,6 @@
-# API — documentação (v0.10.1)
+# API — documentação (v0.10.0)
 
-Referência completa **gerada do código**: `docs/API.md` (358 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (343 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
 
 ## Biblioteca de Soluções (60 operações novas)
 | Grupo | Rotas principais |
@@ -34,6 +34,3 @@ Segurança por rota: `auth=org` (sessão + CSRF + e-mail verificado em escrita),
 | Admin — filas | `GET /v1/admin/institutional/qualifications` · `POST …/{id}/decide` · `GET …/documents` · `POST …/{id}/validate` |
 | Admin — organização | `GET …/organizations/{org_id}` · `POST …/organizations/{org_id}/status` · `GET …/overview` |
 Campos novos: edital (`funding_modality`, `accepted_legal_natures`, `min_maturity`), perfil do financiador, cadastro (`organization.legal_nature_code`), solução (IP/confidencialidade/modalidades) e busca (`legal_natures`, `qualifications`, `modalities`, `funding_ready`, `sharing`).
-
-## Novidades do v0.10.1
-`GET /v1/institutional/persona`, `GET/POST /v1/institutional/agreements` (+ `PATCH/DELETE /{id}`), `GET /v1/institutional/formalization`, `PUT /v1/institutional/formalization/{step_code}`, `GET/POST /v1/institutional/mentoring` (+ `POST /{id}/cancel`), `GET /v1/solutions/{id}/network`; admin: `GET /v1/admin/institutional/agreements`, `POST …/agreements/{id}/decide`, `GET /v1/admin/institutional/mentoring`, `POST …/mentoring/{id}/update`. `GET /v1/insights/fiscal-estimates` ganhou `osc_org_id` e o bloco `institutional_eligibility`. Detalhes gerados em `docs/API.md`.

@@ -104,23 +104,6 @@ Correção do 500 em `/v1/me` para a organização da plataforma · ordenação 
 
 **Estado do release v0.10.0: YELLOW.** Código, migração, API, UI e testes da camada institucional estão verdes; faltam validação jurídica dos catálogos/regras, calibração de maturidade, E2E administrativo, integração fiscal por organização e todas as dependências externas já listadas no §6.
 
-## 3-C. Pendências institucionais (v0.10.1) — o que estava aberto × o que foi feito
-| Item | Estado anterior | Ação | Evidência | Estado |
-|---|---|---|---|---|
-| Cruzamento fiscal × institucional | rota de estimativa sem `osc_org_id` | camada separada `institutional_eligibility` | `FiscalCrossTests` | GREEN (qualidade depende das regras publicadas) |
-| Perfis OS/OSCIP (contrato de gestão, autoridade, áreas) | inexistente | persona + instrumentos + `areas` | `AgreementTests`, `PersonaTests`, E2E | YELLOW (sem revisão jurídica; verificação humana) |
-| Trilha de formalização e mentoria | inexistente | 11 etapas (hipótese) + pedidos com limites | `FormalizationTests`, `MentoringTests` | YELLOW |
-| IA sobre documentos | não implementada | **continua não implementada** (só regras) | — | RED |
-| E2E do painel admin | não testado | E2E com MFA real | `test_e2e_v0101.py` | GREEN |
-| Lint/tipos | só `tsc` | `tsc` + `compileall`; sem linter Python | `TEST_REPORT.md` | YELLOW |
-| Android/iOS | não verificado | inalterado | — | YELLOW (CODE READY) |
-| Seed DEMO institucional | ausente | `[DEMO]` rotulado; qualificação fictícia | verificado no banco de desenvolvimento | GREEN |
-| Revisão jurídica dos catálogos/regras | pendente | **não pode ser feita por IA** | — | RED (externo) |
-| Rede de soluções / tesauro | inexistente / 44 conceitos | endpoint de rede + 67 conceitos | testes | GREEN / YELLOW (sem avaliação com usuários) |
-| Embeddings, LLM, tiles externos, Lattes | externos | não implementados | — | RED (externo) |
-
-**Estado do release v0.10.1: YELLOW** (código e testes verdes; conteúdo jurídico, IA e infraestrutura externa pendentes).
-
 ## 4. Estados de publicação
 | Alvo | READY | BUILT | TESTED | SIGNED | SUBMITTED | APPROVED | PUBLISHED |
 |---|---|---|---|---|---|---|---|

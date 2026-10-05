@@ -1,4 +1,5 @@
 // Biblioteca de Soluções de Impacto: busca por intenção, 7 modos de visão, perfil com proveniência, comparador e ações guiadas.
+import { NetworkView } from "./institution_extra";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { date, money, pct } from "../format";
@@ -388,6 +389,8 @@ export function Profile({ id }: { id: string }) {
       {s.people.length > 0 && <Panel title="Autoria e equipe"><ul className="rows">{s.people.map((p: any, i: number) => <li key={i}><span>{p.name}{p.institution ? ` — ${p.institution}` : ""}</span><span className="muted">{p.role}</span></li>)}</ul></Panel>}
       {s.relationships.length > 0 && <Panel title="Relações"><ul className="rows">{s.relationships.map((r: any, i: number) => <li key={i}><Link to={`/solucoes/${r.id}`}>{r.title}</Link><span className="muted">{r.rel_type}</span></li>)}</ul></Panel>}
 
+      {s.visibility === "published" && <Panel title="Rede da solução"><Button onClick={() => setModal("network")}>Ver rede de relações</Button> <span className="muted small">Autoria, território, ODS, temas e soluções relacionadas, em lista acessível.</span></Panel>}
+
       {!own && s.visibility === "published" && (
         <Panel title="O que você quer fazer?">
           <div className="stack-row" role="group" aria-label="Ações">
@@ -413,6 +416,8 @@ export function Profile({ id }: { id: string }) {
       {s.stats && <Panel title="Interesse (organizações distintas)"><KeyValue items={[["Interessadas", s.stats.interested_orgs], ["Pediram informação", s.stats.requested_info_orgs], ["Em avaliação", s.stats.in_evaluation_orgs],
         ["Pediram adaptação", s.stats.adaptation_requests], ["Financiamento confirmado pelo autor", s.stats.funded_confirmed_orgs], ["Replicações concluídas e confirmadas", s.stats.replications.completed_confirmed], ["Salvamentos", s.stats.saves]]} /></Panel>}
       {own && <OwnerTools id={id} s={s} reload={reload} />}
+
+      <Modal open={modal === "network"} title="Rede da solução" onClose={close}>{modal === "network" && <NetworkView id={id} />}</Modal>
 
       <Modal open={modal === "similar"} title="Quero algo como este" onClose={close}>
         <StateView loading={similar.loading} error={similar.error}>

@@ -995,6 +995,7 @@ class QualificationIn(In):
     verification_url: Annotated[str | None, Field(max_length=500, pattern=r"^https://")] = None
     document_id: Uuid | None = None
     notes: Annotated[str | None, Field(max_length=2000)] = None
+    areas: list[Slug] | None = Field(default=None, max_length=20)
 
 
 class QualificationPatch(In):
@@ -1006,6 +1007,72 @@ class QualificationPatch(In):
     verification_url: Annotated[str | None, Field(max_length=500, pattern=r"^https://")] = None
     document_id: Uuid | None = None
     notes: Annotated[str | None, Field(max_length=2000)] = None
+    areas: list[Slug] | None = Field(default=None, max_length=20)
+
+
+# ---------------------------------------------------------------- v0.10.1: instrumentos, formalização, mentoria
+AgreementType = Literal["management_contract", "partnership_term", "collaboration_term", "fomento_term", "cooperation_agreement", "other"]
+AgreementStatus = Literal["draft", "active", "completed", "terminated", "suspended"]
+
+
+class AgreementIn(In):
+    agreement_type: AgreementType
+    counterpart_name: Annotated[str, Field(min_length=2, max_length=300)]
+    counterpart_authority: Annotated[str | None, Field(max_length=300)] = None
+    instrument_number: Annotated[str | None, Field(max_length=120)] = None
+    object_summary: Annotated[str | None, Field(max_length=2000)] = None
+    start_date: date | None = None
+    end_date: date | None = None
+    value_cents: Cents | None = None
+    agreement_status: AgreementStatus = "active"
+    qualification_id: Uuid | None = None
+    verification_url: Annotated[str | None, Field(max_length=500, pattern=r"^https://")] = None
+    document_id: Uuid | None = None
+
+
+class AgreementPatch(In):
+    counterpart_name: Annotated[str | None, Field(min_length=2, max_length=300)] = None
+    counterpart_authority: Annotated[str | None, Field(max_length=300)] = None
+    instrument_number: Annotated[str | None, Field(max_length=120)] = None
+    object_summary: Annotated[str | None, Field(max_length=2000)] = None
+    start_date: date | None = None
+    end_date: date | None = None
+    value_cents: Cents | None = None
+    agreement_status: AgreementStatus | None = None
+    qualification_id: Uuid | None = None
+    verification_url: Annotated[str | None, Field(max_length=500, pattern=r"^https://")] = None
+    document_id: Uuid | None = None
+
+
+class AgreementDecisionIn(In):
+    decision: Literal["verify", "reject"]
+    note: Annotated[str, Field(min_length=5, max_length=1000)]
+
+
+class FormalizationStepIn(In):
+    state: Literal["not_started", "in_progress", "done_declared"]
+    note: Annotated[str | None, Field(max_length=1000)] = None
+
+
+MentoringTopic = Literal["formalization", "documentation", "project", "fundraising", "accountability", "institutional", "other"]
+
+
+class MentoringIn(In):
+    topic: MentoringTopic
+    message: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class MentoringAdminIn(In):
+    status: Literal["open", "in_progress", "scheduled", "done", "cancelled"]
+    admin_note: Annotated[str | None, Field(max_length=2000)] = None
+
+
+class MentoringAdminQ(Pagination):
+    status: Literal["open", "in_progress", "scheduled", "done", "cancelled"] | None = None
+
+
+class AgreementAdminQ(Pagination):
+    status: Literal["declared", "document_submitted", "verified", "rejected"] | None = "document_submitted"
 
 
 class EligibilityIn(In):

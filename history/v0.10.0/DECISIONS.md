@@ -42,8 +42,4 @@ A ADR **015** (escolha de cloud, gateway, IdP, nome/marca) **continua ABERTA** �
 | 049 | **Situação institucional é decisão humana justificada**; o sistema só sugere | responsabilidade | `suggest_status` não grava | Aceita |
 | 050 | **Catálogos/regras iniciais como rascunho/candidatas com validação jurídica pendente** | não inventar compliance | importar ≠ publicar | Aceita |
 | 051 | **Publicação de solução exige titularidade e autorização declaradas; a plataforma não as verifica** | IP/LGPD | aviso explícito na resposta | Aceita |
-| 052 | **Estimativa fiscal e elegibilidade institucional são camadas separadas na resposta** | misturar sugeriria direito a benefício | bloco `institutional_eligibility` com aviso próprio | Aceita |
-| 053 | **Instrumentos (contrato de gestão/termos) nascem declarados; verificar exige número + comprovante validado ou URL oficial + nota**; org só pode editar/remover enquanto não verificado (gatilho `agreement_guard`) | declarado ≠ verificado (ADR-046) | provado também via SQL direto | Aceita |
-| 054 | **Trilha de formalização: etapas automáticas derivam de dados; manuais são só declaradas** e não afirmam verificação | honestidade; trilha é hipótese | `config/formalization_path.json` com aviso | Aceita |
-| 055 | **Rede da solução mostra só relações cadastradas e demanda agregada**, sem identidades; lista acessível em vez de grafo visual | privacidade/anti-manipulação | sem causalidade inferida | Aceita |
-| 056 | **Termos que colidem com conceitos existentes foram retirados dos conceitos novos do tesauro** | evitar reclassificar buscas atuais | alguns termos novos resolvem para o conceito amplo | Aceita |
+

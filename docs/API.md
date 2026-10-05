@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (343)
+## Operações (358)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -35,12 +35,16 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/fiscal-rules/{rule_id}/action` | admin da plataforma + MFA | — | Fluxo: draft → pending_review → approved (dois aprovadores distintos) → retired |
 | GET | `/v1/admin/flags` | admin da plataforma + MFA | — | flags |
 | PUT | `/v1/admin/flags/{key}` | admin da plataforma + MFA | — | set flag |
+| GET | `/v1/admin/institutional/agreements` | admin da plataforma + MFA | — | Fila de verificação de instrumentos (padrão: comprovante enviado) |
+| POST | `/v1/admin/institutional/agreements/{agreement_id}/decide` | admin da plataforma + MFA | — | Verifica ou rejeita o instrumento. Verificar exige número, documento VALIDADO ou URL oficial, e nota. |
 | GET | `/v1/admin/institutional/catalog` | admin da plataforma + MFA | — | Itens de catálogo em qualquer estado do fluxo editorial |
 | POST | `/v1/admin/institutional/catalog` | admin da plataforma + MFA | — | Cria item de catálogo (nasce rascunho; passa por revisão e aprovação de outra pessoa) |
 | POST | `/v1/admin/institutional/catalog/{item_id}/action` | admin da plataforma + MFA | — | Fluxo: submit → approve (outra pessoa) → publish → archive / return_to_draft |
 | POST | `/v1/admin/institutional/catalog/{item_id}/new-version` | admin da plataforma + MFA | — | Nova versão de um item existente (rascunho). A versão publicada anterior só é arquivada quando a nova for publicada. |
 | GET | `/v1/admin/institutional/documents` | admin da plataforma + MFA | — | Fila de validação documental (arquivos já aprovados no antivírus) |
 | POST | `/v1/admin/institutional/documents/{document_id}/validate` | admin da plataforma + MFA | — | Valida ou rejeita um documento (validação humana; antivírus não substitui). Rejeição exige justificativa. |
+| GET | `/v1/admin/institutional/mentoring` | admin da plataforma + MFA | — | Fila de pedidos de mentoria (padrão: abertos e em andamento) |
+| POST | `/v1/admin/institutional/mentoring/{mentoring_id}/update` | admin da plataforma + MFA | — | Atualiza o andamento do pedido de mentoria |
 | GET | `/v1/admin/institutional/organizations/{org_id}` | admin da plataforma + MFA | — | Visão institucional de uma organização: fatos, maturidade, situação atual e SUGESTÃO de situação |
 | POST | `/v1/admin/institutional/organizations/{org_id}/status` | admin da plataforma + MFA | — | Define a situação institucional (decisão humana, justificada e auditada) |
 | GET | `/v1/admin/institutional/overview` | admin da plataforma + MFA | — | Painel institucional: filas e estados do fluxo editorial |
@@ -165,18 +169,28 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/indicator-values/{value_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador do projeto valida ou rejeita um valor reportado (a OSC não valida o próprio valor — garantido no banco) |
 | GET | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ viewer | Catálogo de indicadores (plataforma, oficiais e definidos pela organização) |
 | POST | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ manager | Cria indicador próprio da organização (origem 'org_defined'; não é indicador oficial) |
+| GET | `/v1/institutional/agreements` | membro da organização ativa | papel ≥ viewer | Instrumentos firmados (contrato de gestão, termo de parceria/fomento/colaboração…) com alertas de vigência |
+| POST | `/v1/institutional/agreements` | membro da organização ativa | papel ≥ manager | Registra um instrumento. Nasce 'declarado' (ou 'comprovante enviado' com documento); só a administração verifica. |
+| DELETE | `/v1/institutional/agreements/{agreement_id}` | membro da organização ativa | papel ≥ manager | Remove instrumento ainda não verificado |
+| PATCH | `/v1/institutional/agreements/{agreement_id}` | membro da organização ativa | papel ≥ manager | Edita o instrumento. Alterar dados comprobatórios de um instrumento verificado o devolve a 'declarado'/'comprovante enviado'. |
 | GET | `/v1/institutional/badges` | membro da organização ativa | papel ≥ viewer | Badges da organização (critério, fonte, data de verificação, validade, estado) — classificação interna, não certificação |
 | GET | `/v1/institutional/catalogs` | membro da organização ativa | papel ≥ viewer | Catálogos publicados: naturezas jurídicas, qualificações, perfis, situações, modalidades e definições de badges (com fonte e confiança) |
 | GET | `/v1/institutional/documents` | membro da organização ativa | papel ≥ viewer | Documentos institucionais com estado (AUSENTE · EXPIRADO · PENDENTE DE VALIDAÇÃO · VALIDADO · REJEITADO) e quais tipos básicos faltam |
 | GET | `/v1/institutional/eligibility` | membro da organização ativa | papel ≥ viewer | Histórico de avaliações de elegibilidade (versão do motor, regras usadas, data) |
 | POST | `/v1/institutional/eligibility` | membro da organização ativa | papel ≥ viewer; limite 120/600s | Avalia a elegibilidade institucional (edital, modalidade de financiamento ou requisitos de um financiador): estado + o que falta + regras e fontes usadas |
+| GET | `/v1/institutional/formalization` | membro da organização ativa | papel ≥ viewer | Trilha de formalização: etapas derivadas dos dados + etapas declaradas, progresso e próxima etapa |
+| PUT | `/v1/institutional/formalization/{step_code}` | membro da organização ativa | papel ≥ manager | Declara o andamento de uma etapa MANUAL (etapas automáticas não são editáveis) |
 | GET | `/v1/institutional/maturity` | membro da organização ativa | papel ≥ viewer | Maturidade institucional 0–6 com o que falta para o próximo nível e o caminho de formalização |
+| GET | `/v1/institutional/mentoring` | membro da organização ativa | papel ≥ viewer | Pedidos de mentoria da organização |
+| POST | `/v1/institutional/mentoring` | membro da organização ativa | papel ≥ member; limite 5/3600s | Pede mentoria (formalização, documentos, projeto, captação, prestação de contas) |
+| POST | `/v1/institutional/mentoring/{mentoring_id}/cancel` | membro da organização ativa | papel ≥ member | Cancela um pedido de mentoria em aberto |
 | GET | `/v1/institutional/needs` | membro da organização ativa | papel ≥ viewer | Necessidades do proponente (financiamento, parceiro, replicação, técnica, institucional, expansão territorial) |
 | POST | `/v1/institutional/needs` | membro da organização ativa | papel ≥ member | Declara uma necessidade (alimenta o match; não é compromisso de ninguém) |
 | DELETE | `/v1/institutional/needs/{need_id}` | membro da organização ativa | papel ≥ member | delete need |
 | PATCH | `/v1/institutional/needs/{need_id}` | membro da organização ativa | papel ≥ member | patch need |
 | GET | `/v1/institutional/orgs/{org_id}` | membro da organização ativa | papel ≥ viewer | Perfil institucional PÚBLICO de uma organização: natureza declarada, qualificações verificadas, situação e badges (sem documentos nem dados privados) |
 | GET | `/v1/institutional/overview` | membro da organização ativa | papel ≥ viewer | Visão institucional: 'Pode participar' × 'Pode receber este tipo de recurso' × 'Ainda precisa cumprir requisitos', com maturidade e badges |
+| GET | `/v1/institutional/persona` | membro da organização ativa | papel ≥ viewer | Visões por perfil (OS, OSCIP, OSC, iniciativa em estruturação): qualificações, autoridade, áreas, instrumentos, alertas de validade e próximos passos |
 | GET | `/v1/institutional/profile` | membro da organização ativa | papel ≥ viewer | Perfil institucional da organização ativa (natureza, perfil de atuação, situação, qualificações) |
 | PUT | `/v1/institutional/profile` | membro da organização ativa | papel ≥ admin | Atualiza a natureza jurídica, o perfil de atuação, missão/visão e alcance geográfico (códigos validados no catálogo publicado) |
 | GET | `/v1/institutional/qualifications` | membro da organização ativa | papel ≥ viewer | Qualificações e certificações da organização (estado: declarada, em análise, verificada, expirada…) |
@@ -338,6 +352,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PUT | `/v1/solutions/{solution_id}/intent` | membro da organização ativa | papel ≥ member | Declara interesse (descoberta → interessado → em análise). A identidade é privada por padrão |
 | GET | `/v1/solutions/{solution_id}/intents` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ viewer | Interessados na minha solução: contagens agregadas + identidades somente das que são públicas ou que fizeram pedido direto |
 | POST | `/v1/solutions/{solution_id}/match` | membro da organização ativa | papel ≥ viewer | Aderência desta solução à tese do meu perfil de financiador (independente do plano; explicável) |
+| GET | `/v1/solutions/{solution_id}/network` | membro da organização ativa | papel ≥ viewer | Rede de impacto da solução (autor, território, ODS, temas, soluções relacionadas e demanda agregada). Sem identidades privadas de financiadores/replicadores. |
 | PUT | `/v1/solutions/{solution_id}/people` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ member | Define autoria e equipe (substitui a lista) |
 | POST | `/v1/solutions/{solution_id}/publish` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ admin | Publica a solução na biblioteca (valida o mínimo de conteúdo) |
 | POST | `/v1/solutions/{solution_id}/relationships` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ member | Relaciona esta solução a outra (derivada de, replica, complementa, combinada com) |

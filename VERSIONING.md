@@ -27,3 +27,15 @@ Histórico: `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos 
 **v0.14.0** (MINOR): nova capacidade (confiança, identidade e assinatura digital) com 26 tabelas, migração `0012_v0140_trust_layer.sql` e **uma mudança de contrato**: `POST /v1/signatures` passou a exigir o campo `code` (segunda camada da assinatura). Em pré-1.0 isso cabe em MINOR, e está destacado no CHANGELOG porque quebra integração que assinava com senha apenas. A `0011` já estava liberada e **não** foi editada; a `0012` foi editada durante o desenvolvimento (nunca aplicada fora do ambiente de construção) e a partir desta liberação é imutável. Snapshot dos documentos do v0.13.0: `history/v0.13.0/`. Config versionada: `config/i18n.json` (catálogo de tradução do núcleo).
 
 **v0.15.0** (MINOR): fecha o NÚCLEO DO PRODUTO antes da etapa de design — ideia → diagnóstico → projeto → documento → match → acompanhamento compartilhando o mesmo vocabulário de evidência, as mesmas versões e a mesma trilha. 15 tabelas novas (205 no total), 51 rotas novas (625 operações), três migrações (`0013_v0150_core_product.sql`, `0014_v0150_platform_templates.sql`, `0015_v0150_fk_indexes.sql`). A `0012` já estava liberada e **não** foi editada. Motores novos versionados: `diagnostic-engine@1.0.0`, `document-assembly@1.0.0`, `risk-rules@1.0`, `freshness@1.0`, `snapshot@1.0`; o match foi a `match-engine@1.2.0` e passou a gravar `rules_version` (`match-rules@1.1`) e `taxonomy_version` junto de motor e pesos. **Nenhum contrato existente mudou** — as 51 rotas são adições. Uma tabela foi REMOVIDA: `sdg_goals`, duplicata que nós mesmos criamos na v0.14.0, consolidada em `ods_goals` (a remoção é verificada pelo teste de caminho de atualização, que também confere que o esquema atualizado é **idêntico** ao criado do zero). Snapshot dos documentos do v0.14.0: `history/v0.14.0/`.
+
+**Tag `v0.15.0-final-pre-design`: `TAG_PUSH_BLOCKED_BY_ENVIRONMENT`.** A tag existe **localmente** e aponta para
+`67aa058`. O envio para o remoto é recusado pelo proxy do ambiente de construção com `HTTP 403` (mesmo
+comportamento das tags `v0.12.1-final-baseline`, `v0.13.0-integration-baseline` e `v0.14.0-trust-baseline`). Em
+substituição, o mesmo commit está publicado em dois ramos: `chore/v0.15.0-final-pre-design-hardening` (trabalho) e
+`savepoint/v0.15.0-final-pre-design` (ponto de salvamento imutável por convenção). Quem tiver permissão de push de
+tag pode criá-la com:
+
+```
+git tag -a v0.15.0-final-pre-design 67aa058 -m "v0.15.0 — núcleo do produto fechado, baseline técnica pré-design"
+git push origin v0.15.0-final-pre-design
+```

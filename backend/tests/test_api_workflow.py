@@ -4,7 +4,8 @@ encerramento → ledger íntegro → relatórios. Também: edital externo e vali
 import unittest
 from datetime import date, timedelta
 
-from tests.support import PASSWORD, Client, grant_premium, make_admin, new_account, server
+from tests.support import (PASSWORD, Client, grant_premium, last_signature_code, make_admin, new_account,
+                           server)
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
 REQUIRED = ["estatuto_social", "cnd_federal"]
@@ -19,6 +20,12 @@ def setup_osc(osc: Client):
         r = osc.upload("/v1/documents", f"{dt}.pdf", PDF, {"doc_type": dt, "title": dt, "valid_until": future})
         assert r.status == 201, r
 
+
+def _sig_code(client, subject_type: str, subject_id: str) -> str:
+    """v0.14.0: assinar exige DUAS camadas — senha e código de uso único pedido antes, ligado ao hash do conteúdo."""
+    r = client.post("/v1/signatures/challenge", {"subject_type": subject_type, "subject_id": subject_id})
+    assert r.status == 201, r
+    return last_signature_code(client.email)
 
 class JourneyTests(unittest.TestCase):
     @classmethod
@@ -94,10 +101,13 @@ class JourneyTests(unittest.TestCase):
         draft_id = osc.post("/v1/drafts", {"kind": "project_proposal", "title": "Proposta", "content": dr["content"], "application_id": aid,
                                            "project_id": pid, "ai_assisted": True}).json["id"]
         self.assertEqual(osc.patch(f"/v1/applications/{aid}/steps/{steps['signature']['id']}", {"status": "done"}).json["code"], "signature_required")
+        code = _sig_code(osc, "draft", draft_id)
         self.assertEqual(osc.post("/v1/signatures", {"subject_type": "draft", "subject_id": draft_id, "role": "legal_representative",
-                                                      "statement": "Declaro que as informações são verdadeiras.", "password": "errada"}).status, 401)
+                                                      "statement": "Declaro que as informações são verdadeiras.", "password": "errada",
+                                                      "code": code}).status, 401)
         self.assertEqual(osc.post("/v1/signatures", {"subject_type": "draft", "subject_id": draft_id, "role": "legal_representative",
-                                                      "statement": "Declaro que as informações são verdadeiras.", "password": PASSWORD}).status, 201)
+                                                      "statement": "Declaro que as informações são verdadeiras.", "password": PASSWORD,
+                                                      "code": code}).status, 201)
         for code, st in steps.items():
             if st["mandatory"] and st["status"] != "done" and code not in ("submission",):
                 r = osc.patch(f"/v1/applications/{aid}/steps/{st['id']}", {"status": "done"})
@@ -216,7 +226,8 @@ class JourneyTests(unittest.TestCase):
         sig = next(s for s in det["steps"] if s["kind"] == "signature")
         dr = osc.post("/v1/drafts", {"kind": "cover_letter", "title": "Carta", "content": "Carta de apresentação.", "application_id": app["id"]}).json["id"]
         osc.post("/v1/signatures", {"subject_type": "draft", "subject_id": dr, "role": "legal_representative",
-                                    "statement": "Assino a carta de apresentação.", "password": PASSWORD})
+                                    "statement": "Assino a carta de apresentação.", "password": PASSWORD,
+                                    "code": _sig_code(osc, "draft", dr)})
         self.assertEqual(osc.patch(f"/v1/applications/{app['id']}/steps/{sig['id']}", {"status": "done"}).status, 200)
         r = osc.post(f"/v1/applications/{app['id']}/transition", {"to_status": "submitted", "external_protocol": "PROTO-2026-001"})
         self.assertEqual(r.status, 200, r)
@@ -243,7 +254,8 @@ class JourneyTests(unittest.TestCase):
         self.assertEqual(admin.post(f"/v1/admin/credentials/{cred}/verify", {"status": "verified", "note": "Consulta ao cadastro do CRC-MT em 04/10/2026"}).status, 200)
         self.assertEqual(pro.post(f"/v1/professional-reviews/{rid}/respond", {"status": "approved", "credential_id": cred}).status, 200)
         s = pro.post("/v1/signatures", {"subject_type": "draft", "subject_id": draft, "role": "professional", "review_id": rid,
-                                        "statement": "Revisei e valido a justificativa orçamentária.", "password": PASSWORD})
+                                        "statement": "Revisei e valido a justificativa orçamentária.", "password": PASSWORD,
+                                        "code": _sig_code(pro, "draft", draft)})
         self.assertEqual(s.status, 201, s)
         v = osc.get(f"/v1/signatures/verify?subject_type=draft&subject_id={draft}").json
         self.assertTrue(v["signatures"][0]["content_unchanged"])

@@ -419,6 +419,8 @@ class SignIn(In):
     review_id: Uuid | None = None
     credential_id: Uuid | None = None
     password: Annotated[str, Field(min_length=1, max_length=256)]
+    # Segunda camada (v0.14.0): código de uso único pedido em POST /v1/signatures/challenge e ligado ao hash do conteúdo.
+    code: Annotated[str, Field(min_length=4, max_length=12)]
 
 
 class DocPatch(In):

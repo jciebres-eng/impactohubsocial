@@ -4361,6 +4361,52 @@
     ]
    }
   },
+  "/v1/drafts/{draft_id}/export": {
+   "post": {
+    "summary": "Gera o rascunho em PDF, DOCX ou ODT e guarda no cofre; opcionalmente imprime o QR de verificação pública",
+    "operationId": "post_document_routes_export_draft",
+    "tags": [
+     "drafts"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "draft_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExportQ"
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/professional-reviews": {
    "post": {
     "summary": "Solicita validação a profissional parceiro habilitado (contrato e honorários fora da plataforma)",
@@ -4531,7 +4577,7 @@
   },
   "/v1/signatures": {
    "post": {
-    "summary": "Assinatura eletrônica avançada na plataforma (reautenticação por senha, hash da versão exata, credencial e trilha)",
+    "summary": "Assinatura eletrônica avançada em DUAS CAMADAS (senha + código de uso único), hash da versão exata, credencial e trilha",
     "operationId": "post_document_routes_sign",
     "tags": [
      "signatures"
@@ -21457,6 +21503,2605 @@
     },
     "description": "Administração da plataforma com MFA"
    }
+  },
+  "/v1/trust/councils": {
+   "get": {
+    "summary": "Conselhos profissionais do catálogo (o formato do registro só é validado quando há padrão configurado)",
+    "operationId": "get_trust_routes_councils",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/trust/identity": {
+   "get": {
+    "summary": "Meu nível de identidade, pedidos e documentos enviados",
+    "operationId": "get_trust_routes_identity_me",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/trust/identity/verifications": {
+   "post": {
+    "summary": "Pede verificação de identidade (documento = conferência humana; biometria e SMS não estão disponíveis)",
+    "operationId": "post_trust_routes_identity_request",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 10/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdentityRequestIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/trust/identity/verifications/{verification_id}/documents": {
+   "post": {
+    "summary": "Anexa um documento já enviado ao cofre a um pedido de verificação",
+    "operationId": "post_trust_routes_identity_attach",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "verification_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdentityDocumentIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/trust/identity/queue": {
+   "get": {
+    "summary": "Fila de verificações de identidade aguardando conferência humana",
+    "operationId": "get_trust_routes_identity_queue",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/trust/identity/{verification_id}/decide": {
+   "post": {
+    "summary": "Decide um pedido de verificação de identidade (decisão humana registrada na cadeia de custódia)",
+    "operationId": "post_trust_routes_identity_decide",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "verification_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/org/credentials/{credential_id}/document": {
+   "post": {
+    "summary": "Anexa o documento do conselho à credencial e a coloca na fila de conferência",
+    "operationId": "post_trust_routes_credential_document",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "credential_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdentityDocumentIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/org/credentials/{credential_id}/history": {
+   "get": {
+    "summary": "Histórico append-only da verificação da credencial",
+    "operationId": "get_trust_routes_credential_history",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "credential_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/trust/credentials/queue": {
+   "get": {
+    "summary": "Credenciais profissionais com documento aguardando conferência",
+    "operationId": "get_trust_routes_credential_queue",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/trust/credentials/{credential_id}/decide": {
+   "post": {
+    "summary": "Confere a credencial; aprovar eleva a identidade da pessoa ao nível profissional",
+    "operationId": "post_trust_routes_credential_decide",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "credential_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CredentialDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/trust/credentials/{credential_id}/revoke": {
+   "post": {
+    "summary": "Revoga uma credencial verificada (motivo obrigatório; entra na cadeia de custódia)",
+    "operationId": "post_trust_routes_credential_revoke",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "credential_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signatures/challenge": {
+   "post": {
+    "summary": "Envia o código de confirmação da assinatura (segunda camada), amarrado ao hash exato do conteúdo",
+    "operationId": "post_trust_routes_signature_challenge",
+    "tags": [
+     "signatures"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 30/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChallengeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signatures/{signature_id}/revoke": {
+   "post": {
+    "summary": "Revoga uma assinatura (fato novo: a assinatura em si é append-only e permanece no histórico)",
+    "operationId": "post_trust_routes_signature_revoke",
+    "tags": [
+     "signatures"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "signature_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/documents/{document_id}/integrity": {
+   "get": {
+    "summary": "Reconta o hash do arquivo guardado e compara com o hash registrado no upload",
+    "operationId": "get_trust_routes_document_integrity",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "document_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/trust/custody": {
+   "get": {
+    "summary": "Cadeia de custódia do objeto e conferência do encadeamento por hash",
+    "operationId": "get_trust_routes_custody_chain",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "subject_type",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "enum": [
+        "document",
+        "draft",
+        "agreement",
+        "credential",
+        "identity"
+       ],
+       "title": "Subject Type",
+       "type": "string"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "Subject Id",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/verifiable-records": {
+   "post": {
+    "summary": "Cria o registro público de verificação (código + QR) do documento, rascunho ou acordo",
+    "operationId": "post_trust_routes_verifiable_create",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager · Rate limit: 120/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VerifiableIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Registros públicos de verificação da organização",
+    "operationId": "get_trust_routes_verifiable_list",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/verifiable-records/{record_id}/revoke": {
+   "post": {
+    "summary": "Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data)",
+    "operationId": "post_trust_routes_verifiable_revoke",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "record_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/verifiable-records/{record_id}/qr": {
+   "get": {
+    "summary": "QR Code (SVG) que aponta para a página pública de verificação",
+    "operationId": "get_trust_routes_verifiable_qr",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "record_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/verify/{code}": {
+   "get": {
+    "summary": "Verificação pública: genuíno? qual versão foi assinada? integridade intacta? quem assinou? está revogado?",
+    "operationId": "get_trust_routes_public_verify",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/verify/{code}/qr": {
+   "get": {
+    "summary": "QR Code (SVG) da página pública de verificação deste código",
+    "operationId": "get_trust_routes_public_verify_qr",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/verifiable-records/{record_id}/timestamp": {
+   "post": {
+    "summary": "Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível)",
+    "operationId": "post_trust_routes_verifiable_timestamp",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "record_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/signed-agreements": {
+   "post": {
+    "summary": "Cria um acordo em rascunho a partir de um documento do cofre (o hash do documento é congelado ao publicar)",
+    "operationId": "post_trust_routes_agreement_create",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AgreementIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Acordos em que a organização é dona ou parte",
+    "operationId": "get_trust_routes_agreement_list",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}": {
+   "get": {
+    "summary": "Acordo com partes, estado das assinaturas e acompanhamento",
+    "operationId": "get_trust_routes_agreement_detail",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "Altera um acordo ainda em rascunho (hash e documento são imutáveis)",
+    "operationId": "patch_trust_routes_agreement_patch",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AgreementPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/parties": {
+   "post": {
+    "summary": "Acrescenta uma parte ao acordo em rascunho",
+    "operationId": "post_trust_routes_agreement_add_party",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PartyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/publish": {
+   "post": {
+    "summary": "Envia o acordo para assinatura (exige pelo menos duas partes obrigatórias)",
+    "operationId": "post_trust_routes_agreement_publish",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/sign": {
+   "post": {
+    "summary": "Assina o acordo como parte (duas camadas: senha e código de uso único ligado ao hash)",
+    "operationId": "post_trust_routes_agreement_sign",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 30/3600s por IP",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AgreementSignIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/decline": {
+   "post": {
+    "summary": "Recusa o acordo como parte (motivo obrigatório; o acordo é cancelado)",
+    "operationId": "post_trust_routes_agreement_decline",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/milestones": {
+   "post": {
+    "summary": "Acrescenta uma entrega ao acompanhamento longitudinal do acordo",
+    "operationId": "post_trust_routes_agreement_milestone",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MilestoneIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}": {
+   "patch": {
+    "summary": "Reporta ou avalia uma entrega do acordo",
+    "operationId": "patch_trust_routes_agreement_milestone_patch",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "milestone_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MilestonePatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/taxonomy": {
+   "get": {
+    "summary": "Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial",
+    "operationId": "get_platform_routes_taxonomy",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/impact-tags": {
+   "post": {
+    "summary": "Marca um objeto (projeto, solução, diagnóstico, necessidade…) com ODS, pilar ESG ou determinante social",
+    "operationId": "post_platform_routes_tag_create",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TagIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Marcadores de um objeto",
+    "operationId": "get_platform_routes_tag_list",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "subject_type",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "enum": [
+        "project",
+        "solution",
+        "diagnosis",
+        "need",
+        "call",
+        "organization",
+        "agreement"
+       ],
+       "title": "Subject Type",
+       "type": "string"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "Subject Id",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/impact-tags/{tag_id}": {
+   "delete": {
+    "summary": "Remove um marcador",
+    "operationId": "delete_platform_routes_tag_delete",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "tag_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/locales": {
+   "get": {
+    "summary": "Idiomas disponíveis, com a cobertura real de tradução declarada",
+    "operationId": "get_platform_routes_locales",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP"
+   }
+  },
+  "/v1/public/translations": {
+   "get": {
+    "summary": "Catálogo de traduções do idioma (chaves ausentes devem cair para pt-BR no cliente)",
+    "operationId": "get_platform_routes_translations",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 240/3600s por IP",
+    "parameters": [
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "pt-BR",
+       "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+       "title": "Locale",
+       "type": "string"
+      }
+     },
+     {
+      "name": "namespace",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,40}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Namespace"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/me/preferences": {
+   "get": {
+    "summary": "Idioma e tema da pessoa (tema: system, light ou dark)",
+    "operationId": "get_platform_routes_prefs_get",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   },
+   "put": {
+    "summary": "Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso)",
+    "operationId": "put_platform_routes_prefs_put",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PrefsIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/funding-quotas": {
+   "post": {
+    "summary": "Cria cotas de financiamento para um projeto (o valor da cota é definido pela organização proponente)",
+    "operationId": "post_platform_routes_quota_create",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuotaIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Cotas da organização, com quantas faltam",
+    "operationId": "get_platform_routes_quota_list",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/funding-quotas/{quota_id}": {
+   "patch": {
+    "summary": "Abre, pausa ou fecha as cotas e ajusta rótulo/prazo (quantidade e valor não mudam depois de criados)",
+    "operationId": "patch_platform_routes_quota_patch",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "quota_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuotaPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/funding-quotas/{quota_id}/pledges": {
+   "post": {
+    "summary": "Reserva cotas (o banco impede vender mais do que existe, inclusive com pedidos simultâneos)",
+    "operationId": "post_platform_routes_pledge_create",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 60/3600s por IP",
+    "parameters": [
+     {
+      "name": "quota_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PledgeIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Apoios de uma cota (proponente vê todos; apoiadora vê os seus)",
+    "operationId": "get_platform_routes_pledge_list",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "quota_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/funding-quotas/pledges/{pledge_id}/confirm": {
+   "post": {
+    "summary": "Confirma o recebimento de um apoio (registro humano; a reserva não se confirma sozinha)",
+    "operationId": "post_platform_routes_pledge_confirm",
+    "tags": [
+     "admin",
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "pledge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/campaigns": {
+   "post": {
+    "summary": "Cria a campanha de divulgação do projeto (rascunho; publicar é um passo separado)",
+    "operationId": "post_platform_routes_campaign_create",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/campaigns/{campaign_id}": {
+   "patch": {
+    "summary": "Altera ou publica/fecha a campanha",
+    "operationId": "patch_platform_routes_campaign_patch",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/public/campaigns/{slug}": {
+   "get": {
+    "summary": "Campanha pública: história do projeto, meta e QUANTAS COTAS FALTAM",
+    "operationId": "get_platform_routes_campaign_public",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/fee-tables": {
+   "get": {
+    "summary": "Tabelas de honorários publicadas, com a fonte e a data de consulta (a plataforma não inventa valor)",
+    "operationId": "get_platform_routes_fee_tables",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/fee-tables/{table_id}": {
+   "get": {
+    "summary": "Itens de uma tabela de honorários",
+    "operationId": "get_platform_routes_fee_table_detail",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "table_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/fee-tables": {
+   "post": {
+    "summary": "Cria tabela de honorários em rascunho (publicar exige fonte, URL e data de consulta)",
+    "operationId": "post_platform_routes_fee_table_create",
+    "tags": [
+     "admin",
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FeeTableIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/fee-tables/{table_id}/items": {
+   "post": {
+    "summary": "Acrescenta item à tabela de honorários (valor vem da fonte, não da plataforma)",
+    "operationId": "post_platform_routes_fee_item_create",
+    "tags": [
+     "admin",
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "table_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FeeItemIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/fee-tables/{table_id}/publish": {
+   "post": {
+    "summary": "Publica a tabela (recusado sem nome da fonte, URL e data de consulta)",
+    "operationId": "post_platform_routes_fee_table_publish",
+    "tags": [
+     "admin",
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "table_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/professional-services": {
+   "post": {
+    "summary": "Cadastra uma atividade oferecida (preço é da profissional, com margem de negociação)",
+    "operationId": "post_platform_routes_service_create",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: provider, individual · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ServiceIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Atividades cadastradas pela organização",
+    "operationId": "get_platform_routes_service_list",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/professional-services/{service_id}": {
+   "patch": {
+    "summary": "Altera ou publica uma atividade",
+    "operationId": "patch_platform_routes_service_patch",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "service_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ServicePatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/directory/services": {
+   "get": {
+    "summary": "Busca por ATIVIDADE oferecida, com card completo: preço, credencial verificada, ODS e localização (quando pública). O diretório por organização continua em GET /v1/directory/professionals.",
+    "operationId": "get_platform_routes_directory_services",
+    "tags": [
+     "professional"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 120,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "uf",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[A-Z]{2}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Uf"
+      }
+     },
+     {
+      "name": "council",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[A-Z]{2,10}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Council"
+      }
+     },
+     {
+      "name": "sdg",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^ODS[0-9]{1,2}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Sdg"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/org/geo": {
+   "put": {
+    "summary": "Define a localização da organização; tornar pública exige consentimento explícito (registrado com data)",
+    "operationId": "put_platform_routes_org_geo",
+    "tags": [
+     "platform"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GeoIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/guide": {
+   "get": {
+    "summary": "Roteiro guiado do diagnóstico: etapas, perguntas, documentos exigidos e progresso real",
+    "operationId": "get_platform_routes_diagnosis_guide",
+    "tags": [
+     "diagnoses"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/guide/{stage_code}": {
+   "put": {
+    "summary": "Salva as respostas e os documentos de uma etapa do diagnóstico guiado",
+    "operationId": "put_platform_routes_diagnosis_stage_put",
+    "tags": [
+     "diagnoses"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "stage_code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StageIn"
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -23710,25 +26355,6 @@
       "title": "Title",
       "type": "string"
      },
-     "description": {
-      "anyOf": [
-       {
-        "maxLength": 4000,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Description"
-     },
-     "amount_cents": {
-      "maximum": 1000000000000,
-      "minimum": 0,
-      "title": "Amount Cents",
-      "type": "integer"
-     },
      "due_on": {
       "anyOf": [
        {
@@ -23741,11 +26367,23 @@
       ],
       "default": null,
       "title": "Due On"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
      }
     },
     "required": [
-     "title",
-     "amount_cents"
+     "title"
     ],
     "title": "MilestoneIn",
     "type": "object"
@@ -24544,6 +27182,28 @@
     "title": "DraftPatch",
     "type": "object"
    },
+   "ExportQ": {
+    "additionalProperties": false,
+    "properties": {
+     "format": {
+      "default": "pdf",
+      "enum": [
+       "pdf",
+       "docx",
+       "odt"
+      ],
+      "title": "Format",
+      "type": "string"
+     },
+     "include_verification": {
+      "default": false,
+      "title": "Include Verification",
+      "type": "boolean"
+     }
+    },
+    "title": "ExportQ",
+    "type": "object"
+   },
    "ReviewRequestIn": {
     "additionalProperties": false,
     "properties": {
@@ -24705,6 +27365,12 @@
       "minLength": 1,
       "title": "Password",
       "type": "string"
+     },
+     "code": {
+      "maxLength": 12,
+      "minLength": 4,
+      "title": "Code",
+      "type": "string"
      }
     },
     "required": [
@@ -24712,7 +27378,8 @@
      "subject_id",
      "role",
      "statement",
-     "password"
+     "password",
+     "code"
     ],
     "title": "SignIn",
     "type": "object"
@@ -30749,25 +33416,28 @@
    "AgreementIn": {
     "additionalProperties": false,
     "properties": {
-     "name": {
-      "maxLength": 200,
-      "minLength": 2,
-      "title": "Name",
-      "type": "string"
-     },
      "kind": {
       "enum": [
-       "convention",
-       "gov",
-       "partner"
+       "service",
+       "partnership",
+       "funding",
+       "volunteer",
+       "data_sharing",
+       "other"
       ],
       "title": "Kind",
       "type": "string"
      },
-     "plan_key": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
       "anyOf": [
        {
-        "pattern": "^[a-z0-9_]{2,60}$",
+        "maxLength": 4000,
         "type": "string"
        },
        {
@@ -30775,55 +33445,17 @@
        }
       ],
       "default": null,
-      "title": "Plan Key"
+      "title": "Summary"
      },
-     "grant_days": {
+     "document_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Document Id",
+      "type": "string"
+     },
+     "project_id": {
       "anyOf": [
        {
-        "maximum": 3650,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Grant Days"
-     },
-     "discount_percent": {
-      "anyOf": [
-       {
-        "maximum": 100,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Discount Percent"
-     },
-     "seats": {
-      "maximum": 100000,
-      "minimum": 1,
-      "title": "Seats",
-      "type": "integer"
-     },
-     "email_domains": {
-      "items": {
-       "pattern": "^[a-z0-9.-]+\\.[a-z]{2,}$",
-       "type": "string"
-      },
-      "maxItems": 20,
-      "title": "Email Domains",
-      "type": "array"
-     },
-     "valid_from": {
-      "anyOf": [
-       {
-        "format": "date-time",
+        "pattern": "^[0-9a-fA-F-]{36}$",
         "type": "string"
        },
        {
@@ -30831,100 +33463,9 @@
        }
       ],
       "default": null,
-      "title": "Valid From"
+      "title": "Project Id"
      },
-     "valid_until": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Valid Until"
-     },
-     "contract_ref": {
-      "anyOf": [
-       {
-        "maxLength": 200,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Contract Ref"
-     }
-    },
-    "required": [
-     "name",
-     "kind",
-     "seats"
-    ],
-    "title": "AgreementIn",
-    "type": "object"
-   },
-   "AgreementPatch": {
-    "additionalProperties": false,
-    "properties": {
-     "counterpart_name": {
-      "anyOf": [
-       {
-        "maxLength": 300,
-        "minLength": 2,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Counterpart Name"
-     },
-     "counterpart_authority": {
-      "anyOf": [
-       {
-        "maxLength": 300,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Counterpart Authority"
-     },
-     "instrument_number": {
-      "anyOf": [
-       {
-        "maxLength": 120,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Instrument Number"
-     },
-     "object_summary": {
-      "anyOf": [
-       {
-        "maxLength": 2000,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Object Summary"
-     },
-     "start_date": {
+     "effective_from": {
       "anyOf": [
        {
         "format": "date",
@@ -30935,9 +33476,9 @@
        }
       ],
       "default": null,
-      "title": "Start Date"
+      "title": "Effective From"
      },
-     "end_date": {
+     "effective_to": {
       "anyOf": [
        {
         "format": "date",
@@ -30948,12 +33489,12 @@
        }
       ],
       "default": null,
-      "title": "End Date"
+      "title": "Effective To"
      },
      "value_cents": {
       "anyOf": [
        {
-        "maximum": 1000000000000,
+        "maximum": 10000000000000,
         "minimum": 0,
         "type": "integer"
        },
@@ -30963,17 +33504,24 @@
       ],
       "default": null,
       "title": "Value Cents"
-     },
-     "agreement_status": {
+     }
+    },
+    "required": [
+     "kind",
+     "title",
+     "document_id"
+    ],
+    "title": "AgreementIn",
+    "type": "object"
+   },
+   "AgreementPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
       "anyOf": [
        {
-        "enum": [
-         "draft",
-         "active",
-         "completed",
-         "terminated",
-         "suspended"
-        ],
+        "maxLength": 200,
+        "minLength": 3,
         "type": "string"
        },
        {
@@ -30981,12 +33529,12 @@
        }
       ],
       "default": null,
-      "title": "Agreement Status"
+      "title": "Title"
      },
-     "qualification_id": {
+     "summary": {
       "anyOf": [
        {
-        "pattern": "^[0-9a-fA-F-]{36}$",
+        "maxLength": 4000,
         "type": "string"
        },
        {
@@ -30994,13 +33542,12 @@
        }
       ],
       "default": null,
-      "title": "Qualification Id"
+      "title": "Summary"
      },
-     "verification_url": {
+     "effective_from": {
       "anyOf": [
        {
-        "maxLength": 500,
-        "pattern": "^https://",
+        "format": "date",
         "type": "string"
        },
        {
@@ -31008,12 +33555,12 @@
        }
       ],
       "default": null,
-      "title": "Verification Url"
+      "title": "Effective From"
      },
-     "document_id": {
+     "effective_to": {
       "anyOf": [
        {
-        "pattern": "^[0-9a-fA-F-]{36}$",
+        "format": "date",
         "type": "string"
        },
        {
@@ -31021,7 +33568,21 @@
        }
       ],
       "default": null,
-      "title": "Document Id"
+      "title": "Effective To"
+     },
+     "value_cents": {
+      "anyOf": [
+       {
+        "maximum": 10000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Value Cents"
      }
     },
     "title": "AgreementPatch",
@@ -31192,7 +33753,7 @@
     "properties": {
      "reason": {
       "maxLength": 500,
-      "minLength": 5,
+      "minLength": 10,
       "title": "Reason",
       "type": "string"
      }
@@ -31969,19 +34530,37 @@
    "PrefsIn": {
     "additionalProperties": false,
     "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/PrefItem"
-      },
-      "maxItems": 6,
-      "minItems": 1,
-      "title": "Items",
-      "type": "array"
+     "locale": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Locale"
+     },
+     "theme": {
+      "anyOf": [
+       {
+        "enum": [
+         "system",
+         "light",
+         "dark"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Theme"
      }
     },
-    "required": [
-     "items"
-    ],
     "title": "PrefsIn",
     "type": "object"
    },
@@ -34267,16 +36846,29 @@
       "title": "Approve",
       "type": "boolean"
      },
-     "reason": {
-      "maxLength": 1000,
+     "note": {
+      "maxLength": 2000,
       "minLength": 5,
-      "title": "Reason",
+      "title": "Note",
       "type": "string"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
      }
     },
     "required": [
      "approve",
-     "reason"
+     "note"
     ],
     "title": "DecisionIn",
     "type": "object"
@@ -34865,7 +37457,13 @@
       "default": "csv",
       "enum": [
        "csv",
-       "json"
+       "json",
+       "xlsx",
+       "ods",
+       "xml",
+       "docx",
+       "odt",
+       "pdf"
       ],
       "title": "Format",
       "type": "string"
@@ -34912,6 +37510,1243 @@
      "evidence"
     ],
     "title": "MaturityIn",
+    "type": "object"
+   },
+   "IdentityRequestIn": {
+    "additionalProperties": false,
+    "properties": {
+     "level": {
+      "enum": [
+       "email",
+       "phone",
+       "document",
+       "professional",
+       "biometric"
+      ],
+      "title": "Level",
+      "type": "string"
+     },
+     "method": {
+      "default": "human_review",
+      "enum": [
+       "platform_token",
+       "human_review",
+       "council_document",
+       "external_provider"
+      ],
+      "title": "Method",
+      "type": "string"
+     }
+    },
+    "required": [
+     "level"
+    ],
+    "title": "IdentityRequestIn",
+    "type": "object"
+   },
+   "IdentityDocumentIn": {
+    "additionalProperties": false,
+    "properties": {
+     "document_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Document Id",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "official_id",
+       "drivers_license",
+       "passport",
+       "proof_of_address",
+       "council_card",
+       "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+     }
+    },
+    "required": [
+     "document_id",
+     "kind"
+    ],
+    "title": "IdentityDocumentIn",
+    "type": "object"
+   },
+   "CredentialDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "approve": {
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 5,
+      "title": "Note",
+      "type": "string"
+     },
+     "valid_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Valid Until"
+     }
+    },
+    "required": [
+     "approve",
+     "note"
+    ],
+    "title": "CredentialDecisionIn",
+    "type": "object"
+   },
+   "ChallengeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "subject_type": {
+      "enum": [
+       "document",
+       "draft",
+       "agreement"
+      ],
+      "title": "Subject Type",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "channel": {
+      "default": "email",
+      "enum": [
+       "email",
+       "sms"
+      ],
+      "title": "Channel",
+      "type": "string"
+     }
+    },
+    "required": [
+     "subject_type",
+     "subject_id"
+    ],
+    "title": "ChallengeIn",
+    "type": "object"
+   },
+   "VerifiableIn": {
+    "additionalProperties": false,
+    "properties": {
+     "subject_type": {
+      "enum": [
+       "document",
+       "draft",
+       "agreement"
+      ],
+      "title": "Subject Type",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 2,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
+     }
+    },
+    "required": [
+     "subject_type",
+     "subject_id"
+    ],
+    "title": "VerifiableIn",
+    "type": "object"
+   },
+   "PartyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Org Id",
+      "type": "string"
+     },
+     "role": {
+      "enum": [
+       "contractor",
+       "provider",
+       "funder",
+       "professional",
+       "witness",
+       "beneficiary_rep"
+      ],
+      "title": "Role",
+      "type": "string"
+     },
+     "required": {
+      "default": true,
+      "title": "Required",
+      "type": "boolean"
+     },
+     "user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "User Id"
+     }
+    },
+    "required": [
+     "org_id",
+     "role"
+    ],
+    "title": "PartyIn",
+    "type": "object"
+   },
+   "AgreementSignIn": {
+    "additionalProperties": false,
+    "properties": {
+     "statement": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Statement",
+      "type": "string"
+     },
+     "password": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Password",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 12,
+      "minLength": 4,
+      "title": "Code",
+      "type": "string"
+     }
+    },
+    "required": [
+     "statement",
+     "password",
+     "code"
+    ],
+    "title": "AgreementSignIn",
+    "type": "object"
+   },
+   "MilestonePatch": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "planned",
+       "in_progress",
+       "delivered",
+       "accepted",
+       "rejected",
+       "canceled"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "MilestonePatch",
+    "type": "object"
+   },
+   "TagIn": {
+    "additionalProperties": false,
+    "properties": {
+     "subject_type": {
+      "enum": [
+       "project",
+       "solution",
+       "diagnosis",
+       "need",
+       "call",
+       "organization",
+       "agreement"
+      ],
+      "title": "Subject Type",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "taxonomy": {
+      "enum": [
+       "sdg",
+       "esg",
+       "determinant"
+      ],
+      "title": "Taxonomy",
+      "type": "string"
+     },
+     "code": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Code",
+      "type": "string"
+     },
+     "is_primary": {
+      "default": false,
+      "title": "Is Primary",
+      "type": "boolean"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "subject_type",
+     "subject_id",
+     "taxonomy",
+     "code"
+    ],
+    "title": "TagIn",
+    "type": "object"
+   },
+   "QuotaIn": {
+    "additionalProperties": false,
+    "properties": {
+     "project_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Label",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "quota_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000000000,
+      "title": "Quota Cents",
+      "type": "integer"
+     },
+     "total_quotas": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000,
+      "title": "Total Quotas",
+      "type": "integer"
+     },
+     "min_per_backer": {
+      "default": 1,
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Min Per Backer",
+      "type": "integer"
+     },
+     "max_per_backer": {
+      "anyOf": [
+       {
+        "maximum": 100000,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Per Backer"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Deadline"
+     }
+    },
+    "required": [
+     "project_id",
+     "label",
+     "quota_cents",
+     "total_quotas"
+    ],
+    "title": "QuotaIn",
+    "type": "object"
+   },
+   "QuotaPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "draft",
+         "open",
+         "paused",
+         "closed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "minLength": 2,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Label"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Deadline"
+     }
+    },
+    "title": "QuotaPatch",
+    "type": "object"
+   },
+   "PledgeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "quantity": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Quantity",
+      "type": "integer"
+     },
+     "display_name": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Display Name"
+     },
+     "is_anonymous": {
+      "default": false,
+      "title": "Is Anonymous",
+      "type": "boolean"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "quantity"
+    ],
+    "title": "PledgeIn",
+    "type": "object"
+   },
+   "CampaignIn": {
+    "additionalProperties": false,
+    "properties": {
+     "project_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "slug": {
+      "pattern": "^[a-z0-9-]{4,80}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 4,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "maxLength": 600,
+      "minLength": 20,
+      "title": "Summary",
+      "type": "string"
+     },
+     "story": {
+      "anyOf": [
+       {
+        "maxLength": 20000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Story"
+     },
+     "cover_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cover Document Id"
+     },
+     "show_backers": {
+      "default": false,
+      "title": "Show Backers",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "project_id",
+     "slug",
+     "title",
+     "summary"
+    ],
+    "title": "CampaignIn",
+    "type": "object"
+   },
+   "CampaignPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 4,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "story": {
+      "anyOf": [
+       {
+        "maxLength": 20000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Story"
+     },
+     "cover_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cover Document Id"
+     },
+     "show_backers": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Backers"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "draft",
+         "published",
+         "closed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     }
+    },
+    "title": "CampaignPatch",
+    "type": "object"
+   },
+   "FeeTableIn": {
+    "additionalProperties": false,
+    "properties": {
+     "council_code": {
+      "pattern": "^[A-Z]{2,10}$",
+      "title": "Council Code",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 4,
+      "title": "Title",
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+     },
+     "reference_year": {
+      "anyOf": [
+       {
+        "maximum": 2100,
+        "minimum": 2000,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reference Year"
+     },
+     "source_name": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Name"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Date"
+     },
+     "notes": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Notes"
+     }
+    },
+    "required": [
+     "council_code",
+     "title",
+     "version"
+    ],
+    "title": "FeeTableIn",
+    "type": "object"
+   },
+   "FeeItemIn": {
+    "additionalProperties": false,
+    "properties": {
+     "service_code": {
+      "pattern": "^[a-z0-9_.-]{2,60}$",
+      "title": "Service Code",
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Description",
+      "type": "string"
+     },
+     "unit": {
+      "enum": [
+       "hour",
+       "session",
+       "document",
+       "report",
+       "visit",
+       "month",
+       "project",
+       "other"
+      ],
+      "title": "Unit",
+      "type": "string"
+     },
+     "reference_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reference Cents"
+     },
+     "min_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Min Cents"
+     },
+     "max_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Cents"
+     },
+     "negotiable": {
+      "default": true,
+      "title": "Negotiable",
+      "type": "boolean"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "service_code",
+     "description",
+     "unit"
+    ],
+    "title": "FeeItemIn",
+    "type": "object"
+   },
+   "ServiceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "modality": {
+      "default": "hybrid",
+      "enum": [
+       "online",
+       "in_person",
+       "hybrid"
+      ],
+      "title": "Modality",
+      "type": "string"
+     },
+     "unit": {
+      "default": "session",
+      "enum": [
+       "hour",
+       "session",
+       "document",
+       "report",
+       "visit",
+       "month",
+       "project",
+       "other"
+      ],
+      "title": "Unit",
+      "type": "string"
+     },
+     "credential_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Credential Id"
+     },
+     "fee_item_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Item Id"
+     },
+     "price_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Price Cents"
+     },
+     "negotiable": {
+      "default": true,
+      "title": "Negotiable",
+      "type": "boolean"
+     },
+     "duration_min": {
+      "anyOf": [
+       {
+        "maximum": 1440,
+        "minimum": 5,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Duration Min"
+     }
+    },
+    "required": [
+     "title"
+    ],
+    "title": "ServiceIn",
+    "type": "object"
+   },
+   "ServicePatch": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "modality": {
+      "default": "hybrid",
+      "enum": [
+       "online",
+       "in_person",
+       "hybrid"
+      ],
+      "title": "Modality",
+      "type": "string"
+     },
+     "unit": {
+      "default": "session",
+      "enum": [
+       "hour",
+       "session",
+       "document",
+       "report",
+       "visit",
+       "month",
+       "project",
+       "other"
+      ],
+      "title": "Unit",
+      "type": "string"
+     },
+     "credential_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Credential Id"
+     },
+     "fee_item_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Item Id"
+     },
+     "price_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Price Cents"
+     },
+     "negotiable": {
+      "default": true,
+      "title": "Negotiable",
+      "type": "boolean"
+     },
+     "duration_min": {
+      "anyOf": [
+       {
+        "maximum": 1440,
+        "minimum": 5,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Duration Min"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "draft",
+         "published",
+         "paused"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     }
+    },
+    "title": "ServicePatch",
+    "type": "object"
+   },
+   "GeoIn": {
+    "additionalProperties": false,
+    "properties": {
+     "lat": {
+      "maximum": 90,
+      "minimum": -90,
+      "title": "Lat",
+      "type": "number"
+     },
+     "lng": {
+      "maximum": 180,
+      "minimum": -180,
+      "title": "Lng",
+      "type": "number"
+     },
+     "precision": {
+      "default": "city",
+      "enum": [
+       "exact",
+       "approximate",
+       "city"
+      ],
+      "title": "Precision",
+      "type": "string"
+     },
+     "public": {
+      "default": false,
+      "title": "Public",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "lat",
+     "lng"
+    ],
+    "title": "GeoIn",
+    "type": "object"
+   },
+   "StageIn": {
+    "additionalProperties": false,
+    "properties": {
+     "answers": {
+      "additionalProperties": true,
+      "title": "Answers",
+      "type": "object"
+     },
+     "document_ids": {
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Document Ids",
+      "type": "array"
+     },
+     "complete": {
+      "default": false,
+      "title": "Complete",
+      "type": "boolean"
+     },
+     "skip_reason": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Skip Reason"
+     }
+    },
+    "title": "StageIn",
     "type": "object"
    }
   },

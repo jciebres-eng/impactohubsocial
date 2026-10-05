@@ -280,16 +280,41 @@ def generate_export(app, c, *, org_id: str, user_id: str, dataset: str, fmt: str
                       org_id, dataset, fmt, Json(filters or {}), user_id)
     _, sql = DATASETS[dataset]
     rows = c.query(sql + " LIMIT 50000", org_id)
+    cols = list(rows[0].keys()) if rows else []
     if fmt == "csv":
         buf = io.StringIO()
         w = csv.writer(buf, lineterminator="\n")
-        cols = list(rows[0].keys()) if rows else []
         w.writerow(cols)
         for r in rows:
             w.writerow([_csv_cell(r[k]) for k in cols])
         data, mime, ext = buf.getvalue().encode("utf-8-sig"), "text/csv", "csv"
-    else:
+    elif fmt == "json":
         data, mime, ext = json.dumps({"dataset": dataset, "rows": rows}, ensure_ascii=False, default=str).encode(), "application/json", "json"
+    else:
+        from ..services import formats as FMT
+        title = f"Exportação — {dataset}"
+        # a neutralização de fórmula vale para TODA planilha, não só csv (xlsx/ods também são abertos em planilha)
+        table = [cols] + [[_csv_cell(r[k]) for k in cols] for r in rows]
+        if fmt == "xlsx":
+            data, mime, ext = FMT.xlsx([(dataset[:31], table)]), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"
+        elif fmt == "ods":
+            data, mime, ext = FMT.ods([(dataset[:31], table)]), "application/vnd.oasis.opendocument.spreadsheet", "ods"
+        elif fmt == "xml":
+            data, mime, ext = FMT.xml(dataset, {"dataset": dataset, "rows": rows}, item="row"), "application/xml", "xml"
+        elif fmt in ("docx", "odt", "pdf"):
+            blocks = [("h2", f"{len(rows)} registro(s)"), ("spacer", "")]
+            for r in rows[:2000]:
+                blocks.append(("li", " · ".join(f"{k}: {r[k]}" for k in cols if r[k] not in (None, ""))))
+            if len(rows) > 2000:
+                blocks.append(("p", f"(exibindo 2.000 de {len(rows)} registros — use xlsx/csv para a lista completa)"))
+            if fmt == "docx":
+                data, mime, ext = FMT.docx(title, blocks), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"
+            elif fmt == "odt":
+                data, mime, ext = FMT.odt(title, blocks), "application/vnd.oasis.opendocument.text", "odt"
+            else:
+                data, mime, ext = FMT.pdf(title, blocks, footer="Gerado pela Plataforma Impacto."), "application/pdf", "pdf"
+        else:
+            raise ApiError(422, "format_unknown", f"Formato não suportado. Disponíveis: {', '.join(FMT.EXPORT_FORMATS)}")
     from ..services.documents import new_storage_key
     key = new_storage_key(org_id)
     app.storage.put(key, data, mime)

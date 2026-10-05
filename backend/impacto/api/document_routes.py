@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import date, UTC
+from typing import Literal
 
 from starlette.responses import Response
 
@@ -292,6 +293,57 @@ def export_pdf(ctx: Ctx):
     return {"document_id": did, "sha256": digest}
 
 
+class ExportQ(S.In):
+    format: Literal["pdf", "docx", "odt"] = "pdf"
+    include_verification: bool = False
+
+
+@route("POST", "/v1/drafts/{draft_id}/export", body=ExportQ, min_role="member", status=201, tags=("drafts",),
+       summary="Gera o rascunho em PDF, DOCX ou ODT e guarda no cofre; opcionalmente imprime o QR de verificação pública")
+def export_draft(ctx: Ctx, body: ExportQ):
+    from ..services import formats as FMT
+    with ctx.tx(readonly=True) as c:
+        d = c.one("SELECT * FROM drafts WHERE id = $1 AND org_id = $2", ctx.path["draft_id"], ctx.org_id)
+    if not d:
+        raise not_found("Rascunho")
+    footer = (f"Versão {d['version']} · SHA-256 do texto: {d['content_sha256']}"
+              + (" · Elaborado com assistência de IA e revisado pela equipe" if d["ai_assisted"] else ""))
+    blocks = [("p", line) if line.strip() else ("spacer", "") for line in d["content"].split("\n")]
+    code = url = None
+    if body.include_verification:
+        with ctx.tx(readonly=True) as c:
+            code = c.scalar("SELECT code FROM verifiable_records WHERE subject_type = 'draft' AND subject_id = $1"
+                            " AND status = 'active' ORDER BY created_at DESC LIMIT 1", d["id"])
+        if not code:
+            raise ApiError(409, "no_verifiable_record", "Gere o registro público de verificação deste rascunho antes de "
+                                                        "imprimir o QR (POST /v1/verifiable-records).")
+        url = f"{ctx.settings.public_base_url.rstrip('/')}/verificar/{code}"
+    if body.format == "pdf":
+        data, mime, ext = FMT.pdf(d["title"], blocks, footer=footer, verification_code=code,
+                                  verification_url=url), "application/pdf", "pdf"
+    elif body.format == "docx":
+        extra = [("spacer", ""), ("h2", "Verificação pública"), ("p", f"Código: {code}"), ("p", url)] if code else []
+        data, mime, ext = (FMT.docx(d["title"], blocks + [("spacer", ""), ("quote", footer)] + extra),
+                           "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx")
+    else:
+        extra = [("spacer", ""), ("h2", "Verificação pública"), ("p", f"Código: {code}"), ("p", url)] if code else []
+        data, mime, ext = (FMT.odt(d["title"], blocks + [("spacer", ""), ("quote", footer)] + extra),
+                           "application/vnd.oasis.opendocument.text", "odt")
+    digest = hashlib.sha256(data).hexdigest()
+    key = docsvc.new_storage_key(ctx.org_id)
+    ctx.app.storage.put(key, data, mime)
+    with ctx.tx() as c:
+        did = c.scalar("INSERT INTO documents(org_id, project_id, application_id, doc_type, title, filename, mime_type,"
+                       " size_bytes, sha256, storage_key, status, scan_engine, scanned_at, origin, uploaded_by)"
+                       " VALUES ($1,$2,$3,'proposta_projeto',$4,$5,$6,$7::bigint,$8,$9,'clean','generated', now(),"
+                       " 'generated', $10) RETURNING id::text",
+                       ctx.org_id, d["project_id"], d["application_id"], d["title"][:200],
+                       safe_filename(d["title"]) + "." + ext, mime, len(data), digest, key, ctx.user_id)
+        ctx.audit(c, "draft.exported", "document", did, {"draft": d["id"], "format": body.format, "sha256": digest})
+    return {"document_id": did, "sha256": digest, "format": body.format, "filename": safe_filename(d["title"]) + "." + ext,
+            "verification_code": code}
+
+
 # ------------------------------------------------------------------------------------------------ validação profissional
 @route("POST", "/v1/professional-reviews", body=S.ReviewRequestIn, min_role="member", status=201, feature="professional.request",
        tags=("professionals",), summary="Solicita validação a profissional parceiro habilitado (contrato e honorários fora da plataforma)")
@@ -396,13 +448,29 @@ def _signature_material(sig: dict) -> str:
 
 
 @route("POST", "/v1/signatures", body=S.SignIn, min_role="member", status=201, rate=("sign_ip", 30, 3600), tags=("signatures",),
-       summary="Assinatura eletrônica avançada na plataforma (reautenticação por senha, hash da versão exata, credencial e trilha)")
+       summary="Assinatura eletrônica avançada em DUAS CAMADAS (senha + código de uso único), hash da versão exata, credencial e trilha")
 def sign(ctx: Ctx, body: S.SignIn):
     from datetime import datetime
+
+    from ..trust import challenges as CH
+    from ..trust import custody as CUST
+    # Camada 1: reautenticação por senha.
     with ctx.system_tx() as c:
         h = c.scalar("SELECT password_hash FROM users WHERE id = $1", ctx.user_id)
     if not passwords.verify_password(body.password, h):
         raise ApiError(401, "reauth_failed", "Senha incorreta — a assinatura exige reautenticação")
+    # Camada 2: código de uso único, amarrado ao hash EXATO do conteúdo (muda o conteúdo, o código não serve mais).
+    with ctx.tx(readonly=True) as c:
+        _t, _col = ("drafts", "content_sha256") if body.subject_type == "draft" else ("documents", "sha256")
+        _h = c.scalar(f"SELECT {_col} FROM {_t} WHERE id = $1", body.subject_id)
+    if _h is None:
+        raise not_found("Objeto da assinatura")
+    with ctx.system_tx() as c:
+        chk = CH.consume(c, user_id=ctx.user_id, subject_type=body.subject_type, subject_id=body.subject_id,
+                         subject_sha256=_h, code=body.code)
+    if not chk["ok"]:
+        raise ApiError(401 if chk["reason"] in ("wrong_code", "no_challenge") else 409, f"challenge_{chk['reason']}",
+                       CH.REASONS.get(chk["reason"], "Código de confirmação inválido"))
     with ctx.tx() as c:
         table, col = ("drafts", "content_sha256") if body.subject_type == "draft" else ("documents", "sha256")
         subj = c.one(f"SELECT id::text AS id, org_id::text AS org_id, {col} AS h, project_id::text AS project_id FROM {table} WHERE id = $1",
@@ -428,10 +496,17 @@ def sign(ctx: Ctx, body: S.SignIn):
                "signer_org_id": ctx.org_id, "credential_id": body.credential_id, "role": body.role, "statement": body.statement,
                "signed_at": datetime.now(UTC).isoformat()}
         mac = hmac_hex(ctx.settings.secret_key, _signature_material(sig))
+        # identity_level() é SECURITY DEFINER: dá para ler o nível aqui dentro e gravar no INSERT
+        # (signatures é append-only desde 0002 — nada de UPDATE depois).
         sid = c.scalar("INSERT INTO signatures(review_id, subject_type, subject_id, subject_sha256, signer_user_id, signer_org_id, credential_id, role,"
-                       " statement, ip, user_agent, signature_hmac, signed_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::timestamptz)"
+                       " statement, ip, user_agent, signature_hmac, signed_at, challenge_id, identity_level)"
+                       " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::timestamptz,$14, identity_level($5))"
                        " RETURNING id::text", body.review_id, body.subject_type, subj["id"], subj["h"], ctx.user_id, ctx.org_id,
-                       body.credential_id, body.role, body.statement, ctx.ip, ctx.user_agent, mac, sig["signed_at"])
+                       body.credential_id, body.role, body.statement, ctx.ip, ctx.user_agent, mac, sig["signed_at"],
+                       chk["challenge_id"])
+        CUST.record(c, subject_type=body.subject_type, subject_id=subj["id"], org_id=ctx.org_id, event_type="signed",
+                    actor_user_id=ctx.user_id, content_sha256=subj["h"],
+                    payload={"role": body.role, "signature_id": sid, "two_factor": True})
         if subj["project_id"]:
             ledger(c, project_id=subj["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="professional_signature",
                    ref_type="signature", ref_id=sid, payload={"role": body.role, "subject_sha256": subj["h"]})
@@ -441,8 +516,10 @@ def sign(ctx: Ctx, body: S.SignIn):
             c.run("UPDATE professional_reviews SET status = 'signed' WHERE id = $1", body.review_id)
             if body.subject_type == "draft":
                 c.run("UPDATE drafts SET status = 'signed' WHERE id = $1", body.subject_id)
-    return {"id": sid, "subject_sha256": subj["h"], "method": "platform_advanced",
-            "legal_note": "Assinatura eletrônica avançada com trilha de auditoria. Para exigências de assinatura qualificada (ICP-Brasil/gov.br), use o integrador externo."}
+    return {"id": sid, "subject_sha256": subj["h"], "method": "platform_advanced", "two_factor": True,
+            "legal_note": "Assinatura eletrônica avançada: reautenticação por senha, código de uso único, hash da versão exata e "
+                          "trilha encadeada. Para exigências de assinatura qualificada (ICP-Brasil/gov.br), use certificado próprio — "
+                          "a plataforma não emite nem homologa assinatura qualificada."}
 
 
 class VerifyQ(S.In):

@@ -35,7 +35,8 @@ class ArchitectureTests(unittest.TestCase):
     def test_system_context_only_in_allowed_modules(self):
         allowed = {"auth.py", "billing.py", "compliance.py", "workflow.py", "ratelimit.py", "http.py", "jobs.py", "cli.py", "seed_dev.py",
                    "app.py", "auth_routes.py", "org_routes.py", "application_routes.py", "execution_routes.py", "document_routes.py",
-                   "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py"}
+                   "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py", "trust_routes.py", "platform_routes.py", "identity.py", "credentials.py",
+                   "challenges.py", "agreements.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:
@@ -69,7 +70,8 @@ class ArchitectureTests(unittest.TestCase):
         from impacto.http import ROUTES
         api.load_all()
         public = {r.path for r in ROUTES if r.auth == "none"}
-        expected_public = {"/v1/auth/register", "/v1/auth/login", "/v1/auth/mfa/verify", "/v1/auth/refresh", "/v1/auth/verify-email",
+        expected_public = {"/v1/public/verify/{code}", "/v1/public/verify/{code}/qr", "/v1/public/campaigns/{slug}",
+                           "/v1/public/locales", "/v1/public/translations", "/v1/auth/register", "/v1/auth/login", "/v1/auth/mfa/verify", "/v1/auth/refresh", "/v1/auth/verify-email",
                            "/v1/auth/forgot-password", "/v1/auth/reset-password", "/v1/plans", "/v1/files/{token}",
                            "/v1/billing/webhooks/stripe", "/v1/legal/{doc}",
                            "/v1/auth/oidc/start", "/v1/auth/oidc/callback",

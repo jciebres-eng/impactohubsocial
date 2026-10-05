@@ -108,7 +108,7 @@ class ApproveImportIn(In):
 
 class ExportIn(In):
     dataset: Annotated[str, Field(pattern=r"^[a-z_]{2,60}$")]
-    format: Literal["csv", "json"] = "csv"
+    format: Literal["csv", "json", "xlsx", "ods", "xml", "docx", "odt", "pdf"] = "csv"
     filters: dict[Annotated[str, Field(max_length=60)], object] = {}
 
 

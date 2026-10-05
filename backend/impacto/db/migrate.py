@@ -101,6 +101,26 @@ def sync_integration_providers(conn: Connection, log=print) -> int:
     return len(doc["providers"])
 
 
+def sync_translations(conn: Connection, log=print) -> int:
+    """Catálogo de traduções do núcleo (config/i18n.json). Dado de referência: pt-BR é a origem, en/es traduzem as
+    MESMAS chaves. O que não estiver aqui continua em português na interface — a cobertura real fica em locales.coverage_note."""
+    path = CONFIG_DIR / "i18n.json"
+    if not path.exists() or not conn.one("SELECT 1 FROM pg_tables WHERE tablename = 'translations'"):
+        return 0
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    n = 0
+    for locale, namespaces in doc["locales"].items():
+        if not conn.one("SELECT 1 FROM locales WHERE code = $1", locale):
+            continue
+        for namespace, entries in namespaces.items():
+            for key, value in entries.items():
+                conn.execute("INSERT INTO translations(locale, namespace, key, value) VALUES ($1,$2,$3,$4)"
+                             " ON CONFLICT (locale, namespace, key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()",
+                             (locale, namespace, key, value))
+                n += 1
+    return n
+
+
 def sync_reference_data(conn: Connection, log=print) -> None:
     plans = json.loads((CONFIG_DIR / "plans.json").read_text(encoding="utf-8"))
     conn.execute_script("BEGIN;")
@@ -143,8 +163,9 @@ def sync_reference_data(conn: Connection, log=print) -> None:
                      Json(r.get("project_requirements", [])), r["source_citation"], r.get("source_url"), r.get("notes")),
                 )
         n_prov = sync_integration_providers(conn, log=log)
+        n_tr = sync_translations(conn, log=log)
         conn.execute_script("COMMIT;")
-        log(f"dados de referência sincronizados: {len(keys)} planos, {n_prov} provedores de integração")
+        log(f"dados de referência sincronizados: {len(keys)} planos, {n_prov} provedores de integração, {n_tr} traduções")
     except Exception:
         conn.execute_script("ROLLBACK;")
         raise

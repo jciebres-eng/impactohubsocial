@@ -104,11 +104,28 @@ def server() -> dict:
         return _state
 
 
+def owner_conn():
+    """Conexão como DONO do banco. Usada só para provar que adulterar a cadeia de custódia exige esse nível de acesso
+    (o papel da aplicação não tem UPDATE nessas tabelas e ainda bate no gatilho append-only)."""
+    from impacto.db.pq import Connection
+    return Connection(OWNER_DSN)
+
+
 def outbox_messages() -> list[email.message.Message]:
     box = TMP / "outbox"
     if not box.exists():
         return []
     return [email.message_from_bytes(p.read_bytes()) for p in sorted(box.glob("*.eml"))]
+
+
+def last_signature_code(to: str) -> str:
+    """Código de 6 dígitos do e-mail de confirmação de assinatura (segunda camada)."""
+    for msg in reversed(outbox_messages()):
+        if msg["To"] == to and "assinar" in (msg["Subject"] or "").lower():
+            m = re.search(r"\b(\d{6})\b", msg.get_payload(decode=True).decode())
+            if m:
+                return m.group(1)
+    raise AssertionError(f"código de assinatura não encontrado para {to}")
 
 
 def last_token_for(to: str, path: str) -> str:

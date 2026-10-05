@@ -24,8 +24,22 @@ from ..services.audit import ledger
 BUILDING = ("draft", "diagnosing", "structuring")
 # Estados em que o projeto é "vivo" para match e captação.
 OPEN = ("ready", "published", "funding", "submitted")
-# Estados terminais: não saem por iniciativa da organização (só reabertura excepcional).
+# Estados de execução acompanhada.
+EXECUTION = ("approved", "funded", "in_execution", "monitoring", "paused", "blocked")
+# Estados encerrados. `archived` só volta por reabertura excepcional, que exige motivo registrado (grafo na 0014).
+CLOSED = ("completed", "cancelled", "rejected", "archived")
 TERMINAL = ("archived",)
+
+
+def phase(status: str) -> str:
+    """Fase do projeto. Serve à leitura humana; a regra de transição continua sendo o grafo no banco."""
+    if status in BUILDING:
+        return "building"
+    if status in OPEN:
+        return "open"
+    if status in EXECUTION:
+        return "execution"
+    return "closed" if status in CLOSED else "unknown"
 
 LABELS: dict[str, str] = {
     "draft": "Rascunho", "diagnosing": "Em diagnóstico", "structuring": "Em estruturação", "ready": "Pronto",
@@ -133,11 +147,14 @@ SNAPSHOT_VERSION = "snapshot@1.0"
 
 def build_state(conn: Connection, project_id: str) -> dict[str, Any]:
     """Retrato do projeto: o que precisa ser comparável ao longo do tempo."""
-    p = conn.one("SELECT id::text AS id, title, status, visibility, budget_total_cents, funded_cents, territory,"
+    p = conn.one("SELECT id::text AS id, title, status, visibility, budget_total_cents, territory,"
                  " causes, ods, esg_tags, starts_on, ends_on, urgency, beneficiaries_count, updated_at,"
                  " origin_idea_id::text AS origin_idea_id FROM projects WHERE id = $1", project_id)
     if not p:
         return {}
+    # a captação não é coluna do projeto: é a soma dos compromissos, lida pela função do banco
+    funding = conn.one("SELECT committed_cents, confirmed_cents, disbursed_cents, funders FROM project_funding($1)",
+                       project_id) or {}
     milestones = conn.query("SELECT id::text AS id, title, due_on, amount_cents, funded_cents, status"
                             " FROM milestones WHERE project_id = $1 ORDER BY due_on NULLS LAST, id", project_id)
     indicators = conn.query(
@@ -157,7 +174,8 @@ def build_state(conn: Connection, project_id: str) -> dict[str, Any]:
         "SELECT DISTINCT a.funder_org_id::text AS org_id, 'funder' AS role, o.legal_name"
         " FROM applications a JOIN organizations o ON o.id = a.funder_org_id"
         " WHERE a.project_id = $1 AND a.funder_org_id IS NOT NULL ORDER BY 1", project_id)
-    return {"snapshot_version": SNAPSHOT_VERSION, "project": p, "milestones": milestones, "indicators": indicators,
+    return {"snapshot_version": SNAPSHOT_VERSION, "project": p, "funding": funding,
+            "milestones": milestones, "indicators": indicators,
             "risks": risks, "documents": docs, "parties": parties,
             "counts": {"milestones": len(milestones), "indicators": len(indicators), "risks": len(risks),
                        "documents": len(docs)}}

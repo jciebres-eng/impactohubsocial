@@ -14254,6 +14254,42 @@
        "title": "Validation",
        "type": "string"
       }
+     },
+     {
+      "name": "org_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Org Id"
+      }
+     },
+     {
+      "name": "doc_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 60,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Doc Type"
+      }
      }
     ]
    }
@@ -24152,6 +24188,2184 @@
      }
     }
    }
+  },
+  "/v1/ideas": {
+   "get": {
+    "summary": "Ideias da organização",
+    "operationId": "get_lifecycle_routes_list_ideas",
+    "tags": [
+     "ideas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Registra uma ideia (ainda não é projeto, e não consome cota de projeto)",
+    "operationId": "post_lifecycle_routes_create_idea",
+    "tags": [
+     "ideas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdeaIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ideas/{idea_id}": {
+   "get": {
+    "summary": "get idea",
+    "operationId": "get_lifecycle_routes_get_idea",
+    "tags": [
+     "ideas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "idea_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "put": {
+    "summary": "update idea",
+    "operationId": "put_lifecycle_routes_update_idea",
+    "tags": [
+     "ideas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "idea_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdeaIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ideas/{idea_id}/promote": {
+   "post": {
+    "summary": "Transforma a ideia em projeto sem apagar a ideia (o projeto guarda a origem)",
+    "operationId": "post_lifecycle_routes_promote_idea",
+    "tags": [
+     "ideas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "idea_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PromoteIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/project-status-graph": {
+   "get": {
+    "summary": "Máquina de situações do projeto (é DADO no banco, não código: um gatilho recusa o que não está aqui)",
+    "operationId": "get_lifecycle_routes_status_graph",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/projects/{project_id}/lifecycle": {
+   "get": {
+    "summary": "Situação atual, para onde pode ir e o que já aconteceu",
+    "operationId": "get_lifecycle_routes_get_lifecycle",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/transitions": {
+   "post": {
+    "summary": "Muda a situação do projeto (recusa explícita quando a máquina não permite)",
+    "operationId": "post_lifecycle_routes_create_transition",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/timeline": {
+   "get": {
+    "summary": "Linha de tempo imutável (trilha encadeada por hash)",
+    "operationId": "get_lifecycle_routes_get_timeline",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/timeline/integrity": {
+   "get": {
+    "summary": "Confere o encadeamento da linha de tempo",
+    "operationId": "get_lifecycle_routes_timeline_integrity",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/snapshots": {
+   "get": {
+    "summary": "list snapshots",
+    "operationId": "get_lifecycle_routes_list_snapshots",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Guarda um retrato comparável do projeto neste instante",
+    "operationId": "post_lifecycle_routes_create_snapshot",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SnapshotIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/snapshots/compare": {
+   "get": {
+    "summary": "Compara dois retratos campo a campo (o que mudou, entrou e saiu)",
+    "operationId": "get_lifecycle_routes_compare_snapshots",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "a",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "A",
+       "type": "string"
+      }
+     },
+     {
+      "name": "b",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "B",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/state": {
+   "get": {
+    "summary": "Estado comparável do projeto agora (mesma estrutura dos retratos)",
+    "operationId": "get_lifecycle_routes_project_state",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/risks": {
+   "get": {
+    "summary": "list risks",
+    "operationId": "get_lifecycle_routes_list_risks",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "create risk",
+    "operationId": "post_lifecycle_routes_create_risk",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RiskIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/risks/{risk_id}": {
+   "put": {
+    "summary": "Atualiza o risco (a origem nunca muda: risco apontado por regra não passa a declarado)",
+    "operationId": "put_lifecycle_routes_update_risk",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "risk_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RiskUpdateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/risks/scan": {
+   "post": {
+    "summary": "Aplica as regras de risco sobre o projeto (indícios, revisados por pessoa)",
+    "operationId": "post_lifecycle_routes_scan_project_risks",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/risk-rules": {
+   "get": {
+    "summary": "Regras de risco aplicadas (abertas a quem usa)",
+    "operationId": "get_lifecycle_routes_risk_rules",
+    "tags": [
+     "lifecycle"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/match-runs/{match_run_id}/feedback": {
+   "post": {
+    "summary": "Retorno humano sobre uma recomendação (nada é treinado automaticamente)",
+    "operationId": "post_lifecycle_routes_match_feedback",
+    "tags": [
+     "match"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "match_run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MatchFeedbackIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "get match feedback",
+    "operationId": "get_lifecycle_routes_get_match_feedback",
+    "tags": [
+     "match"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "match_run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/readiness": {
+   "get": {
+    "summary": "Leitura de prontidão da organização agora (não grava nada)",
+    "operationId": "get_diagnostic_routes_readiness",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/analysis": {
+   "get": {
+    "summary": "Análise do diagnóstico no estado atual (prévia, antes de congelar uma versão)",
+    "operationId": "get_diagnostic_routes_analysis",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/versions": {
+   "post": {
+    "summary": "Congela uma versão do diagnóstico (a anterior nunca é alterada)",
+    "operationId": "post_diagnostic_routes_publish_version",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "get": {
+    "summary": "list versions",
+    "operationId": "get_diagnostic_routes_list_versions",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/versions/compare": {
+   "get": {
+    "summary": "O que mudou entre duas versões (lacunas fechadas, novas forças, confiança)",
+    "operationId": "get_diagnostic_routes_compare_versions",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "a",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maximum": 10000,
+       "minimum": 1,
+       "title": "A",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "b",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maximum": 10000,
+       "minimum": 1,
+       "title": "B",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/versions/{version}": {
+   "get": {
+    "summary": "Retrato completo de uma versão",
+    "operationId": "get_diagnostic_routes_get_version",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "version",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/actions": {
+   "get": {
+    "summary": "list actions",
+    "operationId": "get_diagnostic_routes_list_actions",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Ação declarada pela equipe (a ação de lacuna nasce com a versão do diagnóstico)",
+    "operationId": "post_diagnostic_routes_create_action",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ActionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/diagnoses/{diagnosis_id}/actions/{action_id}": {
+   "put": {
+    "summary": "Atualiza a ação (encerrar por descarte exige motivo)",
+    "operationId": "put_diagnostic_routes_update_action",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "diagnosis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "action_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ActionUpdateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/diagnostic-engine": {
+   "get": {
+    "summary": "O que o motor de diagnóstico avalia, com que peso e como trata ausência de dado",
+    "operationId": "get_diagnostic_routes_engine_reference",
+    "tags": [
+     "diagnosis"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/document-templates": {
+   "get": {
+    "summary": "Modelos de documento da plataforma e os da própria organização",
+    "operationId": "get_assembly_routes_list_templates",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "published",
+          "archived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Cria um modelo próprio da organização (nasce em rascunho)",
+    "operationId": "post_assembly_routes_create_template",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TemplateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/document-templates/{template_id}": {
+   "get": {
+    "summary": "Modelo com seções, campos e o que cada campo exige de evidência",
+    "operationId": "get_assembly_routes_get_template",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "template_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/document-templates/{template_id}/fields": {
+   "post": {
+    "summary": "Adiciona campo ao modelo (recusado depois de publicado)",
+    "operationId": "post_assembly_routes_add_template_field",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "template_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TemplateFieldIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/document-templates/{template_id}/publish": {
+   "post": {
+    "summary": "Publica o modelo (a partir daqui ele não muda mais)",
+    "operationId": "post_assembly_routes_publish_template",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "template_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/document-assembly-reference": {
+   "get": {
+    "summary": "Como a montagem funciona: caminhos de domínio, situações e o que bloqueia a geração",
+    "operationId": "get_assembly_routes_assembly_reference",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/document-assemblies": {
+   "get": {
+    "summary": "list assemblies",
+    "operationId": "get_assembly_routes_list_assemblies",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "drafting",
+          "ready",
+          "blocked",
+          "generated",
+          "in_review",
+          "approved",
+          "rejected",
+          "signed",
+          "archived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Abre uma montagem a partir de um modelo publicado",
+    "operationId": "post_assembly_routes_create_assembly",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssemblyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/document-assemblies/{assembly_id}": {
+   "get": {
+    "summary": "Montagem com campos, valores, evidência, completude e o que impede a geração",
+    "operationId": "get_assembly_routes_get_assembly",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "assembly_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "put": {
+    "summary": "Preenche a montagem (completude e situação são recalculadas pelo servidor)",
+    "operationId": "put_assembly_routes_update_assembly",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "assembly_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssemblyUpdateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/document-assemblies/{assembly_id}/generate": {
+   "post": {
+    "summary": "Gera o documento (RECUSA quando falta campo obrigatório ou evidência)",
+    "operationId": "post_assembly_routes_generate_assembly",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "assembly_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GenerateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/document-assemblies/{assembly_id}/review": {
+   "post": {
+    "summary": "Revisa a montagem (quem montou não aprova: quatro olhos, com CHECK no banco)",
+    "operationId": "post_assembly_routes_review_assembly",
+    "tags": [
+     "documents"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "assembly_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signature-providers": {
+   "get": {
+    "summary": "Provedores de assinatura e o estado REAL de cada um (o que depende de contratação diz isso)",
+    "operationId": "get_assembly_routes_signature_providers",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/signature-policies": {
+   "get": {
+    "summary": "Política de assinatura por tipo de documento (padrão da plataforma + a da organização)",
+    "operationId": "get_assembly_routes_list_signature_policies",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   },
+   "put": {
+    "summary": "Define a política de assinatura da organização",
+    "operationId": "put_assembly_routes_set_signature_policy",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SignaturePolicyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/encryption/keys": {
+   "get": {
+    "summary": "Inventário de chaves por impressão digital (a chave nunca é gravada)",
+    "operationId": "get_assembly_routes_key_inventory",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   },
+   "post": {
+    "summary": "Registra no inventário as chaves em uso para uma finalidade",
+    "operationId": "post_assembly_routes_key_register",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/KeyRegisterIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/encryption/reencrypt": {
+   "post": {
+    "summary": "Recifra a coluna com a chave corrente (idempotente, com auditoria do resultado)",
+    "operationId": "post_assembly_routes_key_reencrypt",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReencryptIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/signature-providers/{provider_key}": {
+   "put": {
+    "summary": "Ajusta o estado real de um provedor de assinatura (passar para produção exige dependência resolvida)",
+    "operationId": "put_assembly_routes_update_provider",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "provider_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProviderUpdateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/match/calibration": {
+   "get": {
+    "summary": "Base para calibração futura do match (sem dado pessoal)",
+    "operationId": "get_assembly_routes_match_calibration",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
   }
  },
  "components": {
@@ -26560,21 +28774,15 @@
    "TransitionIn": {
     "additionalProperties": false,
     "properties": {
-     "to": {
-      "enum": [
-       "draft",
-       "review",
-       "approved",
-       "published",
-       "archived"
-      ],
-      "title": "To",
+     "to_status": {
+      "pattern": "^[a-z0-9_]{2,60}$",
+      "title": "To Status",
       "type": "string"
      },
-     "note": {
+     "reason": {
       "anyOf": [
        {
-        "maxLength": 1000,
+        "maxLength": 2000,
         "type": "string"
        },
        {
@@ -26582,11 +28790,24 @@
        }
       ],
       "default": null,
-      "title": "Note"
+      "title": "Reason"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
      }
     },
     "required": [
-     "to"
+     "to_status"
     ],
     "title": "TransitionIn",
     "type": "object"
@@ -38797,6 +41018,1134 @@
      }
     },
     "title": "StageIn",
+    "type": "object"
+   },
+   "IdeaIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "problem": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Problem"
+     },
+     "hypothesis": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Hypothesis"
+     },
+     "audience": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Audience"
+     },
+     "territory": {
+      "anyOf": [
+       {
+        "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Territory"
+     },
+     "solution_idea": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Solution Idea"
+     },
+     "expected_impact": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expected Impact"
+     },
+     "causes": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Causes",
+      "type": "array"
+     },
+     "ods": {
+      "default": [],
+      "items": {
+       "maximum": 17,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "maxItems": 17,
+      "title": "Ods",
+      "type": "array"
+     },
+     "stage": {
+      "default": "raw",
+      "enum": [
+       "raw",
+       "shaping",
+       "ready",
+       "archived"
+      ],
+      "title": "Stage",
+      "type": "string"
+     }
+    },
+    "required": [
+     "title"
+    ],
+    "title": "IdeaIn",
+    "type": "object"
+   },
+   "PromoteIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     }
+    },
+    "title": "PromoteIn",
+    "type": "object"
+   },
+   "SnapshotIn": {
+    "additionalProperties": false,
+    "properties": {
+     "label": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Label",
+      "type": "string"
+     },
+     "reason": {
+      "default": "manual",
+      "maxLength": 200,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "label"
+    ],
+    "title": "SnapshotIn",
+    "type": "object"
+   },
+   "RiskIn": {
+    "additionalProperties": false,
+    "properties": {
+     "category": {
+      "enum": [
+       "financial",
+       "operational",
+       "legal",
+       "documentary",
+       "eligibility",
+       "reputational",
+       "technical",
+       "partnership",
+       "timeline",
+       "other"
+      ],
+      "title": "Category",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "probability": {
+      "default": "medium",
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "title": "Probability",
+      "type": "string"
+     },
+     "impact": {
+      "default": "medium",
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "title": "Impact",
+      "type": "string"
+     },
+     "mitigation": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Mitigation"
+     },
+     "owner_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Owner User Id"
+     },
+     "review_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Date"
+     }
+    },
+    "required": [
+     "category",
+     "title"
+    ],
+    "title": "RiskIn",
+    "type": "object"
+   },
+   "RiskUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "probability": {
+      "anyOf": [
+       {
+        "enum": [
+         "low",
+         "medium",
+         "high"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Probability"
+     },
+     "impact": {
+      "anyOf": [
+       {
+        "enum": [
+         "low",
+         "medium",
+         "high"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Impact"
+     },
+     "mitigation": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Mitigation"
+     },
+     "owner_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Owner User Id"
+     },
+     "review_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Date"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "open",
+         "mitigating",
+         "accepted",
+         "resolved",
+         "materialized",
+         "dismissed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "resolution_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Resolution Note"
+     }
+    },
+    "title": "RiskUpdateIn",
+    "type": "object"
+   },
+   "MatchFeedbackIn": {
+    "additionalProperties": false,
+    "properties": {
+     "feedback": {
+      "enum": [
+       "accepted",
+       "rejected",
+       "ignored",
+       "not_relevant",
+       "contacted",
+       "converted",
+       "expired"
+      ],
+      "title": "Feedback",
+      "type": "string"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reason"
+     }
+    },
+    "required": [
+     "feedback"
+    ],
+    "title": "MatchFeedbackIn",
+    "type": "object"
+   },
+   "ActionIn": {
+    "additionalProperties": false,
+    "description": "Ação declarada pela equipe. A ação apontada por regra nasce com a versão do diagnóstico, não por aqui.",
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "detail": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Detail"
+     },
+     "priority": {
+      "default": "medium",
+      "enum": [
+       "critical",
+       "high",
+       "medium",
+       "low"
+      ],
+      "title": "Priority",
+      "type": "string"
+     },
+     "owner_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Owner User Id"
+     },
+     "due_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Due On"
+     }
+    },
+    "required": [
+     "title"
+    ],
+    "title": "ActionIn",
+    "type": "object"
+   },
+   "ActionUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "open",
+         "in_progress",
+         "done",
+         "dismissed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "owner_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Owner User Id"
+     },
+     "due_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Due On"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     },
+     "dismissed_reason": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Dismissed Reason"
+     }
+    },
+    "title": "ActionUpdateIn",
+    "type": "object"
+   },
+   "TemplateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "maxLength": 60,
+      "minLength": 3,
+      "pattern": "^[a-z0-9_.-]{3,60}$",
+      "title": "Code",
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 20,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "project_technical",
+       "work_plan",
+       "budget",
+       "schedule",
+       "goal_matrix",
+       "indicator_matrix",
+       "monitoring_plan",
+       "report",
+       "accountability",
+       "presentation",
+       "term",
+       "contract",
+       "letter",
+       "form",
+       "annex",
+       "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "data_sources": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 12,
+      "title": "Data Sources",
+      "type": "array"
+     },
+     "output_formats": {
+      "default": [
+       "pdf",
+       "docx",
+       "odt"
+      ],
+      "items": {
+       "enum": [
+        "pdf",
+        "docx",
+        "odt"
+       ],
+       "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "title": "Output Formats",
+      "type": "array"
+     },
+     "source_note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Note"
+     }
+    },
+    "required": [
+     "code",
+     "version",
+     "title",
+     "kind"
+    ],
+    "title": "TemplateIn",
+    "type": "object"
+   },
+   "TemplateFieldIn": {
+    "additionalProperties": false,
+    "properties": {
+     "section": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Section",
+      "type": "string"
+     },
+     "position": {
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Position",
+      "type": "integer"
+     },
+     "key": {
+      "pattern": "^[a-z0-9_.]{2,60}$",
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Label",
+      "type": "string"
+     },
+     "help": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Help"
+     },
+     "field_type": {
+      "enum": [
+       "text",
+       "textarea",
+       "number",
+       "money",
+       "date",
+       "boolean",
+       "enum",
+       "list",
+       "table",
+       "ods",
+       "determinants",
+       "indicator_ref",
+       "document_ref"
+      ],
+      "title": "Field Type",
+      "type": "string"
+     },
+     "options": {
+      "default": [],
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Options",
+      "type": "array"
+     },
+     "required": {
+      "default": false,
+      "title": "Required",
+      "type": "boolean"
+     },
+     "derived_from": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Derived From"
+     },
+     "requires_evidence": {
+      "default": false,
+      "title": "Requires Evidence",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "section",
+     "position",
+     "key",
+     "label",
+     "field_type"
+    ],
+    "title": "TemplateFieldIn",
+    "type": "object"
+   },
+   "AssemblyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "template_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Template Id",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "diagnosis_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Diagnosis Id"
+     },
+     "application_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Application Id"
+     }
+    },
+    "required": [
+     "template_id",
+     "title"
+    ],
+    "title": "AssemblyIn",
+    "type": "object"
+   },
+   "AssemblyUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "values": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Values"
+     },
+     "evidence": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence"
+     }
+    },
+    "title": "AssemblyUpdateIn",
+    "type": "object"
+   },
+   "GenerateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "format": {
+      "default": "pdf",
+      "enum": [
+       "pdf",
+       "docx",
+       "odt"
+      ],
+      "title": "Format",
+      "type": "string"
+     }
+    },
+    "title": "GenerateIn",
+    "type": "object"
+   },
+   "ReviewIn": {
+    "additionalProperties": false,
+    "properties": {
+     "approve": {
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "approve",
+     "note"
+    ],
+    "title": "ReviewIn",
+    "type": "object"
+   },
+   "SignaturePolicyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "doc_kind": {
+      "maxLength": 60,
+      "minLength": 2,
+      "title": "Doc Kind",
+      "type": "string"
+     },
+     "min_legal_level": {
+      "enum": [
+       "simple",
+       "advanced",
+       "qualified"
+      ],
+      "title": "Min Legal Level",
+      "type": "string"
+     },
+     "min_identity_level": {
+      "default": "email",
+      "enum": [
+       "none",
+       "email",
+       "phone",
+       "document",
+       "professional",
+       "biometric"
+      ],
+      "title": "Min Identity Level",
+      "type": "string"
+     },
+     "require_timestamp": {
+      "default": false,
+      "title": "Require Timestamp",
+      "type": "boolean"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "doc_kind",
+     "min_legal_level"
+    ],
+    "title": "SignaturePolicyIn",
+    "type": "object"
+   },
+   "KeyRegisterIn": {
+    "additionalProperties": false,
+    "properties": {
+     "purpose": {
+      "enum": [
+       "field",
+       "integration",
+       "signature_seal"
+      ],
+      "title": "Purpose",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "purpose"
+    ],
+    "title": "KeyRegisterIn",
+    "type": "object"
+   },
+   "ReencryptIn": {
+    "additionalProperties": false,
+    "properties": {
+     "table": {
+      "pattern": "^[a-z0-9_]{2,60}$",
+      "title": "Table",
+      "type": "string"
+     }
+    },
+    "required": [
+     "table"
+    ],
+    "title": "ReencryptIn",
+    "type": "object"
+   },
+   "ProviderUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "state": {
+      "anyOf": [
+       {
+        "enum": [
+         "unavailable",
+         "configured",
+         "sandbox",
+         "homologation",
+         "production",
+         "degraded",
+         "disabled"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "State"
+     },
+     "activation_note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Activation Note"
+     },
+     "health_state": {
+      "anyOf": [
+       {
+        "enum": [
+         "unknown",
+         "healthy",
+         "degraded",
+         "unavailable"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Health State"
+     },
+     "health_detail": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Health Detail"
+     }
+    },
+    "title": "ProviderUpdateIn",
     "type": "object"
    }
   },

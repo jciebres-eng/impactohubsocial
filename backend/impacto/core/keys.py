@@ -12,6 +12,7 @@ O que NÃO existe aqui: KMS e HSM. Eles dependem de infraestrutura contratada. O
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 from typing import Protocol
 
@@ -25,6 +26,11 @@ ENCRYPTED_COLUMNS: dict[str, tuple[str, str, str]] = {
 }
 # `integration_credentials.secret_cipher` é bytea e NÃO é legível pelo papel da aplicação (GRANT por coluna na 0011):
 # a recifragem dessa coluna exige o papel dono do banco e está descrita em KEY_ROTATION.md, não automatizada aqui.
+
+
+def derived_field_key(secret: str) -> str:
+    """A MESMA derivação do FieldCipher quando FIELD_ENCRYPTION_KEY não está configurada."""
+    return base64.urlsafe_b64encode(hashlib.sha256(("field:" + secret).encode()).digest()).decode()
 
 
 class KeyProvider(Protocol):
@@ -47,6 +53,10 @@ class EnvKeyProvider:
     def _raw(self, purpose: str) -> list[str]:
         if purpose == "field":
             raw = getattr(self.settings, "field_encryption_key", "") or ""
+            if not raw and not getattr(self.settings, "is_hardened", False):
+                # espelha FieldCipher: sem chave própria, a chave REALMENTE em uso é a derivada do SECRET_KEY.
+                # O inventário precisa dizer a verdade sobre qual chave protege o dado hoje.
+                return [derived_field_key(getattr(self.settings, "secret_key", "") or "")]
         elif purpose == "integration":
             raw = getattr(self.settings, "integration_secret_key", "") or getattr(self.settings, "secret_key", "")
         else:

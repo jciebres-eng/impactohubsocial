@@ -14,6 +14,9 @@ COLS = ("p.id::text AS id, p.org_id::text AS org_id, p.title, p.summary, p.probl
         " p.esg_tags, p.territory, p.beneficiaries_count, p.beneficiaries_description, p.budget_total_cents, p.status, p.visibility,"
         " p.urgency, p.starts_on, p.ends_on, p.indicators, p.ai_assisted, p.published_at, p.created_at, p.updated_at")
 ACTIVE = ("draft", "published", "funding", "funded", "in_execution")
+# Janela de pontuação do feed: quantos candidatos recebem a avaliação explicável completa em uma consulta.
+# É um limite DECLARADO na resposta, não um detalhe escondido — ver PERFORMANCE_REPORT.md.
+SCORING_WINDOW = 200
 
 
 def _get_own(c, ctx, pid: str) -> dict:
@@ -226,17 +229,37 @@ def feed(ctx: Ctx, q: S.FeedQ):
         if q.call_id and (not call or not c.one("SELECT 1 FROM calls WHERE id = $1 AND owner_org_id = $2", q.call_id, ctx.org_id)):
             raise not_found("Programa")
         behavior = matching.funder_behavior(c, ctx.org_id)
-        cands = c.query("SELECT p.id::text AS id FROM projects p WHERE p.visibility = 'published' AND p.status IN ('published','funding')"
+        # ETAPA 1 — BUSCA DE CANDIDATOS. Quando o financiador não pediu para ver os bloqueados, a elegibilidade dura
+        # que CABE em SQL (política de causa/território excluídos e compliance reprovado) já tira o candidato aqui:
+        # ele seria descartado depois de qualquer forma, e avaliar centenas de projetos que não entram na lista era o
+        # custo dominante da requisição (medido em PERFORMANCE_REPORT.md). Com `include_blocked`, nada é pré-filtrado.
+        prefilter = "" if q.include_blocked else (
+            " AND o.compliance_status NOT IN ('rejected','suspended')"
+            " AND NOT (p.causes && coalesce($4::text[], '{}'))"
+            " AND NOT EXISTS (SELECT 1 FROM unnest(coalesce($5::text[], '{}')) t"
+            "                  WHERE p.territory = t OR p.territory LIKE t || '-%')")
+        cands = c.query("SELECT p.id::text AS id FROM projects p JOIN organizations o ON o.id = p.org_id"
+                        " WHERE p.visibility = 'published' AND p.status IN ('published','funding')"
                         " AND p.org_id <> $1"
                         " AND ($2::text IS NULL OR $2 = ANY(p.causes)) AND ($3::text IS NULL OR p.territory LIKE $3 || '%')"
                         " AND NOT EXISTS (SELECT 1 FROM feed_feedback f WHERE f.org_id = $1 AND f.target_type = 'project'"
-                        "   AND f.target_id = p.id AND f.action = 'dismiss')"
-                        " ORDER BY p.published_at DESC LIMIT 400", ctx.org_id, q.cause, q.territory)
+                        "   AND f.target_id = p.id AND f.action = 'dismiss')" + prefilter +
+                        # afinidade barata só para ESCOLHER a janela de pontuação; a ordem final é a do motor
+                        " ORDER BY (p.causes && coalesce($4::text[], '{}')) DESC,"
+                        " cardinality(p.causes) DESC, p.published_at DESC LIMIT $6",
+                        ctx.org_id, q.cause, q.territory, funder.get("excluded_causes") or [],
+                        funder.get("excluded_territories") or [], SCORING_WINDOW)
+        # ETAPA 2 — CARGA EM LOTE dos candidatos (3 consultas, não 3 por candidato) e memória por organização.
+        projects = matching.load_projects(c, [cand["id"] for cand in cands])
+        cache = matching.FeedCache()
         scored = []
         hidden = 0
         for cand in cands:
-            proj = matching.load_project(c, cand["id"])
-            m = matching.evaluate_funder_project(c, ctx.org_id, proj, call, funder=funder, behavior=behavior)
+            proj = projects.get(cand["id"])
+            if proj is None:
+                continue
+            m = matching.evaluate_funder_project(c, ctx.org_id, proj, call, funder=funder, behavior=behavior,
+                                                 cache=cache)
             if m["eligibility"] == "blocked" and not q.include_blocked:
                 hidden += 1
                 continue
@@ -245,15 +268,22 @@ def feed(ctx: Ctx, q: S.FeedQ):
         scored.sort(key=lambda x: (order[x[1]["eligibility"]], -(x[1]["score"] or 0), x[0]["id"]))
         out = []
         favs = {r["project_id"] for r in c.query("SELECT project_id::text AS project_id FROM favorites WHERE org_id = $1", ctx.org_id)}
-        for proj, m in scored[q.offset: q.offset + q.limit + 1]:
-            org = c.one("SELECT legal_name, city, uf, compliance_status FROM organizations WHERE id = $1", proj["org_id"])
+        window = scored[q.offset: q.offset + q.limit + 1]
+        orgs = {r["id"]: r for r in c.query("SELECT id::text AS id, legal_name, city, uf, compliance_status"
+                                            " FROM organizations WHERE id = ANY($1::uuid[])",
+                                            [p["org_id"] for p, _ in window])}
+        for proj, m in window:
+            org = {k: v for k, v in (orgs.get(proj["org_id"]) or {}).items() if k != "id"}
             out.append({"project": {k: proj[k] for k in ("id", "title", "causes", "ods", "territory", "beneficiaries_count",
                                                            "budget_total_cents", "funded_cents", "urgency", "status")},
                         "organization": org, "favorite": proj["id"] in favs,
                         "match": {k: m[k] for k in ("eligibility", "recommended_state", "score", "confidence", "why_match", "why_not",
                                                     "risks", "missing_data", "next_action", "blockers")}})
-    return page(out, q.limit, q.offset) | {"hidden_blocked": hidden,
-                                           "engine_note": "Ordenação: elegibilidade, depois compatibilidade. Plano/voucher não interferem."}
+    return page(out, q.limit, q.offset) | {
+        "hidden_blocked": hidden, "scoring_window": SCORING_WINDOW, "candidates_scored": len(cands),
+        "engine_note": "Ordenação: elegibilidade, depois compatibilidade. Plano/voucher não interferem.",
+        "window_note": f"A pontuação explicável é calculada sobre até {SCORING_WINDOW} candidatos por consulta "
+                       "(busca de candidatos por afinidade de causa e data). Use causa/território para estreitar."}
 
 
 @route("POST", "/v1/feed/projects/{project_id}/favorite", kinds=("company", "individual"), min_role="analyst", tags=("feed",))

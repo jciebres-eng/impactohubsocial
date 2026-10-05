@@ -1194,3 +1194,6 @@ class AdminQualQ(Pagination):
 
 class AdminDocQ(Pagination):
     validation: Literal["pending", "validated", "rejected"] = "pending"
+    # a fila cresce; quem revisa precisa poder olhar uma organização ou um tipo por vez
+    org_id: Uuid | None = None
+    doc_type: Annotated[str | None, Field(max_length=60)] = None

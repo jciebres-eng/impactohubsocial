@@ -79,8 +79,10 @@ class TwoLayerSignature(unittest.TestCase):
         doc = upload(self.osc, name="muda.txt", body=b"versao A do conteudo")
         self.osc.post("/v1/signatures/challenge", {"subject_type": "document", "subject_id": doc})
         code = last_signature_code(self.osc.email)
-        with db_system() as db:                     # simula substituição do conteúdo por outro caminho
-            db.run("UPDATE documents SET sha256 = $2 WHERE id = $1", doc, "b" * 64)
+        # Simula substituição do conteúdo. A identidade do arquivo é imutável para a aplicação (gatilho
+        # document_identity_guard, migration 0014), então o cenário só é construível com o papel DONO do banco —
+        # o que, por si, é parte da garantia que este teste descreve.
+        owner_conn().run("UPDATE documents SET sha256 = $2 WHERE id = $1", doc, "b" * 64)
         r = self.osc.post("/v1/signatures", {"subject_type": "document", "subject_id": doc, "role": "legal_representative",
                                              "statement": "Conteudo mudou depois do codigo.", "password": PASSWORD,
                                              "code": code})
@@ -170,8 +172,8 @@ class PublicVerification(unittest.TestCase):
 
     def test_new_version_supersedes_and_keeps_old_verifiable(self):
         doc, code, rec = self._signed_record(b"Primeira versao do documento")
-        with db_system() as db:                      # nova versão do mesmo documento
-            db.run("UPDATE documents SET sha256 = $2, version = 2 WHERE id = $1", doc, "c" * 64)
+        # nova versão do mesmo documento (hash só muda com o papel dono: ver document_identity_guard na 0014)
+        owner_conn().run("UPDATE documents SET sha256 = $2, version = 2 WHERE id = $1", doc, "c" * 64)
         r = self.osc.post("/v1/verifiable-records", {"subject_type": "document", "subject_id": doc})
         self.assertEqual(r.status, 201, r)
         old = self.anon.get(f"/v1/public/verify/{code}").json

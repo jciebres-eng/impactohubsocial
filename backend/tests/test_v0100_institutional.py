@@ -240,7 +240,8 @@ class DocumentStateTests(InstitutionalBase):
         # fila administrativa só traz arquivos já aprovados no antivírus; força o estado do scan no teste
         with db_system() as d:
             d.run("UPDATE documents SET status = 'clean' WHERE id = $1", did)
-        q = self.admin1.get("/v1/admin/institutional/documents").json["items"]
+        # a fila é filtrável por organização (a fila geral cresce com o uso e paginar não é o assunto deste teste)
+        q = self.admin1.get(f"/v1/admin/institutional/documents?org_id={a.org_id}").json["items"]
         self.assertIn(did, [x["id"] for x in q])
         self.assertEqual(self.admin1.post(f"/v1/admin/institutional/documents/{did}/validate", {"decision": "reject"}).status, 422)  # exige motivo
         self.assertEqual(self.admin1.post(f"/v1/admin/institutional/documents/{did}/validate", {"decision": "validate"}).status, 200)

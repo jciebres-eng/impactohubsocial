@@ -35,25 +35,29 @@ def template(conn: Connection, template_id: str) -> dict | None:
     return t
 
 
+# Caminhos de domínio que um campo pode derivar. É uma lista FECHADA: `derived_from` nunca é expressão do cliente,
+# então não há como um modelo transformar a montagem em leitura arbitrária do banco.
+DERIVABLE: dict[str, tuple[str, str]] = {
+    "project.title": ("SELECT title FROM projects WHERE id = $1", "project_id"),
+    "project.problem": ("SELECT problem FROM projects WHERE id = $1", "project_id"),
+    "project.objectives": ("SELECT objectives FROM projects WHERE id = $1", "project_id"),
+    "project.methodology": ("SELECT methodology FROM projects WHERE id = $1", "project_id"),
+    "project.territory": ("SELECT territory FROM projects WHERE id = $1", "project_id"),
+    "project.budget_total_cents": ("SELECT budget_total_cents FROM projects WHERE id = $1", "project_id"),
+    "project.starts_on": ("SELECT starts_on FROM projects WHERE id = $1", "project_id"),
+    "project.ends_on": ("SELECT ends_on FROM projects WHERE id = $1", "project_id"),
+    "project.beneficiaries_count": ("SELECT beneficiaries_count FROM projects WHERE id = $1", "project_id"),
+    "organization.legal_name": ("SELECT legal_name FROM organizations WHERE id = $1", "org_id"),
+    "organization.cnpj": ("SELECT cnpj FROM organizations WHERE id = $1", "org_id"),
+    "organization.city_uf": ("SELECT concat_ws('/', city, uf) FROM organizations WHERE id = $1", "org_id"),
+    "diagnosis.need_statement": ("SELECT need_statement FROM diagnoses WHERE id = $1", "diagnosis_id"),
+    "diagnosis.objective": ("SELECT objective FROM diagnoses WHERE id = $1", "diagnosis_id"),
+}
+
+
 def _derive(conn: Connection, path: str, asm: dict) -> Any:
-    """Valor que vem do DOMÍNIO, não digitado. `derived_from` é um caminho fechado — nunca expressão do cliente."""
-    allowed = {
-        "project.title": ("SELECT title FROM projects WHERE id = $1", "project_id"),
-        "project.problem": ("SELECT problem FROM projects WHERE id = $1", "project_id"),
-        "project.objectives": ("SELECT objectives FROM projects WHERE id = $1", "project_id"),
-        "project.methodology": ("SELECT methodology FROM projects WHERE id = $1", "project_id"),
-        "project.territory": ("SELECT territory FROM projects WHERE id = $1", "project_id"),
-        "project.budget_total_cents": ("SELECT budget_total_cents FROM projects WHERE id = $1", "project_id"),
-        "project.starts_on": ("SELECT starts_on FROM projects WHERE id = $1", "project_id"),
-        "project.ends_on": ("SELECT ends_on FROM projects WHERE id = $1", "project_id"),
-        "project.beneficiaries_count": ("SELECT beneficiaries_count FROM projects WHERE id = $1", "project_id"),
-        "organization.legal_name": ("SELECT legal_name FROM organizations WHERE id = $1", "org_id"),
-        "organization.cnpj": ("SELECT cnpj FROM organizations WHERE id = $1", "org_id"),
-        "organization.city_uf": ("SELECT concat_ws('/', city, uf) FROM organizations WHERE id = $1", "org_id"),
-        "diagnosis.need_statement": ("SELECT need_statement FROM diagnoses WHERE id = $1", "diagnosis_id"),
-        "diagnosis.objective": ("SELECT objective FROM diagnoses WHERE id = $1", "diagnosis_id"),
-    }
-    spec = allowed.get(path)
+    """Valor que vem do DOMÍNIO, não digitado."""
+    spec = DERIVABLE.get(path)
     if not spec:
         return None
     sql, key = spec
@@ -86,7 +90,9 @@ def evaluate(conn: Connection, assembly_id: str) -> dict:
         elif f["required"]:
             missing.append({"kind": "field", "key": f["key"], "label": f["label"], "section": f["section"],
                             "derived_from": f["derived_from"]})
-        if f["requires_evidence"]:
+        # Evidência é exigida quando o campo é obrigatório ou quando a equipe afirmou algo ali: quem afirma, prova.
+        # Campo opcional em branco não gera pendência de evidência.
+        if f["requires_evidence"] and (f["required"] or has):
             doc_id = evidence.get(f["key"])
             if not doc_id:
                 missing.append({"kind": "evidence", "key": f["key"], "label": f"Evidência: {f['label']}",

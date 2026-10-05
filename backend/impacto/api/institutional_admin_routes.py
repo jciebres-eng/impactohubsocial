@@ -330,8 +330,10 @@ def document_queue(ctx: Ctx, q: S.AdminDocQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT d.id::text AS id, d.org_id::text AS org_id, o.legal_name AS org_name, d.doc_type, d.title, d.filename, d.status AS scan_status, d.validation_status,"
                        " d.valid_until, d.issued_on, d.origin_source, d.created_at, d.sha256 FROM documents d JOIN organizations o ON o.id = d.org_id"
-                       " WHERE d.deleted_at IS NULL AND d.validation_status = $1 AND d.status = ANY($2::text[]) ORDER BY d.created_at LIMIT $3 OFFSET $4",
-                       q.validation, ok, q.limit + 1, q.offset)
+                       " WHERE d.deleted_at IS NULL AND d.validation_status = $1 AND d.status = ANY($2::text[])"
+                       " AND ($5::uuid IS NULL OR d.org_id = $5) AND ($6::text IS NULL OR d.doc_type = $6)"
+                       " ORDER BY d.created_at LIMIT $3 OFFSET $4",
+                       q.validation, ok, q.limit + 1, q.offset, q.org_id, q.doc_type)
     for r in rows:
         r["label"] = (DOCUMENT_TYPES.get(r["doc_type"]) or {}).get("label", r["doc_type"])
     return page(rows, q.limit, q.offset)

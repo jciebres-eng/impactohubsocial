@@ -80,11 +80,13 @@ def _collect(conn: Connection, *, org_id: str, project_id: str | None, diagnosis
                               ("methodology", "project_activity"), ("territory", "profile"),
                               ("beneficiaries_description", "profile")):
                 ev.add(Evidence(f"project.{key}", Source.DECLARED, p[key], observed_at=p["updated_at"], kind=kind))
-            ev.add(Evidence("project.budget", Source.DECLARED, p["budget_total_cents"], observed_at=p["updated_at"], kind="budget"))
+            # 0 não é "informado": orçamento zerado e público zerado são ausência de dado, não declaração
+            ev.add(Evidence("project.budget", Source.DECLARED, p["budget_total_cents"] or None,
+                            observed_at=p["updated_at"], kind="budget"))
             ev.add(Evidence("project.schedule", Source.DECLARED,
                             f"{p['starts_on']}–{p['ends_on']}" if p["starts_on"] and p["ends_on"] else None,
                             observed_at=p["updated_at"], kind="budget"))
-            ev.add(Evidence("project.beneficiaries", Source.DECLARED, p["beneficiaries_count"],
+            ev.add(Evidence("project.beneficiaries", Source.DECLARED, p["beneficiaries_count"] or None,
                             observed_at=p["updated_at"], kind="profile"))
             ev.add(Evidence("project.ods", Source.DECLARED, list(p["ods"] or []) or None, observed_at=p["updated_at"], kind="profile"))
         n_ms = conn.scalar("SELECT count(*) FROM milestones WHERE project_id = $1", project_id)
@@ -120,8 +122,8 @@ GAPS: tuple[tuple[str, str, str, str, str, tuple[str, ...]], ...] = (
     ("missing_legal_nature", "identity", "Natureza jurídica não informada", "medium", "Estatuto social", ("org.legal_nature",)),
     ("compliance_not_approved", "compliance", "Cadastro institucional ainda não aprovado", "critical",
      "Documentos do cadastro enviados para análise", ("org.compliance",)),
-    ("missing_statute", "compliance", "Estatuto social ausente no cofre", "high", "Estatuto social registrado", ("doc.estatuto",)),
-    ("missing_board", "compliance", "Ata de eleição da diretoria ausente", "high", "Ata registrada", ("doc.ata_eleicao",)),
+    ("missing_statute", "compliance", "Estatuto social ausente no cofre", "high", "Estatuto social registrado", ("doc.estatuto_social",)),
+    ("missing_board", "compliance", "Ata de eleição da diretoria ausente", "high", "Ata registrada", ("doc.ata_eleicao_diretoria",)),
     ("no_team_size", "governance", "Tamanho da equipe não informado", "low", "Quadro de pessoal", ("org.team_size",)),
     ("no_problem", "problem", "Problema não descrito", "critical", "Descrição do problema com fonte", ("project.problem", "diagnosis.need_statement")),
     ("no_evidence_sources", "problem", "Nenhuma fonte de dados citada para o problema", "high",
@@ -142,7 +144,7 @@ GAPS: tuple[tuple[str, str, str, str, str, tuple[str, ...]], ...] = (
 # Força: o inverso da lacuna. Só é força quando a evidência está presente E é verificada.
 STRENGTH_KEYS: tuple[tuple[str, str, str], ...] = (
     ("org.compliance", "compliance", "Cadastro institucional aprovado pela plataforma"),
-    ("doc.estatuto", "compliance", "Estatuto social no cofre"),
+    ("doc.estatuto_social", "compliance", "Estatuto social no cofre"),
     ("project.validated_measurements", "measurement", "Medições validadas por outra organização"),
     ("project.signed_documents", "solution", "Documentos do projeto assinados"),
 )

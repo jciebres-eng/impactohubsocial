@@ -36,6 +36,74 @@ def load_project(c: Connection, project_id: str) -> dict | None:
     return p
 
 
+def load_projects(c: Connection, project_ids: list[str]) -> dict[str, dict]:
+    """Carrega VÁRIOS projetos em 3 consultas, em vez de 3 por projeto.
+
+    Achado da medição com volume: o feed do financiador fazia uma ida ao banco por candidato para marcos e para a
+    captação. Com algumas centenas de candidatos isso dominava o tempo da requisição.
+    """
+    if not project_ids:
+        return {}
+    rows = c.query(f"SELECT {PROJECT_COLS} FROM projects WHERE id = ANY($1::uuid[])", project_ids)
+    out = {r["id"]: r for r in rows}
+    for r in out.values():
+        r["milestones"] = []
+        r["funded_cents"] = 0
+    for m in c.query("SELECT project_id::text AS project_id, amount_cents, funded_cents, status FROM milestones"
+                     " WHERE project_id = ANY($1::uuid[]) ORDER BY project_id, seq", project_ids):
+        target = out.get(m.pop("project_id"))
+        if target is not None:
+            target["milestones"].append(m)
+    for f in c.query("SELECT project_id::text AS project_id, committed_cents FROM project_funding_many($1::uuid[])",
+                     project_ids):
+        target = out.get(f["project_id"])
+        if target is not None:
+            target["funded_cents"] = f["committed_cents"] or 0
+    return out
+
+
+class FeedCache:
+    """Memória de UMA requisição. Vários projetos candidatos pertencem às mesmas organizações: carregar organização,
+    documentos, histórico, conflito e contexto institucional uma vez por organização, não uma vez por projeto.
+
+    Vive dentro de uma transação, que é de um único solicitante — não há como misturar dado de outro inquilino aqui.
+    """
+
+    def __init__(self) -> None:
+        self.org: dict[str, dict | None] = {}
+        self.docs: dict[tuple[str, str | None], list[dict]] = {}
+        self.history: dict[str, dict] = {}
+        self.conflict: dict[tuple[str, str], bool] = {}
+        self.inst: dict[str, dict] = {}
+
+    def get_org(self, c, org_id):
+        if org_id not in self.org:
+            self.org[org_id] = load_org(c, org_id)
+        return self.org[org_id]
+
+    def get_docs(self, c, org_id, project_id):
+        key = (org_id, project_id)
+        if key not in self.docs:
+            self.docs[key] = load_documents(c, org_id, project_id)
+        return self.docs[key]
+
+    def get_history(self, c, org_id):
+        if org_id not in self.history:
+            self.history[org_id] = load_history(c, org_id)
+        return self.history[org_id]
+
+    def get_conflict(self, c, funder_org_id, org_id):
+        key = (funder_org_id, org_id)
+        if key not in self.conflict:
+            self.conflict[key] = has_conflict(c, funder_org_id, org_id)
+        return self.conflict[key]
+
+    def get_inst(self, c, org_id):
+        if org_id not in self.inst:
+            self.inst[org_id] = inst_context(c, org_id)
+        return self.inst[org_id]
+
+
 def load_call(c: Connection, call_id: str) -> dict | None:
     return c.one(f"SELECT {CALL_COLS} FROM calls WHERE id = $1", call_id)
 
@@ -103,14 +171,15 @@ def evaluate_osc_call(c: Connection, osc_org_id: str, call: dict, project_id: st
 
 
 def evaluate_funder_project(c: Connection, funder_org_id: str, project: dict, call: dict | None = None, *,
-                            funder=None, behavior=None) -> dict:
-    org = load_org(c, project["org_id"])
+                            funder=None, behavior=None, cache: FeedCache | None = None) -> dict:
+    cache = cache if cache is not None else FeedCache()
+    org = cache.get_org(c, project["org_id"])
     funder = funder if funder is not None else (c.one("SELECT * FROM funder_profiles WHERE org_id = $1", funder_org_id) or {})
     if "milestones" not in project:
         project = load_project(c, project["id"])
     fi = []
     try:
-        ctx = inst_context(c, project["org_id"])
+        ctx = cache.get_inst(c, project["org_id"])
         if ctx:
             fi = [{"code": r["code"], "label": r["label"], "status": r["status"], "detail": r.get("detail"), "mandatory": r["mandatory"], "how_to_fix": r.get("how_to_fix")}
                   for r in inst.evaluate_for_funder(c, project["org_id"], funder_org_id, funder, f=ctx["f"], m=ctx["m"])["requirements"]]
@@ -119,9 +188,10 @@ def evaluate_funder_project(c: Connection, funder_org_id: str, project: dict, ca
     except Exception:  # a camada institucional nunca derruba o match; sem dados institucionais o motor segue sem esses critérios
         fi = []
     mi = MatchInput.build("funder_project", org=org, funder=funder, call=call, project=project, inst=fi,
-                          documents=load_documents(c, project["org_id"], project["id"]), history=load_history(c, project["org_id"]),
+                          documents=cache.get_docs(c, project["org_id"], project["id"]),
+                          history=cache.get_history(c, project["org_id"]),
                           behavior=behavior if behavior is not None else funder_behavior(c, funder_org_id),
-                          conflict=has_conflict(c, funder_org_id, project["org_id"]))
+                          conflict=cache.get_conflict(c, funder_org_id, project["org_id"]))
     return evaluate(mi)
 
 
@@ -163,10 +233,10 @@ def record_feedback(c: Connection, *, match_run_id: str, org_id: str, feedback: 
         raise ApiError(409, "already_recorded", "Esta avaliação já recebeu retorno (o histórico não é reescrito)")
     c.run("INSERT INTO match_feedback(match_run_id, org_id, feedback, reason, actor_user_id) VALUES ($1,$2,$3,$4,$5)",
           match_run_id, org_id, feedback, reason, actor_user_id)
-    if run["project_id"]:
-        from .audit import ledger
-        ledger(c, project_id=run["project_id"], org_id=org_id, actor=actor_user_id, entry_type="match_feedback",
-               ref_type="match_run", ref_id=match_run_id, payload={"feedback": feedback, "direction": run["direction"]})
+    # DELIBERADAMENTE não entra na linha de tempo do projeto. Quem avalia é quem OLHA (em geral o financiador), e a
+    # trilha do projeto é lida pela organização dona dele: registrar ali "a empresa X descartou seu projeto" seria
+    # expor a decisão de um terceiro no histórico de outro. O retorno fica em `match_feedback` (append-only, com
+    # UNIQUE por avaliação) e na trilha de auditoria de quem agiu.
     return {"recorded": True, "match_run_id": match_run_id, "feedback": feedback,
             "note": "Retorno registrado. A plataforma NÃO recalibra pesos automaticamente: o dado fica disponível "
                     "para calibração futura com revisão humana."}

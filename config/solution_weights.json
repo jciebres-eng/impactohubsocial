@@ -1,0 +1,68 @@
+{
+ "version": "solution-weights@1.0",
+ "status": "HIPÓTESE inicial a calibrar com dados reais de uso (não validada empiricamente)",
+ "search_relevance": {
+  "text_relevance": 30,
+  "ods_esg": 20,
+  "population": 15,
+  "territory": 10,
+  "budget": 10,
+  "maturity": 5,
+  "replicability": 5,
+  "evidence": 5,
+  "text_relevance_parts": {
+   "fts": 0.5,
+   "concepts": 0.35,
+   "trigram": 0.15
+  },
+  "business_rules": {
+   "desired_match_bonus": 5,
+   "unproven_when_proof_wanted_penalty": 10
+  }
+ },
+ "replicability": {
+  "simplicity": 15,
+  "cost": 12,
+  "infra": 12,
+  "territorial": 12,
+  "specialists": 10,
+  "documented": 14,
+  "training": 8,
+  "evidence": 10,
+  "adaptability": 7,
+  "min_confidence": 50
+ },
+ "maturity": {
+  "problem": 10,
+  "objectives": 8,
+  "approach": 10,
+  "population": 8,
+  "territory": 6,
+  "budget": 8,
+  "schedule": 8,
+  "goals": 8,
+  "ods": 5,
+  "esg": 2,
+  "license": 4,
+  "results": 8,
+  "evidence": 8,
+  "people": 4,
+  "replication_profile": 4
+ },
+ "evidence": {
+  "accepted_items": 35,
+  "kind_diversity": 15,
+  "validated_results": 20,
+  "trust": 20,
+  "linked_project": 10
+ },
+ "solution_funder": {
+  "causes": 25,
+  "ods_esg": 20,
+  "territory": 15,
+  "ticket": 15,
+  "population": 10,
+  "preferences": 10,
+  "maturity": 5
+ }
+}

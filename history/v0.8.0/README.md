@@ -1,15 +1,10 @@
-# Plataforma Impacto — v0.10.0
+# Plataforma Impacto — v0.7.0
 
 Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
 
 > **Estado:** pronto para homologação/piloto controlado. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
 
-**Novo no v0.10.0:** camada institucional do terceiro setor — natureza jurídica × qualificações × situação × elegibilidade por oportunidade, com explicação e fonte. Comece por `THIRD_SECTOR_MODEL.md`, `INSTITUTIONAL_ELIGIBILITY_ENGINE.md` e `FINAL_RELEASE_AUDIT.md` §3-B.
-
-**Novo no v0.9.0:** Biblioteca de Soluções de Impacto — busca por intenção, relevância/match explicáveis, replicação, intenção de financiamento com privacidade. Comece por `SOLUTION_LIBRARY.md`.
-
 ## Comece aqui
-| Biblioteca de Soluções | `SOLUTION_LIBRARY.md`, `SOLUTION_SEARCH.md`, `SOLUTION_MATCH_ENGINE.md`, `REPLICATION_ENGINE.md`, `INTENT_ENGINE.md`, `AI_SEARCH_ARCHITECTURE.md`, `SOLUTION_DATA_MODEL.md`, `API_DOCUMENTATION.md`, `TEST_REPORT.md` |
 | Quero… | Leia |
 |---|---|
 | rodar localmente | `ENVIRONMENT_SETUP.md` |
@@ -29,9 +24,9 @@ config/      planos, taxonomia, pesos do match, regras fiscais candidatas (rascu
 infra/       bootstrap do banco, compose, nginx, alertas
 scripts/     backup/restore, reset do banco de dev, gerador de API docs, make_release
 docs/        arquitetura, banco, API (gerada), segurança, LGPD, match, fiscal, IA, compliance, pagamentos, operação, mobile, testes, admin, negócio, a11y, ESG/ODS, legal/, evidence/
-history/     v0.6.0, v0.7.0 e v0.8.0 preservados (sem sobrescrever)
+history/     v0.6.0 original preservado (sem sobrescrever)
 ```
-Mapa dos documentos pedidos: `AI_ARCHITECTURE` = `docs/AI.md` · `MATCH_ENGINE`, `DATABASE`, `API` (gerada de 306 operações), `SECURITY`, `LGPD`, `DEPLOYMENT`, `TESTING`, `ADMIN`, `BUSINESS_MODEL` em `docs/`.
+Mapa dos documentos pedidos: `AI_ARCHITECTURE` = `docs/AI.md` · `MATCH_ENGINE`, `DATABASE`, `API` (gerada de 165 operações), `SECURITY`, `LGPD`, `DEPLOYMENT`, `TESTING`, `ADMIN`, `BUSINESS_MODEL` em `docs/`.
 
 ## Princípios (verificáveis no código)
 - **Isolamento no banco** (RLS) — não só na API. · **Match independe de plano/voucher** (teste AST). · **Sem nota sem dados suficientes.**

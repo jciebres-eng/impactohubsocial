@@ -1,0 +1,21 @@
+{
+  "_note": "PLACEHOLDERS. Numeros e precos sao hipoteses a validar. Nenhum item altera match ou posicao de prestador.",
+  "version": "plans@0.1",
+  "flags": { "premium_osc": false, "premium_provider": false, "billing_live": false },
+  "invariants": ["no_plan_affects_match", "no_plan_affects_provider_rank", "downgrade_never_deletes_data"],
+  "downgrade_grace_days": 60,
+  "plans": {
+    "funder_basic":   { "role": "funder",   "price": null, "limits": { "programs": 1, "seats": 3, "ai_quota_month": 50, "storage_gb": 5 } },
+    "funder_premium": { "role": "funder",   "price": null, "limits": { "programs": 5, "seats": 15, "ai_quota_month": 500, "storage_gb": 100 },
+      "features": ["custom_workflow","conflict_management","advanced_esg_reports","territory_analytics","templates","priority_support"] },
+    "funder_enterprise": { "role": "funder", "price": "quote", "limits": { "programs": null, "seats": null },
+      "features": ["sso","scim","api","sla","white_label_request","audit_export"] },
+    "osc_basic":      { "role": "osc",      "price": 0, "limits": { "active_projects": 1, "ai_quota_month": 20, "storage_gb": 1 } },
+    "osc_premium":    { "role": "osc",      "price": null, "requires_flag": "premium_osc", "limits": { "active_projects": 10, "ai_quota_month": 200, "storage_gb": 20 },
+      "features": ["templates","own_proposal_analytics","priority_support"] },
+    "provider_basic": { "role": "provider", "price": 0, "limits": { "proposals_month": 5, "ai_quota_month": 10, "storage_gb": 1 } },
+    "provider_premium": { "role": "provider", "price": null, "requires_flag": "premium_provider", "limits": { "proposals_month": 50, "ai_quota_month": 100, "storage_gb": 10 },
+      "features": ["proposal_templates","personal_pipeline","own_proposal_analytics","calendar_integration","priority_support"] }
+  },
+  "never_sellable": ["provider_rank","provider_featured","provider_badge","provider_tier","match_boost","eligibility_override"]
+}

@@ -1,0 +1,1 @@
+# Referência local: usa somente a biblioteca padrão do Python 3.11.

@@ -1,0 +1,17 @@
+{
+  "version": "determinants@1.0",
+  "_note": "Mapeamento PRÓPRIO da plataforma entre causas e domínios de determinantes sociais, para agregação. Não é classificação oficial (OMS/CNDSS); revisar com especialista antes de uso analítico/publicação.",
+  "domains": {
+    "renda_trabalho": {"label": "Renda e trabalho", "causes": ["geracao_renda"]},
+    "alimentacao": {"label": "Alimentação", "causes": ["seguranca_alimentar"]},
+    "saude": {"label": "Saúde", "causes": ["saude"]},
+    "educacao_conectividade": {"label": "Educação e conectividade", "causes": ["educacao", "inclusao_digital", "juventude", "criancas_adolescentes"]},
+    "moradia_saneamento": {"label": "Moradia e saneamento", "causes": ["habitacao", "agua_saneamento"]},
+    "ambiente": {"label": "Ambiente e clima", "causes": ["meio_ambiente", "protecao_animal"]},
+    "protecao_social": {"label": "Proteção social", "causes": ["assistencia_social", "pessoa_idosa", "pessoa_com_deficiencia"]},
+    "direitos_igualdade": {"label": "Direitos e igualdade", "causes": ["direitos_humanos", "igualdade_genero", "igualdade_racial", "povos_tradicionais"]},
+    "cultura_esporte": {"label": "Cultura, esporte e lazer", "causes": ["cultura", "esporte"]},
+    "comunidade": {"label": "Comunidade e inovação social", "causes": ["desenvolvimento_comunitario", "inovacao_social"]}
+  },
+  "min_group": 3
+}

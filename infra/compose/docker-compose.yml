@@ -1,0 +1,51 @@
+# Ambiente completo para STAGING/homologação em uma VM (ou desenvolvimento integrado).
+# Uso: cp .env.example .env (preencha!) && docker compose -f infra/compose/docker-compose.yml --env-file .env up -d
+# Produção: prefira PostgreSQL gerenciado (backup/PITR) e storage S3 — ver docs/DEPLOYMENT.md.
+name: impacto
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?defina}
+      IMPACTO_OWNER_PASSWORD: ${IMPACTO_OWNER_PASSWORD:?defina}
+      IMPACTO_APP_PASSWORD: ${IMPACTO_APP_PASSWORD:?defina}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../db/bootstrap.sql:/bootstrap/bootstrap.sql:ro
+      - ./db-init.sh:/docker-entrypoint-initdb.d/10-impacto.sh:ro
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres"], interval: 5s, retries: 20 }
+    restart: unless-stopped
+  migrate:
+    build: { context: ../.., dockerfile: Dockerfile }
+    command: ["python3", "-m", "impacto.db.migrate"]
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://impacto_owner:${IMPACTO_OWNER_PASSWORD}@db:5432/impacto
+    depends_on: { db: { condition: service_healthy } }
+  api:
+    build: { context: ../.., dockerfile: Dockerfile }
+    env_file: ../../.env
+    environment:
+      DATABASE_URL: postgresql://impacto_app:${IMPACTO_APP_PASSWORD}@db:5432/impacto
+      CLAMD_HOST: clamav
+    volumes: [storage:/data]
+    ports: ["8080:8080"]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    restart: unless-stopped
+  worker:
+    build: { context: ../.., dockerfile: Dockerfile }
+    command: ["python3", "-m", "impacto.jobs", "loop"]
+    env_file: ../../.env
+    environment:
+      DATABASE_URL: postgresql://impacto_app:${IMPACTO_APP_PASSWORD}@db:5432/impacto
+      CLAMD_HOST: clamav
+    volumes: [storage:/data]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    restart: unless-stopped
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+  mailpit:   # SMTP de testes (staging). Em produção use um provedor SMTP real.
+    image: axllent/mailpit:latest
+    profiles: ["staging"]
+    ports: ["8025:8025"]
+volumes: { pgdata: {}, storage: {} }

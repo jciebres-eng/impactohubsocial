@@ -1,0 +1,8 @@
+<!-- Adicione dentro da <activity> principal em web/android/app/src/main/AndroidManifest.xml para App Links -->
+<intent-filter android:autoVerify="true">
+  <action android:name="android.intent.action.VIEW" />
+  <category android:name="android.intent.category.DEFAULT" />
+  <category android:name="android.intent.category.BROWSABLE" />
+  <data android:scheme="https" android:host="SEU-DOMINIO" />
+</intent-filter>
+<!-- Permissões: somente INTERNET (padrão). Câmera/arquivos são acessados pelo seletor do sistema via <input type=file>. -->

@@ -1,0 +1,104 @@
+"""LGPD — direitos do titular: acesso/portabilidade (export), eliminação/anonimização, consentimentos; textos legais."""
+from __future__ import annotations
+
+import uuid
+from pathlib import Path
+
+from starlette.responses import Response
+
+from ..config import ROOT
+from ..http import ApiError, Ctx, json_response, route
+from ..security import passwords
+from . import schemas as S
+
+T = ("privacy",)
+
+
+@route("GET", "/v1/privacy/export", auth="user", raw=True, rate=("export_ip", 10, 3600), tags=T,
+       summary="Exporta os dados pessoais do titular em JSON (art. 18, II e V da LGPD)")
+def export(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        data = {
+            "user": c.one("SELECT id::text AS id, email::text AS email, full_name, email_verified_at, status, locale, created_at, last_login_at,"
+                          " mfa_enabled_at IS NOT NULL AS mfa_enabled FROM users WHERE id = $1", ctx.user_id),
+            "memberships": c.query("SELECT o.legal_name, o.kind, m.role, m.created_at FROM memberships m JOIN organizations o ON o.id = m.org_id"
+                                   " WHERE m.user_id = $1", ctx.user_id),
+            "consents": c.query("SELECT kind, version, granted, at FROM consents WHERE user_id = $1 ORDER BY at", ctx.user_id),
+            "sessions": c.query("SELECT created_at, last_seen_at, ip, user_agent, revoked_at FROM sessions WHERE user_id = $1 ORDER BY created_at DESC"
+                                " LIMIT 200", ctx.user_id),
+            "privacy_requests": c.query("SELECT kind, status, created_at, completed_at FROM privacy_requests WHERE user_id = $1", ctx.user_id),
+        }
+    with ctx.system_tx() as c:
+        data["activity"] = c.query("SELECT action, object_type, at, ip FROM audit_events WHERE actor_user_id = $1 ORDER BY id DESC LIMIT 1000", ctx.user_id)
+        c.run("INSERT INTO privacy_requests(user_id, kind, status, completed_at) VALUES ($1,'export','completed', now())", ctx.user_id)
+        ctx.audit(c, "privacy.export", "user", ctx.user_id)
+    resp = json_response(data)
+    resp.headers["Content-Disposition"] = 'attachment; filename="meus-dados-impacto.json"'
+    return resp
+
+
+class DeleteIn(S.In):
+    password: str
+    confirm: bool
+
+
+@route("POST", "/v1/privacy/delete-account", auth="user", body=DeleteIn, raw=True, rate=("delete_ip", 5, 3600), tags=T,
+       summary="Elimina a conta: anonimiza dados pessoais e revoga sessões. Registros financeiros/auditoria são mantidos pseudonimizados (obrigação legal).")
+def delete_account(ctx: Ctx, body: DeleteIn):
+    if not body.confirm:
+        raise ApiError(422, "confirmation_required", "Confirme a exclusão")
+    with ctx.system_tx() as c:
+        u = c.one("SELECT password_hash, is_platform_admin FROM users WHERE id = $1", ctx.user_id)
+        if not passwords.verify_password(body.password, u["password_hash"]):
+            raise ApiError(401, "reauth_failed", "Senha incorreta")
+        owned = c.query("SELECT m.org_id::text AS org_id, o.legal_name, (SELECT count(*) FROM memberships x WHERE x.org_id = m.org_id) AS members,"
+                        " (SELECT count(*) FROM memberships x WHERE x.org_id = m.org_id AND x.role = 'owner') AS owners,"
+                        " (SELECT count(*) FROM commitments cm WHERE cm.osc_org_id = m.org_id OR cm.funder_org_id = m.org_id) AS financial"
+                        " FROM memberships m JOIN organizations o ON o.id = m.org_id WHERE m.user_id = $1 AND m.role = 'owner'", ctx.user_id)
+        blockers = [o["legal_name"] for o in owned if o["owners"] == 1 and (o["members"] > 1)]
+        if blockers:
+            raise ApiError(409, "transfer_ownership_first", "Transfira a propriedade das organizações antes de excluir a conta",
+                           {"organizations": blockers})
+        anon = f"removido-{uuid.uuid4().hex[:12]}@anonimizado.invalid"
+        for o in owned:
+            if o["members"] == 1:
+                c.run("UPDATE organizations SET status = 'closed', contact_email = NULL, phone = NULL WHERE id = $1", o["org_id"])
+        c.run("DELETE FROM memberships WHERE user_id = $1", ctx.user_id)
+        c.run("UPDATE users SET email = $2, full_name = 'Titular removido', password_hash = NULL, mfa_secret_enc = NULL, mfa_enabled_at = NULL,"
+              " mfa_recovery_hashes = '{}', oidc_subject = NULL, status = 'deleted' WHERE id = $1", ctx.user_id, anon)
+        c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = 'account_deleted', ip = NULL, user_agent = NULL WHERE user_id = $1", ctx.user_id)
+        c.run("DELETE FROM auth_tokens WHERE user_id = $1", ctx.user_id)
+        c.run("INSERT INTO privacy_requests(user_id, kind, status, completed_at, notes) VALUES ($1,'deletion','completed', now(),"
+              " 'Dados pessoais anonimizados; registros de auditoria e financeiros mantidos pseudonimizados')", ctx.user_id)
+        ctx.audit(c, "privacy.account_deleted", "user", ctx.user_id, {})
+    from ..services.auth import clear_session_cookies
+    resp = json_response({"deleted": True})
+    clear_session_cookies(ctx, resp)
+    return resp
+
+
+class ConsentIn(S.In):
+    kind: str
+    granted: bool
+
+
+@route("POST", "/v1/privacy/consents", auth="user", body=ConsentIn, tags=T, summary="Registra/revoga consentimento opcional (ex.: comunicações)")
+def consent(ctx: Ctx, body: ConsentIn):
+    if body.kind != "marketing":
+        raise ApiError(422, "validation_error", "Somente consentimentos opcionais podem ser alterados aqui")
+    with ctx.tx() as c:
+        c.run("INSERT INTO consents(user_id, kind, version, granted, ip) VALUES ($1,'marketing','v1',$2::bool,$3)", ctx.user_id, body.granted, ctx.ip)
+    return {"kind": body.kind, "granted": body.granted}
+
+
+LEGAL = {"termos": "TERMS_OF_USE.md", "privacidade": "PRIVACY_POLICY.md", "cookies": "COOKIES.md"}
+
+
+@route("GET", "/v1/legal/{doc}", auth="none", raw=True, tags=T, summary="Textos legais vigentes (Markdown)")
+def legal(ctx: Ctx):
+    name = LEGAL.get(ctx.path["doc"])
+    if not name:
+        raise ApiError(404, "not_found", "Documento não encontrado")
+    p = Path(ROOT) / "docs" / "legal" / name
+    return Response(p.read_text(encoding="utf-8"), media_type="text/markdown; charset=utf-8",
+                    headers={"Cache-Control": "public, max-age=600"})

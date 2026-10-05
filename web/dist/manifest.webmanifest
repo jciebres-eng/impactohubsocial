@@ -1,0 +1,23 @@
+{
+  "name": "Impacto — editais, projetos e prestação de contas",
+  "short_name": "Impacto",
+  "description": "Do edital à prestação de contas: OSCs, empresas, profissionais e governo na mesma trilha.",
+  "lang": "pt-BR",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#172a46",
+  "theme_color": "#172a46",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Oportunidades", "url": "/oportunidades" },
+    { "name": "Candidaturas", "url": "/candidaturas" }
+  ]
+}

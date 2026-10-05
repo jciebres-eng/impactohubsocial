@@ -1,0 +1,1057 @@
+{
+ "version": "concepts@1.0",
+ "note": "Tesauro PRÓPRIO da plataforma (sinônimos, siglas, expansões). Não é um modelo de embeddings: aproxima semântica por conceitos declarados. Revisão editorial contínua é necessária.",
+ "concepts": {
+  "caps": {
+   "label": "CAPS (Centro de Atenção Psicossocial)",
+   "dim": "institution",
+   "terms": [
+    "caps",
+    "capsad",
+    "caps ad",
+    "caps iii",
+    "centro de atencao psicossocial",
+    "centros de atencao psicossocial"
+   ],
+   "expands": [
+    "saude_mental",
+    "reabilitacao_psicossocial"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "escola": {
+   "label": "Escola",
+   "dim": "institution",
+   "terms": [
+    "escola",
+    "escolas",
+    "escola publica",
+    "escolas publicas",
+    "ensino fundamental",
+    "ensino medio",
+    "sala de aula"
+   ],
+   "expands": [
+    "educacao"
+   ],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "ubs": {
+   "label": "Unidade Básica de Saúde",
+   "dim": "institution",
+   "terms": [
+    "ubs",
+    "posto de saude",
+    "unidade basica de saude",
+    "atencao basica"
+   ],
+   "expands": [
+    "saude"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "cras": {
+   "label": "CRAS/CREAS",
+   "dim": "institution",
+   "terms": [
+    "cras",
+    "creas",
+    "assistencia social",
+    "centro de referencia de assistencia social"
+   ],
+   "expands": [],
+   "themes": [
+    "assistencia_social"
+   ],
+   "ods": [
+    1
+   ],
+   "esg": []
+  },
+  "universidade": {
+   "label": "Universidade / pesquisa",
+   "dim": "institution",
+   "terms": [
+    "universidade",
+    "faculdade",
+    "instituto federal",
+    "pesquisa",
+    "pesquisador",
+    "pesquisadores",
+    "extensao universitaria",
+    "academico"
+   ],
+   "expands": [],
+   "themes": [
+    "inovacao_social"
+   ],
+   "ods": [
+    4,
+    9
+   ],
+   "esg": []
+  },
+  "biblioteca": {
+   "label": "Biblioteca / espaço cultural",
+   "dim": "institution",
+   "terms": [
+    "biblioteca",
+    "bibliotecas",
+    "centro cultural",
+    "ponto de cultura"
+   ],
+   "expands": [
+    "cultura"
+   ],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "saude_mental": {
+   "label": "Saúde mental",
+   "dim": "population",
+   "terms": [
+    "saude mental",
+    "sofrimento psiquico",
+    "transtorno mental",
+    "transtornos mentais",
+    "psicossocial",
+    "psiquiatria",
+    "luta antimanicomial",
+    "bem estar emocional"
+   ],
+   "expands": [
+    "caps"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "idosos": {
+   "label": "Pessoas idosas",
+   "dim": "population",
+   "terms": [
+    "idoso",
+    "idosos",
+    "idosa",
+    "idosas",
+    "pessoa idosa",
+    "terceira idade",
+    "envelhecimento",
+    "envelhecer"
+   ],
+   "expands": [],
+   "themes": [
+    "pessoa_idosa"
+   ],
+   "ods": [
+    3,
+    10
+   ],
+   "esg": []
+  },
+  "criancas": {
+   "label": "Crianças",
+   "dim": "population",
+   "terms": [
+    "crianca",
+    "criancas",
+    "infancia",
+    "infantil",
+    "primeira infancia",
+    "creche"
+   ],
+   "expands": [],
+   "themes": [
+    "criancas_adolescentes"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "adolescentes": {
+   "label": "Adolescentes",
+   "dim": "population",
+   "terms": [
+    "adolescente",
+    "adolescentes",
+    "adolescencia"
+   ],
+   "expands": [],
+   "themes": [
+    "criancas_adolescentes",
+    "juventude"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "jovens": {
+   "label": "Jovens",
+   "dim": "population",
+   "terms": [
+    "jovem",
+    "jovens",
+    "juventude"
+   ],
+   "expands": [],
+   "themes": [
+    "juventude"
+   ],
+   "ods": [
+    8
+   ],
+   "esg": []
+  },
+  "pcd": {
+   "label": "Pessoas com deficiência",
+   "dim": "population",
+   "terms": [
+    "pcd",
+    "pessoa com deficiencia",
+    "pessoas com deficiencia",
+    "deficiencia",
+    "acessibilidade",
+    "inclusao de pessoas com deficiencia",
+    "tea",
+    "autismo"
+   ],
+   "expands": [],
+   "themes": [
+    "pessoa_com_deficiencia"
+   ],
+   "ods": [
+    10
+   ],
+   "esg": []
+  },
+  "mulheres": {
+   "label": "Mulheres",
+   "dim": "population",
+   "terms": [
+    "mulher",
+    "mulheres",
+    "feminino",
+    "gestantes",
+    "maes"
+   ],
+   "expands": [],
+   "themes": [
+    "igualdade_genero"
+   ],
+   "ods": [
+    5
+   ],
+   "esg": []
+  },
+  "violencia_mulheres": {
+   "label": "Violência contra mulheres",
+   "dim": "population",
+   "terms": [
+    "violencia domestica",
+    "violencia contra a mulher",
+    "violencia contra mulheres",
+    "maria da penha",
+    "vitimas de violencia",
+    "feminicidio",
+    "mulheres vitimas de violencia",
+    "mulheres violencia",
+    "violencia mulheres",
+    "violencia mulher",
+    "mulher vitima de violencia",
+    "violencia de genero"
+   ],
+   "expands": [
+    "mulheres"
+   ],
+   "themes": [
+    "igualdade_genero",
+    "direitos_humanos"
+   ],
+   "ods": [
+    5,
+    16
+   ],
+   "esg": []
+  },
+  "indigenas": {
+   "label": "Povos indígenas",
+   "dim": "population",
+   "terms": [
+    "indigena",
+    "indigenas",
+    "povos indigenas",
+    "aldeia"
+   ],
+   "expands": [],
+   "themes": [
+    "povos_tradicionais"
+   ],
+   "ods": [
+    10
+   ],
+   "esg": []
+  },
+  "quilombolas": {
+   "label": "Quilombolas",
+   "dim": "population",
+   "terms": [
+    "quilombola",
+    "quilombolas",
+    "quilombo",
+    "comunidades tradicionais",
+    "povos tradicionais"
+   ],
+   "expands": [],
+   "themes": [
+    "povos_tradicionais",
+    "igualdade_racial"
+   ],
+   "ods": [
+    10
+   ],
+   "esg": []
+  },
+  "situacao_rua": {
+   "label": "População em situação de rua",
+   "dim": "population",
+   "terms": [
+    "situacao de rua",
+    "pessoas em situacao de rua",
+    "morador de rua",
+    "populacao de rua"
+   ],
+   "expands": [],
+   "themes": [
+    "assistencia_social",
+    "direitos_humanos"
+   ],
+   "ods": [
+    1,
+    10
+   ],
+   "esg": []
+  },
+  "rural": {
+   "label": "Zona rural",
+   "dim": "population",
+   "terms": [
+    "rural",
+    "zona rural",
+    "campo",
+    "agricultura familiar",
+    "educacao do campo",
+    "ribeirinho",
+    "ribeirinhos"
+   ],
+   "expands": [],
+   "themes": [
+    "desenvolvimento_comunitario"
+   ],
+   "ods": [
+    2,
+    10
+   ],
+   "esg": []
+  },
+  "lgbtqia": {
+   "label": "População LGBTQIAPN+",
+   "dim": "population",
+   "terms": [
+    "lgbt",
+    "lgbtqia",
+    "lgbtqiapn",
+    "diversidade sexual"
+   ],
+   "expands": [],
+   "themes": [
+    "direitos_humanos"
+   ],
+   "ods": [
+    10
+   ],
+   "esg": []
+  },
+  "artes": {
+   "label": "Artes e expressão artística",
+   "dim": "theme",
+   "terms": [
+    "arte",
+    "artes",
+    "artistico",
+    "artistica",
+    "artisticos",
+    "expressao artistica",
+    "oficina de arte",
+    "oficinas de arte",
+    "teatro",
+    "musica",
+    "pintura",
+    "danca",
+    "artes visuais",
+    "arteterapia",
+    "arte terapia"
+   ],
+   "expands": [
+    "expressao_artistica",
+    "oficinas"
+   ],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [
+    4,
+    11
+   ],
+   "esg": []
+  },
+  "expressao_artistica": {
+   "label": "Expressão artística",
+   "dim": "theme",
+   "terms": [
+    "expressao artistica",
+    "expressao criativa",
+    "criatividade",
+    "criacao artistica"
+   ],
+   "expands": [
+    "artes"
+   ],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [],
+   "esg": []
+  },
+  "oficinas": {
+   "label": "Oficinas",
+   "dim": "theme",
+   "terms": [
+    "oficina",
+    "oficinas",
+    "atelie",
+    "laboratorio",
+    "laboratorios",
+    "grupo de convivencia"
+   ],
+   "expands": [],
+   "themes": [],
+   "ods": [],
+   "esg": []
+  },
+  "reabilitacao_psicossocial": {
+   "label": "Reabilitação psicossocial",
+   "dim": "theme",
+   "terms": [
+    "reabilitacao psicossocial",
+    "reinsercao social",
+    "inclusao psicossocial",
+    "reabilitacao"
+   ],
+   "expands": [
+    "saude_mental"
+   ],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3,
+    10
+   ],
+   "esg": []
+  },
+  "educacao": {
+   "label": "Educação",
+   "dim": "theme",
+   "terms": [
+    "educacao",
+    "ensino",
+    "aprendizagem",
+    "alfabetizacao",
+    "letramento",
+    "reforco escolar",
+    "evasao escolar",
+    "abandono escolar",
+    "permanencia escolar"
+   ],
+   "expands": [],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "evasao_escolar": {
+   "label": "Evasão escolar",
+   "dim": "theme",
+   "terms": [
+    "evasao",
+    "evasao escolar",
+    "abandono escolar",
+    "reprovacao"
+   ],
+   "expands": [
+    "educacao",
+    "adolescentes"
+   ],
+   "themes": [
+    "educacao"
+   ],
+   "ods": [
+    4
+   ],
+   "esg": []
+  },
+  "saude": {
+   "label": "Saúde",
+   "dim": "theme",
+   "terms": [
+    "saude",
+    "atencao a saude",
+    "prevencao",
+    "vacinacao",
+    "saude publica"
+   ],
+   "expands": [],
+   "themes": [
+    "saude"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "meio_ambiente": {
+   "label": "Meio ambiente",
+   "dim": "theme",
+   "terms": [
+    "meio ambiente",
+    "ambiental",
+    "sustentabilidade",
+    "educacao ambiental",
+    "reflorestamento",
+    "biodiversidade",
+    "conservacao"
+   ],
+   "expands": [],
+   "themes": [
+    "meio_ambiente"
+   ],
+   "ods": [
+    13,
+    15
+   ],
+   "esg": []
+  },
+  "residuos": {
+   "label": "Resíduos e reciclagem",
+   "dim": "theme",
+   "terms": [
+    "residuos",
+    "reciclagem",
+    "coleta seletiva",
+    "compostagem",
+    "lixo",
+    "economia circular"
+   ],
+   "expands": [
+    "meio_ambiente"
+   ],
+   "themes": [
+    "meio_ambiente"
+   ],
+   "ods": [
+    12
+   ],
+   "esg": []
+  },
+  "clima": {
+   "label": "Clima",
+   "dim": "theme",
+   "terms": [
+    "clima",
+    "mudanca climatica",
+    "mudancas climaticas",
+    "carbono",
+    "adaptacao climatica"
+   ],
+   "expands": [
+    "meio_ambiente"
+   ],
+   "themes": [
+    "meio_ambiente"
+   ],
+   "ods": [
+    13
+   ],
+   "esg": []
+  },
+  "agua": {
+   "label": "Água e saneamento",
+   "dim": "theme",
+   "terms": [
+    "agua",
+    "saneamento",
+    "agua potavel",
+    "cisterna",
+    "esgoto"
+   ],
+   "expands": [],
+   "themes": [
+    "agua_saneamento"
+   ],
+   "ods": [
+    6
+   ],
+   "esg": []
+  },
+  "alimentacao": {
+   "label": "Segurança alimentar",
+   "dim": "theme",
+   "terms": [
+    "alimentacao",
+    "seguranca alimentar",
+    "fome",
+    "horta",
+    "horta comunitaria",
+    "cozinha comunitaria",
+    "merenda"
+   ],
+   "expands": [],
+   "themes": [
+    "seguranca_alimentar"
+   ],
+   "ods": [
+    2
+   ],
+   "esg": []
+  },
+  "geracao_renda": {
+   "label": "Geração de renda",
+   "dim": "theme",
+   "terms": [
+    "geracao de renda",
+    "renda",
+    "emprego",
+    "empregabilidade",
+    "empreendedorismo",
+    "microcredito",
+    "cooperativa",
+    "trabalho"
+   ],
+   "expands": [],
+   "themes": [
+    "geracao_renda"
+   ],
+   "ods": [
+    8
+   ],
+   "esg": []
+  },
+  "capacitacao_profissional": {
+   "label": "Capacitação profissional",
+   "dim": "theme",
+   "terms": [
+    "capacitacao profissional",
+    "qualificacao profissional",
+    "formacao profissional",
+    "curso profissionalizante",
+    "aprendizagem profissional"
+   ],
+   "expands": [
+    "geracao_renda",
+    "educacao"
+   ],
+   "themes": [
+    "geracao_renda",
+    "educacao"
+   ],
+   "ods": [
+    4,
+    8
+   ],
+   "esg": []
+  },
+  "tecnologia": {
+   "label": "Tecnologia e inclusão digital",
+   "dim": "theme",
+   "terms": [
+    "tecnologia",
+    "inclusao digital",
+    "digital",
+    "programacao",
+    "robotica",
+    "informatica",
+    "internet",
+    "letramento digital"
+   ],
+   "expands": [],
+   "themes": [
+    "inclusao_digital",
+    "inovacao_social"
+   ],
+   "ods": [
+    9,
+    4
+   ],
+   "esg": []
+  },
+  "esporte": {
+   "label": "Esporte",
+   "dim": "theme",
+   "terms": [
+    "esporte",
+    "esportes",
+    "futebol",
+    "atividade fisica",
+    "lazer"
+   ],
+   "expands": [],
+   "themes": [
+    "esporte"
+   ],
+   "ods": [
+    3
+   ],
+   "esg": []
+  },
+  "habitacao": {
+   "label": "Habitação",
+   "dim": "theme",
+   "terms": [
+    "habitacao",
+    "moradia",
+    "casa propria",
+    "reforma de casas"
+   ],
+   "expands": [],
+   "themes": [
+    "habitacao"
+   ],
+   "ods": [
+    11
+   ],
+   "esg": []
+  },
+  "cultura": {
+   "label": "Cultura",
+   "dim": "theme",
+   "terms": [
+    "cultura",
+    "cultural",
+    "patrimonio",
+    "cultura popular",
+    "museu",
+    "festival"
+   ],
+   "expands": [],
+   "themes": [
+    "cultura"
+   ],
+   "ods": [
+    11
+   ],
+   "esg": []
+  },
+  "direitos_humanos": {
+   "label": "Direitos humanos",
+   "dim": "theme",
+   "terms": [
+    "direitos humanos",
+    "cidadania",
+    "acesso a justica",
+    "defensoria",
+    "igualdade racial",
+    "racismo"
+   ],
+   "expands": [],
+   "themes": [
+    "direitos_humanos"
+   ],
+   "ods": [
+    16,
+    10
+   ],
+   "esg": []
+  },
+  "voluntariado": {
+   "label": "Voluntariado",
+   "dim": "theme",
+   "terms": [
+    "voluntariado",
+    "voluntario",
+    "voluntarios"
+   ],
+   "expands": [],
+   "themes": [
+    "desenvolvimento_comunitario"
+   ],
+   "ods": [
+    17
+   ],
+   "esg": []
+  },
+  "comunidade": {
+   "label": "Desenvolvimento comunitário",
+   "dim": "theme",
+   "terms": [
+    "comunidade",
+    "comunitario",
+    "comunitaria",
+    "territorio",
+    "bairro",
+    "periferia"
+   ],
+   "expands": [],
+   "themes": [
+    "desenvolvimento_comunitario"
+   ],
+   "ods": [
+    11
+   ],
+   "esg": []
+  },
+  "governanca": {
+   "label": "Governança e transparência",
+   "dim": "theme",
+   "terms": [
+    "governanca",
+    "transparencia",
+    "prestacao de contas",
+    "compliance",
+    "integridade"
+   ],
+   "expands": [],
+   "themes": [
+    "inovacao_social"
+   ],
+   "ods": [
+    16
+   ],
+   "esg": [
+    "G"
+   ]
+  },
+  "remoto": {
+   "label": "Modalidade remota",
+   "dim": "modality",
+   "terms": [
+    "remoto",
+    "online",
+    "a distancia",
+    "ead",
+    "virtual"
+   ],
+   "expands": [],
+   "themes": [],
+   "ods": [],
+   "esg": []
+  },
+  "presencial": {
+   "label": "Modalidade presencial",
+   "dim": "modality",
+   "terms": [
+    "presencial",
+    "em campo"
+   ],
+   "expands": [],
+   "themes": [],
+   "ods": [],
+   "esg": []
+  },
+  "hibrido": {
+   "label": "Modalidade híbrida",
+   "dim": "modality",
+   "terms": [
+    "hibrido",
+    "hibrida",
+    "semipresencial"
+   ],
+   "expands": [],
+   "themes": [],
+   "ods": [],
+   "esg": []
+  }
+ },
+ "ufs": {
+  "acre": "AC",
+  "alagoas": "AL",
+  "amapa": "AP",
+  "amazonas": "AM",
+  "bahia": "BA",
+  "ceara": "CE",
+  "distrito federal": "DF",
+  "espirito santo": "ES",
+  "goias": "GO",
+  "maranhao": "MA",
+  "mato grosso do sul": "MS",
+  "mato grosso": "MT",
+  "minas gerais": "MG",
+  "para": "PA",
+  "paraiba": "PB",
+  "parana": "PR",
+  "pernambuco": "PE",
+  "piaui": "PI",
+  "rio de janeiro": "RJ",
+  "rio grande do norte": "RN",
+  "rio grande do sul": "RS",
+  "rondonia": "RO",
+  "roraima": "RR",
+  "santa catarina": "SC",
+  "sao paulo": "SP",
+  "sergipe": "SE",
+  "tocantins": "TO"
+ },
+ "capitals": {
+  "rio branco": "AC",
+  "maceio": "AL",
+  "macapa": "AP",
+  "manaus": "AM",
+  "salvador": "BA",
+  "fortaleza": "CE",
+  "brasilia": "DF",
+  "vitoria": "ES",
+  "goiania": "GO",
+  "sao luis": "MA",
+  "cuiaba": "MT",
+  "campo grande": "MS",
+  "belo horizonte": "MG",
+  "belem": "PA",
+  "joao pessoa": "PB",
+  "curitiba": "PR",
+  "recife": "PE",
+  "teresina": "PI",
+  "natal": "RN",
+  "porto alegre": "RS",
+  "porto velho": "RO",
+  "boa vista": "RR",
+  "florianopolis": "SC",
+  "aracaju": "SE",
+  "palmas": "TO"
+ },
+ "regions": {
+  "norte": [
+   "AC",
+   "AP",
+   "AM",
+   "PA",
+   "RO",
+   "RR",
+   "TO"
+  ],
+  "nordeste": [
+   "AL",
+   "BA",
+   "CE",
+   "MA",
+   "PB",
+   "PE",
+   "PI",
+   "RN",
+   "SE"
+  ],
+  "centro oeste": [
+   "DF",
+   "GO",
+   "MT",
+   "MS"
+  ],
+  "sudeste": [
+   "ES",
+   "MG",
+   "RJ",
+   "SP"
+  ],
+  "sul": [
+   "PR",
+   "RS",
+   "SC"
+  ]
+ },
+ "stopwords": [
+  "a",
+  "algo",
+  "as",
+  "ate",
+  "com",
+  "como",
+  "da",
+  "das",
+  "de",
+  "do",
+  "dos",
+  "e",
+  "em",
+  "entre",
+  "fazer",
+  "ideia",
+  "ideias",
+  "ja",
+  "mais",
+  "menos",
+  "meu",
+  "meus",
+  "minha",
+  "minhas",
+  "muito",
+  "na",
+  "nas",
+  "no",
+  "nos",
+  "nossa",
+  "nosso",
+  "o",
+  "os",
+  "ou",
+  "para",
+  "por",
+  "pra",
+  "preciso",
+  "projeto",
+  "projetos",
+  "que",
+  "quero",
+  "seja",
+  "sem",
+  "ser",
+  "sobre",
+  "solucao",
+  "solucoes",
+  "tenho",
+  "ter",
+  "um",
+  "uma",
+  "umas",
+  "uns"
+ ]
+}

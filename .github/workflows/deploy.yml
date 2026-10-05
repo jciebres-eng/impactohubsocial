@@ -1,0 +1,21 @@
+# Deploy manual para staging/produção (modelo). Requer secrets do ambiente no GitHub e um registry configurado.
+name: deploy
+on:
+  workflow_dispatch:
+    inputs:
+      environment: { type: choice, options: [staging, production], required: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build e push da imagem
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ vars.REGISTRY }}" -u "${{ secrets.REGISTRY_USER }}" --password-stdin
+          docker build -t "${{ vars.REGISTRY }}/impacto:${{ github.sha }}" .
+          docker push "${{ vars.REGISTRY }}/impacto:${{ github.sha }}"
+      - name: Migrations (papel dono) — forward-only
+        run: docker run --rm -e MIGRATION_DATABASE_URL="${{ secrets.MIGRATION_DATABASE_URL }}" "${{ vars.REGISTRY }}/impacto:${{ github.sha }}" python3 -m impacto.db.migrate
+      - name: Atualizar serviços api e worker
+        run: echo "Implemente aqui o rollout do seu provedor (ECS/Cloud Run/Kubernetes/Fly/Render) com a tag ${{ github.sha }}"

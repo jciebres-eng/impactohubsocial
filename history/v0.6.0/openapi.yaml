@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: Plataforma Impacto API
+  version: 0.4.0
+  description: API local executável do MVP. Não representa o contrato de produção.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /healthz:
+    get:
+      security: []
+      responses:
+        '200': {description: Serviço disponível}
+  /v1/auth/register:
+    post:
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RegisterRequest'}
+      responses:
+        '201': {description: Usuário criado}
+        '409': {description: E-mail já cadastrado}
+  /v1/auth/login:
+    post:
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/LoginRequest'}
+      responses:
+        '200': {description: Sessão criada}
+        '401': {description: Credenciais inválidas}
+  /v1/me:
+    get:
+      responses:
+        '200':
+          description: Usuário e organização atuais
+          content: {application/json: {schema: {$ref: '#/components/schemas/Me'}}}
+  /v1/plans:
+    get:
+      responses: {'200': {description: Catálogo de planos}}
+  /v1/entitlements:
+    get:
+      responses: {'200': {description: Plano e direitos do tenant}}
+  /v1/subscriptions:
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/SubscriptionRequest'}}}}
+      responses: {'201': {description: Assinatura sandbox criada}}
+  /v1/dashboard/summary:
+    get:
+      responses: {'200': {description: Resumo operacional do tenant}}
+  /v1/programs:
+    get:
+      responses: {'200': {description: Programas do tenant}}
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ProgramRequest'}}}}
+      responses: {'201': {description: Programa criado}}
+  /v1/opportunities:
+    get:
+      responses: {'200': {description: Oportunidades do tenant}}
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/OpportunityRequest'}}}}
+      responses: {'201': {description: Oportunidade criada}}
+  /v1/matches/evaluate:
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/MatchRequest'}}}}
+      responses: {'200': {description: Resultado explicável do match}}
+  /v1/documents:
+    get:
+      responses: {'200': {description: Metadados de documentos}}
+    post:
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentRequest'}}}}
+      responses: {'201': {description: Documento registrado}}
+  /v1/audit-events:
+    get:
+      responses: {'200': {description: Auditoria do tenant}}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, organization_name, kind]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string, minLength: 10}
+        organization_name: {type: string}
+        kind: {type: string, enum: [funder, osc, provider]}
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email}
+        password: {type: string}
+    Me:
+      type: object
+      properties:
+        id: {type: string}
+        email: {type: string}
+        role: {type: string}
+        org_id: {type: string}
+        org_name: {type: string}
+        org_kind: {type: string}
+    ProgramRequest:
+      type: object
+      required: [name, cause, territory, budget_cents]
+      properties:
+        name: {type: string}
+        cause: {type: string}
+        territory: {type: string}
+        budget_cents: {type: integer, minimum: 0}
+        status: {type: string, enum: [draft, open, closed]}
+        criteria_version: {type: string}
+    OpportunityRequest:
+      type: object
+      required: [program_id, title, requested_cents, territory, cause]
+      properties:
+        program_id: {type: string}
+        title: {type: string}
+        description: {type: string}
+        requested_cents: {type: integer, minimum: 0}
+        territory: {type: string}
+        cause: {type: string}
+    MatchRequest:
+      type: object
+      required: [program_id, requested_cents, territory]
+      properties:
+        program_id: {type: string}
+        opportunity_id: {type: string}
+        requested_cents: {type: integer, minimum: 0}
+        territory: {type: string}
+        signals: {type: object, additionalProperties: {type: number, minimum: 0, maximum: 1}}
+    DocumentRequest:
+      type: object
+      required: [filename, sha256]
+      properties:
+        filename: {type: string}
+        sha256: {type: string, pattern: '^[a-fA-F0-9]{64}$'}
+        object_type: {type: string}
+        object_id: {type: string}
+    SubscriptionRequest:
+      type: object
+      required: [plan_key]
+      properties:
+        plan_key: {type: string, enum: [funder_basic, funder_premium, enterprise]}

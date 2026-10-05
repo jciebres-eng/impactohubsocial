@@ -1,0 +1,255 @@
+{
+  "base_ranks": {
+    "artes caps": 1,
+    "arte saúde mental": 1,
+    "projeto idosos": 1,
+    "educação rural": 1,
+    "mulheres violência": 1,
+    "PcD tecnologia": 1,
+    "sude mental arte": 1
+  },
+  "perturbations": [
+    {
+      "weight": "text_relevance",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "text_relevance",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "ods_esg",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "ods_esg",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "population",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "population",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "territory",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "territory",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "budget",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "budget",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "maturity",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "maturity",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "replicability",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "replicability",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "evidence",
+      "factor": 0.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    },
+    {
+      "weight": "evidence",
+      "factor": 1.5,
+      "top3_kept": true,
+      "ranks": {
+        "artes caps": 1,
+        "arte saúde mental": 1,
+        "projeto idosos": 1,
+        "educação rural": 1,
+        "mulheres violência": 1,
+        "PcD tecnologia": 1,
+        "sude mental arte": 1
+      }
+    }
+  ],
+  "flat_weights": {
+    "ranks": {
+      "artes caps": 1,
+      "arte saúde mental": 1,
+      "projeto idosos": 1,
+      "educação rural": 1,
+      "mulheres violência": 1,
+      "PcD tecnologia": 1,
+      "sude mental arte": 1
+    },
+    "top3_kept": true
+  },
+  "summary": {
+    "perturbations": 16,
+    "kept_top3": 16,
+    "base_all_top3": true,
+    "note": "Corpus sintético de 8 soluções e 7 consultas: mostra robustez do desenho, não otimalidade. Pesos continuam HIPÓTESE inicial."
+  }
+}

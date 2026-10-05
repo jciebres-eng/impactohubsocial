@@ -1,10 +1,8 @@
-# Plataforma Impacto — v0.10.0
+# Plataforma Impacto — v0.9.0
 
 Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
 
 > **Estado:** pronto para homologação/piloto controlado. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
-
-**Novo no v0.10.0:** camada institucional do terceiro setor — natureza jurídica × qualificações × situação × elegibilidade por oportunidade, com explicação e fonte. Comece por `THIRD_SECTOR_MODEL.md`, `INSTITUTIONAL_ELIGIBILITY_ENGINE.md` e `FINAL_RELEASE_AUDIT.md` §3-B.
 
 **Novo no v0.9.0:** Biblioteca de Soluções de Impacto — busca por intenção, relevância/match explicáveis, replicação, intenção de financiamento com privacidade. Comece por `SOLUTION_LIBRARY.md`.
 

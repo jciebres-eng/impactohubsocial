@@ -1,0 +1,247 @@
+{
+ "version": "taxonomy@1.0",
+ "causes": {
+  "educacao": "Educação",
+  "saude": "Saúde",
+  "cultura": "Cultura e artes",
+  "esporte": "Esporte e lazer",
+  "meio_ambiente": "Meio ambiente e clima",
+  "assistencia_social": "Assistência social",
+  "criancas_adolescentes": "Crianças e adolescentes",
+  "pessoa_idosa": "Pessoa idosa",
+  "pessoa_com_deficiencia": "Pessoa com deficiência",
+  "direitos_humanos": "Direitos humanos",
+  "igualdade_genero": "Igualdade de gênero",
+  "igualdade_racial": "Igualdade racial",
+  "seguranca_alimentar": "Segurança alimentar",
+  "habitacao": "Habitação",
+  "geracao_renda": "Trabalho e geração de renda",
+  "inovacao_social": "Inovação social",
+  "protecao_animal": "Proteção animal",
+  "desenvolvimento_comunitario": "Desenvolvimento comunitário",
+  "agua_saneamento": "Água e saneamento",
+  "inclusao_digital": "Inclusão digital",
+  "juventude": "Juventude",
+  "povos_tradicionais": "Povos indígenas e comunidades tradicionais"
+ },
+ "ods": {
+  "1": "Erradicação da pobreza",
+  "2": "Fome zero e agricultura sustentável",
+  "3": "Saúde e bem-estar",
+  "4": "Educação de qualidade",
+  "5": "Igualdade de gênero",
+  "6": "Água potável e saneamento",
+  "7": "Energia limpa e acessível",
+  "8": "Trabalho decente e crescimento econômico",
+  "9": "Indústria, inovação e infraestrutura",
+  "10": "Redução das desigualdades",
+  "11": "Cidades e comunidades sustentáveis",
+  "12": "Consumo e produção responsáveis",
+  "13": "Ação contra a mudança global do clima",
+  "14": "Vida na água",
+  "15": "Vida terrestre",
+  "16": "Paz, justiça e instituições eficazes",
+  "17": "Parcerias e meios de implementação"
+ },
+ "esg": {
+  "ambiental": "Ambiental (E)",
+  "social": "Social (S)",
+  "governanca": "Governança (G)",
+  "diversidade": "Diversidade e inclusão",
+  "comunidade_local": "Comunidade do entorno",
+  "cadeia_valor": "Cadeia de valor",
+  "clima": "Clima e carbono",
+  "educacao_financeira": "Educação financeira"
+ },
+ "document_types": {
+  "estatuto_social": {
+   "label": "Estatuto social",
+   "expires": false
+  },
+  "ata_eleicao_diretoria": {
+   "label": "Ata de eleição da diretoria vigente",
+   "expires": true
+  },
+  "cartao_cnpj": {
+   "label": "Comprovante de inscrição no CNPJ",
+   "expires": false
+  },
+  "cnd_federal": {
+   "label": "Certidão de débitos federais e dívida ativa da União",
+   "expires": true
+  },
+  "crf_fgts": {
+   "label": "Certificado de regularidade do FGTS",
+   "expires": true
+  },
+  "cndt_trabalhista": {
+   "label": "Certidão negativa de débitos trabalhistas",
+   "expires": true
+  },
+  "certidao_estadual": {
+   "label": "Certidão de regularidade estadual",
+   "expires": true
+  },
+  "certidao_municipal": {
+   "label": "Certidão de regularidade municipal",
+   "expires": true
+  },
+  "comprovante_endereco": {
+   "label": "Comprovante de endereço",
+   "expires": true
+  },
+  "documento_dirigente": {
+   "label": "Documento de identificação do representante legal",
+   "expires": false
+  },
+  "relatorio_atividades": {
+   "label": "Relatório de atividades",
+   "expires": false
+  },
+  "balanco_patrimonial": {
+   "label": "Balanço patrimonial / demonstrações contábeis",
+   "expires": false
+  },
+  "registro_conselho": {
+   "label": "Registro em conselho de direitos (ex.: CMDCA, CMAS)",
+   "expires": true
+  },
+  "cebas": {
+   "label": "Certificação CEBAS",
+   "expires": true
+  },
+  "titulo_utilidade_publica": {
+   "label": "Título de utilidade pública",
+   "expires": false
+  },
+  "plano_trabalho": {
+   "label": "Plano de trabalho",
+   "expires": false
+  },
+  "orcamento_detalhado": {
+   "label": "Orçamento detalhado",
+   "expires": false
+  },
+  "proposta_projeto": {
+   "label": "Proposta de projeto",
+   "expires": false
+  },
+  "declaracao": {
+   "label": "Declaração",
+   "expires": false
+  },
+  "contrato": {
+   "label": "Contrato / termo",
+   "expires": false
+  },
+  "nota_fiscal": {
+   "label": "Nota fiscal",
+   "expires": false
+  },
+  "recibo": {
+   "label": "Recibo / comprovante de pagamento",
+   "expires": false
+  },
+  "foto_evidencia": {
+   "label": "Foto / registro de evidência",
+   "expires": false
+  },
+  "lista_presenca": {
+   "label": "Lista de presença",
+   "expires": false
+  },
+  "relatorio_prestacao_contas": {
+   "label": "Relatório de prestação de contas",
+   "expires": false
+  },
+  "material_governo": {
+   "label": "Material institucional / governamental",
+   "expires": false
+  },
+  "credencial_profissional": {
+   "label": "Comprovante de registro profissional",
+   "expires": true
+  },
+  "outro": {
+   "label": "Outro",
+   "expires": false
+  }
+ },
+ "certifications": {
+  "cebas": "CEBAS",
+  "oscip": "Qualificação como OSCIP",
+  "utilidade_publica_federal": "Utilidade pública (federal)",
+  "utilidade_publica_estadual": "Utilidade pública (estadual)",
+  "utilidade_publica_municipal": "Utilidade pública (municipal)",
+  "registro_cmdca": "Registro no CMDCA",
+  "registro_cmas": "Registro no CMAS",
+  "registro_cmi": "Registro no Conselho da Pessoa Idosa"
+ },
+ "spheres": {
+  "private": "Privado (empresas, institutos, fundações)",
+  "federal": "Federal",
+  "state": "Estadual",
+  "municipal": "Municipal",
+  "local": "Local / comunitário",
+  "international": "Internacional"
+ },
+ "instruments": {
+  "grant": "Doação/grant",
+  "edital": "Edital",
+  "fund": "Fundo",
+  "financing": "Financiamento",
+  "prize": "Prêmio",
+  "incentive_law": "Lei de incentivo",
+  "donation": "Doação direta",
+  "other": "Outro"
+ },
+ "ufs": [
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO"
+ ],
+ "councils": {
+  "CRC": "Conselho Regional de Contabilidade",
+  "OAB": "Ordem dos Advogados do Brasil",
+  "CRA": "Conselho Regional de Administração",
+  "CORECON": "Conselho Regional de Economia",
+  "CREA": "Conselho Regional de Engenharia e Agronomia",
+  "CRP": "Conselho Regional de Psicologia",
+  "CRESS": "Conselho Regional de Serviço Social",
+  "CAU": "Conselho de Arquitetura e Urbanismo"
+ },
+ "professional_categories": {
+  "contador": "Contabilidade e prestação de contas",
+  "advogado": "Assessoria jurídica",
+  "elaborador_projetos": "Elaboração de projetos e captação",
+  "auditor": "Auditoria",
+  "avaliador_impacto": "Avaliação de impacto",
+  "gestor_projetos": "Gestão de projetos",
+  "engenheiro": "Engenharia / obras",
+  "assistente_social": "Serviço social"
+ }
+}

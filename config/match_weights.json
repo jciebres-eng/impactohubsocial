@@ -1,0 +1,56 @@
+{
+  "version": "weights@1.0",
+  "status": "hipotese_a_calibrar",
+  "forbidden_inputs": [
+    "plan",
+    "plan_key",
+    "subscription",
+    "voucher",
+    "payment",
+    "entitlements",
+    "billing",
+    "sensitive_attributes"
+  ],
+  "funder_project": {
+    "cause": 20,
+    "territory": 15,
+    "budget": 15,
+    "ods_esg": 10,
+    "capacity": 10,
+    "evidence_history": 10,
+    "impact": 10,
+    "urgency": 5,
+    "preference": 5
+  },
+  "osc_call": {
+    "cause": 25,
+    "territory": 15,
+    "budget": 15,
+    "readiness": 15,
+    "ods": 10,
+    "deadline": 10,
+    "history": 10
+  },
+  "thresholds": {
+    "min_confidence_for_score": 50,
+    "priority_score": 75,
+    "compatible_score": 55
+  },
+  "professional_need": {
+    "category": 30,
+    "credential": 25,
+    "territory": 15,
+    "experience": 15,
+    "availability": 10,
+    "language": 5
+  },
+  "solution_funder": {
+    "causes": 25,
+    "ods_esg": 20,
+    "territory": 15,
+    "ticket": 15,
+    "population": 10,
+    "preferences": 10,
+    "maturity": 5
+  }
+}

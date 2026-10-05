@@ -1,0 +1,10 @@
+{
+  "appId": "br.org.impacto.app",
+  "appName": "Impacto",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": { "androidScheme": "https", "iosScheme": "capacitor", "cleartext": false },
+  "android": { "allowMixedContent": false, "captureInput": true, "webContentsDebuggingEnabled": false },
+  "ios": { "contentInset": "automatic", "limitsNavigationsToAppBoundDomains": false },
+  "plugins": { "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#172a46", "showSpinner": false } }
+}

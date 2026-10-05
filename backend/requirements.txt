@@ -1,0 +1,12 @@
+# Dependências de EXECUÇÃO (versões exatas testadas neste release — ver THIRD_PARTY_DEPENDENCIES.md).
+# Sistema: libpq5 (cliente oficial do PostgreSQL) — usado pelo driver em impacto/db/pq.py.
+starlette==1.6.0
+uvicorn==0.53.0
+pydantic==2.13.5
+PyJWT==2.14.0
+cryptography==50.0.1
+python-multipart==0.0.32
+pypdf==5.9.0
+reportlab==5.0.1
+defusedxml==0.7.1
+anyio==4.15.1

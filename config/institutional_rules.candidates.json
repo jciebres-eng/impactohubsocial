@@ -1,0 +1,50 @@
+{
+  "_note": "Regras CANDIDATAS (rascunho) da camada institucional. NÃO são publicadas automaticamente: entram como DRAFT, exigem conferência da fonte por profissional habilitado, data de consulta, revisão e aprovação por outra pessoa. Textos legais podem ter mudado — conferir a redação vigente antes de publicar.",
+  "version": "2026.10-candidates-1",
+  "rules": [
+    {
+      "code": "CAND-CONTRATO-GESTAO-OS",
+      "name": "Contrato de gestão: entidade qualificada como Organização Social",
+      "description": "Contratos de gestão são celebrados com entidades qualificadas como OS pelo ente competente.",
+      "scope_type": "modality", "scope_ref": "management_contract",
+      "requirement": {"type": "qualification_all", "values": ["os"]},
+      "how_to_fix": "Obtenha e registre a qualificação como OS junto ao ente competente e anexe o ato de qualificação.",
+      "source_citation": "Lei nº 9.637/1998 (qualificação como Organização Social) — conferir texto vigente e a legislação do ente",
+      "source_url": "https://www.planalto.gov.br/ccivil_03/leis/l9637.htm",
+      "confidence": "medium", "needs_professional_validation": true
+    },
+    {
+      "code": "CAND-PARCERIA-CNPJ",
+      "name": "Parcerias com a administração pública: organização com CNPJ",
+      "description": "Termos de colaboração/fomento são firmados com pessoas jurídicas (OSC) — exige CNPJ cadastrado.",
+      "scope_type": "modality", "scope_ref": "partnership_term",
+      "requirement": {"type": "cnpj_required"},
+      "how_to_fix": "Formalize a organização e registre o CNPJ no cadastro.",
+      "source_citation": "Lei nº 13.019/2014 (marco regulatório das OSC) — conferir texto vigente",
+      "source_url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm",
+      "confidence": "medium", "needs_professional_validation": true
+    },
+    {
+      "code": "CAND-PARCERIA-ESTATUTO",
+      "name": "Parcerias com a administração pública: estatuto social validado",
+      "description": "A comprovação institucional costuma exigir o estatuto/ato constitutivo; a plataforma só considera o documento VALIDADO.",
+      "scope_type": "modality", "scope_ref": "partnership_term",
+      "requirement": {"type": "document_valid", "doc_types": ["estatuto_social"], "require_validated": true},
+      "how_to_fix": "Envie o estatuto social vigente no cofre de documentos e aguarde a validação.",
+      "source_citation": "Lei nº 13.019/2014 — requisitos de regularidade institucional; conferir exigências específicas do edital",
+      "source_url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm",
+      "confidence": "low", "needs_professional_validation": true
+    },
+    {
+      "code": "CAND-PARCERIA-TEMPO-MINIMO",
+      "name": "Parcerias com a administração pública: tempo mínimo de existência (piso de 12 meses)",
+      "description": "O tempo mínimo de existência com CNPJ varia por esfera (municipal, estadual, federal). Esta candidata usa apenas o PISO de 12 meses; crie regra específica por edital para prazos maiores.",
+      "scope_type": "modality", "scope_ref": "partnership_term",
+      "requirement": {"type": "org_age_min", "months": 12},
+      "how_to_fix": "Aguarde completar o tempo mínimo de existência ou procure editais com exigência menor.",
+      "source_citation": "Lei nº 13.019/2014, art. 33 (prazos por esfera) — conferir texto vigente",
+      "source_url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019.htm",
+      "confidence": "low", "needs_professional_validation": true
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "published_solutions": 5000,
+  "queries": 54,
+  "p50_ms": 180.6,
+  "p95_ms": 473.9,
+  "max_ms": 526.8,
+  "candidate_cap": 200,
+  "note": "1 processo, PostgreSQL local, sem cache; inclui HTTP local, autenticação, RLS, FTS+trigramas, pontuação em Python e registro do log de busca."
+}

@@ -1,0 +1,271 @@
+"""Infraestrutura de testes: PostgreSQL REAL descartável + servidor HTTP REAL (uvicorn) + cliente HTTP.
+
+Variáveis:
+  TEST_ADMIN_DATABASE_URL  superusuário para criar/dropar o banco de teste (padrão: postgresql://postgres@127.0.0.1:5432/postgres)
+  TEST_KEEP_DB=1           não remove o banco ao final (depuração)
+Os papéis impacto_owner/impacto_app são criados pelo bootstrap se não existirem (senhas apenas de teste).
+"""
+from __future__ import annotations
+
+import atexit
+import email
+import http.cookiejar
+import json
+import os
+import re
+import shutil
+import socket
+import subprocess
+import tempfile
+import threading
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import uuid
+from pathlib import Path
+
+BACKEND = Path(__file__).resolve().parents[1]
+ROOT = BACKEND.parent
+os.environ.setdefault("PASSWORD_SCRYPT_N", str(2 ** 14))
+
+ADMIN_URL = os.getenv("TEST_ADMIN_DATABASE_URL", "postgresql://postgres@127.0.0.1:5432/postgres")
+_P = urllib.parse.urlparse(ADMIN_URL)
+HOST, PORT = _P.hostname or "127.0.0.1", _P.port or 5432
+DB_NAME = f"impacto_test_{os.getpid()}"
+OWNER_PW, APP_PW = "owner_test_pw_" + uuid.uuid4().hex[:6], "app_test_pw_" + uuid.uuid4().hex[:6]
+OWNER_DSN = f"host={HOST} port={PORT} dbname={DB_NAME} user=impacto_owner password={OWNER_PW}"
+APP_DSN = f"host={HOST} port={PORT} dbname={DB_NAME} user=impacto_app password={APP_PW}"
+TMP = Path(tempfile.mkdtemp(prefix="impacto-test-"))
+
+_state: dict = {}
+_lock = threading.Lock()
+
+
+def _psql(*args: str) -> str:
+    return subprocess.run(["psql", ADMIN_URL, "-v", "ON_ERROR_STOP=1", "-q", "-tA", *args], check=True,
+                          capture_output=True, text=True).stdout
+
+
+def _create_db() -> None:
+    _psql("-c", f'DROP DATABASE IF EXISTS "{DB_NAME}" WITH (FORCE)')
+    subprocess.run(["psql", ADMIN_URL, "-v", "ON_ERROR_STOP=1", "-q", "-v", f"db={DB_NAME}", "-f", str(ROOT / "infra/db/bootstrap.sql")],
+                   check=True, capture_output=True, text=True)
+    _psql("-c", f"ALTER ROLE impacto_owner PASSWORD '{OWNER_PW}'; ALTER ROLE impacto_app PASSWORD '{APP_PW}';")
+    from impacto.db.migrate import migrate
+    migrate(OWNER_DSN, log=lambda *_: None)
+
+
+def _drop_db() -> None:
+    if os.getenv("TEST_KEEP_DB") == "1":
+        return
+    try:
+        _psql("-c", f'DROP DATABASE IF EXISTS "{DB_NAME}" WITH (FORCE)')
+    except Exception:
+        pass
+    shutil.rmtree(TMP, ignore_errors=True)
+
+
+def test_env() -> dict:
+    return {
+        "IMPACTO_ENV": "test", "DATABASE_URL": APP_DSN, "SECRET_KEY": "test-secret-key-" + "x" * 32,
+        "VOUCHER_HMAC_KEY": "test-voucher-key-" + "y" * 32, "STORAGE_LOCAL_DIR": str(TMP / "storage"),
+        "PUBLIC_BASE_URL": "http://testserver.local", "COOKIE_SECURE": "false", "BILLING_PROVIDER": "sandbox",
+        "AI_PROVIDER": "local", "MAIL_PROVIDER": "console", "LOG_LEVEL": "WARNING", "ALLOW_UNSCANNED_DOWNLOADS": "true", "RATE_LIMIT_MULTIPLIER": "1000",
+    }
+
+
+def server() -> dict:
+    """Sobe (uma vez por processo) banco + servidor. Retorna {'base': url, 'state': AppState}."""
+    with _lock:
+        if _state:
+            return _state
+        os.environ.update(test_env())
+        _create_db()
+        atexit.register(_drop_db)
+        import uvicorn
+        from impacto.app import AppState, create_app
+        from impacto.config import load_settings
+        settings = load_settings()
+        st = AppState(settings)
+        app = create_app(settings, st)
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", 0))
+            port = s.getsockname()[1]
+        cfg = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", lifespan="on")
+        srv = uvicorn.Server(cfg)
+        t = threading.Thread(target=srv.run, daemon=True)
+        t.start()
+        for _ in range(100):
+            if srv.started:
+                break
+            time.sleep(0.05)
+        _state.update({"base": f"http://127.0.0.1:{port}", "state": st, "server": srv})
+        return _state
+
+
+def outbox_messages() -> list[email.message.Message]:
+    box = TMP / "outbox"
+    if not box.exists():
+        return []
+    return [email.message_from_bytes(p.read_bytes()) for p in sorted(box.glob("*.eml"))]
+
+
+def last_token_for(to: str, path: str) -> str:
+    for msg in reversed(outbox_messages()):
+        if msg["To"] == to:
+            body = msg.get_payload(decode=True).decode()
+            m = re.search(re.escape(path) + r"\?token=([A-Za-z0-9_\-]+)", body)
+            if m:
+                return m.group(1)
+    raise AssertionError(f"token {path} não encontrado para {to}")
+
+
+class Response:
+    def __init__(self, status: int, headers, body: bytes):
+        self.status, self.headers, self.body = status, headers, body
+
+    @property
+    def json(self):
+        return json.loads(self.body) if self.body else None
+
+    def __repr__(self):
+        return f"<{self.status} {self.body[:300]!r}>"
+
+
+class Client:
+    """Cliente HTTP real. mode='token' (Bearer, como o app mobile) ou 'cookie' (como o navegador, com CSRF)."""
+
+    def __init__(self, mode: str = "token"):
+        self.base = server()["base"]
+        self.mode = mode
+        self.jar = http.cookiejar.CookieJar()
+        self.opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.jar))
+        self.access = self.refresh_token = self.csrf = None
+        self.user = None
+
+    def request(self, method: str, path: str, body=None, *, headers=None, raw: bytes | None = None, ctype=None) -> Response:
+        h = dict(headers or {})
+        data = None
+        if raw is not None:
+            data = raw
+            if ctype:
+                h["Content-Type"] = ctype
+        elif body is not None:
+            data = json.dumps(body).encode()
+            h["Content-Type"] = "application/json"
+        if self.mode == "token":
+            h.setdefault("X-Auth-Mode", "token")
+            if self.access:
+                h.setdefault("Authorization", f"Bearer {self.access}")
+        elif self.csrf and method in ("POST", "PUT", "PATCH", "DELETE"):
+            h.setdefault("X-CSRF-Token", self.csrf)
+        req = urllib.request.Request(self.base + path, data=data, method=method, headers=h)
+        try:
+            with self.opener.open(req, timeout=60) as r:
+                return Response(r.status, r.headers, r.read())
+        except urllib.error.HTTPError as e:
+            return Response(e.code, e.headers, e.read())
+
+    def get(self, p, **kw):
+        return self.request("GET", p, **kw)
+
+    def post(self, p, body=None, **kw):
+        return self.request("POST", p, body if body is not None else {}, **kw)
+
+    def put(self, p, body=None, **kw):
+        return self.request("PUT", p, body, **kw)
+
+    def patch(self, p, body=None, **kw):
+        return self.request("PATCH", p, body, **kw)
+
+    def delete(self, p, **kw):
+        return self.request("DELETE", p, **kw)
+
+    def login(self, email: str, password: str) -> Response:
+        r = self.post("/v1/auth/login", {"email": email, "password": password})
+        if r.status == 200 and r.json.get("mfa_required") is False:
+            self._absorb(r.json)
+        return r
+
+    def _absorb(self, data: dict):
+        self.access = data.get("access_token") or self.access
+        self.refresh_token = data.get("refresh_token") or self.refresh_token
+        self.csrf = data.get("csrf_token") or self.csrf
+
+    def upload(self, path: str, filename: str, content: bytes, fields: dict | None = None) -> Response:
+        boundary = "----impacto" + uuid.uuid4().hex
+        parts = []
+        for k, v in (fields or {}).items():
+            parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
+        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+                     f"Content-Type: application/octet-stream\r\n\r\n".encode() + content + b"\r\n")
+        parts.append(f"--{boundary}--\r\n".encode())
+        return self.request("POST", path, raw=b"".join(parts), ctype=f"multipart/form-data; boundary={boundary}")
+
+
+PASSWORD = "Senha-Teste-Forte-2026"
+_cnpj_seq = [100000000000]
+
+
+def next_cnpj() -> str:
+    from impacto.services.validators import cnpj_with_check_digits
+    _cnpj_seq[0] += 1
+    return cnpj_with_check_digits(str(_cnpj_seq[0]))
+
+
+def new_account(kind: str = "osc", *, verify: bool = True, mode: str = "token", compliance: str | None = None, **org) -> Client:
+    """Cadastra usuário + organização via API real, confirma e-mail pelo link do outbox e faz login."""
+    c = Client(mode)
+    em = f"{kind}-{uuid.uuid4().hex[:10]}@teste.org"
+    payload = {"email": em, "password": PASSWORD, "full_name": f"Usuária {kind}", "accept_terms": True,
+               "organization": {"kind": kind, "legal_name": org.pop("legal_name", f"Org {kind} {uuid.uuid4().hex[:6]}"),
+                                "cnpj": next_cnpj() if kind not in ("provider", "individual") else None, "uf": org.pop("uf", "MT")}}
+    r = c.post("/v1/auth/register", payload)
+    assert r.status == 202, r
+    if verify:
+        tok = last_token_for(em, "/verificar-email")
+        assert c.post("/v1/auth/verify-email", {"token": tok}).status == 200
+    assert c.login(em, PASSWORD).status == 200
+    c.email = em
+    me = c.get("/v1/me").json
+    c.user = me["user"]
+    c.org_id = me["active_org"]["id"] if me["active_org"] else None
+    if compliance:
+        set_compliance(c.org_id, compliance)
+    return c
+
+
+def db_system():
+    """Conexão de teste no contexto de sistema (para preparar cenários que exigem a administração)."""
+    from impacto.db.pool import DbContext
+    return server()["state"].pool.tx(DbContext(system=True))
+
+
+def set_compliance(org_id: str, status: str) -> None:
+    with db_system() as c:
+        c.run("UPDATE organizations SET compliance_status = $2 WHERE id = $1", org_id, status)
+
+
+def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
+    from impacto.security import totp
+    c = new_account("osc")
+    with db_system() as db:
+        plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
+            "INSERT INTO organizations(kind, legal_name, compliance_status) VALUES ('platform','Plataforma','approved') RETURNING id::text")
+        db.run("UPDATE users SET is_platform_admin = true WHERE id = $1", c.user["id"])
+        db.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'owner') ON CONFLICT DO NOTHING", c.user["id"], plat)
+    secret = None
+    if mfa:
+        secret = c.post("/v1/auth/mfa/setup").json["secret"]
+        assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)}).status == 200
+    assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
+    return c, secret
+
+
+def grant_premium(c: Client, plan: str | None = None) -> None:
+    """Concede plano pago por grant administrativo (como faria um voucher) — evita limites do plano gratuito nos testes."""
+    kind = c.get("/v1/me").json["active_org"]["kind"]
+    plan = plan or {"osc": "osc_premium", "company": "company_premium", "provider": "provider_premium", "individual": "individual_basic"}.get(kind)
+    with db_system() as d:
+        d.run("INSERT INTO entitlement_grants(org_id, plan_key, source, ends_at) VALUES ($1,$2,'admin', now() + interval '30 days')", c.org_id, plan)

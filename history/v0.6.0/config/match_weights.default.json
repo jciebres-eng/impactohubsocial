@@ -1,0 +1,4 @@
+{ "version": "weights@0.1", "status": "hypothesis_to_calibrate",
+  "weights": { "cause_alignment": 20, "territory": 15, "budget_ticket": 15, "mechanism_program": 15,
+               "capacity_readiness": 10, "evidence_indicators": 10, "funder_preference": 5, "schedule_urgency": 5, "residual_operational_risk": 5 },
+  "forbidden_inputs": ["plan","subscription","voucher","payment","sensitive_attributes"] }

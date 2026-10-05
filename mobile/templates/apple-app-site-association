@@ -1,0 +1,1 @@
+{ "applinks": { "apps": [], "details": [ { "appIDs": ["SUBSTITUA_TEAMID.br.org.impacto.app"], "components": [ { "/": "/candidaturas/*" }, { "/": "/oportunidades/*" }, { "/": "/projetos/*" }, { "/": "/verificar-email" }, { "/": "/redefinir-senha" }, { "/": "/convite" } ] } ] } }

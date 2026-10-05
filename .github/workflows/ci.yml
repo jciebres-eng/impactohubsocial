@@ -1,0 +1,44 @@
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions: { contents: read }
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    env:
+      TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: sudo apt-get update && sudo apt-get install -y libpq5 postgresql-client tesseract-ocr
+      - run: pip install -r backend/requirements-dev.txt
+      - name: Lint (ruff)
+        run: cd backend && ruff check impacto
+      - name: Frontend — dependências, typecheck (tipos oficiais) e build
+        run: cd web && npm install --no-audit && npx tsc -p tsconfig.json --noEmit && node build.mjs
+      - run: python -m playwright install --with-deps chromium
+      - name: Testes (unit, integração, segurança/RLS, OIDC, E2E navegador)
+        run: cd backend && python -m unittest discover -s tests -t . -v
+      - name: Auditoria de vulnerabilidades (dependências)
+        run: |
+          pip-audit -r backend/requirements.txt
+          cd web && npm audit --omit=dev --audit-level=high
+  docker:
+    runs-on: ubuntu-24.04
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t impacto:${{ github.sha }} .
+      - name: Configuração de produção recusa segredos ausentes (fail-fast)
+        run: |
+          ! docker run --rm -e IMPACTO_ENV=production -e DATABASE_URL=postgresql://x@y/z impacto:${{ github.sha }} python3 -c "from impacto.config import load_settings; load_settings()"

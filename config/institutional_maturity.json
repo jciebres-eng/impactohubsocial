@@ -1,0 +1,16 @@
+{
+  "version": "maturity@1.0",
+  "status": "HIPÓTESE inicial — limiares a calibrar com dados reais e validar com especialistas do terceiro setor",
+  "base_documents": ["estatuto_social", "cartao_cnpj"],
+  "track_record": {"completed_projects": 1, "accepted_evidences": 3, "validated_indicator_values": 1},
+  "qualification_warning_days": 30,
+  "levels": {
+    "0": "Ideia / iniciativa",
+    "1": "Coletivo ou iniciativa em estruturação",
+    "2": "Proponente formalizado",
+    "3": "Organização formal regular",
+    "4": "Organização com qualificações/certificações",
+    "5": "Organização apta a determinadas modalidades de financiamento/parceria",
+    "6": "Organização com histórico comprovado de execução e impacto"
+  }
+}

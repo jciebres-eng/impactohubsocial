@@ -1,0 +1,3 @@
+# Opcionais: OCR de imagens enviadas (requer o binário tesseract-ocr + pacote de idioma 'por').
+pytesseract==0.3.13
+pillow==12.3.0

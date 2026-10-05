@@ -1,0 +1,13 @@
+[project]
+name = "impacto-backend"
+version = "0.10.0"
+description = "Plataforma Impacto — API (Starlette) sobre PostgreSQL com RLS"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 160
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "S", "UP"]
+ignore = ["S101", "S608", "E501", "B008"]   # S608: SQL montado só com identificadores de listas fixas (teste de arquitetura cobre)

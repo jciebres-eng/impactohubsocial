@@ -1,0 +1,25 @@
+{
+ "//": "Typecheck em ambiente SEM acesso ao npm (sem @types/react): usa declara\u00e7\u00f5es m\u00ednimas em types/. Em CI use tsconfig.json.",
+ "extends": "./tsconfig.json",
+ "compilerOptions": {
+  "typeRoots": [
+   "./types"
+  ],
+  "noImplicitAny": true,
+  "paths": {
+   "react": [
+    "./types/react/index.d.ts"
+   ],
+   "react/jsx-runtime": [
+    "./types/react/jsx-runtime.d.ts"
+   ],
+   "react-dom/client": [
+    "./types/react-dom/client.d.ts"
+   ]
+  }
+ },
+ "include": [
+  "src",
+  "types"
+ ]
+}

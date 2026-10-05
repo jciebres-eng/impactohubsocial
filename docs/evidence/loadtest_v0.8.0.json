@@ -1,0 +1,74 @@
+{
+  "threads": 8,
+  "seconds": 15.0,
+  "total_requests": 4124,
+  "rps": 274.6,
+  "total_errors": 0,
+  "routes": {
+    "/v1/dashboard": {
+      "requests": 517,
+      "errors": 0,
+      "p50_ms": 33.0,
+      "p95_ms": 54.3,
+      "p99_ms": 66.3,
+      "mean_ms": 34.1
+    },
+    "/v1/feed/projects": {
+      "requests": 516,
+      "errors": 0,
+      "p50_ms": 35.7,
+      "p95_ms": 59.8,
+      "p99_ms": 72.0,
+      "mean_ms": 37.4
+    },
+    "/v1/ods": {
+      "requests": 514,
+      "errors": 0,
+      "p50_ms": 23.7,
+      "p95_ms": 41.6,
+      "p99_ms": 52.6,
+      "mean_ms": 24.0
+    },
+    "/v1/indicators/catalog": {
+      "requests": 515,
+      "errors": 0,
+      "p50_ms": 24.0,
+      "p95_ms": 43.6,
+      "p99_ms": 55.1,
+      "mean_ms": 25.6
+    },
+    "/v1/report-center": {
+      "requests": 514,
+      "errors": 0,
+      "p50_ms": 18.0,
+      "p95_ms": 31.6,
+      "p99_ms": 40.7,
+      "mean_ms": 18.7
+    },
+    "/v1/map/projects": {
+      "requests": 515,
+      "errors": 0,
+      "p50_ms": 23.0,
+      "p95_ms": 40.4,
+      "p99_ms": 48.5,
+      "mean_ms": 23.9
+    },
+    "/v1/portfolio": {
+      "requests": 516,
+      "errors": 0,
+      "p50_ms": 24.8,
+      "p95_ms": 44.5,
+      "p99_ms": 54.0,
+      "mean_ms": 26.3
+    },
+    "/v1/me": {
+      "requests": 517,
+      "errors": 0,
+      "p50_ms": 29.1,
+      "p95_ms": 50.3,
+      "p99_ms": 64.4,
+      "mean_ms": 30.1
+    }
+  },
+  "caveats": "mesma máquina para cliente, API e PostgreSQL; dados mínimos; sem rede real; não representa capacidade de produção"
+}

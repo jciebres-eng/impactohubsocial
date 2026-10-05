@@ -27,7 +27,7 @@ base que ainda muda de estrutura. Nada de design foi feito aqui, de propósito.
 
 | Medida | v0.14.0 | v0.15.0 |
 |---|---|---|
-| Testes (banco criado do zero em cada execução) | 564 | **671** (0 falhas, 7 pulados) |
+| Testes (banco criado do zero em cada execução) | 564 | **673** (0 falhas, 7 pulados) |
 | Operações de API | 574 | **625** |
 | Tabelas | 191 | **205** |
 | Políticas de RLS | — | **408** em 203 tabelas |
@@ -109,8 +109,9 @@ Encontrados **por teste**, não por leitura. Os que mais importam:
 | 12 | `archived → monitoring` não exigia motivo | reabrir projeto arquivado é exceção e precisa ser explicada |
 | 13 | 92 chaves estrangeiras de caminho de acesso sem índice | varredura de tabela inteira no filtro de inquilino e no `ON DELETE CASCADE` |
 | 14 | Feed do financiador a 3.126 ms, com ~10 idas ao banco por candidato | inutilizável em volume |
+| 15 | **O empacotador levaria o despejo do banco de desenvolvimento para dentro do ZIP** | `scripts/backup.sh` escreve em `backups/`, que não estava excluído em `collect()` nem no `.gitignore`. O pacote de entrega sairia com o dado de quem usou o ambiente. A regra "sem dado local no pacote" estava sendo cumprida por sorte de ordem: o ZIP é construído antes de alguém rodar o backup. Agora `backups/` e os sufixos de despejo (`.dump`, `.bak`, `.tar`, `.gz`, …) estão excluídos nos dois lugares, **e há teste de arquitetura** que falha se algum dado local ou arquivo compactado voltar a entrar |
 
-Os outros nove são do mesmo tipo: erro que só aparece quando alguém executa de verdade.
+Os outros oito são do mesmo tipo: erro que só aparece quando alguém executa de verdade.
 
 ## 6. Testes acrescentados
 
@@ -122,6 +123,7 @@ Os outros nove são do mesmo tipo: erro que só aparece quando alguém executa d
 | `test_v0150_upgrade.py` | 10 | atualização v0.12.1 → v0.15.0 com dado dentro, e esquema **idêntico** ao criado do zero |
 | `test_e2e_v0150_journeys.py` | 8 | as 8 jornadas de ponta a ponta |
 | `test_e2e_v0150_web.py` | 6 | navegador real: página limpa, ideia→projeto, bloqueio visível, recusa visível, desconhecido separado, indisponibilidade declarada |
+| `test_architecture.py` (2 novos) | 2 | o pacote de entrega **não leva despejo de banco, dado local nem arquivo compactado** |
 | `test_v0150_performance.py` | 7 | volume de alvo, orçamento de tempo, detector de N+1, `EXPLAIN` sem varredura sequencial |
 
 A varredura de rotas de escrita merece nota: ela percorre o **registro de rotas** e chama cada rota de escrita com

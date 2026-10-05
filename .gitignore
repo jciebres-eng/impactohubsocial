@@ -6,3 +6,7 @@ dist-release/
 *.zip
 data/outbox/
 data/storage/
+# dump de banco é dado local: nunca vai para o repositório nem para o pacote de entrega
+backups/
+*.dump
+*.dump.sha256

@@ -17,7 +17,7 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 - **Indicadores por nível de resultado**: `indicator_catalog.result_kind` (`output`/`outcome`/`impact`), com comentário na coluna: "Meta atingida NÃO é impacto".
 - **51 rotas novas** (625 operações) e **13 telas funcionais** (`web/src/pages/core.tsx`) — sem nenhuma decisão de design, de propósito.
 - `migrations/0013_v0150_core_product.sql` (15 tabelas novas), `0014_v0150_platform_templates.sql` (modelos da plataforma + correções), `0015_v0150_fk_indexes.sql` (92 índices).
-- **+107 testes (671 no total)**: núcleo (39), invariantes (21), isolamento (16), caminho de atualização (10), jornadas de ponta a ponta (8), navegador (6), volume (7, em passo próprio).
+- **+109 testes (673 no total)**: núcleo (39), invariantes (21), isolamento (16), caminho de atualização (10), jornadas de ponta a ponta (8), navegador (6), volume (7, em passo próprio).
 - Documentos: `CORE_PRODUCT_ARCHITECTURE.md`, `MATCH_ENGINE_FINAL.md`, `DIAGNOSTIC_ENGINE.md`, `PROJECT_LIFECYCLE.md`, `DOCUMENT_ASSEMBLY.md`, `LONGITUDINAL_TRACKING.md`, `KEY_ROTATION.md`, `SIGNATURE_VALIDATION_MATRIX.md`, `EXTERNAL_DEPENDENCIES.md`, `HOMOLOGATION_MATRIX.md`, `DATA_RETENTION_MATRIX.md`, `DATABASE_INTEGRITY_REPORT.md`, `SECURITY_FINAL_CHECKLIST.md`, `PERFORMANCE_REPORT.md`, `RELEASE_READINESS.md`, `FINAL_PRE_DESIGN_HARDENING_REPORT.md`. `DESIGN_HANDOFF.md` ganhou a seção 13 com os **fluxos A–I** e os **20 invariantes de design**.
 ### Alterado
 - **Consolidação dos ODS**: `sdg_goals`, criada por engano na v0.14.0, foi **REMOVIDA**; `ods_goals` (que existe desde a 0001 e é referenciada por `indicator_catalog` e `ods_targets`) ganhou `code`, `name_en`, `color_hex` e `active`. `/v1/taxonomy` passou a `/v1/impact-taxonomy` (já existia `/v1/meta/taxonomy` com outro significado).
@@ -38,6 +38,7 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 - **Campo opcional em branco** na interface enviava `""` e o servidor recusava com erro de padrão de formato.
 - **92 chaves estrangeiras de caminho de acesso sem índice** (`org_id`, `project_id`, `application_id`, …): varredura de tabela inteira no filtro de inquilino e no `ON DELETE CASCADE`.
 - Todos os 35 `except Exception` em `backend/impacto` passaram a ter comentário dizendo por quê.
+- **O empacotador levaria o despejo do banco de desenvolvimento para dentro do ZIP**: `scripts/backup.sh` escreve em `backups/`, que não estava excluído nem em `collect()` nem no `.gitignore`. O pacote sairia com o dado de quem usou o ambiente. `backups/` e os sufixos de despejo (`.dump`, `.bak`, `.tar`, `.gz`, …) passaram a ser excluídos nos dois lugares, e **dois testes de arquitetura** falham se dado local ou arquivo compactado voltar a entrar.
 
 ## [0.14.0] — 2026-10-05 — Trust, Identity & Digital Signature (cumulativo; snapshot do v0.13.0 em `history/v0.13.0/`)
 ### Adicionado

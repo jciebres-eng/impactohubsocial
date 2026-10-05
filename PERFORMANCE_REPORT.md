@@ -78,7 +78,7 @@ mostrou FK de caminho de acesso sem índice. Ver `DATABASE_INTEGRITY_REPORT.md` 
 
 | | Antes da 0015 | Depois |
 |---|---|---|
-| Suíte completa (671 testes, muita escrita) | 268 s | 268 s |
+| Suíte completa (673 testes, muita escrita) | 268 s | 268 s |
 
 Nesta escala, o custo é indistinguível do ruído. Em volume de produção com escrita intensa, 92 índices têm custo
 real — e é por isso que a regra foi restritiva (só coluna de inquilino ou de pai percorrido), e não "índice em toda

@@ -107,7 +107,7 @@ A migração `0015_v0150_fk_indexes.sql` criou os 92 índices. **Regra aplicada*
 percorrido pela aplicação. Chave para `users` (`created_by`, `reviewed_by`, `approved_by`…) **não** entrou: a
 aplicação não lista "tudo que a pessoa X criou", e índice que ninguém usa é custo de escrita sem retorno.
 
-Resultado: de 460 para **552** índices, e `fk_without_index_hot` em **0**. A suíte completa (671 testes, que
+Resultado: de 460 para **552** índices, e `fk_without_index_hot` em **0**. A suíte completa (673 testes, que
 escrevem muito) manteve o mesmo tempo: 268 s antes, 268 s depois — o custo de escrita é irrelevante nesta escala.
 
 ## 5. Integridade referencial

@@ -13,7 +13,7 @@ O que falta é majoritariamente externo (contas, provedores, jurídico, tributá
 ## Semáforo por área
 | Área | Status | Evidência | Pendência para produção |
 |---|---|---|---|
-| Backend/API | GREEN | 625 operações; suíte verde (671 testes) | — |
+| Backend/API | GREEN | 625 operações; suíte verde (673 testes) | — |
 | Banco/migrações/RLS | GREEN | testes RLS (API e SQL direto), restore verificado | PostgreSQL gerenciado, PITR, criptografia em repouso |
 | Autenticação/sessões/MFA | GREEN | testes | WebAuthn opcional; política de senha corporativa |
 | SSO OIDC | YELLOW | IdP falso | testar com IdP real (Google/Entra/Keycloak) |

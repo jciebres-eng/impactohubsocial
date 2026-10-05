@@ -1,6 +1,6 @@
 # TEST_REPORT — v0.15.0 (Núcleo do produto, 2026-10-05)
 
-**v0.15.0: 671 testes, 0 falhas, 7 pulados** (564 do v0.14.0 + **107** do núcleo do produto). Log íntegro:
+**v0.15.0: 673 testes, 0 falhas, 7 pulados** (564 do v0.14.0 + **109** do núcleo do produto). Log íntegro:
 `docs/evidence/test_run_v0.15.0.log`. Lint: `docs/evidence/ruff_v0.15.0.log`. Desempenho:
 `docs/evidence/perf_v0.15.0.log`. Integridade do banco: `docs/evidence/db_integrity_v0.15.0.txt`.
 
@@ -21,13 +21,13 @@ cd backend && PERF_FULL=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest test
 |---|---|---|---|
 | Unidade (puros) | 39 | 49 | 55 |
 | API/integração (HTTP + PostgreSQL reais) | 395 | 471 | 554 |
-| Arquitetura (invariantes do código) | 6 | 8 | 8 |
+| Arquitetura (invariantes do código) | 6 | 8 | 10 |
 | E2E de navegador (Chromium) | 28 | 36 | 42 |
 | Volume (passo próprio) | — | — | 7 |
 | Caminho de atualização de banco | — | — | 10 |
-| **Total** | **468** | **564** | **671** |
+| **Total** | **468** | **564** | **673** |
 
-## Novos no v0.15.0 (107)
+## Novos no v0.15.0 (109)
 
 | Suíte | Testes | O que prova |
 |---|---|---|

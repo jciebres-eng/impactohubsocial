@@ -95,3 +95,32 @@ class ArchitectureTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReleasePackageTests(unittest.TestCase):
+    """O pacote de entrega não pode levar dado local nem despejo de banco.
+
+    Isto já aconteceu: `scripts/backup.sh` escreve em `backups/`, e `collect()` recolhia o `.dump` do banco de
+    desenvolvimento — com o dado de quem usou o ambiente — para dentro do ZIP. Passou a ser teste.
+    """
+
+    @staticmethod
+    def _collect() -> list[str]:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("make_release", ROOT / "scripts" / "make_release.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return [p.relative_to(mod.ROOT).as_posix() for p in mod.collect()]
+
+    def test_package_has_no_database_dump_or_local_data(self):
+        files = self._collect()
+        self.assertTrue(files, "collect() não devolveu arquivo nenhum")
+        forbidden = [f for f in files
+                     if f.startswith(("backups/", "data/", "dist-release/"))
+                     or f.endswith((".dump", ".bak", ".sqlite", ".sqlite3", ".db", ".tar", ".gz", ".zip",
+                                    ".pem", ".key", ".p12", ".jks", ".keystore"))]
+        self.assertEqual(forbidden, [], f"o pacote levaria dado local ou despejo de banco: {forbidden}")
+
+    def test_package_has_no_nested_archive(self):
+        self.assertEqual([f for f in self._collect() if f.endswith(".zip")], [],
+                         "ZIP dentro de ZIP é proibido pela regra de entrega")

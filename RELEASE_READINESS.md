@@ -6,7 +6,7 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 
 | # | Portão | Situação | Prova |
 |---|---|---|---|
-| 1 | Suíte completa verde, banco criado do zero | 🟢 | 671 testes, 0 falhas, 7 pulados · `docs/evidence/test_run_v0.15.0.log` |
+| 1 | Suíte completa verde, banco criado do zero | 🟢 | 673 testes, 0 falhas, 7 pulados · `docs/evidence/test_run_v0.15.0.log` |
 | 2 | Lint do backend sem apontamento | 🟢 | `ruff 0.16.8`, "All checks passed" · `docs/evidence/ruff_v0.15.0.log` |
 | 3 | Tipos do frontend sem erro | 🟢 | `tsc --noEmit` limpo |
 | 4 | Build do frontend | 🟢 | `node build.mjs` · 14 arquivos no pré-cache |
@@ -28,6 +28,9 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 | 20 | Dado de demonstração separado de dado de produção | 🟢 | ver §4 |
 | 21 | Documentação da versão completa e versionada | 🟢 | 16 documentos novos/atualizados + snapshot em `history/v0.14.0/` |
 | 22 | ZIP completo, sem ZIP aninhado, validado por extração | 🟢 | `scripts/make_release.py` + `--verify` |
+| 23 | **Pacote sem despejo de banco nem dado local**, garantido por teste | 🟢 | `test_architecture.ReleasePackageTests` (2 testes) |
+
+Portão 23 foi acrescentado depois de um achado real: `backups/` não estava excluído do empacotamento, e o despejo do banco de desenvolvimento entraria no ZIP na próxima construção. Corrigido no `.gitignore`, no empacotador e com teste.
 
 ## 2. Veredito por camada
 

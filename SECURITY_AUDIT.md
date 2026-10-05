@@ -124,7 +124,7 @@ Método: varredura automatizada de autorização sobre **todas as 475 operaçõe
 | Capacidade de evento, certificado, voucher de uso único, webhook duplicado e decisão de trial sob **concorrência real** | — | GREEN — 6 testes com threads; garantias por `FOR UPDATE`/`ON CONFLICT` no banco |
 | Injeção SQL/XSS em busca, chamado e checklist | — | GREEN — armazenado literalmente; nada reinterpretado; frontend não usa `innerHTML` |
 | Travessia de caminho em download | — | GREEN — token HMAC curto + conferência de `storage_key` contra a linha do documento |
-| Segredos no repositório | — | GREEN — varredura de padrões (a única ocorrência é o vetor público `AKIAIOSFODNN7EXAMPLE` da documentação da AWS, em teste) |
+| Segredos no repositório | — | GREEN — varredura de padrões; a única ocorrência é o vetor de exemplo público da documentação oficial da AWS (sufixo `…EXAMPLE`), usado no teste de assinatura SigV4 em `tests/test_unit.py` |
 | Segredos em log | — | GREEN — `_REDACT_KEYS` em `observability.py` oculta senha/token/segredo/cookie/código |
 | Pendente | YELLOW | pentest externo; auditoria de dependências (registries bloqueados neste ambiente); privilégio amplo do modo administrativo segue como disciplina de código revisada |
 

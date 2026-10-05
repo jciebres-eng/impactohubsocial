@@ -1,44 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.15.0] — 2026-10-05 — Núcleo do produto, endurecimento final pré-design (cumulativo; snapshot do v0.14.0 em `history/v0.14.0/`)
-### Adicionado
-- **Vocabulário comum de evidência** (`core/evidence.py`): 9 fontes, `verified` **derivado da fonte** (não dá para marcar declaração como verificada), frescura com meia-vida por tipo de dado, decaimento que reduz **confiança e não pontuação**, e `insufficient_data` como faixa própria de confiança (cobertura abaixo de 40% não vira "confiança baixa", vira "não dá para dizer").
-- **Ideia → projeto sem apagar a ideia**: `ideas` (5 estágios) e `projects.origin_idea_id`. A ideia continua registrada e aponta para o projeto; promover duas vezes responde 409. Ideia não consome cota de projeto; a promoção consome.
-- **Máquina de situações do projeto como DADO**: 17 situações e 58 transições em `project_status_graph`, com gatilho que recusa o que não está no grafo **inclusive em SQL direto e no contexto privilegiado**. Transição que exige motivo responde 422 sem ele; transição inválida responde 409 **dizendo para onde é possível ir**. As transições que o produto já fazia desde a v0.7.0 estão no grafo.
-- **Linha de tempo do projeto** reusando `ledger_entries` (append-only, encadeada por hash desde a 0002), com 20 tipos de entrada novos e verificação de integridade exposta na API. Nenhuma segunda tabela de histórico.
-- **Retratos comparáveis** (`project_snapshots`): estado canônico com hash, `ledger_seq`, e comparação campo a campo (`changed`/`added`/`removed`). O mesmo estado produz o mesmo hash.
-- **Registro de riscos** (`project_risks`) com `declared` × `system_identified` separados, 8 regras publicadas (`risk-rules@1.0`), severidade por matriz, varredura **idempotente** que auto-resolve o que deixou de valer e **nunca reabre** risco encerrado pela organização. Encerrar exige motivo.
-- **Diagnóstico longitudinal** (`diagnostic-engine@1.0.0`): 20 lacunas em 8 dimensões ponderadas; saída separada em FATO / INFERÊNCIA / RECOMENDAÇÃO / **DESCONHECIDO**; versões imutáveis com `what_changed` calculado pelo servidor; publicar sem mudança não cria versão; lacuna gera ação e ação fecha quando a lacuna fecha.
-- **Montagem de documento** (`document-assembly@1.0.0`): modelo publicado imutável, campo derivado por **lista fechada** de 14 caminhos de domínio, completude e bloqueio calculados pelo servidor, **recusa explicada** ao gerar incompleto (409 com o que falta), geração para PDF/DOCX/ODT no cofre com hash, e revisão com **quatro olhos**. Três modelos da plataforma publicados, cada um com a fonte declarada.
-- **Inventário e rotação de chave** (`core/keys.py`): impressão digital de 16 hex (a chave **nunca** é gravada), estados `active`/`decrypt_only`/`retired`, recifragem em lote idempotente e auditada. KMS/HSM **declarado ausente** na API e na tela.
-- **Provedores de assinatura com estado REAL** (`signature_providers`): `platform_advanced` em produção (avançada, selo HMAC), `govbr` e `icp_brasil` **indisponíveis** com a dependência nomeada. Gatilho no banco recusa assinatura com provedor fora de produção. Política de assinatura por tipo de documento, que **recusa** exigir nível que nenhum provedor entrega.
-- **Match `match-engine@1.2.0`**: evidência nos sinais, confiança ajustada por frescura, faixa de confiança, **quatro versões** (motor/pesos/regras/taxonomia) viajando com cada resultado, e **retorno humano** (`match_feedback`, 7 valores, um por avaliação) com base de calibração sem dado pessoal — **sem treino automático**.
-- **Indicadores por nível de resultado**: `indicator_catalog.result_kind` (`output`/`outcome`/`impact`), com comentário na coluna: "Meta atingida NÃO é impacto".
-- **51 rotas novas** (625 operações) e **13 telas funcionais** (`web/src/pages/core.tsx`) — sem nenhuma decisão de design, de propósito.
-- `migrations/0013_v0150_core_product.sql` (15 tabelas novas), `0014_v0150_platform_templates.sql` (modelos da plataforma + correções), `0015_v0150_fk_indexes.sql` (92 índices).
-- **+107 testes (671 no total)**: núcleo (39), invariantes (21), isolamento (16), caminho de atualização (10), jornadas de ponta a ponta (8), navegador (6), volume (7, em passo próprio).
-- Documentos: `CORE_PRODUCT_ARCHITECTURE.md`, `MATCH_ENGINE_FINAL.md`, `DIAGNOSTIC_ENGINE.md`, `PROJECT_LIFECYCLE.md`, `DOCUMENT_ASSEMBLY.md`, `LONGITUDINAL_TRACKING.md`, `KEY_ROTATION.md`, `SIGNATURE_VALIDATION_MATRIX.md`, `EXTERNAL_DEPENDENCIES.md`, `HOMOLOGATION_MATRIX.md`, `DATA_RETENTION_MATRIX.md`, `DATABASE_INTEGRITY_REPORT.md`, `SECURITY_FINAL_CHECKLIST.md`, `PERFORMANCE_REPORT.md`, `RELEASE_READINESS.md`, `FINAL_PRE_DESIGN_HARDENING_REPORT.md`. `DESIGN_HANDOFF.md` ganhou a seção 13 com os **fluxos A–I** e os **20 invariantes de design**.
-### Alterado
-- **Consolidação dos ODS**: `sdg_goals`, criada por engano na v0.14.0, foi **REMOVIDA**; `ods_goals` (que existe desde a 0001 e é referenciada por `indicator_catalog` e `ods_targets`) ganhou `code`, `name_en`, `color_hex` e `active`. `/v1/taxonomy` passou a `/v1/impact-taxonomy` (já existia `/v1/meta/taxonomy` com outro significado).
-- **Feed do financiador 1,9× mais rápido** (3.126 ms → 1.615 ms com 10.000 projetos): elegibilidade dura que cabe em SQL entra no `WHERE`, carga em lote (`load_projects` + `project_funding_many`), memória por organização na requisição, e janela de pontuação de 200 **declarada na resposta**.
-- `GET /v1/admin/institucional/documents` aceita filtro por organização e por tipo (a fila cresce com o uso).
-- `migrate()` aceita `upto=` para preparar um banco em versão anterior e conferir o caminho de atualização.
-- `archived → monitoring` passou a **exigir motivo**: reabrir projeto arquivado é exceção.
-- Identidade do arquivo em `documents` (`sha256`, `size_bytes`, `storage_key`, `mime_type`) ficou **imutável para todo papel da aplicação**, privilegiado incluído.
-### Corrigido
-- **Lacuna de documento nunca fechava**: o diagnóstico usava as chaves `doc.estatuto` e `doc.ata_eleicao`, mas o tipo real no cofre é `estatuto_social` e `ata_eleicao_diretoria`. Por mais documento que a organização enviasse, a lacuna continuava aberta.
-- **Versão de diagnóstico nascia a cada segundo**: `generated_at` entrava no hash de comparação, então "congelar versão" criava versão nova mesmo sem nada ter mudado.
-- **Retorno de match escrevia na trilha do projeto**, expondo no histórico lido pela organização a decisão de um financiador terceiro. Removido.
-- **Orçamento `0` e público `0` contavam como "informado"** no diagnóstico.
-- **Evidência exigida bloqueava campo opcional em branco**, travando a geração para sempre.
-- `build_state` lia `projects.funded_cents`, coluna que não existe — a captação vem de `project_funding()`.
-- Promoção de ideia violava `projects.territory NOT NULL` quando a ideia não tinha território.
-- `EnvKeyProvider` não enxergava a chave realmente em uso (derivada do `SECRET_KEY` quando não há `FIELD_ENCRYPTION_KEY`): o inventário mostrava "nenhuma chave" com dado cifrado existindo.
-- **Campo opcional em branco** na interface enviava `""` e o servidor recusava com erro de padrão de formato.
-- **92 chaves estrangeiras de caminho de acesso sem índice** (`org_id`, `project_id`, `application_id`, …): varredura de tabela inteira no filtro de inquilino e no `ON DELETE CASCADE`.
-- Todos os 35 `except Exception` em `backend/impacto` passaram a ter comentário dizendo por quê.
-
 ## [0.14.0] — 2026-10-05 — Trust, Identity & Digital Signature (cumulativo; snapshot do v0.13.0 em `history/v0.13.0/`)
 ### Adicionado
 - **Verificação pública por terceiro** (`GET /v1/public/verify/{code}`, sem login): responde se o documento é genuíno, **qual versão foi assinada**, se a integridade permanece (hash declarado × arquivo recontado agora), quem assinou, carimbos e se está revogado. A página pública lê **somente** um registro público curado — nunca tabela privada. Código legível `IMP-XXXX-XXXX-XXXX` tolerante a digitação errada e **QR Code** gerado pela própria plataforma.

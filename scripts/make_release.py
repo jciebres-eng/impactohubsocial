@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log", "docs/evidence/perf_v0.15.0.log", "history/v0.14.0/test_run_v0.14.0.log", "history/v0.14.0/VERSION", "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -52,7 +52,28 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "DOCUMENT_FORMATS.md", "FINAL_TRUST_HARDENING_REPORT.md", "FINAL_TRUST_MANIFEST.json",
             "backend/migrations/0012_v0140_trust_layer.sql", "backend/tests/test_v0140_trust.py",
             "backend/tests/test_e2e_v0140_trust.py", "config/i18n.json",
-            "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/VERSION"]
+            "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/VERSION",
+            # v0.15.0 — núcleo do produto
+            "CORE_PRODUCT_ARCHITECTURE.md", "MATCH_ENGINE_FINAL.md", "DIAGNOSTIC_ENGINE.md", "PROJECT_LIFECYCLE.md",
+            "DOCUMENT_ASSEMBLY.md", "LONGITUDINAL_TRACKING.md", "KEY_ROTATION.md", "SIGNATURE_VALIDATION_MATRIX.md",
+            "EXTERNAL_DEPENDENCIES.md", "HOMOLOGATION_MATRIX.md", "DATA_RETENTION_MATRIX.md",
+            "DATABASE_INTEGRITY_REPORT.md", "SECURITY_FINAL_CHECKLIST.md", "PERFORMANCE_REPORT.md",
+            "RELEASE_READINESS.md", "FINAL_PRE_DESIGN_HARDENING_REPORT.md", "PRE_DESIGN_AUDIT.md",
+            "V0.15.0_FINAL_MANIFEST.json",
+            "backend/migrations/0013_v0150_core_product.sql", "backend/migrations/0014_v0150_platform_templates.sql",
+            "backend/migrations/0015_v0150_fk_indexes.sql",
+            "backend/impacto/core/evidence.py", "backend/impacto/core/lifecycle.py",
+            "backend/impacto/core/diagnostic.py", "backend/impacto/core/assembly.py", "backend/impacto/core/keys.py",
+            "backend/impacto/api/lifecycle_routes.py", "backend/impacto/api/diagnostic_routes.py",
+            "backend/impacto/api/assembly_routes.py", "backend/impacto/api/core_schemas.py",
+            "backend/tests/test_v0150_core.py", "backend/tests/test_v0150_invariants.py",
+            "backend/tests/test_v0150_security.py", "backend/tests/test_v0150_upgrade.py",
+            "backend/tests/test_v0150_performance.py", "backend/tests/test_e2e_v0150_journeys.py",
+            "backend/tests/test_e2e_v0150_web.py", "web/src/pages/core.tsx",
+            "scripts/db_integrity_report.py",
+            "docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log",
+            "docs/evidence/perf_v0.15.0.log", "docs/evidence/db_integrity_v0.15.0.txt",
+            "history/v0.14.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

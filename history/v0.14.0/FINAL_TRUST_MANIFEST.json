@@ -1,0 +1,261 @@
+{
+  "version": "0.14.0",
+  "stage": "TRUST, IDENTITY & DIGITAL SIGNATURE",
+  "git_commit": "fa3626a2e15613ad40b8fd44b996ffff61a75648",
+  "git_branch": "chore/trust-identity-signature",
+  "previous_baseline_tag": "v0.12.1-final-baseline",
+  "generated_at": "2026-10-05T20:09:42+00:00",
+  "build_status": "PASS",
+  "lint_status": "PASS",
+  "typecheck_status": "PASS",
+  "test_status": "PASS",
+  "e2e_status": "PASS",
+  "security_status": "PARTIAL",
+  "dependency_audit_status": "BLOCKED",
+  "database_status": "PASS",
+  "migration_status": "PASS",
+  "accessibility_status": "PARTIAL",
+  "zip_filename": "IMPACTO_TRUST_BASELINE.zip",
+  "tests": {
+    "total": 564,
+    "passed": 564,
+    "failed": 0,
+    "skipped": 0,
+    "unit": 49,
+    "api_integration": 471,
+    "architecture": 8,
+    "e2e_browser": 36,
+    "new_in_this_stage": 96,
+    "evidence": "docs/evidence/test_run_v0.14.0.log",
+    "duration_seconds": 260.5
+  },
+  "api": {
+    "operations": 574,
+    "new_in_this_stage": 63,
+    "spec": "docs/openapi.json",
+    "parity_checked": true,
+    "breaking_change": "POST /v1/signatures passou a exigir o campo 'code' (segunda camada da assinatura)"
+  },
+  "database": {
+    "tables": 191,
+    "new_in_this_stage": 26,
+    "migrations": 12,
+    "rls_on_all_tables_except": [
+      "schema_migrations"
+    ],
+    "created_from_scratch_each_test_run": true,
+    "incremental_migration_verified": true
+  },
+  "trust": {
+    "public_verification": {
+      "implemented": true,
+      "requires_login": false,
+      "answers": [
+        "genuine",
+        "signed_version_vs_current",
+        "integrity",
+        "signers",
+        "revocation"
+      ],
+      "reads_private_tables": false
+    },
+    "signature": {
+      "layers": 2,
+      "factors": [
+        "password_reauth",
+        "single_use_code_bound_to_content_hash"
+      ],
+      "level": "advanced_electronic_signature",
+      "qualified": false,
+      "append_only": true,
+      "revocation": "new_fact_never_update"
+    },
+    "custody_chain": {
+      "per_object": true,
+      "hash_chained": true,
+      "append_only": true,
+      "rewritable_by_application": false,
+      "rewritable_by_system_context": false
+    },
+    "identity_levels": [
+      "none",
+      "email",
+      "phone",
+      "document",
+      "professional",
+      "biometric"
+    ],
+    "councils_catalogued": 20,
+    "not_implemented": {
+      "icp_brasil_signature": "EXTERNAL_DEPENDENCY + REQUIRES_HOMOLOGATION",
+      "govbr_signature": "EXTERNAL_AUTHORIZATION_REQUIRED",
+      "biometrics_and_liveness": "EXTERNAL_DEPENDENCY (no biometric data is stored)",
+      "rfc3161_timestamp": "EXTERNAL_DEPENDENCY (trusted timestamping authority)",
+      "sms_channel": "NOT_IMPLEMENTED (no SMS provider)",
+      "online_council_lookup": "NOT_IMPLEMENTED (no public contracted API)",
+      "wopi_online_editing": "EXTERNAL_DEPENDENCY (document server)",
+      "un_sdg_emblems": "EXTERNAL_AUTHORIZATION_REQUIRED (protected trademark; not distributed)"
+    },
+    "refuses_instead_of_simulating": true
+  },
+  "formats": {
+    "export": [
+      "pdf",
+      "docx",
+      "odt",
+      "xlsx",
+      "ods",
+      "xml",
+      "csv",
+      "json"
+    ],
+    "import_text_extraction": [
+      "docx",
+      "odt",
+      "pdf",
+      "txt",
+      "csv",
+      "json",
+      "xml"
+    ],
+    "written_by_hand": [
+      "docx",
+      "xlsx",
+      "odt",
+      "ods",
+      "xml"
+    ],
+    "reason": "npm/PyPI registries blocked in this environment",
+    "validated_by": "zip reopened and XML asserted in tests",
+    "not_validated_in": [
+      "Microsoft Office",
+      "LibreOffice"
+    ]
+  },
+  "qr_code": {
+    "own_implementation": true,
+    "standard": "ISO/IEC 18004",
+    "versions": "1-10",
+    "ec_level": "M",
+    "validated_by": "round-trip through our own encoder/decoder + structural assertions",
+    "not_validated_with": "commercial QR reader"
+  },
+  "i18n": {
+    "locales": [
+      "pt-BR",
+      "en",
+      "es"
+    ],
+    "source_locale": "pt-BR",
+    "keys_per_locale": 98,
+    "coverage": {
+      "pt-BR": "100% da interface",
+      "en": "núcleo",
+      "es": "núcleo"
+    },
+    "same_keys_across_locales_enforced_by_test": true
+  },
+  "security": {
+    "proven_by_test": [
+      "self_promotion_blocked",
+      "two_layer_signature",
+      "code_bound_to_hash",
+      "code_single_use",
+      "custody_chain_immutable",
+      "tampered_file_detected",
+      "no_personal_data_in_public_page",
+      "cross_party_signature_forgery",
+      "agreement_hash_frozen",
+      "quota_oversell",
+      "fee_table_without_source",
+      "idor_cross_tenant",
+      "xml_injection",
+      "formula_injection"
+    ],
+    "by_inspection_only": [
+      "log_injection",
+      "docx_odt_reading"
+    ],
+    "residual_risks": [
+      "server_key_rotation_invalidates_old_seals"
+    ],
+    "not_performed": [
+      "pentest",
+      "dependency_audit",
+      "load_test"
+    ],
+    "bug_found_and_fixed": "quota capacity trigger passed silently: SELECT FOR UPDATE applies the UPDATE policy, the row vanished for the backer and the resulting NULLs voided every check (negative quotas possible)"
+  },
+  "commands": {
+    "test": "cd backend && TEST_ADMIN_DATABASE_URL=\"postgresql://postgres@127.0.0.1:5432/postgres\" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v",
+    "lint": "cd backend && ruff check impacto tests",
+    "typecheck": "cd web && node node_modules/typescript/bin/tsc -p tsconfig.offline.json --noEmit",
+    "build": "cd web && node build.mjs",
+    "release": "python3 scripts/make_release.py --name IMPACTO_TRUST_BASELINE.zip",
+    "verify_release": "python3 scripts/make_release.py --verify <dir>"
+  },
+  "blocked": {
+    "dependency_audit": {
+      "npm": "403 Forbidden (registry.npmjs.org)",
+      "pip": "No matching distribution found",
+      "impact": "nenhuma afirmacao sobre vulnerabilidades de dependencias",
+      "required_in_ci": [
+        "npm audit --omit=dev",
+        "pip-audit -r backend/requirements.txt"
+      ]
+    },
+    "manual_validation_required": [
+      "abrir docx/xlsx/odt/ods no Microsoft Office e no LibreOffice",
+      "ler o QR Code com leitor comercial"
+    ],
+    "external": [
+      "certificado ICP-Brasil + biblioteca PAdES/CAdES",
+      "credenciamento gov.br",
+      "provedor de biometria e prova de vida",
+      "Autoridade de Carimbo de Tempo",
+      "provedor de SMS",
+      "servidor WOPI",
+      "autorizacao de uso dos emblemas da ONU",
+      "tabelas oficiais de honorarios dos conselhos",
+      "gerenciador de segredos",
+      "decisao juridica sobre retencao",
+      "pentest",
+      "teste de carga"
+    ]
+  },
+  "classification": {
+    "TECHNICAL_BASELINE": "GREEN",
+    "TRUST_FOUNDATION": "GREEN",
+    "PUBLIC_VERIFICATION": "GREEN",
+    "TWO_LAYER_SIGNATURE": "GREEN",
+    "CUSTODY_AND_INTEGRITY": "GREEN",
+    "IDENTITY_AND_CREDENTIALS": "GREEN",
+    "SECURITY": "GREEN (3 YELLOW declarados; pentest pendente)",
+    "TESTS": "GREEN",
+    "DESIGN_READINESS": "GREEN",
+    "OFFICE_FORMATS_AND_QR": "YELLOW (validacao manual pendente)",
+    "LGPD": "YELLOW (VALIDACAO JURIDICA NECESSARIA: retencao)",
+    "SECRETS_AND_KEY_ROTATION": "YELLOW (DEPENDENCIA DE INFRAESTRUTURA)",
+    "QUALIFIED_SIGNATURE": "RED (AUTORIZACAO EXTERNA + HOMOLOGACAO)",
+    "BIOMETRICS_SMS_TSA": "RED (NAO IMPLEMENTADOS - recusam explicitamente)",
+    "ONLINE_OFFICE_EDITING": "RED (DEPENDENCIA EXTERNA: servidor WOPI)",
+    "PRODUCTION_READINESS": "YELLOW (piloto controlado)",
+    "STORE_READINESS": "RED (apps nao construidos)"
+  },
+  "documents": [
+    "TRUST_INVENTORY.md",
+    "TRUST_ARCHITECTURE.md",
+    "TRUST_IDENTITY.md",
+    "DIGITAL_SIGNATURE.md",
+    "PUBLIC_VERIFICATION.md",
+    "TRUST_SECURITY.md",
+    "TRUST_TESTING.md",
+    "SDG_ESG_TAXONOMY.md",
+    "I18N.md",
+    "DOCUMENT_FORMATS.md",
+    "FINAL_TRUST_HARDENING_REPORT.md",
+    "DESIGN_HANDOFF.md"
+  ],
+  "note": "git_commit identifica o commit do CONTEUDO. O commit seguinte adiciona apenas artefatos de release.",
+  "zip_note": "O digest do pacote fica em dist-release/IMPACTO_TRUST_BASELINE.zip.sha256. A integridade do CONTEUDO e verificavel por RELEASE_MANIFEST.sha256 com 'python3 scripts/make_release.py --verify <dir>'."
+}

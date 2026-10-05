@@ -16,7 +16,7 @@ import threading
 import time
 from collections import defaultdict
 from contextvars import ContextVar
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 trace_id_var: ContextVar[str] = ContextVar("trace_id", default="")
@@ -76,7 +76,7 @@ def _redact(obj):
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         base = {
-            "ts": datetime.fromtimestamp(record.created, timezone.utc).isoformat(timespec="milliseconds"),
+            "ts": datetime.fromtimestamp(record.created, UTC).isoformat(timespec="milliseconds"),
             "level": record.levelname.lower(), "logger": record.name, "msg": record.getMessage(),
             "request_id": request_id_var.get(), **_SERVICE,
         }
@@ -146,7 +146,7 @@ class Metrics:
         return "{" + ",".join(f'{k}="{str(v).replace(chr(92), chr(92)*2).replace(chr(34), chr(92)+chr(34))}"' for k, v in items) + "}"
 
     def render(self) -> str:
-        out = [f"# TYPE impacto_uptime_seconds gauge", f"impacto_uptime_seconds {time.time() - self.started:.0f}"]
+        out = ["# TYPE impacto_uptime_seconds gauge", f"impacto_uptime_seconds {time.time() - self.started:.0f}"]
         with self._lock:
             names = sorted({k[0] for k in self.counters})
             for n in names:
@@ -164,7 +164,7 @@ class Metrics:
                 for (name, labels), (buckets, total, count) in sorted(self.hist.items()):
                     if name != n:
                         continue
-                    for b, c in zip(_BUCKETS, buckets):
+                    for b, c in zip(_BUCKETS, buckets, strict=False):
                         out.append(f"{n}_bucket{self._lbl(labels, [('le', b)])} {c}")
                     out.append(f"{n}_bucket{self._lbl(labels, [('le', '+Inf')])} {count}")
                     out.append(f"{n}_sum{self._lbl(labels)} {total:.6f}")

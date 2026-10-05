@@ -1,7 +1,7 @@
 """Rotas de autenticação, conta, sessões e equipe."""
 from __future__ import annotations
 
-from ..http import ApiError, Ctx, json_response, route
+from ..http import ApiError, Ctx, route
 from ..services import auth
 from . import schemas as S
 

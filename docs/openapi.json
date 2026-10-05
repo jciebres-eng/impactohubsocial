@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -15402,6 +15402,4571 @@
      }
     ]
    }
+  },
+  "/v1/help/search": {
+   "get": {
+    "summary": "Busca híbrida (texto + similaridade + vocabulário de tópicos + perfil + tela). Pública para conteúdo público; autenticada amplia por perfil. Sem embeddings.",
+    "operationId": "get_knowledge_routes_help_search",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 200,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "ctx",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_.-]{2,80}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Ctx"
+      }
+     },
+     {
+      "name": "type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "article",
+          "faq",
+          "resource",
+          "course",
+          "event"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Type"
+      }
+     },
+     {
+      "name": "audience",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "osc",
+          "company",
+          "individual",
+          "provider",
+          "government"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Audience"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 60,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Category"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 20,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/context": {
+   "get": {
+    "summary": "Ajuda contextual de uma tela/campo (artigos, FAQs e modelos mapeados)",
+    "operationId": "get_knowledge_routes_help_context",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "key",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[a-z0-9_.-]{2,80}$",
+       "title": "Key",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/categories": {
+   "get": {
+    "summary": "Categorias com contagem de conteúdo publicado visível para o perfil",
+    "operationId": "get_knowledge_routes_help_categories",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP"
+   }
+  },
+  "/v1/help/articles": {
+   "get": {
+    "summary": "Lista de guias/artigos publicados (visibilidade por perfil)",
+    "operationId": "get_knowledge_routes_help_articles",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Category"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/articles/{slug}": {
+   "get": {
+    "summary": "Guia/artigo com passos, checklist, erros comuns, documentos necessários, ação e conteúdos relacionados",
+    "operationId": "get_knowledge_routes_help_article",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/faqs": {
+   "get": {
+    "summary": "FAQ inteligente: por categoria, perfil ou tela; com votos de utilidade",
+    "operationId": "get_knowledge_routes_help_faqs",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 200,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "ctx",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_.-]{2,80}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Ctx"
+      }
+     },
+     {
+      "name": "type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "article",
+          "faq",
+          "resource",
+          "course",
+          "event"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Type"
+      }
+     },
+     {
+      "name": "audience",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "osc",
+          "company",
+          "individual",
+          "provider",
+          "government"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Audience"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 60,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Category"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 20,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/resources": {
+   "get": {
+    "summary": "Biblioteca de documentos, modelos, checklists, vídeos e relatórios publicados",
+    "operationId": "get_knowledge_routes_help_resources",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "template",
+          "document",
+          "checklist",
+          "video",
+          "report",
+          "bulletin",
+          "spreadsheet",
+          "other"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 60,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Category"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 120,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/resources/{slug}": {
+   "get": {
+    "summary": "Recurso da biblioteca (com modelo preenchível, checklist e versões anteriores)",
+    "operationId": "get_knowledge_routes_help_resource",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/resources/{resource_id}/download-url": {
+   "post": {
+    "summary": "URL temporária (5 min) do arquivo do recurso; só recurso publicado e visível; arquivo já passou por varredura antivírus",
+    "operationId": "post_knowledge_routes_help_resource_download",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "resource_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/resources/{resource_id}/use-template": {
+   "post": {
+    "summary": "Preenche um modelo e cria um rascunho (drafts) da organização — conteúdo gerado do modelo, sem IA",
+    "operationId": "post_knowledge_routes_use_template",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "resource_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TemplateUseIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/assistant": {
+   "post": {
+    "summary": "Assistente ancorado: responde SÓ com conteúdo publicado, cita fontes; sem base suficiente recusa e oferece chamado. Não usa IA generativa.",
+    "operationId": "post_knowledge_routes_help_assistant",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 60/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssistantIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/feedback": {
+   "post": {
+    "summary": "\"Este conteúdo ajudou?\" — 'Não ajudou' exige o motivo",
+    "operationId": "post_knowledge_routes_help_feedback",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 200/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FeedbackIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/checklists": {
+   "put": {
+    "summary": "Salva o progresso de um checklist (por pessoa e, opcionalmente, por projeto)",
+    "operationId": "put_knowledge_routes_checklist_put",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChecklistIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "checklist get",
+    "operationId": "get_knowledge_routes_checklist_get",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "title": "Scope",
+       "type": "string"
+      }
+     },
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/start": {
+   "get": {
+    "summary": "Comece aqui: jornada por tipo de organização com % de prontidão calculado por dados reais",
+    "operationId": "get_knowledge_routes_help_start",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/help/pending": {
+   "get": {
+    "summary": "O que falta para eu avançar? (pendências derivadas de dados reais)",
+    "operationId": "get_knowledge_routes_help_pending",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/help/activities": {
+   "get": {
+    "summary": "Minhas atividades: chamados, cursos, eventos, certificados e solicitações",
+    "operationId": "get_knowledge_routes_help_activities",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/help/recommendations": {
+   "get": {
+    "summary": "Próximos conteúdos recomendados (etapas faltantes, cursos em andamento, eventos); plano não influencia",
+    "operationId": "get_knowledge_routes_help_recs",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/help/events": {
+   "get": {
+    "summary": "Agenda de eventos (vagas restantes) e gravações",
+    "operationId": "get_knowledge_routes_events",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "when",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "upcoming",
+       "enum": [
+        "upcoming",
+        "past",
+        "all"
+       ],
+       "title": "When",
+       "type": "string"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "webinar",
+          "training",
+          "workshop",
+          "oficina",
+          "mentoring",
+          "demo",
+          "institutional",
+          "community"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/events/mine": {
+   "get": {
+    "summary": "Minhas inscrições",
+    "operationId": "get_knowledge_routes_events_mine",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/help/events/{slug}": {
+   "get": {
+    "summary": "Evento (link de acesso só para inscritas; materiais/gravação após o evento)",
+    "operationId": "get_knowledge_routes_event_get",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/events/{event_id}/register": {
+   "post": {
+    "summary": "Inscrição (lista de espera quando lotado)",
+    "operationId": "post_knowledge_routes_event_register",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 60/3600s por IP",
+    "parameters": [
+     {
+      "name": "event_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "delete": {
+    "summary": "Cancela a inscrição e promove a lista de espera",
+    "operationId": "delete_knowledge_routes_event_cancel",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "event_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/events/{event_id}/rate": {
+   "post": {
+    "summary": "Avalia o evento (só quem participou)",
+    "operationId": "post_knowledge_routes_event_rate",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "event_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EventRateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/courses": {
+   "get": {
+    "summary": "Cursos publicados e trilhas por perfil",
+    "operationId": "get_knowledge_routes_courses",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP"
+   }
+  },
+  "/v1/help/courses/{slug}": {
+   "get": {
+    "summary": "Curso: módulos, aulas e progresso (quando autenticada)",
+    "operationId": "get_knowledge_routes_course_get",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/courses/{slug}/enroll": {
+   "post": {
+    "summary": "course enroll",
+    "operationId": "post_knowledge_routes_course_enroll",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/lessons/{lesson_id}": {
+   "get": {
+    "summary": "Conteúdo da aula (quiz sem gabarito)",
+    "operationId": "get_knowledge_routes_lesson_get",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/lessons/{lesson_id}/complete": {
+   "post": {
+    "summary": "Conclui a aula; quiz é corrigido no servidor (gabarito nunca sai do banco)",
+    "operationId": "post_knowledge_routes_lesson_complete",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 300/3600s por IP",
+    "parameters": [
+     {
+      "name": "lesson_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LessonDoneIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/courses/{slug}/certificate": {
+   "post": {
+    "summary": "Emite o certificado de conclusão (não oficial) quando todas as aulas foram concluídas",
+    "operationId": "post_knowledge_routes_certificate",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/certificates/{code}": {
+   "get": {
+    "summary": "Verifica a autenticidade de um certificado de conclusão pelo código",
+    "operationId": "get_knowledge_routes_certificate_verify",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 60/3600s por IP",
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/support/tickets": {
+   "post": {
+    "summary": "Abre chamado (categoria, contexto da tela e anexos já enviados em Documentos). Prioridade/SLA são definidos pela equipe.",
+    "operationId": "post_knowledge_routes_ticket_create",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 30/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TicketIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "tickets mine",
+    "operationId": "get_knowledge_routes_tickets_mine",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/support/tickets/{ticket_id}": {
+   "get": {
+    "summary": "ticket get",
+    "operationId": "get_knowledge_routes_ticket_get",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/support/tickets/{ticket_id}/messages": {
+   "post": {
+    "summary": "ticket reply",
+    "operationId": "post_knowledge_routes_ticket_reply",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TicketReplyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/support/tickets/{ticket_id}/rate": {
+   "post": {
+    "summary": "Avalia o atendimento (após resolvido)",
+    "operationId": "post_knowledge_routes_ticket_rate",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TicketRateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/support/tickets/{ticket_id}/close": {
+   "post": {
+    "summary": "Encerra um chamado já resolvido",
+    "operationId": "post_knowledge_routes_ticket_close",
+    "tags": [
+     "support"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/trial-requests": {
+   "post": {
+    "summary": "Solicita teste de módulos/ambiente. Não concede acesso: a equipe decide (com motivo) e usa o mecanismo de trial existente.",
+    "operationId": "post_knowledge_routes_trial_request",
+    "tags": [
+     "trial"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 10/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TrialRequestIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "trial requests mine",
+    "operationId": "get_knowledge_routes_trial_requests_mine",
+    "tags": [
+     "trial"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/help/partnerships": {
+   "post": {
+    "summary": "Pedido de parceria (formulário público; consentimento obrigatório para contato)",
+    "operationId": "post_knowledge_routes_partnership_create",
+    "tags": [
+     "partnerships"
+    ],
+    "security": [],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 5/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PartnershipIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/demo-requests": {
+   "post": {
+    "summary": "Agendamento de demonstração (consentimento obrigatório)",
+    "operationId": "post_knowledge_routes_demo_create",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 5/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DemoIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/newsletter": {
+   "post": {
+    "summary": "Inscrição no boletim com confirmação por e-mail (duplo opt-in). Resposta idêntica exista ou não a inscrição (sem enumeração).",
+    "operationId": "post_knowledge_routes_newsletter",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 10/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NewsletterIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/newsletter/confirm": {
+   "post": {
+    "summary": "newsletter confirm",
+    "operationId": "post_knowledge_routes_newsletter_confirm",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 30/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TokenIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/newsletter/unsubscribe": {
+   "post": {
+    "summary": "newsletter unsubscribe",
+    "operationId": "post_knowledge_routes_newsletter_unsubscribe",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 30/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TokenIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/notifications/prefs": {
+   "get": {
+    "summary": "Preferências de notificação por grupo (app e e-mail)",
+    "operationId": "get_knowledge_routes_prefs_get",
+    "tags": [
+     "notifications"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   },
+   "put": {
+    "summary": "prefs put",
+    "operationId": "put_knowledge_routes_prefs_put",
+    "tags": [
+     "notifications"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PrefsIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/help/sitemap": {
+   "get": {
+    "summary": "Sitemap do conteúdo PÚBLICO indexável (exemplos/DEMO e conteúdo privado ficam de fora)",
+    "operationId": "get_knowledge_routes_sitemap",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP"
+   }
+  },
+  "/v1/admin/staff-roles": {
+   "get": {
+    "summary": "Papéis internos (editor, reviewer, support)",
+    "operationId": "get_content_admin_routes_staff_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   },
+   "post": {
+    "summary": "Concede papel interno (auditado)",
+    "operationId": "post_content_admin_routes_staff_grant",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StaffRoleIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/staff-roles/{user_id}/{role}": {
+   "delete": {
+    "summary": "Revoga papel interno",
+    "operationId": "delete_content_admin_routes_staff_revoke",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "user_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "role",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/overview": {
+   "get": {
+    "summary": "Painel editorial: itens por estado, aguardando revisão e conteúdo desatualizado",
+    "operationId": "get_content_admin_routes_overview",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/content/categories": {
+   "post": {
+    "summary": "category create",
+    "operationId": "post_content_admin_routes_category_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CategoryIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/history/{object_type}/{object_id}": {
+   "get": {
+    "summary": "Histórico editorial (quem fez o quê, quando)",
+    "operationId": "get_content_admin_routes_content_history",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "object_type",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "object_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/articles": {
+   "post": {
+    "summary": "Cria artigo/guia (versão 1 em rascunho)",
+    "operationId": "post_content_admin_routes_article_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ArticleIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "article list",
+    "operationId": "get_content_admin_routes_article_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/articles/{slug}": {
+   "get": {
+    "summary": "article admin get",
+    "operationId": "get_content_admin_routes_article_admin_get",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "Atualiza metadados (público, tags, telas, relacionados). O texto só muda por nova versão.",
+    "operationId": "patch_content_admin_routes_article_meta",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ArticleMetaIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/articles/{slug}/versions": {
+   "post": {
+    "summary": "Nova versão (rascunho) a partir de uma edição; exige nota de mudança",
+    "operationId": "post_content_admin_routes_article_new_version",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VersionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/article-versions/{version_id}": {
+   "put": {
+    "summary": "Edita uma versão em RASCUNHO (versões revisadas são imutáveis)",
+    "operationId": "put_content_admin_routes_article_version_edit",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "version_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VersionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/article-versions/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_article_version",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/resources/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_resource",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/faqs/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_faq",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/courses/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_course",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/events/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_event",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/paths/{id}/transition": {
+   "post": {
+    "summary": "Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos).",
+    "operationId": "post_content_admin_routes_transition_path",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/{obj_type}/{id}/reviewed": {
+   "post": {
+    "summary": "Confirma que o conteúdo continua válido (zera 'Revisão necessária')",
+    "operationId": "post_content_admin_routes_reviewed",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obj_type",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewedIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/resources": {
+   "post": {
+    "summary": "Cria recurso (modelo, documento, checklist, vídeo, relatório, boletim) em rascunho",
+    "operationId": "post_content_admin_routes_resource_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResourceIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "resource list",
+    "operationId": "get_content_admin_routes_resource_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/resources/{id}": {
+   "put": {
+    "summary": "Edita recurso em RASCUNHO",
+    "operationId": "put_content_admin_routes_resource_edit",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResourceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/resources/{id}/new-version": {
+   "post": {
+    "summary": "Nova versão de um recurso publicado (a anterior fica no histórico como 'superseded')",
+    "operationId": "post_content_admin_routes_resource_new_version",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ResourceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/faqs": {
+   "post": {
+    "summary": "Cria FAQ em rascunho (ou revisão de uma publicada via revises_id)",
+    "operationId": "post_content_admin_routes_faq_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FaqIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "faq list",
+    "operationId": "get_content_admin_routes_faq_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/faqs/{id}": {
+   "put": {
+    "summary": "Edita FAQ em rascunho",
+    "operationId": "put_content_admin_routes_faq_edit",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FaqIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/courses": {
+   "post": {
+    "summary": "Cria curso (módulos, aulas, quiz com gabarito separado) em rascunho",
+    "operationId": "post_content_admin_routes_course_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CourseIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "course list",
+    "operationId": "get_content_admin_routes_course_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/courses/{id}": {
+   "put": {
+    "summary": "Substitui a estrutura de um curso em RASCUNHO/REVISÃO (cursos publicados: arquive e crie outro — limitação documentada)",
+    "operationId": "put_content_admin_routes_course_edit",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CourseIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/paths": {
+   "post": {
+    "summary": "Cria trilha de aprendizado (cursos/guias/recursos em ordem)",
+    "operationId": "post_content_admin_routes_path_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PathIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/certificates/{code}/revoke": {
+   "post": {
+    "summary": "Revoga certificado de conclusão (motivo obrigatório, auditado)",
+    "operationId": "post_content_admin_routes_cert_revoke",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeCertIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/events": {
+   "post": {
+    "summary": "Cria evento em rascunho (link de acesso fica restrito às inscritas)",
+    "operationId": "post_content_admin_routes_event_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EventIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/events/{id}": {
+   "patch": {
+    "summary": "Atualiza evento (alterações em evento publicado ficam no histórico)",
+    "operationId": "patch_content_admin_routes_event_patch",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EventPatchIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/events/{id}/attendance": {
+   "post": {
+    "summary": "Registra presença (a avaliação só é liberada a quem participou)",
+    "operationId": "post_content_admin_routes_event_attendance",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AttendanceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/events/{id}/registrations": {
+   "get": {
+    "summary": "Inscritas (dados mínimos: nome, organização, estado, presença)",
+    "operationId": "get_content_admin_routes_event_regs",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/events/{id}/recording-to-resource": {
+   "post": {
+    "summary": "Transforma a gravação do evento em recurso da biblioteca (rascunho, sujeito a revisão)",
+    "operationId": "post_content_admin_routes_event_recording",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/support/tickets": {
+   "get": {
+    "summary": "Fila de chamados (por estado, prioridade e atraso de SLA)",
+    "operationId": "get_content_admin_routes_queue",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "open",
+          "in_progress",
+          "waiting_user",
+          "waiting_internal",
+          "resolved",
+          "closed",
+          "active"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "low",
+          "normal",
+          "high",
+          "critical"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Priority"
+      }
+     },
+     {
+      "name": "overdue",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Overdue",
+       "type": "boolean"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/support/tickets/{ticket_id}": {
+   "get": {
+    "summary": "staff ticket get",
+    "operationId": "get_content_admin_routes_staff_ticket_get",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "Estado, prioridade (recalcula SLA) e responsável",
+    "operationId": "patch_content_admin_routes_staff_ticket_update",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TicketStaffIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/support/tickets/{ticket_id}/messages": {
+   "post": {
+    "summary": "Responde (ou anota internamente) um chamado",
+    "operationId": "post_content_admin_routes_staff_reply",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TicketReplyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/support/tickets/{ticket_id}/to-article": {
+   "post": {
+    "summary": "Vincula o chamado a um artigo (o assunto deixa de contar como recorrente sem base)",
+    "operationId": "post_content_admin_routes_ticket_to_article",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "ticket_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/support/sla": {
+   "get": {
+    "summary": "SLA por prioridade (valores iniciais são hipótese operacional, configuráveis)",
+    "operationId": "get_content_admin_routes_sla_get",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/support/sla/{priority}": {
+   "put": {
+    "summary": "Ajusta o SLA de uma prioridade (administradores)",
+    "operationId": "put_content_admin_routes_sla_put",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "priority",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SlaIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/partnerships": {
+   "get": {
+    "summary": "Pipeline de parcerias",
+    "operationId": "get_content_admin_routes_partnership_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/hub/partnerships/{id}": {
+   "get": {
+    "summary": "partnership get",
+    "operationId": "get_content_admin_routes_partnership_get",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/hub/partnerships/{id}/move": {
+   "post": {
+    "summary": "Move no pipeline (histórico) e define responsável; 'ativa' cria o registro de parceria",
+    "operationId": "post_content_admin_routes_partnership_move",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PartnershipMoveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/partnerships/{id}/notes": {
+   "post": {
+    "summary": "partnership note",
+    "operationId": "post_content_admin_routes_partnership_note",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NoteIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/demo-requests": {
+   "get": {
+    "summary": "demo list",
+    "operationId": "get_content_admin_routes_demo_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/hub/demo-requests/{id}/handle": {
+   "post": {
+    "summary": "Agenda/conclui/cancela demonstração e avisa a pessoa por e-mail",
+    "operationId": "post_content_admin_routes_demo_handle",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DemoHandleIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/trial-requests": {
+   "get": {
+    "summary": "trial req list",
+    "operationId": "get_content_admin_routes_trial_req_list",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 30,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 100,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/hub/trial-requests/{id}/decide": {
+   "post": {
+    "summary": "Decide a solicitação de teste (motivo obrigatório): inicia/estende o trial existente ou recusa; nunca automático",
+    "operationId": "post_content_admin_routes_trial_req_decide",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/hub/trials": {
+   "get": {
+    "summary": "Painel de testes: solicitações, ativos, vencendo, conversão e uso por organização",
+    "operationId": "get_content_admin_routes_trials_dash",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/hub/analytics": {
+   "get": {
+    "summary": "Analytics da Central: buscas, lacunas, utilidade, chamados, academia, eventos, parcerias",
+    "operationId": "get_content_admin_routes_analytics",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/hub/newsletter": {
+   "get": {
+    "summary": "Inscrições do boletim (contagens; e-mails só para administradores)",
+    "operationId": "get_content_admin_routes_newsletter_admin",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/hub/newsletter/dispatch": {
+   "post": {
+    "summary": "Dispara agora o envio do boletim às inscritas devidas (o worker também faz)",
+    "operationId": "post_content_admin_routes_newsletter_dispatch",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
   }
  },
  "components": {
@@ -15647,8 +20212,9 @@
     "additionalProperties": false,
     "properties": {
      "token": {
-      "maxLength": 200,
-      "minLength": 10,
+      "maxLength": 100,
+      "minLength": 20,
+      "pattern": "^[A-Za-z0-9_-]+$",
       "title": "Token",
       "type": "string"
      }
@@ -17798,27 +22364,21 @@
    "TransitionIn": {
     "additionalProperties": false,
     "properties": {
-     "to_status": {
+     "to": {
       "enum": [
        "draft",
-       "submitted",
-       "screening",
-       "due_diligence",
+       "review",
        "approved",
-       "rejected",
-       "withdrawn",
-       "committed",
-       "in_execution",
-       "reporting",
-       "closed"
+       "published",
+       "archived"
       ],
-      "title": "To Status",
+      "title": "To",
       "type": "string"
      },
      "note": {
       "anyOf": [
        {
-        "maxLength": 2000,
+        "maxLength": 1000,
         "type": "string"
        },
        {
@@ -17827,23 +22387,10 @@
       ],
       "default": null,
       "title": "Note"
-     },
-     "external_protocol": {
-      "anyOf": [
-       {
-        "maxLength": 120,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "External Protocol"
      }
     },
     "required": [
-     "to_status"
+     "to"
     ],
     "title": "TransitionIn",
     "type": "object"
@@ -18273,39 +22820,37 @@
    "FeedbackIn": {
     "additionalProperties": false,
     "properties": {
-     "kind": {
+     "target_type": {
       "enum": [
-       "funder_feedback",
-       "progress_report",
-       "final_report"
+       "article",
+       "faq",
+       "resource",
+       "course",
+       "lesson",
+       "event"
       ],
-      "title": "Kind",
+      "title": "Target Type",
       "type": "string"
      },
-     "body": {
-      "maxLength": 8000,
-      "minLength": 2,
-      "title": "Body",
+     "target_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Target Id",
       "type": "string"
      },
-     "rating": {
-      "anyOf": [
-       {
-        "maximum": 5,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Rating"
+     "helpful": {
+      "title": "Helpful",
+      "type": "boolean"
      },
-     "application_id": {
+     "reason": {
       "anyOf": [
        {
-        "pattern": "^[0-9a-fA-F-]{36}$",
+        "enum": [
+         "not_found",
+         "hard_to_understand",
+         "outdated",
+         "need_support",
+         "other"
+        ],
         "type": "string"
        },
        {
@@ -18313,12 +22858,12 @@
        }
       ],
       "default": null,
-      "title": "Application Id"
+      "title": "Reason"
      },
-     "document_id": {
+     "comment": {
       "anyOf": [
        {
-        "pattern": "^[0-9a-fA-F-]{36}$",
+        "maxLength": 1000,
         "type": "string"
        },
        {
@@ -18326,12 +22871,13 @@
        }
       ],
       "default": null,
-      "title": "Document Id"
+      "title": "Comment"
      }
     },
     "required": [
-     "kind",
-     "body"
+     "target_type",
+     "target_id",
+     "helpful"
     ],
     "title": "FeedbackIn",
     "type": "object"
@@ -25205,6 +29751,3026 @@
      "action"
     ],
     "title": "AgreementActionIn",
+    "type": "object"
+   },
+   "TemplateUseIn": {
+    "additionalProperties": false,
+    "properties": {
+     "values": {
+      "additionalProperties": {
+       "maxLength": 5000,
+       "type": "string"
+      },
+      "title": "Values",
+      "type": "object"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     }
+    },
+    "required": [
+     "values"
+    ],
+    "title": "TemplateUseIn",
+    "type": "object"
+   },
+   "AssistantIn": {
+    "additionalProperties": false,
+    "properties": {
+     "question": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Question",
+      "type": "string"
+     },
+     "ctx": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z0-9_.-]{2,80}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ctx"
+     }
+    },
+    "required": [
+     "question"
+    ],
+    "title": "AssistantIn",
+    "type": "object"
+   },
+   "ChecklistIn": {
+    "additionalProperties": false,
+    "properties": {
+     "scope": {
+      "pattern": "^[a-z0-9:_-]{3,140}$",
+      "title": "Scope",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "checked": {
+      "items": {
+       "type": "integer"
+      },
+      "maxItems": 200,
+      "title": "Checked",
+      "type": "array"
+     }
+    },
+    "required": [
+     "scope",
+     "checked"
+    ],
+    "title": "ChecklistIn",
+    "type": "object"
+   },
+   "EventRateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "satisfaction": {
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Satisfaction",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "satisfaction"
+    ],
+    "title": "EventRateIn",
+    "type": "object"
+   },
+   "LessonDoneIn": {
+    "additionalProperties": false,
+    "properties": {
+     "answers": {
+      "anyOf": [
+       {
+        "items": {
+         "maximum": 20,
+         "minimum": 0,
+         "type": "integer"
+        },
+        "maxItems": 100,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Answers"
+     }
+    },
+    "title": "LessonDoneIn",
+    "type": "object"
+   },
+   "TicketIn": {
+    "additionalProperties": false,
+    "properties": {
+     "category": {
+      "enum": [
+       "question",
+       "bug",
+       "technical",
+       "document",
+       "payment",
+       "compliance",
+       "project",
+       "funding",
+       "report",
+       "partnership",
+       "other"
+      ],
+      "title": "Category",
+      "type": "string"
+     },
+     "subject": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Subject",
+      "type": "string"
+     },
+     "message": {
+      "maxLength": 8000,
+      "minLength": 5,
+      "title": "Message",
+      "type": "string"
+     },
+     "context": {
+      "additionalProperties": {
+       "maxLength": 200,
+       "type": "string"
+      },
+      "default": {},
+      "propertyNames": {
+       "enum": [
+        "page",
+        "field",
+        "project_id",
+        "article",
+        "app"
+       ]
+      },
+      "title": "Context",
+      "type": "object"
+     },
+     "document_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Document Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "category",
+     "subject",
+     "message"
+    ],
+    "title": "TicketIn",
+    "type": "object"
+   },
+   "TicketReplyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "body": {
+      "maxLength": 8000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+     },
+     "document_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Document Ids",
+      "type": "array"
+     },
+     "internal": {
+      "default": false,
+      "title": "Internal",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "body"
+    ],
+    "title": "TicketReplyIn",
+    "type": "object"
+   },
+   "TicketRateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "score": {
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Score",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "score"
+    ],
+    "title": "TicketRateIn",
+    "type": "object"
+   },
+   "TrialRequestIn": {
+    "additionalProperties": false,
+    "properties": {
+     "users_count": {
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Users Count",
+      "type": "integer"
+     },
+     "purpose": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Purpose",
+      "type": "string"
+     },
+     "modules": {
+      "default": [],
+      "items": {
+       "maxLength": 60,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Modules",
+      "type": "array"
+     },
+     "period_days": {
+      "default": 14,
+      "maximum": 60,
+      "minimum": 7,
+      "title": "Period Days",
+      "type": "integer"
+     },
+     "responsible": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Responsible",
+      "type": "string"
+     }
+    },
+    "required": [
+     "users_count",
+     "purpose",
+     "responsible"
+    ],
+    "title": "TrialRequestIn",
+    "type": "object"
+   },
+   "PartnershipIn": {
+    "additionalProperties": false,
+    "properties": {
+     "org_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Org Name",
+      "type": "string"
+     },
+     "contact_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Contact Name",
+      "type": "string"
+     },
+     "contact_email": {
+      "maxLength": 254,
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "title": "Contact Email",
+      "type": "string"
+     },
+     "contact_phone": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Contact Phone"
+     },
+     "kind": {
+      "enum": [
+       "institutional",
+       "academic",
+       "government",
+       "business",
+       "technology",
+       "osc",
+       "media",
+       "research",
+       "training",
+       "distribution",
+       "territorial"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "objective": {
+      "maxLength": 3000,
+      "minLength": 10,
+      "title": "Objective",
+      "type": "string"
+     },
+     "proposal": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Proposal"
+     },
+     "territory": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Territory"
+     },
+     "audience": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Audience"
+     },
+     "resources_offered": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Resources Offered"
+     },
+     "counterpart": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Counterpart"
+     },
+     "target_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Date"
+     },
+     "consent": {
+      "title": "Consent",
+      "type": "boolean"
+     },
+     "website": {
+      "anyOf": [
+       {
+        "maxLength": 100,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Website"
+     }
+    },
+    "required": [
+     "org_name",
+     "contact_name",
+     "contact_email",
+     "kind",
+     "objective",
+     "consent"
+    ],
+    "title": "PartnershipIn",
+    "type": "object"
+   },
+   "DemoIn": {
+    "additionalProperties": false,
+    "properties": {
+     "org_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Org Name",
+      "type": "string"
+     },
+     "contact_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Contact Name",
+      "type": "string"
+     },
+     "contact_email": {
+      "maxLength": 254,
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "title": "Contact Email",
+      "type": "string"
+     },
+     "contact_phone": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Contact Phone"
+     },
+     "audience_kind": {
+      "enum": [
+       "osc",
+       "company",
+       "individual",
+       "provider",
+       "government",
+       "other"
+      ],
+      "title": "Audience Kind",
+      "type": "string"
+     },
+     "org_size": {
+      "anyOf": [
+       {
+        "enum": [
+         "1-10",
+         "11-50",
+         "51-200",
+         "200+"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Org Size"
+     },
+     "interest": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Interest"
+     },
+     "preferred_slots": {
+      "default": [],
+      "items": {
+       "format": "date-time",
+       "type": "string"
+      },
+      "maxItems": 3,
+      "title": "Preferred Slots",
+      "type": "array"
+     },
+     "notes": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Notes"
+     },
+     "consent": {
+      "title": "Consent",
+      "type": "boolean"
+     },
+     "website": {
+      "anyOf": [
+       {
+        "maxLength": 100,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Website"
+     }
+    },
+    "required": [
+     "org_name",
+     "contact_name",
+     "contact_email",
+     "audience_kind",
+     "consent"
+    ],
+    "title": "DemoIn",
+    "type": "object"
+   },
+   "NewsletterIn": {
+    "additionalProperties": false,
+    "properties": {
+     "email": {
+      "maxLength": 254,
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "title": "Email",
+      "type": "string"
+     },
+     "topics": {
+      "default": [
+       "platform"
+      ],
+      "items": {
+       "enum": [
+        "platform",
+        "opportunities",
+        "events",
+        "legislation",
+        "technology",
+        "esg",
+        "ods",
+        "cases",
+        "trends",
+        "results"
+       ],
+       "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "title": "Topics",
+      "type": "array"
+     },
+     "frequency": {
+      "default": "monthly",
+      "enum": [
+       "weekly",
+       "monthly"
+      ],
+      "title": "Frequency",
+      "type": "string"
+     },
+     "consent": {
+      "title": "Consent",
+      "type": "boolean"
+     },
+     "website": {
+      "anyOf": [
+       {
+        "maxLength": 100,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Website"
+     }
+    },
+    "required": [
+     "email",
+     "consent"
+    ],
+    "title": "NewsletterIn",
+    "type": "object"
+   },
+   "PrefItem": {
+    "additionalProperties": false,
+    "properties": {
+     "grp": {
+      "enum": [
+       "billing",
+       "content",
+       "events",
+       "support",
+       "partnerships",
+       "opportunities"
+      ],
+      "title": "Grp",
+      "type": "string"
+     },
+     "in_app": {
+      "title": "In App",
+      "type": "boolean"
+     },
+     "email": {
+      "title": "Email",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "grp",
+     "in_app",
+     "email"
+    ],
+    "title": "PrefItem",
+    "type": "object"
+   },
+   "PrefsIn": {
+    "additionalProperties": false,
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/PrefItem"
+      },
+      "maxItems": 6,
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "PrefsIn",
+    "type": "object"
+   },
+   "StaffRoleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "email": {
+      "maxLength": 254,
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "title": "Email",
+      "type": "string"
+     },
+     "role": {
+      "enum": [
+       "editor",
+       "reviewer",
+       "support"
+      ],
+      "title": "Role",
+      "type": "string"
+     }
+    },
+    "required": [
+     "email",
+     "role"
+    ],
+    "title": "StaffRoleIn",
+    "type": "object"
+   },
+   "CategoryIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{2,60}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "name": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Name",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "sort": {
+      "default": 100,
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Sort",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "slug",
+     "name"
+    ],
+    "title": "CategoryIn",
+    "type": "object"
+   },
+   "RefItem": {
+    "additionalProperties": false,
+    "properties": {
+     "label": {
+      "maxLength": 200,
+      "title": "Label",
+      "type": "string"
+     },
+     "url": {
+      "maxLength": 500,
+      "pattern": "^https://",
+      "title": "Url",
+      "type": "string"
+     },
+     "source_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Date"
+     }
+    },
+    "required": [
+     "label",
+     "url"
+    ],
+    "title": "RefItem",
+    "type": "object"
+   },
+   "StepItem": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+     },
+     "text": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "title"
+    ],
+    "title": "StepItem",
+    "type": "object"
+   },
+   "ArticleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{3,100}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "start",
+       "how_it_works",
+       "guide",
+       "article",
+       "policy",
+       "glossary",
+       "procedure"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Category"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "authenticated",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "origin": {
+      "default": "official",
+      "enum": [
+       "official",
+       "educational",
+       "third_party"
+      ],
+      "title": "Origin",
+      "type": "string"
+     },
+     "tags": {
+      "default": [],
+      "items": {
+       "maxLength": 40,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Tags",
+      "type": "array"
+     },
+     "ctx_keys": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_.-]{2,80}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Ctx Keys",
+      "type": "array"
+     },
+     "est_minutes": {
+      "anyOf": [
+       {
+        "maximum": 600,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Est Minutes"
+     },
+     "required_docs": {
+      "default": [],
+      "items": {
+       "maxLength": 120,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Required Docs",
+      "type": "array"
+     },
+     "action_label": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Action Label"
+     },
+     "action_link": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "pattern": "^/",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Action Link"
+     },
+     "related_articles": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9-]{3,100}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Related Articles",
+      "type": "array"
+     },
+     "related_resources": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9-]{3,100}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Related Resources",
+      "type": "array"
+     },
+     "related_courses": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9-]{3,100}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Related Courses",
+      "type": "array"
+     },
+     "review_every_days": {
+      "default": 180,
+      "maximum": 1095,
+      "minimum": 7,
+      "title": "Review Every Days",
+      "type": "integer"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "body": {
+      "maxLength": 60000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+     },
+     "steps": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/StepItem"
+      },
+      "maxItems": 30,
+      "title": "Steps",
+      "type": "array"
+     },
+     "checklist": {
+      "default": [],
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Checklist",
+      "type": "array"
+     },
+     "common_mistakes": {
+      "default": [],
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Common Mistakes",
+      "type": "array"
+     },
+     "refs": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/RefItem"
+      },
+      "maxItems": 20,
+      "title": "Refs",
+      "type": "array"
+     },
+     "regulatory": {
+      "default": false,
+      "title": "Regulatory",
+      "type": "boolean"
+     },
+     "regulatory_source": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Source"
+     },
+     "regulatory_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Date"
+     },
+     "valid_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Valid Until"
+     },
+     "change_note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Change Note"
+     }
+    },
+    "required": [
+     "slug",
+     "kind",
+     "title",
+     "body"
+    ],
+    "title": "ArticleIn",
+    "type": "object"
+   },
+   "ArticleMetaIn": {
+    "additionalProperties": false,
+    "properties": {
+     "audience": {
+      "anyOf": [
+       {
+        "items": {
+         "enum": [
+          "osc",
+          "company",
+          "individual",
+          "provider",
+          "government"
+         ],
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Audience"
+     },
+     "visibility": {
+      "anyOf": [
+       {
+        "enum": [
+         "public",
+         "authenticated",
+         "audience"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Visibility"
+     },
+     "origin": {
+      "anyOf": [
+       {
+        "enum": [
+         "official",
+         "educational",
+         "third_party"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Origin"
+     },
+     "tags": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Tags"
+     },
+     "ctx_keys": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9_.-]{2,80}$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ctx Keys"
+     },
+     "est_minutes": {
+      "anyOf": [
+       {
+        "maximum": 600,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Est Minutes"
+     },
+     "action_label": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Action Label"
+     },
+     "action_link": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "pattern": "^/",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Action Link"
+     },
+     "related_articles": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9-]{3,100}$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Related Articles"
+     },
+     "related_resources": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9-]{3,100}$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Related Resources"
+     },
+     "related_courses": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9-]{3,100}$",
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Related Courses"
+     },
+     "review_every_days": {
+      "anyOf": [
+       {
+        "maximum": 1095,
+        "minimum": 7,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Every Days"
+     },
+     "demo": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Demo"
+     }
+    },
+    "title": "ArticleMetaIn",
+    "type": "object"
+   },
+   "VersionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "body": {
+      "maxLength": 60000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+     },
+     "steps": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/StepItem"
+      },
+      "maxItems": 30,
+      "title": "Steps",
+      "type": "array"
+     },
+     "checklist": {
+      "default": [],
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 50,
+      "title": "Checklist",
+      "type": "array"
+     },
+     "common_mistakes": {
+      "default": [],
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Common Mistakes",
+      "type": "array"
+     },
+     "refs": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/RefItem"
+      },
+      "maxItems": 20,
+      "title": "Refs",
+      "type": "array"
+     },
+     "regulatory": {
+      "default": false,
+      "title": "Regulatory",
+      "type": "boolean"
+     },
+     "regulatory_source": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Source"
+     },
+     "regulatory_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Date"
+     },
+     "valid_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Valid Until"
+     },
+     "change_note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Change Note"
+     }
+    },
+    "required": [
+     "title",
+     "body"
+    ],
+    "title": "VersionIn",
+    "type": "object"
+   },
+   "ReviewedIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "title": "ReviewedIn",
+    "type": "object"
+   },
+   "TemplateField": {
+    "additionalProperties": false,
+    "properties": {
+     "key": {
+      "pattern": "^[a-z0-9_]{1,40}$",
+      "title": "Key",
+      "type": "string"
+     },
+     "label": {
+      "maxLength": 120,
+      "title": "Label",
+      "type": "string"
+     },
+     "type": {
+      "default": "text",
+      "enum": [
+       "text",
+       "textarea",
+       "number",
+       "date"
+      ],
+      "title": "Type",
+      "type": "string"
+     },
+     "required": {
+      "default": false,
+      "title": "Required",
+      "type": "boolean"
+     },
+     "help": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Help"
+     }
+    },
+    "required": [
+     "key",
+     "label"
+    ],
+    "title": "TemplateField",
+    "type": "object"
+   },
+   "TemplateSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "draft_kind": {
+      "maxLength": 40,
+      "title": "Draft Kind",
+      "type": "string"
+     },
+     "fields": {
+      "items": {
+       "$ref": "#/components/schemas/TemplateField"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Fields",
+      "type": "array"
+     }
+    },
+    "required": [
+     "draft_kind",
+     "fields"
+    ],
+    "title": "TemplateSchema",
+    "type": "object"
+   },
+   "ResourceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{3,100}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "template",
+       "document",
+       "checklist",
+       "video",
+       "report",
+       "bulletin",
+       "spreadsheet",
+       "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Category"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "authenticated",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "origin": {
+      "default": "official",
+      "enum": [
+       "official",
+       "educational",
+       "third_party"
+      ],
+      "title": "Origin",
+      "type": "string"
+     },
+     "tags": {
+      "default": [],
+      "items": {
+       "maxLength": 40,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Tags",
+      "type": "array"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Url"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     },
+     "template_schema": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/TemplateSchema"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "checklist_items": {
+      "default": [],
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 60,
+      "title": "Checklist Items",
+      "type": "array"
+     },
+     "duration_min": {
+      "anyOf": [
+       {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Duration Min"
+     },
+     "period_start": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Period Start"
+     },
+     "period_end": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Period End"
+     },
+     "ods": {
+      "default": [],
+      "items": {
+       "maximum": 17,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "maxItems": 17,
+      "title": "Ods",
+      "type": "array"
+     },
+     "territories": {
+      "default": [],
+      "items": {
+       "maxLength": 40,
+       "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Territories",
+      "type": "array"
+     },
+     "themes": {
+      "default": [],
+      "items": {
+       "maxLength": 60,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Themes",
+      "type": "array"
+     },
+     "ctx_keys": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_.-]{2,80}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Ctx Keys",
+      "type": "array"
+     },
+     "regulatory": {
+      "default": false,
+      "title": "Regulatory",
+      "type": "boolean"
+     },
+     "regulatory_source": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Source"
+     },
+     "regulatory_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Date"
+     },
+     "valid_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Valid Until"
+     },
+     "change_note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Change Note"
+     },
+     "review_every_days": {
+      "default": 365,
+      "maximum": 1095,
+      "minimum": 7,
+      "title": "Review Every Days",
+      "type": "integer"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "slug",
+     "kind",
+     "title"
+    ],
+    "title": "ResourceIn",
+    "type": "object"
+   },
+   "FaqIn": {
+    "additionalProperties": false,
+    "properties": {
+     "question": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Question",
+      "type": "string"
+     },
+     "answer": {
+      "maxLength": 8000,
+      "minLength": 5,
+      "title": "Answer",
+      "type": "string"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Category"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "public",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "origin": {
+      "default": "official",
+      "enum": [
+       "official",
+       "educational",
+       "third_party"
+      ],
+      "title": "Origin",
+      "type": "string"
+     },
+     "tags": {
+      "default": [],
+      "items": {
+       "maxLength": 40,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Tags",
+      "type": "array"
+     },
+     "ctx_keys": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_.-]{2,80}$",
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Ctx Keys",
+      "type": "array"
+     },
+     "related_article": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z0-9-]{3,100}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Related Article"
+     },
+     "review_every_days": {
+      "default": 180,
+      "maximum": 1095,
+      "minimum": 7,
+      "title": "Review Every Days",
+      "type": "integer"
+     },
+     "sort": {
+      "default": 100,
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Sort",
+      "type": "integer"
+     },
+     "revises_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Revises Id"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "question",
+     "answer"
+    ],
+    "title": "FaqIn",
+    "type": "object"
+   },
+   "LessonIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Title",
+      "type": "string"
+     },
+     "kind": {
+      "default": "text",
+      "enum": [
+       "text",
+       "video",
+       "quiz",
+       "activity"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "body": {
+      "anyOf": [
+       {
+        "maxLength": 40000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Body"
+     },
+     "video_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Video Url"
+     },
+     "captions_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Captions Url"
+     },
+     "transcript": {
+      "anyOf": [
+       {
+        "maxLength": 40000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Transcript"
+     },
+     "minutes": {
+      "anyOf": [
+       {
+        "maximum": 600,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Minutes"
+     },
+     "materials": {
+      "default": [],
+      "items": {
+       "additionalProperties": {
+        "maxLength": 300,
+        "type": "string"
+       },
+       "type": "object"
+      },
+      "maxItems": 20,
+      "title": "Materials",
+      "type": "array"
+     },
+     "quiz": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/QuizQuestion"
+      },
+      "maxItems": 50,
+      "title": "Quiz",
+      "type": "array"
+     }
+    },
+    "required": [
+     "title"
+    ],
+    "title": "LessonIn",
+    "type": "object"
+   },
+   "ModuleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "lessons": {
+      "items": {
+       "$ref": "#/components/schemas/LessonIn"
+      },
+      "maxItems": 40,
+      "minItems": 1,
+      "title": "Lessons",
+      "type": "array"
+     }
+    },
+    "required": [
+     "title",
+     "lessons"
+    ],
+    "title": "ModuleIn",
+    "type": "object"
+   },
+   "QuizQuestion": {
+    "additionalProperties": false,
+    "properties": {
+     "q": {
+      "maxLength": 500,
+      "minLength": 3,
+      "title": "Q",
+      "type": "string"
+     },
+     "options": {
+      "items": {
+       "maxLength": 300,
+       "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 2,
+      "title": "Options",
+      "type": "array"
+     },
+     "answer": {
+      "maximum": 7,
+      "minimum": 0,
+      "title": "Answer",
+      "type": "integer"
+     },
+     "explanation": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Explanation"
+     }
+    },
+    "required": [
+     "q",
+     "options",
+     "answer"
+    ],
+    "title": "QuizQuestion",
+    "type": "object"
+   },
+   "CourseIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{3,100}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "authenticated",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "origin": {
+      "default": "educational",
+      "enum": [
+       "official",
+       "educational",
+       "third_party"
+      ],
+      "title": "Origin",
+      "type": "string"
+     },
+     "level": {
+      "default": "beginner",
+      "enum": [
+       "beginner",
+       "intermediate",
+       "advanced"
+      ],
+      "title": "Level",
+      "type": "string"
+     },
+     "hours": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 400,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Hours"
+     },
+     "pass_score": {
+      "default": 70,
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Pass Score",
+      "type": "integer"
+     },
+     "cert_enabled": {
+      "default": false,
+      "title": "Cert Enabled",
+      "type": "boolean"
+     },
+     "tags": {
+      "default": [],
+      "items": {
+       "maxLength": 40,
+       "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Tags",
+      "type": "array"
+     },
+     "review_every_days": {
+      "default": 365,
+      "maximum": 1095,
+      "minimum": 7,
+      "title": "Review Every Days",
+      "type": "integer"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     },
+     "modules": {
+      "items": {
+       "$ref": "#/components/schemas/ModuleIn"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Modules",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "title",
+     "modules"
+    ],
+    "title": "CourseIn",
+    "type": "object"
+   },
+   "PathIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{3,100}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "authenticated",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "items": {
+      "items": {
+       "additionalProperties": {
+        "maxLength": 200,
+        "type": "string"
+       },
+       "propertyNames": {
+        "enum": [
+         "type",
+         "slug",
+         "title"
+        ]
+       },
+       "type": "object"
+      },
+      "maxItems": 30,
+      "minItems": 1,
+      "title": "Items",
+      "type": "array"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "slug",
+     "title",
+     "items"
+    ],
+    "title": "PathIn",
+    "type": "object"
+   },
+   "RevokeCertIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 500,
+      "minLength": 5,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "RevokeCertIn",
+    "type": "object"
+   },
+   "EventIn": {
+    "additionalProperties": false,
+    "properties": {
+     "slug": {
+      "pattern": "^[a-z0-9-]{3,100}$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "webinar",
+       "training",
+       "workshop",
+       "oficina",
+       "mentoring",
+       "demo",
+       "institutional",
+       "community"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "starts_at": {
+      "format": "date-time",
+      "title": "Starts At",
+      "type": "string"
+     },
+     "duration_min": {
+      "maximum": 1440,
+      "minimum": 5,
+      "title": "Duration Min",
+      "type": "integer"
+     },
+     "speaker": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Speaker"
+     },
+     "modality": {
+      "default": "online",
+      "enum": [
+       "online",
+       "in_person",
+       "hybrid"
+      ],
+      "title": "Modality",
+      "type": "string"
+     },
+     "location": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Location"
+     },
+     "join_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Join Url"
+     },
+     "capacity": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Capacity"
+     },
+     "registration_open": {
+      "default": true,
+      "title": "Registration Open",
+      "type": "boolean"
+     },
+     "audience": {
+      "default": [],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "individual",
+        "provider",
+        "government"
+       ],
+       "type": "string"
+      },
+      "title": "Audience",
+      "type": "array"
+     },
+     "visibility": {
+      "default": "public",
+      "enum": [
+       "public",
+       "authenticated",
+       "audience"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "demo": {
+      "default": false,
+      "title": "Demo",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "slug",
+     "kind",
+     "title",
+     "starts_at",
+     "duration_min"
+    ],
+    "title": "EventIn",
+    "type": "object"
+   },
+   "EventPatchIn": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 6000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "starts_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts At"
+     },
+     "duration_min": {
+      "anyOf": [
+       {
+        "maximum": 1440,
+        "minimum": 5,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Duration Min"
+     },
+     "capacity": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Capacity"
+     },
+     "registration_open": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Registration Open"
+     },
+     "recording_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Recording Url"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "cancelled",
+         "completed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "join_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Join Url"
+     }
+    },
+    "title": "EventPatchIn",
+    "type": "object"
+   },
+   "AttendanceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "user_ids": {
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 500,
+      "title": "User Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "user_ids"
+    ],
+    "title": "AttendanceIn",
+    "type": "object"
+   },
+   "TicketStaffIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "open",
+         "in_progress",
+         "waiting_user",
+         "waiting_internal",
+         "resolved",
+         "closed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "priority": {
+      "anyOf": [
+       {
+        "enum": [
+         "low",
+         "normal",
+         "high",
+         "critical"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Priority"
+     },
+     "assigned_to": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Assigned To"
+     },
+     "assign": {
+      "default": false,
+      "title": "Assign",
+      "type": "boolean"
+     }
+    },
+    "title": "TicketStaffIn",
+    "type": "object"
+   },
+   "SlaIn": {
+    "additionalProperties": false,
+    "properties": {
+     "first_response_minutes": {
+      "maximum": 100000,
+      "minimum": 5,
+      "title": "First Response Minutes",
+      "type": "integer"
+     },
+     "resolution_minutes": {
+      "maximum": 1000000,
+      "minimum": 5,
+      "title": "Resolution Minutes",
+      "type": "integer"
+     },
+     "escalate_after_minutes": {
+      "maximum": 1000000,
+      "minimum": 5,
+      "title": "Escalate After Minutes",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "first_response_minutes",
+     "resolution_minutes",
+     "escalate_after_minutes"
+    ],
+    "title": "SlaIn",
+    "type": "object"
+   },
+   "PartnershipMoveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to": {
+      "enum": [
+       "received",
+       "qualification",
+       "contact",
+       "meeting",
+       "proposal",
+       "negotiation",
+       "approved",
+       "active",
+       "completed",
+       "archived",
+       "rejected"
+      ],
+      "title": "To",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     },
+     "owner_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Owner Id"
+     }
+    },
+    "required": [
+     "to"
+    ],
+    "title": "PartnershipMoveIn",
+    "type": "object"
+   },
+   "NoteIn": {
+    "additionalProperties": false,
+    "properties": {
+     "body": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+     }
+    },
+    "required": [
+     "body"
+    ],
+    "title": "NoteIn",
+    "type": "object"
+   },
+   "DemoHandleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "scheduled",
+       "done",
+       "cancelled"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "scheduled_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Scheduled At"
+     },
+     "meeting_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Meeting Url"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "DemoHandleIn",
+    "type": "object"
+   },
+   "DecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "approve": {
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "reason": {
+      "maxLength": 1000,
+      "minLength": 5,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "approve",
+     "reason"
+    ],
+    "title": "DecisionIn",
     "type": "object"
    }
   },

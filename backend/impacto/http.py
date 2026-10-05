@@ -12,13 +12,15 @@ from __future__ import annotations
 
 import json
 import logging
+import re as _re
 import time
 import traceback
 import uuid
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from pydantic import BaseModel, ValidationError
 from starlette.concurrency import run_in_threadpool
@@ -32,7 +34,6 @@ from .security.tokens import csrf_for_session, sha256_hex
 
 logger = logging.getLogger("impacto.http")
 
-import re as _re
 _UUID = _re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 ROLE_ORDER = ["viewer", "member", "analyst", "manager", "admin", "owner"]
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
@@ -104,6 +105,7 @@ class Principal:
     org_name: str | None
     role: str | None
     via: str  # bearer | cookie
+    staff_roles: tuple[str, ...] = ()   # editor | reviewer | support (papéis internos concedidos pela administração)
 
     def has_role(self, minimum: str) -> bool:
         return self.role is not None and ROLE_ORDER.index(self.role) >= ROLE_ORDER.index(minimum)
@@ -197,6 +199,7 @@ class RouteSpec:
     allow_unverified: bool = False
     rate: tuple[str, int, int] | None = None  # (bucket, limite, janela_segundos) por IP
     raw_body: bool = False       # handler recebe bytes do corpo (ex.: webhooks com assinatura)
+    staff: tuple[str, ...] = ()  # auth="admin": além de administradores, aceita estes papéis internos (sempre com MFA)
 
 
 ROUTES: list[RouteSpec] = []
@@ -235,6 +238,7 @@ def load_principal(ctx: Ctx) -> Principal | None:
             "SELECT s.id::text AS session_id, s.user_id::text AS user_id, s.org_id::text AS org_id, s.mfa_verified,"
             " s.last_seen_at, u.email::text AS email, u.full_name, u.status, u.is_platform_admin,"
             " u.email_verified_at IS NOT NULL AS email_verified, u.mfa_enabled_at IS NOT NULL AS mfa_enabled,"
+            " coalesce((SELECT array_agg(sr.role) FROM staff_roles sr WHERE sr.user_id = u.id), '{}') AS staff_roles,"
             " o.kind AS org_kind, o.legal_name AS org_name, o.status AS org_status, m.role"
             " FROM sessions s JOIN users u ON u.id = s.user_id"
             " LEFT JOIN memberships m ON m.user_id = s.user_id AND m.org_id = s.org_id"
@@ -251,7 +255,7 @@ def load_principal(ctx: Ctx) -> Principal | None:
         is_platform_admin=row["is_platform_admin"], mfa_enabled=row["mfa_enabled"], mfa_verified=row["mfa_verified"],
         email_verified=row["email_verified"], org_id=row["org_id"] if has_org else None,
         org_kind=row["org_kind"] if has_org else None, org_name=row["org_name"] if has_org else None,
-        role=row["role"] if has_org else None, via=via or "bearer")
+        role=row["role"] if has_org else None, via=via or "bearer", staff_roles=tuple(row["staff_roles"] or ()))
 
 
 def _check_origin(ctx: Ctx) -> None:
@@ -282,7 +286,7 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
         raise ApiError(401, "unauthenticated", "Autenticação necessária")
     _check_csrf(ctx)
     if spec.auth == "admin":
-        if not p.is_platform_admin:
+        if not p.is_platform_admin and not (spec.staff and set(spec.staff) & set(p.staff_roles)):
             raise forbidden("Área restrita à administração da plataforma", "admin_only")
         if ctx.settings.require_mfa_for_admins and not p.mfa_verified:
             raise forbidden("Administração exige MFA ativo e verificado nesta sessão", "mfa_required")
@@ -461,7 +465,7 @@ def _record_error(app_state, spec: RouteSpec, rid: str, exc: BaseException) -> N
                   " VALUES ($1,$2,500,$3,$4,$5,$6) ON CONFLICT (fingerprint) DO UPDATE SET occurrences = error_events.occurrences + 1,"
                   " last_seen = now(), last_request_id = EXCLUDED.last_request_id, last_trace_id = EXCLUDED.last_trace_id, resolved = false",
                   fp, spec.path, type(exc).__name__, msg, rid, trace_id_var.get() or None)
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001, S110 - registrar erro nunca pode causar novo erro
         pass
 
 

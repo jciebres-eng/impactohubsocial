@@ -92,3 +92,20 @@ Nenhuma afirmação de "seguro" é feita além do que os testes provam. Os teste
 | Sem dados de cartão no esquema | GREEN | teste de esquema |
 | Segredos: apenas placeholders em `.env.example`; teste de arquitetura de segredos verde | GREEN | `test_architecture` |
 Pendente: pentest; verificação da assinatura com segredo real do Stripe; revisão do contexto de sistema nas rotas de cotação (rodam em `system_tx` com `org_id` da sessão, por RLS de vouchers/convênios).
+
+## Central de Conhecimento (v0.12.0)
+| Controle | Estado | Evidência |
+|---|---|---|
+| Rascunho/aprovado/arquivado nunca público; visibilidade `public/authenticated/audience` aplicada no banco (`kb_visible`) | GREEN | `Editorial`, `Visibility` |
+| Quatro olhos (autor ≠ aprovador) inclusive para administrador; banco recusa UPDATE direto | GREEN | `test_author_cannot_approve_even_as_platform_admin_and_db_enforces_it` |
+| Versão publicada imutável; regulatório exige fonte+data | GREEN | `test_published_version_is_immutable…`, `test_regulatory_content_…` |
+| Rotas internas exigem papel + MFA; só administrador concede papéis | GREEN | `test_roles_are_enforced`, `test_staff_routes_require_mfa`, `test_admin_grants_and_revokes_staff_roles` |
+| Chamado privado (IDOR), pessoa não define prioridade/estado/SLA, nota interna invisível, anexo só de documento da própria organização | GREEN | `test_tickets_are_private_…`, `test_user_cannot_set_priority_…`, `test_attachment_must_be_own_org_document` |
+| Quiz: gabarito nunca sai do banco (nem por SQL como aplicação) | GREEN | `test_quiz_key_never_leaves_the_server` |
+| Link de acesso de evento só para inscrita confirmada | GREEN | `test_registration_waitlist_promotion_and_private_join_link` |
+| Endpoints públicos com limite de taxa; validação de entrada (tamanhos, URLs https, e-mail) | GREEN | `test_public_endpoints_are_rate_limited_in_spec`, `test_search_validates_input` |
+| Captação: consentimento obrigatório, honeypot, pedido de outra pessoa ilegível, boletim com duplo opt-in e token em hash | GREEN | `Captation` |
+| Pedido de teste nunca concede acesso; só dono pede, só administrador decide | GREEN | `TrialRequests` |
+| XSS: conteúdo renderizado como **texto** (sem `dangerouslySetInnerHTML`/`innerHTML` no frontend); JSON-LD via `textContent`; CSP mantida (E2E sem violações) | GREEN (por inspeção + E2E) | `grep` + `test_e2e_*` |
+| Assistente não usa conteúdo não publicado e não inventa | GREEN | `test_assistant_*` |
+| Pendente | YELLOW | pentest; privilégio amplo do modo administrativo (disciplina de código); auditoria de dependências npm/pip **não executada** (rede bloqueada neste ambiente); SMTP real |

@@ -29,3 +29,9 @@
 | Cancelamento/exclusão | GREEN | cancelar não apaga dados nem histórico financeiro; exclusão de conta segue o fluxo existente | prazos de guarda fiscal a validar |
 
 Conclusão: **mecanismos técnicos presentes; conformidade LGPD não declarada** — depende de governança, jurídico e DPO.
+
+| Central (v0.12.0): busca/assistente | GREEN (técnico) | log guarda **hash + assuntos**, nunca o texto digitado; retenção 18 meses (`retention`) | validar prazo com o jurídico |
+| Central: captação (parceria, demonstração, boletim) | YELLOW | consentimento com versão/data, finalidade clara, anti-bot, duplo opt-in, descadastro por link | **base legal, prazo de retenção de propostas/demos e texto de consentimento pendentes (jurídico/DPO)** |
+| Central: chamados | YELLOW | só a pessoa e a equipe veem; anexos só documentos próprios | orientar a não enviar dados sensíveis (há aviso no formulário); prazo de guarda |
+| Central: e-mail de avisos | YELLOW | respeita preferências; sem e-mail para conta não verificada | SMTP/SPF/DKIM reais |
+| Certificados públicos | YELLOW | verificação pública expõe **nome do titular, curso, carga e data** (necessário à verificação) | confirmar base legal/aviso ao titular |

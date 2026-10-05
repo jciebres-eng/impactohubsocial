@@ -4,6 +4,7 @@ import { date, label } from "../format";
 import { Link, navigate, useLocation } from "../router";
 import { useSession } from "../session";
 import { Button, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useLoad, useTaxonomy, useToast } from "../ui/kit";
+import { ContextHelp } from "./help";
 import { DocLink } from "./projects";
 
 /** Botão de upload com validação de tamanho no cliente (o servidor valida tipo real, conteúdo ativo e antivírus). */
@@ -57,6 +58,7 @@ export function Documents() {
   return (
     <>
       <PageHead title="Documentos" sub="Cofre privado: cada arquivo tem tipo verificado, hash SHA-256, validade e acesso só para quem precisa." />
+      <ContextHelp ctxKey="documents.upload" />
       <Panel title="Enviar documento">
         <div className="inline-form">
           <Field label="Tipo"><Select value={upType} onChange={setUpType} options={docOpts} /></Field>

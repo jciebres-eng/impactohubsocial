@@ -7,7 +7,7 @@ Senha padrão: variável DEMO_PASSWORD (padrão "Demo-Impacto-2026!") — nunca 
 from __future__ import annotations
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 
 from .db.pool import DbContext
 from .db.pq import Json
@@ -16,7 +16,8 @@ from .services.validators import cnpj_with_check_digits
 
 DEMO_EMAILS = {"osc": "osc@demo.impacto.local", "company": "empresa@demo.impacto.local",
                "provider": "contador@demo.impacto.local", "government": "governo@demo.impacto.local",
-               "admin": "admin@demo.impacto.local"}
+               "admin": "admin@demo.impacto.local", "editor": "editor@demo.impacto.local", "reviewer": "revisor@demo.impacto.local",
+               "support": "suporte@demo.impacto.local"}
 
 
 def seed(state, force: bool = False) -> dict:
@@ -25,7 +26,7 @@ def seed(state, force: bool = False) -> dict:
         raise RuntimeError("seed de demonstração bloqueado fora de development/test")
     pw = os.getenv("DEMO_PASSWORD", "Demo-Impacto-2026!")
     h = passwords.hash_password(pw)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     with state.pool.tx(DbContext(system=True)) as c:
         if c.scalar("SELECT count(*) FROM users WHERE email = $1", DEMO_EMAILS["osc"]):
             return {"status": "already_seeded"}
@@ -52,7 +53,7 @@ def seed(state, force: bool = False) -> dict:
         plat = c.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or \
             c.scalar("INSERT INTO organizations(kind, legal_name, compliance_status) VALUES ('platform','Administração da Plataforma','approved') RETURNING id::text")
         u_osc = user(DEMO_EMAILS["osc"], "Ana Exemplo (OSC)", osc)
-        u_comp = user(DEMO_EMAILS["company"], "Bruno Exemplo (Empresa)", comp)
+        user(DEMO_EMAILS["company"], "Bruno Exemplo (Empresa)", comp)
         u_prov = user(DEMO_EMAILS["provider"], "Carla Exemplo (Contadora)", prov)
         user(DEMO_EMAILS["government"], "Davi Exemplo (Governo)", gov)
         u_admin = user(DEMO_EMAILS["admin"], "Admin Demo", plat, admin=True)
@@ -95,7 +96,8 @@ def seed(state, force: bool = False) -> dict:
               " current_date + 395,'open')", pid, osc)
         c.run("UPDATE projects SET visibility = 'published', status = 'published', published_at = now() WHERE id = $1", pid)
         pdf = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
-        import hashlib, uuid as _uuid
+        import hashlib
+        import uuid as _uuid
         for dt, title, valid in (("estatuto_social", "Estatuto social (exemplo)", None), ("cartao_cnpj", "Cartão CNPJ (exemplo)", None),
                                  ("ata_eleicao_diretoria", "Ata de eleição (exemplo)", now.date() + timedelta(days=500)),
                                  ("cnd_federal", "CND federal (exemplo)", now.date() + timedelta(days=150))):
@@ -108,7 +110,19 @@ def seed(state, force: bool = False) -> dict:
               " 'Material fictício de demonstração.','guide','https://example.org/guia-ficticio','published', now())", gov)
         _seed_solutions(c, osc, u_osc)
         _seed_institutional(c, osc, u_osc, u_admin, org, user)
+        _seed_knowledge(c, plat, user)
     return {"status": "seeded", "password_env": "DEMO_PASSWORD", "users": DEMO_EMAILS}
+
+
+def _seed_knowledge(c, plat: str, user) -> None:
+    """Central de Conhecimento: contas internas de demonstração (editor/revisor/suporte) e conteúdo inicial publicado COM o selo DEMO (autor ≠ revisor)."""
+    from .services import kb_seed
+    u_ed = user(DEMO_EMAILS["editor"], "Eva Exemplo (Editora)", plat)
+    u_rv = user(DEMO_EMAILS["reviewer"], "Rui Exemplo (Revisor)", plat)
+    u_sp = user(DEMO_EMAILS["support"], "Sol Exemplo (Suporte)", plat)
+    for uid, role in ((u_ed, "editor"), (u_rv, "reviewer"), (u_sp, "support")):
+        c.run("INSERT INTO staff_roles(user_id, role) VALUES ($1,$2)", uid, role)
+    kb_seed.import_seed(c, author_id=u_ed, reviewer_id=u_rv, publish=True)
 
 
 # Soluções de DEMONSTRAÇÃO (is_demo = true; só em development/test). Todas fictícias, autodeclaradas, sem evidência verificada.

@@ -1,8 +1,10 @@
-# Plataforma Impacto — v0.11.0
+# Plataforma Impacto — v0.12.0
 
 Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
 
 > **Estado:** pronto para homologação/piloto controlado. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.12.0:** Central de Conhecimento — `/ajuda` (busca, guias, biblioteca, FAQ, assistente ancorado), Academia, eventos, suporte com SLA, parcerias, demonstração, solicitação de teste, boletim e CMS em `/admin/central`. Começa em `KNOWLEDGE_HUB.md`. **Sem conteúdo oficial real ainda (só exemplos rotulados).**
 
 **Novo no v0.11.0:** monetização SaaS — trial de 14 dias FULL sem cartão, níveis FREE/PLUS/PREMIUM/GOV, cobrança mensal/anual (Stripe, só simulado em testes), vouchers, licenças e convênios. Comece por `docs/billing.md`. **Preços não definidos; Stripe não homologado.**
 

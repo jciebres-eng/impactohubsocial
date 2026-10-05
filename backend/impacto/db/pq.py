@@ -17,9 +17,10 @@ import ctypes
 import ctypes.util
 import json
 import uuid
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, UTC
 from decimal import Decimal
-from typing import Any, Iterable, Sequence
+from typing import Any
+from collections.abc import Iterable, Sequence
 
 # --------------------------------------------------------------------------------------------
 # Carregamento da libpq
@@ -251,7 +252,7 @@ def _parse_bool(s: str) -> bool:
 
 def _parse_ts(s: str) -> datetime:
     dt = datetime.fromisoformat(s)
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
 def _parse_json(s: str) -> Any:
@@ -332,7 +333,7 @@ class Connection:
     def __del__(self):  # pragma: no cover
         try:
             self.close()
-        except Exception:
+        except Exception:  # noqa: S110 - destrutor: fechar é best-effort
             pass
 
     # -- execução ------------------------------------------------------------------------------

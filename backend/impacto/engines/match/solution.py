@@ -24,7 +24,7 @@ class SolutionMatchInput:
     prefs: dict
 
     @staticmethod
-    def build(funder: dict, solution: dict, prefs: dict | None = None) -> "SolutionMatchInput":
+    def build(funder: dict, solution: dict, prefs: dict | None = None) -> SolutionMatchInput:
         return SolutionMatchInput(_pick(funder, _F), _pick(solution, _S), _pick(prefs or {}, _P))
 
 

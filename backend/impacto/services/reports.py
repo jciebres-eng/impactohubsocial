@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from ..db.pq import Connection
 from ..http import ApiError
@@ -69,7 +69,7 @@ def build(c: Connection, rtype: str, kind: str, org_id: str, project_id: str | N
     sections: list[dict] = []
     fn = _BUILDERS[rtype]
     fn(c, kind, org_id, projects, pids, sections)
-    return {"type": rtype, "title": TYPES[rtype][0], "organization": org["name"], "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    return {"type": rtype, "title": TYPES[rtype][0], "organization": org["name"], "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "scope": {"projects": len(projects), "project_id": project_id}, "sections": sections, "wording": WORDING}
 
 

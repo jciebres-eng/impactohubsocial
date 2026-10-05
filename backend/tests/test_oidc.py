@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import jwt
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from tests.support import Client, db_system, server
+from tests.support import Client, server
 
 
 class FakeIdP:

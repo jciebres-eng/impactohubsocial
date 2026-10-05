@@ -1,5 +1,16 @@
 # Release notes — v0.11.0
 
+## v0.12.0 — Central de Conhecimento
+**Resumo:** hub de ajuda (guias, busca, ajuda contextual, biblioteca, FAQ, assistente ancorado), Academia com quiz e certificado não oficial, eventos, suporte com SLA, parcerias, demonstração, solicitação de teste, boletim e CMS editorial com quatro olhos. **Não há conteúdo oficial real publicado** — só exemplos rotulados.
+- **Quem usa:** qualquer pessoa pode buscar, ler guias públicos, ver eventos/cursos, pedir demonstração, propor parceria e assinar o boletim (com confirmação por e-mail). Quem entrou salva checklists, faz cursos, abre chamados e se inscreve em eventos.
+- **Equipe:** `/admin/central` (editor escreve; revisor aprova e publica — outra pessoa). Suporte atende pela fila com SLA.
+- **Avisos por e-mail** agora saem para cobrança, suporte e eventos (respeitando `/ajuda/preferencias`).
+- **O que NÃO é:** o assistente não usa IA generativa; certificados não são oficiais; SLA inicial é hipótese; preços e Stripe real continuam pendentes. Veja `KNOWLEDGE_HUB.md` §4.1.
+- Atualização: aplicar a migração `0009`; configurar o worker para o job `hub_ops`; opcionalmente `kb-import` para criar rascunhos.
+
+---
+
+
 **Resumo v0.11.0:** monetização completa sobre o billing existente — níveis FREE/PLUS/PREMIUM/GOV, trial de 14 dias FULL sem cartão, cobrança mensal/anual por Stripe (webhooks seguros), vouchers, licenças e convênios, tudo com preço/desconto/direitos decididos no servidor. **Preços ainda não definidos e Stripe ainda não homologado** (`docs/billing.md`).
 ## Para qualquer organização
 - Ao se cadastrar você recebe **14 dias de acesso FULL, sem cartão**. Você pode cancelar a qualquer momento: o acesso FULL continua até o fim do teste, **nenhuma cobrança é feita**, e depois a conta passa ao plano gratuito — seus dados e histórico financeiro permanecem.

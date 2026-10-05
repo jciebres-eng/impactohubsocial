@@ -47,3 +47,6 @@ Coluna nova: `organization_qualifications.areas text[]`. Banco de desenvolviment
 | `entitlement_grants` + origem ampliada, motivo, `agreement_id`, revogação | licenças com origem, revogáveis | `billing_guard` |
 | `agreements`, `agreement_members` | convênios/GOV | RLS só privilegiado (código nunca visível); quatro olhos (CHECK) |
 Banco de desenvolvimento: **120 tabelas, 247 políticas RLS**.
+
+## v0.12.0 — migração 0009 (Central de Conhecimento)
+32 tabelas novas (120 → 152 no banco de desenvolvimento), todas com RLS. Detalhe por grupo, gatilhos e funções: `KNOWLEDGE_DATA_MODEL.md`. Destaques: quatro olhos por CHECK, versões imutáveis, gabarito de quiz inacessível à aplicação, `support_guard`, duplo opt-in do boletim com token só em hash.

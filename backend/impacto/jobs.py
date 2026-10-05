@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from .adapters.http_client import HttpClient
 from .db.pool import DbContext
@@ -171,7 +171,7 @@ def import_source(app, s: dict, http: HttpClient | None = None) -> dict:
                     continue
                 closes = it.get("closes_at") or None
                 try:
-                    closes = datetime.fromisoformat(str(closes)).astimezone(timezone.utc) if closes else None
+                    closes = datetime.fromisoformat(str(closes)).astimezone(UTC) if closes else None
                 except ValueError:
                     closes = None
                 causes = it.get("causes") or []
@@ -180,7 +180,7 @@ def import_source(app, s: dict, http: HttpClient | None = None) -> dict:
                 terr = [x.strip() for x in (terr.split(",") if isinstance(terr, str) else terr) if x and str(x).strip()][:20]
                 instrument = it.get("instrument") if it.get("instrument") in ("grant", "edital", "fund", "financing", "prize", "incentive_law",
                                                                               "donation", "other") else "edital"
-                status_call = "open" if (closes is None or closes > datetime.now(timezone.utc)) else "closed"
+                status_call = "open" if (closes is None or closes > datetime.now(UTC)) else "closed"
                 r = c.one("INSERT INTO calls(source_type, source_id, source_reference, sphere, instrument, funder_name, title, summary, url, causes,"
                           " territories, closes_at, status, managed_on_platform, last_verified_at) VALUES ('imported',$1,$2,$3,$4,$5,$6,$7,$8,"
                           " $9::text[],$10::text[],$11::timestamptz,$12,false, now()) ON CONFLICT (source_id, source_reference) DO UPDATE SET"
@@ -268,8 +268,15 @@ def billing_lifecycle(app) -> dict:
     return monetization.lifecycle_job(app)
 
 
+def hub_ops(app) -> dict:
+    """Central de Conhecimento: escalonamento de SLA, lembretes de evento, envio do boletim (duplo opt-in), e-mails de cobrança/teste/suporte/eventos e retenção de analytics (18 meses)."""
+    from .services import hub
+    with app.pool.tx(DbContext(system=True)) as c:
+        return {**hub.sla_escalation(c), **hub.event_reminders(c), **hub.bulletin_dispatch(app, c), **hub.notification_emails(app, c), **hub.retention(c)}
+
+
 JOBS = [("close_calls", close_calls), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle)]
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops)]
 
 
 def run_once(app) -> list[dict]:

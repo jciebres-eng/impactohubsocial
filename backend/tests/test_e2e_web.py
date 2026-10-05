@@ -3,9 +3,8 @@ Pulado automaticamente se o Playwright/Chromium ou o build do frontend não esti
 import re
 import unittest
 import uuid
-from pathlib import Path
 
-from tests.support import PASSWORD, ROOT, db_system, last_token_for, new_account, server
+from tests.support import PASSWORD, ROOT, last_token_for, new_account, server
 
 DIST = ROOT / "web" / "dist" / "index.html"
 try:

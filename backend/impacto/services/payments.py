@@ -11,7 +11,7 @@ from __future__ import annotations
 import csv
 import io
 import re
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 
 from ..db.pq import Connection
 from ..http import ApiError
@@ -189,9 +189,9 @@ def reconcile(c: Connection, org_id: str) -> dict:
     used: set[str] = set()
     matched = manual = 0
     for p in pays:
-        cand = [l for l in lines if l["id"] not in used and l["amount_cents"] == p["amount_cents"]
-                and abs((l["booked_on"] - p["d"]).days) <= 5 + 0]
-        exact = [l for l in cand if p["external_ref"] and l["reference"] and l["reference"].strip().lower() == p["external_ref"].strip().lower()]
+        cand = [ln for ln in lines if ln["id"] not in used and ln["amount_cents"] == p["amount_cents"]
+                and abs((ln["booked_on"] - p["d"]).days) <= 5 + 0]
+        exact = [ln for ln in cand if p["external_ref"] and ln["reference"] and ln["reference"].strip().lower() == p["external_ref"].strip().lower()]
         pick = exact[0] if exact else (cand[0] if len(cand) == 1 else None)
         if pick:
             used.add(pick["id"])

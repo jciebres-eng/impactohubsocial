@@ -31,9 +31,11 @@ def _org_criterion(code: str, params: dict, facts: dict, today: date, ctx: dict)
         for t in params.get("doc_types", []):
             st, d = best_state(docs, t, today)
             if st == "validated":
-                ver.append(as_date(d.get("validated_at"))); exp.append(as_date(d.get("valid_until")))
+                ver.append(as_date(d.get("validated_at")))
+                exp.append(as_date(d.get("valid_until")))
             else:
-                got = False; miss.append(t)
+                got = False
+                miss.append(t)
         return _basis(got, max((v for v in ver if v), default=None) if got else None, exp, "Documentos validados: " + ", ".join(params.get("doc_types", [])) if got else "Faltam/pendentes: " + ", ".join(miss))
     if code == "qualification_verified":
         t = params.get("type")

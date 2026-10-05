@@ -5,7 +5,7 @@ import { tokenStore } from "./native";
 
 export type Org = { id: string; kind: "osc" | "company" | "individual" | "provider" | "government" | "platform"; legal_name: string; trade_name?: string; compliance_status: string; role: string };
 export type Me = {
-  user: { id: string; email: string; full_name: string; email_verified: boolean; mfa_enabled: boolean; mfa_verified: boolean; is_platform_admin: boolean };
+  user: { id: string; email: string; full_name: string; email_verified: boolean; mfa_enabled: boolean; mfa_verified: boolean; is_platform_admin: boolean; staff_roles?: string[] };
   active_org: Org | null;
   organizations: Org[];
   entitlements: { plans: string[]; plan_names: string[]; features: string[]; limits: Record<string, number | null> } | null;

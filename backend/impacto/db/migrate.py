@@ -67,7 +67,7 @@ def migrate(dsn: str, *, sync_reference: bool = True, log=print) -> list[str]:
     except Exception:
         try:
             conn.execute_script("ROLLBACK;")
-        except Exception:
+        except Exception:  # noqa: S110 - rollback best-effort; a exceção original é relançada
             pass
         raise
     finally:

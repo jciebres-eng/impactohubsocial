@@ -223,19 +223,26 @@ def relevance(intent: dict, filters: dict, sol: dict, feats: dict) -> dict:
     stage, kind, trust = sol["stage"], sol["kind"], sol["trust_level"]
     if (d["proven"] or filters.get("proven")) and stage in ("running", "completed"):
         if trust in ("evidenced", "verified"):
-            adj += w["business_rules"]["desired_match_bonus"]; adjustments.append("+bônus: busca por solução comprovada e esta tem evidência verificada")
+            adj += w["business_rules"]["desired_match_bonus"]
+            adjustments.append("+bônus: busca por solução comprovada e esta tem evidência verificada")
         else:
-            adj -= w["business_rules"]["unproven_when_proof_wanted_penalty"]; adjustments.append("−penalidade: busca por solução comprovada, mas esta é autodeclarada")
+            adj -= w["business_rules"]["unproven_when_proof_wanted_penalty"]
+            adjustments.append("−penalidade: busca por solução comprovada, mas esta é autodeclarada")
     elif d["proven"] and (kind == "idea" or stage in ("idea", "proposal")):
-        adj -= w["business_rules"]["unproven_when_proof_wanted_penalty"]; adjustments.append("−penalidade: busca por solução que já funcionou; esta ainda não foi executada")
+        adj -= w["business_rules"]["unproven_when_proof_wanted_penalty"]
+        adjustments.append("−penalidade: busca por solução que já funcionou; esta ainda não foi executada")
     if d["ready_to_fund"] and sol.get("seeking_funding"):
-        adj += w["business_rules"]["desired_match_bonus"]; adjustments.append("+bônus: busca por projeto pronto para financiamento")
+        adj += w["business_rules"]["desired_match_bonus"]
+        adjustments.append("+bônus: busca por projeto pronto para financiamento")
     if d["idea"] and kind == "idea":
-        adj += w["business_rules"]["desired_match_bonus"]; adjustments.append("+bônus: busca por ideias")
+        adj += w["business_rules"]["desired_match_bonus"]
+        adjustments.append("+bônus: busca por ideias")
     if d["methodology"] and kind in ("methodology", "social_tech"):
-        adj += w["business_rules"]["desired_match_bonus"]; adjustments.append("+bônus: busca por metodologia/tecnologia social")
+        adj += w["business_rules"]["desired_match_bonus"]
+        adjustments.append("+bônus: busca por metodologia/tecnologia social")
     if d["academic"] and kind == "academic":
-        adj += w["business_rules"]["desired_match_bonus"]; adjustments.append("+bônus: busca por conteúdo acadêmico")
+        adj += w["business_rules"]["desired_match_bonus"]
+        adjustments.append("+bônus: busca por conteúdo acadêmico")
     if score is not None:
         score = round(max(0.0, min(100.0, score + adj)), 1)
     return {"score": score, "confidence": round(100 * kw / applicable, 1) if applicable else None, "version": SCORE_VERSIONS["relevance"],

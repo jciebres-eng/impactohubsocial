@@ -37,7 +37,7 @@ def combine(sols: list[dict]) -> dict:
                 notes.append(f"“{a['title']}” ({a['uf']}) e “{b['title']}” ({b['uf']}) atuam em UFs diferentes: definir território de aplicação.")
             if a.get("budget_cents") and b.get("budget_cents") and max(a["budget_cents"], b["budget_cents"]) > 5 * min(a["budget_cents"], b["budget_cents"]):
                 conflicts.append({**pair, "reason": "Escalas de orçamento muito distintas (>5×): integração exige redimensionamento."})
-            for x, y in ((a, b), (b, a)):
+            for x, _y in ((a, b), (b, a)):
                 if not x.get("allow_adaptation") or not x.get("allow_replication"):
                     conflicts.append({"a": x["id"], "titles": [x["title"]], "reason": "Licença/condições do autor restringem adaptação ou replicação: pedir autorização antes de combinar."})
                     break
@@ -55,7 +55,8 @@ def combine(sols: list[dict]) -> dict:
     for c in conflicts:
         k = (c.get("a"), c.get("b"), c["reason"])
         if k not in seen:
-            seen.add(k); uniq.append(c)
+            seen.add(k)
+            uniq.append(c)
     return {"engine_version": ENGINE_VERSION, "count": n, "complementary": complementary, "overlaps": overlaps, "conflicts": uniq, "dependencies": deps,
             "opportunities": opps, "notes": notes, "shared_themes": sorted(shared_t), "shared_population": sorted(shared_p),
             "union": {"themes": sorted(allt), "population": sorted(allp), "ods": sorted(allo)},

@@ -38,7 +38,7 @@ def _check_codes(c, d: dict, org_kind: str, has_cnpj: bool) -> None:
         svc.require_catalog_code(cat, "legal_nature", d.get("legal_nature_code"), "legal_nature_code")
         svc.require_catalog_code(cat, "institutional_profile", d.get("institutional_profile"), "institutional_profile")
     except ValueError as e:
-        raise ApiError(422, "validation_error", str(e), {"valid": {k: sorted(v) for k, v in cat.items() if k in ("legal_nature", "institutional_profile")}})
+        raise ApiError(422, "validation_error", str(e), {"valid": {k: sorted(v) for k, v in cat.items() if k in ("legal_nature", "institutional_profile")}}) from e
     code = d.get("legal_nature_code")
     if code:
         attrs = cat["legal_nature"][code]["attributes"]
@@ -119,7 +119,7 @@ def _check_qualification(c, ctx: Ctx, d: dict, *, creating: bool) -> None:
         try:
             svc.require_catalog_code(cat, "qualification_type", d["qualification_type"], "qualification_type")
         except ValueError as e:
-            raise ApiError(422, "validation_error", str(e), {"valid": sorted(cat.get("qualification_type", {}))})
+            raise ApiError(422, "validation_error", str(e), {"valid": sorted(cat.get("qualification_type", {}))}) from e
     if d.get("issue_date") and d.get("expiration_date") and d["expiration_date"] < d["issue_date"]:
         raise ApiError(422, "dates_invalid", "A data de validade não pode ser anterior à data de emissão")
     if d.get("document_id") and not c.one("SELECT 1 FROM documents WHERE id = $1 AND org_id = $2 AND deleted_at IS NULL", d["document_id"], ctx.org_id):

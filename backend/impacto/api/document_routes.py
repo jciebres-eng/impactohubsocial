@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import date
+from datetime import date, UTC
 
-from starlette.responses import RedirectResponse, Response
+from starlette.responses import Response
 
 from ..http import ApiError, Ctx, not_found, page, route
 from ..security import passwords
@@ -71,7 +71,7 @@ def upload(ctx: Ctx, form):
         iss = str(form.get("issued_on") or "").strip() or None
         issued_on = date.fromisoformat(iss) if iss else None
     except ValueError:
-        raise ApiError(422, "validation_error", "valid_until e issued_on devem ser AAAA-MM-DD")
+        raise ApiError(422, "validation_error", "valid_until e issued_on devem ser AAAA-MM-DD") from None
     origin_source = (str(form.get("origin_source") or "").strip()[:200]) or None
     data = f.file.read(ctx.settings.max_upload_bytes + 1)
     if len(data) > ctx.settings.max_upload_bytes:
@@ -398,7 +398,7 @@ def _signature_material(sig: dict) -> str:
 @route("POST", "/v1/signatures", body=S.SignIn, min_role="member", status=201, rate=("sign_ip", 30, 3600), tags=("signatures",),
        summary="Assinatura eletrônica avançada na plataforma (reautenticação por senha, hash da versão exata, credencial e trilha)")
 def sign(ctx: Ctx, body: S.SignIn):
-    from datetime import datetime, timezone
+    from datetime import datetime
     with ctx.system_tx() as c:
         h = c.scalar("SELECT password_hash FROM users WHERE id = $1", ctx.user_id)
     if not passwords.verify_password(body.password, h):
@@ -426,7 +426,7 @@ def sign(ctx: Ctx, body: S.SignIn):
                 raise ApiError(403, "forbidden", "Assinatura de financiador exige relação com o projeto")
         sig = {"subject_type": body.subject_type, "subject_id": subj["id"], "subject_sha256": subj["h"], "signer_user_id": ctx.user_id,
                "signer_org_id": ctx.org_id, "credential_id": body.credential_id, "role": body.role, "statement": body.statement,
-               "signed_at": datetime.now(timezone.utc).isoformat()}
+               "signed_at": datetime.now(UTC).isoformat()}
         mac = hmac_hex(ctx.settings.secret_key, _signature_material(sig))
         sid = c.scalar("INSERT INTO signatures(review_id, subject_type, subject_id, subject_sha256, signer_user_id, signer_org_id, credential_id, role,"
                        " statement, ip, user_agent, signature_hmac, signed_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::timestamptz)"

@@ -2,8 +2,6 @@
 (filas de instrumentos e de mentoria) — com verificações próprias de acessibilidade (não substituem axe/leitor de tela)."""
 import re
 import unittest
-import uuid
-from datetime import date, timedelta
 
 from tests.support import PASSWORD, db_system, make_admin, new_account, server
 from tests.test_e2e_v080 import A11Y_JS

@@ -4,7 +4,7 @@ encerramento → ledger íntegro → relatórios. Também: edital externo e vali
 import unittest
 from datetime import date, timedelta
 
-from tests.support import PASSWORD, Client, db_system, grant_premium, make_admin, new_account, server
+from tests.support import PASSWORD, Client, grant_premium, make_admin, new_account, server
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
 REQUIRED = ["estatuto_social", "cnd_federal"]

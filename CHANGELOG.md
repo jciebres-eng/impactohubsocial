@@ -1,6 +1,21 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.12.0] — 2026-10-05 — Central de Conhecimento (cumulativo; snapshot do v0.11.0 em `history/v0.11.0/`)
+### Adicionado
+- **Central de Conhecimento** (`/ajuda`): busca híbrida (FTS + trigrama + assuntos + tela + público, com “por que apareceu”), ajuda contextual, guias com checklist/passos/ação, biblioteca (modelos preenchíveis → rascunho, checklists, documentos, versões), FAQ com votos, **assistente extrativo e ancorado** (recusa quando não há base; sem IA generativa), “Comece aqui” e pendências **medidos por dados reais**, “Minhas atividades”.
+- **Academia**: cursos, quiz corrigido no servidor (gabarito inacessível), trilhas, certificado **não oficial** com verificação pública e revogação.
+- **Eventos** (vagas, lista de espera com promoção, link só para inscritas, presença, avaliação, gravação), **suporte** (chamados, SLA com escalonamento, notas internas, recorrência), **parcerias** (CRM) e **demonstração** (públicos, com consentimento e anti-bot), **solicitação de teste** (decisão humana com motivo; reaproveita `org_trials`), **boletim** (duplo opt-in), preferências de notificação.
+- **Governança editorial**: fluxo rascunho→revisão→aprovado→publicado→arquivado, **quatro olhos no banco**, versões imutáveis, regulatório exige fonte+data, “Revisão necessária”, histórico, papéis `editor/reviewer/support`.
+- **E-mail** para avisos de cobrança, suporte e eventos (job `hub_ops`, respeita preferências, sem repetição) — fecha o pendente “avisos de cobrança só in-app”.
+- Migração `0009_v0120_knowledge_hub.sql` (32 tabelas; banco de desenvolvimento: 152). API: **475** operações (+102). Frontend: `/ajuda/*` (público e logado) e `/admin/central/*`.
+- Testes: **357** (290 + 62 de domínio + 5 E2E de navegador, 4 jornadas). Documentos: `KNOWLEDGE_HUB`, `USER_GUIDES`, `TRAINING_ACADEMY`, `SUPPORT_SYSTEM`, `PARTNERSHIP_SYSTEM`, `TRIAL_SYSTEM`, `CONTENT_GOVERNANCE`, `KNOWLEDGE_DATA_MODEL`, `STORE_READINESS`.
+### Alterado
+- **Lint Python**: `ruff` instalado e executado (`docs/evidence/ruff_v0.12.0.log`); ~40 arquivos receberam correções que preservam o comportamento (suíte verde antes e depois).
+- `Principal.staff_roles`, `RouteSpec.staff`; `/v1/me` devolve `staff_roles`; `jobs.py` ganhou `hub_ops`.
+### Não feito / pendente (declarado)
+- **Nenhum conteúdo real**: só exemplos `demo=true`; nenhuma regra fiscal/jurídica aprovada. Sem IA generativa; sem embeddings; pesos de busca e SLA inicial são **hipótese**. Preços, nota fiscal e Stripe real seguem pendentes. Editor de curso/recurso/FAQ/evento é JSON validado. Curso publicado não é editado no lugar. Botão de ajuda contextual ligado em 3 telas. Auditoria de dependências npm/pip **não executada** (rede bloqueada). Sem axe/leitor de tela; apps móveis não compilados.
+
 ## [0.11.0] — 2026-10-05 — Monetização SaaS (cumulativo; snapshot do v0.10.1 em `history/v0.10.1/`)
 ### Adicionado
 - **Níveis FREE / PLUS / PREMIUM(FULL) / GOV** (`plans.tier`, `config/plans@1.1`; planos `osc_plus`, `company_plus`, `gov_institutional`) e função central de direitos (`entitlements.effective/get_entitlements/has_access`). Preços **não definidos** (nunca inventados).

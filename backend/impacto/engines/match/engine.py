@@ -21,7 +21,7 @@ from __future__ import annotations
 import json
 import math
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -89,7 +89,7 @@ class MatchInput:
     inst: list[dict] | None = None   # requisitos institucionais já avaliados (camada institucional); sem plano/voucher
 
     @classmethod
-    def build(cls, direction: str, **raw: Any) -> "MatchInput":
+    def build(cls, direction: str, **raw: Any) -> MatchInput:
         """Único ponto de entrada: descarta qualquer campo fora da lista branca."""
         proj = _pick(raw.get("project"), PROJECT_FIELDS) if raw.get("project") else None
         if proj and proj.get("milestones"):
@@ -113,7 +113,7 @@ class MatchInput:
 # Utilitários
 # ------------------------------------------------------------------------------------------------
 def _today(mi: MatchInput) -> date:
-    return mi.today or datetime.now(timezone.utc).date()
+    return mi.today or datetime.now(UTC).date()
 
 
 def _as_date(v) -> date | None:

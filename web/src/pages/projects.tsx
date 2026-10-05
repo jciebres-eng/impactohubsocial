@@ -4,6 +4,7 @@ import { centsToInput, date, label, money, n, parseMoney, MATCH_STATE } from "..
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, MoneyFlow, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { ContextHelp } from "./help";
 import { MatchVerdict } from "../ui/trail";
 import { UploadButton } from "./documents";
 
@@ -71,6 +72,7 @@ export function NewProject() {
   return (
     <>
       <PageHead title="Novo projeto" back={<Link to="/projetos" className="back">Projetos</Link>} />
+      <ContextHelp ctxKey="project.new" />
       <div className="split">
         <Panel title="Descreva a necessidade com suas palavras">
           <TextArea rows={7} value={text} onChange={setText}

@@ -1,6 +1,16 @@
-# API — documentação (v0.11.0)
+# API — documentação (v0.12.0)
 
-Referência completa **gerada do código**: `docs/API.md` (373 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (475 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+
+## Central de Conhecimento (102 operações novas, v0.12.0)
+| Grupo | Rotas principais |
+|---|---|
+| Busca/leitura (públicas, com limite de taxa) | `GET /v1/help/search·context·categories·articles[/{slug}]·faqs·resources[/{slug}]·events[/{slug}]·courses[/{slug}]·sitemap` · `POST /v1/help/assistant` · `GET /v1/help/certificates/{code}` |
+| Autenticadas | `POST /v1/help/feedback` · `GET·PUT /v1/help/checklists` · `GET /v1/help/start·pending·activities·recommendations` · `POST …/resources/{id}/download-url·use-template` · eventos `…/register·rate` · cursos `…/enroll·certificate`, `GET·POST /v1/help/lessons/{id}[/complete]` |
+| Suporte | `POST·GET /v1/support/tickets` · `GET …/{id}` · `POST …/{id}/messages·rate·close` |
+| Captação (públicas, consentimento + anti-bot) | `POST /v1/help/partnerships·demo-requests·newsletter` · `POST /v1/help/newsletter/confirm·unsubscribe` · `POST·GET /v1/help/trial-requests` (dono da organização) |
+| Preferências | `GET·PUT /v1/notifications/prefs` |
+| Administração (`staff`: editor/reviewer/support + administradores, MFA) | `/v1/admin/staff-roles` · `/v1/admin/content/{overview,categories,articles,resources,faqs,courses,paths,events,history}` · `POST …/{id}/transition` por tipo · `POST /v1/admin/content/{tipo}/{id}/reviewed` · `/v1/admin/support/{tickets,sla}` · `/v1/admin/hub/{partnerships,demo-requests,trial-requests,trials,analytics,newsletter,certificates}` |
 
 ## Biblioteca de Soluções (60 operações novas)
 | Grupo | Rotas principais |

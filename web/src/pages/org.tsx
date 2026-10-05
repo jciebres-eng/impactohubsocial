@@ -4,6 +4,7 @@ import { centsToInput, date, dateTime, label, money, n, parseMoney } from "../fo
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { ContextHelp } from "./help";
 import { UFS } from "./public";
 import { UploadButton } from "./documents";
 
@@ -190,6 +191,7 @@ export function Compliance() {
       <PageHead title="Verificação do cadastro" sub="Necessária para receber aprovação de financiadores e publicar editais. A decisão final é humana."
         back={<Link to="/organizacao" className="back">Organização</Link>}
         actions={data?.compliance_status !== "in_review" && <Button variant="primary" busy={busy} onClick={() => run(() => api.post("/v1/compliance/request-review"), "Verificação solicitada").then(() => { reload(); reloadMe(); })}>Solicitar verificação</Button>} />
+      <ContextHelp ctxKey="compliance.status" />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <>

@@ -155,3 +155,24 @@ Conta/domínio/TLS · PostgreSQL gerenciado · S3 · ClamAV · SMTP · Stripe (e
 | Avisos (dias 1/7/11/13/14 etc.) | YELLOW | in-app testado | sem e-mail |
 | Frontend `/conta/plano`, admin | YELLOW | `tsc` + build OK; sem E2E de navegador para o fluxo de cobrança | E2E com Stripe de teste |
 **Estado da monetização: YELLOW** (código e 290 testes verdes; provedor real, preços, jurídico e e-mail pendentes).
+
+## 3-E. Central de Conhecimento (v0.12.0) — prova × pendência
+Legenda: GREEN = provado por teste/execução neste ambiente · YELLOW = implementado, falta serviço/validação externa · RED = ausente.
+| Área | Estado | Prova | Pendência |
+|---|---|---|---|
+| Knowledge Hub (guias, ajuda contextual, comece aqui, pendências) | GREEN (mecanismo) | `Editorial`, `Visibility`, `Onboarding`, E2E 1–2 | **conteúdo oficial real: RED** (só exemplos `demo`); botão contextual em 3 telas |
+| Busca | YELLOW | `SearchAndAssistant` (sinônimos, explicação, vazio, entrada inválida) | pesos hipótese; sem embeddings; calibrar com uso real |
+| Assistente | GREEN (ancorado/recusa) / RED (IA generativa) | `test_assistant_*` | sem provedor de IA; extrativo |
+| Guias de usuário | YELLOW | seed de 14 guias `demo` | redação oficial |
+| Documentos/biblioteca | GREEN | `FaqAndResources` (modelo→rascunho, versões, download temporário) | arquivos oficiais |
+| Academia | GREEN | `Academy` + E2E 3 (quiz, certificado, verificação pública) | conteúdo real; certificado **não oficial**; curso publicado não editável no lugar |
+| Eventos | GREEN | `Events` + E2E 4 | e-mail real |
+| FAQ | GREEN | `test_faq_*` | conteúdo oficial |
+| Suporte/SLA | GREEN (mecanismo) / YELLOW (SLA hipótese, SMTP) | `Support` + E2E 2 | validar metas |
+| Parcerias/Demo | GREEN (mecanismo) / YELLOW (jurídico) | `Captation`, E2E 1 | base legal/retenção |
+| Trial (pedido) | GREEN | `TrialRequests` + E2E 4 | Stripe real, preços (RED) |
+| Analytics | GREEN | `AnalyticsAndGovernance` | — |
+| Segurança | GREEN (testado) / YELLOW (pentest, dependências não auditadas) | `SECURITY_AUDIT.md` | pentest; `npm audit`/`pip-audit` em CI |
+| LGPD | YELLOW | `LGPD_AUDIT.md` | jurídico/DPO |
+| Mobile/responsivo | YELLOW | E2E em viewport 390 px (jornada 1); layout responsivo | apps nativos não compilados; sem axe |
+Itens **RED herdados** do pedido: conteúdo real/regras fiscais aprovadas, IA generativa, preços/nota fiscal, embeddings. **Resolvido nesta versão:** lint Python (ruff) e avisos de cobrança por e-mail (job `hub_ops`; SMTP real não exercitado).

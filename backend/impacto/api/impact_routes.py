@@ -301,7 +301,7 @@ def determinants(ctx: Ctx, q: DetQ):
                         "suppressed": n < k})
     return {"territory": q.territory, "min_group": k, "domains": out,
             "note": ("Contagens vêm só de projetos publicados na plataforma — NÃO são estatísticas populacionais nem indicam necessidade relativa. "
-                     "Grupos com menos de %d projetos são suprimidos. Não há dados externos (IBGE/Censo) carregados nesta versão." % k),
+                     f"Grupos com menos de {k} projetos são suprimidos. Não há dados externos (IBGE/Censo) carregados nesta versão."),
             "taxonomy_note": _DET["_note"]}
 
 

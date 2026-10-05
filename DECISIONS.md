@@ -57,3 +57,13 @@ A ADR **015** (escolha de cloud, gateway, IdP, nome/marca) **continua ABERTA** �
 | 064 | **Webhook idempotente e tolerante a ordem** (`event.id`, `event.created` × `last_event_at`); `payment_intent.*`/`invoice.created` ignorados | Stripe reenvia e reordena eventos | testado só com dublê | Aceita |
 | 065 | **Divisão PLUS × PREMIUM é HIPÓTESE; preços ficam NULL** (contratação online recusada sem preço) | não inventar produto/valor | decisão do proprietário | Aceita — pendente |
 | 066 | **Cartão fora da plataforma**: método de pagamento só no portal do provedor | PCI/LGPD | sem colunas de cartão (testado) | Aceita |
+| 067 | **Central de Conhecimento é um módulo próprio e reaproveita notificações, documentos e trial** (nenhuma tabela duplicada) | auditoria prévia | `OBJECTS`/`kb_*`/`hub_*` + chamadas a `monetization.start_trial` | Aceita |
+| 068 | **Busca por vocabulário de assuntos + FTS + trigrama, sem embeddings; pesos são hipótese; cada resultado explica por quê** | transparência; sem dependência de modelo | `help-search@1.0.0`; recall limitado ao vocabulário | Aceita — calibrar com uso real |
+| 069 | **Assistente é extrativo e ancorado; recusa quando não há base; `ai_used:false`** | não inventar orientação (fiscal/jurídica) | sem IA generativa; provedor de IA continua não escolhido | Aceita |
+| 070 | **Quatro olhos no banco para todo conteúdo; regulatório exige fonte+data; versões imutáveis** | governança editorial verificável | CHECKs e gatilhos; testes via SQL direto | Aceita |
+| 071 | **Todo conteúdo mostra origem e selo “Exemplo / rascunho”; exemplos nunca são indexáveis** | honestidade (não existe conteúdo oficial real) | `demo=true`, `noindex`, fora do sitemap | Aceita |
+| 072 | **Papéis internos `editor/reviewer/support` em tabela própria, com MFA; privilégio de banco continua o de modo administrativo** | menor mudança segura | disciplina de código; separação de contas internas pendente | Aceita — pendente |
+| 073 | **Suporte: pessoa nunca define prioridade/estado/SLA; SLA inicial é hipótese configurável** | integridade do atendimento | `support_guard`; valores a validar com a equipe | Aceita |
+| 074 | **Pedido de teste nunca concede acesso; decisão humana com motivo; reaproveita o trial único por organização** | anti-abuso preservado | 409 `trial_used` | Aceita |
+| 075 | **Certificados são de conclusão da plataforma, não oficiais; verificação pública mostra o aviso** | não sugerir reconhecimento | texto fixo na API e na tela | Aceita |
+| 076 | **Captação pública exige consentimento, tem isca anti-bot e limite por IP; boletim com duplo opt-in e token em hash; analytics sem texto livre, retenção 18 meses** | LGPD/minimização | testes de consentimento, honeypot e retenção | Aceita |

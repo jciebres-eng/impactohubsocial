@@ -50,3 +50,16 @@ O que falta é majoritariamente externo (contas, provedores, jurídico, tributá
 
 ## Não declarar
 Não declarar "solução comprovada" sem nível `evidenced/verified` concedido pela administração, nem "busca com IA/semântica vetorial". Não declarar "compliance", "segurança total", "benefício fiscal", "impacto comprovado" ou "publicado". A plataforma exibe disclaimers e só mostra dados cadastrados/verificados.
+
+## Central de Conhecimento (v0.12.0) — acréscimo ao semáforo
+| Área | Status | Evidência | Pendência |
+|---|---|---|---|
+| Central: backend/API | GREEN | 62 testes de domínio, 475 operações | — |
+| Central: frontend | GREEN (funcional) / YELLOW (design, acessibilidade formal) | `tsc`, build, 5 E2E (4 jornadas) | auditoria axe/leitor de tela; camada de design |
+| Conteúdo oficial | **RED** | só exemplos `demo` | redação, revisão jurídica/técnica e publicação pela equipe |
+| Assistente / IA | YELLOW | extrativo e ancorado, `ai_used:false` | escolher provedor se quiser IA generativa (com DPA e testes) |
+| Busca | YELLOW | vocabulário + FTS; pesos hipótese | calibrar com buscas reais; embeddings opcionais |
+| Suporte/SLA | YELLOW | testado; SLA inicial hipótese; SMTP real não exercitado | validar metas com a equipe |
+| Parcerias/demo/boletim | YELLOW | testado | base legal, retenção, SMTP real |
+| Lint Python | GREEN | `ruff` limpo (`docs/evidence/ruff_v0.12.0.log`) | rodar em CI |
+| Auditoria de dependências | YELLOW | **não executada** | `npm audit`/`pip-audit` em CI |

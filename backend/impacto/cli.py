@@ -2,6 +2,7 @@
 
 python -m impacto.cli create-admin --email ops@empresa.com --name "Fulano"   # senha lida do stdin (nunca por argumento)
 python -m impacto.cli seed-demo                                              # SOMENTE development/test
+python -m impacto.cli kb-import --author-email ops@empresa.com             # conteúdo inicial como RASCUNHO (demo), para revisão editorial
 python -m impacto.cli gen-secrets                                            # gera valores para SECRET_KEY etc. (não grava nada)
 """
 from __future__ import annotations
@@ -21,6 +22,8 @@ def main(argv: list[str]) -> int:
     a.add_argument("--email", required=True)
     a.add_argument("--name", required=True)
     sub.add_parser("seed-demo")
+    k = sub.add_parser("kb-import", help="importa o conteúdo inicial da Central como RASCUNHOS (demo) para revisão editorial")
+    k.add_argument("--author-email", required=True)
     sub.add_parser("gen-secrets")
     args = p.parse_args(argv)
 
@@ -43,6 +46,17 @@ def main(argv: list[str]) -> int:
             return 1
         from .seed_dev import seed
         print(seed(state, force=True))
+        return 0
+
+    if args.cmd == "kb-import":
+        from .services import kb_seed
+        with state.pool.tx(DbContext(system=True)) as c:
+            uid = c.scalar("SELECT id::text FROM users WHERE email = $1", args.author_email.lower())
+            if not uid:
+                print("Autor não encontrado", file=sys.stderr)
+                return 1
+            print(kb_seed.import_seed(c, author_id=uid, reviewer_id=None, publish=False))
+        print("Itens criados como RASCUNHO (demo). A publicação exige revisão de outra pessoa no CMS.")
         return 0
 
     if args.cmd == "create-admin":

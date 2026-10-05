@@ -6,7 +6,7 @@ import unittest
 import uuid
 from datetime import date, timedelta
 
-from tests.support import Client, db_system, grant_premium, make_admin, new_account, server
+from tests.support import Client, grant_premium, make_admin, new_account, server
 from tests.test_v0100_institutional import PDF, add_qual, iso, verify_qualification
 
 TODAY = date.today()

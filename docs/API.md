@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.11.0)
+# API REST /v1 — referência gerada do código (v0.12.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (373)
+## Operações (475)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -30,6 +30,38 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/calls/{call_id}/verify` | admin da plataforma + MFA | — | Registra conferência do edital na fonte oficial (data/responsável) |
 | GET | `/v1/admin/compliance-reviews` | admin da plataforma + MFA | — | compliance queue |
 | POST | `/v1/admin/compliance-reviews/{review_id}/decide` | admin da plataforma + MFA | — | compliance decide |
+| POST | `/v1/admin/content/article-versions/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| PUT | `/v1/admin/content/article-versions/{version_id}` | admin da plataforma + MFA | — | Edita uma versão em RASCUNHO (versões revisadas são imutáveis) |
+| GET | `/v1/admin/content/articles` | admin da plataforma + MFA | — | article list |
+| POST | `/v1/admin/content/articles` | admin da plataforma + MFA | — | Cria artigo/guia (versão 1 em rascunho) |
+| GET | `/v1/admin/content/articles/{slug}` | admin da plataforma + MFA | — | article admin get |
+| PATCH | `/v1/admin/content/articles/{slug}` | admin da plataforma + MFA | — | Atualiza metadados (público, tags, telas, relacionados). O texto só muda por nova versão. |
+| POST | `/v1/admin/content/articles/{slug}/versions` | admin da plataforma + MFA | — | Nova versão (rascunho) a partir de uma edição; exige nota de mudança |
+| POST | `/v1/admin/content/categories` | admin da plataforma + MFA | — | category create |
+| GET | `/v1/admin/content/courses` | admin da plataforma + MFA | — | course list |
+| POST | `/v1/admin/content/courses` | admin da plataforma + MFA | — | Cria curso (módulos, aulas, quiz com gabarito separado) em rascunho |
+| PUT | `/v1/admin/content/courses/{id}` | admin da plataforma + MFA | — | Substitui a estrutura de um curso em RASCUNHO/REVISÃO (cursos publicados: arquive e crie outro — limitação documentada) |
+| POST | `/v1/admin/content/courses/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| POST | `/v1/admin/content/events` | admin da plataforma + MFA | — | Cria evento em rascunho (link de acesso fica restrito às inscritas) |
+| PATCH | `/v1/admin/content/events/{id}` | admin da plataforma + MFA | — | Atualiza evento (alterações em evento publicado ficam no histórico) |
+| POST | `/v1/admin/content/events/{id}/attendance` | admin da plataforma + MFA | — | Registra presença (a avaliação só é liberada a quem participou) |
+| POST | `/v1/admin/content/events/{id}/recording-to-resource` | admin da plataforma + MFA | — | Transforma a gravação do evento em recurso da biblioteca (rascunho, sujeito a revisão) |
+| GET | `/v1/admin/content/events/{id}/registrations` | admin da plataforma + MFA | — | Inscritas (dados mínimos: nome, organização, estado, presença) |
+| POST | `/v1/admin/content/events/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| GET | `/v1/admin/content/faqs` | admin da plataforma + MFA | — | faq list |
+| POST | `/v1/admin/content/faqs` | admin da plataforma + MFA | — | Cria FAQ em rascunho (ou revisão de uma publicada via revises_id) |
+| PUT | `/v1/admin/content/faqs/{id}` | admin da plataforma + MFA | — | Edita FAQ em rascunho |
+| POST | `/v1/admin/content/faqs/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| GET | `/v1/admin/content/history/{object_type}/{object_id}` | admin da plataforma + MFA | — | Histórico editorial (quem fez o quê, quando) |
+| GET | `/v1/admin/content/overview` | admin da plataforma + MFA | — | Painel editorial: itens por estado, aguardando revisão e conteúdo desatualizado |
+| POST | `/v1/admin/content/paths` | admin da plataforma + MFA | — | Cria trilha de aprendizado (cursos/guias/recursos em ordem) |
+| POST | `/v1/admin/content/paths/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| GET | `/v1/admin/content/resources` | admin da plataforma + MFA | — | resource list |
+| POST | `/v1/admin/content/resources` | admin da plataforma + MFA | — | Cria recurso (modelo, documento, checklist, vídeo, relatório, boletim) em rascunho |
+| PUT | `/v1/admin/content/resources/{id}` | admin da plataforma + MFA | — | Edita recurso em RASCUNHO |
+| POST | `/v1/admin/content/resources/{id}/new-version` | admin da plataforma + MFA | — | Nova versão de um recurso publicado (a anterior fica no histórico como 'superseded') |
+| POST | `/v1/admin/content/resources/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| POST | `/v1/admin/content/{obj_type}/{id}/reviewed` | admin da plataforma + MFA | — | Confirma que o conteúdo continua válido (zera 'Revisão necessária') |
 | GET | `/v1/admin/contribution-models` | admin da plataforma + MFA | — | Fila de revisão jurídica de modelos de contribuição |
 | POST | `/v1/admin/contribution-models/{model_id}/decide` | admin da plataforma + MFA | — | Decisão jurídica: aprova (vira utilizável em pagamentos) ou devolve ao rascunho, com parecer registrado |
 | GET | `/v1/admin/credentials` | admin da plataforma + MFA | — | credentials |
@@ -42,6 +74,19 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/flags` | admin da plataforma + MFA | — | flags |
 | PUT | `/v1/admin/flags/{key}` | admin da plataforma + MFA | — | set flag |
 | POST | `/v1/admin/grants/{grant_id}/revoke` | admin da plataforma + MFA | — | Revoga uma licença/grant (motivo obrigatório); o histórico é preservado |
+| GET | `/v1/admin/hub/analytics` | admin da plataforma + MFA | — | Analytics da Central: buscas, lacunas, utilidade, chamados, academia, eventos, parcerias |
+| POST | `/v1/admin/hub/certificates/{code}/revoke` | admin da plataforma + MFA | — | Revoga certificado de conclusão (motivo obrigatório, auditado) |
+| GET | `/v1/admin/hub/demo-requests` | admin da plataforma + MFA | — | demo list |
+| POST | `/v1/admin/hub/demo-requests/{id}/handle` | admin da plataforma + MFA | — | Agenda/conclui/cancela demonstração e avisa a pessoa por e-mail |
+| GET | `/v1/admin/hub/newsletter` | admin da plataforma + MFA | — | Inscrições do boletim (contagens; e-mails só para administradores) |
+| POST | `/v1/admin/hub/newsletter/dispatch` | admin da plataforma + MFA | — | Dispara agora o envio do boletim às inscritas devidas (o worker também faz) |
+| GET | `/v1/admin/hub/partnerships` | admin da plataforma + MFA | — | Pipeline de parcerias |
+| GET | `/v1/admin/hub/partnerships/{id}` | admin da plataforma + MFA | — | partnership get |
+| POST | `/v1/admin/hub/partnerships/{id}/move` | admin da plataforma + MFA | — | Move no pipeline (histórico) e define responsável; 'ativa' cria o registro de parceria |
+| POST | `/v1/admin/hub/partnerships/{id}/notes` | admin da plataforma + MFA | — | partnership note |
+| GET | `/v1/admin/hub/trial-requests` | admin da plataforma + MFA | — | trial req list |
+| POST | `/v1/admin/hub/trial-requests/{id}/decide` | admin da plataforma + MFA | — | Decide a solicitação de teste (motivo obrigatório): inicia/estende o trial existente ou recusa; nunca automático |
+| GET | `/v1/admin/hub/trials` | admin da plataforma + MFA | — | Painel de testes: solicitações, ativos, vencendo, conversão e uso por organização |
 | GET | `/v1/admin/institutional/agreements` | admin da plataforma + MFA | — | Fila de verificação de instrumentos (padrão: comprovante enviado) |
 | POST | `/v1/admin/institutional/agreements/{agreement_id}/decide` | admin da plataforma + MFA | — | Verifica ou rejeita o instrumento. Verificar exige número, documento VALIDADO ou URL oficial, e nota. |
 | GET | `/v1/admin/institutional/catalog` | admin da plataforma + MFA | — | Itens de catálogo em qualquer estado do fluxo editorial |
@@ -89,6 +134,16 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/solutions/queue` | admin da plataforma + MFA | — | Fila de verificação: solicitações, evidências a revisar, contestações abertas |
 | POST | `/v1/admin/solutions/{solution_id}/remove` | admin da plataforma + MFA | — | Remove a solução da biblioteca (irreversível pelo autor) |
 | POST | `/v1/admin/solutions/{solution_id}/verify` | admin da plataforma + MFA | — | Define o nível de confiança. Níveis altos exigem evidências aceitas (regras no servidor) |
+| GET | `/v1/admin/staff-roles` | admin da plataforma + MFA | — | Papéis internos (editor, reviewer, support) |
+| POST | `/v1/admin/staff-roles` | admin da plataforma + MFA | — | Concede papel interno (auditado) |
+| DELETE | `/v1/admin/staff-roles/{user_id}/{role}` | admin da plataforma + MFA | — | Revoga papel interno |
+| GET | `/v1/admin/support/sla` | admin da plataforma + MFA | — | SLA por prioridade (valores iniciais são hipótese operacional, configuráveis) |
+| PUT | `/v1/admin/support/sla/{priority}` | admin da plataforma + MFA | — | Ajusta o SLA de uma prioridade (administradores) |
+| GET | `/v1/admin/support/tickets` | admin da plataforma + MFA | — | Fila de chamados (por estado, prioridade e atraso de SLA) |
+| GET | `/v1/admin/support/tickets/{ticket_id}` | admin da plataforma + MFA | — | staff ticket get |
+| PATCH | `/v1/admin/support/tickets/{ticket_id}` | admin da plataforma + MFA | — | Estado, prioridade (recalcula SLA) e responsável |
+| POST | `/v1/admin/support/tickets/{ticket_id}/messages` | admin da plataforma + MFA | — | Responde (ou anota internamente) um chamado |
+| POST | `/v1/admin/support/tickets/{ticket_id}/to-article` | admin da plataforma + MFA | — | Vincula o chamado a um artigo (o assunto deixa de contar como recorrente sem base) |
 | GET | `/v1/admin/users` | admin da plataforma + MFA | — | users |
 | POST | `/v1/admin/users/{user_id}/status` | admin da plataforma + MFA | — | Ativa/desativa usuário (revoga sessões ao desativar) |
 | GET | `/v1/admin/voucher-batches` | admin da plataforma + MFA | — | list batches |
@@ -181,6 +236,45 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/fiscal/rules` | membro da organização ativa | papel ≥ viewer | Regras fiscais aprovadas (fonte, versão e vigência) |
 | GET | `/v1/gov/territory-stats` | membro da organização ativa | tipos: government, platform; papel ≥ viewer; plano: `gov.data` | Dados agregados e anonimizados por território e causa (k-anonimato ≥ 3 projetos por grupo) |
 | POST | `/v1/graph-edges/{edge_id}/validate` | membro da organização ativa | tipos: company, government, individual; papel ≥ manager | Revisão externa (financiador do projeto) que promove a ligação a 'causalidade validada', com evidência e justificativa |
+| GET | `/v1/help/activities` | usuário autenticado | — | Minhas atividades: chamados, cursos, eventos, certificados e solicitações |
+| GET | `/v1/help/articles` | pública | limite 600/3600s | Lista de guias/artigos publicados (visibilidade por perfil) |
+| GET | `/v1/help/articles/{slug}` | pública | limite 600/3600s | Guia/artigo com passos, checklist, erros comuns, documentos necessários, ação e conteúdos relacionados |
+| POST | `/v1/help/assistant` | pública | limite 60/3600s | Assistente ancorado: responde SÓ com conteúdo publicado, cita fontes; sem base suficiente recusa e oferece chamado. Não usa IA generativa. |
+| GET | `/v1/help/categories` | pública | limite 600/3600s | Categorias com contagem de conteúdo publicado visível para o perfil |
+| GET | `/v1/help/certificates/{code}` | pública | limite 60/3600s | Verifica a autenticidade de um certificado de conclusão pelo código |
+| GET | `/v1/help/checklists` | usuário autenticado | — | checklist get |
+| PUT | `/v1/help/checklists` | usuário autenticado | — | Salva o progresso de um checklist (por pessoa e, opcionalmente, por projeto) |
+| GET | `/v1/help/context` | pública | limite 600/3600s | Ajuda contextual de uma tela/campo (artigos, FAQs e modelos mapeados) |
+| GET | `/v1/help/courses` | pública | limite 600/3600s | Cursos publicados e trilhas por perfil |
+| GET | `/v1/help/courses/{slug}` | pública | limite 600/3600s | Curso: módulos, aulas e progresso (quando autenticada) |
+| POST | `/v1/help/courses/{slug}/certificate` | usuário autenticado | — | Emite o certificado de conclusão (não oficial) quando todas as aulas foram concluídas |
+| POST | `/v1/help/courses/{slug}/enroll` | usuário autenticado | — | course enroll |
+| POST | `/v1/help/demo-requests` | pública | limite 5/3600s | Agendamento de demonstração (consentimento obrigatório) |
+| GET | `/v1/help/events` | pública | limite 600/3600s | Agenda de eventos (vagas restantes) e gravações |
+| GET | `/v1/help/events/mine` | usuário autenticado | — | Minhas inscrições |
+| POST | `/v1/help/events/{event_id}/rate` | usuário autenticado | — | Avalia o evento (só quem participou) |
+| DELETE | `/v1/help/events/{event_id}/register` | usuário autenticado | — | Cancela a inscrição e promove a lista de espera |
+| POST | `/v1/help/events/{event_id}/register` | usuário autenticado | limite 60/3600s | Inscrição (lista de espera quando lotado) |
+| GET | `/v1/help/events/{slug}` | pública | limite 600/3600s | Evento (link de acesso só para inscritas; materiais/gravação após o evento) |
+| GET | `/v1/help/faqs` | pública | limite 600/3600s | FAQ inteligente: por categoria, perfil ou tela; com votos de utilidade |
+| POST | `/v1/help/feedback` | usuário autenticado | limite 200/3600s | "Este conteúdo ajudou?" — 'Não ajudou' exige o motivo |
+| GET | `/v1/help/lessons/{lesson_id}` | usuário autenticado | — | Conteúdo da aula (quiz sem gabarito) |
+| POST | `/v1/help/lessons/{lesson_id}/complete` | usuário autenticado | limite 300/3600s | Conclui a aula; quiz é corrigido no servidor (gabarito nunca sai do banco) |
+| POST | `/v1/help/newsletter` | pública | limite 10/3600s | Inscrição no boletim com confirmação por e-mail (duplo opt-in). Resposta idêntica exista ou não a inscrição (sem enumeração). |
+| POST | `/v1/help/newsletter/confirm` | pública | limite 30/3600s | newsletter confirm |
+| POST | `/v1/help/newsletter/unsubscribe` | pública | limite 30/3600s | newsletter unsubscribe |
+| POST | `/v1/help/partnerships` | pública | limite 5/3600s | Pedido de parceria (formulário público; consentimento obrigatório para contato) |
+| GET | `/v1/help/pending` | usuário autenticado | — | O que falta para eu avançar? (pendências derivadas de dados reais) |
+| GET | `/v1/help/recommendations` | usuário autenticado | — | Próximos conteúdos recomendados (etapas faltantes, cursos em andamento, eventos); plano não influencia |
+| GET | `/v1/help/resources` | pública | limite 600/3600s | Biblioteca de documentos, modelos, checklists, vídeos e relatórios publicados |
+| POST | `/v1/help/resources/{resource_id}/download-url` | usuário autenticado | limite 120/3600s | URL temporária (5 min) do arquivo do recurso; só recurso publicado e visível; arquivo já passou por varredura antivírus |
+| POST | `/v1/help/resources/{resource_id}/use-template` | membro da organização ativa | papel ≥ member | Preenche um modelo e cria um rascunho (drafts) da organização — conteúdo gerado do modelo, sem IA |
+| GET | `/v1/help/resources/{slug}` | pública | limite 600/3600s | Recurso da biblioteca (com modelo preenchível, checklist e versões anteriores) |
+| GET | `/v1/help/search` | pública | limite 600/3600s | Busca híbrida (texto + similaridade + vocabulário de tópicos + perfil + tela). Pública para conteúdo público; autenticada amplia por perfil. Sem embeddings. |
+| GET | `/v1/help/sitemap` | pública | limite 600/3600s | Sitemap do conteúdo PÚBLICO indexável (exemplos/DEMO e conteúdo privado ficam de fora) |
+| GET | `/v1/help/start` | membro da organização ativa | papel ≥ viewer | Comece aqui: jornada por tipo de organização com % de prontidão calculado por dados reais |
+| GET | `/v1/help/trial-requests` | membro da organização ativa | papel ≥ viewer | trial requests mine |
+| POST | `/v1/help/trial-requests` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Solicita teste de módulos/ambiente. Não concede acesso: a equipe decide (com motivo) e usa o mecanismo de trial existente. |
 | POST | `/v1/indicator-values/{value_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador do projeto valida ou rejeita um valor reportado (a OSC não valida o próprio valor — garantido no banco) |
 | GET | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ viewer | Catálogo de indicadores (plataforma, oficiais e definidos pela organização) |
 | POST | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ manager | Cria indicador próprio da organização (origem 'org_defined'; não é indicador oficial) |
@@ -234,6 +328,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | DELETE | `/v1/network/follow/{org_id}` | membro da organização ativa | papel ≥ member | unfollow |
 | POST | `/v1/network/follow/{org_id}` | membro da organização ativa | papel ≥ member | Passa a seguir uma organização (seguimento mútuo habilita mensagens) |
 | GET | `/v1/notifications` | membro da organização ativa | papel ≥ viewer | notifications |
+| GET | `/v1/notifications/prefs` | usuário autenticado | — | Preferências de notificação por grupo (app e e-mail) |
+| PUT | `/v1/notifications/prefs` | usuário autenticado | — | prefs put |
 | POST | `/v1/notifications/read-all` | membro da organização ativa | papel ≥ viewer | read all |
 | POST | `/v1/notifications/{notification_id}/read` | membro da organização ativa | papel ≥ viewer | read one |
 | GET | `/v1/ods` | membro da organização ativa | papel ≥ viewer | 17 ODS e quantidade de metas oficiais carregadas (metas/indicadores oficiais entram por importação) |
@@ -386,6 +482,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/statements/reconcile` | membro da organização ativa | tipos: osc; papel ≥ manager | Reexecuta o pareamento extrato × pagamentos |
 | GET | `/v1/suppliers` | membro da organização ativa | tipos: osc; papel ≥ viewer | list suppliers |
 | POST | `/v1/suppliers` | membro da organização ativa | tipos: osc; papel ≥ member | create supplier |
+| GET | `/v1/support/tickets` | usuário autenticado | — | tickets mine |
+| POST | `/v1/support/tickets` | usuário autenticado | limite 30/3600s | Abre chamado (categoria, contexto da tela e anexos já enviados em Documentos). Prioridade/SLA são definidos pela equipe. |
+| GET | `/v1/support/tickets/{ticket_id}` | usuário autenticado | — | ticket get |
+| POST | `/v1/support/tickets/{ticket_id}/close` | usuário autenticado | — | Encerra um chamado já resolvido |
+| POST | `/v1/support/tickets/{ticket_id}/messages` | usuário autenticado | limite 120/3600s | ticket reply |
+| POST | `/v1/support/tickets/{ticket_id}/rate` | usuário autenticado | — | Avalia o atendimento (após resolvido) |
 | POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher (transação atômica; resposta genérica para códigos inválidos). Descontos ficam pendentes até o checkout. |
 
 Rotas de infraestrutura: `GET /healthz` (liveness), `GET /readyz` (banco + migrations), `GET /metrics` (Prometheus, Bearer `METRICS_TOKEN`),

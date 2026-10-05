@@ -12,7 +12,7 @@ import hmac
 import os
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 
@@ -79,11 +79,11 @@ class S3Storage:
 
     def _url(self, key: str, method: str, ttl: int = 300, extra: dict | None = None) -> str:
         path = f"/{self.bucket}/{key}"
-        qs = sigv4_presign(method, self.host, path, self.region, self.ak, self.sk, ttl, datetime.now(timezone.utc), extra)
+        qs = sigv4_presign(method, self.host, path, self.region, self.ak, self.sk, ttl, datetime.now(UTC), extra)
         return f"{self.base}{urllib.parse.quote(path, safe='/-_.~')}?{qs}"
 
     def put(self, key: str, data: bytes, content_type: str) -> None:
-        req = urllib.request.Request(self._url(key, "PUT"), data=data, method="PUT",
+        req = urllib.request.Request(self._url(key, "PUT"), data=data, method="PUT",  # noqa: S310 - URL assinada controlada pela configuração
                                      headers={"Content-Type": content_type})
         with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310 - URL controlada pela configuração
             if r.status not in (200, 201):
@@ -94,7 +94,7 @@ class S3Storage:
             return r.read()
 
     def delete(self, key: str) -> None:
-        req = urllib.request.Request(self._url(key, "DELETE"), method="DELETE")
+        req = urllib.request.Request(self._url(key, "DELETE"), method="DELETE")  # noqa: S310 - URL assinada controlada pela configuração
         with urllib.request.urlopen(req, timeout=30):  # noqa: S310
             pass
 

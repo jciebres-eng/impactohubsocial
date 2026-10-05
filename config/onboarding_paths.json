@@ -1,0 +1,311 @@
+{
+  "version": "onboarding@1.0",
+  "status": "HIPÓTESE — a ordem e o peso das etapas foram definidos pela equipe de produto e devem ser validados com usuárias reais. Cada etapa é marcada como concluída por dados reais da plataforma (detector), nunca por autodeclaração.",
+  "paths": {
+    "osc": {
+      "title": "Primeiros passos da OSC",
+      "steps": [
+        {
+          "key": "account",
+          "title": "Criar conta",
+          "detector": "always",
+          "link": "/conta",
+          "guide": "como-criar-conta-e-organizacao",
+          "minutes": 5
+        },
+        {
+          "key": "org_validated",
+          "title": "Validar a organização",
+          "detector": "org_validated",
+          "link": "/organizacao/compliance",
+          "guide": "como-validar-sua-organizacao",
+          "minutes": 15
+        },
+        {
+          "key": "profile",
+          "title": "Completar o perfil",
+          "detector": "profile_complete",
+          "link": "/organizacao",
+          "guide": "como-completar-o-perfil",
+          "minutes": 10
+        },
+        {
+          "key": "documents",
+          "title": "Enviar documentos",
+          "detector": "documents",
+          "link": "/documentos",
+          "guide": "como-enviar-documentos",
+          "minutes": 10
+        },
+        {
+          "key": "diagnosis",
+          "title": "Realizar o diagnóstico",
+          "detector": "diagnosis",
+          "link": "/diagnosticos",
+          "guide": "como-fazer-o-diagnostico",
+          "minutes": 30
+        },
+        {
+          "key": "project",
+          "title": "Criar o projeto",
+          "detector": "project_created",
+          "link": "/projetos",
+          "guide": "como-cadastrar-um-projeto",
+          "minutes": 20
+        },
+        {
+          "key": "indicators",
+          "title": "Definir indicadores",
+          "detector": "indicators",
+          "link": "/projetos",
+          "guide": "como-definir-indicadores",
+          "minutes": 15
+        },
+        {
+          "key": "budget",
+          "title": "Preparar o orçamento",
+          "detector": "budget",
+          "link": "/projetos",
+          "guide": "como-preencher-o-orcamento",
+          "minutes": 25
+        },
+        {
+          "key": "compliance",
+          "title": "Validar compliance",
+          "detector": "compliance_ok",
+          "link": "/organizacao/compliance",
+          "guide": "como-validar-sua-organizacao",
+          "minutes": 10
+        },
+        {
+          "key": "publish",
+          "title": "Publicar o projeto",
+          "detector": "project_published",
+          "link": "/projetos",
+          "guide": "como-publicar-um-projeto",
+          "minutes": 5
+        },
+        {
+          "key": "matches",
+          "title": "Receber interesse e matches",
+          "detector": "applications",
+          "link": "/candidaturas",
+          "guide": "como-interpretar-o-match",
+          "minutes": 10
+        },
+        {
+          "key": "funding",
+          "title": "Registrar financiamento",
+          "detector": "commitments_osc",
+          "link": "/candidaturas",
+          "guide": "como-registrar-financiamento",
+          "minutes": 10
+        },
+        {
+          "key": "execution",
+          "title": "Registrar a execução",
+          "detector": "execution",
+          "link": "/projetos",
+          "guide": "como-registrar-a-execucao",
+          "minutes": 15
+        },
+        {
+          "key": "accountability",
+          "title": "Prestar contas",
+          "detector": "accountability",
+          "link": "/projetos",
+          "guide": "como-prestar-contas",
+          "minutes": 30
+        },
+        {
+          "key": "impact",
+          "title": "Demonstrar impacto",
+          "detector": "impact_values",
+          "link": "/projetos",
+          "guide": "como-demonstrar-impacto",
+          "minutes": 20
+        }
+      ]
+    },
+    "company": {
+      "title": "Primeiros passos do financiador (empresa/instituto)",
+      "steps": [
+        {
+          "key": "account",
+          "title": "Criar conta",
+          "detector": "always",
+          "link": "/conta",
+          "guide": "como-criar-conta-e-organizacao",
+          "minutes": 5
+        },
+        {
+          "key": "profile",
+          "title": "Completar o perfil institucional",
+          "detector": "profile_complete",
+          "link": "/organizacao",
+          "guide": "como-completar-o-perfil",
+          "minutes": 10
+        },
+        {
+          "key": "funder_profile",
+          "title": "Definir o perfil de investimento",
+          "detector": "funder_profile",
+          "link": "/organizacao",
+          "guide": "como-definir-o-perfil-de-investimento",
+          "minutes": 15
+        },
+        {
+          "key": "search",
+          "title": "Salvar uma busca",
+          "detector": "saved_search",
+          "link": "/oportunidades",
+          "guide": "como-descobrir-projetos",
+          "minutes": 5
+        },
+        {
+          "key": "interest",
+          "title": "Demonstrar interesse em um projeto",
+          "detector": "applications_funder",
+          "link": "/explorar",
+          "guide": "como-interpretar-o-match",
+          "minutes": 10
+        },
+        {
+          "key": "funding",
+          "title": "Registrar um aporte",
+          "detector": "commitments_funder",
+          "link": "/carteira",
+          "guide": "como-registrar-financiamento",
+          "minutes": 10
+        },
+        {
+          "key": "follow",
+          "title": "Acompanhar evidências e impacto",
+          "detector": "follow_progress",
+          "link": "/carteira",
+          "guide": "como-acompanhar-impacto",
+          "minutes": 10
+        }
+      ]
+    },
+    "individual": {
+      "title": "Primeiros passos do financiador (pessoa física)",
+      "steps": [
+        {
+          "key": "account",
+          "title": "Criar conta",
+          "detector": "always",
+          "link": "/conta",
+          "guide": "como-criar-conta-e-organizacao",
+          "minutes": 5
+        },
+        {
+          "key": "funder_profile",
+          "title": "Definir interesses",
+          "detector": "funder_profile",
+          "link": "/organizacao",
+          "guide": "como-definir-o-perfil-de-investimento",
+          "minutes": 10
+        },
+        {
+          "key": "interest",
+          "title": "Demonstrar interesse em um projeto",
+          "detector": "applications_funder",
+          "link": "/explorar",
+          "guide": "como-interpretar-o-match",
+          "minutes": 10
+        },
+        {
+          "key": "funding",
+          "title": "Registrar um aporte",
+          "detector": "commitments_funder",
+          "link": "/carteira",
+          "guide": "como-registrar-financiamento",
+          "minutes": 10
+        }
+      ]
+    },
+    "provider": {
+      "title": "Primeiros passos do profissional",
+      "steps": [
+        {
+          "key": "account",
+          "title": "Criar conta",
+          "detector": "always",
+          "link": "/conta",
+          "guide": "como-criar-conta-e-organizacao",
+          "minutes": 5
+        },
+        {
+          "key": "profile",
+          "title": "Completar o perfil",
+          "detector": "profile_complete",
+          "link": "/organizacao",
+          "guide": "como-completar-o-perfil",
+          "minutes": 10
+        },
+        {
+          "key": "provider_profile",
+          "title": "Informar competências e disponibilidade",
+          "detector": "provider_profile",
+          "link": "/organizacao",
+          "guide": "como-montar-o-perfil-profissional",
+          "minutes": 15
+        },
+        {
+          "key": "credential",
+          "title": "Cadastrar credencial profissional",
+          "detector": "credential",
+          "link": "/organizacao",
+          "guide": "como-montar-o-perfil-profissional",
+          "minutes": 10
+        },
+        {
+          "key": "review",
+          "title": "Atender uma solicitação de revisão",
+          "detector": "reviews_done",
+          "link": "/revisoes",
+          "guide": "como-atender-uma-revisao",
+          "minutes": 20
+        }
+      ]
+    },
+    "government": {
+      "title": "Primeiros passos do órgão/instituição",
+      "steps": [
+        {
+          "key": "account",
+          "title": "Criar conta",
+          "detector": "always",
+          "link": "/conta",
+          "guide": "como-criar-conta-e-organizacao",
+          "minutes": 5
+        },
+        {
+          "key": "profile",
+          "title": "Completar o perfil institucional",
+          "detector": "profile_complete",
+          "link": "/organizacao",
+          "guide": "como-completar-o-perfil",
+          "minutes": 10
+        },
+        {
+          "key": "territory",
+          "title": "Explorar indicadores territoriais agregados",
+          "detector": "always",
+          "link": "/dados-territoriais",
+          "guide": "como-usar-dados-territoriais",
+          "minutes": 10
+        },
+        {
+          "key": "call",
+          "title": "Publicar um edital ou programa",
+          "detector": "calls_published",
+          "link": "/editais",
+          "guide": "como-publicar-um-edital",
+          "minutes": 20
+        }
+      ]
+    }
+  }
+}

@@ -8,7 +8,7 @@ import struct
 import threading
 import time
 import unittest
-from datetime import date, datetime, timezone
+from datetime import date, datetime, UTC
 
 from impacto.engines.match.engine import MatchInput, evaluate
 from impacto.engines.match.territory import covers, specificity, valid
@@ -245,7 +245,7 @@ class ValidatorAndUploadTests(unittest.TestCase):
 class AdapterTests(unittest.TestCase):
     def test_sigv4_official_aws_vector(self):
         qs = sigv4_presign("GET", "examplebucket.s3.amazonaws.com", "/test.txt", "us-east-1", "AKIAIOSFODNN7EXAMPLE",
-                           "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", 86400, datetime(2013, 5, 24, tzinfo=timezone.utc))
+                           "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", 86400, datetime(2013, 5, 24, tzinfo=UTC))
         self.assertTrue(qs.endswith("X-Amz-Signature=aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404"))
 
     def _fake_clamd(self, reply: bytes):

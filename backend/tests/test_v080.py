@@ -3,7 +3,7 @@ financiador PF, ODS/indicadores/grafo/diagnóstico, compras, contribuição e pa
 rastreamento. Cada módulo inclui testes NEGATIVOS e de isolamento entre organizações (cross-tenant)."""
 import json
 import unittest
-from datetime import date, timedelta
+from datetime import date
 
 from impacto.db import pq
 from tests.support import Client, db_system, grant_premium, make_admin, new_account, server

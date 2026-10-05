@@ -45,7 +45,7 @@ export const STATUS_LABEL: Record<string, string> = {
   verified: "Verificada", expired: "Vencida", active: "Ativa", past_due: "Pagamento pendente", canceled: "Cancelada",
   pending_review: "Em revisão", retired: "Retirada", pending_approval: "Aguardando 2ª aprovação", revoked: "Revogado",
   triaged: "Em triagem", actioned: "Providência tomada", dismissed: "Arquivada", info_requested: "Informações solicitadas",
-  incomplete: "Incompleta",
+  incomplete: "Incompleta", review: "Em revisão",
 };
 export const label = (s?: string | null) => (s ? STATUS_LABEL[s] || s : "—");
 

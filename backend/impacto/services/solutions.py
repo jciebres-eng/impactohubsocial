@@ -104,7 +104,6 @@ def _term_in(text: str, term: str) -> bool:
 
 
 def _concept_hit(cid: str, text: str, sol: dict) -> bool:
-    cfg = K.load()["concepts"][cid]
     if cid in (sol.get("population") or []) or cid in (sol.get("institutions") or []):
         return True
     return any(_term_in(text, t) for t in K.concept_terms(cid))

@@ -165,8 +165,6 @@ def parse(query: str) -> dict:
     consumed = set()
     for f in found:
         consumed.update(tokens(f.get("matched", "")))
-    for u in terr["ufs"]:
-        pass
     text_tokens = tokens(q)
     unmatched = [t for t in text_tokens if t not in consumed and not t.isdigit() and t not in {"mil", "k", "meses", "mes", "ano", "anos", "r"}
                  and t not in {x for names in [norm(k) for k in cfg["ufs"]] for x in names.split()} and t not in {"ods", "esg"}]

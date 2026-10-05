@@ -1,6 +1,6 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.11.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+Produto: SemVer (`VERSION` = `0.12.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
 (migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: `match-engine@1.0.0`, `fiscal-engine@1.0.0`; pesos `weights@1.0`; planos `plans@1.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
 
@@ -17,3 +17,5 @@ Histórico: `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos 
 **Por que 0.10.1 (PATCH):** fecha pendências do 0.10.0 sem mudar o contrato existente (adições compatíveis: rotas novas, campo `areas`, bloco extra na estimativa fiscal). `0007_v0101_institutional_extras.sql` é nova (a 0006 liberada **não** foi editada). Snapshot do v0.10.0 em `history/v0.10.0/`. A Central de Conhecimento será 0.11.0 (módulo novo ⇒ MINOR).
 
 **Por que 0.11.0 (MINOR):** nova capacidade grande (monetização: trial, tiers, vouchers/convênios, webhooks) com mudança de comportamento (cancelar mantém acesso até o fim do período) e `0008_v0110_monetization.sql` (6 tabelas). Snapshot dos documentos do 0.10.1 em `history/v0.10.1/`; nada foi sobrescrito. Planos: `plans@1.1`.
+
+**v0.12.0** (MINOR): nova capacidade de produto (Central de Conhecimento). Migração `0009` (ainda não liberada → editada em desenvolvimento e banco recriado; a partir da liberação, só migrações novas). Motor novo: `help-search@1.0.0` (gravado nos logs de busca). Snapshot dos documentos do v0.11.0: `history/v0.11.0/`. Configs versionadas: `config/help_synonyms.json`, `config/onboarding_paths.json` (hipóteses editoriais).

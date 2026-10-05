@@ -3,8 +3,8 @@
 import re
 import unittest
 
-from tests.support import PASSWORD, ROOT, new_account, server
-from tests.test_v080 import published_project, funded_pair
+from tests.support import PASSWORD, new_account, server
+from tests.test_v080 import funded_pair
 from tests.test_e2e_web import DIST, HAVE_PW
 
 if HAVE_PW:

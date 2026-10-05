@@ -9,7 +9,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Callable
+from collections.abc import Callable
 
 Transport = Callable[[str, str, dict, bytes | None, float], tuple[int, dict, bytes]]
 
@@ -49,7 +49,7 @@ def check_destination(url: str) -> None:
 
 def urllib_transport(method: str, url: str, headers: dict, body: bytes | None, timeout: float) -> tuple[int, dict, bytes]:
     check_destination(url)
-    req = urllib.request.Request(url, data=body, method=method, headers=headers)
+    req = urllib.request.Request(url, data=body, method=method, headers=headers)  # noqa: S310 - destino validado por check_destination
     try:
         with _OPENER.open(req, timeout=timeout) as r:  # noqa: S310
             return r.status, dict(r.headers), r.read(10_000_000)

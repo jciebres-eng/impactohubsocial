@@ -18,7 +18,7 @@ import queue
 import threading
 import time
 from dataclasses import dataclass
-from typing import Iterator
+from collections.abc import Iterator
 
 from ..observability import add_span
 from .pq import Connection, OperationalError, PQTRANS_IDLE, SerializationFailure
@@ -33,7 +33,7 @@ class DbContext:
     system: bool = False
 
     @staticmethod
-    def anonymous() -> "DbContext":
+    def anonymous() -> DbContext:
         return DbContext()
 
 

@@ -4,7 +4,7 @@ import threading
 import unittest
 from datetime import date, timedelta
 
-from tests.support import PASSWORD, Client, db_system, grant_premium, make_admin, new_account, server, set_compliance
+from tests.support import PASSWORD, Client, db_system, grant_premium, make_admin, new_account, server
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
 
@@ -85,8 +85,10 @@ class BillingAndVoucherTests(unittest.TestCase):
             self.assertEqual(d.scalar("SELECT redeemed_count FROM vouchers WHERE batch_id = $1", bid), 1)
 
     def test_stripe_webhook_signature_and_idempotency(self):
-        import hashlib, hmac, json, time
-        from impacto.services import billing
+        import hashlib
+        import hmac
+        import json
+        import time
         st = server()["state"]
         old = (st.settings.billing_provider, st.settings.stripe_webhook_secret)
         st.settings.billing_provider, st.settings.stripe_webhook_secret = "stripe", "whsec_test"

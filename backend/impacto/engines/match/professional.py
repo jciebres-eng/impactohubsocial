@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import date
 
 from .engine import DEFAULT_WEIGHTS, Signal, SIGNAL_LABELS, _finish, _pick
-from .territory import covers, specificity
+from .territory import specificity
 
 ENGINE_VERSION = "professional-match@1.0.0"
 # Categorias cujo exercício depende de registro em conselho (credencial verificada passa a ser requisito).
@@ -30,7 +30,7 @@ class ProfessionalInput:
     today: date
 
     @staticmethod
-    def build(professional: dict, need: dict, today: date | None = None) -> "ProfessionalInput":
+    def build(professional: dict, need: dict, today: date | None = None) -> ProfessionalInput:
         return ProfessionalInput(_pick(professional, _PROF_KEYS), _pick(need, _NEED_KEYS), today or date.today())
 
 
@@ -96,7 +96,7 @@ def evaluate(mi: ProfessionalInput) -> dict:
         missing.append({"field": "territories", "label": "Territórios de atuação ou atendimento remoto", "owner": "professional"})
 
     done = p.get("completed_reviews")
-    sig.append(Signal("experience", weights["experience"], None if done is None else min(1.0, done / 5), "revisões concluídas na plataforma: %s" % done))
+    sig.append(Signal("experience", weights["experience"], None if done is None else min(1.0, done / 5), f"revisões concluídas na plataforma: {done}"))
     lim, load = p.get("open_reviews_limit"), p.get("open_reviews")
     sig.append(Signal("availability", weights["availability"], None if not lim or load is None else max(0.0, 1 - load / lim),
                       "carga atual de revisões em aberto"))

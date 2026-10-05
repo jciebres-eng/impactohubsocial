@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, UTC
 
 from ..db.pq import Connection
 from ..http import ApiError, Ctx, cookie_names, json_response, unprocessable
@@ -23,7 +23,7 @@ LOCK_MINUTES = 15
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ------------------------------------------------------------------------------------------------
@@ -135,7 +135,6 @@ def register(ctx: Ctx, body) -> dict:
         if cnpj and not cnpj_valid(cnpj):
             raise unprocessable("CNPJ inválido", [{"field": "organization.cnpj", "message": "dígitos verificadores inválidos"}])
     pw_hash = passwords.hash_password(body.password)
-    mailer = ctx.app.mailer
     with ctx.system_tx() as c:
         existing = c.one("SELECT id::text AS id, email_verified_at FROM users WHERE email = $1", email)
         if existing:
@@ -450,7 +449,8 @@ def me(ctx: Ctx) -> dict:
         ent = effective(c, p.org_id, p.org_kind) if p.org_id else None
         unread = c.scalar("SELECT count(*) FROM notifications WHERE read_at IS NULL") if p.org_id else 0
     return {"user": {"id": p.user_id, "email": p.email, "full_name": p.full_name, "email_verified": p.email_verified,
-                     "mfa_enabled": p.mfa_enabled, "mfa_verified": p.mfa_verified, "is_platform_admin": p.is_platform_admin},
+                     "mfa_enabled": p.mfa_enabled, "mfa_verified": p.mfa_verified, "is_platform_admin": p.is_platform_admin,
+                     "staff_roles": list(p.staff_roles)},
             "active_org": next((o for o in orgs if o["id"] == p.org_id), None), "organizations": orgs,
             "entitlements": ent and {k: ent[k] for k in ("plans", "plan_names", "features", "limits")},
             "subscription": ent and ent["subscription"], "unread_notifications": unread,

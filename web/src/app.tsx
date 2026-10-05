@@ -20,6 +20,8 @@ import * as Ops from "./pages/ops";
 import * as Sol from "./pages/solutions";
 import * as SolM from "./pages/solutions_manage";
 import * as Inst from "./pages/institution";
+import * as Help from "./pages/help";
+import * as HelpA from "./pages/helpAdmin";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -92,6 +94,19 @@ const ROUTES: R[] = [
   ["/admin/risco", () => <Ops.Risk />, ["platform"]],
   ["/admin/erros", () => <Ops.Errors />, ["platform"]],
   ["/admin/contribuicao", () => <Ops.ContributionReview />, ["platform"]],
+  ["/admin/central", () => <HelpA.Overview />, ["platform"]],
+  ["/admin/central/artigos", () => <HelpA.Articles />, ["platform"]],
+  ["/admin/central/artigos/:slug", (p) => <HelpA.ArticleEditor slug={p.slug} />, ["platform"]],
+  ["/admin/central/recursos", () => <HelpA.Resources />, ["platform"]],
+  ["/admin/central/faqs", () => <HelpA.Faqs />, ["platform"]],
+  ["/admin/central/cursos", () => <HelpA.Courses />, ["platform"]],
+  ["/admin/central/eventos", () => <HelpA.EventsAdmin />, ["platform"]],
+  ["/admin/central/suporte", () => <HelpA.SupportQueue />, ["platform"]],
+  ["/admin/central/suporte/:id", (p) => <HelpA.SupportTicket id={p.id} />, ["platform"]],
+  ["/admin/central/parcerias", () => <HelpA.Partnerships />, ["platform"]],
+  ["/admin/central/testes", () => <HelpA.Trials />, ["platform"]],
+  ["/admin/central/analytics", () => <HelpA.Analytics />, ["platform"]],
+  ["/admin/central/equipe", () => <HelpA.StaffRoles />, ["platform"]],
   ["/admin", () => <Admin.Overview />, ["platform"]],
   ["/admin/compliance", () => <Admin.ComplianceQueue />, ["platform"]],
   ["/admin/credenciais", () => <Admin.Credentials />, ["platform"]],
@@ -104,6 +119,38 @@ const ROUTES: R[] = [
   ["/admin/organizacoes", () => <Admin.Orgs />, ["platform"]],
   ["/admin/denuncias", () => <Admin.Reports />, ["platform"]],
   ["/admin/auditoria", () => <Admin.Audit />, ["platform"]],
+];
+
+
+// Central de Conhecimento: páginas públicas (sem login) e privadas. Com sessão, usam o Shell; sem, a moldura pública.
+type HR = [string, (p: Record<string, string>) => ReactNode, boolean?];   // [padrão, página, exige login]
+const HELP: HR[] = [
+  ["/ajuda", () => <Help.HelpHome />],
+  ["/ajuda/busca", () => <Help.HelpSearch />],
+  ["/ajuda/comece-aqui", () => <Help.Start />, true],
+  ["/ajuda/pendencias", () => <Help.Pending />, true],
+  ["/ajuda/atividades", () => <Help.Activities />, true],
+  ["/ajuda/preferencias", () => <Help.Prefs />, true],
+  ["/ajuda/biblioteca", () => <Help.Library />],
+  ["/ajuda/biblioteca/:slug", (p) => <Help.Resource slug={p.slug} />],
+  ["/ajuda/faq", () => <Help.Faq />],
+  ["/ajuda/faq/:id", (p) => <Help.Faq focus={p.id} />],
+  ["/ajuda/academia", () => <Help.Academy />],
+  ["/ajuda/academia/aula/:id", (p) => <Help.Lesson id={p.id} />, true],
+  ["/ajuda/academia/:slug", (p) => <Help.Course slug={p.slug} />],
+  ["/ajuda/certificado/:code", (p) => <Help.Certificate code={p.code} />],
+  ["/ajuda/eventos", () => <Help.Events />],
+  ["/ajuda/eventos/:slug", (p) => <Help.EventPage slug={p.slug} />],
+  ["/ajuda/suporte", () => <Help.Tickets />, true],
+  ["/ajuda/suporte/novo", () => <Help.NewTicket />, true],
+  ["/ajuda/suporte/:id", (p) => <Help.Ticket id={p.id} />, true],
+  ["/ajuda/parcerias", () => <Help.PartnershipForm />],
+  ["/ajuda/demonstracao", () => <Help.DemoForm />],
+  ["/ajuda/teste", () => <Help.TrialRequest />, true],
+  ["/ajuda/boletim", () => <Help.Newsletter />],
+  ["/ajuda/boletim/confirmar", () => <Help.NewsletterToken mode="confirm" />],
+  ["/ajuda/boletim/cancelar", () => <Help.NewsletterToken mode="unsubscribe" />],
+  ["/ajuda/:slug", (p) => <Help.Article slug={p.slug} />],
 ];
 
 const PUBLIC: [string, () => ReactNode][] = [
@@ -127,7 +174,7 @@ const NAV: Record<string, [string, string][]> = {
     ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
   platform: [["/admin", "Visão geral"], ["/admin/compliance", "Compliance"], ["/admin/credenciais", "Credenciais"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
-    ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
+    ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
 };
 const KIND_LABEL: Record<string, string> = { osc: "OSC", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração" };
 
@@ -136,6 +183,13 @@ export function App() {
   const { path } = useLocation();
   for (const [pat, render] of PUBLIC) if (match(pat, path)) return <>{render()}</>;
   if (loading) return <div className="boot"><StateView loading /></div>;
+  for (const [pat, render, needsLogin] of HELP) {
+    const params = match(pat, path);
+    if (!params) continue;
+    if (me?.active_org) return <Shell>{render(params)}</Shell>;
+    if (me) return <Shell><Org.CreateOrg /></Shell>;
+    return <Help.PublicFrame>{needsLogin ? <Help.NeedLogin>{render(params)}</Help.NeedLogin> : render(params)}</Help.PublicFrame>;
+  }
   if (!me) {
     if (path === "/") return <Pub.Landing />;
     navigate(`/entrar?proximo=${encodeURIComponent(path + location.search)}`, true);
@@ -146,7 +200,8 @@ export function App() {
   for (const [pat, render, kinds] of ROUTES) {
     const params = match(pat, path);
     if (!params) continue;
-    if (kinds && kinds.length && !kinds.includes(kind)) return <Shell><NotHere /></Shell>;
+    const staffHere = path.startsWith("/admin/central") && !!me.user.staff_roles?.length;   // papéis internos (editor/revisor/suporte)
+    if (kinds && kinds.length && !kinds.includes(kind) && !staffHere) return <Shell><NotHere /></Shell>;
     if (pat === "/" && kind === "platform") return <Shell><Admin.Overview /></Shell>;
     return <Shell>{render(params)}</Shell>;
   }
@@ -202,6 +257,8 @@ function Shell({ children }: { children: ReactNode }) {
           ))}
         </ul>
         <ul className="rail-foot">
+          <li><Link to="/ajuda" className={active("/ajuda") ? "on" : ""}>Ajuda</Link></li>
+          {kind !== "platform" && !!me.user.staff_roles?.length && <li><Link to="/admin/central" className={active("/admin/central") ? "on" : ""}>Central (equipe)</Link></li>}
           <li><Link to="/notificacoes" className={active("/notificacoes") ? "on" : ""}>Notificações {me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}</Link></li>
           {kind !== "platform" && <li><Link to="/organizacao" className={active("/organizacao") ? "on" : ""}>Organização</Link></li>}
           {kind !== "platform" && <li><Link to="/conta/plano" className={active("/conta/plano") ? "on" : ""}>Plano</Link></li>}

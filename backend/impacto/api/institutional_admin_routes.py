@@ -8,7 +8,6 @@ from ..db.pq import Json
 from ..engines.institutional import badges as badge_engine
 from ..engines.institutional import eligibility as elig
 from ..engines.institutional.common import config
-from ..engines.institutional.documents import doc_state
 from ..http import ApiError, Ctx, not_found, page, route
 from ..services import institutional as svc
 from ..services import documents as docsvc
@@ -64,7 +63,7 @@ def _validate_rule(c, d: dict) -> dict:
     try:
         req = elig.validate_requirement(d["requirement"])
     except ValueError as e:
-        raise ApiError(422, "validation_error", "requirement: " + str(e))
+        raise ApiError(422, "validation_error", "requirement: " + str(e)) from e
     cat = svc.catalog(c)
     if req["type"] in ("qualification_any", "qualification_all"):
         bad = [v for v in req["values"] if v not in cat.get("qualification_type", {})]

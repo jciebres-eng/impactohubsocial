@@ -12,7 +12,7 @@ from __future__ import annotations
 from datetime import date
 
 from .common import (DISCLAIMER_LEGAL, SEVERITY, STATE_LABELS, STATUS_LABELS, as_date, br, config, months_between)
-from .documents import best_state, doc_state
+from .documents import best_state
 from . import maturity as _maturity
 
 ENGINE_VERSION = "institutional-eligibility@1.0.0"

@@ -491,7 +491,6 @@ class SolutionDatabaseGuardTests(unittest.TestCase):
         return server()["state"].pool.tx(DbContext(user_id=c.user["id"], org_id=c.org_id, org_kind=c.get("/v1/me").json["active_org"]["kind"]))
 
     def test_owner_cannot_forge_trust_demo_or_verification(self):
-        from impacto.db import pq
         for col, val in (("trust_level", "'verified'"), ("is_demo", "true"), ("verified_by", f"'{self.a.user['id']}'::uuid"), ("disputed", "true")):
             with self.assertRaises(Exception) as cm:
                 with self.ctx(self.a) as c:

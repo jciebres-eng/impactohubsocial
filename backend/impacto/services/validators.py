@@ -17,9 +17,9 @@ def cnpj_valid(v: str | None) -> bool:
     if len(d) != 14 or d == d[0] * 14:
         return False
     nums = [int(x) for x in d]
-    s1 = sum(a * b for a, b in zip(nums[:12], _CNPJ_W1)) % 11
+    s1 = sum(a * b for a, b in zip(nums[:12], _CNPJ_W1, strict=True)) % 11
     dv1 = 0 if s1 < 2 else 11 - s1
-    s2 = sum(a * b for a, b in zip(nums[:13], _CNPJ_W2)) % 11
+    s2 = sum(a * b for a, b in zip(nums[:13], _CNPJ_W2, strict=True)) % 11
     dv2 = 0 if s2 < 2 else 11 - s2
     return nums[12] == dv1 and nums[13] == dv2
 
@@ -31,9 +31,9 @@ def cnpj_format(v: str) -> str:
 
 def cnpj_with_check_digits(base12: str) -> str:
     nums = [int(x) for x in base12]
-    s1 = sum(a * b for a, b in zip(nums, _CNPJ_W1)) % 11
+    s1 = sum(a * b for a, b in zip(nums, _CNPJ_W1, strict=True)) % 11
     nums.append(0 if s1 < 2 else 11 - s1)
-    s2 = sum(a * b for a, b in zip(nums, _CNPJ_W2)) % 11
+    s2 = sum(a * b for a, b in zip(nums, _CNPJ_W2, strict=True)) % 11
     nums.append(0 if s2 < 2 else 11 - s2)
     return "".join(map(str, nums))
 

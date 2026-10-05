@@ -2,7 +2,6 @@
 perfil fiscal, diretório de profissionais parceiros, notificações e denúncias."""
 from __future__ import annotations
 
-from ..db.pq import Json
 from ..http import ApiError, Ctx, not_found, page, route
 from . import schemas as S
 

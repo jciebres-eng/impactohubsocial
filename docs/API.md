@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (573)
+## Operações (574)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -210,6 +210,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/calls/{call_id}` | membro da organização ativa | papel ≥ viewer | Detalhe do edital. Para OSC: requisitos atendidos/pendentes, compatibilidade, riscos e próxima ação. |
 | PUT | `/v1/calls/{call_id}` | membro da organização ativa | tipos: company, government; papel ≥ manager | update call |
 | GET | `/v1/calls/{call_id}/applications` | membro da organização ativa | tipos: company, government; papel ≥ analyst | Candidaturas recebidas, com compatibilidade explicada (shortlist) |
+| GET | `/v1/campaigns` | membro da organização ativa | papel ≥ viewer | Campanhas da organização, com o endereço público e a situação |
 | POST | `/v1/campaigns` | membro da organização ativa | papel ≥ manager | Cria a campanha de divulgação do projeto (rascunho; publicar é um passo separado) |
 | PATCH | `/v1/campaigns/{campaign_id}` | membro da organização ativa | papel ≥ manager | Altera ou publica/fecha a campanha |
 | POST | `/v1/commitments/{commitment_id}/payments` | membro da organização ativa | tipos: company, government, individual; papel ≥ manager | Registra um pagamento (parcela) do aporte — declarado pelo financiador; a plataforma não movimenta dinheiro |
@@ -304,6 +305,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/impact-tags` | membro da organização ativa | papel ≥ viewer | Marcadores de um objeto |
 | POST | `/v1/impact-tags` | membro da organização ativa | papel ≥ manager | Marca um objeto (projeto, solução, diagnóstico, necessidade…) com ODS, pilar ESG ou determinante social |
 | DELETE | `/v1/impact-tags/{tag_id}` | membro da organização ativa | papel ≥ manager | Remove um marcador |
+| GET | `/v1/impact-taxonomy` | membro da organização ativa | papel ≥ viewer | Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial |
 | POST | `/v1/indicator-values/{value_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador do projeto valida ou rejeita um valor reportado (a OSC não valida o próprio valor — garantido no banco) |
 | GET | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ viewer | Catálogo de indicadores (plataforma, oficiais e definidos pela organização) |
 | POST | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ manager | Cria indicador próprio da organização (origem 'org_defined'; não é indicador oficial) |
@@ -575,7 +577,6 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/support/tickets/{ticket_id}/close` | usuário autenticado | — | Encerra um chamado já resolvido |
 | POST | `/v1/support/tickets/{ticket_id}/messages` | usuário autenticado | limite 120/3600s | ticket reply |
 | POST | `/v1/support/tickets/{ticket_id}/rate` | usuário autenticado | — | Avalia o atendimento (após resolvido) |
-| GET | `/v1/taxonomy` | membro da organização ativa | papel ≥ viewer | Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial |
 | GET | `/v1/trust/councils` | membro da organização ativa | papel ≥ viewer | Conselhos profissionais do catálogo (o formato do registro só é validado quando há padrão configurado) |
 | GET | `/v1/trust/custody` | membro da organização ativa | papel ≥ viewer | Cadeia de custódia do objeto e conferência do encadeamento por hash |
 | GET | `/v1/trust/identity` | usuário autenticado | — | Meu nível de identidade, pedidos e documentos enviados |

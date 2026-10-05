@@ -12,8 +12,8 @@ test_login_errors_are_identical (tests.test_api_auth.AuthTests.test_login_errors
 test_logout_revokes_session (tests.test_api_auth.AuthTests.test_logout_revokes_session) ... ok
 test_mfa_flow_and_recovery_code (tests.test_api_auth.AuthTests.test_mfa_flow_and_recovery_code) ... ok
 test_password_reset_revokes_sessions (tests.test_api_auth.AuthTests.test_password_reset_revokes_sessions) ... ok
-test_refresh_rotation_and_reuse_detection (tests.test_api_auth.AuthTests.test_refresh_rotation_and_reuse_detection) ... {"ts": "2026-10-05T19:31:47.666+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "8ab507c52f5d461b", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "7da2e715325b07b7048a4ea3d05e2ef6", "user_id": "5a21ed1e-51c1-4dae-b255-fb7cd540741f"}
-{"ts": "2026-10-05T19:31:47.722+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "6e2d5cf93eb5415f", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "bed48f03949852aaef899e7cde34ba4d", "user_id": "5a21ed1e-51c1-4dae-b255-fb7cd540741f"}
+test_refresh_rotation_and_reuse_detection (tests.test_api_auth.AuthTests.test_refresh_rotation_and_reuse_detection) ... {"ts": "2026-10-05T19:52:42.652+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "bac9326205d7423b", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "52909861650f289314d695845733a62d", "user_id": "22223dd9-62c3-4379-bfb8-2a988ff78128"}
+{"ts": "2026-10-05T19:52:42.714+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "d578ec4515974da7", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "18e8bfeaa01e8302330ae8c586eb0b81", "user_id": "22223dd9-62c3-4379-bfb8-2a988ff78128"}
 ok
 test_register_does_not_enumerate_existing_email (tests.test_api_auth.AuthTests.test_register_does_not_enumerate_existing_email) ... ok
 test_register_verify_login_me (tests.test_api_auth.AuthTests.test_register_verify_login_me) ... ok
@@ -26,8 +26,8 @@ test_saved_search_tracks_new_calls_and_notifies (tests.test_api_features.AlertsT
 test_paid_plan_with_price_via_sandbox (tests.test_api_features.BillingAndVoucherTests.test_paid_plan_with_price_via_sandbox) ... ok
 test_public_plan_catalog (tests.test_api_features.BillingAndVoucherTests.test_public_plan_catalog) ... ok
 test_sandbox_checkout_unlocks_paid_features (tests.test_api_features.BillingAndVoucherTests.test_sandbox_checkout_unlocks_paid_features) ... ok
-test_stripe_webhook_signature_and_idempotency (tests.test_api_features.BillingAndVoucherTests.test_stripe_webhook_signature_and_idempotency) ... {"ts": "2026-10-05T19:31:51.052+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "615a12bad2924506", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "fd7aa88511e653803d0f1d992016aa05"}
-{"ts": "2026-10-05T19:31:51.087+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "91fe2e9d59a24702", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "7caf4ad321efccc1e30ddf855427688d"}
+test_stripe_webhook_signature_and_idempotency (tests.test_api_features.BillingAndVoucherTests.test_stripe_webhook_signature_and_idempotency) ... {"ts": "2026-10-05T19:52:46.338+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "bf2b4036e6434425", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "8005317e35314ddc6c1c4b4455131716"}
+{"ts": "2026-10-05T19:52:46.397+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "9954747807484f47", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "49b91fb97b02be78769191dea19212f3"}
 ok
 test_voucher_concurrency_last_use (tests.test_api_features.BillingAndVoucherTests.test_voucher_concurrency_last_use) ... ok
 test_voucher_dual_approval_and_single_use (tests.test_api_features.BillingAndVoucherTests.test_voucher_dual_approval_and_single_use) ... ok
@@ -43,8 +43,8 @@ test_export_and_delete_account (tests.test_api_features.PrivacyAndAdminTests.tes
 test_legal_texts_served (tests.test_api_features.PrivacyAndAdminTests.test_legal_texts_served) ... ok
 test_reports_flow (tests.test_api_features.PrivacyAndAdminTests.test_reports_flow) ... ok
 test_external_call_tracking (tests.test_api_workflow.JourneyTests.test_external_call_tracking) ... ok
-test_full_platform_journey (tests.test_api_workflow.JourneyTests.test_full_platform_journey) ... {"ts": "2026-10-05T19:32:00.361+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "e9592fe767664209", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "0add246fc4ec30b7d42a3e9cb45d66fd", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas o financiador informa desembolso/cancelamento", "user_id": "792a25cc-2e5b-4fe5-98e9-7b3e0562f477"}
-{"ts": "2026-10-05T19:32:00.384+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "8b2c454c5a064606", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "9b84f9dfef2165fc988f5980b7a17b16", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas a OSC confirma o recebimento", "user_id": "fdfc7d88-8744-4ae1-be66-54009c77a5b0"}
+test_full_platform_journey (tests.test_api_workflow.JourneyTests.test_full_platform_journey) ... {"ts": "2026-10-05T19:52:56.787+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "774e2a899e34474f", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "72a80c11ceccf5f7dc7ff4f969c1d205", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas o financiador informa desembolso/cancelamento", "user_id": "02c1ec88-3891-441b-b8e3-1825aa63fd66"}
+{"ts": "2026-10-05T19:52:56.818+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "b31a0c6856014eb5", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "7f05218edd23aac267be1bd191e16a3e", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas a OSC confirma o recebimento", "user_id": "72131fbe-112e-4b3a-848e-832278e2a485"}
 ok
 test_funder_interest_flow_and_feed (tests.test_api_workflow.JourneyTests.test_funder_interest_flow_and_feed) ... ok
 test_professional_validation_and_signature (tests.test_api_workflow.JourneyTests.test_professional_validation_and_signature) ... ok
@@ -76,6 +76,14 @@ test_register_shows_legal_nature_for_osc (tests.test_e2e_v0100.WebV0100.test_reg
 test_admin_panel_queues (tests.test_e2e_v0101.WebV0101.test_admin_panel_queues) ... ok
 test_institution_new_tabs_journey (tests.test_e2e_v0101.WebV0101.test_institution_new_tabs_journey) ... ok
 test_solution_network_view (tests.test_e2e_v0101.WebV0101.test_solution_network_view) ... ok
+test_dark_theme_keeps_readable_contrast (tests.test_e2e_v0140_trust.TrustE2E.test_dark_theme_keeps_readable_contrast) ... ok
+test_new_pages_have_no_console_errors_and_one_h1 (tests.test_e2e_v0140_trust.TrustE2E.test_new_pages_have_no_console_errors_and_one_h1) ... ok
+test_public_campaign_shows_remaining_quotas (tests.test_e2e_v0140_trust.TrustE2E.test_public_campaign_shows_remaining_quotas) ... ok
+test_public_page_shows_revocation (tests.test_e2e_v0140_trust.TrustE2E.test_public_page_shows_revocation) ... ok
+test_theme_choice_is_applied_and_persists (tests.test_e2e_v0140_trust.TrustE2E.test_theme_choice_is_applied_and_persists) ... ok
+test_third_party_verifies_without_logging_in (tests.test_e2e_v0140_trust.TrustE2E.test_third_party_verifies_without_logging_in) ... ok
+test_two_layer_signature_through_the_ui (tests.test_e2e_v0140_trust.TrustE2E.test_two_layer_signature_through_the_ui) ... ok
+test_unknown_code_shows_friendly_error (tests.test_e2e_v0140_trust.TrustE2E.test_unknown_code_shows_friendly_error) ... ok
 test_admin_and_provider_pages (tests.test_e2e_v080.WebV080.test_admin_and_provider_pages) ... ok
 test_individual_funder_journey_pages (tests.test_e2e_v080.WebV080.test_individual_funder_journey_pages) ... ok
 test_osc_pages_and_report_render (tests.test_e2e_v080.WebV080.test_osc_pages_and_report_render) ... ok
@@ -87,6 +95,9 @@ test_osc_signup_project_with_assist_and_publish (tests.test_e2e_web.WebE2E.test_
 test_security_headers_on_spa (tests.test_e2e_web.WebE2E.test_security_headers_on_spa) ... ok
 test_rejects_wrong_audience_nonce_and_unverified_email (tests.test_oidc.OidcTests.test_rejects_wrong_audience_nonce_and_unverified_email) ... ok
 test_sso_login_provisions_user_and_session (tests.test_oidc.OidcTests.test_sso_login_provisions_user_and_session) ... ok
+/usr/lib/python3.13/asyncio/events.py:36: ResourceWarning: unclosed <socket.socket [closed] fd=9, family=2, type=1, proto=6>
+  def __init__(self, callback, args, loop, context=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
 test_anonymous_context_sees_nothing (tests.test_security_tenancy.DatabaseRlsTests.test_anonymous_context_sees_nothing) ... ok
 test_app_db_role_cannot_bypass_rls (tests.test_security_tenancy.DatabaseRlsTests.test_app_db_role_cannot_bypass_rls) ... ok
 test_app_role_has_no_bypass (tests.test_security_tenancy.DatabaseRlsTests.test_app_role_has_no_bypass) ... ok
@@ -96,9 +107,6 @@ test_ledger_tampering_is_detected (tests.test_security_tenancy.DatabaseRlsTests.
 test_privileged_columns_guarded (tests.test_security_tenancy.DatabaseRlsTests.test_privileged_columns_guarded) ... ok
 test_unfiltered_select_returns_only_own_rows (tests.test_security_tenancy.DatabaseRlsTests.test_unfiltered_select_returns_only_own_rows) ... ok
 test_unfiltered_update_cannot_touch_other_tenant (tests.test_security_tenancy.DatabaseRlsTests.test_unfiltered_update_cannot_touch_other_tenant) ... ok
-/usr/lib/python3.13/email/feedparser.py:526: ResourceWarning: unclosed <socket.socket [closed] fd=9, family=2, type=1, proto=6>
-  lastvalue = [line]
-ResourceWarning: Enable tracemalloc to get the object allocation traceback
 test_admin_without_mfa_is_blocked (tests.test_security_tenancy.TenancyTests.test_admin_without_mfa_is_blocked) ... ok
 test_company_sees_only_published_and_docs_only_after_due_diligence (tests.test_security_tenancy.TenancyTests.test_company_sees_only_published_and_docs_only_after_due_diligence) ... ok
 test_download_token_is_short_lived_and_tamper_proof (tests.test_security_tenancy.TenancyTests.test_download_token_is_short_lived_and_tamper_proof) ... ok
@@ -143,7 +151,7 @@ test_signed_tokens (tests.test_unit.SecurityPrimitiveTests.test_signed_tokens) .
 test_stripe_signature (tests.test_unit.SecurityPrimitiveTests.test_stripe_signature) ... ok
 test_totp_rfc6238_vectors (tests.test_unit.SecurityPrimitiveTests.test_totp_rfc6238_vectors) ... ok
 test_internal_destinations_are_blocked (tests.test_unit.SsrfTests.test_internal_destinations_are_blocked) ... ok
-test_loopback_http_only_in_dev_and_redirects_not_followed (tests.test_unit.SsrfTests.test_loopback_http_only_in_dev_and_redirects_not_followed) ... /usr/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=9, family=2, type=1, proto=0, laddr=('127.0.0.1', 36851)>
+test_loopback_http_only_in_dev_and_redirects_not_followed (tests.test_unit.SsrfTests.test_loopback_http_only_in_dev_and_redirects_not_followed) ... /usr/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=9, family=2, type=1, proto=0, laddr=('127.0.0.1', 44093)>
   if method() is not None:
 ResourceWarning: Enable tracemalloc to get the object allocation traceback
 ok
@@ -231,8 +239,8 @@ test_only_owner_can_checkout_cancel_and_change (tests.test_v0110_monetization.Bi
 test_user_cannot_change_plan_price_or_rights (tests.test_v0110_monetization.BillingSecurityTests.test_user_cannot_change_plan_price_or_rights) ... ok
 test_cancel_prevents_renewal_and_keeps_history (tests.test_v0110_monetization.StripeFlowTests.test_cancel_prevents_renewal_and_keeps_history) ... ok
 test_checkout_during_trial_sends_trial_end_and_never_charges_early (tests.test_v0110_monetization.StripeFlowTests.test_checkout_during_trial_sends_trial_end_and_never_charges_early) ... ok
-test_duplicate_webhook_does_not_duplicate_charge_or_invoice (tests.test_v0110_monetization.StripeFlowTests.test_duplicate_webhook_does_not_duplicate_charge_or_invoice) ... {"ts": "2026-10-05T19:33:55.779+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "284938ef7f0a4117", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "6fbd50cbc2e0bc0826c49010d6a88f4b"}
-{"ts": "2026-10-05T19:33:55.816+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "01642574ac5a46b4", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "22606578e23e448bcc69579109ae5700"}
+test_duplicate_webhook_does_not_duplicate_charge_or_invoice (tests.test_v0110_monetization.StripeFlowTests.test_duplicate_webhook_does_not_duplicate_charge_or_invoice) ... {"ts": "2026-10-05T19:55:01.868+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "bad8ed3e71ff4a8d", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "0bacd3a88583592bdf1f67184e879f3b"}
+{"ts": "2026-10-05T19:55:01.904+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "65eb7a7b5dfe477c", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "a7a836279ac57b885543e01cda983f8a"}
 ok
 test_monthly_and_annual_use_the_right_price (tests.test_v0110_monetization.StripeFlowTests.test_monthly_and_annual_use_the_right_price) ... ok
 test_out_of_order_subscription_events_are_ignored (tests.test_v0110_monetization.StripeFlowTests.test_out_of_order_subscription_events_are_ignored) ... ok
@@ -261,7 +269,7 @@ test_concurrent_voucher_redemption_respects_the_single_use_limit (tests.test_v01
 test_duplicate_webhook_delivered_concurrently_is_processed_once (tests.test_v0120_hardening.Concurrency.test_duplicate_webhook_delivered_concurrently_is_processed_once)
 Idempotência sob concorrência: o mesmo event.id entregue 4x em paralelo grava UMA linha (garantia do banco). ... ok
 test_event_capacity_is_never_exceeded_under_concurrent_registration (tests.test_v0120_hardening.Concurrency.test_event_capacity_is_never_exceeded_under_concurrent_registration) ... ok
-test_webhook_without_valid_signature_is_never_recorded (tests.test_v0120_hardening.Concurrency.test_webhook_without_valid_signature_is_never_recorded) ... {"ts": "2026-10-05T19:34:09.809+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "b4bff2feaef04930", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "87f04b819d5eefd4637218b0553a8573"}
+test_webhook_without_valid_signature_is_never_recorded (tests.test_v0120_hardening.Concurrency.test_webhook_without_valid_signature_is_never_recorded) ... {"ts": "2026-10-05T19:55:17.827+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "2940c21aae744e5e", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "25192909e6f49d0e3a6458be5e349ea1"}
 ok
 test_checklist_progress_and_feedback_are_per_user (tests.test_v0120_hardening.CrossTenantIdor.test_checklist_progress_and_feedback_are_per_user) ... ok
 test_other_tenant_cannot_read_write_or_rate_ticket (tests.test_v0120_hardening.CrossTenantIdor.test_other_tenant_cannot_read_write_or_rate_ticket) ... ok
@@ -269,7 +277,7 @@ test_trial_and_demo_requests_are_scoped_to_the_organization (tests.test_v0120_ha
 test_uuid_of_another_tenant_never_returns_data_on_core_objects (tests.test_v0120_hardening.CrossTenantIdor.test_uuid_of_another_tenant_never_returns_data_on_core_objects) ... ok
 test_bad_json_and_media_type_are_rejected_cleanly (tests.test_v0120_hardening.ErrorHygiene.test_bad_json_and_media_type_are_rejected_cleanly) ... ok
 test_database_schema_details_never_reach_the_client (tests.test_v0120_hardening.ErrorHygiene.test_database_schema_details_never_reach_the_client)
-Violação de CHECK no banco não deve expor tabela/constraint; a mensagem autorada pelos gatilhos continua visível. ... {"ts": "2026-10-05T19:34:11.292+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "14e378e18af34a16", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "b92496a69ae3fbf008176028a8be9e9b", "error_id": "b677a272cb6c", "route": "/v1/admin/content/courses", "constraint": "courses_check2", "error": "new row for relation \"courses\" violates check constraint \"courses_check2\"", "user_id": "97eeb910-1cec-4322-99db-fb1a9475d2f9"}
+Violação de CHECK no banco não deve expor tabela/constraint; a mensagem autorada pelos gatilhos continua visível. ... {"ts": "2026-10-05T19:55:19.524+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "bbe0bae841874306", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "ce8f2f193969983b791f06609ffbe3da", "error_id": "babcfef23ce1", "route": "/v1/admin/content/courses", "constraint": "courses_check2", "error": "new row for relation \"courses\" violates check constraint \"courses_check2\"", "user_id": "27686496-aaf7-4d01-b621-2bdead1f055d"}
 ok
 test_malformed_ids_and_bodies_never_leak_internals_and_never_500 (tests.test_v0120_hardening.ErrorHygiene.test_malformed_ids_and_bodies_never_leak_internals_and_never_500) ... ok
 test_sql_and_xss_payloads_are_treated_as_text_everywhere_in_the_hub (tests.test_v0120_hardening.ErrorHygiene.test_sql_and_xss_payloads_are_treated_as_text_everywhere_in_the_hub) ... ok
@@ -308,7 +316,7 @@ test_admin_grants_and_revokes_staff_roles (tests.test_v0120_knowledge.Editorial.
 test_author_cannot_approve_even_as_platform_admin_and_db_enforces_it (tests.test_v0120_knowledge.Editorial.test_author_cannot_approve_even_as_platform_admin_and_db_enforces_it) ... ok
 test_draft_is_not_public_until_published_by_another_person (tests.test_v0120_knowledge.Editorial.test_draft_is_not_public_until_published_by_another_person) ... ok
 test_published_version_is_immutable_and_new_version_supersedes (tests.test_v0120_knowledge.Editorial.test_published_version_is_immutable_and_new_version_supersedes) ... ok
-test_regulatory_content_needs_source_and_date_and_expires (tests.test_v0120_knowledge.Editorial.test_regulatory_content_needs_source_and_date_and_expires) ... {"ts": "2026-10-05T19:34:27.834+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "ff8185ca47644b3d", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "415b31f3a3f460500c18dfed2bc15172", "error_id": "ef3ccd1722d4", "route": "/v1/admin/content/article-versions/{id}/transition", "constraint": "kb_article_versions_check2", "error": "new row for relation \"kb_article_versions\" violates check constraint \"kb_article_versions_check2\"", "user_id": "c9304c5f-46c7-410f-a967-d6e694fb041c"}
+test_regulatory_content_needs_source_and_date_and_expires (tests.test_v0120_knowledge.Editorial.test_regulatory_content_needs_source_and_date_and_expires) ... {"ts": "2026-10-05T19:55:36.341+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "b77b5e0fda0b421f", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "4e690983a0d4396c9c58dbf97b500bba", "error_id": "e9020e4b6da3", "route": "/v1/admin/content/article-versions/{id}/transition", "constraint": "kb_article_versions_check2", "error": "new row for relation \"kb_article_versions\" violates check constraint \"kb_article_versions_check2\"", "user_id": "c1184dbe-97ed-42c5-9fea-dce96a8415cf"}
 ok
 test_returning_to_draft_requires_a_note (tests.test_v0120_knowledge.Editorial.test_returning_to_draft_requires_a_note) ... ok
 test_roles_are_enforced (tests.test_v0120_knowledge.Editorial.test_roles_are_enforced) ... ok
@@ -402,8 +410,8 @@ A guarda autoritativa roda na chamada: destino interno vira erro PERMANENTE (nã
 test_webhook_headers_cannot_smuggle_authorization (tests.test_v0130_integrations.IntegrationSecurity.test_webhook_headers_cannot_smuggle_authorization) ... ok
 test_xml_bomb_and_deep_nesting_are_refused (tests.test_v0130_integrations.IntegrationSecurity.test_xml_bomb_and_deep_nesting_are_refused) ... ok
 test_canceled_job_is_not_executed (tests.test_v0130_integrations.JobLifecycle.test_canceled_job_is_not_executed) ... ok
-test_circuit_opens_after_consecutive_failures_and_protects_the_external_system (tests.test_v0130_integrations.JobLifecycle.test_circuit_opens_after_consecutive_failures_and_protects_the_external_system) ... {"ts": "2026-10-05T19:34:48.730+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "connection_id": "aa91f7ea-444b-4e18-90db-d30e4a8fe12e", "failure_streak": 5}
-{"ts": "2026-10-05T19:34:48.786+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "connection_id": "aa91f7ea-444b-4e18-90db-d30e4a8fe12e", "failure_streak": 6}
+test_circuit_opens_after_consecutive_failures_and_protects_the_external_system (tests.test_v0130_integrations.JobLifecycle.test_circuit_opens_after_consecutive_failures_and_protects_the_external_system) ... {"ts": "2026-10-05T19:55:58.163+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "connection_id": "3c9114c8-f671-4db7-a12f-d3b10cb7ecd2", "failure_streak": 5}
+{"ts": "2026-10-05T19:55:58.206+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "connection_id": "3c9114c8-f671-4db7-a12f-d3b10cb7ecd2", "failure_streak": 6}
 ok
 test_concurrent_workers_never_run_the_same_job_twice (tests.test_v0130_integrations.JobLifecycle.test_concurrent_workers_never_run_the_same_job_twice) ... ok
 test_explicit_idempotency_key_is_respected (tests.test_v0130_integrations.JobLifecycle.test_explicit_idempotency_key_is_respected) ... ok
@@ -420,12 +428,12 @@ test_mapping_transforms_are_declared_and_validated (tests.test_v0130_integration
 test_version_conflict_is_detected_and_never_silently_overwritten (tests.test_v0130_integrations.MappingAndExternalIds.test_version_conflict_is_detected_and_never_silently_overwritten) ... ok
 test_catalog_only_accepts_real_events (tests.test_v0130_integrations.OutboundWebhooks.test_catalog_only_accepts_real_events) ... ok
 test_event_is_delivered_once_with_valid_signature (tests.test_v0130_integrations.OutboundWebhooks.test_event_is_delivered_once_with_valid_signature) ... ok
-test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed (tests.test_v0130_integrations.OutboundWebhooks.test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed) ... {"ts": "2026-10-05T19:34:50.281+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "delivery_id": "92026eca-cbcf-41cd-a592-cf2d604e9ca0", "event_type": "TRIAL.STARTED", "attempts": 6, "code": "[REDACTED]"}
+test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed (tests.test_v0130_integrations.OutboundWebhooks.test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed) ... {"ts": "2026-10-05T19:55:59.403+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "delivery_id": "4100d106-5003-4124-b186-6350efa59b12", "event_type": "TRIAL.STARTED", "attempts": 6, "code": "[REDACTED]"}
 ok
 test_http_endpoint_and_internal_targets_are_refused (tests.test_v0130_integrations.OutboundWebhooks.test_http_endpoint_and_internal_targets_are_refused) ... ok
 test_only_subscribed_events_and_active_subscriptions_are_delivered (tests.test_v0130_integrations.OutboundWebhooks.test_only_subscribed_events_and_active_subscriptions_are_delivered) ... ok
 test_other_organization_never_receives_events (tests.test_v0130_integrations.OutboundWebhooks.test_other_organization_never_receives_events) ... ok
-test_permanent_rejection_goes_straight_to_dead_letter (tests.test_v0130_integrations.OutboundWebhooks.test_permanent_rejection_goes_straight_to_dead_letter) ... {"ts": "2026-10-05T19:34:50.806+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "delivery_id": "59e2c5d2-170a-4f04-ae51-a9de8cee4713", "event_type": "PAYMENT.FAILED", "attempts": 1, "code": "[REDACTED]"}
+test_permanent_rejection_goes_straight_to_dead_letter (tests.test_v0130_integrations.OutboundWebhooks.test_permanent_rejection_goes_straight_to_dead_letter) ... {"ts": "2026-10-05T19:55:59.910+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.13.0", "env": "test", "delivery_id": "b6788a12-e9bb-4c37-9b76-7aaca3bb8f34", "event_type": "PAYMENT.FAILED", "attempts": 1, "code": "[REDACTED]"}
 ok
 test_signature_is_verifiable_and_rejects_tampering (tests.test_v0130_integrations.OutboundWebhooks.test_signature_is_verifiable_and_rejects_tampering) ... ok
 test_test_delivery_endpoint_emits_a_ping (tests.test_v0130_integrations.OutboundWebhooks.test_test_delivery_endpoint_emits_a_ping) ... ok
@@ -471,8 +479,8 @@ test_partial_save_does_not_require_everything (tests.test_v0140_trust.GuidedDiag
 test_skip_is_recorded_with_reason (tests.test_v0140_trust.GuidedDiagnosis.test_skip_is_recorded_with_reason) ... ok
 test_stage_with_required_document_demands_it (tests.test_v0140_trust.GuidedDiagnosis.test_stage_with_required_document_demands_it) ... ok
 test_unknown_stage_and_foreign_document_are_refused (tests.test_v0140_trust.GuidedDiagnosis.test_unknown_stage_and_foreign_document_are_refused) ... ok
-test_biometric_and_phone_are_refused_explicitly (tests.test_v0140_trust.IdentityVerification.test_biometric_and_phone_are_refused_explicitly) ... {"ts": "2026-10-05T19:35:01.591+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "8fdb3f3a39044a0f", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "7e88afc69babf8a2fa1faf3249d815d3", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 9.5, "spans": {"db.tx": {"count": 3, "ms": 8.4}}, "user_id": "9fe52abf-104e-4aeb-a873-e20d611196f9", "org_id": "7febccb8-fbdc-433c-b4c2-e2ead62f50df"}
-{"ts": "2026-10-05T19:35:01.602+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "42f69f39007848ac", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "497cb67758c90a9a44609e230bc19a45", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 8.3, "spans": {"db.tx": {"count": 3, "ms": 7.3}}, "user_id": "9fe52abf-104e-4aeb-a873-e20d611196f9", "org_id": "7febccb8-fbdc-433c-b4c2-e2ead62f50df"}
+test_biometric_and_phone_are_refused_explicitly (tests.test_v0140_trust.IdentityVerification.test_biometric_and_phone_are_refused_explicitly) ... {"ts": "2026-10-05T19:56:11.934+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "d9e637912f6c4f3b", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "87c3da90ddac9d74fecf3612fd7527cc", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 6.7, "spans": {"db.tx": {"count": 3, "ms": 5.7}}, "user_id": "97f9fd6b-79a2-4d00-8ed2-f9d3c0029c9f", "org_id": "30537a6a-a28b-48a2-b411-4299937e387e"}
+{"ts": "2026-10-05T19:56:11.942+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "425eea2a79784956", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "ad1d832d9a74a236963ff124f37012e4", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 5.9, "spans": {"db.tx": {"count": 3, "ms": 5.0}}, "user_id": "97f9fd6b-79a2-4d00-8ed2-f9d3c0029c9f", "org_id": "30537a6a-a28b-48a2-b411-4299937e387e"}
 ok
 test_document_verification_needs_human_decision (tests.test_v0140_trust.IdentityVerification.test_document_verification_needs_human_decision) ... ok
 test_self_promotion_is_blocked_at_database_level (tests.test_v0140_trust.IdentityVerification.test_self_promotion_is_blocked_at_database_level) ... ok
@@ -525,7 +533,7 @@ test_code_dies_when_content_changes (tests.test_v0140_trust.TwoLayerSignature.te
 test_code_is_single_use (tests.test_v0140_trust.TwoLayerSignature.test_code_is_single_use) ... ok
 test_signature_requires_challenge_code (tests.test_v0140_trust.TwoLayerSignature.test_signature_requires_challenge_code) ... ok
 test_signature_succeeds_with_both_layers (tests.test_v0140_trust.TwoLayerSignature.test_signature_succeeds_with_both_layers) ... ok
-test_sms_channel_is_refused_explicitly (tests.test_v0140_trust.TwoLayerSignature.test_sms_channel_is_refused_explicitly) ... {"ts": "2026-10-05T19:35:14.001+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "1061b389a0bf4dfd", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "56adf1a88cada894c8c6e4894afe4e0e", "method": "POST", "route": "/v1/signatures/challenge", "status": 501, "ms": 11.6, "spans": {"db.tx": {"count": 4, "ms": 10.6}}, "user_id": "31209361-0dd9-42bd-9753-471474c21e78", "org_id": "68c62306-8092-4685-b659-b2f02cefb563"}
+test_sms_channel_is_refused_explicitly (tests.test_v0140_trust.TwoLayerSignature.test_sms_channel_is_refused_explicitly) ... {"ts": "2026-10-05T19:56:25.441+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "d7ebd6d1613c40b3", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "d5abb305b2cad67abcad9f4406698240", "method": "POST", "route": "/v1/signatures/challenge", "status": 501, "ms": 12.8, "spans": {"db.tx": {"count": 4, "ms": 11.5}}, "user_id": "ddfad71f-35e1-487b-9799-590799805adb", "org_id": "64243472-ae9c-429d-81a2-b61c47e93629"}
 ok
 test_wrong_code_is_refused_and_counted (tests.test_v0140_trust.TwoLayerSignature.test_wrong_code_is_refused_and_counted) ... ok
 test_wrong_password_is_refused_before_code (tests.test_v0140_trust.TwoLayerSignature.test_wrong_password_is_refused_before_code) ... ok
@@ -535,7 +543,7 @@ test_reports_scope_language_and_csv_safety (tests.test_v080.GeoAndReportTests.te
 test_cross_tenant_isolation (tests.test_v080.ImpactTests.test_cross_tenant_isolation) ... ok
 test_determinants_k_anonymity_and_honest_note (tests.test_v080.ImpactTests.test_determinants_k_anonymity_and_honest_note) ... ok
 test_diagnosis_to_project_flow (tests.test_v080.ImpactTests.test_diagnosis_to_project_flow) ... ok
-test_graph_link_types_and_external_validation (tests.test_v080.ImpactTests.test_graph_link_types_and_external_validation) ... {"ts": "2026-10-05T19:35:18.750+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "cd505bb016864498", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "a524fc9a79f8930f89a49fb6973e2956", "error_id": "a9095adfd690", "route": "/v1/projects/{project_id}/graph/edges", "constraint": "impact_edges_check", "error": "new row for relation \"impact_edges\" violates check constraint \"impact_edges_check\"", "user_id": "d9279f5d-1a42-4463-8ad7-c97cbebd38c8"}
+test_graph_link_types_and_external_validation (tests.test_v080.ImpactTests.test_graph_link_types_and_external_validation) ... {"ts": "2026-10-05T19:56:30.103+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "5238d38dd49040eb", "service": "impacto-api", "version": "0.13.0", "env": "test", "trace_id": "7d9db7eb2998a4d302d93a28429cb841", "error_id": "b2291d302a18", "route": "/v1/projects/{project_id}/graph/edges", "constraint": "impact_edges_check", "error": "new row for relation \"impact_edges\" violates check constraint \"impact_edges_check\"", "user_id": "c821ec52-79fb-4950-b259-9b995ec42320"}
 ok
 test_indicator_reported_vs_validated_flow (tests.test_v080.ImpactTests.test_indicator_reported_vs_validated_flow) ... ok
 test_ods_catalog_and_honest_targets (tests.test_v080.ImpactTests.test_ods_catalog_and_honest_targets) ... ok
@@ -598,6 +606,6 @@ test_trust_progression_needs_accepted_evidence_and_resets_on_edit (tests.test_v0
 test_view_never_creates_intent_and_events_are_deduplicated (tests.test_v090_solutions.SolutionHttpTests.test_view_never_creates_intent_and_events_are_deduplicated) ... ok
 
 ----------------------------------------------------------------------
-Ran 556 tests in 243.421s
+Ran 564 tests in 260.468s
 
 OK

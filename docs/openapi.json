@@ -22839,7 +22839,7 @@
     }
    }
   },
-  "/v1/taxonomy": {
+  "/v1/impact-taxonomy": {
    "get": {
     "summary": "Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial",
     "operationId": "get_platform_routes_taxonomy",
@@ -23435,6 +23435,56 @@
       }
      }
     }
+   },
+   "get": {
+    "summary": "Campanhas da organização, com o endereço público e a situação",
+    "operationId": "get_platform_routes_campaign_list",
+    "tags": [
+     "funding"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
    }
   },
   "/v1/campaigns/{campaign_id}": {

@@ -5,6 +5,7 @@ import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
 import { ContextHelp } from "./help";
+import { Preferences } from "./prefs";
 import { UFS } from "./public";
 import { UploadButton } from "./documents";
 
@@ -279,6 +280,11 @@ export function Account() {
   return (
     <>
       <PageHead title="Minha conta" sub={`${me.user.full_name} · ${me.user.email}`} />
+      <Preferences />
+      <Panel title="Identidade">
+        <p className="muted">Quanto mais forte a identificação, mais a sua assinatura vale para quem recebe o documento.</p>
+        <p><Link to="/identidade">Ver e reforçar minha identidade</Link></p>
+      </Panel>
       <div className="split">
         <Panel title="Verificação em duas etapas">
           {me.user.mfa_enabled ? <p><Pill tone="good">Ativa</Pill> Seu login pede um código do aplicativo autenticador.</p> : (

@@ -648,7 +648,7 @@ class TaxonomyAndTags(unittest.TestCase):
         cls.osc = new_account("osc", compliance="approved")
 
     def test_catalog_has_17_sdg_with_official_colors_and_no_un_logo(self):
-        r = self.osc.get("/v1/taxonomy")
+        r = self.osc.get("/v1/impact-taxonomy")
         self.assertEqual(r.status, 200, r)
         self.assertEqual(len(r.json["sdg"]), 17)
         self.assertEqual(r.json["sdg"][0]["code"], "ODS1")

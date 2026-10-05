@@ -22,6 +22,12 @@ import * as SolM from "./pages/solutions_manage";
 import * as Inst from "./pages/institution";
 import * as Help from "./pages/help";
 import * as HelpA from "./pages/helpAdmin";
+import * as Verify from "./pages/verify";
+import * as Trust from "./pages/trust";
+import * as TrustA from "./pages/trustAdmin";
+import * as Funding from "./pages/funding";
+import * as Prefs from "./pages/prefs";
+import * as DiagGuide from "./pages/diagnosisGuide";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -52,6 +58,19 @@ const ROUTES: R[] = [
   ["/organizacao/compliance", () => <Org.Compliance />],
   ["/organizacao/equipe", () => <Org.Team />],
   ["/conta", () => <Org.Account />],
+  ["/conta/preferencias", () => <Prefs.Preferences standalone />],
+  ["/identidade", () => <Trust.Identity />],
+  ["/verificacoes", () => <Trust.VerifiableRecords />],
+  ["/acordos", () => <Trust.Agreements />],
+  ["/acordos/novo", () => <Trust.AgreementForm />],
+  ["/acordos/:id", (p) => <Trust.AgreementDetail id={p.id} />],
+  ["/cotas", () => <Funding.Quotas />, ["osc"]],
+  ["/cotas/:id/apoios", (p) => <Funding.QuotaPledges id={p.id} />, ["osc"]],
+  ["/campanha-gestao", () => <Funding.Campaigns />, ["osc"]],
+  ["/minhas-atividades", () => <TrustA.MyServices />, ["provider", "individual"]],
+  ["/admin/identidade", () => <TrustA.IdentityQueue />, ["platform"]],
+  ["/admin/credenciais-profissionais", () => <TrustA.CredentialQueue />, ["platform"]],
+  ["/admin/honorarios", () => <TrustA.FeeTables />, ["platform"]],
   ["/conta/plano", () => <Org.Plan />],
   ["/settings/billing", () => <Org.Plan />],
   ["/fiscal", () => <Org.Fiscal />, ["company"]],
@@ -67,6 +86,7 @@ const ROUTES: R[] = [
   ["/necessidades/:id", (p) => <Net.NeedDetail id={p.id} />, ["osc"]],
   ["/diagnosticos", () => <Impact.Diagnoses />, ["osc"]],
   ["/diagnosticos/:id", (p) => <Impact.DiagnosisEditor id={p.id} />, ["osc"]],
+  ["/diagnosticos/:id/roteiro", (p) => <DiagGuide.DiagnosisGuide id={p.id} />, ["osc"]],
   ["/determinantes", () => <Impact.Determinants />, ["government", "platform"]],
   ["/pagamentos", () => <Fin.Payments />, ["osc", "company", "individual", "government"]],
   ["/pagamentos/:id", (p) => <Fin.PaymentDetail id={p.id} />, ["osc", "company", "individual", "government"]],
@@ -125,6 +145,10 @@ const ROUTES: R[] = [
 // Central de Conhecimento: páginas públicas (sem login) e privadas. Com sessão, usam o Shell; sem, a moldura pública.
 type HR = [string, (p: Record<string, string>) => ReactNode, boolean?];   // [padrão, página, exige login]
 const HELP: HR[] = [
+  // Verificação pública e campanha: abrem SEM login (moldura pública) e também dentro do app.
+  ["/verificar", () => <Verify.VerifyPage />],
+  ["/verificar/:code", () => <Verify.VerifyPage />],
+  ["/campanha/:slug", () => <Funding.PublicCampaign />],
   ["/ajuda", () => <Help.HelpHome />],
   ["/ajuda/busca", () => <Help.HelpSearch />],
   ["/ajuda/comece-aqui", () => <Help.Start />, true],
@@ -161,18 +185,18 @@ const PUBLIC: [string, () => ReactNode][] = [
 
 const NAV: Record<string, [string, string][]> = {
   osc: [["/", "Início"], ["/oportunidades", "Oportunidades"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
-    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/pagamentos", "Pagamentos"], ["/documentos", "Documentos"], ["/rascunhos", "Rascunhos"], ["/profissionais", "Profissionais parceiros"],
+    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
     ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/solucoes/replicacao", "Replicação"],
     ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/materiais", "Materiais"]],
   company: [["/", "Início"], ["/explorar", "Projetos para apoiar"], ["/editais", "Programas"], ["/candidaturas", "Candidaturas"],
     ["/carteira", "Carteira e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"],
-    ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
+    ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/materiais", "Materiais"]],
   individual: [["/", "Início"], ["/explorar", "Projetos para apoiar"], ["/candidaturas", "Candidaturas"], ["/carteira", "Meu apoio e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"],
-    ["/instituicao", "Perfil institucional"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"]],
-  provider: [["/", "Início"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
+    ["/instituicao", "Perfil institucional"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/mensagens", "Mensagens"]],
+  provider: [["/", "Início"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/minhas-atividades", "Minhas atividades"], ["/identidade", "Identidade"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
   government: [["/", "Início"], ["/editais", "Editais"], ["/candidaturas", "Candidaturas"], ["/carteira", "Execução e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"],
-    ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
-  platform: [["/admin", "Visão geral"], ["/admin/compliance", "Compliance"], ["/admin/credenciais", "Credenciais"], ["/admin/editais", "Editais curados"],
+    ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
+  platform: [["/admin", "Visão geral"], ["/admin/compliance", "Compliance"], ["/admin/identidade", "Identidade"], ["/admin/credenciais", "Credenciais"], ["/admin/credenciais-profissionais", "Credenciais profissionais"], ["/admin/honorarios", "Honorários"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
     ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
 };

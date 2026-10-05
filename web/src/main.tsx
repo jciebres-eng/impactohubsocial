@@ -5,8 +5,12 @@ import { RouterProvider } from "./router";
 import { SessionProvider } from "./session";
 import { ToastProvider } from "./ui/kit";
 import { ErrorBoundary as Boundary } from "./ui/boundary";
+import { bootTheme } from "./pages/prefs";
 
 const ErrorBoundary = Boundary as unknown as (p: { children: any }) => any; // (componente de classe; tipagem mínima offline)
+
+// Tema salvo pela pessoa é aplicado ANTES do primeiro render, para não piscar branco e depois escuro.
+bootTheme();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

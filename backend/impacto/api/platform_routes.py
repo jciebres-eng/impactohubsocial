@@ -19,7 +19,7 @@ OWNER = "owner"
 
 
 # ================================================================================ taxonomia
-@route("GET", "/v1/taxonomy", min_role="viewer", tags=T,
+@route("GET", "/v1/impact-taxonomy", min_role="viewer", tags=T,
        summary="Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial")
 def taxonomy(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
@@ -255,6 +255,19 @@ def campaign_create(ctx: Ctx, body: TSch.CampaignIn):
                        body.cover_document_id, body.show_backers, ctx.user_id)
         ctx.audit(c, "campaign.created", "campaign", cid, {"slug": body.slug})
     return {"id": cid, "slug": body.slug, "status": "draft", "public_path": f"/campanha/{body.slug}"}
+
+
+@route("GET", "/v1/campaigns", query=TSch.Pagination, min_role="viewer", tags=("funding",),
+       summary="Campanhas da organização, com o endereço público e a situação")
+def campaign_list(ctx: Ctx, q: TSch.Pagination):
+    with ctx.tx(readonly=True) as c:
+        rows = c.query("SELECT c.id::text AS id, c.slug, c.title, c.summary, c.status, c.show_backers, c.published_at,"
+                       " c.project_id::text AS project_id, p.title AS project_title FROM campaigns c"
+                       " JOIN projects p ON p.id = c.project_id WHERE c.org_id = $1 ORDER BY c.created_at DESC"
+                       " LIMIT $2 OFFSET $3", ctx.org_id, q.limit + 1, q.offset)
+    for r in rows[:q.limit]:
+        r["public_path"] = f"/campanha/{r['slug']}"
+    return page(rows, q.limit, q.offset)
 
 
 @route("PATCH", "/v1/campaigns/{campaign_id}", body=TSch.CampaignPatch, min_role=WRITE, tags=("funding",),

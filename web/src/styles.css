@@ -23,11 +23,18 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* 'data-theme=light' permite forçar o tema claro mesmo com o sistema no escuro (preferência da pessoa). */
+  :root:not([data-theme="light"]) {
     --papel: #0f1826; --folha: #16223a; --texto: #e7ecf3; --texto-2: #b6c2d4; --texto-3: #8796ad;
     --linha: #2a3a55; --linha-2: #223049; --mata-claro: #133a2c; --barro-claro: #3d1d18; --ambar-claro: #3a2d10; --ipe-claro: #3b3011;
     --mata: #49b38a; --barro: #ec7a66; --ambar: #f2c45a; --ipe-escuro: #f2c45a; --sombra: none; color-scheme: dark;
   }
+}
+/* Mesmos valores, agora escolhidos pela pessoa (sem depender do sistema). Nenhum token novo: não é redesign. */
+:root[data-theme="dark"] {
+  --papel: #0f1826; --folha: #16223a; --texto: #e7ecf3; --texto-2: #b6c2d4; --texto-3: #8796ad;
+  --linha: #2a3a55; --linha-2: #223049; --mata-claro: #133a2c; --barro-claro: #3d1d18; --ambar-claro: #3a2d10; --ipe-claro: #3b3011;
+  --mata: #49b38a; --barro: #ec7a66; --ambar: #f2c45a; --ipe-escuro: #f2c45a; --sombra: none; color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -39,7 +46,8 @@ h2 { font: 600 19px/1.3 var(--serif); }
 h3 { font-size: 14px; font-weight: 600; color: var(--texto-2); margin-top: 1em; }
 p { margin: 0 0 .75em; }
 a { color: var(--tinta-3); text-underline-offset: 3px; }
-@media (prefers-color-scheme: dark) { a { color: #9ec0ff; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) a { color: #9ec0ff; } }
+:root[data-theme="dark"] a { color: #9ec0ff; }
 code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; border-radius: 4px; }
 .muted { color: var(--texto-3); }
@@ -106,7 +114,10 @@ code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .btn-ghost:hover:not(:disabled) { border-color: var(--texto-3); }
 .btn-danger { background: var(--barro); color: #fff; }
 .btn-link { background: none; color: var(--tinta-3); padding: 4px 6px; min-height: 0; font-weight: 600; }
-@media (prefers-color-scheme: dark) { .btn-link { color: #9ec0ff; } .btn-ink { background: var(--tinta-3); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-link { color: #9ec0ff; }
+  :root:not([data-theme="light"]) .btn-ink { background: var(--tinta-3); } }
+:root[data-theme="dark"] .btn-link { color: #9ec0ff; }
+:root[data-theme="dark"] .btn-ink { background: var(--tinta-3); }
 .linkish { background: none; border: 0; padding: 0; color: var(--tinta-3); font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -303,7 +314,8 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .flow-label { color: var(--texto-2); }
 .flow-track { height: 14px; background: var(--linha-2); border-radius: 3px; overflow: hidden; }
 .flow-fill { display: block; height: 100%; background: var(--tinta); }
-@media (prefers-color-scheme: dark) { .flow-fill { background: var(--ipe); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .flow-fill { background: var(--ipe); } }
+:root[data-theme="dark"] .flow-fill { background: var(--ipe); }
 .flow-value { font-weight: 600; }
 @media (max-width: 600px) { .flow li, .bar-row { grid-template-columns: 1fr auto; } .flow-track, .bar-track { grid-column: 1 / -1; grid-row: 2; } }
 .fiscal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }

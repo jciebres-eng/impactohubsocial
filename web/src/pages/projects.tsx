@@ -4,6 +4,7 @@ import { centsToInput, date, label, money, n, parseMoney, MATCH_STATE } from "..
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, MoneyFlow, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { ImpactTags } from "./taxonomy";
 import { ContextHelp } from "./help";
 import { MatchVerdict } from "../ui/trail";
 import { UploadButton } from "./documents";
@@ -141,7 +142,7 @@ export function ProjectDetail({ id }: { id: string }) {
           <div className="tabs" role="tablist">
             {TABS.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "tab on" : "tab"} onClick={() => setTab(k)}>{l}</button>)}
           </div>
-          {tab === "overview" && <Overview p={p} />}
+          {tab === "overview" && <><Overview p={p} /><ImpactTags subjectType="project" subjectId={id} /></>}
           {tab === "budget" && <Budget p={p} reload={reload} />}
           {tab === "execution" && <Execution p={p} />}
           {tab === "reports" && <Report id={id} />}

@@ -70,7 +70,7 @@ def test_env() -> dict:
     return {
         "IMPACTO_ENV": "test", "DATABASE_URL": APP_DSN, "SECRET_KEY": "test-secret-key-" + "x" * 32,
         "VOUCHER_HMAC_KEY": "test-voucher-key-" + "y" * 32, "STORAGE_LOCAL_DIR": str(TMP / "storage"),
-        "PUBLIC_BASE_URL": "http://testserver.local", "COOKIE_SECURE": "false", "BILLING_PROVIDER": "sandbox",
+        "PUBLIC_BASE_URL": "http://testserver.local", "COOKIE_SECURE": "false", "BILLING_PROVIDER": "sandbox", "TRIAL_AUTO_START": "false",
         "AI_PROVIDER": "local", "MAIL_PROVIDER": "console", "LOG_LEVEL": "WARNING", "ALLOW_UNSCANNED_DOWNLOADS": "true", "RATE_LIMIT_MULTIPLIER": "1000",
     }
 

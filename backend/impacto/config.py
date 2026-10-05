@@ -85,7 +85,9 @@ class Settings:
     billing_provider: str = "none"        # none | sandbox | stripe | manual
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
-    stripe_prices: dict[str, str] = field(default_factory=dict)
+    stripe_prices: dict[str, str] = field(default_factory=dict)   # chaves: <plan_key> (mensal), <plan_key>_month, <plan_key>_year
+    trial_auto_start: bool = True
+    trial_days: int = 14
     ai_provider: str = "local"            # local | anthropic | openai_compatible | disabled
     ai_base_url: str = ""
     ai_api_key: str = ""
@@ -163,6 +165,8 @@ def load_settings() -> Settings:
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
         stripe_prices=prices,
+        trial_auto_start=_bool("TRIAL_AUTO_START", True),
+        trial_days=_int("TRIAL_DAYS", 14),
         ai_provider=_env("AI_PROVIDER", "local"),
         ai_base_url=_env("AI_BASE_URL", "") or "",
         ai_api_key=_env("AI_API_KEY", "") or "",

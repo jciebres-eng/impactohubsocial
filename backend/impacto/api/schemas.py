@@ -445,7 +445,24 @@ class AiSummarizeIn(In):
 
 # ---------------------------------------------------------------- billing
 class CheckoutIn(In):
+    """O cliente escolhe plano e periodicidade. Preço, desconto, trial e valor final são sempre calculados no servidor."""
     plan_key: Slug
+    interval: Literal["month", "year"] | None = None
+    voucher: Annotated[str | None, Field(min_length=6, max_length=40)] = None
+
+
+class QuoteIn(In):
+    plan_key: Slug
+    interval: Literal["month", "year"] | None = None
+
+
+class ChangePlanIn(In):
+    plan_key: Slug
+    interval: Literal["month", "year"] | None = None
+
+
+class AgreementJoinIn(In):
+    code: Annotated[str, Field(min_length=6, max_length=40)]
 
 
 class VoucherRedeemIn(In):

@@ -41,6 +41,10 @@ class BillingAndVoucherTests(unittest.TestCase):
             self.assertIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
             self.assertEqual(osc.post("/v1/saved-searches", {"name": "Cultura", "filters": {"cause": "cultura"}}).status, 201)
             self.assertEqual(osc.post("/v1/billing/cancel").status, 200)
+            # v0.11.0: cancelar NÃO corta o acesso já pago — vale até o fim do período; só então volta ao FREE
+            self.assertIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
+            with db_system() as d:
+                d.run("UPDATE subscriptions SET current_period_end = now() - interval '8 days' WHERE org_id = $1", osc.org_id)
             self.assertNotIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
             # rebaixamento não apaga dados
             self.assertEqual(len(osc.get("/v1/saved-searches").json["items"]), 1)

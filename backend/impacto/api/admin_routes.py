@@ -343,10 +343,15 @@ def rule_action(ctx: Ctx, body: RuleActionIn):
 # ------------------------------------------------------------------------------------------------ vouchers
 class BatchIn(S.In):
     campaign: Annotated[str, Field(min_length=2, max_length=120)]
-    type: Literal["grant_plan", "grant_feature", "free_period"]
+    type: Literal["grant_plan", "grant_feature", "free_period", "percent_off", "amount_off"]
     plan_key: S.Slug | None = None
     feature_key: Annotated[str | None, Field(max_length=60)] = None
-    duration_days: Annotated[int, Field(ge=1, le=1095)]
+    duration_days: Annotated[int | None, Field(ge=1, le=3650)] = None        # licença: None = permanente (grant_plan/grant_feature)
+    percent: Annotated[int | None, Field(ge=1, le=100)] = None               # percent_off (100 = licença gratuita de plan_key por duration_days)
+    amount_cents: Annotated[int | None, Field(ge=1, le=100_000_000)] = None  # amount_off
+    discount_duration: Literal["once", "repeating", "forever"] = "once"
+    discount_months: Annotated[int | None, Field(ge=1, le=36)] = None
+    organization_id: S.Uuid | None = None                                    # voucher restrito a uma organização/convênio
     quantity: Annotated[int, Field(ge=1, le=500)]
     max_redemptions: Annotated[int, Field(ge=1, le=10000)] = 1
     scope_roles: list[Literal["osc", "company", "provider", "government"]] = Field(default_factory=list)
@@ -359,6 +364,16 @@ class BatchIn(S.In):
 def create_batch(ctx: Ctx, body: BatchIn):
     if body.type in ("grant_plan", "free_period") and not body.plan_key:
         raise ApiError(422, "validation_error", "Informe plan_key")
+    if body.type == "free_period" and not body.duration_days:
+        raise ApiError(422, "validation_error", "free_period exige duration_days (para licença permanente use grant_plan sem duração)")
+    if body.type == "percent_off" and not body.percent:
+        raise ApiError(422, "validation_error", "Informe percent")
+    if body.type == "percent_off" and body.percent == 100 and not body.plan_key:
+        raise ApiError(422, "validation_error", "Voucher de 100% concede licença: informe plan_key")
+    if body.type == "amount_off" and not body.amount_cents:
+        raise ApiError(422, "validation_error", "Informe amount_cents")
+    if body.discount_duration == "repeating" and not body.discount_months:
+        raise ApiError(422, "validation_error", "Informe discount_months para desconto recorrente")
     if body.type == "grant_feature" and not body.feature_key:
         raise ApiError(422, "validation_error", "Informe feature_key")
     codes = []
@@ -370,10 +385,13 @@ def create_batch(ctx: Ctx, body: BatchIn):
             raw = "".join(secrets.choice(ALPHABET) for _ in range(12))
             code = f"{raw[:4]}-{raw[4:8]}-{raw[8:]}"
             codes.append(code)
+            value = {"percent": body.percent} if body.type == "percent_off" else ({"amount_cents": body.amount_cents} if body.type == "amount_off" else {})
             c.run("INSERT INTO vouchers(batch_id, code_hash, code_hint, type, plan_key, feature_key, scope_roles, scope_cnpj, duration_days,"
-                  " max_redemptions, valid_until) VALUES ($1,$2,$3,$4,$5,$6,$7::text[],$8,$9::int,$10::int,$11::timestamptz)",
+                  " max_redemptions, valid_until, value, discount_duration, discount_months, organization_id, created_by)"
+                  " VALUES ($1,$2,$3,$4,$5,$6,$7::text[],$8,$9::int,$10::int,$11::timestamptz,$12::jsonb,$13,$14::int,$15,$16)",
                   bid, code_hash(ctx.settings.voucher_hmac_key, code), raw[-4:], body.type, body.plan_key, body.feature_key, body.scope_roles,
-                  body.scope_cnpj, body.duration_days, body.max_redemptions, body.valid_until)
+                  body.scope_cnpj, body.duration_days, body.max_redemptions, body.valid_until, Json(value), body.discount_duration, body.discount_months,
+                  body.organization_id, ctx.user_id)
         ctx.audit(c, "voucher.batch_created", "voucher_batch", bid, {"campaign": body.campaign, "quantity": body.quantity, "type": body.type}, org_id=None)
     return {"batch_id": bid, "status": "pending_approval", "codes": codes,
             "warning": "Guarde os códigos agora: eles não poderão ser exibidos novamente."}
@@ -467,7 +485,8 @@ def invoice_paid(ctx: Ctx, body: PaidIn):
 class GrantIn(S.In):
     plan_key: S.Slug | None = None
     feature_key: Annotated[str | None, Field(max_length=60)] = None
-    days: Annotated[int, Field(ge=1, le=1095)]
+    days: Annotated[int | None, Field(ge=1, le=3650)] = None              # None = licença permanente
+    source: Literal["admin", "license", "partner", "convention", "gov", "promotion"] = "admin"
     reason: Annotated[str, Field(min_length=3, max_length=500)]
 
 
@@ -476,10 +495,10 @@ def grant(ctx: Ctx, body: GrantIn):
     if not (body.plan_key or body.feature_key):
         raise ApiError(422, "validation_error", "Informe plan_key ou feature_key")
     with ctx.tx() as c:
-        gid = c.scalar("INSERT INTO entitlement_grants(org_id, plan_key, feature_key, source, ends_at, created_by)"
-                       " VALUES ($1,$2,$3,'admin', now() + make_interval(days => $4::int), $5) RETURNING id::text",
-                       ctx.path["org_id"], body.plan_key, body.feature_key, body.days, ctx.user_id)
-        ctx.audit(c, "billing.admin_grant", "grant", gid, {"plan": body.plan_key, "feature": body.feature_key, "reason": body.reason},
+        gid = c.scalar("INSERT INTO entitlement_grants(org_id, plan_key, feature_key, source, reason, ends_at, created_by)"
+                       " VALUES ($1,$2,$3,$4,$5, CASE WHEN $6::int IS NULL THEN NULL ELSE now() + make_interval(days => $6::int) END, $7) RETURNING id::text",
+                       ctx.path["org_id"], body.plan_key, body.feature_key, body.source, body.reason, body.days, ctx.user_id)
+        ctx.audit(c, "billing.admin_grant", "grant", gid, {"plan": body.plan_key, "feature": body.feature_key, "source": body.source, "days": body.days, "reason": body.reason},
                   org_id=ctx.path["org_id"])
     return {"id": gid}
 

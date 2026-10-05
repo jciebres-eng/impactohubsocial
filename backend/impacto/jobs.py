@@ -263,8 +263,13 @@ def risk_scan(app) -> dict:
         return risk.scan(c)
 
 
+def billing_lifecycle(app) -> dict:
+    from .services import monetization
+    return monetization.lifecycle_job(app)
+
+
 JOBS = [("close_calls", close_calls), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention)]
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle)]
 
 
 def run_once(app) -> list[dict]:

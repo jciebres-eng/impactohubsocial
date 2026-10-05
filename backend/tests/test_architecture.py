@@ -35,7 +35,7 @@ class ArchitectureTests(unittest.TestCase):
     def test_system_context_only_in_allowed_modules(self):
         allowed = {"auth.py", "billing.py", "compliance.py", "workflow.py", "ratelimit.py", "http.py", "jobs.py", "cli.py", "seed_dev.py",
                    "app.py", "auth_routes.py", "org_routes.py", "application_routes.py", "execution_routes.py", "document_routes.py",
-                   "billing_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py"}
+                   "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:

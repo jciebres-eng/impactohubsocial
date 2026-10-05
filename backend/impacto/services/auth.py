@@ -161,6 +161,8 @@ def register(ctx: Ctx, body) -> dict:
                 c.run("INSERT INTO funder_profiles(org_id) VALUES ($1)", org_id)
             if org.kind == "provider":
                 c.run("INSERT INTO provider_profiles(org_id) VALUES ($1)", org_id)
+            from . import monetization
+            monetization.start_trial(c, ctx.settings, org_id=org_id, org_kind=org.kind, email=email, cnpj=cnpj, user_id=uid, source="signup")
         tok = create_auth_token(c, uid, "verify_email", 60 * 48)
         from .audit import record
         record(c, org_id=org_id, actor=uid, action="user.registered", object_type="user", object_id=uid,

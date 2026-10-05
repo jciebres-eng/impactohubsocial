@@ -86,14 +86,19 @@ def sync_reference_data(conn: Connection, log=print) -> None:
         for key, p in plans["plans"].items():
             keys.append(key)
             conn.execute(
-                "INSERT INTO plans(plan_key, version, role, name, price_cents, interval, limits, features, requires_flag, public, active)"
-                " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::text[],$9,$10,true)"
-                " ON CONFLICT (plan_key) DO UPDATE SET version=EXCLUDED.version, role=EXCLUDED.role, name=EXCLUDED.name,"
+                "INSERT INTO plans(plan_key, version, role, name, price_cents, interval, limits, features, requires_flag, public, active, tier)"
+                " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::text[],$9,$10,true,$11)"
+                " ON CONFLICT (plan_key) DO UPDATE SET version=EXCLUDED.version, role=EXCLUDED.role, name=EXCLUDED.name, tier=EXCLUDED.tier,"
                 " price_cents=EXCLUDED.price_cents, interval=EXCLUDED.interval, limits=EXCLUDED.limits,"
                 " features=EXCLUDED.features, requires_flag=EXCLUDED.requires_flag, public=EXCLUDED.public, active=true",
                 (key, plans["version"], p["role"], p["name"], p.get("price_cents"), p.get("interval", "month"),
-                 Json(p.get("limits", {})), p.get("features", []), p.get("requires_flag"), p.get("public", True)),
+                 Json(p.get("limits", {})), p.get("features", []), p.get("requires_flag"), p.get("public", True), p.get("tier", "free")),
             )
+            for interval, amount in (p.get("prices") or {}).items():
+                # valor da configuração só sobrescreve quando definido (null = não definido; o proprietário pode ter preenchido no banco)
+                conn.execute("INSERT INTO plan_prices(plan_key, interval, amount_cents) VALUES ($1,$2,$3)"
+                             " ON CONFLICT (plan_key, interval) DO UPDATE SET amount_cents = coalesce(EXCLUDED.amount_cents, plan_prices.amount_cents)",
+                             (key, interval, amount))
         conn.execute("UPDATE plans SET active = false WHERE NOT (plan_key = ANY($1::text[]))", (keys,))
         for flag, cfg in plans.get("flags", {}).items():
             conn.execute(

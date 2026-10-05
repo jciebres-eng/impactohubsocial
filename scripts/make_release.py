@@ -38,7 +38,7 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "KNOWLEDGE_HUB.md", "USER_GUIDES.md", "TRAINING_ACADEMY.md", "SUPPORT_SYSTEM.md", "PARTNERSHIP_SYSTEM.md", "TRIAL_SYSTEM.md", "CONTENT_GOVERNANCE.md",
             "KNOWLEDGE_DATA_MODEL.md", "STORE_READINESS.md", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/VERSION",
             "config/help_synonyms.json", "config/onboarding_paths.json", "backend/migrations/0009_v0120_knowledge_hub.sql",
-            "FINAL_TECHNICAL_BASELINE.md", "DESIGN_HANDOFF.md", "backend/migrations/0010_v0121_indexes.sql",
+            "FINAL_TECHNICAL_BASELINE.md", "DESIGN_HANDOFF.md", "FINAL_RELEASE_MANIFEST.json", "backend/migrations/0010_v0121_indexes.sql",
             "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/VERSION",
             "backend/tests/test_v0120_hardening.py", "backend/tests/test_e2e_baseline.py"]
 

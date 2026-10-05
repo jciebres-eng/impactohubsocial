@@ -1,0 +1,90 @@
+{
+  "version": "0.12.1",
+  "git_commit": "f8fe9d6bd0bcc756f0e0ba8f8e2250b1ba5e6cf7",
+  "git_branch": "inc/v0.12.0-central-conhecimento",
+  "git_tag": "v0.12.1-final-baseline",
+  "generated_at": "2026-10-05T17:09:36+00:00",
+  "build_status": "PASS",
+  "lint_status": "PASS",
+  "typecheck_status": "PASS",
+  "test_status": "PASS",
+  "e2e_status": "PASS",
+  "security_status": "PARTIAL",
+  "dependency_audit_status": "BLOCKED",
+  "database_status": "PASS",
+  "migration_status": "PASS",
+  "accessibility_status": "PARTIAL",
+  "zip_filename": "FINAL_FULL_RELEASE.zip",
+  "tests": {
+    "total": 392,
+    "passed": 392,
+    "failed": 0,
+    "skipped": 0,
+    "unit": 33,
+    "api_integration": 325,
+    "architecture": 6,
+    "e2e_browser": 28,
+    "evidence": "docs/evidence/test_run_v0.12.1.log"
+  },
+  "api": {
+    "operations": 475,
+    "spec": "docs/openapi.json",
+    "parity_checked": true
+  },
+  "database": {
+    "tables": 152,
+    "migrations": 10,
+    "rls_on_all_tables_except": [
+      "schema_migrations"
+    ],
+    "created_from_scratch_each_test_run": true,
+    "incremental_migration_verified": true
+  },
+  "commands": {
+    "test": "cd backend && TEST_ADMIN_DATABASE_URL=\"postgresql://postgres@127.0.0.1:5432/postgres\" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v",
+    "lint": "cd backend && ruff check impacto tests",
+    "typecheck": "cd web && node node_modules/typescript/bin/tsc -p tsconfig.offline.json --noEmit",
+    "build": "cd web && node build.mjs",
+    "release": "python3 scripts/make_release.py",
+    "verify_release": "python3 scripts/make_release.py --verify <dir>"
+  },
+  "blocked": {
+    "dependency_audit": {
+      "npm": "npm install --package-lock-only --ignore-scripts -> 403 Forbidden (registry.npmjs.org); npm audit exige lockfile",
+      "pip": "pip install pip-audit -> No matching distribution found; pip download requests -> idem (PyPI bloqueado)",
+      "impact": "nenhuma afirmacao sobre vulnerabilidades de dependencias; executar em CI",
+      "required_in_ci": [
+        "npm audit --omit=dev",
+        "pip-audit -r backend/requirements.txt"
+      ]
+    },
+    "accessibility": {
+      "axe_core": "instalacao bloqueada (registry npm)",
+      "done_instead": "verificacao propria em navegador: rotulos, foco, lang, IDs, cabecalhos, overflow, contraste AA (claro e escuro)"
+    },
+    "external": [
+      "Stripe real",
+      "SMTP real",
+      "clamd real",
+      "S3 real",
+      "IdP real",
+      "conteudo oficial",
+      "precos",
+      "nota fiscal",
+      "pentest",
+      "builds assinados Apple/Google"
+    ]
+  },
+  "readiness": {
+    "technical_baseline": "READY",
+    "design": "READY",
+    "web": "READY",
+    "app_api": "READY",
+    "production": "NOT READY"
+  },
+  "note": "git_commit identifica o commit do CONTEUDO auditado (codigo, testes, docs, migrations). O commit seguinte adiciona apenas artefatos de release (este manifesto e RELEASE_MANIFEST.sha256/csv); a tag v0.12.1-final-baseline aponta para o commit de conteudo.",
+  "zip_alias": "IMPACTO_v0.12_FINAL_BASELINE.zip (copia byte a byte, mesmo sha256)",
+  "zip_files": 517,
+  "zip_sha256_file": "dist-release/FINAL_FULL_RELEASE.zip.sha256",
+  "zip_note": "O digest do pacote nao pode ficar dentro do proprio pacote (auto-referencia): ele fica em dist-release/FINAL_FULL_RELEASE.zip.sha256 e no relatorio de entrega. A integridade do CONTEUDO e verificavel por RELEASE_MANIFEST.sha256 (517 arquivos) com 'python3 scripts/make_release.py --verify <dir>'."
+}

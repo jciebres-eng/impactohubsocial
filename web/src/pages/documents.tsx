@@ -57,7 +57,9 @@ export function Documents() {
   const docOpts = Object.entries(tax?.document_types || {}).map(([k, v]: any) => [k, v.label]) as [string, string][];
   return (
     <>
-      <PageHead title="Documentos" sub="Cofre privado: cada arquivo tem tipo verificado, hash SHA-256, validade e acesso só para quem precisa." />
+      <PageHead title="Documentos" sub="Cofre privado: cada arquivo tem tipo verificado, hash SHA-256, validade e acesso só para quem precisa."
+                actions={<><Link to="/documentos/montagens">Montagem de documentos</Link>{" · "}
+                           <Link to="/documentos/modelos">Modelos</Link></>} />
       <ContextHelp ctxKey="documents.upload" />
       <Panel title="Enviar documento">
         <div className="inline-form">

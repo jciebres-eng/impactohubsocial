@@ -158,9 +158,12 @@ class DiagnosticInvariants(unittest.TestCase):
                                                   "need_statement": "Necessidade com dado."}).json["id"]
 
     def test_same_state_does_not_create_a_new_version(self):
+        """Inclusive atravessando a virada do segundo: "nada mudou" é sobre a organização, não sobre o relógio."""
+        import time
         first = self.osc.post(f"/v1/diagnoses/{self.did}/versions").json
         self.assertTrue(first["created"])
         for _ in range(3):
+            time.sleep(1.1)
             again = self.osc.post(f"/v1/diagnoses/{self.did}/versions").json
             self.assertFalse(again["created"], "versão criada sem nada ter mudado")
             self.assertEqual(again["version"], first["version"])

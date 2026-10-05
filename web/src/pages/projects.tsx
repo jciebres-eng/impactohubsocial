@@ -3,6 +3,7 @@ import { api } from "../api";
 import { centsToInput, date, label, money, n, parseMoney, MATCH_STATE } from "../format";
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
+import { MatchFeedbackBox } from "./core";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, MoneyFlow, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
 import { ImpactTags } from "./taxonomy";
 import { ContextHelp } from "./help";
@@ -163,13 +164,18 @@ function Overview({ p }: { p: any }) {
           <ul className="rows">
             <li><Link to={`/projetos/${p.id}/impacto`}>Impacto, ODS e indicadores</Link></li>
             <li><Link to={`/projetos/${p.id}/grafo`}>Impact Graph</Link></li>
-            {p.is_owner && <><li><Link to={`/projetos/${p.id}/compras`}>Compras e cotações</Link></li>
+            {p.is_owner && <><li><Link to={`/projetos/${p.id}/situacao`}>Situação e transições</Link></li>
+            <li><Link to={`/projetos/${p.id}/linha-do-tempo`}>Linha de tempo</Link></li>
+            <li><Link to={`/projetos/${p.id}/retratos`}>Retratos comparáveis</Link></li>
+            <li><Link to={`/projetos/${p.id}/riscos`}>Riscos</Link></li>
+            <li><Link to={`/projetos/${p.id}/compras`}>Compras e cotações</Link></li>
             <li><Link to={`/projetos/${p.id}/contribuicao`}>Modelos de contribuição</Link></li>
             <li><Link to={`/projetos/${p.id}/apoio-profissional`}>Apoio profissional</Link></li>
             <li><Link to={`/projetos/${p.id}/localizacao`}>Localização pública</Link></li></>}
           </ul>
         </Panel>
         {p.match && <MatchVerdict m={p.match} />}
+        {p.match?.match_run_id && <MatchFeedbackBox matchRunId={p.match.match_run_id} />}
         <Panel title="O projeto">
           {p.summary && <p className="lead">{p.summary}</p>}
           {p.problem && <><h3>Problema</h3><p className="pre">{p.problem}</p></>}

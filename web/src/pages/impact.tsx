@@ -203,7 +203,8 @@ export function DiagnosisEditor({ id }: { id: string }) {
   return (
     <>
       <PageHead title="Diagnóstico" sub={data?.title} back={<Link to="/diagnosticos" className="back">Diagnósticos</Link>}
-                actions={<Link to={`/diagnosticos/${id}/roteiro`}>Roteiro guiado etapa a etapa</Link>} />
+                actions={<><Link to={`/diagnosticos/${id}/roteiro`}>Roteiro guiado etapa a etapa</Link>{" · "}
+                           <Link to={`/diagnosticos/${id}/versoes`}>Versões e ações</Link></>} />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <form className="form form-wide" onSubmit={(e: any) => { e.preventDefault(); run(() => api.put(`/v1/diagnoses/${id}`, body()), "Diagnóstico salvo").then(reload); }}>

@@ -28,6 +28,7 @@ import * as TrustA from "./pages/trustAdmin";
 import * as Funding from "./pages/funding";
 import * as Prefs from "./pages/prefs";
 import * as DiagGuide from "./pages/diagnosisGuide";
+import * as Core from "./pages/core";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -44,6 +45,18 @@ const ROUTES: R[] = [
   ["/projetos", () => <Proj.Projects />, ["osc"]],
   ["/projetos/novo", () => <Proj.NewProject />, ["osc"]],
   ["/projetos/:id", (p) => <Proj.ProjectDetail id={p.id} />],
+  ["/ideias", () => <Core.Ideas />, ["osc"]],
+  ["/prontidao", () => <Core.Readiness />, ["osc"]],
+  ["/projetos/:id/situacao", (p) => <Core.Lifecycle id={p.id} />, ["osc"]],
+  ["/projetos/:id/linha-do-tempo", (p) => <Core.Timeline id={p.id} />, ["osc"]],
+  ["/projetos/:id/retratos", (p) => <Core.Snapshots id={p.id} />, ["osc"]],
+  ["/projetos/:id/riscos", (p) => <Core.Risks id={p.id} />, ["osc"]],
+  ["/diagnosticos/:id/versoes", (p) => <Core.DiagnosisVersions id={p.id} />, ["osc"]],
+  ["/documentos/montagens", () => <Core.Assemblies />],
+  ["/documentos/modelos", () => <Core.Templates />],
+  ["/documentos/montagens/:id", (p) => <Core.AssemblyDetail id={p.id} />],
+  ["/assinatura/provedores", () => <Core.SignatureProviders />],
+  ["/assinatura/politica", () => <Core.SignaturePolicies />],
   ["/explorar", () => <Proj.Feed />, ["company", "individual"]],
   ["/carteira", () => <Proj.Portfolio />, ["company", "government", "individual"]],
   ["/candidaturas", () => <Apps.Applications />],
@@ -139,6 +152,7 @@ const ROUTES: R[] = [
   ["/admin/organizacoes", () => <Admin.Orgs />, ["platform"]],
   ["/admin/denuncias", () => <Admin.Reports />, ["platform"]],
   ["/admin/auditoria", () => <Admin.Audit />, ["platform"]],
+  ["/admin/chaves", () => <Core.EncryptionKeys />, ["platform"]],
 ];
 
 
@@ -184,13 +198,13 @@ const PUBLIC: [string, () => ReactNode][] = [
 ];
 
 const NAV: Record<string, [string, string][]> = {
-  osc: [["/", "Início"], ["/oportunidades", "Oportunidades"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
-    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
+  osc: [["/", "Início"], ["/oportunidades", "Oportunidades"], ["/ideias", "Ideias"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
+    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
     ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/solucoes/replicacao", "Replicação"],
     ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/materiais", "Materiais"]],
   company: [["/", "Início"], ["/explorar", "Projetos para apoiar"], ["/editais", "Programas"], ["/candidaturas", "Candidaturas"],
     ["/carteira", "Carteira e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"],
-    ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/materiais", "Materiais"]],
+    ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/documentos/montagens", "Montagem de documentos"], ["/materiais", "Materiais"]],
   individual: [["/", "Início"], ["/explorar", "Projetos para apoiar"], ["/candidaturas", "Candidaturas"], ["/carteira", "Meu apoio e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"],
     ["/instituicao", "Perfil institucional"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/mensagens", "Mensagens"]],
   provider: [["/", "Início"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/minhas-atividades", "Minhas atividades"], ["/identidade", "Identidade"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
@@ -198,7 +212,7 @@ const NAV: Record<string, [string, string][]> = {
     ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
   platform: [["/admin", "Visão geral"], ["/admin/compliance", "Compliance"], ["/admin/identidade", "Identidade"], ["/admin/credenciais", "Credenciais"], ["/admin/credenciais-profissionais", "Credenciais profissionais"], ["/admin/honorarios", "Honorários"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
-    ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
+    ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/chaves", "Chaves de cifragem"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
 };
 const KIND_LABEL: Record<string, string> = { osc: "OSC", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração" };
 

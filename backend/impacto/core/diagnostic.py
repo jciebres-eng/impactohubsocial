@@ -212,8 +212,14 @@ def analyse(conn: Connection, *, org_id: str, project_id: str | None = None, dia
 
 
 # ------------------------------------------------------------------------------------------------ versões
+# Campos que mudam a cada leitura sem que NADA tenha mudado na organização. Entrar no hash faria "congelar versão"
+# criar versão nova a cada segundo — e "o que mudou" passaria a ser uma pergunta sobre o relógio, não sobre o projeto.
+VOLATILE = ("generated_at",)
+
+
 def _digest(payload: dict) -> str:
-    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
+    stable = {k: v for k, v in payload.items() if k not in VOLATILE}
+    return hashlib.sha256(json.dumps(stable, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
 
 
 def _diff(prev: dict | None, cur: dict) -> dict[str, Any]:

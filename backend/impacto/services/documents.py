@@ -97,9 +97,9 @@ def extract_text(mime: str, data: bytes, max_chars: int = 200_000) -> str | None
                 langs = pytesseract.get_languages(config="")
                 lang = "por" if "por" in langs else "eng"
                 return pytesseract.image_to_string(Image.open(io.BytesIO(data)), lang=lang, timeout=20)[:max_chars] or None
-            except Exception:
+            except Exception:  # noqa: BLE001 - OCR é melhor esforço: sem texto extraído o documento segue válido
                 return None
-    except Exception:
+    except Exception:  # noqa: BLE001 - extração de texto nunca derruba o envio do arquivo
         return None
     return None
 

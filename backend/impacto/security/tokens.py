@@ -40,7 +40,7 @@ def verify_payload(secret: str, token: str) -> dict | None:
         return None
     try:
         body = json.loads(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
-    except Exception:
+    except Exception:  # noqa: BLE001 - corpo malformado é token inválido (a assinatura já foi conferida acima)
         return None
     if int(body.get("exp", 0)) < int(time.time()):
         return None

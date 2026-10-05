@@ -63,7 +63,7 @@ class Pool:
             if can_create:
                 try:
                     return self._new()
-                except Exception:
+                except Exception:  # noqa: BLE001 - devolve a vaga contabilizada e RELANÇA
                     with self._lock:
                         self._created -= 1
                     raise
@@ -88,7 +88,7 @@ class Pool:
         if conn.transaction_status() != PQTRANS_IDLE:
             try:
                 conn.execute("ROLLBACK")
-            except Exception:
+            except Exception:  # noqa: BLE001 - conexão que não aceita ROLLBACK é descartada, não devolvida ao pool
                 conn.close()
                 with self._lock:
                     self._created -= 1
@@ -140,7 +140,7 @@ class Pool:
             if not conn.closed:
                 try:
                     conn.execute("ROLLBACK")
-                except Exception:
+                except Exception:  # noqa: BLE001 - ROLLBACK de melhor esforço; a exceção original é RELANÇADA
                     conn.close()
             raise
         finally:

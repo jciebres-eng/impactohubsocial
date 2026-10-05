@@ -107,7 +107,7 @@ def upload(ctx: Ctx, form):
                 c.run("UPDATE application_steps SET status = 'done', document_id = $3, completed_at = now(), completed_by = $4"
                       " WHERE application_id = $1 AND code = $2 AND status <> 'done'", application_id, f"doc_{doc_type}", did, ctx.user_id)
             ctx.audit(c, "document.uploaded", "document", did, {"sha256": digest, "size": len(data), "doc_type": doc_type, "scan": status})
-    except Exception:
+    except Exception:  # noqa: BLE001 - qualquer falha após gravar o arquivo apaga o objeto órfão e RELANÇA
         ctx.app.storage.delete(key)
         raise
     out = {"id": did, "sha256": digest, "status": status, "mime_type": mime}

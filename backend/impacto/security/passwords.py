@@ -51,7 +51,7 @@ def verify_password(password: str, stored: str | None) -> bool:
         raw = base64.urlsafe_b64decode(stored.encode())
         calc = hashlib.pbkdf2_hmac("sha256", password.encode(), raw[:16], 210000)
         return hmac.compare_digest(calc, raw[16:])
-    except Exception:
+    except Exception:  # noqa: BLE001 - hash armazenado malformado é senha inválida, não erro do servidor
         return False
 
 

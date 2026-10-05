@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.12.1)
+# API REST /v1 — referência gerada do código (v0.13.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (475)
+## Operações (511)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -107,6 +107,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/institutional/rules/import-candidates` | admin da plataforma + MFA | — | Importa as regras CANDIDATAS do repositório como RASCUNHO (nunca publica; idempotente por código) |
 | POST | `/v1/admin/institutional/rules/{rule_id}/action` | admin da plataforma + MFA | — | Fluxo: submit → approve (outra pessoa) → publish (data de consulta da fonte) → archive |
 | POST | `/v1/admin/institutional/rules/{rule_id}/new-version` | admin da plataforma + MFA | — | Nova versão de uma regra existente (a publicada continua valendo até a nova ser publicada) |
+| GET | `/v1/admin/integrations/overview` | admin da plataforma + MFA | — | Qual integração está quebrada agora? Saúde, filas, falhas, dead-letters |
+| POST | `/v1/admin/integrations/providers/{key}/maturity` | admin da plataforma + MFA | — | Promove/rebaixa a maturidade de um provedor COM evidência registrada (nunca automático) |
+| POST | `/v1/admin/integrations/run-worker` | admin da plataforma + MFA | — | Executa um ciclo do trabalhador agora (jobs devidos + entregas devidas) |
 | POST | `/v1/admin/invoices` | admin da plataforma + MFA | — | Emite cobrança manual (registro interno; NF-e é emitida no sistema fiscal da empresa) |
 | POST | `/v1/admin/invoices/{invoice_id}/paid` | admin da plataforma + MFA | — | invoice paid |
 | GET | `/v1/admin/jobs` | admin da plataforma + MFA | — | jobs |
@@ -309,6 +312,39 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/institutional/qualifications/{qualification_id}/events` | membro da organização ativa | papel ≥ viewer | Histórico (append-only) da qualificação |
 | GET | `/v1/institutional/rules` | membro da organização ativa | papel ≥ viewer | Regras de elegibilidade PUBLICADAS (código, versão, fonte, data de consulta, confiança) |
 | GET | `/v1/institutional/statement` | membro da organização ativa | papel ≥ viewer | Declaração institucional de apoio (gerada por regras): só afirma o que está cadastrado, rotula o estado e diz 'Não foi possível confirmar' no resto |
+| GET | `/v1/integrations/connections` | membro da organização ativa | papel ≥ viewer | connections |
+| POST | `/v1/integrations/connections` | membro da organização ativa | papel ≥ manager | Cria conexão em rascunho. Endpoint passa pela guarda de SSRF; ambiente production só com adapter disponível. |
+| DELETE | `/v1/integrations/connections/{id}` | membro da organização ativa | papel ≥ owner | Revoga a conexão (credenciais apagadas; histórico de jobs preservado) |
+| GET | `/v1/integrations/connections/{id}` | membro da organização ativa | papel ≥ viewer | Conexão com saúde, credencial (só dica), jobs recentes, correspondências e entradas |
+| PATCH | `/v1/integrations/connections/{id}` | membro da organização ativa | papel ≥ manager | Altera nome, endpoint, configuração ou estado. Ativar exige configuração válida e credencial quando o provedor pede. |
+| DELETE | `/v1/integrations/connections/{id}/credential` | membro da organização ativa | papel ≥ owner | credential delete |
+| PUT | `/v1/integrations/connections/{id}/credential` | membro da organização ativa | papel ≥ owner | Grava/rotaciona a credencial (cifrada). A resposta traz só a dica; o segredo nunca volta pela API nem vai para log. |
+| POST | `/v1/integrations/connections/{id}/health` | membro da organização ativa | papel ≥ viewer; limite 60/3600s | Verificação de saúde (somente leitura; nunca destrutiva). Uma chamada externa curta. |
+| POST | `/v1/integrations/connections/{id}/jobs` | membro da organização ativa | papel ≥ manager; limite 120/3600s | Enfileira um job (executado pelo trabalhador, nunca dentro da requisição). Mesma chave de idempotência → mesmo job. |
+| GET | `/v1/integrations/connections/{id}/mappings` | membro da organização ativa | papel ≥ viewer | mappings get |
+| PUT | `/v1/integrations/connections/{id}/mappings` | membro da organização ativa | papel ≥ manager | Substitui o conjunto de mapeamentos da conexão (campo externo → campo canônico, com transformação declarada) |
+| GET | `/v1/integrations/datasets` | membro da organização ativa | papel ≥ viewer | Datasets exportáveis (BI) — colunas públicas do domínio, filtradas pela organização |
+| GET | `/v1/integrations/deliveries` | membro da organização ativa | papel ≥ viewer | deliveries |
+| POST | `/v1/integrations/deliveries/{id}/replay` | membro da organização ativa | papel ≥ manager | Replay controlado: só dead-letter da própria organização |
+| GET | `/v1/integrations/events` | membro da organização ativa | papel ≥ viewer | events list |
+| GET | `/v1/integrations/events/catalog` | membro da organização ativa | papel ≥ viewer | Eventos de domínio que a plataforma realmente emite |
+| GET | `/v1/integrations/exports` | membro da organização ativa | papel ≥ viewer | exports list |
+| POST | `/v1/integrations/exports` | membro da organização ativa | papel ≥ manager; limite 30/3600s | Gera um dataset (CSV/JSON) da própria organização; download pela URL temporária de documentos |
+| GET | `/v1/integrations/imports` | membro da organização ativa | papel ≥ viewer | imports list |
+| POST | `/v1/integrations/imports` | membro da organização ativa | papel ≥ manager; limite 60/3600s | Importa a partir de um documento JÁ validado pelo cofre: valida → interpreta → mapeia → pré-visualiza (sem aplicar) |
+| GET | `/v1/integrations/imports/{id}` | membro da organização ativa | papel ≥ viewer | Pré-visualização: linhas interpretadas, mapeadas e erros por linha |
+| POST | `/v1/integrations/imports/{id}/approve` | membro da organização ativa | papel ≥ owner | Aprova e aplica (só linhas válidas; cria correspondências de ID externo; nunca cria usuários/organizações) |
+| POST | `/v1/integrations/inbound/{connection_id}` | pública | limite 600/60s | Recebe webhook de sistema externo: assinatura verificada pelo adapter, deduplicada pelo banco, enfileira job. Nunca processa negócio na requisição. |
+| GET | `/v1/integrations/jobs` | membro da organização ativa | papel ≥ viewer | jobs list |
+| GET | `/v1/integrations/jobs/{id}` | membro da organização ativa | papel ≥ viewer | job get |
+| POST | `/v1/integrations/jobs/{id}/cancel` | membro da organização ativa | papel ≥ manager | job cancel |
+| GET | `/v1/integrations/links` | membro da organização ativa | papel ≥ viewer | Correspondências ID interno ↔ ID externo (conflitos nunca são resolvidos em silêncio) |
+| GET | `/v1/integrations/providers` | membro da organização ativa | papel ≥ viewer | Catálogo de provedores com matriz de capacidades e maturidade REAL |
+| GET | `/v1/integrations/subscriptions` | membro da organização ativa | papel ≥ viewer | subs list |
+| POST | `/v1/integrations/subscriptions` | membro da organização ativa | papel ≥ manager | Webhook de saída: HTTPS, assinatura HMAC (t=…,v1=…), retries com backoff e dead-letter |
+| DELETE | `/v1/integrations/subscriptions/{id}` | membro da organização ativa | papel ≥ manager | sub delete |
+| PATCH | `/v1/integrations/subscriptions/{id}` | membro da organização ativa | papel ≥ manager | sub patch |
+| POST | `/v1/integrations/subscriptions/{id}/test` | membro da organização ativa | papel ≥ manager; limite 30/3600s | Emite um evento INTEGRATION.TEST para esta assinatura (entregue pelo trabalhador) |
 | GET | `/v1/legal/{doc}` | pública | — | Textos legais vigentes (Markdown) |
 | GET | `/v1/map/projects` | membro da organização ativa | papel ≥ viewer | Projetos publicados no mapa: pontos só conforme a precisão escolhida + contagem por UF (sem mapa-base externo) |
 | GET | `/v1/materials` | membro da organização ativa | papel ≥ viewer | Biblioteca de materiais governamentais e institucionais publicados |

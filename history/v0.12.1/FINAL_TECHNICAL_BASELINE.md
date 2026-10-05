@@ -67,9 +67,3 @@ Conteúdo oficial e revisão jurídica/tributária · preços, nota fiscal e hom
 
 ## 24. Instruções para o próximo agente (design)
 Leia `DESIGN_HANDOFF.md` primeiro: ele lista rotas, componentes, estados (carregando/erro/vazio/sessão expirada/sem permissão), formatos de dado, o que não pode ser alterado e o que **não** é bug. Em resumo: trabalhe em tokens e componentes (`src/styles.css`, `src/ui/kit.tsx`) e nas páginas; **não** reimplemente backend, banco, autenticação, permissões ou cobrança; preserve os rótulos de honestidade (exemplo, origem, certificado não oficial, revisão necessária, preço não definido, SLA como meta interna); mantenha `tsc`, build e `make test` verdes — se um teste de contraste ou acessibilidade falhar, o design quebrou um invariante e o ajuste é no token, não no teste.
-
----
-## Adendo v0.13.0 — camada de integração
-Esta baseline (v0.12.1) descreve a **camada funcional** e continua válida: nenhum contrato dela mudou no v0.13.0.
-O v0.13.0 **acrescenta** a camada de integração (13 tabelas, 36 rotas, 6 adapters, 76 testes) sem alterar autenticação, autorização, cobrança, Central de Conhecimento ou frontend. O relatório próprio dessa etapa é `FINAL_INTEGRATION_HARDENING_REPORT.md`; as telas que faltam estão no §11 do `DESIGN_HANDOFF.md`.
-A tag `v0.12.1-final-baseline` continua sendo o ponto auditado da camada funcional.

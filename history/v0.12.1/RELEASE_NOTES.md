@@ -1,11 +1,4 @@
-# Release notes — v0.13.0
-
-## v0.13.0 — Integration Hub (fundação)
-**Resumo:** a plataforma passou a conversar com sistemas externos por uma camada própria, desacoplada: conexões por ambiente, credenciais cifradas que a API nunca devolve, mapeamento de campos, correspondência de ID externo com conflito explícito, jobs idempotentes com repetição e disjuntor, webhooks de entrada e saída assinados, importação CSV/XLSX com aprovação humana, exportação e um painel que responde “qual integração está quebrada agora”.
-- **Para quem contrata:** dá para conectar um ERP (Senior, TOTVS) ou qualquer API REST sem mexer no núcleo do produto, e trocar de fornecedor sem reescrever o sistema.
-- **Para a equipe:** 36 rotas novas, 13 tabelas, 9 provedores no catálogo com **maturidade honesta**, 76 testes novos (468 no total).
-- **O que NÃO é:** **nenhuma integração foi executada contra um sistema externo real** — tudo foi provado contra dublê. Nenhum provedor está homologado. Integração com governo exige credenciamento e o adapter **recusa agir** enquanto isso. SFTP não foi implementado. E **não existe nenhuma tela** — a interface é a próxima etapa.
-- Leia `INTEGRATION_HUB.md` e `FINAL_INTEGRATION_HARDENING_REPORT.md`.
+# Release notes — v0.11.0
 
 ## v0.12.0 — Central de Conhecimento
 **Resumo:** hub de ajuda (guias, busca, ajuda contextual, biblioteca, FAQ, assistente ancorado), Academia com quiz e certificado não oficial, eventos, suporte com SLA, parcerias, demonstração, solicitação de teste, boletim e CMS editorial com quatro olhos. **Não há conteúdo oficial real publicado** — só exemplos rotulados.

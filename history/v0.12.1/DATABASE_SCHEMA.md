@@ -50,24 +50,3 @@ Banco de desenvolvimento: **120 tabelas, 247 políticas RLS**.
 
 ## v0.12.0 — migração 0009 (Central de Conhecimento)
 32 tabelas novas (120 → 152 no banco de desenvolvimento), todas com RLS. Detalhe por grupo, gatilhos e funções: `KNOWLEDGE_DATA_MODEL.md`. Destaques: quatro olhos por CHECK, versões imutáveis, gabarito de quiz inacessível à aplicação, `support_guard`, duplo opt-in do boletim com token só em hash.
-
----
-
-# Camada de integração (migração `0011_v0130_integration_hub.sql`, v0.13.0)
-Cumulativa (0001–0010 intactas). **165 tabelas no total**, RLS em todas exceto `schema_migrations`.
-
-| Tabela | Finalidade | Garantias no banco |
-|---|---|---|
-| `integration_providers` | catálogo de provedores e capacidades | `maturity` enum `scaffolded→contract_tested→sandbox_validated→homologated→production_active`; gatilho impede promoção pelo papel da aplicação sem privilégio; GRANT UPDATE só em `(maturity, updated_at)` |
-| `integration_connections` | organização × provedor × **ambiente** | UNIQUE `(org_id, provider_id, environment)`; `status` draft/active/paused/revoked; `health_state`, `failure_streak`, `circuit_open_until` |
-| `integration_credentials` | segredo da conexão | `secret_cipher bytea` cifrado (Fernet) **ou** `secret_ref`, CHECK de um-ou-outro; **sem SELECT** na coluna para `impacto_app`; leitura só por `integration_secret(uuid)` SECURITY DEFINER; `hint` para exibição |
-| `integration_mappings` | campo externo → canônico | transformação de conjunto fechado; obrigatoriedade; único por (conexão, entidade, campo) |
-| `external_entity_links` | ID interno ↔ ID externo | UNIQUE `(conexão, entidade, external_id)` **e** `(conexão, entidade, internal_id)`; `sync_status` inclui `conflict` e `deleted_externally` com `conflict_detail` — **nada é sobrescrito em silêncio** |
-| `integration_jobs` | execução idempotente | UNIQUE `(org_id, idempotency_key)`; `error_kind` temporary/permanent; tentativas e correlação |
-| `integration_events` | caixa de saída de eventos de domínio | INSERT permitido na transação da organização (`org_id = app_org() OR app_priv()`) — o evento cai junto com o fato |
-| `integration_subscriptions` | webhook de saída do parceiro | CHECK HTTPS; `secret_cipher` cifrado e não legível; GRANT UPDATE só em `(name, url, event_types, status, headers)` |
-| `integration_deliveries` | entrega de evento | UNIQUE `(assinatura, evento)`; INSERT pela organização, UPDATE/DELETE só privilegiado (ninguém “declara entregue”) |
-| `integration_inbound` | webhook recebido | UNIQUE `(conexão, external_event_id)` — deduplicação no banco, não na aplicação |
-| `integration_imports` / `integration_import_rows` | importação de arquivo | UNIQUE `(org_id, entidade, sha256)`; erro por linha; aprovação humana registrada |
-| `integration_exports` | exportação | gera documento no cofre; sem acesso direto ao banco |
-

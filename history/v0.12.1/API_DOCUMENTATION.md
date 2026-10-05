@@ -1,21 +1,6 @@
-# API — documentação (v0.13.0)
+# API — documentação (v0.12.0)
 
-Referência completa **gerada do código**: `docs/API.md` (511 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
-
-## Integrações (36 operações novas, v0.13.0)
-| Grupo | Rotas principais |
-|---|---|
-| Catálogo | `GET /v1/integrations/providers·datasets·events` |
-| Conexões | `POST·GET /v1/integrations/connections` · `GET·PATCH·DELETE …/{id}` · `POST …/{id}/health` |
-| Credencial (escreve, nunca lê) | `PUT·DELETE /v1/integrations/connections/{id}/credential` — resposta traz só a dica (`••••4f2a`) |
-| Mapeamentos | `GET·PUT /v1/integrations/connections/{id}/mappings` |
-| Jobs | `POST·GET /v1/integrations/connections/{id}/jobs` · `GET /v1/integrations/jobs[/{id}]` · `POST …/{id}/cancel` |
-| Correspondências | `GET /v1/integrations/links` · `GET /v1/integrations/connections/{id}/links` |
-| Webhooks de saída | `POST·GET /v1/integrations/subscriptions` · `PATCH·DELETE …/{id}` · `POST …/{id}/test` · `GET /v1/integrations/deliveries` · `POST …/{id}/replay` |
-| Entrada (pública, assinada) | `POST /v1/integrations/inbound/{connection_id}` — HMAC `t=…,v1=…`, `X-Event-Id` obrigatório, duplicado ignorado |
-| Arquivos | `POST·GET /v1/integrations/imports` · `GET …/{id}` · `POST …/{id}/approve` · `POST·GET /v1/integrations/exports` |
-| Administração | `GET /v1/admin/integrations/overview` · `POST /v1/admin/integrations/providers/{code}/maturity` · `POST /v1/admin/integrations/run-worker` |
-Detalhes de estados, assinatura e erros: `INTEGRATION_HUB.md`.
+Referência completa **gerada do código**: `docs/API.md` (475 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
 
 ## Central de Conhecimento (102 operações novas, v0.12.0)
 | Grupo | Rotas principais |

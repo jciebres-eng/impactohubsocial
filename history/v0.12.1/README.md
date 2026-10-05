@@ -1,10 +1,8 @@
-# Plataforma Impacto — v0.13.0
+# Plataforma Impacto — v0.12.1
 
 Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
 
 > **Estado:** pronto para homologação/piloto controlado. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
-
-**Novo no v0.13.0 (Integration Hub):** camada de integração desacoplada — conexões por ambiente, credenciais cifradas que a API nunca devolve, mapeamento de campos, correspondência de ID externo com conflito explícito, jobs idempotentes com repetição e disjuntor, webhooks de entrada e saída assinados, importação CSV/XLSX com aprovação humana, exportação e painel de operação. 13 tabelas, 36 rotas, 9 provedores declarados com **maturidade honesta**, 468 testes. **Nenhuma integração foi executada contra sistema externo real** e **não há nenhuma tela** — comece por `INTEGRATION_HUB.md`, `FINAL_INTEGRATION_HARDENING_REPORT.md` e `DESIGN_HANDOFF.md` §11.
 
 **Novo no v0.12.1 (baseline técnica):** endurecimento final antes da camada de design — varredura de autorização nas 475 operações, testes de concorrência, correção de vazamento de esquema em erros, do desconto de voucher que não aparecia, da perda de boletim em falha de SMTP e do contraste reprovado (WCAG AA). 392 testes. Comece por `FINAL_TECHNICAL_BASELINE.md` e `DESIGN_HANDOFF.md`.
 

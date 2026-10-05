@@ -1,25 +1,19 @@
-# TEST_REPORT — v0.13.0 (Integration Hub, 2026-10-05)
+# TEST_REPORT — v0.12.1 (baseline técnica, 2026-10-05)
 
-**v0.13.0: 468 testes, 0 falhas, 0 ignorados** (392 do v0.12.1 + **76** da camada de integração). Log íntegro: `docs/evidence/test_run_v0.13.0.log`.
-Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 11 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
+**v0.12.1: 392 testes, 0 falhas, 0 ignorados** (359 do v0.12.0 + **33** novos). Log íntegro: `docs/evidence/test_run_v0.12.1.log`.
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 10 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
 ```
 cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
 ```
-| Categoria | v0.12.1 | v0.13.0 |
-|---|---|---|
-| Unidade (puros) | 33 | 39 |
-| API/integração (HTTP + PostgreSQL reais) | 325 | 395 |
-| Arquitetura (invariantes do código) | 6 | 6 |
-| E2E de navegador (Chromium) | 28 | 28 |
-| **Total** | **392** | **468** |
+| Categoria | Testes |
+|---|---|
+| Unidade (puros) | 33 |
+| API/integração (HTTP + PostgreSQL reais) | 325 |
+| Arquitetura (invariantes do código) | 6 |
+| E2E de navegador (Chromium) | 28 |
+| **Total** | **392** |
 
-## Novos no v0.13.0 (76) — `tests/test_v0130_integrations.py`
-Detalhamento por classe, o que o dublê prova e o que **não** prova: `INTEGRATION_TESTING.md`. Resumo:
-ciclo de vida da conexão (9) · segurança de credencial (7) · isolamento entre organizações/IDOR (10) · mapeamento, transformações e conflito de ID externo (9) · jobs, idempotência, repetição, disjuntor e **4 trabalhadores em paralelo = 1 execução** (8) · webhooks de saída, assinatura HMAC, dead-letter e reenvio (7) · webhooks de entrada, janela de 300 s, deduplicação e **4 entradas em paralelo = 1 processamento** (6) · importação/exportação de arquivo, incluindo recusa explicada de JSON/XML e neutralização de fórmula (8) · saúde não destrutiva, painel de operação, latência e retenção (5) · segurança: SSRF (169.254.169.254), XXE, bomba XML, injeção em SOAP, mapeamento sem execução de código (5) · contrato dos 6 adapters, com o de governo **recusando agir** enquanto não autorizado (6) · jornada completa simulada e queda do sistema externo sem afetar o núcleo (2).
-**Nenhum sistema externo foi chamado**: o transporte é substituído por dublê. Isto prova o nosso lado do contrato, **não** compatibilidade com Senior, TOTVS, Gov.br ou Stripe reais.
-
-## Baseline v0.12.1 (mantida, continua passando)
-### Novos no v0.12.1 (33)
+## Novos nesta baseline (33)
 **`tests/test_v0120_hardening.py` (27) — testes que tentam QUEBRAR o sistema:**
 - **Varredura de autorização sobre TODAS as 475 operações** (não por amostragem): toda rota não pública recusa anônimo com 401; toda rota administrativa recusa usuária comum com 403; **toda** rota administrativa recusa administrador **sem MFA**; nenhuma rota devolve 5xx a entrada anônima/placeholder; o catálogo de rotas **confere com o OpenAPI** (475 = 475).
 - **IDOR de leitura e de ESCRITA** entre organizações: chamado de outra organização não pode ser lido, respondido, avaliado nem encerrado; pedidos de teste e progresso de checklist são isolados; projeto de outra organização não vaza por UUID.
@@ -32,7 +26,7 @@ ciclo de vida da conexão (9) · segurança de credencial (7) · isolamento entr
 **`tests/test_e2e_knowledge.py` (+2):** **contraste WCAG AA medido no navegador** em 7 páginas × tema claro e escuro; ausência de IDs duplicados, de salto de nível de cabeçalho e presença de `lang="pt-BR"`.
 
 ## Verificações estáticas e de build
-`ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.13.0.log`) · `tsc --noEmit` → **PASS** · `node build.mjs` → **PASS** (180 KB gzip) · `python -m compileall` → **PASS** · `migrate --check` → sem pendências e sem checksum alterado.
+`ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.12.1.log`) · `tsc --noEmit` → **PASS** · `node build.mjs` → **PASS** (180 KB gzip) · `python -m compileall` → **PASS** · `migrate --check` → sem pendências e sem checksum alterado.
 
 ## Medição de desempenho (fluxos críticos, dados de desenvolvimento)
 p50/p95 por requisição, servidor real: `/v1/me` 12/13 ms · `/v1/help/start` (15 detectores) 17/19 ms · `/v1/help/pending` 16/23 ms · `/v1/help/recommendations` 19/25 ms · `/v1/help/search` 24/27 ms · `/v1/documents` 7/8 ms · `/v1/projects` 9/16 ms. Consultas por requisição: 8 a 28 (inclui sessão/RLS). **Limite honesto:** volume de desenvolvimento, 1 processo — não substitui teste de carga em produção.

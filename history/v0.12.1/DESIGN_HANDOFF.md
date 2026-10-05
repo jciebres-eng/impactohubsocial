@@ -1,20 +1,19 @@
 # DESIGN_HANDOFF — o que a próxima etapa (UI/UX) recebe
 
-**Versão da baseline:** 0.13.0 · **Branch:** `chore/integration-hub-foundation` · **Documento técnico completo:** `FINAL_TECHNICAL_BASELINE.md` (base v0.12.1) + `FINAL_INTEGRATION_HARDENING_REPORT.md` (camada de integração).
+**Versão da baseline:** 0.12.1 · **Branch:** `inc/v0.12.0-central-conhecimento` · **Documento técnico completo:** `FINAL_TECHNICAL_BASELINE.md`.
 
 A camada funcional está fechada e testada. Esta etapa é de **design**: identidade visual, sistema de design, componentes, layout, onboarding visual, dashboards, UI web e mobile. **Não é necessário reimplementar backend, banco, autenticação, permissões ou cobrança** — e, se algo parecer faltando, confira primeiro a seção “Pendências que NÃO são bugs”.
 
 ## 1. O que está pronto (e provado por teste)
 | Camada | Estado | Onde está |
 |---|---|---|
-| API REST `/v1` | 511 operações, contrato estável, OpenAPI gerado do código | `docs/API.md`, `docs/openapi.json`, `GET /v1/openapi.json` |
-| Banco | PostgreSQL 16, 165 tabelas, RLS em todas (exceto `schema_migrations`), 11 migrations forward-only | `KNOWLEDGE_DATA_MODEL.md`, `docs/DATABASE.md` |
+| API REST `/v1` | 475 operações, contrato estável, OpenAPI gerado do código | `docs/API.md`, `docs/openapi.json`, `GET /v1/openapi.json` |
+| Banco | PostgreSQL 16, 152 tabelas, RLS em todas (exceto `schema_migrations`), 10 migrations forward-only | `KNOWLEDGE_DATA_MODEL.md`, `docs/DATABASE.md` |
 | Autenticação | sessão por cookie httpOnly (web) **ou** Bearer (app nativo), refresh rotativo, MFA TOTP, OIDC opcional | `src/api.ts`, `src/session.tsx` |
 | Autorização | por rota: `auth` (none/user/org/admin), tipo de organização, papel mínimo, papéis internos, entitlements | `backend/impacto/http.py` |
 | Multi-tenant | isolamento por RLS no banco, provado inclusive por SQL direto | `tests/test_security_tenancy.py` |
 | Cobrança/trial/vouchers | trial de 14 dias, tiers, vouchers, convênios, licenças, webhooks idempotentes (Stripe **dublê**) | `docs/billing.md` |
 | Central de Conhecimento | busca, guias, biblioteca, FAQ, assistente ancorado, academia, eventos, suporte com SLA, parcerias, CMS editorial | `KNOWLEDGE_HUB.md` |
-| Integração (hub) | 13 tabelas, 36 rotas, 9 provedores, webhooks (entrada e saída), importação/exportação, jobs com repetição e disjuntor — **sem tela** | `INTEGRATION_HUB.md` |
 | Frontend atual | React 19 + TypeScript, roteador próprio, PWA, build esbuild (180 KB gzip), 0 erros de console em 25 páginas/viewports | `web/src` |
 | Acessibilidade base | rótulos, foco visível, `lang`, sem IDs duplicados, sem salto de cabeçalho, contraste **AA** em tema claro e escuro | `tests/test_e2e_knowledge.py` |
 
@@ -89,46 +88,3 @@ cd web && node node_modules/typescript/bin/tsc -p tsconfig.offline.json --noEmit
 cd backend && ruff check impacto tests
 ```
 Antes de abrir um PR de design: `tsc` + build + `make test` verdes. Se um teste de acessibilidade ou de contraste falhar, **o design mudou um invariante** — ajuste o token, não o teste.
-
-## 11. Camada de integração (v0.13.0) — **API pronta, interface inexistente**
-A v0.13.0 acrescentou o hub de integrações **sem nenhuma tela**. É o maior bloco de UI novo desta próxima etapa. Detalhes em `INTEGRATION_HUB.md` (conceitos, estados, rotas) e `INTEGRATION_OPERATIONS.md` (painel de operação).
-
-### 11.1 Entidades que a UI precisa representar
-Provedor · Conexão (organização × provedor × ambiente) · Credencial (só a dica, `••••4f2a`) · Mapeamento de campos · Correspondência de ID externo · Job · Evento · Assinatura de webhook · Entrega · Entrada (webhook recebido) · Importação de arquivo · Exportação.
-
-### 11.2 Estados a desenhar (lista fechada — não inventar outros)
-- **Conexão:** `draft`, `active`, `paused`, `revoked`.
-- **Saúde:** `unconfigured`, `unknown`, `healthy`, `degraded`, `unauthorized`, `unavailable` (+ “disjuntor aberto até HH:MM”).
-- **Job:** `pending`, `running`, `succeeded`, `partial`, `retrying`, `failed`, `canceled` — com distinção visível entre erro **temporário** (vai repetir sozinho) e **permanente** (exige ação humana).
-- **Entrega:** `pending`, `delivered`, `retrying`, `dead_letter`, `skipped`.
-- **Entrada:** `received`, `processed`, `ignored`, `rejected`, `duplicate`.
-- **Correspondência:** `linked`, `pending`, `conflict`, `stale`, `deleted_externally`.
-- **Importação:** `uploaded`, `validated`, `parsed`, `previewed`, `approved`, `imported`, `rejected`, `failed`.
-- **Maturidade do provedor:** `scaffolded`, `contract_tested`, `sandbox_validated`, `homologated`, `production_active`.
-- **Ambiente:** `development`, `sandbox`, `homologation`, `production`.
-
-### 11.3 Telas necessárias (nenhuma existe hoje)
-1. **Catálogo de provedores** — cartões com capacidades e **selo de maturidade honesto**.
-2. **Lista de conexões** — por ambiente, com saúde, última execução e “o que está quebrado”.
-3. **Nova conexão / configuração** — formulário dirigido por `config_problems` (a API devolve os problemas em português).
-4. **Credencial** — formulário que escreve e nunca lê; exibir apenas a dica, com “substituir” e “remover”. Nunca mostrar campo preenchido com o segredo.
-5. **Mapeamento de campos** — campo externo → canônico, transformação escolhida numa lista fechada de 12, obrigatoriedade, prévia.
-6. **Saúde e diagnóstico** — botão “Testar conexão” (não destrutivo), histórico, detalhe do erro.
-7. **Jobs** — lista filtrável, detalhe com tentativas, tipo de erro, correlação e **trilha de auditoria**; ações: cancelar, reenfileirar.
-8. **Correspondências e conflitos** — fila de conflitos com decisão humana explícita (**nada é sobrescrito em silêncio**).
-9. **Webhooks de saída** — assinaturas, eventos (catálogo de 26), segredo, teste de entrega, fila de dead-letter com “reenviar”.
-10. **Importação de arquivo** — enviar (CSV/XLSX), prévia com erro linha a linha, aprovação explícita; JSON/XML respondem 422 com explicação (mostrar a mensagem, não escondê-la).
-11. **Exportação** — escolher dataset e baixar pelo documento gerado.
-12. **Painel de operação (administração)** — saúde agregada, conexões quebradas, jobs 24 h, dead-letters, profundidade da fila, importações aguardando aprovação, latência p50/p95 por provedor.
-
-### 11.4 Padrões obrigatórios nessas telas
-- **Segredo nunca aparece.** Nem em formulário, nem em log, nem em “copiar configuração”.
-- **Ambiente sempre visível.** `production` deve ser visualmente distinto; promover = criar outra conexão, nunca “mudar a chave”.
-- **Erro temporário × permanente** precisa ser legível sem abrir detalhe: um vai se resolver sozinho, o outro não.
-- **Maturidade não pode ser maquiada.** `scaffolded` e `technically_ready` não podem parecer “pronto”. O adapter de governo **recusa agir** fora de `production_active` — a tela deve explicar isso, não escondê-lo.
-- **Conflito exige decisão.** Nunca um botão “resolver tudo” que sobrescreve.
-- **Aprovação de importação é humana** (papel `owner`) e só aplica linhas válidas.
-- Estados de carregando/vazio/erro/repetindo já têm equivalente no `StateView` do kit atual.
-
-### 11.5 O que NÃO desenhar como pronto
-SFTP (não implementado), SAML/LDAP, WhatsApp/SMS/push, integração oficial Gov.br/Conecta (exige credenciamento), qualquer provedor como “homologado”. Nenhuma integração foi executada contra sistema externo real — só contra dublê.

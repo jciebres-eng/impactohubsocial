@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -40,7 +40,13 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "config/help_synonyms.json", "config/onboarding_paths.json", "backend/migrations/0009_v0120_knowledge_hub.sql",
             "FINAL_TECHNICAL_BASELINE.md", "DESIGN_HANDOFF.md", "FINAL_RELEASE_MANIFEST.json", "backend/migrations/0010_v0121_indexes.sql",
             "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/VERSION",
-            "backend/tests/test_v0120_hardening.py", "backend/tests/test_e2e_baseline.py"]
+            "backend/tests/test_v0120_hardening.py", "backend/tests/test_e2e_baseline.py",
+            "INTEGRATION_INVENTORY.md", "INTEGRATION_ARCHITECTURE.md", "INTEGRATION_HUB.md", "INTEGRATION_SECURITY.md",
+            "INTEGRATION_OPERATIONS.md", "INTEGRATION_TESTING.md", "INTEGRATION_PROVIDER_GUIDE.md",
+            "INTEGRATION_CAPABILITY_MATRIX.md", "FINAL_INTEGRATION_HARDENING_REPORT.md", "FINAL_INTEGRATION_MANIFEST.json",
+            "backend/migrations/0011_v0130_integration_hub.sql", "backend/tests/test_v0130_integrations.py",
+            "config/integration_providers.json", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log",
+            "history/v0.12.1/VERSION"]
 
 
 def sha256(p: Path) -> str:
@@ -83,7 +89,7 @@ def scan_secrets(files: list[Path]) -> list[str]:
     return hits
 
 
-def build() -> int:
+def build(zip_name: str = "FINAL_FULL_RELEASE.zip") -> int:
     version = (ROOT / "VERSION").read_text().strip()
     files = collect()
     missing = [r for r in REQUIRED if not (ROOT / r).exists()]
@@ -114,12 +120,12 @@ def build() -> int:
         w.writerow(["sha256", "file", "size_bytes", "mtime_utc"])
         w.writerows(rows)
     top = f"plataforma-impacto-v{version}"
-    zpath = OUT / "FINAL_FULL_RELEASE.zip"
+    zpath = OUT / zip_name
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         for p in files + [ROOT / "RELEASE_MANIFEST.sha256", ROOT / "RELEASE_MANIFEST.csv"]:
             z.write(p, f"{top}/{p.relative_to(ROOT).as_posix()}")
     zsha = sha256(zpath)
-    (OUT / "FINAL_FULL_RELEASE.zip.sha256").write_text(f"{zsha}  FINAL_FULL_RELEASE.zip\n")
+    (OUT / f"{zip_name}.sha256").write_text(f"{zsha}  {zip_name}\n")
     print(f"{len(files)} arquivos · zip {zpath.stat().st_size / 1e6:.2f} MB · sha256 {zsha}")
     return 0
 
@@ -152,4 +158,6 @@ def verify(d: Path) -> int:
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "--verify":
         sys.exit(verify(Path(sys.argv[2] if len(sys.argv) > 2 else ".")))
+    if len(sys.argv) >= 3 and sys.argv[1] == "--name":
+        sys.exit(build(sys.argv[2]))
     sys.exit(build())

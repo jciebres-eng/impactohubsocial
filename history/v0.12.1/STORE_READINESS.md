@@ -24,7 +24,3 @@ Avaliação honesta (GREEN = provado por teste/execução; YELLOW = código pron
 - **Auditoria de dependências:** tentada e **bloqueada** neste ambiente (`npm install --package-lock-only` → 403 do registry; `pip install pip-audit` → “no matching distribution”). Sem lockfile não há `npm audit`. **Obrigatório rodar em CI antes de publicar.** Dependências de execução são pinadas em `backend/requirements.txt` e `web/package.json`.
 - **Jornadas de navegador** agora incluem logout, área bloqueada por perfil, página Plano (voucher + cancelamento) e administração com MFA — o fluxo de cobrança deixou de ser “só API”.
 - **Conclusão inalterada:** pronto para a camada de design e para piloto; **não** pronto para publicação nas lojas (builds assinados, regras de compra das lojas, revisão jurídica e conteúdo oficial continuam pendentes).
-
-## v0.13.0 — efeito nas lojas
-A camada de integração **não muda nada do ponto de vista das lojas**: não há tela, não há SDK de terceiro no app, não há nova permissão de dispositivo e nenhum dado novo é coletado do aparelho. Continuam valendo os bloqueios já listados: apps não construídos nem assinados, sem conta de desenvolvedor, sem política de privacidade publicada em domínio próprio.
-Quando a integração ganhar tela, a política de privacidade precisará declarar o **compartilhamento com terceiros** que a organização configurar (ver `LGPD_AUDIT.md` — base legal por assinatura).

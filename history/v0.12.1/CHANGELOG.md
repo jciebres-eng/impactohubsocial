@@ -1,24 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.13.0] — 2026-10-05 — Integration Hub (fundação) — cumulativo; snapshot do v0.12.1 em `history/v0.12.1/`
-### Adicionado
-- **Camada de integração desacoplada** (`backend/impacto/integrations/`): contratos internos (`Environment`, `Capability`, `AuthKind`, `SyncStrategy`, `Maturity`, `CanonicalRecord`, `IntegrationError`, protocolo `IntegrationAdapter`), transporte resiliente (classificação temporário × permanente, espera crescente com variação, disjuntor por conexão), abstração de credencial cifrada, mapeamento de campos com 12 transformações declaradas (sem `eval`), correspondência de ID externo, caixa de saída de eventos de domínio, entrada de webhook deduplicada, jobs idempotentes e integração por arquivo (CSV/XLSX/JSON/XML). **O núcleo não importa nenhum fornecedor.**
-- `migrations/0011_v0130_integration_hub.sql`: 13 tabelas com RLS (165 no total), unicidades de idempotência, `integration_secret()` SECURITY DEFINER e GRANTs por coluna — a coluna do segredo **não é legível** pelo papel da aplicação.
-- **36 rotas** `/v1/integrations/*` e `/v1/admin/integrations/*` (511 operações no total): catálogo, conexões, credencial (escreve, nunca lê), mapeamentos, saúde não destrutiva, jobs, correspondências, eventos, assinaturas de webhook, entregas e reenvio, entrada pública assinada, importação com aprovação humana, exportação e painel de operação.
-- **Adapters de fundação**: `generic_rest`, `generic_webhook`, `senior_sapiens` (híbrido REST+SOAP), `totvs` (Protheus/RM/Datasul), `government_api` (recusa agir enquanto não autorizado), `bi_export` (6 datasets), `file_batch`. 9 provedores em `config/integration_providers.json` com **maturidade honesta**.
-- **+76 testes (468 no total)**: ciclo de vida, segurança de credencial, isolamento entre organizações (IDOR), mapeamento e conflito de ID, idempotência e concorrência (4 trabalhadores = 1 execução; 4 entradas = 1 processamento), webhooks de entrada e saída, arquivos, saúde/operação, segurança (SSRF, XXE, bomba XML, injeção SOAP) e contrato dos adapters.
-- Documentos: `INTEGRATION_INVENTORY.md`, `INTEGRATION_ARCHITECTURE.md`, `INTEGRATION_HUB.md`, `INTEGRATION_SECURITY.md`, `INTEGRATION_OPERATIONS.md`, `INTEGRATION_TESTING.md`, `INTEGRATION_PROVIDER_GUIDE.md`, `INTEGRATION_CAPABILITY_MATRIX.md`, `FINAL_INTEGRATION_HARDENING_REPORT.md`. `DESIGN_HANDOFF.md` ganhou a seção 11 (camada de integração: entidades, estados, 12 telas necessárias).
-### Corrigido
-- Hub: política de RLS de `integration_deliveries` impedia a própria emissão de evento; evento de domínio exigia privilégio e quebrava a caixa de saída na transação da organização; GRANT amplo expunha o segredo da assinatura; gatilho de maturidade bloqueava a própria migração; faltava GRANT para a promoção de maturidade pela administração. Todos corrigidos **antes da liberação** da migração 0011.
-- Validação de endpoint deixou de resolver DNS na gravação (impedia configurar host ainda não provisionado e tornava o salvamento dependente de DNS); a guarda autoritativa de SSRF continua no momento da chamada.
-- `GET /v1/integrations/jobs/{id}` consultava `audit_events.created_at` (a coluna é `at`).
-### Não feito / pendente (declarado)
-- **Nenhuma integração homologada ou executada contra sistema externo real** — só contra dublê. SFTP **não implementado**. Gov.br/Conecta exige credenciamento (AUTORIZAÇÃO EXTERNA NECESSÁRIA).
-- Sem interface: a camada de integração não tem nenhuma tela (é trabalho da etapa de design).
-- Sem fila distribuída (o trabalhador é o agendador do processo); sem teste de carga; `npm audit`/`pip-audit` continuam bloqueados pelo ambiente.
-- Expurgo de jobs e eventos sem prazo definido — **VALIDAÇÃO JURÍDICA NECESSÁRIA**.
-
 ## [0.12.1] — 2026-10-05 — Baseline técnica para a camada de design (cumulativo; snapshot do v0.12.0 em `history/v0.12.0/`)
 ### Corrigido
 - **Vazamento de detalhes do banco nas respostas da API**: violações de CHECK/FK/NOT NULL devolviam o texto interno do PostgreSQL (nome de tabela, de constraint e, em violação de unicidade, valores). Agora a resposta é genérica com `error_id`, e o detalhe fica só no log; **mensagens autoradas pelos gatilhos do projeto continuam visíveis** (chegam com o mesmo código de erro e são distinguidas por padrão de texto).

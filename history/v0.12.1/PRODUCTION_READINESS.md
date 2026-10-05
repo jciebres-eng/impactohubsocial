@@ -1,4 +1,4 @@
-# PRODUCTION_READINESS — v0.13.0
+# PRODUCTION_READINESS — v0.11.0
 
 **Veredito: PRONTO PARA HOMOLOGAÇÃO / PILOTO CONTROLADO. NÃO pronto para produção aberta.**
 O que falta é majoritariamente externo (contas, provedores, jurídico, tributário) e de validação operacional (carga, pentest, build de contêiner/apps).
@@ -6,7 +6,7 @@ O que falta é majoritariamente externo (contas, provedores, jurídico, tributá
 ## Semáforo por área
 | Área | Status | Evidência | Pendência para produção |
 |---|---|---|---|
-| Backend/API | GREEN | 511 operações; suíte verde (468 testes) | — |
+| Backend/API | GREEN | 358 operações; suíte verde | — |
 | Banco/migrações/RLS | GREEN | testes RLS (API e SQL direto), restore verificado | PostgreSQL gerenciado, PITR, criptografia em repouso |
 | Autenticação/sessões/MFA | GREEN | testes | WebAuthn opcional; política de senha corporativa |
 | SSO OIDC | YELLOW | IdP falso | testar com IdP real (Google/Entra/Keycloak) |
@@ -77,16 +77,3 @@ Não declarar "solução comprovada" sem nível `evidenced/verified` concedido p
 | Entrega de e-mail (outbox, reenvio sem duplicar) | GREEN (outbox) | 2 testes | **SMTP real** |
 | Auditoria de dependências | **BLOQUEADA no ambiente** | npm 403; PyPI sem versões | executar em CI |
 | Cobrança real, preços, nota fiscal, conteúdo oficial, IA generativa | RED/externo | — | decisão do proprietário / jurídico / provedor |
-
-## Camada de integração (v0.13.0)
-| Área | Status | Evidência | Pendência para produção |
-|---|---|---|---|
-| Fundação do hub (contratos, jobs, eventos, correspondências) | GREEN | 76 testes; `INTEGRATION_TESTING.md` | — |
-| Segurança da camada (SSRF, XXE, HMAC, credencial, IDOR) | GREEN | `INTEGRATION_SECURITY.md` | egress controlado na infraestrutura (DNS rebinding); pentest |
-| Adapters REST/SOAP (genérico, Senior, TOTVS) | **YELLOW** | só contra dublê | credencial de sandbox do cliente + homologação |
-| Adapter de governo | **RED** | recusa agir por decisão de projeto | **AUTORIZAÇÃO EXTERNA NECESSÁRIA** (credenciamento Gov.br/Conecta) |
-| SFTP | **RED** | contrato declarado, **não implementado** | implementar quando houver cliente real |
-| Execução assíncrona | **YELLOW** | trabalhador no agendador do processo, `SKIP LOCKED` | fila dedicada se `queue_depth` crescer — **DEPENDÊNCIA DE INFRAESTRUTURA** |
-| Retenção de jobs/eventos | **YELLOW** | só entregas têm expurgo (180 dias) | **VALIDAÇÃO JURÍDICA NECESSÁRIA** |
-| Interface das integrações | **RED** | nenhuma tela | etapa de design (`DESIGN_HANDOFF.md` §11) |
-| Carga/volume real | **RED** | não testado | teste de carga antes do piloto com parceiro |

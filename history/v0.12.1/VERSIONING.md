@@ -1,6 +1,6 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.13.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+Produto: SemVer (`VERSION` = `0.12.1`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
 (migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: `match-engine@1.0.0`, `fiscal-engine@1.0.0`; pesos `weights@1.0`; planos `plans@1.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
 
@@ -21,5 +21,3 @@ Histórico: `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos 
 **v0.12.0** (MINOR): nova capacidade de produto (Central de Conhecimento). Migração `0009` (ainda não liberada → editada em desenvolvimento e banco recriado; a partir da liberação, só migrações novas). Motor novo: `help-search@1.0.0` (gravado nos logs de busca). Snapshot dos documentos do v0.11.0: `history/v0.11.0/`. Configs versionadas: `config/help_synonyms.json`, `config/onboarding_paths.json` (hipóteses editoriais).
 
 **v0.12.1** (PATCH): correções de defeito e endurecimento, sem nova capacidade de produto nem mudança de contrato da API (475 operações, mesmos campos). Migração `0010_v0121_indexes.sql` só adiciona índices — a `0009` já havia sido liberada e **não** foi editada. Snapshot dos documentos do v0.12.0: `history/v0.12.0/`.
-
-**v0.13.0** (MINOR): nova capacidade (camada de integração) com 13 tabelas, 36 rotas e migração `0011_v0130_integration_hub.sql`. A `0010` já estava liberada e **não** foi editada; a `0011` foi editada durante o desenvolvimento (nunca aplicada fora do ambiente de construção) e a partir desta liberação é imutável. Nenhum contrato existente mudou — só adições. Snapshot dos documentos do v0.12.1: `history/v0.12.1/`. A tag `v0.12.1-final-baseline` continua sendo a baseline auditada da camada funcional; o v0.13.0 a estende sem alterá-la.

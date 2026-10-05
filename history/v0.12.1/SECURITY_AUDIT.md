@@ -1,4 +1,4 @@
-# SECURITY_AUDIT — v0.13.0 (2026-10-05)
+# SECURITY_AUDIT — v0.10.0 (2026-10-05)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
@@ -129,23 +129,3 @@ Método: varredura automatizada de autorização sobre **todas as 475 operaçõe
 | Pendente | YELLOW | pentest externo; auditoria de dependências (registries bloqueados neste ambiente); privilégio amplo do modo administrativo segue como disciplina de código revisada |
 
 **Nota de desenho (não defeito):** a URL assinada de download (`/v1/files/{token}`, 5 min) é uma *capability* — quem tiver o link acessa, como em URLs pré-assinadas de S3. O token é HMAC, expira e é conferido contra a linha do documento.
-
-## Camada de integração (v0.13.0)
-Revisão completa, vetor a vetor, com o que é **PROVADO por teste** e o que é **POR INSPEÇÃO**: `INTEGRATION_SECURITY.md`. Resumo:
-
-| Controle | Estado |
-|---|---|
-| SSRF na gravação (forma) e na chamada (resolução + sem redirecionamento) | **GREEN** — testado com 169.254.169.254 |
-| XXE, entidade externa e bomba XML (`defusedxml`, 8 MB, profundidade 40) | **GREEN** |
-| Injeção de XML em envelope SOAP (escape + operação validada) | **GREEN** |
-| Falsificação de webhook (HMAC-SHA256, comparação em tempo constante) | **GREEN** |
-| Reenvio (carimbo ±300 s **+** deduplicação no banco) | **GREEN** — provado com 4 entradas simultâneas |
-| Vazamento de credencial (cifrada, sem SELECT para o papel da aplicação, só dica na API, redação em log) | **GREEN** |
-| IDOR / escape de organização nas 13 tabelas novas | **GREEN** |
-| Escalonamento de privilégio (credencial e aprovação exigem `owner`; progresso de job/entrega é escrita privilegiada) | **GREEN** |
-| Arquivo malicioso (cofre existente **não** enfraquecido; limites de XLSX) e injeção de fórmula na exportação | **GREEN** |
-| Negação de serviço por sistema externo (teto de tempo, tentativas, disjuntor, trabalho fora da requisição) | **GREEN** |
-| Injeção em log e travessia de caminho | **YELLOW** — por inspeção, sem teste dedicado |
-| DNS rebinding (resolução e conexão são passos separados) | **YELLOW** — risco residual declarado; mitigar no egress da infraestrutura |
-| Auditoria de dependências | **RED** — registries npm/PyPI bloqueados neste ambiente; obrigatória em CI |
-| Pentest da camada de integração | **RED** — não executado |

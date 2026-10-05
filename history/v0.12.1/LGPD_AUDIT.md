@@ -1,4 +1,4 @@
-# LGPD_AUDIT — v0.13.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.10.1 (técnico; não é parecer jurídico)
 
 | Requisito | Estado | Evidência | Pendência |
 |---|---|---|---|
@@ -38,17 +38,3 @@ Conclusão: **mecanismos técnicos presentes; conformidade LGPD não declarada**
 
 | Erros da API não expõem dados de outras pessoas (v0.12.1) | GREEN (técnico) | violação de unicidade não devolve mais o valor conflitante (evita enumeração de e-mail) | — |
 | Desconto reservado exposto à própria organização (v0.12.1) | GREEN (técnico) | leitura em contexto de sistema **restrita ao `org_id` da sessão**; sem código/hash de voucher na resposta; teste de isolamento | — |
-
-## Camada de integração (v0.13.0)
-| Requisito | Estado | Evidência | Pendência |
-|---|---|---|---|
-| Inventário dos fluxos de integração | GREEN | `INTEGRATION_ARCHITECTURE.md` (6 fluxos) e `INTEGRATION_HUB.md` | — |
-| Minimização no que sai | GREEN | payload de evento montado pelo servidor; datasets de BI com colunas fixas do domínio (sem segredo, sem conteúdo de mensagem de suporte) | revisar dataset a dataset com o DPO |
-| Minimização no que entra | GREEN | importação **nunca cria pessoa nem organização**; só vincula e atualiza existentes, com aprovação humana | — |
-| Base legal para compartilhar com terceiro | **YELLOW** | a organização cria a assinatura e responde por ela; não há registro de finalidade por assinatura | **VALIDAÇÃO JURÍDICA NECESSÁRIA**: registrar finalidade/base legal por assinatura |
-| Controle de acesso | GREEN | RLS nas 13 tabelas + papéis (`owner` para credencial e aprovação); testes de organização cruzada | — |
-| Segredo de terceiro | GREEN | cifrado, sem leitura pela aplicação, nunca em log, auditoria, resposta ou ZIP | rotação programada (hoje manual) |
-| Rastreabilidade | GREEN | `audit_events` com quem/organização/conexão/operação/resultado/correlação, **sem segredo** | — |
-| Retenção | **YELLOW** | entregas concluídas apagadas em 180 dias; dead-letter preservado | jobs, eventos e entradas **sem prazo definido** — decisão jurídica |
-| Transferência internacional | **YELLOW** | depende do provedor que a organização conectar | cláusulas por provedor quando houver conexão real |
-| Eliminação | GREEN | apagar correspondência não apaga dado do núcleo; exclusão de conta segue o fluxo de privacidade existente | — |

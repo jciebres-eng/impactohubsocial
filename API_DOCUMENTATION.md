@@ -1,6 +1,38 @@
-# API — documentação (v0.14.0)
+# API — documentação (v0.15.0)
 
-Referência completa **gerada do código**: `docs/API.md` (574 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (625 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+
+## Núcleo do produto (51 operações novas, v0.15.0)
+
+| Grupo | Rotas principais |
+|---|---|
+| Ideias | `GET·POST /v1/ideas` · `GET·PUT /v1/ideas/{id}` · `POST /v1/ideas/{id}/promote` |
+| Ciclo de vida | `GET /v1/project-status-graph` · `GET /v1/projects/{id}/lifecycle` · `POST /v1/projects/{id}/transitions` |
+| Linha de tempo | `GET /v1/projects/{id}/timeline` · `GET …/timeline/integrity` |
+| Retratos | `GET·POST /v1/projects/{id}/snapshots` · `GET …/snapshots/compare?a=&b=` · `GET /v1/projects/{id}/state` |
+| Riscos | `GET·POST /v1/projects/{id}/risks` · `PUT …/risks/{rid}` · `POST …/risks/scan` · `GET /v1/risk-rules` |
+| Diagnóstico | `GET /v1/readiness` · `GET /v1/diagnoses/{id}/analysis` · `POST·GET /v1/diagnoses/{id}/versions` · `GET …/versions/{n}` · `GET …/versions/compare?a=&b=` · `GET·POST /v1/diagnoses/{id}/actions` · `PUT …/actions/{aid}` · `GET /v1/diagnostic-engine` |
+| Modelos de documento | `GET·POST /v1/document-templates` · `GET /v1/document-templates/{id}` · `POST …/{id}/fields` · `POST …/{id}/publish` · `GET /v1/document-assembly-reference` |
+| Montagem | `GET·POST /v1/document-assemblies` · `GET·PUT /v1/document-assemblies/{id}` · `POST …/{id}/generate` · `POST …/{id}/review` |
+| Match (retorno humano) | `POST·GET /v1/match-runs/{id}/feedback` · `GET /v1/admin/match/calibration` |
+| Assinatura | `GET /v1/signature-providers` · `GET /v1/signature-policies` · `PUT /v1/signature-policies` · `PUT /v1/admin/signature-providers/{key}` |
+| Chaves (administração) | `GET·POST /v1/admin/encryption/keys` · `POST /v1/admin/encryption/reencrypt` |
+
+**Recusas que fazem parte do contrato** (não são erros a contornar):
+
+| Situação | Resposta |
+|---|---|
+| transição fora do grafo | `409 invalid_transition`, com a lista do que é possível |
+| transição que exige motivo, sem motivo | `422 reason_required` |
+| montagem incompleta | `409 assembly_blocked`, com `missing` e `completeness` |
+| quem montou tenta aprovar | `409 four_eyes` |
+| modelo publicado recebendo campo | `409 template_published` |
+| `derived_from` fora da lista fechada | `422 derived_unknown`, com os caminhos disponíveis |
+| retorno de match repetido | `409 already_recorded` |
+| política exigindo nível indisponível | `409 level_unavailable` |
+| promover provedor qualificado sem assimetria real | `409 cannot_promote` |
+| tabela sem coluna cifrada registrada | `422 table_not_rotatable` |
+| ideia já promovida | `409 already_promoted` |
 
 ## Confiança, identidade e assinatura (63 operações novas, v0.14.0)
 | Grupo | Rotas principais |

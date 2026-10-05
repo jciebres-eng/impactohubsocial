@@ -1,4 +1,12 @@
-# LGPD_AUDIT — v0.14.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.15.0 (técnico; não é parecer jurídico)
+
+A matriz por categoria de dado — base legal, finalidade, prazo, o que acontece no fim do prazo e quem tem acesso —
+está em **`DATA_RETENTION_MATRIX.md`**, inclusive a lista do que a plataforma **deliberadamente não coleta** (sem
+cadastro nominal de beneficiário, sem dado sensível, sem dado biométrico, sem rastreamento publicitário) e as
+**5 pendências honestas** (prazo de retenção de documento após encerramento, remoção física do objeto no
+armazenamento, DPO nomeado, RIPD e ROPA formal).
+
+
 
 | Requisito | Estado | Evidência | Pendência |
 |---|---|---|---|

@@ -1,18 +1,67 @@
-# TEST_REPORT — v0.14.0 (Trust, Identity & Digital Signature, 2026-10-05)
+# TEST_REPORT — v0.15.0 (Núcleo do produto, 2026-10-05)
 
-**v0.14.0: 564 testes, 0 falhas, 0 ignorados** (468 do v0.13.0 + **96** da camada de confiança: 88 de API/unidade e 8 de navegador). Log íntegro: `docs/evidence/test_run_v0.14.0.log`.
-Detalhamento classe a classe e o que **não** está testado: `TRUST_TESTING.md`.
-Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 12 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
+**v0.15.0: 671 testes, 0 falhas, 7 pulados** (564 do v0.14.0 + **107** do núcleo do produto). Log íntegro:
+`docs/evidence/test_run_v0.15.0.log`. Lint: `docs/evidence/ruff_v0.15.0.log`. Desempenho:
+`docs/evidence/perf_v0.15.0.log`. Integridade do banco: `docs/evidence/db_integrity_v0.15.0.txt`.
+
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 15 migrações), servidor HTTP real
+(uvicorn) e Chromium (Playwright). Comando:
 ```
-cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
+cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" \
+  PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
 ```
-| Categoria | v0.12.1 | v0.13.0 | v0.14.0 |
+
+Os **7 pulados** são a suíte de volume, que roda em passo próprio porque o dado sintético muda o resultado de
+testes de ranking e paginação no mesmo banco:
+```
+cd backend && PERF_FULL=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest tests.test_v0150_performance -v
+```
+
+| Categoria | v0.13.0 | v0.14.0 | v0.15.0 |
 |---|---|---|---|
-| Unidade (puros) | 33 | 39 | 49 |
-| API/integração (HTTP + PostgreSQL reais) | 325 | 395 | 471 |
-| Arquitetura (invariantes do código) | 6 | 6 | 8 |
-| E2E de navegador (Chromium) | 28 | 28 | 36 |
-| **Total** | **392** | **468** | **564** |
+| Unidade (puros) | 39 | 49 | 55 |
+| API/integração (HTTP + PostgreSQL reais) | 395 | 471 | 554 |
+| Arquitetura (invariantes do código) | 6 | 8 | 8 |
+| E2E de navegador (Chromium) | 28 | 36 | 42 |
+| Volume (passo próprio) | — | — | 7 |
+| Caminho de atualização de banco | — | — | 10 |
+| **Total** | **468** | **564** | **671** |
+
+## Novos no v0.15.0 (107)
+
+| Suíte | Testes | O que prova |
+|---|---|---|
+| `test_v0150_core.py` | 39 | comportamento de cada capacidade nova, pela API real: ideia sobrevive à promoção · transição inválida recusada com as opções · motivo obrigatório · trilha encadeada · retratos comparáveis · risco de regra separado do declarado e não reaberto · versão de diagnóstico imutável e diff do servidor · montagem bloqueada diz o que falta · quatro olhos · provedor indisponível recusado no banco · inventário de chave sem expor chave |
+| `test_v0150_invariants.py` | 21 | mesma entrada + mesmas versões = mesmo resultado · plano não influencia match nem diagnóstico · bloqueado nunca sai elegível e sem pontuação · declaração nunca é verificada · frescura reduz confiança e não pontuação · `insufficient_data` é faixa própria · fonte melhor vence o conflito · hash de documento gerado imutável · varredura de risco idempotente · retrato de projeto imutável tem o mesmo hash |
+| `test_v0150_security.py` | 16 | **varredura automática de TODAS as rotas de escrita** com identificador inexistente (nenhuma 2xx, nenhuma 5xx) · matriz explícita A → recurso de B em 12 leituras e 15 escritas · RLS em SQL direto nas tabelas novas · funções `SECURITY DEFINER` não vazam · tabelas de chave invisíveis · rotas de administração exigem segundo fator · `DELETE` idempotente é indistinguível |
+| `test_v0150_upgrade.py` | 10 | atualização v0.12.1 → v0.13.0 → v0.14.0 → v0.15.0 **com dado dentro**: dado sobreviveu · trilha íntegra · transições legadas no grafo · ODS consolidados sem referência quebrada · estruturas novas com RLS · **esquema atualizado idêntico ao criado do zero** (colunas, índices, políticas e gatilhos) |
+| `test_e2e_v0150_journeys.py` | 8 | as 8 jornadas de ponta a ponta pela API real (ver abaixo) |
+| `test_e2e_v0150_web.py` | 6 | navegador real: páginas novas com um `<h1>` e sem erro de console · ideia vira projeto pela interface · **bloqueio de montagem visível com o botão desabilitado** · recusa de transição mostrada · desconhecido separado de lacuna · indisponibilidade de provedor declarada na tela |
+| `test_v0150_performance.py` | 7 | volume de alvo (1.000 orgs · 10.000 projetos · 100.000 documentos · 100.000 avaliações), orçamento de tempo por requisição, detector de N+1 por tamanho de página, `EXPLAIN` sem varredura sequencial |
+
+### As 8 jornadas
+
+1. Ideia → diagnóstico → projeto → documento montado → assinado → **verificado publicamente sem login**.
+2. Projeto publicado → financiador avalia → retorno → captação → execução.
+3. Organização sem dado nenhum → tudo desconhecido → preenche evidência → **lacunas fecham e a versão registra**.
+4. Montagem bloqueada → completa → gerada → recusada na revisão → corrigida → aprovada → assinada com as duas camadas.
+5. Acompanhamento no tempo: retratos, comparação, integridade da trilha.
+6. Risco: regra aponta → equipe mitiga → encerramento com motivo.
+7. Retorno humano sobre recomendação → base de calibração para a administração, **sem treino automático**.
+8. Duas organizações percorrendo a mesma jornada: **nenhuma vê qualquer passo da outra**.
+
+## O que continua NÃO testado
+
+| Item | Por quê |
+|---|---|
+| Carga concorrente em ambiente dimensionado | 2 vCPU no ambiente de construção produziria número enganoso |
+| Integração contra sistema externo real | depende de acesso a instância de cliente ou órgão |
+| Assinatura qualificada, Gov.br, ACT, biometria, SMS | dependem de contratação; o que existe é o teste da **recusa explícita** |
+| Leitura dos arquivos gerados pelo Microsoft Office e LibreOffice | os testes reabrem o ZIP e conferem o XML, mas nenhum aplicativo comercial abriu os arquivos aqui (ADR 110) |
+| Leitura do QR por leitor comercial | o teste é de ida e volta pelo próprio codificador (ADR 111) |
+| Teste de intrusão independente | nunca houve |
+
+---
 
 ## Novos no v0.14.0 (96)
 `tests/test_v0140_trust.py` (88) e `tests/test_e2e_v0140_trust.py` (8). Resumo do que é **provado**:

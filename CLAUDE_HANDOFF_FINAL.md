@@ -1,4 +1,21 @@
-# CLAUDE_HANDOFF_FINAL — continuação a partir do v0.10.0
+# CLAUDE_HANDOFF_FINAL — continuação a partir do v0.15.0
+
+> **Estado em v0.15.0:** o núcleo do produto está fechado (ideia → diagnóstico → projeto → documento → match →
+> acompanhamento). A próxima etapa é **DESIGN**, não engenharia. Comece por `FINAL_PRE_DESIGN_HARDENING_REPORT.md`,
+> `CORE_PRODUCT_ARCHITECTURE.md` e `DESIGN_HANDOFF.md` §13 (fluxos A–I e os 20 invariantes de design).
+>
+> **Se for continuar engenharia**, a lista do que falta está em `RELEASE_READINESS.md` §5 e a próxima otimização
+> mapeada está em `PERFORMANCE_REPORT.md` §5 (carregadores em lote para o feed — com o aviso de que foi exatamente
+> em `SECURITY DEFINER` que apareceram os defeitos de RLS das versões anteriores: ADR 103, 104, 105).
+>
+> **Regras do proprietário que continuam valendo:** não inventar teste, integração, publicação, segurança,
+> compliance nem benefício fiscal — **PROVE**. Nada de segredo em entregável. Sem ZIP dentro de ZIP. Relatório
+> final em português com GREEN/YELLOW/RED honesto. Versão sempre sobe, documentos anteriores vão para
+> `history/vX/`, nada é sobrescrito em silêncio.
+
+---
+
+## Continuação original (a partir do v0.10.0)
 
 ## Objetivo desta etapa
 Receba este pacote como base. **Não assuma que está pronto para produção** (veja `PRODUCTION_READINESS.md`). Primeiro **reproduza**: `ENVIRONMENT_SETUP.md` → `make test` (esperado: suíte verde; log de referência em `docs/evidence/`). Audite o código real, não os documentos.

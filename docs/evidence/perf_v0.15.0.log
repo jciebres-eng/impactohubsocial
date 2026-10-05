@@ -1,0 +1,20 @@
+# Volume sintético escala CHEIA — v0.15.0
+# 2026-10-05T22:28:47Z
+# 1.000 organizações · 10.000 projetos · 10.000 soluções · 100.000 documentos · 100.000 avaliações de match
+# Máquina da medição: 2 vCPU Intel Xeon @ 2.80GHz, 7 GB de RAM, PostgreSQL 16.15 local, container Linux 6.18 x86_64.
+# Servidor de aplicação e banco na MESMA máquina: em produção separada, a latência de rede entra por cima.
+test_document_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_document_list_stays_within_budget) ... ok
+test_funder_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_funder_feed_stays_within_budget) ... ok
+test_hot_queries_use_an_index (tests.test_v0150_performance.VolumeTests.test_hot_queries_use_an_index) ... ok
+test_list_does_not_grow_linearly_with_the_page_size (tests.test_v0150_performance.VolumeTests.test_list_does_not_grow_linearly_with_the_page_size)
+Detector de N+1: se a página de 100 custar muito mais que a de 5, há consulta por linha. ... ok
+test_project_timeline_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_project_timeline_stays_within_budget) ... ok
+test_readiness_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_stays_within_budget) ... ok
+test_volume_was_really_created (tests.test_v0150_performance.VolumeTests.test_volume_was_really_created) ... ok
+
+[desempenho · escala cheia] volume criado em 11.9s · documentos=11ms · feed_financiador=1615ms · linha_do_tempo=8ms · projetos_100=1655ms · projetos_5=1474ms · prontidao=11ms
+
+----------------------------------------------------------------------
+Ran 7 tests in 21.864s
+
+OK

@@ -1,12 +1,19 @@
-# PRODUCTION_READINESS — v0.14.0
+# PRODUCTION_READINESS — v0.15.0
 
-**Veredito: PRONTO PARA HOMOLOGAÇÃO / PILOTO CONTROLADO. NÃO pronto para produção aberta.**
+**Veredito: NÚCLEO DO PRODUTO FECHADO E PRONTO PARA A ETAPA DE DESIGN. Pronto para homologação / piloto
+controlado. NÃO pronto para produção aberta.**
+
+O semáforo portão por portão, com a prova de cada um e a lista fechada do que esta versão **não** entrega, está em
+**`RELEASE_READINESS.md`**. Em resumo: 22 portões verdes; três vermelhos, nenhum de engenharia interna
+(validação de segurança externa que não foi contratada, camada de design que é a etapa seguinte, aplicativo nativo
+que não foi iniciado).
+
 O que falta é majoritariamente externo (contas, provedores, jurídico, tributário) e de validação operacional (carga, pentest, build de contêiner/apps).
 
 ## Semáforo por área
 | Área | Status | Evidência | Pendência para produção |
 |---|---|---|---|
-| Backend/API | GREEN | 574 operações; suíte verde (564 testes) | — |
+| Backend/API | GREEN | 625 operações; suíte verde (671 testes) | — |
 | Banco/migrações/RLS | GREEN | testes RLS (API e SQL direto), restore verificado | PostgreSQL gerenciado, PITR, criptografia em repouso |
 | Autenticação/sessões/MFA | GREEN | testes | WebAuthn opcional; política de senha corporativa |
 | SSO OIDC | YELLOW | IdP falso | testar com IdP real (Google/Entra/Keycloak) |

@@ -1,0 +1,27 @@
+tables: 205
+tables_without_rls: schema_migrations
+policies: 408
+tables_with_policy: 203
+triggers: 118
+functions: 224
+security_definer_functions: 53
+security_definer_without_search_path: 
+foreign_keys: 529
+fk_without_index: 274
+fk_without_index_hot: 
+check_constraints: 922
+unique_constraints: 288
+indexes: 552
+tables_without_primary_key: 
+nullable_org_id_columns: audit_events, course_certificates, course_enrollments, demo_requests, hub_event_registrations, indicator_catalog, integration_events, kb_checklist_progress, kb_feedback, partnership_requests, sessions, signature_policies, solution_events, solution_people, solution_search_log, support_tickets, trial_claims, trust_events
+append_only_tables: application_transitions, audit_events, credential_verifications, diagnosis_versions, eligibility_evaluations, ledger_entries, match_feedback, organization_qualification_events, payment_events, project_snapshots, project_transitions, signature_revocations, signatures, solution_intent_events, solution_versions, trust_events, trust_timestamps
+guarded_tables: calls, document_assemblies, document_templates, documents, fee_tables, ideas, identity_documents, identity_verifications, milestones, organizations, professional_credentials, quota_pledges, signature_providers, signed_agreement_parties, signed_agreements, solution_disputes, solution_evidence, solution_results, users, verifiable_records
+migrations_applied: 15
+migrations_list: 0001_schema, 0002_security, 0003_match_support, 0004_v080_modules, 0005_v090_solutions, 0006_v0100_institutional, 0007_v0101_institutional_extras, 0008_v0110_monetization, 0009_v0120_knowledge_hub, 0010_v0121_indexes, 0011_v0130_integration_hub, 0012_v0140_trust_layer, 0013_v0150_core_product, 0014_v0150_platform_templates, 0015_v0150_fk_indexes
+app_role_tables_with_delete: 181
+app_role_column_grants: 7135
+orphan_rows_check: nenhuma verificação de órfão aplicável: toda referência é FK declarada
+ods_goals: 17
+status_graph_edges: 58
+signature_providers_in_production: 1
+document_templates_published: 3

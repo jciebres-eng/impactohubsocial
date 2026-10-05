@@ -1,7 +1,29 @@
-# SECURITY_AUDIT — v0.14.0 (2026-10-05)
+# SECURITY_AUDIT — v0.15.0 (2026-10-05)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
+A lista linha a linha, com a prova de cada item e as **9 pendências honestas**, está em
+**`SECURITY_FINAL_CHECKLIST.md`**.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
+
+## v0.15.0 — o que mudou nesta auditoria
+
+| Item | Antes | Agora |
+|---|---|---|
+| Matriz de isolamento A → recurso de B | testes pontuais por recurso | **varredura automática do registro de rotas**: toda rota de escrita com identificador é chamada com identificador inexistente, e nenhuma pode responder 2xx nem 5xx. Rota nova sem conferência de dona falha sem ninguém escrever teste para ela |
+| Fuga por `SECURITY DEFINER` | revisada caso a caso | teste dedicado (`test_security_definer_helpers_do_not_leak_other_tenant`) + verificação de que **as 53 funções têm `search_path` fixo** |
+| Imutabilidade do arquivo | hash conferido na verificação | `document_identity_guard()` recusa alterar hash, tamanho, tipo e chave de armazenamento para **todo** papel da aplicação, privilegiado incluído |
+| Máquina de estados do projeto | regra na camada HTTP | gatilho no banco que recusa transição fora do grafo até em SQL direto |
+| Assinatura com provedor indisponível | checagem no código | **gatilho no banco** (`signature_provider_guard`): não existe caminho que produza assinatura ICP-Brasil simulada |
+| Inventário de chaves | não existia | `encryption_keys` com impressão digital de 16 hex (a chave nunca é gravada), tabelas invisíveis para a organização, recifragem auditada |
+| Expressão em modelo de documento | — | `derived_from` é **lista fechada** de 14 caminhos; teste tenta `users.password_hash` e recebe 422 |
+| `except Exception` sem explicação | 10 ocorrências | **0** — todas as 35 têm comentário dizendo por quê |
+| Índice em chave estrangeira de inquilino | 92 faltando | 0 faltando (migração 0015) — importa para segurança porque toda política de RLS compara `org_id = app_org()` |
+
+**Continua RED:** nenhum teste de intrusão independente, nenhuma revisão de segurança externa, nenhum programa de
+recompensa por vulnerabilidade, nenhum KMS/HSM. Ver `SECURITY_FINAL_CHECKLIST.md` §9.
+
+---
+
 
 ## Achados do v0.6.0 (corrigidos)
 | # | Achado | Severidade | Correção |

@@ -1,6 +1,9 @@
 # DESIGN_HANDOFF — o que a próxima etapa (UI/UX) recebe
 
-**Versão da baseline:** 0.14.0 · **Branch:** `chore/trust-identity-signature` · **Documentos técnicos:** `FINAL_TECHNICAL_BASELINE.md` (base v0.12.1) + `FINAL_INTEGRATION_HARDENING_REPORT.md` (integração) + `FINAL_TRUST_HARDENING_REPORT.md` (confiança, identidade e assinatura).
+**Versão da baseline:** 0.15.0 · **Branch:** `chore/v0.15.0-final-pre-design-hardening` · **Documentos técnicos:** `FINAL_PRE_DESIGN_HARDENING_REPORT.md` (este ciclo) + `CORE_PRODUCT_ARCHITECTURE.md` + `FINAL_TECHNICAL_BASELINE.md` (base v0.12.1) + `FINAL_INTEGRATION_HARDENING_REPORT.md` (integração) + `FINAL_TRUST_HARDENING_REPORT.md` (confiança, identidade e assinatura).
+
+> **Leitura mínima antes de começar:** este arquivo, `CORE_PRODUCT_ARCHITECTURE.md` (como as peças se ligam) e a
+> seção 13 abaixo (**fluxos do produto A–I** e **invariantes de design**). O resto é referência.
 
 A camada funcional está fechada e testada. Esta etapa é de **design**: identidade visual, sistema de design, componentes, layout, onboarding visual, dashboards, UI web e mobile. **Não é necessário reimplementar backend, banco, autenticação, permissões ou cobrança** — e, se algo parecer faltando, confira primeiro a seção “Pendências que NÃO são bugs”.
 
@@ -203,3 +206,157 @@ menu, então mudar a estrutura de navegação não exige tocar em página nenhum
 Observação técnica para quem for fazer: a lista de itens por perfil já passou de 15 em alguns casos (OSC tem 20), o que
 é um argumento real a favor do agrupamento horizontal com submenus.
 
+
+
+---
+
+# 13. v0.15.0 — o núcleo do produto (telas FUNCIONAIS, ainda sem design)
+
+A v0.15.0 fechou o núcleo: ideia → diagnóstico → projeto → documento → match → acompanhamento, com evidência,
+versões e trilha. As telas existem, funcionam e estão testadas no navegador — mas foram escritas com o mesmo kit e
+os mesmos tokens das anteriores, **sem nenhuma decisão de design**. É exatamente aqui que a designer entra.
+
+**O que a engenharia deliberadamente NÃO fez nesta etapa** (e não é esquecimento): identidade visual, sistema de
+design, paleta, tipografia, animação, reorganização de navegação, dashboards, ilustração, onboarding visual.
+
+## 13.1 Telas novas (e o estado em que estão)
+
+| Rota | O que faz | Estado |
+|---|---|---|
+| `/ideias` | lista e anota ideias; "Transformar em projeto" | funcional, sem desenho |
+| `/prontidao` | leitura de prontidão da organização (FATO / INFERÊNCIA / RECOMENDAÇÃO / DESCONHECIDO) | funcional — **candidata número 1 a dashboard** |
+| `/projetos/:id/situacao` | situação atual, transições possíveis, histórico | funcional — **candidata a diagrama de fluxo** |
+| `/projetos/:id/linha-do-tempo` | trilha encadeada, com integridade | funcional — **candidata a linha de tempo visual** |
+| `/projetos/:id/retratos` | retratos e comparação campo a campo | funcional — comparação hoje é lista |
+| `/projetos/:id/riscos` | riscos declarados e apontados por regra | funcional — **candidata a matriz probabilidade × impacto** |
+| `/diagnosticos/:id/versoes` | versões imutáveis, o que mudou, ações | funcional — **candidata a evolução no tempo** |
+| `/documentos/montagens` | montagens abertas, com completude | funcional |
+| `/documentos/montagens/:id` | preenchimento seção a seção, bloqueio, geração, revisão | funcional — **a tela mais importante do produto para a OSC** |
+| `/documentos/modelos` | modelos disponíveis e a fonte de cada um | funcional |
+| `/assinatura/provedores` | provedores e o estado real de cada um | funcional |
+| `/assinatura/politica` | política de assinatura por tipo de documento | funcional |
+| `/admin/chaves` | inventário de chaves e rotação | funcional |
+
+Links de entrada já existem: do projeto (bloco "Aprofundar"), do diagnóstico (cabeçalho) e do cofre de documentos.
+
+## 13.2 FLUXOS CENTRAIS DO PRODUTO (A–I)
+
+São os caminhos que a designer precisa desenhar como **um percurso**, não como telas soltas. Cada um já funciona
+ponta a ponta e tem jornada de teste correspondente (`backend/tests/test_e2e_v0150_journeys.py`).
+
+### A. Da ideia ao projeto
+`/ideias` → anotar → amadurecer (`raw` → `shaping` → `ready`) → **Transformar em projeto** → `/projetos/:id`
+
+A ideia **não desaparece**: fica marcada como "Virou projeto" e aponta para ele; o projeto guarda a origem.
+O desenho precisa deixar isso visível — é a diferença entre "um lixo de anotações" e "a história do projeto".
+
+### B. Diagnóstico como processo, não formulário
+`/diagnosticos` → `/diagnosticos/:id/roteiro` (etapas) → `/diagnosticos/:id/versoes` → congelar versão → ações
+
+O que o desenho precisa resolver: mostrar **completude por dimensão** (8 dimensões com peso diferente), separar
+lacuna de desconhecido, e dar peso visual ao "o que mudou desde a última versão".
+
+### C. Estruturar o projeto
+`/projetos/:id` → orçamento e marcos → indicadores (`/projetos/:id/impacto`) → riscos → situação
+
+Hoje são abas e links. O percurso natural é um progresso guiado com o que falta sempre à vista.
+
+### D. Montar documento
+`/documentos/montagens` → escolher modelo → preencher por seção → anexar evidência → **gerar** → revisão (4 olhos) → assinar
+
+A tela de montagem é onde a OSC passa mais tempo. Pontos de atenção para o desenho:
+- **campo derivado** (vem do projeto) tem que parecer diferente de campo digitado, e dizer onde se corrige;
+- **o que falta** precisa estar visível ao lado do que foi feito, não em uma aba separada;
+- **o botão de gerar desabilitado** precisa dizer por quê sem a pessoa precisar procurar.
+
+### E. Publicar e captar
+`/projetos/:id` → publicar → `/projetos/:id/situacao` (`published` → `funding`) → `/cotas`, `/campanha-gestao`
+
+### F. Match nas duas direções
+- OSC: `/oportunidades` → detalhe → candidatura assistida
+- Financiador: `/explorar` → detalhe do projeto → retorno sobre a recomendação
+
+O desenho do resultado de match é delicado e está detalhado em 13.3: pontuação, confiança, bloqueio, porquê,
+o que falta e próxima ação são **seis coisas diferentes** e hoje aparecem no mesmo bloco.
+
+### G. Executar e comprovar
+`/projetos/:id` → execução → evidências → despesas → indicadores medidos e validados → relatórios
+
+### H. Acompanhar no tempo
+`/projetos/:id/retratos` (congelar) → comparar dois retratos → `/projetos/:id/linha-do-tempo` → integridade
+
+Este é o fluxo que vende a plataforma para um financiador: "o que mudou entre março e setembro, com prova".
+Hoje é funcional e feio; é onde o desenho tem mais a ganhar.
+
+### I. Provar para terceiro
+documento → assinatura em duas camadas → `/verificacoes` → código → `/verificar/:code` (**sem login**)
+
+A página pública é a única que uma pessoa de fora vê. Hoje funciona e é sóbria; merece ser a mais bem desenhada do
+produto.
+
+## 13.3 Invariantes de design — o que o desenho NÃO pode fazer
+
+Não são preferências. São afirmações que a plataforma sustenta com código e teste, e que a interface pode
+**restilizar à vontade** mas não pode suavizar, esconder nem contradizer. Os testes de navegador em
+`backend/tests/test_e2e_v0150_web.py` conferem parte disto, e a lista inteira vale como contrato.
+
+1. **Não esconder bloqueio.** Montagem bloqueada mostra o que falta; transição recusada mostra para onde é
+   possível ir; match bloqueado mostra o bloqueio. Botão desabilitado sem motivo visível é defeito.
+2. **Não esconder risco.** Risco apontado por regra aparece marcado como **apontado por regra**, nunca como
+   veredito, e nunca sumido porque "deixa a tela feia".
+3. **Não esconder evidência que falta.** `missing_data`, `missing_evidence` e `unknown` são conteúdo, não ruído.
+4. **"Não sei" ≠ "está ruim".** `unknown` precisa ficar visualmente separado de lacuna. Pintar desconhecido de
+   vermelho é mentir sobre a organização.
+5. **Pontuação alta com confiança baixa NÃO é recomendação.** Quando `confidence < 50`, a API já devolve
+   `score: null`. O desenho não pode reintroduzir um número onde a API recusou dar um.
+6. **Confiança e pontuação são eixos diferentes.** Não podem virar uma estrela só.
+7. **Não esconder revogação.** Assinatura revogada aparece como revogada, com o motivo, na verificação pública.
+8. **Versão assinada ≠ versão atual.** Documento com versão nova mostra `superseded` e as duas versões.
+9. **Não chamar declaração de verificada.** "Informado pela organização" e "conferido pela plataforma" precisam ser
+   visualmente distintos — a API já entrega `source` e `verified` em toda evidência.
+10. **Não chamar assinatura simples de qualificada.** O rótulo vem de `legal_level`; a plataforma entrega
+    **avançada**. Ver `SIGNATURE_VALIDATION_MATRIX.md`.
+11. **Não chamar Gov.br de ICP-Brasil.** São níveis jurídicos diferentes, e os dois estão **indisponíveis** hoje.
+12. **Não esconder indisponibilidade de provedor.** `unavailable` aparece com a dependência que falta.
+13. **Não esconder erro de integração.** Falha de conexão, circuito aberto e carta morta são estado do sistema que a
+    organização precisa ver.
+14. **Não mostrar dado privado na verificação pública.** A página pública mostra só `public_fields`.
+15. **Meta atingida não é impacto.** Produto, resultado e impacto são três níveis (`result_kind`) e não podem virar
+    um só número "de impacto".
+16. **Não apresentar estimativa fiscal como garantia.** O aviso "não é parecer jurídico" fica.
+17. **Não inventar preço.** Tabela de honorário sem fonte não existe; o desenho não preenche o vazio com faixa
+    plausível.
+18. **Ação apontada por regra vem marcada como tal** e nunca se confunde com ação que a equipe criou.
+19. **Documento gerado mostra a completude do momento da geração.** O rodapé já traz isso.
+20. **Retorno sobre recomendação não muda a nota.** O desenho não pode sugerir que "curtir" melhora o match.
+
+## 13.4 Onde o desenho agrega mais nesta versão
+
+Em ordem de retorno:
+
+1. **`/documentos/montagens/:id`** — é onde a OSC passa mais tempo e onde o produto mais se diferencia. Resolver
+   "o que falta × o que está feito × o que vem do projeto" em uma tela é o maior ganho disponível.
+2. **`/prontidao`** — hoje são painéis empilhados. É o melhor candidato a dashboard de verdade, com as 8 dimensões.
+3. **Resultado de match** — seis informações diferentes em um bloco. Separar pontuação, confiança, bloqueio, porquê,
+   o que falta e próxima ação muda a qualidade da decisão de quem financia.
+4. **`/projetos/:id/retratos` + linha de tempo** — a narrativa "o que mudou" é o argumento de venda para
+   financiador, e hoje é uma lista de campos.
+5. **`/projetos/:id/situacao`** — 17 situações e 58 transições pedem um diagrama, não um `select`.
+6. **Riscos** — matriz probabilidade × impacto é um padrão conhecido e a plataforma já tem os dois eixos.
+7. **Navegação** — o pedido do proprietário (menus horizontais retráteis, grande área de trabalho) continua
+   pendente de propósito, e a lista por perfil cresceu de novo nesta versão (OSC tem 24 itens).
+
+## 13.5 O que o desenho pode mudar sem pedir
+
+- Qualquer coisa visual: cor, tipografia, espaçamento, ícone, ilustração, animação, sombra, raio.
+- Estrutura de navegação, agrupamento, ordem dos itens, hierarquia de páginas.
+- Como um estado é **apresentado** (chip, cor, ícone, posição), desde que o estado continue visível.
+- Texto de interface escrito por nós (não os textos de erro que vêm da API, que já são em português).
+- Layout de qualquer tela, inclusive quebrar uma em várias ou juntar várias em uma.
+
+## 13.6 O que exige combinar antes
+
+- Mudar contrato da API (caminho, nome de campo, código de erro).
+- Remover ou suavizar qualquer um dos 20 invariantes de 13.3.
+- Mudar rótulo de nível jurídico, de origem de evidência ou de maturidade de integração.
+- Apresentar como pronto algo que `HOMOLOGATION_MATRIX.md` lista como `scaffolded` ou `contract_tested`.

@@ -1,8 +1,10 @@
-# Plataforma Impacto — v0.14.0
+# Plataforma Impacto — v0.15.0
 
 Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
 
-> **Estado:** pronto para homologação/piloto controlado. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+> **Estado:** núcleo do produto fechado e **tecnicamente pronto para a etapa de design**; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.15.0 (Núcleo do produto):** as seis peças passaram a ser **um sistema**, não seis telas — ideia → diagnóstico → projeto → documento → match → acompanhamento compartilhando o mesmo vocabulário de evidência (com fonte, data e frescura), as mesmas versões de motor e a mesma trilha encadeada por hash. A **ideia não é apagada** ao virar projeto; a **máquina de 17 situações é dado no banco**, com gatilho que recusa transição inválida até em SQL direto; a **linha de tempo** é a trilha que já existia, verificável; **retratos comparáveis** respondem "o que mudou entre março e setembro"; o **diagnóstico** separa FATO, INFERÊNCIA, RECOMENDAÇÃO e **DESCONHECIDO**, com versões imutáveis e `o que mudou` calculado pelo servidor; a **montagem de documento** recusa gerar incompleto, dizendo o que falta, e exige **quatro olhos** para aprovar; o **match** carrega quatro versões e aceita retorno humano **sem treinar nada automaticamente**. 671 testes, 625 operações, 205 tabelas. **Não há assinatura qualificada (ICP-Brasil/Gov.br), KMS/HSM, integração contra sistema real nem teste de intrusão independente** — tudo isso está listado com nome e motivo. Comece por `CORE_PRODUCT_ARCHITECTURE.md`, `FINAL_PRE_DESIGN_HARDENING_REPORT.md` e `DESIGN_HANDOFF.md` §13.
 
 **Novo no v0.14.0 (Confiança, identidade e assinatura digital):** **qualquer pessoa autorizada pode verificar um documento da plataforma sem ter conta** — pelo código impresso ou pelo QR, em `/verificar`: diz se é genuíno, **qual versão foi assinada**, se a integridade continua intacta, quem assinou e se foi revogado. Mais: assinatura eletrônica avançada em **duas camadas** (senha + código de uso único amarrado ao hash do conteúdo), cadeia de custódia encadeada por objeto, identidade por níveis com conferência humana, credencial profissional com catálogo de 20 conselhos, acordos multiassinatura com acompanhamento, carimbo de tempo interno, taxonomia ODS/ESG/determinantes sociais, idioma e tema por usuária, financiamento em cotas com campanha pública, honorários exigindo fonte, georreferência com consentimento, diagnóstico guiado em 8 etapas e exportação em docx/xlsx/odt/ods/xml/pdf. 564 testes. **Não há assinatura qualificada (ICP-Brasil/gov.br), biometria, SMS nem carimbo de ACT** — essas dependem de contratação externa e a plataforma **recusa explicitamente** em vez de simular. Comece por `PUBLIC_VERIFICATION.md`, `DIGITAL_SIGNATURE.md` e `FINAL_TRUST_HARDENING_REPORT.md`.
 
@@ -28,6 +30,12 @@ Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos
 | saber o que funciona e o que falta | `FINAL_RELEASE_AUDIT.md`, `PRODUCTION_READINESS.md` |
 | publicar (Web, Google Play, App Store) | `DEPLOYMENT_CHECKLIST.md`, `docs/DEPLOYMENT.md`, `docs/MOBILE.md` |
 | continuar o desenvolvimento | `CLAUDE_HANDOFF_FINAL.md`, `DECISIONS.md` |
+| entender o núcleo do produto | `CORE_PRODUCT_ARCHITECTURE.md`, `MATCH_ENGINE_FINAL.md`, `DIAGNOSTIC_ENGINE.md`, `PROJECT_LIFECYCLE.md`, `DOCUMENT_ASSEMBLY.md`, `LONGITUDINAL_TRACKING.md` |
+| fazer o design | `DESIGN_HANDOFF.md` §13 (fluxos A–I + 20 invariantes) |
+| saber o que depende de terceiro | `EXTERNAL_DEPENDENCIES.md`, `HOMOLOGATION_MATRIX.md`, `SIGNATURE_VALIDATION_MATRIX.md` |
+| auditar segurança, banco e desempenho | `SECURITY_FINAL_CHECKLIST.md`, `DATABASE_INTEGRITY_REPORT.md`, `PERFORMANCE_REPORT.md` |
+| rotacionar chave de cifragem | `KEY_ROTATION.md` |
+| saber o que é guardado e por quanto tempo | `DATA_RETENTION_MATRIX.md` |
 | segurança / LGPD | `SECURITY_AUDIT.md`, `docs/SECURITY.md`, `LGPD_AUDIT.md`, `docs/LGPD.md`, `docs/legal/` |
 | licenças e PI | `THIRD_PARTY_DEPENDENCIES.md`, `IP_REGISTER.md` |
 | integridade do pacote | `RELEASE_MANIFEST.sha256` (`python3 scripts/make_release.py --verify .`) |

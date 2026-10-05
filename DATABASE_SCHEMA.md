@@ -1,4 +1,21 @@
-# DATABASE_SCHEMA — camada institucional (migração `0006_v0100_institutional.sql`)
+# DATABASE_SCHEMA
+
+**v0.15.0 — 205 tabelas, 15 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
+`SECURITY DEFINER`, chaves estrangeiras, índices, imutabilidade e caminho de atualização) está em
+**`DATABASE_INTEGRITY_REPORT.md`**, com os números colhidos do catálogo do PostgreSQL por
+`scripts/db_integrity_report.py`.
+
+## Migrações da v0.15.0
+
+| Migração | O que faz |
+|---|---|
+| `0013_v0150_core_product.sql` | 15 tabelas do núcleo (`ideas`, `project_transitions`, `project_status_graph`, `project_snapshots`, `project_risks`, `diagnosis_versions`, `diagnosis_actions`, `document_templates`, `document_template_fields`, `document_assemblies`, `match_feedback`, `signature_providers`, `signature_policies`, `encryption_keys`, `encryption_rotations`); consolida os ODS **removendo** `sdg_goals`; acrescenta 20 tipos de entrada à trilha; `indicator_catalog.result_kind`; 5 gatilhos de guarda; RLS e GRANT por coluna |
+| `0014_v0150_platform_templates.sql` | 3 modelos de documento da plataforma, publicados, com a fonte declarada (49 campos); exige motivo para reabrir projeto arquivado; `document_identity_guard()`; `project_funding_many()` em lote |
+| `0015_v0150_fk_indexes.sql` | 92 índices para chave estrangeira de caminho de acesso (regra explicada no comentário da migração) |
+
+---
+
+## Camada institucional (migração `0006_v0100_institutional.sql`)
 
 Esquema completo anterior: `docs/DATABASE.md`. Esta migração é **cumulativa** (0001–0005 intactas). Papéis: `impacto_owner` (dono) e `impacto_app` (aplicação, sujeito a RLS e gatilhos de guarda).
 

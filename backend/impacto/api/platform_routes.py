@@ -23,7 +23,10 @@ OWNER = "owner"
        summary="Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial")
 def taxonomy(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
-        sdg = c.query("SELECT number, code, name_pt, name_en, color_hex FROM sdg_goals WHERE active ORDER BY number")
+        # ods_goals é a tabela CONSOLIDADA (existia desde a 0001 e é referenciada por indicator_catalog);
+        # a sdg_goals que eu havia criado na 0012 era duplicata e foi removida na 0013.
+        sdg = c.query("SELECT number, code, name AS name_pt, name_en, color_hex FROM ods_goals"
+                      " WHERE active ORDER BY number")
         esg = c.query("SELECT code, name_pt, name_en, description FROM esg_pillars ORDER BY code")
         det = c.query("SELECT code, name_pt, layer, description, source_note FROM social_determinants WHERE active ORDER BY code")
     return {"sdg": sdg, "esg": esg, "determinants": det,
@@ -50,8 +53,8 @@ def tag_create(ctx: Ctx, body: TSch.TagIn):
 def tag_list(ctx: Ctx, q: TSch.TagQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT t.id::text AS id, t.taxonomy, t.code, t.is_primary, t.note,"
-                       " coalesce(g.name_pt, p.name_pt, d.name_pt) AS name, g.color_hex"
-                       " FROM impact_tags t LEFT JOIN sdg_goals g ON t.taxonomy = 'sdg' AND g.code = t.code"
+                       " coalesce(g.name, p.name_pt, d.name_pt) AS name, g.color_hex"
+                       " FROM impact_tags t LEFT JOIN ods_goals g ON t.taxonomy = 'sdg' AND g.code = t.code"
                        " LEFT JOIN esg_pillars p ON t.taxonomy = 'esg' AND p.code = t.code"
                        " LEFT JOIN social_determinants d ON t.taxonomy = 'determinant' AND d.code = t.code"
                        " WHERE t.subject_type = $1 AND t.subject_id = $2 ORDER BY t.taxonomy, t.code",
@@ -315,8 +318,8 @@ def campaign_public(ctx: Ctx):
                               " p.created_at FROM quota_pledges p LEFT JOIN organizations o ON o.id = p.backer_org_id"
                               " WHERE p.project_id = $1 AND p.status = 'confirmed' ORDER BY p.created_at DESC LIMIT 50",
                               camp["project_id"])
-        tags = c.query("SELECT t.taxonomy, t.code, coalesce(g.name_pt, pl.name_pt, d.name_pt) AS name, g.color_hex"
-                       " FROM impact_tags t LEFT JOIN sdg_goals g ON t.taxonomy = 'sdg' AND g.code = t.code"
+        tags = c.query("SELECT t.taxonomy, t.code, coalesce(g.name, pl.name_pt, d.name_pt) AS name, g.color_hex"
+                       " FROM impact_tags t LEFT JOIN ods_goals g ON t.taxonomy = 'sdg' AND g.code = t.code"
                        " LEFT JOIN esg_pillars pl ON t.taxonomy = 'esg' AND pl.code = t.code"
                        " LEFT JOIN social_determinants d ON t.taxonomy = 'determinant' AND d.code = t.code"
                        " WHERE t.subject_type = 'project' AND t.subject_id = $1", camp["project_id"])

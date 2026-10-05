@@ -25,12 +25,17 @@ from datetime import date, datetime, UTC
 from pathlib import Path
 from typing import Any
 
+from ...core.evidence import Evidence, EvidenceSet, Source, band
 from .territory import covers, specificity
 
-ENGINE_VERSION = "match-engine@1.1.0"
+ENGINE_VERSION = "match-engine@1.2.0"
+# Regras de elegibilidade e taxonomia versionadas SEPARADAMENTE dos pesos: um resultado antigo nunca muda de
+# significado quando a régua muda. As quatro versões viajam com o resultado e ficam gravadas em match_runs.
+RULES_VERSION = "match-rules@1.1"
 _CONFIG = Path(__file__).resolve().parents[4] / "config" / "match_weights.json"
 DEFAULT_WEIGHTS: dict = json.loads(_CONFIG.read_text(encoding="utf-8"))
 _TAX = json.loads((_CONFIG.parent / "taxonomy.json").read_text(encoding="utf-8"))
+TAXONOMY_VERSION = _TAX.get("version", "taxonomy@unknown")
 
 
 def _doc_label(code: str) -> str:
@@ -201,11 +206,20 @@ class Signal:
     weight: float
     value: float | None
     detail: str
+    # Evidência que sustenta o sinal. Quando presente, o resultado mostra DE ONDE veio o dado, se foi VERIFICADO e
+    # quão FRESCO é. Sem isso, "a organização declarou" e "a equipe conferiu" entrariam no motor como o mesmo número.
+    evidence: Evidence | None = None
 
     def as_dict(self) -> dict:
-        return {"key": self.key, "label": SIGNAL_LABELS.get(self.key, self.key), "weight": self.weight,
-                "value": None if self.value is None else round(self.value, 4),
-                "contribution": None if self.value is None else round(self.weight * self.value, 4), "detail": self.detail}
+        out = {"key": self.key, "label": SIGNAL_LABELS.get(self.key, self.key), "weight": self.weight,
+               "value": None if self.value is None else round(self.value, 4),
+               "contribution": None if self.value is None else round(self.weight * self.value, 4), "detail": self.detail}
+        if self.evidence is not None:
+            ed = self.evidence.as_dict()
+            out["evidence"] = {"source": ed["source"], "verified": ed["verified"], "observed_at": ed["observed_at"],
+                               "expires_at": ed["expires_at"], "freshness": ed["freshness"],
+                               "confidence": ed["confidence"], "reference": ed["reference"]}
+        return out
 
 
 def _weights_for(direction: str, override: dict | None) -> tuple[dict, str]:
@@ -364,8 +378,15 @@ def evaluate_osc_call(mi: MatchInput) -> dict:
 
     total_req = [r for r in reqs if r["mandatory"]]
     met = sum(1 for r in total_req if r["status"] == "met")
+    # Procedência do sinal: documento no cofre e vigente é VERIFIED_DOCUMENT; requisito atendido por declaração é
+    # DECLARED. O sinal mais fraco manda, porque prontidão por autodeclaração não é prontidão comprovada.
+    doc_based = [r for r in total_req if r["status"] == "met" and r.get("kind") in (None, "document", "certification")]
+    newest_doc = max((d.get("created_at") for d in (mi.documents or []) if d.get("created_at")), default=None)
+    rd_source = Source.VERIFIED_DOCUMENT if doc_based and newest_doc else (Source.DECLARED if total_req else Source.ABSENT)
     sig.append(Signal("readiness", weights["readiness"], (met / len(total_req)) if total_req else 1.0,
-                      f"{met} de {len(total_req)} requisitos obrigatórios atendidos"))
+                      f"{met} de {len(total_req)} requisitos obrigatórios atendidos",
+                      evidence=Evidence("readiness", rd_source, met if total_req else None, observed_at=newest_doc,
+                                        kind="document", detail=f"{len(doc_based)} requisito(s) sustentado(s) por documento")))
 
     ods_ov = _overlap((project or {}).get("ods") or org.get("ods"), call.get("ods"))
     sig.append(Signal("ods", weights["ods"], None if ods_ov is None and call.get("ods") else (ods_ov if ods_ov is not None else 0.6),
@@ -388,7 +409,9 @@ def evaluate_osc_call(mi: MatchInput) -> dict:
         ev_t, ev_a = int(h.get("evidences_total") or 0), int(h.get("evidences_accepted") or 0)
         comp = int(h.get("completed_projects") or 0)
         val = min(1.0, 0.4 * min(comp, 3) / 3 + (0.6 * ev_a / ev_t if ev_t else 0.3))
-        sig.append(Signal("history", weights["history"], val, f"{comp} projeto(s) concluído(s); {ev_a}/{ev_t} evidências aceitas"))
+        sig.append(Signal("history", weights["history"], val, f"{comp} projeto(s) concluído(s); {ev_a}/{ev_t} evidências aceitas",
+                          evidence=Evidence("history", Source.PLATFORM_RECORD, comp, observed_at=_today(mi),
+                                            kind="project_activity", detail="histórico medido na própria plataforma")))
     else:
         sig.append(Signal("history", weights["history"], None, "Sem histórico na plataforma"))
 
@@ -494,8 +517,14 @@ def evaluate_funder_project(mi: MatchInput) -> dict:
         months = _months_between(founded, today)
         age_score = min(1.0, months / 36)
     cap = doc_ratio * 0.6 + (age_score if age_score is not None else 0.3) * 0.25 + (0.15 if org.get("compliance_status") == "approved" else 0)
+    approved = org.get("compliance_status") == "approved"
+    newest = max((d.get("created_at") for d in (mi.documents or []) if d.get("created_at")), default=None)
+    cap_source = (Source.PLATFORM_RECORD if approved else (Source.VERIFIED_DOCUMENT if live else Source.DECLARED))
     sig.append(Signal("capacity", weights["capacity"], cap,
-                      f"Documentação básica {round(doc_ratio * 100)}% · compliance {org.get('compliance_status') or 'pendente'}"))
+                      f"Documentação básica {round(doc_ratio * 100)}% · compliance {org.get('compliance_status') or 'pendente'}",
+                      evidence=Evidence("capacity", cap_source, round(cap, 4), observed_at=newest, kind="compliance",
+                                        detail="cadastro aprovado pela plataforma" if approved
+                                               else f"{len(live)} documento(s) vigente(s) no cofre")))
     if org.get("compliance_status") != "approved":
         risks.append({"code": "COMPLIANCE_PENDING", "severity": "medium", "message": "Compliance da OSC não concluído"})
 
@@ -507,7 +536,9 @@ def evaluate_funder_project(mi: MatchInput) -> dict:
         if q:
             val = max(0.0, val - 0.1 * q)
             risks.append({"code": "EXPENSES_QUESTIONED", "severity": "medium", "message": f"{q} despesa(s) questionada(s) em projetos anteriores"})
-        sig.append(Signal("evidence_history", weights["evidence_history"], min(1.0, val), f"{ev_a}/{ev_t} evidências aceitas"))
+        sig.append(Signal("evidence_history", weights["evidence_history"], min(1.0, val), f"{ev_a}/{ev_t} evidências aceitas",
+                          evidence=Evidence("evidence_history", Source.PLATFORM_RECORD, ev_a, observed_at=_today(mi),
+                                            kind="project_activity", detail="evidências avaliadas na plataforma")))
     else:
         sig.append(Signal("evidence_history", weights["evidence_history"], None, "Sem histórico de execução na plataforma"))
         risks.append({"code": "NO_TRACK_RECORD", "severity": "low", "message": "OSC sem histórico de execução registrado na plataforma"})
@@ -551,8 +582,18 @@ def _finish(mi, direction, weights, wver, sig, blockers, reqs, risks, missing, u
     total_w = sum(s.weight for s in sig) or 1.0
     known = [s for s in sig if s.value is not None]
     known_w = sum(s.weight for s in known)
-    confidence = round(100 * known_w / total_w, 1)
+    coverage = round(100 * known_w / total_w, 1)
     score = round(100 * sum(s.weight * s.value for s in known) / known_w, 1) if known_w else None
+    # Confiança = cobertura dos sinais AJUSTADA pela frescura/procedência das evidências. Dado velho ou apenas
+    # declarado não reduz a PONTUAÇÃO (o fato pode ser verdade), reduz a CERTEZA.
+    evid = EvidenceSet()
+    for s in sig:
+        if s.evidence is not None:
+            evid.add(s.evidence)
+    confidence, conf_detail = (coverage, "sem evidências datadas")
+    if evid.items:
+        from ...core.evidence import decay_confidence
+        confidence, conf_detail = decay_confidence(coverage, evid)
     if confidence < th["min_confidence_for_score"]:
         score = None
     if blockers:
@@ -592,12 +633,21 @@ def _finish(mi, direction, weights, wver, sig, blockers, reqs, risks, missing, u
 
     features = {s.key: (None if s.value is None else round(s.value, 4)) for s in sig}
     features.update({"blockers": len(blockers), "confidence": confidence})
+    evidence_summary = evid.summary() if evid.items else {"known": 0, "total": 0, "verified": 0,
+                                                          "declared_only": 0, "mean_confidence": 0.0, "stale": 0}
+    conf_band = band(confidence, len(known), len(sig))
     return {
-        "engine_version": ENGINE_VERSION, "weights_version": wver, "direction": direction,
-        "eligibility": eligibility, "recommended_state": state, "score": score, "confidence": confidence,
+        "engine_version": ENGINE_VERSION, "weights_version": wver, "rules_version": RULES_VERSION,
+        "taxonomy_version": TAXONOMY_VERSION, "direction": direction,
+        "eligibility": eligibility, "recommended_state": state, "score": score,
+        "coverage": coverage, "confidence": confidence, "confidence_detail": conf_detail,
+        "confidence_band": conf_band.value,
         "blockers": blockers, "requirements": reqs, "why_match": why, "why_not": why_not, "risks": risks,
         "missing_data": missing, "next_action": nxt, "signals": [s.as_dict() for s in sig], "features": features,
-        "disclaimer": "Indicador de apoio à decisão. Decisão final é humana; plano ou voucher não alteram este resultado.",
+        "evidence": evid.as_dict() if evid.items else {}, "evidence_summary": evidence_summary,
+        "stale_evidence": evid.stale() if evid.items else [],
+        "disclaimer": "Indicador de apoio à decisão. Decisão final é humana; plano ou voucher não alteram este resultado. "
+                      "Pontuação alta com confiança baixa NÃO é recomendação: confira a faixa de confiança.",
     }
 
 

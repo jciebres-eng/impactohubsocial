@@ -126,8 +126,59 @@ def evaluate_funder_project(c: Connection, funder_org_id: str, project: dict, ca
 
 
 def persist(c: Connection, viewer_org: str, user_id: str, result: dict, call_id: str | None, project_id: str | None) -> str:
-    return c.scalar("INSERT INTO match_runs(viewer_org_id, direction, call_id, project_id, engine_version, weights_version, eligibility,"
-                    " score, confidence, result, features, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::numeric,$9::numeric,$10::jsonb,$11::jsonb,$12)"
+    """Grava o resultado com as QUATRO versões (motor, pesos, regras, taxonomia) e a evidência que o sustentou.
+
+    Um resultado antigo nunca muda de significado quando a régua muda: quem leu "82 com confiança alta" em outubro
+    continua podendo saber com qual motor, quais pesos, quais regras e qual taxonomia aquilo foi calculado.
+    """
+    return c.scalar("INSERT INTO match_runs(viewer_org_id, direction, call_id, project_id, engine_version, weights_version,"
+                    " rules_version, taxonomy_version, eligibility, score, confidence, result, features, evidence, created_by)"
+                    " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::numeric,$11::numeric,$12::jsonb,$13::jsonb,$14::jsonb,$15)"
                     " RETURNING id::text", viewer_org, result["direction"], call_id, project_id, result["engine_version"],
-                    result["weights_version"], result["eligibility"], result["score"], result["confidence"],
-                    Json({k: v for k, v in result.items() if k != "features"}), Json(result["features"]), user_id)
+                    result["weights_version"], result.get("rules_version"), result.get("taxonomy_version"),
+                    result["eligibility"], result["score"], result["confidence"],
+                    Json({k: v for k, v in result.items() if k not in ("features", "evidence")}),
+                    Json(result["features"]), Json(result.get("evidence") or {}), user_id)
+
+
+FEEDBACK_KINDS = ("accepted", "rejected", "ignored", "not_relevant", "contacted", "converted", "expired")
+
+
+def record_feedback(c: Connection, *, match_run_id: str, org_id: str, feedback: str, reason: str | None,
+                    actor_user_id: str | None) -> dict:
+    """Retorno humano sobre a recomendação. Serve para CALIBRAR depois — nada é treinado automaticamente aqui.
+
+    O dataset fica pronto (run + versões + evidência + retorno + quem + quando + por quê) para uma calibração futura
+    feita com revisão humana. A plataforma não ajusta pesos sozinha.
+    """
+    from ..http import ApiError
+    if feedback not in FEEDBACK_KINDS:
+        raise ApiError(422, "validation_error", f"Retorno inválido. Use: {', '.join(FEEDBACK_KINDS)}")
+    run = c.one("SELECT id::text AS id, viewer_org_id::text AS viewer_org_id, project_id::text AS project_id,"
+                " direction FROM match_runs WHERE id = $1", match_run_id)
+    if not run or run["viewer_org_id"] != org_id:
+        raise ApiError(404, "not_found", "Avaliação de match não encontrada")
+    existing = c.scalar("SELECT 1 FROM match_feedback WHERE match_run_id = $1 AND org_id = $2", match_run_id, org_id)
+    if existing:
+        raise ApiError(409, "already_recorded", "Esta avaliação já recebeu retorno (o histórico não é reescrito)")
+    c.run("INSERT INTO match_feedback(match_run_id, org_id, feedback, reason, actor_user_id) VALUES ($1,$2,$3,$4,$5)",
+          match_run_id, org_id, feedback, reason, actor_user_id)
+    if run["project_id"]:
+        from .audit import ledger
+        ledger(c, project_id=run["project_id"], org_id=org_id, actor=actor_user_id, entry_type="match_feedback",
+               ref_type="match_run", ref_id=match_run_id, payload={"feedback": feedback, "direction": run["direction"]})
+    return {"recorded": True, "match_run_id": match_run_id, "feedback": feedback,
+            "note": "Retorno registrado. A plataforma NÃO recalibra pesos automaticamente: o dado fica disponível "
+                    "para calibração futura com revisão humana."}
+
+
+def calibration_dataset(c: Connection, *, limit: int = 1000, offset: int = 0) -> dict:
+    """Base para calibração futura (administração). Sem dado pessoal: só identificadores, versões e sinais."""
+    rows = c.query("SELECT r.id::text AS match_run_id, r.direction, r.engine_version, r.weights_version,"
+                   " r.rules_version, r.taxonomy_version, r.eligibility, r.score, r.confidence, r.features,"
+                   " f.feedback, f.at AS feedback_at FROM match_runs r"
+                   " JOIN match_feedback f ON f.match_run_id = r.id ORDER BY r.created_at DESC LIMIT $1 OFFSET $2",
+                   limit, offset)
+    counts = c.query("SELECT feedback, count(*) AS n FROM match_feedback GROUP BY feedback ORDER BY feedback")
+    return {"rows": rows, "counts": counts,
+            "note": "Dataset para calibração supervisionada futura. Nenhum treino automático acontece na plataforma."}

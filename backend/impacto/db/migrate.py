@@ -46,7 +46,9 @@ def status(conn: Connection) -> dict:
     return {"applied": sorted(applied), "pending": pending, "changed": changed}
 
 
-def migrate(dsn: str, *, sync_reference: bool = True, log=print) -> list[str]:
+def migrate(dsn: str, *, sync_reference: bool = True, upto: str | None = None, log=print) -> list[str]:
+    """Aplica as migrations pendentes em ordem. `upto` para em uma versão (inclusive), o que permite preparar um banco
+    em uma versão anterior e conferir o CAMINHO DE ATUALIZAÇÃO — e não só o banco criado do zero."""
     conn = Connection(dsn)
     done: list[str] = []
     try:
@@ -54,7 +56,11 @@ def migrate(dsn: str, *, sync_reference: bool = True, log=print) -> list[str]:
         st = status(conn)
         if st["changed"]:
             raise RuntimeError(f"Migrations já aplicadas foram alteradas (forward-only): {st['changed']}")
+        if upto and upto not in {f.stem for f in _files()}:
+            raise RuntimeError(f"Migration '{upto}' não existe")
         for f in _files():
+            if upto and f.stem > upto:
+                break
             if f.stem not in st["pending"]:
                 continue
             log(f"aplicando {f.name}")
@@ -64,7 +70,7 @@ def migrate(dsn: str, *, sync_reference: bool = True, log=print) -> list[str]:
             done.append(f.stem)
         if sync_reference:
             sync_reference_data(conn, log=log)
-    except Exception:
+    except Exception:  # noqa: BLE001 - desfaz a migração em curso e RELANÇA (forward-only não aceita meio aplicado)
         try:
             conn.execute_script("ROLLBACK;")
         except Exception:  # noqa: S110 - rollback best-effort; a exceção original é relançada
@@ -166,7 +172,7 @@ def sync_reference_data(conn: Connection, log=print) -> None:
         n_tr = sync_translations(conn, log=log)
         conn.execute_script("COMMIT;")
         log(f"dados de referência sincronizados: {len(keys)} planos, {n_prov} provedores de integração, {n_tr} traduções")
-    except Exception:
+    except Exception:  # noqa: BLE001 - dado de referência é tudo-ou-nada; desfaz e RELANÇA
         conn.execute_script("ROLLBACK;")
         raise
 

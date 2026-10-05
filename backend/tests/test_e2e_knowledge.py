@@ -16,6 +16,25 @@ except ImportError:  # pragma: no cover
     HAVE_PW = False
 
 
+CONTRAST_JS = """() => {
+  const bad = [], seen = new Set();
+  const lum = (c) => { const [r,g,b] = c.map(v => { v/=255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }); return 0.2126*r+0.7152*g+0.0722*b; };
+  const parse = (s) => { const m = String(s).match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const p = m[1].split(',').map(parseFloat); return p.length >= 3 && (p[3] === undefined || p[3] > 0.5) ? p.slice(0,3) : null; };
+  const bgOf = (el) => { let e = el; while (e) { const c = parse(getComputedStyle(e).backgroundColor); if (c) return c; e = e.parentElement; } return [255,255,255]; };
+  document.querySelectorAll('p,span,a,button,li,td,th,h1,h2,h3,label,strong,dt,dd,summary').forEach(el => {
+    if (!el.textContent || !el.textContent.trim() || el.children.length) return;
+    const st = getComputedStyle(el), fg = parse(st.color); if (!fg) return;
+    const bg = bgOf(el), l1 = lum(fg), l2 = lum(bg);
+    const ratio = (Math.max(l1,l2)+0.05) / (Math.min(l1,l2)+0.05);
+    const size = parseFloat(st.fontSize), bold = (parseInt(st.fontWeight)||400) >= 700;
+    const need = (size >= 24 || (size >= 18.66 && bold)) ? 3.0 : 4.5;
+    const key = st.color + '|' + bg.join(',') + '|' + Math.round(size);
+    if (ratio < need && !seen.has(key)) { seen.add(key); bad.push(st.color + ' ' + Math.round(size) + 'px -> ' + (Math.round(ratio*100)/100) + ':1 (exige ' + need + ') em "' + el.textContent.trim().slice(0,24) + '"'); }
+  });
+  return bad;
+}"""
+
+
 @unittest.skipUnless(HAVE_PW and DIST.exists(), "Playwright ou build do frontend indisponível")
 class KnowledgeE2E(unittest.TestCase):
     @classmethod
@@ -223,6 +242,38 @@ class KnowledgeE2E(unittest.TestCase):
             p.locator("main").wait_for()
             p.wait_for_load_state("networkidle")
             self.assertEqual(p.evaluate(A11Y_JS), [], path)
+        self.assertEqual(p.errors, [])
+
+    def test_text_contrast_meets_wcag_aa_on_public_pages(self):
+        """Contraste de texto (WCAG AA 4.5:1 / 3:1 para texto grande) medido no navegador, em tema claro e escuro."""
+        for scheme in ("light", "dark"):
+            ctx = self.browser.new_context(viewport={"width": 1280, "height": 900}, color_scheme=scheme)
+            p = ctx.new_page()
+            for path in ("/ajuda", "/ajuda/faq", "/ajuda/academia", "/ajuda/eventos", "/ajuda/biblioteca", "/ajuda/demonstracao", "/entrar"):
+                p.goto(self.base + path)
+                p.locator("main, .auth-main").first.wait_for()
+                p.wait_for_load_state("networkidle")
+                self.assertEqual(p.evaluate(CONTRAST_JS), [], f"{scheme} {path}")
+            ctx.close()
+
+    def test_no_duplicate_element_ids_and_no_heading_level_skips(self):
+        p = self.page()
+        audit = """() => {
+          const ids = {}; document.querySelectorAll('[id]').forEach(e => ids[e.id] = (ids[e.id]||0)+1);
+          const dup = Object.entries(ids).filter(([,n]) => n > 1).map(([k]) => k);
+          let last = 0; const skips = [];
+          document.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => { const l = Number(h.tagName[1]);
+            if (last && l > last + 1) skips.push('h' + last + '->h' + l); last = l; });
+          return {dup, skips, lang: document.documentElement.lang || null};
+        }"""
+        for path in ("/ajuda", "/ajuda/faq", "/ajuda/academia", "/ajuda/eventos", "/ajuda/biblioteca", "/ajuda/boletim"):
+            p.goto(self.base + path)
+            p.locator("main").wait_for()
+            p.wait_for_load_state("networkidle")
+            r = p.evaluate(audit)
+            self.assertEqual(r["dup"], [], f"IDs duplicados em {path}")
+            self.assertEqual(r["skips"], [], f"nível de cabeçalho saltado em {path}")
+            self.assertEqual(r["lang"], "pt-BR", path)
         self.assertEqual(p.errors, [])
 
     def test_private_pages_redirect_visitor_to_login(self):

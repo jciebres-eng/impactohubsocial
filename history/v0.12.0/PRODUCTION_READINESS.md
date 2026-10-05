@@ -63,17 +63,3 @@ Não declarar "solução comprovada" sem nível `evidenced/verified` concedido p
 | Parcerias/demo/boletim | YELLOW | testado | base legal, retenção, SMTP real |
 | Lint Python | GREEN | `ruff` limpo (`docs/evidence/ruff_v0.12.0.log`) | rodar em CI |
 | Auditoria de dependências | YELLOW | **não executada** | `npm audit`/`pip-audit` em CI |
-
-## Baseline técnica v0.12.1 — atualização do semáforo
-| Área | Status | Evidência | Pendência |
-|---|---|---|---|
-| Autorização de **todas** as 475 operações | GREEN | varredura automatizada (anônimo, usuária comum, admin sem MFA) | — |
-| Concorrência (eventos, certificados, vouchers, webhooks, trial) | GREEN | 6 testes com threads | carga concorrente em volume de produção |
-| Higiene de erros / vazamento de esquema | GREEN | corrigido + teste de regressão | — |
-| Índices de consultas reais | GREEN | `0010_v0121_indexes.sql` + `EXPLAIN` por índice | medição em volume de produção |
-| Desempenho dos fluxos críticos | GREEN (dev) | p95 < 30 ms em 10 fluxos | teste de carga real |
-| Migrations (zero e incremental) | GREEN | banco criado do zero em cada suíte + 0010 aplicada em banco existente; `--check` limpo | — |
-| Acessibilidade base (incl. contraste AA claro/escuro) | GREEN | testes de navegador | axe + leitor de tela |
-| Entrega de e-mail (outbox, reenvio sem duplicar) | GREEN (outbox) | 2 testes | **SMTP real** |
-| Auditoria de dependências | **BLOQUEADA no ambiente** | npm 403; PyPI sem versões | executar em CI |
-| Cobrança real, preços, nota fiscal, conteúdo oficial, IA generativa | RED/externo | — | decisão do proprietário / jurídico / provedor |

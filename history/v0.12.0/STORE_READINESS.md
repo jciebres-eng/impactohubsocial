@@ -18,9 +18,3 @@ Avaliação honesta (GREEN = provado por teste/execução; YELLOW = código pron
 | Pentest, carga concorrente, DR | YELLOW | ver `PRODUCTION_READINESS.md` |
 
 **Conclusão:** o produto está pronto para **receber a camada de design e para homologação/piloto**. **Não está pronto para publicação nas lojas** — faltam builds assinados, decisões de monetização nas lojas, revisão jurídica e conteúdo oficial.
-
-## Atualização v0.12.1
-- **Acessibilidade:** contraste AA corrigido e agora verificado automaticamente (claro e escuro); rótulos, foco, cabeçalhos, IDs e ausência de rolagem horizontal a 390 px provados em 25 combinações de página/viewport. **Ainda falta** axe e leitor de tela.
-- **Auditoria de dependências:** tentada e **bloqueada** neste ambiente (`npm install --package-lock-only` → 403 do registry; `pip install pip-audit` → “no matching distribution”). Sem lockfile não há `npm audit`. **Obrigatório rodar em CI antes de publicar.** Dependências de execução são pinadas em `backend/requirements.txt` e `web/package.json`.
-- **Jornadas de navegador** agora incluem logout, área bloqueada por perfil, página Plano (voucher + cancelamento) e administração com MFA — o fluxo de cobrança deixou de ser “só API”.
-- **Conclusão inalterada:** pronto para a camada de design e para piloto; **não** pronto para publicação nas lojas (builds assinados, regras de compra das lojas, revisão jurídica e conteúdo oficial continuam pendentes).

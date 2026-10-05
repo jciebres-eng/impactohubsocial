@@ -1,20 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.12.1] — 2026-10-05 — Baseline técnica para a camada de design (cumulativo; snapshot do v0.12.0 em `history/v0.12.0/`)
-### Corrigido
-- **Vazamento de detalhes do banco nas respostas da API**: violações de CHECK/FK/NOT NULL devolviam o texto interno do PostgreSQL (nome de tabela, de constraint e, em violação de unicidade, valores). Agora a resposta é genérica com `error_id`, e o detalhe fica só no log; **mensagens autoradas pelos gatilhos do projeto continuam visíveis** (chegam com o mesmo código de erro e são distinguidas por padrão de texto).
-- **Desconto de voucher reservado nunca aparecia** na página Plano: `GET /v1/billing` montava `pending_discounts` com JOIN em `vouchers`, tabela invisível à organização por RLS — o resultado era **sempre vazio**. Passou a ser lido em contexto de sistema restrito ao `org_id` da sessão, expondo só tipo/valor/plano (nunca código ou hash).
-- **Boletim podia ser perdido**: `last_sent_at` era consumido ANTES do envio, então uma falha de SMTP fazia a inscrita perder a edição do período inteiro. Agora o período só avança quando o envio sai; o job devolve `failed` e reenvia no ciclo seguinte.
-- **Contraste reprovado (WCAG AA)**: o texto secundário (`--texto-3`) tinha 4.19:1 sobre o fundo das páginas (exigido 4.5:1). Token ajustado para 4.63:1 **preservando matiz e saturação**; tema escuro já passava. Há teste automático de contraste em tema claro e escuro.
-### Adicionado
-- `migrations/0010_v0121_indexes.sql`: 6 índices de cobertura para consultas reais em tabelas de crescimento (`course_enrollments.course_id`, `partnership_activities(request_id, created_at)`, `trial_requests` por organização e por usuária, `partnership_requests.user_id`, `demo_requests.user_id`). Cada índice cita a consulta que o justifica e foi verificado por `EXPLAIN`.
-- **+33 testes (392 no total)**: varredura de autorização sobre as 475 operações, IDOR de escrita, 6 testes de concorrência real com threads, higiene de erros, invariantes de dinheiro/fuso, entrega de e-mail, 4 jornadas de navegador que faltavam (logout, área bloqueada, página Plano com voucher e cancelamento, administração com MFA) e 2 de acessibilidade medida no navegador.
-- Documentos: `FINAL_TECHNICAL_BASELINE.md`, `DESIGN_HANDOFF.md`, `FINAL_RELEASE_MANIFEST.json`.
-### Não feito / pendente (declarado)
-- `npm audit` e `pip-audit` **não executados**: registries npm e PyPI bloqueados neste ambiente (403 / “no matching distribution”) — comandos e erros registrados em `FINAL_TECHNICAL_BASELINE.md`. Rodar em CI.
-- Sem axe/leitor de tela; sem Stripe real, nota fiscal ou preços; sem conteúdo oficial; sem IA generativa/embeddings; apps móveis não compilados; pentest e carga em volume de produção pendentes.
-
 ## [0.12.0] — 2026-10-05 — Central de Conhecimento (cumulativo; snapshot do v0.11.0 em `history/v0.11.0/`)
 ### Adicionado
 - **Central de Conhecimento** (`/ajuda`): busca híbrida (FTS + trigrama + assuntos + tela + público, com “por que apareceu”), ajuda contextual, guias com checklist/passos/ação, biblioteca (modelos preenchíveis → rascunho, checklists, documentos, versões), FAQ com votos, **assistente extrativo e ancorado** (recusa quando não há base; sem IA generativa), “Comece aqui” e pendências **medidos por dados reais**, “Minhas atividades”.

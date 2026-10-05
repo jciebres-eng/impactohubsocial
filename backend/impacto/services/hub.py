@@ -562,19 +562,23 @@ def bulletin_dispatch(app, c) -> dict:
     """Envia o boletim a quem confirmou (duplo opt-in): só conteúdo PUBLICADO desde o último envio; um e-mail por inscrita; link de descadastro."""
     due = c.query("SELECT id::text AS id, email::text AS email, frequency, last_sent_at, topics FROM newsletter_subscriptions WHERE status = 'active'"
                   " AND (last_sent_at IS NULL OR last_sent_at < now() - CASE frequency WHEN 'weekly' THEN interval '7 days' ELSE interval '30 days' END)")
-    sent = 0
+    sent = failed = 0
     for s in due:
         since = s["last_sent_at"] or datetime.now(UTC) - timedelta(days=30)
         items = c.query("SELECT title, slug, summary FROM kb_resources WHERE status = 'published' AND kind = 'bulletin' AND visibility = 'public' AND published_at > $1 ORDER BY published_at DESC LIMIT 10", since)
         if not items:
             continue
         tok = secrets.token_urlsafe(32)
-        c.run("UPDATE newsletter_subscriptions SET token_hash = $2, last_sent_at = now() WHERE id = $1", s["id"], _hash(tok))
+        c.run("UPDATE newsletter_subscriptions SET token_hash = $2 WHERE id = $1", s["id"], _hash(tok))     # o link precisa do token ANTES do envio
         base = app.settings.public_base_url.rstrip("/") if getattr(app.settings, "public_base_url", None) else ""
         body = "Novidades da plataforma:\n\n" + "\n".join(f"- {i['title']}: {base}/ajuda/biblioteca/{i['slug']}" for i in items) + f"\n\nPara não receber mais: {base}/ajuda/boletim/cancelar?token={tok}\n"
+        # `last_sent_at` só avança quando o envio REALMENTE saiu: falha de e-mail não consome o período da inscrita (reenvia no ciclo seguinte).
         if send_mail(app, c, to=s["email"], subject="[Impacto] Boletim", text=body):
+            c.run("UPDATE newsletter_subscriptions SET last_sent_at = now() WHERE id = $1", s["id"])
             sent += 1
-    return {"sent": sent, "due": len(due)}
+        else:
+            failed += 1
+    return {"sent": sent, "due": len(due), "failed": failed}
 
 
 def retention(c, months: int = 18) -> dict:

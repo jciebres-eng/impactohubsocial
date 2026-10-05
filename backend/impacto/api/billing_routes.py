@@ -50,11 +50,15 @@ def billing_state(ctx: Ctx):
                     " ORDER BY created_at DESC LIMIT 1", ctx.org_id, ["active", "trialing", "past_due"])
         trial_row = c.one("SELECT * FROM org_trials WHERE org_id = $1", ctx.org_id)
         now = mon._now(c)
-        pending = c.query("SELECT v.type, v.value, v.plan_key FROM voucher_redemptions r JOIN vouchers v ON v.id = r.voucher_id WHERE r.org_id = $1 AND r.status = 'pending_discount'", ctx.org_id)
         agreements = c.query("SELECT a.name, a.kind, a.discount_percent, a.plan_key, m.status, g.ends_at FROM agreement_members m JOIN agreements a ON a.id = m.agreement_id"
                              " LEFT JOIN entitlement_grants g ON g.id = m.grant_id WHERE m.org_id = $1", ctx.org_id)
         grants = c.query("SELECT plan_key, feature_key, source, reason, starts_at, ends_at FROM entitlement_grants WHERE org_id = $1 AND revoked_at IS NULL"
                          " AND (ends_at IS NULL OR ends_at > now()) ORDER BY created_at DESC", ctx.org_id)
+    # `vouchers` é invisível à organização por RLS (só app_priv()), então o desconto reservado é lido em contexto de sistema
+    # SEMPRE restrito ao org_id da sessão e expondo apenas tipo/valor/plano — nunca código, hash ou dados de outra organização.
+    with ctx.system_tx() as c:
+        pending = c.query("SELECT v.type, v.value, v.plan_key FROM voucher_redemptions r JOIN vouchers v ON v.id = r.voucher_id"
+                          " WHERE r.org_id = $1 AND r.status = 'pending_discount'", ctx.org_id)
     tv = mon.trial_view(trial_row, now, has_paid_sub=bool(sub and sub["status"] in ("active", "trialing")))
     next_charge = None
     if sub and sub["status"] in ("active", "trialing") and not sub["cancel_at_period_end"] and sub["provider"] != "manual":

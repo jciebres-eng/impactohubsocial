@@ -109,23 +109,3 @@ Pendente: pentest; verificação da assinatura com segredo real do Stripe; revis
 | XSS: conteúdo renderizado como **texto** (sem `dangerouslySetInnerHTML`/`innerHTML` no frontend); JSON-LD via `textContent`; CSP mantida (E2E sem violações) | GREEN (por inspeção + E2E) | `grep` + `test_e2e_*` |
 | Assistente não usa conteúdo não publicado e não inventa | GREEN | `test_assistant_*` |
 | Pendente | YELLOW | pentest; privilégio amplo do modo administrativo (disciplina de código); auditoria de dependências npm/pip **não executada** (rede bloqueada neste ambiente); SMTP real |
-
-## Endurecimento final — v0.12.1 (baseline técnica)
-Método: varredura automatizada de autorização sobre **todas as 475 operações**, testes de IDOR de leitura e escrita, concorrência com threads, sondas de injeção/travessia/erro e revisão de contexto de sistema (RLS). **Não é pentest.**
-
-| Achado | Gravidade | Correção / prova |
-|---|---|---|
-| **Vazamento de esquema nas respostas de erro**: violações de CHECK/FK/NOT NULL devolviam o texto interno do PostgreSQL (tabela, constraint; em unicidade o texto pode conter valores → enumeração/PII) | Média | Resposta genérica + `error_id`; detalhe só no log; mensagens autoradas pelos gatilhos preservadas. Teste: `ErrorHygiene.test_database_schema_details_never_reach_the_client` |
-| **Contexto de sistema com JOIN bloqueado por RLS** devolvia lista vazia em `/v1/billing` (desconto reservado) | Baixa (funcional) | Leitura em contexto de sistema **restrita ao `org_id` da sessão**, sem expor código/hash; teste de isolamento entre organizações incluído |
-| Toda rota não pública recusa anônimo (401) | — | GREEN — varredura de 475 operações |
-| Toda rota administrativa recusa usuária comum (403 `admin_only`) e administrador **sem MFA** (403 `mfa_required`) | — | GREEN — varredura de 475 operações |
-| Nenhuma rota devolve 5xx a entrada anônima/placeholder | — | GREEN — varredura |
-| IDOR de **escrita** entre organizações (responder/avaliar/encerrar chamado alheio) | — | GREEN — 404 em todos os verbos; mensagem alheia não entra na thread |
-| Capacidade de evento, certificado, voucher de uso único, webhook duplicado e decisão de trial sob **concorrência real** | — | GREEN — 6 testes com threads; garantias por `FOR UPDATE`/`ON CONFLICT` no banco |
-| Injeção SQL/XSS em busca, chamado e checklist | — | GREEN — armazenado literalmente; nada reinterpretado; frontend não usa `innerHTML` |
-| Travessia de caminho em download | — | GREEN — token HMAC curto + conferência de `storage_key` contra a linha do documento |
-| Segredos no repositório | — | GREEN — varredura de padrões (a única ocorrência é o vetor público `AKIAIOSFODNN7EXAMPLE` da documentação da AWS, em teste) |
-| Segredos em log | — | GREEN — `_REDACT_KEYS` em `observability.py` oculta senha/token/segredo/cookie/código |
-| Pendente | YELLOW | pentest externo; auditoria de dependências (registries bloqueados neste ambiente); privilégio amplo do modo administrativo segue como disciplina de código revisada |
-
-**Nota de desenho (não defeito):** a URL assinada de download (`/v1/files/{token}`, 5 min) é uma *capability* — quem tiver o link acessa, como em URLs pré-assinadas de S3. O token é HMAC, expira e é conferido contra a linha do documento.

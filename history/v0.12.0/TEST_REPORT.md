@@ -1,41 +1,4 @@
-# TEST_REPORT — v0.12.1 (baseline técnica, 2026-10-05)
-
-**v0.12.1: 392 testes, 0 falhas, 0 ignorados** (359 do v0.12.0 + **33** novos). Log íntegro: `docs/evidence/test_run_v0.12.1.log`.
-Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 10 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
-```
-cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
-```
-| Categoria | Testes |
-|---|---|
-| Unidade (puros) | 33 |
-| API/integração (HTTP + PostgreSQL reais) | 325 |
-| Arquitetura (invariantes do código) | 6 |
-| E2E de navegador (Chromium) | 28 |
-| **Total** | **392** |
-
-## Novos nesta baseline (33)
-**`tests/test_v0120_hardening.py` (27) — testes que tentam QUEBRAR o sistema:**
-- **Varredura de autorização sobre TODAS as 475 operações** (não por amostragem): toda rota não pública recusa anônimo com 401; toda rota administrativa recusa usuária comum com 403; **toda** rota administrativa recusa administrador **sem MFA**; nenhuma rota devolve 5xx a entrada anônima/placeholder; o catálogo de rotas **confere com o OpenAPI** (475 = 475).
-- **IDOR de leitura e de ESCRITA** entre organizações: chamado de outra organização não pode ser lido, respondido, avaliado nem encerrado; pedidos de teste e progresso de checklist são isolados; projeto de outra organização não vaza por UUID.
-- **Concorrência real (threads):** capacidade de evento nunca estoura (2 vagas, 5 inscrições simultâneas → 2 inscritas + 3 lista de espera); certificado emitido 4x em paralelo gera **um**; voucher de uso único resgatado por 4 organizações em paralelo é aplicado **uma vez**; webhook duplicado entregue 4x em paralelo grava **uma** linha e processa uma vez; webhook sem assinatura válida nunca é gravado; decisão de trial aplicada 3x em paralelo vale **uma**.
-- **Higiene de erros:** IDs malformados, travessia de caminho, JSON inválido, media type errado, campos desconhecidos e limites de paginação → 4xx tratado, nunca 5xx, com `request_id` e **sem vazar esquema, SQL, traceback ou segredo**; carga de SQL/XSS é armazenada literalmente.
-- **Dinheiro e tempo:** desconto é sempre inteiro em centavos, nunca negativo, nunca maior que a base; economia anual nunca é inventada; plano sem preço **recusa venda**; prazos de SLA nascem no futuro e todo carimbo de tempo sai em ISO 8601 **com fuso**.
-- **Entrega de e-mail:** falha de SMTP não consome o período do boletim e não marca o aviso como enviado (reenvia no ciclo seguinte, sem duplicar depois).
-- **Regressão do desconto reservado** (ver `FINAL_TECHNICAL_BASELINE.md` §Bugs).
-**`tests/test_e2e_baseline.py` (4) — jornadas de navegador que faltavam:** cadastro → confirmação → login → **Sair** (sessão encerrada de fato); área permitida × **área bloqueada pelo tipo de organização** × rota inexistente; **página Plano** (estado do teste, voucher aplicado pela interface, cancelamento que mantém o acesso já concedido); **administração com MFA real (TOTP)** → troca de organização ativa → visão geral, auditoria, CMS e fila de suporte.
-**`tests/test_e2e_knowledge.py` (+2):** **contraste WCAG AA medido no navegador** em 7 páginas × tema claro e escuro; ausência de IDs duplicados, de salto de nível de cabeçalho e presença de `lang="pt-BR"`.
-
-## Verificações estáticas e de build
-`ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.12.1.log`) · `tsc --noEmit` → **PASS** · `node build.mjs` → **PASS** (180 KB gzip) · `python -m compileall` → **PASS** · `migrate --check` → sem pendências e sem checksum alterado.
-
-## Medição de desempenho (fluxos críticos, dados de desenvolvimento)
-p50/p95 por requisição, servidor real: `/v1/me` 12/13 ms · `/v1/help/start` (15 detectores) 17/19 ms · `/v1/help/pending` 16/23 ms · `/v1/help/recommendations` 19/25 ms · `/v1/help/search` 24/27 ms · `/v1/documents` 7/8 ms · `/v1/projects` 9/16 ms. Consultas por requisição: 8 a 28 (inclui sessão/RLS). **Limite honesto:** volume de desenvolvimento, 1 processo — não substitui teste de carga em produção.
-
-## Limites desta suíte (não mudaram)
-Acessibilidade é verificada por **checagens próprias** (rótulos, foco, contraste, cabeçalhos, IDs, overflow), **sem axe e sem leitor de tela** — registry npm bloqueado neste ambiente. Stripe, SMTP, antivírus, S3 e IdP são **dublês**. Sem teste cross-browser, sem carga concorrente em volume de produção, sem apps móveis compilados. Qualidade da busca provada apenas nas frases testadas.
-
----
-# TEST_REPORT — v0.12.0 (anterior)
+# TEST_REPORT — v0.12.0 (2026-10-05)
 
 **v0.12.0: 359 testes, 0 falhas, 0 ignorados** (290 herdados + **62** de domínio em `backend/tests/test_v0120_knowledge.py` + **7** E2E de navegador em `backend/tests/test_e2e_knowledge.py`). Log completo: `docs/evidence/test_run_v0.12.0.log` (`python3 -m unittest discover -s tests -t . -v`, PostgreSQL 16 real, servidor HTTP real, Chromium/Playwright). Lint: `ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.12.0.log`); `tsc --noEmit` e `compileall` limpos.
 

@@ -13,7 +13,7 @@
   --mata: #1e7a57; --mata-claro: #e3f3ec;
   --barro: #b3412e; --barro-claro: #fbe9e5;
   --ambar-claro: #fdf2dc; --ambar: #8a5a00;
-  --texto: #1b2433; --texto-2: #4a5568; --texto-3: #6b778a;
+  --texto: #1b2433; --texto-2: #4a5568; --texto-3: #657082;   /* AA 4.63:1 sobre --papel (era #6b778a, 4.19:1 — reprovava WCAG AA) */
   --linha: #dbe2eb; --linha-2: #e8edf3;
   --foco: #2563eb;
   --raio-s: 6px; --raio-m: 10px; --raio-l: 16px;

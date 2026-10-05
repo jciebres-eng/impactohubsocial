@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -37,7 +37,10 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "REPOSITORY_PROJECTS.md", "DATABASE_SCHEMA.md", "config/institutional_rules.candidates.json", "history/v0.9.0/VERSION",
             "KNOWLEDGE_HUB.md", "USER_GUIDES.md", "TRAINING_ACADEMY.md", "SUPPORT_SYSTEM.md", "PARTNERSHIP_SYSTEM.md", "TRIAL_SYSTEM.md", "CONTENT_GOVERNANCE.md",
             "KNOWLEDGE_DATA_MODEL.md", "STORE_READINESS.md", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/VERSION",
-            "config/help_synonyms.json", "config/onboarding_paths.json", "backend/migrations/0009_v0120_knowledge_hub.sql"]
+            "config/help_synonyms.json", "config/onboarding_paths.json", "backend/migrations/0009_v0120_knowledge_hub.sql",
+            "FINAL_TECHNICAL_BASELINE.md", "DESIGN_HANDOFF.md", "backend/migrations/0010_v0121_indexes.sql",
+            "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/VERSION",
+            "backend/tests/test_v0120_hardening.py", "backend/tests/test_e2e_baseline.py"]
 
 
 def sha256(p: Path) -> str:

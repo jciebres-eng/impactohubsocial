@@ -35,6 +35,3 @@ Conclusão: **mecanismos técnicos presentes; conformidade LGPD não declarada**
 | Central: chamados | YELLOW | só a pessoa e a equipe veem; anexos só documentos próprios | orientar a não enviar dados sensíveis (há aviso no formulário); prazo de guarda |
 | Central: e-mail de avisos | YELLOW | respeita preferências; sem e-mail para conta não verificada | SMTP/SPF/DKIM reais |
 | Certificados públicos | YELLOW | verificação pública expõe **nome do titular, curso, carga e data** (necessário à verificação) | confirmar base legal/aviso ao titular |
-
-| Erros da API não expõem dados de outras pessoas (v0.12.1) | GREEN (técnico) | violação de unicidade não devolve mais o valor conflitante (evita enumeração de e-mail) | — |
-| Desconto reservado exposto à própria organização (v0.12.1) | GREEN (técnico) | leitura em contexto de sistema **restrita ao `org_id` da sessão**; sem código/hash de voucher na resposta; teste de isolamento | — |

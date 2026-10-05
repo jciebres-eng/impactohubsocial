@@ -36,6 +36,9 @@ logger = logging.getLogger("impacto.http")
 
 _UUID = _re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 ROLE_ORDER = ["viewer", "member", "analyst", "manager", "admin", "owner"]
+# Texto interno do PostgreSQL (nomes de tabela/coluna/constraint). Mensagens AUTORADAS pelos gatilhos do projeto
+# também chegam como check_violation (RAISE ... ERRCODE 23514) e continuam visíveis: só o texto interno é generalizado.
+_PG_INTERNAL = _re.compile(r"violates (check|foreign key|not-null|exclusion|unique) constraint|null value in column|new row for relation|insert or update on table|duplicate key value", _re.I)
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
 
 
@@ -408,7 +411,13 @@ def make_endpoint(spec: RouteSpec, app_state):
             return problem(409, "conflict", "Registro duplicado", {"constraint": e.constraint})
         except (pq.CheckViolation, pq.ForeignKeyViolation, pq.NotNullViolation, pq.RaiseException) as e:
             status = 422
-            return problem(422, "integrity_error", str(e).split("\n")[0][:300])
+            msg = str(e).split("\n")[0][:300]
+            if _PG_INTERNAL.search(msg):     # nome de tabela/coluna/constraint não sai na resposta: fica no log com error_id
+                eid = uuid.uuid4().hex[:12]
+                log(logger, logging.WARNING, "integrity_error", error_id=eid, route=spec.path, constraint=getattr(e, "constraint", None),
+                    error=msg, user_id=ctx.principal.user_id if ctx.principal else None)
+                return problem(422, "integrity_error", "Dados inválidos para esta operação", None, error_id=eid)
+            return problem(422, "integrity_error", msg)
         except pq.InsufficientPrivilege as e:
             status = 403
             log(logger, logging.WARNING, "rls_denied", route=spec.path, error=str(e)[:300],

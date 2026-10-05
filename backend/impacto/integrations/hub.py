@@ -31,7 +31,8 @@ def adapter_for(provider_key: str):
 
 def load_connection(c, connection_id: str) -> dict:
     row = c.one("SELECT id::text AS id, org_id::text AS org_id, provider_key, name, environment, status, endpoint, external_system_id,"
-                " config, health_state, failure_streak, circuit_open_until FROM integration_connections WHERE id = $1", connection_id)
+                " config, health_state, health_detail, last_health_at, last_success_at, failure_streak, circuit_open_until,"
+                " metadata, created_at, updated_at FROM integration_connections WHERE id = $1", connection_id)
     if not row:
         raise IntegrationError("connection_not_found", "Conexão não encontrada", kind="permanent", status=404)
     return row

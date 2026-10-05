@@ -311,7 +311,13 @@ CREATE POLICY int_events_write ON integration_events FOR INSERT WITH CHECK (org_
 CREATE POLICY int_sub_rw ON integration_subscriptions FOR ALL USING (org_id = app_org() OR app_priv()) WITH CHECK (org_id = app_org() OR app_priv());
 CREATE POLICY int_deliv_read ON integration_deliveries FOR SELECT
   USING (app_priv() OR EXISTS (SELECT 1 FROM integration_subscriptions s WHERE s.id = subscription_id AND s.org_id = app_org()));
-CREATE POLICY int_deliv_write ON integration_deliveries FOR ALL USING (app_priv()) WITH CHECK (app_priv());
+-- a fila de entrega nasce na MESMA transação do fato (padrão outbox), então a organização pode INSERIR para as
+-- próprias assinaturas; o PROGRESSO da entrega (status/tentativas) é escrita privilegiada do trabalhador, para que
+-- ninguém possa declarar "entregue" por conta própria.
+CREATE POLICY int_deliv_insert ON integration_deliveries FOR INSERT
+  WITH CHECK (app_priv() OR EXISTS (SELECT 1 FROM integration_subscriptions s WHERE s.id = subscription_id AND s.org_id = app_org()));
+CREATE POLICY int_deliv_update ON integration_deliveries FOR UPDATE USING (app_priv()) WITH CHECK (app_priv());
+CREATE POLICY int_deliv_delete ON integration_deliveries FOR DELETE USING (app_priv());
 CREATE POLICY int_inbound_read ON integration_inbound FOR SELECT
   USING (app_priv() OR EXISTS (SELECT 1 FROM integration_connections c WHERE c.id = connection_id AND c.org_id = app_org()));
 CREATE POLICY int_inbound_write ON integration_inbound FOR ALL USING (app_priv()) WITH CHECK (app_priv());
@@ -323,6 +329,9 @@ CREATE POLICY int_export_rw ON integration_exports FOR ALL USING (org_id = app_o
 
 -- ------------------------------------------------------------------------------------------------ privilégios
 GRANT SELECT ON integration_providers TO impacto_app;
+-- a administração promove/rebaixa a maturidade pela API (com evidência registrada em auditoria); o gatilho acima
+-- garante que só contexto privilegiado escreve. Nenhuma outra coluna do catálogo é alterável pela aplicação.
+GRANT UPDATE (maturity, updated_at) ON integration_providers TO impacto_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON integration_connections, integration_mappings, external_entity_links, integration_jobs,
   integration_events, integration_deliveries, integration_inbound, integration_imports,
   integration_import_rows, integration_exports TO impacto_app;

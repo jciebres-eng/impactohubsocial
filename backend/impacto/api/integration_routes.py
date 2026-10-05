@@ -78,7 +78,7 @@ def connection_create(ctx: Ctx, body: I.ConnectionIn):
         raise ApiError(422, "no_adapter", "Este provedor está no catálogo mas ainda não tem adapter executável (SCAFFOLDED)")
     if body.endpoint:
         try:
-            assert_allowed_endpoint(body.endpoint)
+            assert_allowed_endpoint(body.endpoint, allow_loopback=not ctx.settings.is_hardened)
         except IntegrationError as exc:
             raise _problem(exc) from None
     problems = ADAPTERS[body.provider_key]().validate_config({"endpoint": body.endpoint, "config": body.config, "environment": body.environment})
@@ -105,7 +105,7 @@ def connection_get(ctx: Ctx):
 def connection_patch(ctx: Ctx, body: I.ConnectionPatchIn):
     if body.endpoint:
         try:
-            assert_allowed_endpoint(body.endpoint)
+            assert_allowed_endpoint(body.endpoint, allow_loopback=not ctx.settings.is_hardened)
         except IntegrationError as exc:
             raise _problem(exc) from None
     with ctx.tx() as c:
@@ -232,7 +232,7 @@ def job_get(ctx: Ctx):
                     " FROM integration_jobs WHERE id = $1 AND org_id = $2", ctx.path["id"], ctx.org_id)
         if not row:
             raise not_found("Job")
-        row["audit_trail"] = c.query("SELECT action, payload, created_at FROM audit_events WHERE object_type = 'integration_job' AND object_id = $1 ORDER BY created_at",
+        row["audit_trail"] = c.query("SELECT action, payload, at FROM audit_events WHERE object_type = 'integration_job' AND object_id = $1 ORDER BY at",
                                      ctx.path["id"])
         return row
 

@@ -11,7 +11,7 @@ import random
 import time
 from datetime import UTC, datetime, timedelta
 
-from ..adapters.http_client import HttpClient, check_destination
+from ..adapters.http_client import HttpClient
 from ..observability import log
 from .contracts import IntegrationError
 
@@ -108,11 +108,30 @@ class ResilientCaller:
             connection_id=str(self.connection.get("id")), **entry)
 
 
-def assert_allowed_endpoint(url: str) -> None:
-    """Valida o destino antes de gravar a conexão (falha cedo, com mensagem clara)."""
+def assert_allowed_endpoint(url: str, *, allow_loopback: bool = False) -> None:
+    """Valida a FORMA do endereço ao gravar a conexão: esquema e, quando o host é um IP literal, faixa permitida.
+
+    NÃO resolve DNS aqui de propósito: a organização pode configurar um host que ainda não resolve (DNS interno, host a
+    ser provisionado) e uma falha de DNS não deve impedir a configuração. A guarda de SSRF autoritativa roda na HORA DA
+    CHAMADA (`check_destination` dentro do HttpClient), que resolve o nome e recusa rede interna/metadados.
+
+    `allow_loopback` existe só para apontar uma CONEXÃO a um dublê local em desenvolvimento. Destino de webhook de
+    saída (URL fornecida pelo cliente) nunca permite loopback nem rede privada, em nenhum ambiente.
+    """
+    import ipaddress
+    import urllib.parse
+    u = urllib.parse.urlsplit(url or "")
+    host = u.hostname or ""
+    dev = allow_loopback      # só quem chama decide: endpoint de ERP local em desenvolvimento, sim; webhook do cliente, nunca
+    if not host:
+        raise IntegrationError("endpoint_invalid", "Endereço sem host", kind="permanent")
+    if u.scheme != "https" and not (dev and u.scheme == "http" and host in ("127.0.0.1", "localhost")):
+        raise IntegrationError("destination_blocked", "Somente HTTPS é permitido para provedores externos", kind="permanent")
     try:
-        check_destination(url)
-    except ValueError as exc:
-        raise IntegrationError("destination_blocked", str(exc), kind="permanent") from exc
-    except OSError as exc:
-        raise IntegrationError("dns", f"Não foi possível resolver o endereço: {exc}", kind="temporary") from exc
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return                     # nome de domínio: a verificação real acontece na chamada
+    if ip.is_loopback and dev:
+        return
+    if (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified):
+        raise IntegrationError("destination_blocked", "Destino de rede interna não permitido", kind="permanent")

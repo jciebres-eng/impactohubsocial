@@ -154,10 +154,19 @@ def _parse_xlsx(raw: bytes) -> list[dict]:
 
 
 # ------------------------------------------------------------------------------------------------ pipeline de importação
+# Formatos aceitos por UPLOAD: a lista é limitada pela allowlist do cofre de documentos (que valida assinatura binária).
+# JSON e XML continuam suportados pelo interpretador (respostas de conexão REST/SOAP), mas NÃO por upload — enfraquecer a
+# allowlist do cofre para aceitar texto sem assinatura seria perder um controle de segurança já existente.
+UPLOAD_FORMATS = ("csv", "xlsx")
+
+
 def create_import(app, c, *, org_id: str, user_id: str, entity: str, fmt: str, document_id: str, connection_id: str | None) -> dict:
     """UPLOAD já aconteceu no cofre. Aqui: VALIDATE (documento da própria organização, limpo) → PARSE → MAP → PREVIEW."""
     if entity not in ENTITIES:
         raise ApiError(422, "entity_invalid", "Entidade inválida")
+    if fmt not in UPLOAD_FORMATS:
+        raise ApiError(422, "format_not_uploadable",
+                       f"Importação por arquivo aceita {', '.join(UPLOAD_FORMATS)}. JSON e XML são lidos por conexão (REST/SOAP), não por upload.")
     d = c.one("SELECT id::text AS id, filename, sha256, storage_key, status, mime_type, size_bytes FROM documents"
               " WHERE id = $1 AND org_id = $2 AND deleted_at IS NULL", document_id, org_id)
     if not d:

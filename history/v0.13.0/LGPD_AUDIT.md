@@ -1,4 +1,4 @@
-# LGPD_AUDIT — v0.14.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.13.0 (técnico; não é parecer jurídico)
 
 | Requisito | Estado | Evidência | Pendência |
 |---|---|---|---|
@@ -52,17 +52,3 @@ Conclusão: **mecanismos técnicos presentes; conformidade LGPD não declarada**
 | Retenção | **YELLOW** | entregas concluídas apagadas em 180 dias; dead-letter preservado | jobs, eventos e entradas **sem prazo definido** — decisão jurídica |
 | Transferência internacional | **YELLOW** | depende do provedor que a organização conectar | cláusulas por provedor quando houver conexão real |
 | Eliminação | GREEN | apagar correspondência não apaga dado do núcleo; exclusão de conta segue o fluxo de privacidade existente | — |
-
-## Camada de confiança (v0.14.0)
-| Requisito | Estado | Evidência | Pendência |
-|---|---|---|---|
-| Minimização na identificação | GREEN | guarda-se a **referência** ao documento no cofre e o resultado da conferência; **nunca** número de documento, imagem extraída ou vetor biométrico (ADR 106) | — |
-| Minimização na página pública | GREEN | payload curado na criação do registro; nome de pessoa só em assinatura profissional com credencial verificada; teste prova ausência de e-mail, identificador e nome nos outros papéis | revisão do DPO sobre o nome profissional exposto |
-| Biometria | GREEN (por ausência) | não implementada; nenhum dado biométrico é armazenado nem processado | se vier provedor, exige base legal própria e avaliação de impacto |
-| Finalidade da verificação pública | GREEN | a organização decide publicar o código; o terceiro vê apenas o necessário para conferir autenticidade | — |
-| Localização de organização/profissional | GREEN | só é pública com **consentimento registrado com data** (CHECK no banco) e com precisão declarada | orientar a usar precisão por cidade quando o endereço é residencial |
-| Rastreabilidade | GREEN | cadeia de custódia por objeto + `audit_events`, sem segredo e sem conteúdo do documento | — |
-| Retenção | **YELLOW** | `trust_events`, `verifiable_records`, `signature_challenges` e `identity_documents` **sem expurgo automático** | **VALIDAÇÃO JURÍDICA NECESSÁRIA**: prazo por tipo. Atenção: cadeia de custódia e assinatura têm valor probatório — apagar pode ser pior que guardar |
-| Eliminação a pedido | **YELLOW** | a exclusão de conta anonimiza o usuário; a assinatura e a cadeia **permanecem** (são prova de um ato) | definir com o jurídico o que é anonimizável sem destruir a prova |
-| Dado de terceiro em documento enviado | **YELLOW** | o cofre não inspeciona conteúdo; um documento de identidade contém dado sensível de quem o enviou | orientação ao usuário + prazo de descarte do documento após a conferência |
-| Compartilhamento | GREEN | a verificação pública não compartilha com terceiro definido: é consulta iniciada por quem tem o código | — |

@@ -1,47 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.14.0] — 2026-10-05 — Trust, Identity & Digital Signature (cumulativo; snapshot do v0.13.0 em `history/v0.13.0/`)
-### Adicionado
-- **Verificação pública por terceiro** (`GET /v1/public/verify/{code}`, sem login): responde se o documento é genuíno, **qual versão foi assinada**, se a integridade permanece (hash declarado × arquivo recontado agora), quem assinou, carimbos e se está revogado. A página pública lê **somente** um registro público curado — nunca tabela privada. Código legível `IMP-XXXX-XXXX-XXXX` tolerante a digitação errada e **QR Code** gerado pela própria plataforma.
-- **Assinatura eletrônica avançada em DUAS camadas**: senha + código de uso único enviado por e-mail e **amarrado ao hash exato do conteúdo** (se o documento muda, o código morre). A assinatura passou a guardar qual código foi queimado e **qual era o nível de identidade** da pessoa naquele momento.
-- **Revogação sem apagar nada**: `signature_revocations` (append-only) e revogação do registro público com motivo e data visíveis na página pública.
-- **Cadeia de custódia por objeto** (`trust_events`): cada fato (criação, versão, assinatura, carimbo, consulta pública, conferência de integridade, revogação) encadeado por hash em gatilho SECURITY DEFINER, append-only, com função de verificação que aponta o `seq` exato da quebra.
-- **Identidade por níveis** (`none→email→phone→document→professional→biometric`) com envio de documento ao cofre e **decisão humana** registrada; ninguém promove a própria identidade (coluna guardada no banco). Biometria, prova de vida e SMS **recusam explicitamente** (dependência externa) em vez de simular.
-- **Credencial profissional**: catálogo de 20 conselhos, fluxo documental com histórico append-only, revogação, e elevação automática da identidade ao aprovar. "Verificada" significa **documento conferido pela equipe** — a plataforma não consulta conselho on-line, e diz isso na própria resposta.
-- **Acordos multiassinatura** (`signed_agreements`): hash congelado ao publicar, cada parte assina com as duas camadas, vira vigente só quando **todas** as obrigatórias assinaram, recusa cancela com motivo, e entregas dão o acompanhamento longitudinal.
-- **Carimbo de tempo interno** (selo HMAC do servidor, conferível); RFC 3161 recusa com `501 tsa_not_configured`.
-- **Taxonomia ODS/ESG/determinantes sociais**: 17 ODS com código, nome e cor oficial (os **emblemas da ONU não acompanham** a plataforma — marca protegida), 3 pilares ESG, 11 determinantes sociais, e marcadores aplicáveis a projeto, solução, diagnóstico, necessidade, edital, organização e acordo, com integridade garantida por gatilho.
-- **Idioma e tema**: 3 idiomas com **cobertura declarada por idioma** (pt-BR 100%, en/es núcleo), catálogo versionado em `config/i18n.json` com teste garantindo as mesmas chaves nos três; tema claro/escuro/sistema escolhido pela pessoa e aplicado antes do primeiro render.
-- **Financiamento em cotas e campanha pública**: cotas com valor definido pela organização, reserva que o banco impede de estourar (inclusive sob concorrência), confirmação de recebimento pela equipe e página pública com "faltam N cotas".
-- **Honorários por conselho**: publicar exige nome da fonte, URL e data de consulta (CHECK no banco). A tabela **nasce vazia** — a plataforma não estima honorário. Mais catálogo de atividades do profissional com preço próprio e margem de negociação, e busca por atividade com card completo.
-- **Georreferência de organização** com consentimento registrado: a localização só aparece publicamente depois do consentimento, e a precisão é declarada.
-- **Diagnóstico guiado em 8 etapas** (hipótese editorial declarada), com perguntas obrigatórias, documentos exigidos por etapa, progresso real e motivo registrado ao pular.
-- **Formatos de documento**: docx, xlsx, odt, ods e xml escritos à mão (sem biblioteca nova — registros bloqueados), PDF com QR de verificação, leitura de docx/odt, e exportação dos datasets nos 8 formatos.
-- `migrations/0012_v0140_trust_layer.sql`: 26 tabelas novas (191 no total), RLS em todas.
-- **+96 testes (564 no total)**: 88 de API/unidade e 8 de navegador.
-- Documentos: `TRUST_INVENTORY.md`, `TRUST_ARCHITECTURE.md`, `TRUST_IDENTITY.md`, `DIGITAL_SIGNATURE.md`, `PUBLIC_VERIFICATION.md`, `TRUST_SECURITY.md`, `TRUST_TESTING.md`, `SDG_ESG_TAXONOMY.md`, `I18N.md`, `DOCUMENT_FORMATS.md`, `FINAL_TRUST_HARDENING_REPORT.md`.
-### Alterado (mudança de contrato)
-- **`POST /v1/signatures` passou a exigir o campo `code`** (segunda camada). É mudança deliberada de contrato: assinar com senha apenas deixou de ser possível. O fluxo novo é `POST /v1/signatures/challenge` e depois `POST /v1/signatures`.
-- `POST /v1/integrations/exports` aceita 8 formatos (antes: csv e json).
-### Corrigido
-- **Gatilho de capacidade de cotas passava em silêncio**: `SELECT ... FOR UPDATE` aplica também a política de UPDATE, a cota desaparecia para quem apoia e os `NULL` resultantes anulavam todas as checagens — era possível reservar cota inexistente. Agora a função é SECURITY DEFINER (e soma **todas** as reservas) e tem checagem explícita de `NULL`.
-- **Payload da verificação pública só continha as assinaturas visíveis a quem pediu o código** — num acordo entre organizações diferentes, a página pública sairia incompleta. Passou a ser montado em contexto de sistema.
-- **Recursão infinita de política de RLS** entre acordos e partes (as duas tabelas se consultavam) — travessia movida para funções SECURITY DEFINER.
-- Unicidade global do endereço da campanha era checada sob RLS, então duas organizações conseguiam o mesmo endereço (o banco barrava com erro genérico).
-- Leitor de docx/odt não desfazia entidades XML (`&amp;` voltava literal).
-- Páginas novas do frontend passavam o erro cru para o `StateView`, que espera texto: a mensagem da API não aparecia.
-### Não feito / pendente (declarado)
-- **Assinatura qualificada ICP-Brasil e gov.br: NÃO IMPLEMENTADAS** (dependência externa + homologação). O enum aceita os valores desde a v0.7.0, mas nenhum código os produz.
-- **Biometria, prova de vida e SMS: NÃO IMPLEMENTADOS** (exigem provedor contratado). Nenhum dado biométrico é armazenado.
-- **Carimbo RFC 3161: NÃO IMPLEMENTADO** (exige ACT contratada).
-- **Consulta on-line a conselho profissional: não existe** — nenhum conselho expõe API pública contratada.
-- **Edição on-line de Office/LibreOffice: NÃO IMPLEMENTADA** (exige servidor WOPI — dependência externa).
-- **Emblemas oficiais da ONU não acompanham a plataforma** (marca protegida); as 169 metas dos ODS não foram incluídas.
-- Nenhum arquivo foi aberto no Office/LibreOffice e nenhum QR foi lido por leitor comercial neste ambiente.
-- `npm audit`/`pip-audit` continuam bloqueados pelo ambiente; pentest e teste de carga pendentes.
-- Expurgo de `trust_events` e `verifiable_records` sem prazo definido — **VALIDAÇÃO JURÍDICA NECESSÁRIA**.
-
 ## [0.13.0] — 2026-10-05 — Integration Hub (fundação) — cumulativo; snapshot do v0.12.1 em `history/v0.12.1/`
 ### Adicionado
 - **Camada de integração desacoplada** (`backend/impacto/integrations/`): contratos internos (`Environment`, `Capability`, `AuthKind`, `SyncStrategy`, `Maturity`, `CanonicalRecord`, `IntegrationError`, protocolo `IntegrationAdapter`), transporte resiliente (classificação temporário × permanente, espera crescente com variação, disjuntor por conexão), abstração de credencial cifrada, mapeamento de campos com 12 transformações declaradas (sem `eval`), correspondência de ID externo, caixa de saída de eventos de domínio, entrada de webhook deduplicada, jobs idempotentes e integração por arquivo (CSV/XLSX/JSON/XML). **O núcleo não importa nenhum fornecedor.**

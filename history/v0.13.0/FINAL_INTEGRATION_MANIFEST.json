@@ -1,0 +1,190 @@
+{
+  "version": "0.13.0",
+  "stage": "INTEGRATION HUB (foundation)",
+  "git_commit": "a90d7cbe26a6398f1d7b1711b69a6b4dfa2c00ae",
+  "git_branch": "chore/integration-hub-foundation",
+  "previous_baseline_tag": "v0.12.1-final-baseline",
+  "generated_at": "2026-10-05T18:24:48+00:00",
+  "build_status": "PASS",
+  "lint_status": "PASS",
+  "typecheck_status": "PASS",
+  "test_status": "PASS",
+  "e2e_status": "PASS",
+  "security_status": "PARTIAL",
+  "dependency_audit_status": "BLOCKED",
+  "database_status": "PASS",
+  "migration_status": "PASS",
+  "accessibility_status": "PARTIAL",
+  "zip_filename": "IMPACTO_INTEGRATION_BASELINE.zip",
+  "tests": {
+    "total": 468,
+    "passed": 468,
+    "failed": 0,
+    "skipped": 0,
+    "unit": 39,
+    "api_integration": 395,
+    "architecture": 6,
+    "e2e_browser": 28,
+    "new_in_this_stage": 76,
+    "evidence": "docs/evidence/test_run_v0.13.0.log",
+    "duration_seconds": 221.3,
+    "note": "Nenhum sistema externo real foi chamado: o transporte HTTP e substituido por duble (FakeTransport)."
+  },
+  "api": {
+    "operations": 511,
+    "new_in_this_stage": 36,
+    "spec": "docs/openapi.json",
+    "parity_checked": true
+  },
+  "database": {
+    "tables": 165,
+    "new_in_this_stage": 13,
+    "migrations": 11,
+    "rls_on_all_tables_except": [
+      "schema_migrations"
+    ],
+    "created_from_scratch_each_test_run": true,
+    "incremental_migration_verified": true,
+    "secret_column_readable_by_app_role": false
+  },
+  "integration": {
+    "providers_declared": 9,
+    "adapters": [
+      "generic_rest",
+      "generic_webhook",
+      "senior_sapiens",
+      "totvs",
+      "government_api",
+      "bi_export",
+      "file_batch"
+    ],
+    "maturity": {
+      "scaffolded": [
+        "government_api",
+        "sftp_batch"
+      ],
+      "contract_tested": [
+        "generic_rest",
+        "generic_webhook",
+        "senior_sapiens",
+        "totvs",
+        "stripe_billing",
+        "bi_export",
+        "file_batch"
+      ],
+      "sandbox_validated": [],
+      "homologated": [],
+      "production_active": []
+    },
+    "channels": {
+      "rest": "IMPLEMENTED",
+      "webhook_in": "IMPLEMENTED",
+      "webhook_out": "IMPLEMENTED",
+      "domain_events": "IMPLEMENTED",
+      "file_csv_xlsx": "IMPLEMENTED",
+      "file_json_xml": "IMPLEMENTED (via conexao REST/SOAP; upload recusado com 422)",
+      "soap_xml": "IMPLEMENTED",
+      "sftp": "NOT IMPLEMENTED"
+    },
+    "event_catalog": 26,
+    "executed_against_real_external_system": false,
+    "homologated_providers": 0,
+    "ui_screens": 0,
+    "idempotency_enforced_by": "UNIQUE constraints (jobs, inbound, deliveries, imports)",
+    "resilience": {
+      "error_classification": "temporary|permanent",
+      "backoff": "exponential with jitter",
+      "circuit_breaker": "5 consecutive failures / 300s",
+      "dead_letter_after_attempts": 6,
+      "replay": "dead-letter only, own org"
+    }
+  },
+  "security": {
+    "proven_by_test": [
+      "ssrf",
+      "xxe",
+      "xml_bomb",
+      "soap_injection",
+      "webhook_spoofing",
+      "replay",
+      "credential_leakage",
+      "idor_cross_tenant",
+      "privilege_escalation",
+      "malicious_file",
+      "formula_injection",
+      "external_dos"
+    ],
+    "by_inspection_only": [
+      "log_injection",
+      "path_traversal",
+      "insecure_deserialization"
+    ],
+    "residual_risks": [
+      "dns_rebinding"
+    ],
+    "not_performed": [
+      "pentest",
+      "dependency_audit",
+      "load_test"
+    ]
+  },
+  "commands": {
+    "test": "cd backend && TEST_ADMIN_DATABASE_URL=\"postgresql://postgres@127.0.0.1:5432/postgres\" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v",
+    "lint": "cd backend && ruff check impacto tests",
+    "typecheck": "cd web && node node_modules/typescript/bin/tsc -p tsconfig.offline.json --noEmit",
+    "build": "cd web && node build.mjs",
+    "release": "python3 scripts/make_release.py --name IMPACTO_INTEGRATION_BASELINE.zip",
+    "verify_release": "python3 scripts/make_release.py --verify <dir>"
+  },
+  "blocked": {
+    "dependency_audit": {
+      "npm": "npm install --package-lock-only --ignore-scripts -> 403 Forbidden (registry.npmjs.org)",
+      "pip": "pip install pip-audit -> No matching distribution found (PyPI bloqueado)",
+      "impact": "nenhuma afirmacao sobre vulnerabilidades de dependencias; executar em CI",
+      "required_in_ci": [
+        "npm audit --omit=dev",
+        "pip-audit -r backend/requirements.txt"
+      ]
+    },
+    "external": [
+      "credenciais de sandbox dos ERPs",
+      "contrato de WebService Senior",
+      "definicao do produto TOTVS do cliente",
+      "credenciamento Gov.br/Conecta",
+      "Stripe real e precos",
+      "SMTP real",
+      "host SFTP",
+      "egress controlado",
+      "decisao juridica sobre retencao e base legal",
+      "pentest",
+      "teste de carga"
+    ]
+  },
+  "classification": {
+    "TECHNICAL_BASELINE": "GREEN",
+    "INTEGRATION_FOUNDATION": "GREEN",
+    "SECURITY": "GREEN (2 YELLOW declarados; pentest pendente)",
+    "TESTS": "GREEN",
+    "DESIGN_READINESS": "GREEN",
+    "REAL_EXTERNAL_INTEGRATION": "YELLOW (HOMOLOGACAO NECESSARIA)",
+    "GOVERNMENT_INTEGRATION": "RED (AUTORIZACAO EXTERNA NECESSARIA)",
+    "SFTP": "RED (NAO IMPLEMENTADO)",
+    "INTEGRATION_UI": "RED (nao existe)",
+    "PRODUCTION_READINESS": "YELLOW (piloto controlado)",
+    "STORE_READINESS": "RED (apps nao construidos)"
+  },
+  "documents": [
+    "INTEGRATION_INVENTORY.md",
+    "INTEGRATION_ARCHITECTURE.md",
+    "INTEGRATION_HUB.md",
+    "INTEGRATION_SECURITY.md",
+    "INTEGRATION_OPERATIONS.md",
+    "INTEGRATION_TESTING.md",
+    "INTEGRATION_PROVIDER_GUIDE.md",
+    "INTEGRATION_CAPABILITY_MATRIX.md",
+    "FINAL_INTEGRATION_HARDENING_REPORT.md",
+    "DESIGN_HANDOFF.md"
+  ],
+  "note": "git_commit identifica o commit do CONTEUDO. O commit seguinte adiciona apenas artefatos de release (este manifesto e RELEASE_MANIFEST.sha256/csv).",
+  "zip_note": "O digest do pacote fica em dist-release/IMPACTO_INTEGRATION_BASELINE.zip.sha256. A integridade do CONTEUDO e verificavel por RELEASE_MANIFEST.sha256 com 'python3 scripts/make_release.py --verify <dir>'."
+}

@@ -1,21 +1,20 @@
 # DESIGN_HANDOFF — o que a próxima etapa (UI/UX) recebe
 
-**Versão da baseline:** 0.14.0 · **Branch:** `chore/trust-identity-signature` · **Documentos técnicos:** `FINAL_TECHNICAL_BASELINE.md` (base v0.12.1) + `FINAL_INTEGRATION_HARDENING_REPORT.md` (integração) + `FINAL_TRUST_HARDENING_REPORT.md` (confiança, identidade e assinatura).
+**Versão da baseline:** 0.13.0 · **Branch:** `chore/integration-hub-foundation` · **Documento técnico completo:** `FINAL_TECHNICAL_BASELINE.md` (base v0.12.1) + `FINAL_INTEGRATION_HARDENING_REPORT.md` (camada de integração).
 
 A camada funcional está fechada e testada. Esta etapa é de **design**: identidade visual, sistema de design, componentes, layout, onboarding visual, dashboards, UI web e mobile. **Não é necessário reimplementar backend, banco, autenticação, permissões ou cobrança** — e, se algo parecer faltando, confira primeiro a seção “Pendências que NÃO são bugs”.
 
 ## 1. O que está pronto (e provado por teste)
 | Camada | Estado | Onde está |
 |---|---|---|
-| API REST `/v1` | 574 operações, contrato estável, OpenAPI gerado do código | `docs/API.md`, `docs/openapi.json`, `GET /v1/openapi.json` |
-| Banco | PostgreSQL 16, 191 tabelas, RLS em todas (exceto `schema_migrations`), 12 migrations forward-only | `KNOWLEDGE_DATA_MODEL.md`, `docs/DATABASE.md` |
+| API REST `/v1` | 511 operações, contrato estável, OpenAPI gerado do código | `docs/API.md`, `docs/openapi.json`, `GET /v1/openapi.json` |
+| Banco | PostgreSQL 16, 165 tabelas, RLS em todas (exceto `schema_migrations`), 11 migrations forward-only | `KNOWLEDGE_DATA_MODEL.md`, `docs/DATABASE.md` |
 | Autenticação | sessão por cookie httpOnly (web) **ou** Bearer (app nativo), refresh rotativo, MFA TOTP, OIDC opcional | `src/api.ts`, `src/session.tsx` |
 | Autorização | por rota: `auth` (none/user/org/admin), tipo de organização, papel mínimo, papéis internos, entitlements | `backend/impacto/http.py` |
 | Multi-tenant | isolamento por RLS no banco, provado inclusive por SQL direto | `tests/test_security_tenancy.py` |
 | Cobrança/trial/vouchers | trial de 14 dias, tiers, vouchers, convênios, licenças, webhooks idempotentes (Stripe **dublê**) | `docs/billing.md` |
 | Central de Conhecimento | busca, guias, biblioteca, FAQ, assistente ancorado, academia, eventos, suporte com SLA, parcerias, CMS editorial | `KNOWLEDGE_HUB.md` |
 | Integração (hub) | 13 tabelas, 36 rotas, 9 provedores, webhooks (entrada e saída), importação/exportação, jobs com repetição e disjuntor — **sem tela** | `INTEGRATION_HUB.md` |
-| Confiança/identidade/assinatura | verificação pública, assinatura em duas camadas, custódia, identidade, credenciais, acordos, cotas, taxonomia, idioma e tema — **com telas básicas já implementadas** | `TRUST_ARCHITECTURE.md` |
 | Frontend atual | React 19 + TypeScript, roteador próprio, PWA, build esbuild (180 KB gzip), 0 erros de console em 25 páginas/viewports | `web/src` |
 | Acessibilidade base | rótulos, foco visível, `lang`, sem IDs duplicados, sem salto de cabeçalho, contraste **AA** em tema claro e escuro | `tests/test_e2e_knowledge.py` |
 
@@ -133,73 +132,3 @@ Provedor · Conexão (organização × provedor × ambiente) · Credencial (só 
 
 ### 11.5 O que NÃO desenhar como pronto
 SFTP (não implementado), SAML/LDAP, WhatsApp/SMS/push, integração oficial Gov.br/Conecta (exige credenciamento), qualquer provedor como “homologado”. Nenhuma integração foi executada contra sistema externo real — só contra dublê.
-
----
-
-## 12. Camada de confiança (v0.14.0) — telas **existem**, mas são funcionais, não desenhadas
-Diferente da camada de integração (§11, que continua **sem nenhuma tela**), a camada de confiança já tem interface
-funcional construída com o kit atual, sem redesign, sem animação e sem token de cor novo. O que o designer recebe aqui é
-**fluxo validado e invariantes travados por teste** — o trabalho é de linguagem visual, hierarquia e ritmo, não de
-descobrir o que a tela precisa fazer.
-
-### 12.1 Telas implementadas
-| Rota | O que é | Observação para o design |
-|---|---|---|
-| `/verificar` e `/verificar/:code` | **página pública** de verificação (sem login) | é a tela mais exposta do produto: um terceiro que não conhece a marca vai cair direto nela. Merece o maior cuidado. |
-| `/campanha/:slug` | campanha pública com "faltam N cotas" | idem: página de entrada para doador/apoiador |
-| `/identidade` | nível de identidade, pedidos e documentos | |
-| `/verificacoes` | códigos públicos da organização, com contador de consultas e revogação | |
-| `/acordos`, `/acordos/novo`, `/acordos/:id` | acordos multiassinatura com partes, assinatura e entregas | |
-| `/cotas`, `/cotas/:id/apoios`, `/campanha-gestao` | cotas e campanha | |
-| `/minhas-atividades` | catálogo do profissional | |
-| `/conta/preferencias` | idioma e tema | |
-| `/admin/identidade`, `/admin/credenciais-profissionais`, `/admin/honorarios` | filas da equipe | |
-| `/diagnosticos/:id/roteiro` | diagnóstico guiado em 8 etapas | |
-| Componentes | `SignBox` (assinatura em duas camadas), `ImpactTags` (ODS/ESG/determinantes), `QuotaProgress` | reutilizáveis |
-
-### 12.2 Estados a desenhar (listas fechadas)
-- **Registro público:** `active` · `superseded` (existe versão mais nova) · `revoked` · `expired`.
-- **Integridade:** intacta · hash diferente do registrado · **arquivo guardado não confere** (três mensagens diferentes).
-- **Identidade:** `none` · `email` · `phone` · `document` · `professional` · `biometric`; pedido em `pending` ·
-  `under_review` · `verified` · `rejected` · `expired` · `revoked`.
-- **Credencial:** `self_declared` · `document_submitted` · `verified` · `rejected` · `expired`.
-- **Acordo:** `draft` · `awaiting_signatures` · `active` · `completed` · `canceled` · `expired`; parte: pendente ·
-  assinou · recusou.
-- **Cota:** `draft` · `open` · `paused` · `closed`; apoio: `pledged` · `confirmed` · `canceled` · `refunded`.
-- **Campanha:** `draft` · `published` · `closed`. **Etapa do diagnóstico:** `pending` · `in_progress` · `complete` · `skipped`.
-- **Tema:** `system` · `light` · `dark`. **Idioma:** `pt-BR` (100%) · `en` e `es` (núcleo).
-
-### 12.3 Invariantes que o design NÃO pode suavizar
-1. **A página pública não ganha dado pessoal.** Nome de pessoa aparece só em assinatura profissional com credencial
-   verificada. Há teste que falha se e-mail, identificador ou nome de representante aparecerem no corpo.
-2. **"Credencial verificada" = documento conferido pela equipe.** A frase "a plataforma não consulta o conselho
-   profissional on-line" precisa continuar visível. Não trocar por um selo verde sozinho.
-3. **"Não é assinatura qualificada".** Toda tela de assinatura diz isso. Pode ser restilizado, nunca removido.
-4. **Biometria, SMS e carimbo de ACT recusam.** As mensagens explicam a dependência externa — são informação, não erro
-   feio para esconder.
-5. **Revogado é revogado.** Estado visualmente inequívoco, com motivo e data. Nunca um aviso discreto.
-6. **Versão assinada × versão atual.** Quando divergem, a tela precisa dizer que existe versão mais nova — é a diferença
-   entre conferir o documento certo e o errado.
-7. **"A plataforma não estima honorário"** e **"o valor da cota é definido pela organização"**: nada de sugestão de preço.
-8. **Marcadores ODS usam a cor oficial, nunca o emblema da ONU** (marca protegida — ver `SDG_ESG_TAXONOMY.md`).
-9. **Consentimento de localização** é explícito e datado; a precisão (exata/aproximada/cidade) precisa estar visível.
-10. **Etapas do diagnóstico são hipótese editorial** — o aviso fica.
-
-### 12.4 Onde o design agrega mais
-- **Página pública de verificação**: hoje é uma lista de painéis. Merece um veredito visual imediato (genuíno/revogado/
-  integridade) antes de qualquer detalhe, e uma versão de impressão.
-- **Assinatura em duas camadas**: hoje é um modal com dois passos. É o momento mais tenso do produto e ganha muito com
-  ritmo e microcopy.
-- **QR e código no PDF**: o layout atual é funcional; o documento impresso é peça de comunicação.
-- **Filas da equipe** (identidade, credenciais): trabalho repetitivo que pede densidade e atalhos.
-- **Campanha pública**: é peça de captação — hoje é honesta e sem graça.
-
-### 12.5 Pedido do proprietário registrado para esta etapa
-O proprietário pediu, para a etapa de design: **menus suspensos retráteis selecionáveis horizontais** e **uma grande área
-de trabalho em vez de menus laterais**. Isso **não foi implementado de propósito** — é reestruturação de navegação, ou
-seja, design, e esta etapa era de engenharia (o próprio escopo dizia "não faça redesign"). A navegação atual
-(`NAV` em `web/src/app.tsx`, por tipo de organização) está pronta para ser reorganizada: as rotas são independentes do
-menu, então mudar a estrutura de navegação não exige tocar em página nenhuma.
-Observação técnica para quem for fazer: a lista de itens por perfil já passou de 15 em alguns casos (OSC tem 20), o que
-é um argumento real a favor do agrupamento horizontal com submenus.
-

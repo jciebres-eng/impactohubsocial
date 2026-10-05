@@ -1,4 +1,4 @@
-# SECURITY_AUDIT — v0.14.0 (2026-10-05)
+# SECURITY_AUDIT — v0.13.0 (2026-10-05)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
@@ -149,29 +149,3 @@ Revisão completa, vetor a vetor, com o que é **PROVADO por teste** e o que é 
 | DNS rebinding (resolução e conexão são passos separados) | **YELLOW** — risco residual declarado; mitigar no egress da infraestrutura |
 | Auditoria de dependências | **RED** — registries npm/PyPI bloqueados neste ambiente; obrigatória em CI |
 | Pentest da camada de integração | **RED** — não executado |
-
-## Camada de confiança (v0.14.0)
-Revisão vetor a vetor, com o que é provado por teste e o que é por inspeção: `TRUST_SECURITY.md`. Resumo:
-
-| Controle | Estado |
-|---|---|
-| Autopromoção de identidade e de credencial bloqueada no banco (coluna guardada) | **GREEN** |
-| Assinatura em duas camadas; código de uso único amarrado ao hash; 4 usos simultâneos ⇒ 1 assinatura | **GREEN** |
-| Cadeia de custódia irreescrevível pela aplicação e pelo contexto de sistema; adulteração detectada | **GREEN** |
-| Integridade do arquivo recontada na verificação pública e no endpoint próprio | **GREEN** |
-| Página pública sem dado pessoal (payload curado na criação, não filtrado na saída) | **GREEN** |
-| Falsificação de assinatura de outra parte; hash do acordo congelado | **GREEN** |
-| Supervenda de cotas, inclusive sob concorrência | **GREEN** (bug real corrigido — ver abaixo) |
-| Publicação de honorário sem fonte | **GREEN** |
-| IDOR entre organizações nas 26 tabelas novas | **GREEN** |
-| Injeção em XML/OOXML/ODF gerado e injeção de fórmula em planilha | **GREEN** |
-| Enumeração de código público (~60 bits + limite por IP) | **GREEN** |
-| Injeção em log e leitura de docx/odt enviado | **YELLOW** — por inspeção, sem teste dedicado |
-| Rotação da chave do servidor invalida selos antigos | **YELLOW** — **DEPENDÊNCIA DE INFRAESTRUTURA** (gerenciador de segredos + versionamento de chave) |
-| Pentest da camada | **RED** — não executado |
-| Auditoria de dependências | **RED** — registros npm/PyPI bloqueados; obrigatória em CI |
-
-**Bug de segurança encontrado e corrigido:** o gatilho que impede vender mais cotas do que existem passava em silêncio,
-porque `SELECT ... FOR UPDATE` aplica também a política de UPDATE da tabela travada — a cota desaparecia para quem apoia
-e os `NULL` resultantes anulavam todas as comparações. Correção: função SECURITY DEFINER com checagem explícita de `NULL`.
-Lição generalizada em ADR 103: **guarda de integridade não pode depender de visibilidade por RLS.**

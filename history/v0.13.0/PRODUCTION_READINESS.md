@@ -1,4 +1,4 @@
-# PRODUCTION_READINESS — v0.14.0
+# PRODUCTION_READINESS — v0.13.0
 
 **Veredito: PRONTO PARA HOMOLOGAÇÃO / PILOTO CONTROLADO. NÃO pronto para produção aberta.**
 O que falta é majoritariamente externo (contas, provedores, jurídico, tributário) e de validação operacional (carga, pentest, build de contêiner/apps).
@@ -6,7 +6,7 @@ O que falta é majoritariamente externo (contas, provedores, jurídico, tributá
 ## Semáforo por área
 | Área | Status | Evidência | Pendência para produção |
 |---|---|---|---|
-| Backend/API | GREEN | 574 operações; suíte verde (564 testes) | — |
+| Backend/API | GREEN | 511 operações; suíte verde (468 testes) | — |
 | Banco/migrações/RLS | GREEN | testes RLS (API e SQL direto), restore verificado | PostgreSQL gerenciado, PITR, criptografia em repouso |
 | Autenticação/sessões/MFA | GREEN | testes | WebAuthn opcional; política de senha corporativa |
 | SSO OIDC | YELLOW | IdP falso | testar com IdP real (Google/Entra/Keycloak) |
@@ -90,24 +90,3 @@ Não declarar "solução comprovada" sem nível `evidenced/verified` concedido p
 | Retenção de jobs/eventos | **YELLOW** | só entregas têm expurgo (180 dias) | **VALIDAÇÃO JURÍDICA NECESSÁRIA** |
 | Interface das integrações | **RED** | nenhuma tela | etapa de design (`DESIGN_HANDOFF.md` §11) |
 | Carga/volume real | **RED** | não testado | teste de carga antes do piloto com parceiro |
-
-## Camada de confiança (v0.14.0)
-| Área | Status | Evidência | Pendência para produção |
-|---|---|---|---|
-| Verificação pública por terceiro | GREEN | 10 testes de API + 3 de navegador; sem dado pessoal | — |
-| Assinatura avançada em duas camadas | GREEN | 7 testes + concorrência | — |
-| Cadeia de custódia e integridade | GREEN | 4 testes, incluindo detecção de adulteração | — |
-| Identidade por níveis (documento) | GREEN | conferência humana testada | treinar a equipe que vai conferir |
-| Credencial profissional | GREEN | fluxo documental testado | definir com o proprietário quem confere |
-| Acordos multiassinatura | GREEN | 8 testes | modelo de minuta é do cliente |
-| Taxonomia, idioma, tema, cotas, honorários, geo, diagnóstico guiado | GREEN | 28 testes | conteúdo e tabelas de fonte a cadastrar |
-| Formatos docx/xlsx/odt/ods/xml/pdf | **YELLOW** | ZIP reaberto e XML conferido | **abrir amostra no Office e no LibreOffice** (não existem neste ambiente) |
-| QR Code | **YELLOW** | ida e volta no próprio pipeline | **ler com leitor comercial** antes de imprimir em escala |
-| Assinatura qualificada (ICP-Brasil/gov.br) | **RED** | não implementada | **AUTORIZAÇÃO EXTERNA + HOMOLOGAÇÃO** |
-| Biometria e prova de vida | **RED** | não implementadas (recusam) | provedor contratado |
-| Carimbo de tempo de ACT (RFC 3161) | **RED** | não implementado (recusa) | ACT contratada |
-| SMS como segunda camada | **RED** | não implementado | provedor de SMS |
-| Edição on-line de Office/LibreOffice | **RED** | não implementada | **servidor WOPI** (Collabora/OnlyOffice/M365) |
-| Rotação da chave do servidor | **YELLOW** | selos antigos deixam de conferir se a chave mudar | gerenciador de segredos + versionamento de chave |
-| Retenção de custódia e identidade | **YELLOW** | sem expurgo automático | **VALIDAÇÃO JURÍDICA NECESSÁRIA** (apagar prova pode ser pior que guardar) |
-| Pentest e carga | **RED** | não executados | antes do piloto aberto |

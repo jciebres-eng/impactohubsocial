@@ -1,31 +1,17 @@
-# TEST_REPORT — v0.14.0 (Trust, Identity & Digital Signature, 2026-10-05)
+# TEST_REPORT — v0.13.0 (Integration Hub, 2026-10-05)
 
-**v0.14.0: 564 testes, 0 falhas, 0 ignorados** (468 do v0.13.0 + **96** da camada de confiança: 88 de API/unidade e 8 de navegador). Log íntegro: `docs/evidence/test_run_v0.14.0.log`.
-Detalhamento classe a classe e o que **não** está testado: `TRUST_TESTING.md`.
-Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 12 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
+**v0.13.0: 468 testes, 0 falhas, 0 ignorados** (392 do v0.12.1 + **76** da camada de integração). Log íntegro: `docs/evidence/test_run_v0.13.0.log`.
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 11 migrations), servidor HTTP real (uvicorn) e Chromium (Playwright). Comando:
 ```
 cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
 ```
-| Categoria | v0.12.1 | v0.13.0 | v0.14.0 |
-|---|---|---|---|
-| Unidade (puros) | 33 | 39 | 49 |
-| API/integração (HTTP + PostgreSQL reais) | 325 | 395 | 471 |
-| Arquitetura (invariantes do código) | 6 | 6 | 8 |
-| E2E de navegador (Chromium) | 28 | 28 | 36 |
-| **Total** | **392** | **468** | **564** |
-
-## Novos no v0.14.0 (96)
-`tests/test_v0140_trust.py` (88) e `tests/test_e2e_v0140_trust.py` (8). Resumo do que é **provado**:
-assinatura em duas camadas (sem código não assina; código morre quando o conteúdo muda; 4 tentativas simultâneas com o
-mesmo código ⇒ **1** assinatura) · verificação pública sem login **sem dado pessoal no corpo da resposta nem na página
-renderizada** · arquivo adulterado detectado pela recontagem do hash · revogação visível e nada apagado · cadeia de
-custódia encadeada, **irreescrevível pela aplicação e pelo contexto de sistema**, com adulteração detectada no `seq`
-exato · autopromoção de identidade e de credencial bloqueadas no banco · biometria, SMS e RFC 3161 **recusando** ·
-acordo só vigente com todas as partes, hash congelado, parte não marca a outra · isolamento entre organizações nas
-tabelas novas · cotas que não estouram nem sob concorrência · honorário sem fonte recusado · geo pública só com
-consentimento · taxonomia com código inválido recusado pelo banco · catálogo de tradução com as mesmas chaves nos três
-idiomas · 8 formatos de arquivo reabertos e com XML conferido · ida e volta do QR Code · tema escolhido aplicado antes do
-primeiro render com contraste AA medido no navegador.
+| Categoria | v0.12.1 | v0.13.0 |
+|---|---|---|
+| Unidade (puros) | 33 | 39 |
+| API/integração (HTTP + PostgreSQL reais) | 325 | 395 |
+| Arquitetura (invariantes do código) | 6 | 6 |
+| E2E de navegador (Chromium) | 28 | 28 |
+| **Total** | **392** | **468** |
 
 ## Novos no v0.13.0 (76) — `tests/test_v0130_integrations.py`
 Detalhamento por classe, o que o dublê prova e o que **não** prova: `INTEGRATION_TESTING.md`. Resumo:
@@ -46,7 +32,7 @@ ciclo de vida da conexão (9) · segurança de credencial (7) · isolamento entr
 **`tests/test_e2e_knowledge.py` (+2):** **contraste WCAG AA medido no navegador** em 7 páginas × tema claro e escuro; ausência de IDs duplicados, de salto de nível de cabeçalho e presença de `lang="pt-BR"`.
 
 ## Verificações estáticas e de build
-`ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.14.0.log`) · `tsc --noEmit` → **PASS** · `node build.mjs` → **PASS** (180 KB gzip) · `python -m compileall` → **PASS** · `migrate --check` → sem pendências e sem checksum alterado.
+`ruff check impacto tests` → **All checks passed** (`docs/evidence/ruff_v0.13.0.log`) · `tsc --noEmit` → **PASS** · `node build.mjs` → **PASS** (180 KB gzip) · `python -m compileall` → **PASS** · `migrate --check` → sem pendências e sem checksum alterado.
 
 ## Medição de desempenho (fluxos críticos, dados de desenvolvimento)
 p50/p95 por requisição, servidor real: `/v1/me` 12/13 ms · `/v1/help/start` (15 detectores) 17/19 ms · `/v1/help/pending` 16/23 ms · `/v1/help/recommendations` 19/25 ms · `/v1/help/search` 24/27 ms · `/v1/documents` 7/8 ms · `/v1/projects` 9/16 ms. Consultas por requisição: 8 a 28 (inclui sessão/RLS). **Limite honesto:** volume de desenvolvimento, 1 processo — não substitui teste de carga em produção.

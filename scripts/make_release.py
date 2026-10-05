@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -46,7 +46,13 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "INTEGRATION_CAPABILITY_MATRIX.md", "FINAL_INTEGRATION_HARDENING_REPORT.md", "FINAL_INTEGRATION_MANIFEST.json",
             "backend/migrations/0011_v0130_integration_hub.sql", "backend/tests/test_v0130_integrations.py",
             "config/integration_providers.json", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log",
-            "history/v0.12.1/VERSION"]
+            "history/v0.12.1/VERSION",
+            "TRUST_INVENTORY.md", "TRUST_ARCHITECTURE.md", "TRUST_IDENTITY.md", "DIGITAL_SIGNATURE.md",
+            "PUBLIC_VERIFICATION.md", "TRUST_SECURITY.md", "TRUST_TESTING.md", "SDG_ESG_TAXONOMY.md", "I18N.md",
+            "DOCUMENT_FORMATS.md", "FINAL_TRUST_HARDENING_REPORT.md", "FINAL_TRUST_MANIFEST.json",
+            "backend/migrations/0012_v0140_trust_layer.sql", "backend/tests/test_v0140_trust.py",
+            "backend/tests/test_e2e_v0140_trust.py", "config/i18n.json",
+            "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

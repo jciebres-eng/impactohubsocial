@@ -1,26 +1,6 @@
-# API — documentação (v0.14.0)
+# API — documentação (v0.13.0)
 
-Referência completa **gerada do código**: `docs/API.md` (574 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
-
-## Confiança, identidade e assinatura (63 operações novas, v0.14.0)
-| Grupo | Rotas principais |
-|---|---|
-| **Verificação pública (sem login)** | `GET /v1/public/verify/{code}` · `GET /v1/public/verify/{code}/qr` |
-| Registros verificáveis | `POST·GET /v1/verifiable-records` · `POST …/{id}/revoke` · `POST …/{id}/timestamp` · `GET …/{id}/qr` |
-| Assinatura | `POST /v1/signatures/challenge` (segunda camada) · `POST /v1/signatures` (**agora exige `code`**) · `POST /v1/signatures/{id}/revoke` · `GET /v1/signatures/verify` |
-| Integridade e custódia | `GET /v1/documents/{id}/integrity` · `GET /v1/trust/custody?subject_type=&subject_id=` |
-| Identidade | `GET /v1/trust/identity` · `POST /v1/trust/identity/verifications` · `POST …/{id}/documents` · `GET /v1/admin/trust/identity/queue` · `POST /v1/admin/trust/identity/{id}/decide` |
-| Credencial profissional | `GET /v1/trust/councils` · `POST /v1/org/credentials/{id}/document` · `GET /v1/org/credentials/{id}/history` · `GET /v1/admin/trust/credentials/queue` · `POST …/{id}/decide` · `POST …/{id}/revoke` |
-| Acordos | `POST·GET /v1/signed-agreements` · `GET·PATCH …/{id}` · `POST …/{id}/parties·publish·sign·decline·milestones` · `PATCH …/milestones/{id}` |
-| Taxonomia | `GET /v1/impact-taxonomy` · `POST·GET /v1/impact-tags` · `DELETE …/{id}` |
-| Idioma e tema | `GET /v1/public/locales` · `GET /v1/public/translations` · `GET·PUT /v1/me/preferences` |
-| Cotas e campanha | `POST·GET /v1/funding-quotas` · `PATCH …/{id}` · `POST·GET …/{id}/pledges` · `POST /v1/admin/funding-quotas/pledges/{id}/confirm` · `POST·GET·PATCH /v1/campaigns` · `GET /v1/public/campaigns/{slug}` |
-| Honorários e serviços | `GET /v1/fee-tables[/{id}]` · `POST /v1/admin/fee-tables[/{id}/items|/publish]` · `POST·GET·PATCH /v1/professional-services` · `GET /v1/directory/services` |
-| Georreferência | `PUT /v1/org/geo` |
-| Diagnóstico guiado | `GET /v1/diagnoses/{id}/guide` · `PUT /v1/diagnoses/{id}/guide/{stage_code}` |
-| Documentos | `POST /v1/drafts/{id}/export` (pdf/docx/odt, com QR opcional) |
-
-Detalhes: `PUBLIC_VERIFICATION.md`, `DIGITAL_SIGNATURE.md`, `TRUST_IDENTITY.md`.
+Referência completa **gerada do código**: `docs/API.md` (511 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
 
 ## Integrações (36 operações novas, v0.13.0)
 | Grupo | Rotas principais |

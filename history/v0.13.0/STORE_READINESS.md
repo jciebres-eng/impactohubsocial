@@ -28,16 +28,3 @@ Avaliação honesta (GREEN = provado por teste/execução; YELLOW = código pron
 ## v0.13.0 — efeito nas lojas
 A camada de integração **não muda nada do ponto de vista das lojas**: não há tela, não há SDK de terceiro no app, não há nova permissão de dispositivo e nenhum dado novo é coletado do aparelho. Continuam valendo os bloqueios já listados: apps não construídos nem assinados, sem conta de desenvolvedor, sem política de privacidade publicada em domínio próprio.
 Quando a integração ganhar tela, a política de privacidade precisará declarar o **compartilhamento com terceiros** que a organização configurar (ver `LGPD_AUDIT.md` — base legal por assinatura).
-
-## v0.14.0 — efeito nas lojas
-Duas coisas passam a importar para a revisão das lojas:
-1. **Verificação pública é uma tela sem login** dentro do app. Isso é permitido (é consulta de autenticidade, não conteúdo
-   gerado por terceiro), mas a descrição da loja deve dizer o que a tela faz, para não parecer funcionalidade oculta.
-2. **Envio de documento de identidade** no fluxo de identificação. Apple e Google exigem, na ficha do app, declarar a
-   coleta de "Identifiers"/"Sensitive info" e apontar a política de privacidade. A política precisa descrever: o que é
-   guardado (referência ao arquivo e resultado da conferência), o que **não** é (número, imagem extraída, biometria) e
-   por quanto tempo — este último ainda **depende de decisão jurídica**.
-Não há SDK novo, não há permissão nova de dispositivo e **nenhuma biometria** é usada (o que elimina a exigência de
-declarar dado biométrico). Os bloqueios anteriores continuam: apps não construídos nem assinados, sem conta de
-desenvolvedor, sem política publicada em domínio próprio.
-

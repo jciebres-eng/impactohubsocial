@@ -1,6 +1,6 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.14.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+Produto: SemVer (`VERSION` = `0.13.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
 (migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: `match-engine@1.0.0`, `fiscal-engine@1.0.0`; pesos `weights@1.0`; planos `plans@1.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
 
@@ -23,5 +23,3 @@ Histórico: `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos 
 **v0.12.1** (PATCH): correções de defeito e endurecimento, sem nova capacidade de produto nem mudança de contrato da API (475 operações, mesmos campos). Migração `0010_v0121_indexes.sql` só adiciona índices — a `0009` já havia sido liberada e **não** foi editada. Snapshot dos documentos do v0.12.0: `history/v0.12.0/`.
 
 **v0.13.0** (MINOR): nova capacidade (camada de integração) com 13 tabelas, 36 rotas e migração `0011_v0130_integration_hub.sql`. A `0010` já estava liberada e **não** foi editada; a `0011` foi editada durante o desenvolvimento (nunca aplicada fora do ambiente de construção) e a partir desta liberação é imutável. Nenhum contrato existente mudou — só adições. Snapshot dos documentos do v0.12.1: `history/v0.12.1/`. A tag `v0.12.1-final-baseline` continua sendo a baseline auditada da camada funcional; o v0.13.0 a estende sem alterá-la.
-
-**v0.14.0** (MINOR): nova capacidade (confiança, identidade e assinatura digital) com 26 tabelas, migração `0012_v0140_trust_layer.sql` e **uma mudança de contrato**: `POST /v1/signatures` passou a exigir o campo `code` (segunda camada da assinatura). Em pré-1.0 isso cabe em MINOR, e está destacado no CHANGELOG porque quebra integração que assinava com senha apenas. A `0011` já estava liberada e **não** foi editada; a `0012` foi editada durante o desenvolvimento (nunca aplicada fora do ambiente de construção) e a partir desta liberação é imutável. Snapshot dos documentos do v0.13.0: `history/v0.13.0/`. Config versionada: `config/i18n.json` (catálogo de tradução do núcleo).

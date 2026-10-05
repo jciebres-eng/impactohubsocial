@@ -1,24 +1,4 @@
-# Release notes — v0.14.0
-
-## v0.14.0 — Confiança, identidade e assinatura digital
-**Resumo:** documento assinado na plataforma passou a ser **conferível por qualquer pessoa autorizada**, sem conta: pelo
-código impresso ou pelo QR Code, em `/verificar`. A página responde se o documento é genuíno, **qual versão foi
-assinada**, se a integridade permanece intacta, quem assinou e se foi revogado.
-- **Para quem recebe o documento:** confere em segundos, sem login, e vê se existe versão mais nova.
-- **Para quem assina:** assinatura em duas camadas (senha + código de uso único por e-mail) amarrada à versão exata do
-  conteúdo — se o documento muda, o código deixa de valer.
-- **Para a organização:** cadeia de custódia de cada documento, revogação com motivo visível, acordos assinados por todas
-  as partes com acompanhamento das entregas, identidade e credencial profissional conferidas por pessoas da equipe.
-- **Também entrou:** taxonomia ODS/ESG/determinantes sociais, idioma e tema por usuária, financiamento em cotas com
-  campanha pública ("faltam N cotas"), tabela de honorários que só publica com fonte e data, georreferência com
-  consentimento, diagnóstico guiado em 8 etapas e exportação em docx, xlsx, odt, ods, xml e PDF com QR.
-- **O que NÃO é:** **não há assinatura qualificada (ICP-Brasil ou gov.br)**, nem biometria, nem prova de vida, nem SMS,
-  nem carimbo de Autoridade de Carimbo de Tempo. Tudo isso depende de contratação externa e a plataforma **recusa com
-  mensagem explicando**, em vez de fingir. "Credencial verificada" significa **documento conferido pela equipe** — a
-  plataforma não consulta conselho profissional on-line. Os emblemas oficiais da ONU **não acompanham** a plataforma.
-- **Atenção a integrações:** `POST /v1/signatures` passou a exigir o campo `code`. Quem assinava com senha apenas precisa
-  pedir o código antes (`POST /v1/signatures/challenge`).
-- Leia `PUBLIC_VERIFICATION.md` e `FINAL_TRUST_HARDENING_REPORT.md`.
+# Release notes — v0.13.0
 
 ## v0.13.0 — Integration Hub (fundação)
 **Resumo:** a plataforma passou a conversar com sistemas externos por uma camada própria, desacoplada: conexões por ambiente, credenciais cifradas que a API nunca devolve, mapeamento de campos, correspondência de ID externo com conflito explícito, jobs idempotentes com repetição e disjuntor, webhooks de entrada e saída assinados, importação CSV/XLSX com aprovação humana, exportação e um painel que responde “qual integração está quebrada agora”.

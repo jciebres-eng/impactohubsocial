@@ -275,7 +275,25 @@ def hub_ops(app) -> dict:
         return {**hub.sla_escalation(c), **hub.event_reminders(c), **hub.bulletin_dispatch(app, c), **hub.notification_emails(app, c), **hub.retention(c)}
 
 
-JOBS = [("close_calls", close_calls), ("import_sources", import_all), ("saved_searches", saved_searches_job),
+def integration_ops(app) -> dict:
+    """Integration Hub: executa jobs devidos, entrega webhooks de saída, verifica saúde das conexões ativas e aplica retenção."""
+    from .integrations import events as EV, hub as HUB
+
+    def run():
+        with app.pool.tx(DbContext(system=True)) as c:
+            jobs = HUB.process_due(app, c)
+            deliveries = EV.deliver_pending(app, c)
+            stale = c.query("SELECT id::text AS id FROM integration_connections WHERE status = 'active'"
+                            " AND (last_health_at IS NULL OR last_health_at < now() - interval '30 minutes') LIMIT 20")
+            for row in stale:
+                HUB.health_check(app, c, row["id"])          # somente leitura; grava o estado na conexão
+            kept = EV.retention(c)
+        return {"jobs": jobs, "deliveries": deliveries, "health_checked": len(stale), **kept}
+
+    return _run(app, "integration_ops", run)
+
+
+JOBS = [("close_calls", close_calls), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
         ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops)]
 
 

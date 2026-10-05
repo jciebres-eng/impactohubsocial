@@ -78,6 +78,29 @@ def migrate(dsn: str, *, sync_reference: bool = True, log=print) -> list[str]:
     return done
 
 
+def sync_integration_providers(conn: Connection, log=print) -> int:
+    """Catálogo de provedores do Integration Hub (config/integration_providers.json). Dado de referência, nunca demo.
+    A maturidade do arquivo só pode REBAIXAR ou manter o que está no banco quando o banco já tiver evidência superior
+    (sandbox/homologated/production_active promovidos pela administração não são desfeitos por deploy)."""
+    path = CONFIG_DIR / "integration_providers.json"
+    if not path.exists() or not conn.one("SELECT 1 FROM pg_tables WHERE tablename = 'integration_providers'"):
+        return 0
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    order = ["scaffolded", "contract_tested", "sandbox", "homologated", "production_active"]
+    for p in doc["providers"]:
+        cur = conn.one("SELECT maturity FROM integration_providers WHERE key = $1", p["key"])
+        maturity = p["maturity"]
+        if cur and order.index(cur["maturity"]) > order.index(maturity):
+            maturity = cur["maturity"]
+        conn.execute("INSERT INTO integration_providers(key, name, category, api_style, auth_kinds, capabilities, maturity, docs_url, notes, active, updated_at)"
+                     " VALUES ($1,$2,$3,$4,$5::text[],$6::jsonb,$7,$8,$9,true, now()) ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name,"
+                     " category = EXCLUDED.category, api_style = EXCLUDED.api_style, auth_kinds = EXCLUDED.auth_kinds, capabilities = EXCLUDED.capabilities,"
+                     " maturity = EXCLUDED.maturity, docs_url = EXCLUDED.docs_url, notes = EXCLUDED.notes, updated_at = now()",
+                     (p["key"], p["name"], p["category"], p["api_style"], p.get("auth_kinds", []), Json(p["capabilities"]), maturity,
+                      p.get("docs_url"), p.get("notes")))
+    return len(doc["providers"])
+
+
 def sync_reference_data(conn: Connection, log=print) -> None:
     plans = json.loads((CONFIG_DIR / "plans.json").read_text(encoding="utf-8"))
     conn.execute_script("BEGIN;")
@@ -119,8 +142,9 @@ def sync_reference_data(conn: Connection, log=print) -> None:
                      r.get("limit_note"), r.get("causes", []), Json(r.get("requirements", [])),
                      Json(r.get("project_requirements", [])), r["source_citation"], r.get("source_url"), r.get("notes")),
                 )
+        n_prov = sync_integration_providers(conn, log=log)
         conn.execute_script("COMMIT;")
-        log(f"dados de referência sincronizados: {len(keys)} planos")
+        log(f"dados de referência sincronizados: {len(keys)} planos, {n_prov} provedores de integração")
     except Exception:
         conn.execute_script("ROLLBACK;")
         raise

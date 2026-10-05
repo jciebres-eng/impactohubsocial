@@ -878,7 +878,7 @@ export function Activities() {
   );
 }
 
-const PREF_LABEL: Record<string, string> = { billing: "Cobrança e plano", content: "Conteúdo da Central", events: "Eventos", support: "Chamados", partnerships: "Parcerias", opportunities: "Oportunidades" };
+const PREF_LABEL: Record<string, string> = { billing: "Cobrança e plano", content: "Conteúdo da Central", events: "Eventos", support: "Chamados", partnerships: "Parcerias", opportunities: "Oportunidades", network: "Rede e relações", proposal: "Propostas", message: "Recados", funding: "Apoio e captação", report: "Relatórios de impacto", project: "Projetos e etapas", document: "Documentos", account: "Conta e moderação" };
 export function Prefs() {
   const { data, loading, error, reload } = useLoad("/v1/notifications/prefs");
   const [items, setItems] = useState<any[]>([]);

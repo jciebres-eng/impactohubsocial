@@ -172,7 +172,8 @@ class TokenIn(In):
 
 
 class PrefItem(In):
-    grp: Literal["billing", "content", "events", "support", "partnerships", "opportunities"]
+    grp: Literal["billing", "content", "events", "support", "partnerships", "opportunities",
+                 "network", "proposal", "message", "funding", "report", "project", "document", "account"]
     in_app: bool
     email: bool
 

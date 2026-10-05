@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.11.0",
+  "version": "0.10.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -4784,7 +4784,7 @@
   },
   "/v1/plans": {
    "get": {
-    "summary": "Catálogo público de planos (tier, preços mensal/anual; preço null = sob consulta)",
+    "summary": "Catálogo público de planos (preço null = sob consulta)",
     "operationId": "get_billing_routes_plans",
     "tags": [
      "billing"
@@ -4802,7 +4802,7 @@
   },
   "/v1/billing": {
    "get": {
-    "summary": "Estado de cobrança da organização: plano, status, trial, próxima cobrança, avisos, faturas",
+    "summary": "Assinatura, direitos e faturas da organização",
     "operationId": "get_billing_routes_billing_state",
     "tags": [
      "billing"
@@ -4826,45 +4826,9 @@
     "description": "Requer organização ativa · Papel mínimo: viewer"
    }
   },
-  "/v1/billing/quote": {
-   "post": {
-    "summary": "Simulação do valor FINAL calculada no servidor (preço, desconto, trial, primeira cobrança). Não cobra nada.",
-    "operationId": "post_billing_routes_quote",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: viewer",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/QuoteIn"
-       }
-      }
-     }
-    }
-   }
-  },
   "/v1/billing/checkout": {
    "post": {
-    "summary": "Inicia contratação (Stripe Checkout) com trial quando houver. Sem gateway configurado, responde 503 de forma explícita.",
+    "summary": "Inicia contratação (Stripe Checkout). Sem gateway configurado, responde 503 de forma explícita.",
     "operationId": "post_billing_routes_checkout",
     "tags": [
      "billing"
@@ -4900,96 +4864,8 @@
   },
   "/v1/billing/cancel": {
    "post": {
-    "summary": "Cancela a assinatura ou o trial (sem cobrança; acesso mantido até o fim do período)",
+    "summary": "cancel",
     "operationId": "post_billing_routes_cancel",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/reactivate": {
-   "post": {
-    "summary": "Desfaz um cancelamento em andamento",
-    "operationId": "post_billing_routes_reactivate",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/change-plan": {
-   "post": {
-    "summary": "Upgrade/downgrade (sincronizado com o provedor)",
-    "operationId": "post_billing_routes_change_plan",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 20/3600s por IP",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/ChangePlanIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/billing/portal": {
-   "post": {
-    "summary": "Portal de pagamento do provedor (método de pagamento, faturas)",
-    "operationId": "post_billing_routes_portal",
     "tags": [
      "billing"
     ],
@@ -5033,7 +4909,7 @@
   },
   "/v1/vouchers/redeem": {
    "post": {
-    "summary": "Resgata voucher (transação atômica; resposta genérica para códigos inválidos). Descontos ficam pendentes até o checkout.",
+    "summary": "Resgata voucher (transação atômica; resposta genérica para códigos inválidos)",
     "operationId": "post_billing_routes_redeem",
     "tags": [
      "billing"
@@ -14950,458 +14826,6 @@
      }
     }
    }
-  },
-  "/v1/agreements/join": {
-   "post": {
-    "summary": "Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos.",
-    "operationId": "post_monetization_routes_join",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 10/3600s por IP",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/AgreementJoinIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/billing/organizations/{org_id}": {
-   "get": {
-    "summary": "Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização",
-    "operationId": "get_monetization_routes_org_billing",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "org_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ]
-   }
-  },
-  "/v1/admin/organizations/{org_id}/trial": {
-   "post": {
-    "summary": "Concede trial a uma organização que ainda não o teve (motivo obrigatório)",
-    "operationId": "post_monetization_routes_grant_trial",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "201": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "org_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/TrialGrantIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/grants/{grant_id}/revoke": {
-   "post": {
-    "summary": "Revoga uma licença/grant (motivo obrigatório); o histórico é preservado",
-    "operationId": "post_monetization_routes_revoke_grant",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "grant_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/RevokeIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/plans/{plan_key}/price": {
-   "put": {
-    "summary": "Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide)",
-    "operationId": "put_monetization_routes_set_price",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "plan_key",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/PriceIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/agreements": {
-   "post": {
-    "summary": "Cria convênio (rascunho). O código é exibido UMA vez; a ativação exige outro administrador.",
-    "operationId": "post_monetization_routes_create_agreement",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "201": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/AgreementIn"
-       }
-      }
-     }
-    }
-   },
-   "get": {
-    "summary": "Lista convênios (sem o código)",
-    "operationId": "get_monetization_routes_list_agreements",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA"
-   }
-  },
-  "/v1/admin/agreements/{agreement_id}/action": {
-   "post": {
-    "summary": "Ativa (por outro administrador), suspende ou encerra um convênio",
-    "operationId": "post_monetization_routes_agreement_action",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "agreement_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/AgreementActionIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/agreements/{agreement_id}/members": {
-   "get": {
-    "summary": "Organizações vinculadas ao convênio",
-    "operationId": "get_monetization_routes_agreement_members",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "agreement_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ]
-   }
-  },
-  "/v1/admin/agreements/{agreement_id}/members/{org_id}/revoke": {
-   "post": {
-    "summary": "Remove uma organização do convênio (revoga a licença e libera a vaga)",
-    "operationId": "post_monetization_routes_revoke_member",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "agreement_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     },
-     {
-      "name": "org_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/RevokeIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/voucher-batches/{batch_id}/redemptions": {
-   "get": {
-    "summary": "Utilizações de um lote de vouchers (quem usou e quando; código só pelo final)",
-    "operationId": "get_monetization_routes_batch_redemptions",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "batch_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ]
-   }
   }
  },
  "components": {
@@ -18748,112 +18172,19 @@
     "title": "AiSummarizeIn",
     "type": "object"
    },
-   "QuoteIn": {
-    "additionalProperties": false,
-    "properties": {
-     "plan_key": {
-      "pattern": "^[a-z0-9_]{2,60}$",
-      "title": "Plan Key",
-      "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     }
-    },
-    "required": [
-     "plan_key"
-    ],
-    "title": "QuoteIn",
-    "type": "object"
-   },
    "CheckoutIn": {
     "additionalProperties": false,
-    "description": "O cliente escolhe plano e periodicidade. Preço, desconto, trial e valor final são sempre calculados no servidor.",
     "properties": {
      "plan_key": {
       "pattern": "^[a-z0-9_]{2,60}$",
       "title": "Plan Key",
       "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     },
-     "voucher": {
-      "anyOf": [
-       {
-        "maxLength": 40,
-        "minLength": 6,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Voucher"
      }
     },
     "required": [
      "plan_key"
     ],
     "title": "CheckoutIn",
-    "type": "object"
-   },
-   "ChangePlanIn": {
-    "additionalProperties": false,
-    "properties": {
-     "plan_key": {
-      "pattern": "^[a-z0-9_]{2,60}$",
-      "title": "Plan Key",
-      "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     }
-    },
-    "required": [
-     "plan_key"
-    ],
-    "title": "ChangePlanIn",
     "type": "object"
    },
    "VoucherRedeemIn": {
@@ -19336,9 +18667,7 @@
       "enum": [
        "grant_plan",
        "grant_feature",
-       "free_period",
-       "percent_off",
-       "amount_off"
+       "free_period"
       ],
       "title": "Type",
       "type": "string"
@@ -19370,83 +18699,10 @@
       "title": "Feature Key"
      },
      "duration_days": {
-      "anyOf": [
-       {
-        "maximum": 3650,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Duration Days"
-     },
-     "percent": {
-      "anyOf": [
-       {
-        "maximum": 100,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Percent"
-     },
-     "amount_cents": {
-      "anyOf": [
-       {
-        "maximum": 100000000,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Amount Cents"
-     },
-     "discount_duration": {
-      "default": "once",
-      "enum": [
-       "once",
-       "repeating",
-       "forever"
-      ],
-      "title": "Discount Duration",
-      "type": "string"
-     },
-     "discount_months": {
-      "anyOf": [
-       {
-        "maximum": 36,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Discount Months"
-     },
-     "organization_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Organization Id"
+      "maximum": 1095,
+      "minimum": 1,
+      "title": "Duration Days",
+      "type": "integer"
      },
      "quantity": {
       "maximum": 500,
@@ -19504,6 +18760,7 @@
     "required": [
      "campaign",
      "type",
+     "duration_days",
      "quantity"
     ],
     "title": "BatchIn",
@@ -19637,31 +18894,10 @@
       "title": "Feature Key"
      },
      "days": {
-      "anyOf": [
-       {
-        "maximum": 3650,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Days"
-     },
-     "source": {
-      "default": "admin",
-      "enum": [
-       "admin",
-       "license",
-       "partner",
-       "convention",
-       "gov",
-       "promotion"
-      ],
-      "title": "Source",
-      "type": "string"
+      "maximum": 1095,
+      "minimum": 1,
+      "title": "Days",
+      "type": "integer"
      },
      "reason": {
       "maxLength": 500,
@@ -19671,6 +18907,7 @@
      }
     },
     "required": [
+     "days",
      "reason"
     ],
     "title": "GrantIn",
@@ -24695,25 +23932,28 @@
    "AgreementIn": {
     "additionalProperties": false,
     "properties": {
-     "name": {
-      "maxLength": 200,
-      "minLength": 2,
-      "title": "Name",
-      "type": "string"
-     },
-     "kind": {
+     "agreement_type": {
       "enum": [
-       "convention",
-       "gov",
-       "partner"
+       "management_contract",
+       "partnership_term",
+       "collaboration_term",
+       "fomento_term",
+       "cooperation_agreement",
+       "other"
       ],
-      "title": "Kind",
+      "title": "Agreement Type",
       "type": "string"
      },
-     "plan_key": {
+     "counterpart_name": {
+      "maxLength": 300,
+      "minLength": 2,
+      "title": "Counterpart Name",
+      "type": "string"
+     },
+     "counterpart_authority": {
       "anyOf": [
        {
-        "pattern": "^[a-z0-9_]{2,60}$",
+        "maxLength": 300,
         "type": "string"
        },
        {
@@ -24721,13 +23961,65 @@
        }
       ],
       "default": null,
-      "title": "Plan Key"
+      "title": "Counterpart Authority"
      },
-     "grant_days": {
+     "instrument_number": {
       "anyOf": [
        {
-        "maximum": 3650,
-        "minimum": 1,
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Instrument Number"
+     },
+     "object_summary": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Object Summary"
+     },
+     "start_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Start Date"
+     },
+     "end_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "End Date"
+     },
+     "value_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
         "type": "integer"
        },
        {
@@ -24735,41 +24027,24 @@
        }
       ],
       "default": null,
-      "title": "Grant Days"
+      "title": "Value Cents"
      },
-     "discount_percent": {
-      "anyOf": [
-       {
-        "maximum": 100,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
+     "agreement_status": {
+      "default": "active",
+      "enum": [
+       "draft",
+       "active",
+       "completed",
+       "terminated",
+       "suspended"
       ],
-      "default": null,
-      "title": "Discount Percent"
+      "title": "Agreement Status",
+      "type": "string"
      },
-     "seats": {
-      "maximum": 100000,
-      "minimum": 1,
-      "title": "Seats",
-      "type": "integer"
-     },
-     "email_domains": {
-      "items": {
-       "pattern": "^[a-z0-9.-]+\\.[a-z]{2,}$",
-       "type": "string"
-      },
-      "maxItems": 20,
-      "title": "Email Domains",
-      "type": "array"
-     },
-     "valid_from": {
+     "qualification_id": {
       "anyOf": [
        {
-        "format": "date-time",
+        "pattern": "^[0-9a-fA-F-]{36}$",
         "type": "string"
        },
        {
@@ -24777,12 +24052,13 @@
        }
       ],
       "default": null,
-      "title": "Valid From"
+      "title": "Qualification Id"
      },
-     "valid_until": {
+     "verification_url": {
       "anyOf": [
        {
-        "format": "date-time",
+        "maxLength": 500,
+        "pattern": "^https://",
         "type": "string"
        },
        {
@@ -24790,12 +24066,12 @@
        }
       ],
       "default": null,
-      "title": "Valid Until"
+      "title": "Verification Url"
      },
-     "contract_ref": {
+     "document_id": {
       "anyOf": [
        {
-        "maxLength": 200,
+        "pattern": "^[0-9a-fA-F-]{36}$",
         "type": "string"
        },
        {
@@ -24803,13 +24079,12 @@
        }
       ],
       "default": null,
-      "title": "Contract Ref"
+      "title": "Document Id"
      }
     },
     "required": [
-     "name",
-     "kind",
-     "seats"
+     "agreement_type",
+     "counterpart_name"
     ],
     "title": "AgreementIn",
     "type": "object"
@@ -25092,119 +24367,6 @@
      "status"
     ],
     "title": "MentoringAdminIn",
-    "type": "object"
-   },
-   "AgreementJoinIn": {
-    "additionalProperties": false,
-    "properties": {
-     "code": {
-      "maxLength": 40,
-      "minLength": 6,
-      "title": "Code",
-      "type": "string"
-     }
-    },
-    "required": [
-     "code"
-    ],
-    "title": "AgreementJoinIn",
-    "type": "object"
-   },
-   "TrialGrantIn": {
-    "additionalProperties": false,
-    "properties": {
-     "days": {
-      "default": 14,
-      "maximum": 90,
-      "minimum": 1,
-      "title": "Days",
-      "type": "integer"
-     },
-     "reason": {
-      "maxLength": 500,
-      "minLength": 5,
-      "title": "Reason",
-      "type": "string"
-     }
-    },
-    "required": [
-     "reason"
-    ],
-    "title": "TrialGrantIn",
-    "type": "object"
-   },
-   "RevokeIn": {
-    "additionalProperties": false,
-    "properties": {
-     "reason": {
-      "maxLength": 500,
-      "minLength": 5,
-      "title": "Reason",
-      "type": "string"
-     }
-    },
-    "required": [
-     "reason"
-    ],
-    "title": "RevokeIn",
-    "type": "object"
-   },
-   "PriceIn": {
-    "additionalProperties": false,
-    "properties": {
-     "interval": {
-      "enum": [
-       "month",
-       "year"
-      ],
-      "title": "Interval",
-      "type": "string"
-     },
-     "amount_cents": {
-      "anyOf": [
-       {
-        "maximum": 1000000000000,
-        "minimum": 0,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Amount Cents"
-     },
-     "reason": {
-      "maxLength": 500,
-      "minLength": 5,
-      "title": "Reason",
-      "type": "string"
-     }
-    },
-    "required": [
-     "interval",
-     "reason"
-    ],
-    "title": "PriceIn",
-    "type": "object"
-   },
-   "AgreementActionIn": {
-    "additionalProperties": false,
-    "properties": {
-     "action": {
-      "enum": [
-       "activate",
-       "suspend",
-       "end"
-      ],
-      "title": "Action",
-      "type": "string"
-     }
-    },
-    "required": [
-     "action"
-    ],
-    "title": "AgreementActionIn",
     "type": "object"
    }
   },

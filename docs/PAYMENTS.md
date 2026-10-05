@@ -18,3 +18,6 @@ Webhook com assinatura HMAC (tolerância 300 s) · idempotência por `event.id` 
 
 ## Pendências
 Conta e homologação Stripe (modo de teste e produção) · preços · nota fiscal/contabilização · reembolso/chargeback/disputa · conciliação · meios locais (Pix/boleto) via provedor · exigência das lojas para venda dentro do app.
+
+## v0.11.0 — atualização
+Provedor `stripe` agora com: preço mensal/anual (`STRIPE_PRICE_<PLAN>[_MONTH|_YEAR]`), `trial_end`, cupom de desconto, portal de cobrança, cancelar/reativar, troca de plano, e eventos `customer.subscription.*`/`invoice.*` com ordem e idempotência. Cancelar mantém acesso até o fim do período. Detalhes: `docs/billing.md`. Continua **não homologado** contra o Stripe real.

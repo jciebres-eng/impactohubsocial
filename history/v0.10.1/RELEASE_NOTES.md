@@ -1,15 +1,4 @@
-# Release notes — v0.11.0
-
-**Resumo v0.11.0:** monetização completa sobre o billing existente — níveis FREE/PLUS/PREMIUM/GOV, trial de 14 dias FULL sem cartão, cobrança mensal/anual por Stripe (webhooks seguros), vouchers, licenças e convênios, tudo com preço/desconto/direitos decididos no servidor. **Preços ainda não definidos e Stripe ainda não homologado** (`docs/billing.md`).
-## Para qualquer organização
-- Ao se cadastrar você recebe **14 dias de acesso FULL, sem cartão**. Você pode cancelar a qualquer momento: o acesso FULL continua até o fim do teste, **nenhuma cobrança é feita**, e depois a conta passa ao plano gratuito — seus dados e histórico financeiro permanecem.
-- Página **Plano e cobrança** (`/conta/plano`): mensal/anual com a economia real, valor final calculado pelo servidor, voucher, código de convênio, cancelar/manter assinatura, faturas e portal de pagamento.
-- Falha de pagamento: aviso claro, sem corte imediato e sem perda de dados.
-## Para a administração
-- Vouchers de desconto (%/valor/100%/permanente), convênios (código + vagas + plano/desconto, ativação por 2º admin), licenças com origem e revogação, trial concedido com motivo, preço do plano — tudo auditado.
-## Limites desta versão
-Sem preços definidos, a contratação online é recusada. Stripe só foi simulado em testes. Avisos apenas dentro da plataforma.
-
+# Release notes — v0.10.1
 
 **Resumo:** fecha as pendências da camada institucional do v0.10.0 que podiam ser resolvidas sem infraestrutura externa. Nada aqui é parecer jurídico nem certificação governamental.
 

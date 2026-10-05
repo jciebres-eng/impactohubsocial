@@ -1,4 +1,4 @@
-# PRODUCTION_READINESS — v0.11.0
+# PRODUCTION_READINESS — v0.10.1
 
 **Veredito: PRONTO PARA HOMOLOGAÇÃO / PILOTO CONTROLADO. NÃO pronto para produção aberta.**
 O que falta é majoritariamente externo (contas, provedores, jurídico, tributário) e de validação operacional (carga, pentest, build de contêiner/apps).
@@ -35,11 +35,6 @@ O que falta é majoritariamente externo (contas, provedores, jurídico, tributá
 | Biblioteca — frontend | GREEN / YELLOW (a11y) | build + 3 E2E | axe/leitor de tela, teste de usabilidade |
 | Segurança externa | YELLOW | auditoria interna | pentest, varredura de dependências, WAF |
 | Camada institucional (v0.10.0) | YELLOW | 51 testes novos; motor e fluxo editorial verdes | **revisão jurídica dos catálogos e regras**, publicar regras reais (2 aprovadores), calibrar maturidade, bases governamentais inexistentes |
-| Monetização: trial, tiers, vouchers, convênios, licenças (v0.11.0) | GREEN (lógica) | 34 testes + 256 herdados | divisão PLUS×PREMIUM é hipótese |
-| Cobrança Stripe (checkout, webhooks, portal, upgrade/downgrade) | YELLOW | testado só com dublê | conta Stripe, endpoint do webhook, Billing Portal, homologação em modo de teste; verificar mínimo de `trial_end` |
-| Preços dos planos | RED | `plan_prices` NULL; contratação online recusada | proprietário define e cadastra (admin) |
-| Avisos de trial/cobrança por e-mail | RED | só in-app | provedor de e-mail transacional |
-| Nota fiscal, reembolso, chargeback, conciliação | RED | fora do escopo | tributário/financeiro |
 | Perfis OS/OSCIP, instrumentos, trilha e mentoria (v0.10.1) | YELLOW | 23 testes novos + E2E admin com MFA | revisão jurídica da trilha e dos rótulos; validação de qualificações pela equipe; atendimento humano da mentoria |
 | Cruzamento fiscal × elegibilidade (v0.10.1) | YELLOW | testes de isolamento e estados | regras fiscais/institucionais **reais** aprovadas por profissional |
 | Rede da solução (v0.10.1) | GREEN (backend) / YELLOW (a11y) | testes de privacidade; lista acessível; sem grafo visual | usabilidade; grafo visual opcional |

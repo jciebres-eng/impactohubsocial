@@ -1,0 +1,19 @@
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+............{"ts": "2026-10-05T14:35:49.378+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "600f83d2f0b84cc7", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "3dfe41a82d2be41403e2c79d7e585992", "user_id": "c56a3b5a-400e-42d5-9be1-144a5591abe3"}
+{"ts": "2026-10-05T14:35:49.419+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "ff0b056b1b5840b0", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "932b56b1491e2fe5cf010ae185526f2f", "user_id": "c56a3b5a-400e-42d5-9be1-144a5591abe3"}
+............{"ts": "2026-10-05T14:35:53.293+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "96724481dc3b4f99", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "937a020365e63eda51f38d80fa3c542e"}
+{"ts": "2026-10-05T14:35:53.328+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "8364e48a34cf433a", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "81d7e2d5881239781c18e4106738428e"}
+...............{"ts": "2026-10-05T14:36:02.958+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "5c1096545ac9480a", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "d54cb9aa51e25830f46b5597007e7593", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas o financiador informa desembolso/cancelamento", "user_id": "60146c12-db84-4bb7-9bcb-a74cb9a2d30c"}
+{"ts": "2026-10-05T14:36:02.985+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "0c54d7f89186407f", "service": "impacto-api", "version": "0.10.0", "env": "test", "trace_id": "7044da34d49e6ebee79b89d5f6af10b2", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas a OSC confirma o recebimento", "user_id": "d66488fc-8666-46ab-85cf-b895becb7c13"}
+.................................../usr/lib/python3.13/email/feedparser.py:526: ResourceWarning: unclosed <socket.socket [closed] fd=9, family=2, type=1, proto=6>
+  lastvalue = [line]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+............................................/usr/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=9, family=2, type=1, proto=0, laddr=('127.0.0.1', 46307)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..........................................................................................................................................
+----------------------------------------------------------------------
+Ran 256 tests in 124.796s
+
+OK

@@ -31,3 +31,6 @@ Contabilização de gratuidade/desconto e emissão fiscal: **[VALIDAR com contad
 
 ## Biblioteca de Soluções — notas de monetização (hipóteses, nenhuma ativa)
 Permitido (capacidade, nunca ranking): limites maiores de rascunhos/comparações/combinações, alertas de novas soluções, relatórios de funil para autores, serviços profissionais de curadoria/validação. **Proibido por regra testada:** vender posição, destaque algorítmico, nota ou "selo" de comprovação. A busca, o match e as recomendações não leem plano/assinatura.
+
+## v0.11.0 — níveis e trial
+FREE · PLUS · PREMIUM (FULL) · GOV (contrato institucional). Trial de 14 dias FULL por organização, sem cartão. Preços mensal/anual **não definidos** (decisão do proprietário); a divisão de recursos PLUS × PREMIUM é **hipótese** a validar. Plano nunca influencia match/busca/ranking.

@@ -1,6 +1,6 @@
-# API — documentação (v0.11.0)
+# API — documentação (v0.10.1)
 
-Referência completa **gerada do código**: `docs/API.md` (373 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (358 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
 
 ## Biblioteca de Soluções (60 operações novas)
 | Grupo | Rotas principais |
@@ -37,11 +37,3 @@ Campos novos: edital (`funding_modality`, `accepted_legal_natures`, `min_maturit
 
 ## Novidades do v0.10.1
 `GET /v1/institutional/persona`, `GET/POST /v1/institutional/agreements` (+ `PATCH/DELETE /{id}`), `GET /v1/institutional/formalization`, `PUT /v1/institutional/formalization/{step_code}`, `GET/POST /v1/institutional/mentoring` (+ `POST /{id}/cancel`), `GET /v1/solutions/{id}/network`; admin: `GET /v1/admin/institutional/agreements`, `POST …/agreements/{id}/decide`, `GET /v1/admin/institutional/mentoring`, `POST …/mentoring/{id}/update`. `GET /v1/insights/fiscal-estimates` ganhou `osc_org_id` e o bloco `institutional_eligibility`. Detalhes gerados em `docs/API.md`.
-
-## Monetização (v0.11.0 — 15 operações novas; ver `docs/billing.md`)
-| Grupo | Rotas |
-|---|---|
-| Organização | `GET /v1/plans` (tiers, preços, economia anual) · `GET /v1/billing` · `POST /v1/billing/quote` · `/checkout` · `/cancel` · `/reactivate` · `/change-plan` · `/portal` · `POST /v1/vouchers/redeem` · `POST /v1/agreements/join` |
-| Webhook | `POST /v1/billing/webhooks/stripe` (assinatura HMAC, idempotente, fora de ordem) |
-| Admin (MFA, motivo, auditoria) | `GET /v1/admin/billing/organizations/{id}` · `POST .../trial` · `POST /v1/admin/grants/{id}/revoke` · `PUT /v1/admin/plans/{plan_key}/price` · `/v1/admin/agreements` (+ `/action`, `/members`, revogar) · `GET /v1/admin/voucher-batches/{id}/redemptions` |
-O cliente **não** envia preço, desconto, tier nem direitos: campos extras são recusados (422).

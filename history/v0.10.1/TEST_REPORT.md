@@ -1,9 +1,4 @@
-# TEST_REPORT — v0.11.0 (2026-10-05)
-
-**v0.11.0: 290 testes, 0 falhas, 0 ignorados** (256 herdados + **34** em `backend/tests/test_v0110_monetization.py`). Log completo: `docs/evidence/test_run_v0.11.0.log` (comando: `python3 -m unittest discover -s tests -t . -v` em `backend/`, PostgreSQL 16 real).
-Cobertura nova: trial (início/14 dias/FULL/avisos/cancelamento dia 1 e dia 13/FREE após o fim/anti-abuso/lembretes sem duplicar), tiers (FREE/PLUS/PREMIUM/GOV), vouchers (20%, expirado, esgotado, 100%, permanente, valor fixo), checkout com `trial_end`, webhooks (duplicado, assinatura inválida, replay, fora de ordem), mensal/anual, cancelar impede renovação e preserva histórico, upgrade/downgrade, falha de pagamento/ação requerida/portal, convênios (vagas, domínio, 2º admin, GOV, revogação), revogação de licença, isolamento entre organizações e escrita direta bloqueada no banco.
-**Limite:** o Stripe é um **dublê HTTP** — prova o que a plataforma envia/decide/registra, não o comportamento da API real. **Não há E2E de navegador do fluxo de cobrança** (frontend validado por `tsc` + build). Sem linter Python.
-
+# TEST_REPORT — v0.10.1 (2026-10-05)
 
 **Resultado: 256 testes, 0 falhas, 0 ignorados** (233 herdados do v0.10.0 + 17 em `test_v0101_institutional.py` (instrumentos, perfis, trilha, mentoria, cruzamento fiscal) + 2 de rede da solução + 1 de tesauro + 3 E2E em `test_e2e_v0101.py`). Log integral: `docs/evidence/test_run_v0.10.1.log` (anteriores preservados). Ambiente: PostgreSQL 16 real, servidor HTTP real, Chromium (Playwright).
 

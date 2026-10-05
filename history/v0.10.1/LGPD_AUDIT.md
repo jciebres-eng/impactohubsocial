@@ -24,8 +24,4 @@
 | Identidade de financiadores/replicadores (v0.9.0) | GREEN (técnico) | privada por padrão; autor só vê com opt-in ou pedido direto; agregados por organizações distintas | base legal do compartilhamento no pedido |
 | Autoria/equipe de soluções (v0.9.0) | YELLOW | nomes cadastrados pelo autor (pode incluir terceiros) | orientar autores a ter consentimento; processo de remoção/contestação existe |
 | Localização pública (v0.8.0) | GREEN (técnico) | precisão configurável; coordenadas exatas nunca vazam | validar padrões com o jurídico |
-| Monetização (v0.11.0): e-mail/CNPJ para anti-abuso do trial | YELLOW | só HMAC (`trial_claims`), sem dado em claro, retenção 24 meses no job `billing_lifecycle`; teste garante ausência de e-mail em claro | base legal (legítimo interesse/prevenção a fraude) e RIPD a validar com DPO |
-| Dados de pagamento | GREEN | a plataforma não armazena cartão (portal do provedor); faturas guardam valor/status/URL | contrato/operador (Stripe) e transferência internacional a validar |
-| Cancelamento/exclusão | GREEN | cancelar não apaga dados nem histórico financeiro; exclusão de conta segue o fluxo existente | prazos de guarda fiscal a validar |
-
 Conclusão: **mecanismos técnicos presentes; conformidade LGPD não declarada** — depende de governança, jurídico e DPO.

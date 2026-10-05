@@ -166,7 +166,7 @@ export function FiscalRules() {
 
 export function Vouchers() {
   const { data, error, loading, reload } = useLoad<any>("/v1/admin/voucher-batches");
-  const f = useForm({ campaign: "", type: "grant_plan", plan_key: "osc_premium", feature_key: "", duration_days: "90", quantity: "10", max_redemptions: "1", scope_roles: "osc" });
+  const f = useForm({ campaign: "", type: "grant_plan", plan_key: "osc_premium", feature_key: "", duration_days: "90", quantity: "10", max_redemptions: "1", scope_roles: "osc", percent: "20", amount: "", discount_duration: "once", discount_months: "3" });
   const [codes, setCodes] = useState<string[] | null>(null);
   const { busy, run } = useAction();
   return (
@@ -174,12 +174,20 @@ export function Vouchers() {
       <PageHead title="Vouchers" sub="Códigos guardados apenas como hash. Cada lote só vale após aprovação de um segundo administrador." />
       <div className="split">
         <Panel title="Novo lote">
-          <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/admin/voucher-batches", { campaign: f.v.campaign, type: f.v.type, plan_key: f.v.type === "grant_feature" ? null : f.v.plan_key, feature_key: f.v.type === "grant_feature" ? f.v.feature_key : null, duration_days: Number(f.v.duration_days), quantity: Number(f.v.quantity), max_redemptions: Number(f.v.max_redemptions), scope_roles: f.v.scope_roles ? [f.v.scope_roles] : [] }), "Lote criado").then((r: any) => { if (r) { setCodes(r.codes); reload(); } }); }}>
+          <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/admin/voucher-batches", { campaign: f.v.campaign, type: f.v.type, plan_key: f.v.type === "grant_feature" || f.v.type === "amount_off" || (f.v.type === "percent_off" && Number(f.v.percent) < 100 && !f.v.plan_key) ? (f.v.plan_key || null) : f.v.plan_key,
+            feature_key: f.v.type === "grant_feature" ? f.v.feature_key : null, duration_days: f.v.duration_days ? Number(f.v.duration_days) : null,
+            percent: f.v.type === "percent_off" ? Number(f.v.percent) : null, amount_cents: f.v.type === "amount_off" ? Math.round(Number(String(f.v.amount).replace(",", ".")) * 100) : null,
+            discount_duration: f.v.discount_duration, discount_months: f.v.discount_duration === "repeating" ? Number(f.v.discount_months) : null,
+            quantity: Number(f.v.quantity), max_redemptions: Number(f.v.max_redemptions), scope_roles: f.v.scope_roles ? [f.v.scope_roles] : [] }), "Lote criado").then((r: any) => { if (r) { setCodes(r.codes); reload(); } }); }}>
             <Field label="Campanha"><Input value={f.v.campaign} onChange={f.set("campaign")} /></Field>
-            <Field label="Tipo"><Select value={f.v.type} onChange={f.set("type")} options={[["grant_plan", "Gratuidade de plano"], ["grant_feature", "Liberar recurso"], ["free_period", "Período gratuito"]]} /></Field>
-            {f.v.type !== "grant_feature" ? <Field label="Plano"><Select value={f.v.plan_key} onChange={f.set("plan_key")} options={[["osc_premium", "OSC Captação"], ["company_premium", "Empresa Impacto"], ["provider_premium", "Profissional Plus"]]} /></Field>
+            <Field label="Tipo"><Select value={f.v.type} onChange={f.set("type")} options={[["grant_plan", "Licença gratuita de plano"], ["grant_feature", "Liberar recurso"], ["free_period", "Período gratuito"], ["percent_off", "Desconto percentual (100% = licença)"], ["amount_off", "Desconto em valor fixo"]]} /></Field>
+            {f.v.type !== "grant_feature" ? <Field label="Plano"><Select value={f.v.plan_key} onChange={f.set("plan_key")} options={[["osc_premium", "OSC Premium"], ["osc_plus", "OSC Plus"], ["company_premium", "Empresa Premium"], ["company_plus", "Empresa Plus"], ["provider_premium", "Profissional Plus"]]} /></Field>
               : <Field label="Recurso"><Input value={f.v.feature_key} onChange={f.set("feature_key")} placeholder="alerts.saved_search" /></Field>}
-            <Field label="Duração (dias)"><Input inputMode="numeric" value={f.v.duration_days} onChange={f.set("duration_days")} /></Field>
+            {f.v.type === "percent_off" && <Field label="Desconto (%)"><Input inputMode="numeric" value={f.v.percent} onChange={f.set("percent")} /></Field>}
+            {f.v.type === "amount_off" && <Field label="Desconto (R$)"><Input inputMode="decimal" value={f.v.amount} onChange={f.set("amount")} /></Field>}
+            {(f.v.type === "percent_off" || f.v.type === "amount_off") && <Field label="Duração do desconto"><Select value={f.v.discount_duration} onChange={f.set("discount_duration")} options={[["once", "Primeira cobrança"], ["repeating", "Por alguns meses"], ["forever", "Enquanto durar a assinatura"]]} /></Field>}
+            {f.v.discount_duration === "repeating" && (f.v.type === "percent_off" || f.v.type === "amount_off") && <Field label="Meses de desconto"><Input inputMode="numeric" value={f.v.discount_months} onChange={f.set("discount_months")} /></Field>}
+            {f.v.type !== "amount_off" && (f.v.type !== "percent_off" || Number(f.v.percent) >= 100) && <Field label="Duração da licença (dias; vazio = permanente)"><Input inputMode="numeric" value={f.v.duration_days} onChange={f.set("duration_days")} /></Field>}
             <Field label="Quantidade de códigos"><Input inputMode="numeric" value={f.v.quantity} onChange={f.set("quantity")} /></Field>
             <Field label="Usos por código"><Input inputMode="numeric" value={f.v.max_redemptions} onChange={f.set("max_redemptions")} /></Field>
             <Field label="Restrito a"><Select value={f.v.scope_roles} onChange={f.set("scope_roles")} placeholder="Qualquer tipo" options={[["osc", "OSC"], ["company", "Empresa"], ["provider", "Profissional"]]} /></Field>
@@ -300,5 +308,115 @@ export function Audit() {
         <Pager data={data} offset={offset} setOffset={setOffset} />
       </StateView>
     </AdminGate>
+  );
+}
+
+
+const AGR_KIND: [string, string][] = [["convention", "Convênio"], ["partner", "Parceria"], ["gov", "Instituição pública (GOV)"]];
+
+/** Convênios, parcerias e contratos institucionais: licença e/ou desconto por código; ativação por um segundo administrador. */
+export function Agreements() {
+  const { data, error, loading, reload } = useLoad<any>("/v1/admin/agreements");
+  const f = useForm({ name: "", kind: "convention", plan_key: "osc_premium", seats: "10", grant_days: "", discount_percent: "", email_domains: "", contract_ref: "" });
+  const [code, setCode] = useState<string | null>(null);
+  const { busy, run } = useAction();
+  const act = (id: string, action: string, ok: string) => run(() => api.post(`/v1/admin/agreements/${id}/action`, { action }), ok).then(reload);
+  return (
+    <AdminGate>
+      <PageHead title="Convênios e contratos" sub="O código é exibido uma única vez e guardado apenas como hash. O domínio de e-mail só restringe quem pode entrar; o código continua obrigatório. A ativação exige um segundo administrador." />
+      <div className="split">
+        <Panel title="Novo convênio">
+          <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/admin/agreements", { name: f.v.name, kind: f.v.kind, plan_key: f.v.plan_key || null, seats: Number(f.v.seats), grant_days: f.v.grant_days ? Number(f.v.grant_days) : null,
+            discount_percent: f.v.discount_percent ? Number(f.v.discount_percent) : null, email_domains: f.v.email_domains.split(/[\s,;]+/).filter(Boolean), contract_ref: f.v.contract_ref || null }), "Convênio criado (rascunho)").then((r: any) => { if (r) { setCode(r.code); reload(); } }); }}>
+            <Field label="Nome"><Input value={f.v.name} onChange={f.set("name")} /></Field>
+            <Field label="Tipo"><Select value={f.v.kind} onChange={f.set("kind")} options={AGR_KIND} /></Field>
+            <Field label="Plano concedido"><Select value={f.v.plan_key} onChange={f.set("plan_key")} placeholder="Nenhum (só desconto)" options={[["osc_premium", "OSC Premium"], ["osc_plus", "OSC Plus"], ["company_premium", "Empresa Premium"], ["company_plus", "Empresa Plus"], ["gov_institutional", "GOV institucional"]]} /></Field>
+            <Field label="Vagas (organizações)"><Input inputMode="numeric" value={f.v.seats} onChange={f.set("seats")} /></Field>
+            <Field label="Dias de licença (vazio = até o fim do convênio)"><Input inputMode="numeric" value={f.v.grant_days} onChange={f.set("grant_days")} /></Field>
+            <Field label="Desconto no checkout (%)"><Input inputMode="numeric" value={f.v.discount_percent} onChange={f.set("discount_percent")} /></Field>
+            <Field label="Domínios de e-mail permitidos (opcional)"><Input value={f.v.email_domains} onChange={f.set("email_domains")} placeholder="exemplo.org.br" /></Field>
+            <Field label="Referência do contrato"><Input value={f.v.contract_ref} onChange={f.set("contract_ref")} /></Field>
+            <Button type="submit" variant="primary" busy={busy}>Criar convênio</Button>
+          </form>
+        </Panel>
+        <Panel title="Convênios">
+          <StateView loading={loading} error={error} onRetry={reload}>
+            <ul className="rows">{data?.items.map((a: any) => (
+              <li key={a.id}><span><strong>{a.name}</strong> · {label(a.kind)} · {a.seats_used}/{a.seats} vagas<br /><span className="muted">{a.plan_key || "somente desconto"}{a.discount_percent ? ` · ${a.discount_percent}% de desconto` : ""} · código …{a.code_hint}</span></span>
+                <span className="row-actions"><Pill status={a.status} />
+                  {a.status === "draft" && <Button variant="link" onClick={() => act(a.id, "activate", "Convênio ativado")}>Ativar (2º admin)</Button>}
+                  {a.status === "active" && <Button variant="link" onClick={() => confirm("Suspender novos ingressos?") && act(a.id, "suspend", "Convênio suspenso")}>Suspender</Button>}
+                  {a.status !== "ended" && <Button variant="link" onClick={() => confirm("Encerrar o convênio? As licenças dos membros são revogadas.") && act(a.id, "end", "Convênio encerrado")}>Encerrar</Button>}</span></li>
+            ))}{data?.items.length === 0 && <li className="muted">Nenhum convênio.</li>}</ul>
+          </StateView>
+        </Panel>
+      </div>
+      <Modal open={!!code} title="Código do convênio" onClose={() => setCode(null)}>
+        <p>Guarde agora: o código não será exibido novamente.</p>
+        <p><code>{code}</code></p>
+      </Modal>
+    </AdminGate>
+  );
+}
+
+/** Cobrança de uma organização: trial, licenças (concessão e revogação com motivo) e histórico. Toda intervenção exige motivo e é auditada. */
+export function OrgBilling() {
+  const [orgId, setOrgId] = useState("");
+  const [data, setData] = useState<any>(null);
+  const f = useForm({ plan_key: "osc_premium", days: "30", source: "license", reason: "", trial_days: "14" });
+  const { busy, run } = useAction();
+  const load = (id = orgId) => run(() => api.get(`/v1/admin/billing/organizations/${id}`)).then((r: any) => r && setData(r));
+  return (
+    <AdminGate>
+      <PageHead title="Cobrança por organização" sub="Intervenções de suporte: licença, revogação e período de teste. Sempre com motivo; ficam na trilha de auditoria." />
+      <Panel>
+        <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); load(); }}>
+          <Field label="ID da organização"><Input value={orgId} onChange={setOrgId} /></Field>
+          <Button type="submit" variant="ink" busy={busy}>Consultar</Button>
+        </form>
+      </Panel>
+      {data && <>
+        <Panel title="Situação">
+          <KV d={data} />
+        </Panel>
+        <div className="split">
+          <Panel title="Conceder licença">
+            <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post(`/v1/admin/organizations/${orgId}/grants`, { plan_key: f.v.plan_key, days: f.v.days ? Number(f.v.days) : null, source: f.v.source, reason: f.v.reason }), "Licença concedida").then(() => load()); }}>
+              <Field label="Plano"><Select value={f.v.plan_key} onChange={f.set("plan_key")} options={[["osc_premium", "OSC Premium"], ["osc_plus", "OSC Plus"], ["company_premium", "Empresa Premium"], ["company_plus", "Empresa Plus"], ["gov_institutional", "GOV institucional"]]} /></Field>
+              <Field label="Origem"><Select value={f.v.source} onChange={f.set("source")} options={[["license", "Licença"], ["partner", "Parceria"], ["convention", "Convênio"], ["gov", "GOV"], ["promotion", "Promoção"], ["admin", "Administrativa"]]} /></Field>
+              <Field label="Dias (vazio = permanente)"><Input inputMode="numeric" value={f.v.days} onChange={f.set("days")} /></Field>
+              <Field label="Motivo"><Input value={f.v.reason} onChange={f.set("reason")} /></Field>
+              <Button type="submit" variant="primary" busy={busy}>Conceder</Button>
+            </form>
+          </Panel>
+          <Panel title="Período de teste">
+            <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post(`/v1/admin/organizations/${orgId}/trial`, { days: Number(f.v.trial_days), reason: f.v.reason }), "Teste iniciado").then(() => load()); }}>
+              <Field label="Dias"><Input inputMode="numeric" value={f.v.trial_days} onChange={f.set("trial_days")} /></Field>
+              <Field label="Motivo"><Input value={f.v.reason} onChange={f.set("reason")} /></Field>
+              <Button type="submit" variant="ink" busy={busy}>Iniciar teste</Button>
+            </form>
+            <p className="muted">Cada organização tem no máximo um período de teste.</p>
+          </Panel>
+        </div>
+        <Panel title="Licenças">
+          <ul className="rows">{data.grants?.map((g: any) => (
+            <li key={g.id}><span>{label(g.source)} · {g.plan_key || g.feature_key}<br /><span className="muted">{g.reason || "—"}{g.revoke_reason ? ` · revogada: ${g.revoke_reason}` : ""}</span></span>
+              <span className="row-actions">{g.revoked_at ? <Pill tone="muted">Revogada</Pill> : <>{g.ends_at ? `até ${date(g.ends_at)}` : "sem prazo"}
+                <Button variant="link" onClick={() => { const reason = prompt("Motivo da revogação (mín. 3 caracteres)"); if (reason) run(() => api.post(`/v1/admin/grants/${g.id}/revoke`, { reason }), "Licença revogada").then(() => load()); }}>Revogar</Button></>}</span></li>
+          ))}{!data.grants?.length && <li className="muted">Nenhuma licença.</li>}</ul>
+        </Panel>
+      </>}
+    </AdminGate>
+  );
+}
+
+function KV({ d }: { d: any }) {
+  return (
+    <dl className="kv">
+      <div><dt>Nível</dt><dd>{d.entitlements?.tier_label || "—"}</dd></div>
+      <div><dt>Assinatura</dt><dd>{d.subscriptions?.[0] ? `${label(d.subscriptions[0].status)} · ${d.subscriptions[0].plan_key}` : "—"}</dd></div>
+      <div><dt>Teste</dt><dd>{d.trial ? `${label(d.trial.status)} até ${date(d.trial.trial_end)}` : "—"}</dd></div>
+      <div><dt>Faturas</dt><dd>{d.invoices?.length ?? 0}</dd></div>
+    </dl>
   );
 }

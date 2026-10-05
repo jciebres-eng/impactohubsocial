@@ -1,22 +1,6 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
-## [0.11.0] — 2026-10-05 — Monetização SaaS (cumulativo; snapshot do v0.10.1 em `history/v0.10.1/`)
-### Adicionado
-- **Níveis FREE / PLUS / PREMIUM(FULL) / GOV** (`plans.tier`, `config/plans@1.1`; planos `osc_plus`, `company_plus`, `gov_institutional`) e função central de direitos (`entitlements.effective/get_entitlements/has_access`). Preços **não definidos** (nunca inventados).
-- **Trial de 14 dias FULL por organização**, iniciado no cadastro, sem cartão; cancelar mantém o acesso até o fim e não cobra; nada é apagado. Anti-abuso por HMAC de e-mail normalizado e CNPJ (`trial_claims`). Avisos nos dias 1/7/11/13/14, fim, conversão, falha e cancelamento (in-app, sem repetição).
-- **Cobrança mensal/anual** com economia real (`plan_prices`), cotação calculada no servidor (`POST /v1/billing/quote`), checkout Stripe com `trial_end` (nunca cobra antes do fim do trial), troca de plano com proration (`/change-plan`), portal do provedor (`/portal`), cancelar/reativar.
-- **Webhooks Stripe** idempotentes, assinados e tolerantes a eventos fora de ordem; estados TRIALING/ACTIVE/PAST_DUE/CANCELED/INCOMPLETE/EXPIRED + `payment_issue` (`payment_failed`/`action_required`).
-- **Vouchers** de desconto percentual e valor fixo (duração única/recorrente/permanente), 100% = licença, sem duração = permanente, por plano e por organização. **Licenças** com origem e revogação com motivo. **Convênios/GOV** (código, vagas, período, plano e/ou desconto; domínio só restringe; ativação por 2º admin).
-- Admin: vouchers estendidos, convênios, cobrança por organização (licença, revogação, trial, preço do plano). Frontend: `/conta/plano` (alias `/settings/billing`) reescrita — alternância mensal/anual, cotação, trial, cancelamento com confirmação, voucher, convênio, faturas.
-- Migração `0008_v0110_monetization.sql` (6 tabelas: `plan_prices`, `org_trials`, `trial_claims`, `billing_notices`, `agreements`, `agreement_members`; colunas novas; RLS e gatilho `billing_guard`). API: **373** operações. Banco de desenvolvimento: **120** tabelas.
-- +34 testes (290 no total) em `test_v0110_monetization.py`. Documentação: `docs/billing.md`.
-### Alterado (comportamento)
-- Cancelar assinatura (sandbox/manual) mantém o acesso até o fim do período pago (antes: imediato). `invoice.paid` com valor > 0 converte o trial e confirma o plano.
-- Job `billing_lifecycle` (lembretes, fim de trial, conversão de assinaturas sandbox, fim de períodos cancelados, limpeza de `trial_claims` > 24 meses).
-### Não feito / pendente (declarado)
-- **Stripe nunca foi chamado de verdade** (só dublê): conta, preços, endpoint do webhook, Billing Portal e homologação são externos. O mínimo de `trial_end` do Checkout (~48 h) **não foi verificado** na API real. Divisão PLUS × PREMIUM é **hipótese**. Avisos só in-app (sem e-mail). Sem nota fiscal/reembolso/chargeback. Sem linter Python.
-
 ## [0.10.1] — 2026-10-05 — Pendências institucionais (cumulativo; snapshot do v0.10.0 em `history/v0.10.0/`)
 ### Adicionado
 - **Cruzamento fiscal × elegibilidade institucional**: `GET /v1/insights/fiscal-estimates` aceita `osc_org_id` e devolve `institutional_eligibility` (estado, resumo, o que falta, camadas fiscais) como camada **separada** da estimativa; aviso quando a OSC é NÃO ELEGÍVEL.

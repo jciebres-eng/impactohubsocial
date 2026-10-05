@@ -51,6 +51,7 @@ const ROUTES: R[] = [
   ["/organizacao/equipe", () => <Org.Team />],
   ["/conta", () => <Org.Account />],
   ["/conta/plano", () => <Org.Plan />],
+  ["/settings/billing", () => <Org.Plan />],
   ["/fiscal", () => <Org.Fiscal />, ["company"]],
   ["/materiais", () => <Org.Materials />],
   ["/dados-territoriais", () => <Org.GovData />, ["government", "platform"]],
@@ -97,6 +98,8 @@ const ROUTES: R[] = [
   ["/admin/editais", () => <Admin.CuratedCalls />, ["platform"]],
   ["/admin/fiscal", () => <Admin.FiscalRules />, ["platform"]],
   ["/admin/vouchers", () => <Admin.Vouchers />, ["platform"]],
+  ["/admin/convenios", () => <Admin.Agreements />, ["platform"]],
+  ["/admin/cobranca", () => <Admin.OrgBilling />, ["platform"]],
   ["/admin/usuarios", () => <Admin.Users />, ["platform"]],
   ["/admin/organizacoes", () => <Admin.Orgs />, ["platform"]],
   ["/admin/denuncias", () => <Admin.Reports />, ["platform"]],
@@ -123,7 +126,7 @@ const NAV: Record<string, [string, string][]> = {
   government: [["/", "Início"], ["/editais", "Editais"], ["/candidaturas", "Candidaturas"], ["/carteira", "Execução e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"],
     ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
   platform: [["/admin", "Visão geral"], ["/admin/compliance", "Compliance"], ["/admin/credenciais", "Credenciais"], ["/admin/editais", "Editais curados"],
-    ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
+    ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
     ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
 };
 const KIND_LABEL: Record<string, string> = { osc: "OSC", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração" };

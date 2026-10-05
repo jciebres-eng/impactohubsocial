@@ -331,56 +331,127 @@ export function Account() {
   );
 }
 
+const FEATURE: Record<string, string> = { "catalog.search": "Banco de oportunidades", "match.explain": "Compatibilidade explicada", "applications.assisted": "Candidatura assistida",
+  "documents.vault": "Cofre de documentos", "evidence.post": "Evidências e prestação de contas", "professional.request": "Validação por profissionais parceiros",
+  "alerts.saved_search": "Rastreio automático e alertas de editais", "opportunity.tracking": "Acompanhamento de oportunidades", "ai.assist.advanced": "Mais assistência de IA",
+  "reports.export": "Exportação de relatórios", templates: "Modelos", "feed.projects": "Feed de projetos", "portfolio.tracking": "Rastreio do investimento",
+  "reports.basic": "Relatórios", "reports.advanced": "Relatórios avançados", "conflict.management": "Gestão de conflito de interesse", "fiscal.estimates": "Incentivos fiscais (estimativas)",
+  "territory.analytics": "Análise territorial", sso: "Login corporativo (SSO)", "audit.export": "Exportação de auditoria", "api.access": "Acesso à API",
+  "directory.listing": "Presença no diretório", "reviews.receive": "Receber solicitações", "signatures.sign": "Assinar com credencial", "calls.publish": "Publicar editais",
+  "materials.publish": "Publicar materiais", "gov.data": "Dados do território" };
+const PAYMENT_ISSUE: Record<string, string> = { payment_failed: "Não conseguimos processar seu pagamento. Atualize o método de pagamento para manter o plano.", action_required: "Seu banco pede uma confirmação adicional para concluir o pagamento." };
+
+/** Plano e cobrança (/conta/plano e /settings/billing). Preço, desconto e trial são sempre calculados no servidor; aqui só exibimos e pedimos a ação. */
 export function Plan() {
   const { me, reload: reloadMe } = useSession();
   const plans = useLoad<any>("/v1/plans");
   const billing = useLoad<any>("/v1/billing");
+  const [interval, setInterval_] = useState<"month" | "year">("month");
+  const [voucher, setVoucher] = useState("");
   const [code, setCode] = useState("");
+  const [agr, setAgr] = useState("");
+  const [quote, setQuote] = useState<any>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const { busy, run } = useAction();
   const kind = me?.active_org?.kind;
-  const role = kind === "company" ? "company" : kind;
-  const current = new Set(me?.entitlements?.plans || []);
-  const FEATURE: Record<string, string> = { "catalog.search": "Banco de oportunidades", "match.explain": "Compatibilidade explicada", "applications.assisted": "Candidatura assistida",
-    "documents.vault": "Cofre de documentos", "evidence.post": "Evidências e prestação de contas", "professional.request": "Validação por profissionais parceiros",
-    "alerts.saved_search": "Rastreio automático e alertas de editais", "opportunity.tracking": "Acompanhamento de oportunidades", "ai.assist.advanced": "Mais assistência de IA",
-    "reports.export": "Exportação de relatórios", templates: "Modelos", "feed.projects": "Feed de projetos", "portfolio.tracking": "Rastreio do investimento",
-    "reports.basic": "Relatórios", "reports.advanced": "Relatórios avançados", "conflict.management": "Gestão de conflito de interesse", "fiscal.estimates": "Incentivos fiscais (estimativas)",
-    "territory.analytics": "Análise territorial", sso: "Login corporativo (SSO)", "audit.export": "Exportação de auditoria", "api.access": "Acesso à API",
-    "directory.listing": "Presença no diretório", "reviews.receive": "Receber solicitações", "signatures.sign": "Assinar com credencial", "calls.publish": "Publicar editais",
-    "materials.publish": "Publicar materiais", "gov.data": "Dados do território" };
+  const isOwner = me?.active_org?.role === "owner";
+  const b = billing.data;
+  const sub = b?.subscription;
+  const trial = b?.trial;
+  const refresh = async () => { await reloadMe(); billing.reload(); };
+  const doQuote = (planKey: string) => run(() => api.post("/v1/billing/quote", { plan_key: planKey, interval, voucher: undefined })).then((q: any) => q && setQuote(q));
+  const checkout = (planKey: string) => run(() => api.post("/v1/billing/checkout", { plan_key: planKey, interval, voucher: voucher || undefined }))
+    .then(async (r: any) => { if (r?.url) location.href = r.url; else if (r) { setQuote(null); await refresh(); } });
+  const hasPrice = (p: any) => p.prices && p.prices[interval] != null;
+  const current = new Set<string>(me?.entitlements?.plans || []);
   return (
     <>
-      <PageHead title="Plano" sub={me?.entitlements?.plan_names?.join(" + ")} />
+      <PageHead title="Plano e cobrança" sub={b ? `${b.tier_label}${me?.entitlements?.plan_names?.length ? " · " + me.entitlements.plan_names.join(" + ") : ""}` : undefined} />
       {plans.data && !plans.data.billing_live && <p className="banner">Cobrança online em modo {plans.data.billing_provider === "sandbox" ? "de testes (nenhuma cobrança real)" : "não configurado"}. Contratações podem ser feitas por proposta comercial ou voucher.</p>}
+      {b?.notices?.map((n: any) => <p key={n.code} className={`banner banner-${n.level}`} role={n.level === "warning" ? "alert" : "status"}>{n.text}</p>)}
+      {sub?.payment_issue && <p className="banner banner-warning" role="alert">{PAYMENT_ISSUE[sub.payment_issue]} <Button variant="link" busy={busy} onClick={() => run(() => api.post("/v1/billing/portal")).then((r: any) => r?.url && (location.href = r.url))}>Atualizar pagamento</Button></p>}
+      <StateView loading={billing.loading} error={billing.error} onRetry={billing.reload}>
+        <Panel title="Sua assinatura">
+          <KeyValue items={[
+            ["Nível de acesso", b?.tier_label],
+            ["Situação", sub ? <Pill status={sub.status} /> : trial?.active ? <Pill tone="good">Teste gratuito{trial.canceled ? " (cancelado)" : ""}</Pill> : <Pill tone="muted">Sem assinatura paga</Pill>],
+            trial?.active ? ["Teste até", `${date(trial.trial_end)} (${trial.days_left} ${trial.days_left === 1 ? "dia" : "dias"})`] : null,
+            sub?.interval ? ["Cobrança", sub.interval === "year" ? "Anual" : "Mensal"] : null,
+            sub?.amount_cents != null ? ["Valor", money(sub.amount_cents)] : null,
+            b?.next_charge ? ["Próxima cobrança", `${date(b.next_charge.at)}${b.next_charge.amount_cents != null ? " · " + money(b.next_charge.amount_cents) : ""}`] : null,
+            sub?.cancel_at_period_end ? ["Acesso até", date(sub.current_period_end)] : null,
+          ].filter(Boolean) as any} />
+          {b?.payment_method && <p className="muted">{b.payment_method}</p>}
+          <div className="actions">
+            {sub?.has_payment_customer && <Button variant="ghost" busy={busy} onClick={() => run(() => api.post("/v1/billing/portal")).then((r: any) => r?.url && (location.href = r.url))}>Método de pagamento e faturas</Button>}
+            {isOwner && ((sub && !sub.cancel_at_period_end) || (trial?.active && !trial.canceled && !sub)) && <Button variant="link" onClick={() => setCancelOpen(true)}>Cancelar</Button>}
+            {isOwner && (sub?.cancel_at_period_end || (trial?.canceled && trial.active)) && <Button variant="ink" busy={busy} onClick={() => run(() => api.post("/v1/billing/reactivate"), "Cancelamento desfeito").then(refresh)}>Manter minha assinatura</Button>}
+          </div>
+          {(b?.licenses?.length > 0 || b?.agreements?.length > 0 || b?.pending_discounts?.length > 0) && (
+            <ul className="rows">
+              {b.licenses.map((l: any, i: number) => <li key={"l" + i}><span>Licença {label(l.source)}{l.plan_key ? ` · ${l.plan_key}` : ""}</span><span>{l.ends_at ? `até ${date(l.ends_at)}` : "sem prazo"}</span></li>)}
+              {b.agreements.map((a: any, i: number) => <li key={"a" + i}><span>Convênio: {a.name}</span><span>{a.discount_percent ? `${a.discount_percent}% de desconto` : "licença"} <Pill status={a.status} /></span></li>)}
+              {b.pending_discounts.map((d: any, i: number) => <li key={"d" + i}><span>Desconto de voucher aguardando a contratação</span><span>{d.type === "percent_off" ? `${d.value?.percent}%` : money(d.value?.amount_cents)}</span></li>)}
+            </ul>
+          )}
+        </Panel>
+      </StateView>
+      <div className="seg" role="group" aria-label="Periodicidade">
+        <button type="button" className={interval === "month" ? "on" : ""} aria-pressed={interval === "month"} onClick={() => { setInterval_("month"); setQuote(null); }}>Mensal</button>
+        <button type="button" className={interval === "year" ? "on" : ""} aria-pressed={interval === "year"} onClick={() => { setInterval_("year"); setQuote(null); }}>Anual</button>
+      </div>
       <StateView loading={plans.loading} error={plans.error} onRetry={plans.reload}>
         <div className="plans">
-          {plans.data?.items.filter((p: any) => p.role === role).map((p: any) => (
-            <article key={p.plan_key} className={`plan${current.has(p.plan_key) ? " plan-current" : ""}`}>
-              <h2>{p.name}</h2>
-              <p className="plan-price">{p.price_cents === 0 ? "Gratuito" : p.price_cents ? `${money(p.price_cents)} / ${p.interval === "year" ? "ano" : "mês"}` : "Sob proposta"}</p>
-              <ul>{p.features.map((f: string) => <li key={f}>{FEATURE[f] || f}</li>)}</ul>
-              <p className="muted">{Object.entries(p.limits).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v === null ? "ilimitado" : v}`).join(" · ")}</p>
-              {current.has(p.plan_key) ? <Pill tone="good">Plano atual</Pill> : p.price_cents ? (
-                <Button variant="primary" busy={busy} disabled={!p.available || me?.active_org?.role !== "owner"}
-                  onClick={() => run(() => api.post("/v1/billing/checkout", { plan_key: p.plan_key })).then(async (r: any) => { if (r?.url) location.href = r.url; else if (r) { await reloadMe(); billing.reload(); } })}>Contratar</Button>
-              ) : p.price_cents === null && <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a>}
-            </article>
-          ))}
+          {plans.data?.items.filter((p: any) => p.role === kind).map((p: any) => {
+            const cur = current.has(p.plan_key) || sub?.plan_key === p.plan_key;
+            const free = p.tier === "free" || p.price_cents === 0;
+            return (
+              <article key={p.plan_key} className={`plan${cur ? " plan-current" : ""}`}>
+                <h2>{p.name}</h2>
+                <p className="muted">{p.tier_label}</p>
+                <p className="plan-price">{free ? "Gratuito" : hasPrice(p) ? `${money(p.prices[interval])} / ${interval === "year" ? "ano" : "mês"}` : "Preço não divulgado"}</p>
+                {interval === "year" && p.annual_savings && <p className="muted">Economia de {money(p.annual_savings.cents)} por ano ({p.annual_savings.percent}%) em relação ao mensal.</p>}
+                <ul>{p.features.map((f: string) => <li key={f}>{FEATURE[f] || f}</li>)}</ul>
+                <p className="muted">{Object.entries(p.limits).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v === null ? "ilimitado" : v}`).join(" · ")}</p>
+                {cur ? <Pill tone="good">Plano atual</Pill> : free ? null : p.tier === "gov" ? <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a> :
+                  <Button variant="primary" busy={busy} disabled={!p.available || !isOwner || !hasPrice(p)} onClick={() => sub ? run(() => api.post("/v1/billing/change-plan", { plan_key: p.plan_key, interval }), "Plano alterado").then(refresh) : doQuote(p.plan_key)}>{sub ? "Mudar para este plano" : "Assinar"}</Button>}
+              </article>
+            );
+          })}
         </div>
       </StateView>
+      <Modal open={!!quote} title="Confirme sua assinatura" onClose={() => setQuote(null)} footer={<Button variant="primary" busy={busy} onClick={() => checkout(quote.plan_key)}>{quote?.trial?.active ? "Continuar para o pagamento" : "Ir para o pagamento"}</Button>}>
+        {quote && <>
+          <KeyValue items={[["Plano", `${quote.plan_name} · ${quote.interval === "year" ? "anual" : "mensal"}`], ["Valor", money(quote.base_cents)],
+            quote.discount ? ["Desconto", quote.discount.kind === "percent" ? `${quote.discount.value}%` : money(quote.discount.value)] : null, ["Valor final", money(quote.final_cents)],
+            ["Primeira cobrança", quote.charge_now ? "ao confirmar o pagamento" : date(quote.first_charge_at)]].filter(Boolean) as any} />
+          {quote.trial?.active && <p>Você continua no teste gratuito. Nenhuma cobrança será feita antes de {date(quote.first_charge_at)}, e você pode cancelar antes dessa data.</p>}
+          <Field label="Tenho um voucher"><Input value={voucher} onChange={(v) => setVoucher(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
+          <p className="muted">Você pode cancelar quando quiser. Os dados do cartão são tratados pelo provedor de pagamento; a plataforma não os armazena.</p>
+        </>}
+      </Modal>
+      <Modal open={cancelOpen} title="Cancelar assinatura" onClose={() => setCancelOpen(false)} footer={<><Button variant="ghost" onClick={() => setCancelOpen(false)}>Voltar</Button><Button variant="danger" busy={busy} onClick={() => run(() => api.post("/v1/billing/cancel"), "Cancelamento confirmado").then((r) => { if (r) { setCancelOpen(false); refresh(); } })}>Confirmar cancelamento</Button></>}>
+        {trial?.active && !sub ? <p>Você continuará com acesso FULL até {date(trial.trial_end)}. Nenhuma cobrança será realizada. Depois disso, sua conta passa para o plano gratuito.</p>
+          : <p>Você continuará tendo acesso até {date(sub?.current_period_end)}. Depois disso, sua conta passa para o plano gratuito. Seus dados e seu histórico financeiro não serão apagados.</p>}
+      </Modal>
       <div className="split">
         <Panel title="Tenho um voucher">
-          <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/vouchers/redeem", { code }), "Voucher aplicado").then(async (r) => { if (r) { setCode(""); await reloadMe(); billing.reload(); } }); }}>
+          <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/vouchers/redeem", { code }), "Voucher aplicado").then(async (r) => { if (r) { setCode(""); await refresh(); } }); }}>
             <Field label="Código"><Input value={code} onChange={(v) => setCode(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
             <Button type="submit" variant="ink" busy={busy}>Aplicar</Button>
           </form>
         </Panel>
-        <Panel title="Assinatura e faturas" actions={billing.data?.entitlements?.subscription && <Button variant="link" onClick={() => confirm("Cancelar a assinatura? Seus dados não serão apagados.") && run(() => api.post("/v1/billing/cancel"), "Cancelamento solicitado").then(reloadMe)}>Cancelar assinatura</Button>}>
-          {billing.data?.entitlements?.subscription && <p>Assinatura: <Pill status={billing.data.entitlements.subscription.status} /> até {date(billing.data.entitlements.subscription.current_period_end)}</p>}
-          <ul className="rows">{billing.data?.invoices.map((i: any) => <li key={i.id}><span>{i.description || "Assinatura"} · {date(i.created_at)}</span><span>{money(i.amount_cents)} <Pill status={i.status} /></span></li>)}
-            {billing.data?.invoices.length === 0 && <li className="muted">Nenhuma fatura.</li>}</ul>
+        <Panel title="Código de convênio">
+          <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/agreements/join", { code: agr }), "Convênio aplicado").then(async (r) => { if (r) { setAgr(""); await refresh(); } }); }}>
+            <Field label="Código do convênio"><Input value={agr} onChange={(v) => setAgr(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
+            <Button type="submit" variant="ink" busy={busy}>Entrar no convênio</Button>
+          </form>
         </Panel>
       </div>
+      <Panel title="Histórico de faturas">
+        <ul className="rows">{b?.invoices.map((i: any) => <li key={i.id}><span>{i.description || "Assinatura"} · {date(i.created_at)}</span><span>{money(i.amount_cents)} <Pill status={i.status} />{i.hosted_url && <> <a href={i.hosted_url} target="_blank" rel="noopener noreferrer">Ver fatura</a></>}</span></li>)}
+          {b?.invoices.length === 0 && <li className="muted">Nenhuma fatura.</li>}</ul>
+      </Panel>
     </>
   );
 }

@@ -23,7 +23,7 @@ EXCLUDE_DIRS = {"node_modules", "__pycache__", ".git", ".venv", "venv", "data", 
 EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", ".key", ".p12", ".jks", ".keystore", ".zip"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "docs/evidence/test_run_v0.11.0.log", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]

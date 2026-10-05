@@ -38,6 +38,3 @@ Fechadas as pendências institucionais factíveis (ver `FINAL_RELEASE_AUDIT.md` 
 
 ## Como validar rapidamente
 `make db && make web && make test` · `python3 scripts/make_release.py --verify` · `curl localhost:8080/readyz`.
-
-## Atualização v0.11.0 — monetização
-Leia `docs/billing.md`. Estado: backend/frontend/testes completos (290 verdes); **pendente externo**: conta Stripe e homologação, definição dos preços (`PUT /v1/admin/plans/{plan_key}/price`), e-mail transacional, jurídico (termos de assinatura/reembolso, RIPD), validação PLUS×PREMIUM. Não invente preços, price IDs ou chaves. Próximo incremento planejado: Central de Conhecimento (v0.12.0). Snapshot do estado anterior: `history/v0.10.1/`.

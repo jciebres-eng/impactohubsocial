@@ -2,9 +2,9 @@
 // - shell estático pré-cacheado e versionado (atualiza a cada build);
 // - navegação: rede primeiro, fallback para o shell em cache e, sem cache, página offline;
 // - /v1 (API) e /metrics: NUNCA passam pelo cache (dados privados e sempre atuais).
-const VERSION = "1ef3dfbe1834";
+const VERSION = "3f6501905fca";
 const CACHE = `impacto-shell-${VERSION}`;
-const PRECACHE = ["/assets/app-MIWJA4TI.js","/assets/styles-JS7ZJ57G.css","/fonts/inter-Regular.woff","/fonts/inter-SemiBold.woff","/fonts/lora-variable.ttf","/icons/apple-touch-icon.png","/icons/favicon.svg","/icons/icon-192.png","/icons/icon-512.png","/icons/maskable-512.png","/","/manifest.webmanifest","/offline.html","/robots.txt"];
+const PRECACHE = ["/assets/app-THZQ7D3R.js","/assets/styles-EVKJLXQJ.css","/fonts/inter-Regular.woff","/fonts/inter-SemiBold.woff","/fonts/lora-variable.ttf","/icons/apple-touch-icon.png","/icons/favicon.svg","/icons/icon-192.png","/icons/icon-512.png","/icons/maskable-512.png","/","/manifest.webmanifest","/offline.html","/robots.txt"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));

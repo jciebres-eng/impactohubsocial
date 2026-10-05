@@ -31,3 +31,19 @@ Só para frente, com checksum. Reversão = restaurar backup (`scripts/restore_te
 | `formalization_steps` | etapas manuais declaradas (PK org+etapa) | RLS |
 | `mentoring_requests` | pedidos de mentoria | `mentoring_guard`: org só cancela; RLS |
 Coluna nova: `organization_qualifications.areas text[]`. Banco de desenvolvimento: 114 tabelas, 237 políticas RLS.
+
+
+---
+## v0.11.0 — migração `0008_v0110_monetization.sql` (cumulativa; 0001–0007 intactas)
+| Tabela / alteração | Finalidade | Garantias |
+|---|---|---|
+| `plans.tier` | free/plus/premium/gov | CHECK |
+| `plan_prices` | preço mensal/anual por plano (NULL = não definido) | RLS: leitura pública, escrita só privilegiado |
+| `subscriptions` + `interval, trial_end, canceled_at, last_event_at, amount_cents, discount, payment_issue, origin` | ciclo de vida e valor calculado no servidor | índice único parcial: 1 assinatura vigente por organização |
+| `org_trials` | trial por organização (PK = no máximo um) | RLS + `billing_guard` (só servidor/admin) |
+| `trial_claims` | anti-abuso: HMAC do e-mail normalizado/CNPJ | RLS só privilegiado; sem dado em claro |
+| `billing_notices` | avisos sem repetição | PK (org, tipo, ref) |
+| `vouchers`/`voucher_redemptions` + desconto, duração, organização, status | descontos reais, `pending_discount` | RLS existente |
+| `entitlement_grants` + origem ampliada, motivo, `agreement_id`, revogação | licenças com origem, revogáveis | `billing_guard` |
+| `agreements`, `agreement_members` | convênios/GOV | RLS só privilegiado (código nunca visível); quatro olhos (CHECK) |
+Banco de desenvolvimento: **120 tabelas, 247 políticas RLS**.

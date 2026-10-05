@@ -139,19 +139,3 @@ Conta/domínio/TLS · PostgreSQL gerenciado · S3 · ClamAV · SMTP · Stripe (e
 
 ## 7. Riscos principais
 1. Pesos do match são hipóteses. 2. Regras fiscais ainda inexistentes (só candidatas). 3. Driver de banco próprio (ctypes) — substituível por psycopg 3, mas é código a manter. 4. Tokens do app móvel em armazenamento simples. 5. Sem teste de carga. 6. Textos legais não validados. 7. Assinatura profissional ≠ ICP-Brasil. 8. Tipagem TS validada só com *shims* offline (CI valida com tipos oficiais).
-
-## 3-D. Monetização (v0.11.0) — prova × pendência
-| Item | Estado | Evidência | Pendência |
-|---|---|---|---|
-| Auditoria prévia do billing existente e reaproveitamento | GREEN | migração 0008 apenas estende; 50 testes de billing preexistentes seguem verdes | — |
-| Tiers + função central de direitos | GREEN | `TierAccessTests` | divisão PLUS×PREMIUM = hipótese |
-| Trial 14 dias, cancelamento (dia 1 e 13), FREE após o fim, sem cobrança | GREEN | `TrialTests`, `StripeFlowTests` | — |
-| Anti-abuso do trial | GREEN (limites declarados) | alias Gmail bloqueado; `trial_claims` só HMAC | e-mails descartáveis/CNPJ falso não são cobertos |
-| Vouchers (%, valor, 100%, permanente, expirado, esgotado, reuso) | GREEN | `VoucherTests` | — |
-| Convênios/GOV e licenças revogáveis | GREEN | `AgreementTests` | contratos reais/jurídico |
-| Webhooks (assinatura, duplicado, fora de ordem, falha, ação requerida) | GREEN **contra dublê** | `StripeFlowTests` | **YELLOW**: nunca contra o Stripe real |
-| Checkout/portal/upgrade/downgrade Stripe | YELLOW | chamadas verificadas no dublê | conta, preços, Billing Portal, homologação; mínimo de `trial_end` (~48 h) não verificado |
-| Preços mensal/anual | RED (decisão pendente) | `plan_prices` NULL; contratação recusada sem preço | proprietário define valores |
-| Avisos (dias 1/7/11/13/14 etc.) | YELLOW | in-app testado | sem e-mail |
-| Frontend `/conta/plano`, admin | YELLOW | `tsc` + build OK; sem E2E de navegador para o fluxo de cobrança | E2E com Stripe de teste |
-**Estado da monetização: YELLOW** (código e 290 testes verdes; provedor real, preços, jurídico e e-mail pendentes).

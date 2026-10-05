@@ -80,15 +80,3 @@ Sem pentest. Não há linter Python nesta construção.
 
 ## Declaração
 Nenhuma afirmação de "seguro" é feita além do que os testes provam. Os testes cobrem os controles listados; **ausência de falhas nos testes não implica ausência de vulnerabilidades**.
-
-## Monetização (v0.11.0)
-| Controle | Estado | Evidência |
-|---|---|---|
-| Cliente não define plano/preço/desconto/direito (422 em campos extras; RLS + `billing_guard` impedem escrita direta como papel da aplicação) | GREEN | `BillingSecurityTests` |
-| Isolamento entre organizações (trial, assinatura, faturas, licenças, avisos; `agreements`/`trial_claims` invisíveis) | GREEN | idem |
-| Webhook: HMAC, tolerância 300 s, idempotência, replay antigo recusado, evento fora de ordem ignorado | GREEN (dublê) | `StripeFlowTests` |
-| Checkout/cancelar/trocar/portal só `owner`; admin com MFA, motivo e auditoria; quatro olhos para convênio/lote | GREEN | testes |
-| Códigos de voucher/convênio só como HMAC; respostas genéricas; limite de taxa | GREEN | testes |
-| Sem dados de cartão no esquema | GREEN | teste de esquema |
-| Segredos: apenas placeholders em `.env.example`; teste de arquitetura de segredos verde | GREEN | `test_architecture` |
-Pendente: pentest; verificação da assinatura com segredo real do Stripe; revisão do contexto de sistema nas rotas de cotação (rodam em `system_tx` com `org_id` da sessão, por RLS de vouchers/convênios).

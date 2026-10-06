@@ -6420,57 +6420,11 @@
          "type": "null"
         }
        ],
-       "default": "open",
+       "default": "reported",
        "title": "Status"
       }
      }
     ]
-   }
-  },
-  "/v1/admin/reports/{report_id}": {
-   "post": {
-    "summary": "report decide",
-    "operationId": "post_admin_routes_report_decide",
-    "tags": [
-     "admin"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "report_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/ReportDecisionIn"
-       }
-      }
-     }
-    }
    }
   },
   "/v1/admin/audit": {
@@ -32817,6 +32771,67 @@
     }
    }
   },
+  "/v1/datasets": {
+   "get": {
+    "summary": "Conjuntos de dados externos carregados: publicador, licença, datas e hash do arquivo",
+    "operationId": "get_territory_routes_datasets",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/admin/datasets": {
+   "post": {
+    "summary": "Registra a procedência de um conjunto de dados externo (licença obrigatória)",
+    "operationId": "post_territory_routes_register_dataset",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DatasetIn"
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/frameworks": {
    "get": {
     "summary": "Referenciais reconhecidos, com o que a plataforma implementa e o que NÃO mapeia",
@@ -34939,6 +34954,429 @@
      }
     ]
    }
+  },
+  "/v1/reports/vocabulary": {
+   "get": {
+    "summary": "Os quatro níveis (denúncia, suspeita, infração comprovada, consequência jurídica)",
+    "operationId": "get_complaint_routes_vocabulary",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/conta/denuncias": {
+   "get": {
+    "summary": "O que é imputado à sua organização — sem revelar quem denunciou",
+    "operationId": "get_complaint_routes_my_reports",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin"
+   }
+  },
+  "/v1/conta/denuncias/{report_id}/manifestacao": {
+   "post": {
+    "summary": "Manifestação de quem foi denunciado (append-only)",
+    "operationId": "post_complaint_routes_respond",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RespondIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conta/denuncias/{report_id}/recurso": {
+   "post": {
+    "summary": "Recurso da conclusão (a conclusão só muda por aqui)",
+    "operationId": "post_complaint_routes_appeal",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppealIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/reports/queue": {
+   "get": {
+    "summary": "Fila de apuração, com a distinção entre arquivada e não procedente",
+    "operationId": "get_complaint_routes_queue",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z_]{4,30}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/reports/{report_id}/responses": {
+   "get": {
+    "summary": "Manifestações de quem foi denunciado",
+    "operationId": "get_complaint_routes_report_responses",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/reports/{report_id}/review": {
+   "post": {
+    "summary": "Leva para análise e registra quem analisa (continua não sendo achado)",
+    "operationId": "post_complaint_routes_take",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/reports/{report_id}/request-response": {
+   "post": {
+    "summary": "Abre o contraditório: chama quem foi denunciado a se manifestar",
+    "operationId": "post_complaint_routes_request_response",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/reports/{report_id}/conclude": {
+   "post": {
+    "summary": "Conclusão fundamentada. Só 'substantiated' autoriza medida",
+    "operationId": "post_complaint_routes_conclude",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConcludeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/reports/{report_id}/dismiss": {
+   "post": {
+    "summary": "Arquiva SEM análise de mérito — o que é diferente de concluir pela improcedência",
+    "operationId": "post_complaint_routes_dismiss",
+    "tags": [
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "report_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DismissIn"
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -36093,6 +36531,32 @@
       ],
       "default": null,
       "title": "Details"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z_]{3,30}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Category"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
      }
     },
     "required": [
@@ -39239,32 +39703,6 @@
      "reason"
     ],
     "title": "GrantIn",
-    "type": "object"
-   },
-   "ReportDecisionIn": {
-    "additionalProperties": false,
-    "properties": {
-     "status": {
-      "enum": [
-       "triaged",
-       "actioned",
-       "dismissed"
-      ],
-      "title": "Status",
-      "type": "string"
-     },
-     "resolution": {
-      "maxLength": 4000,
-      "minLength": 3,
-      "title": "Resolution",
-      "type": "string"
-     }
-    },
-    "required": [
-     "status",
-     "resolution"
-    ],
-    "title": "ReportDecisionIn",
     "type": "object"
    },
    "FlagIn": {
@@ -50690,20 +51128,15 @@
    "ReviewIn": {
     "additionalProperties": false,
     "properties": {
-     "approve": {
-      "title": "Approve",
-      "type": "boolean"
-     },
-     "note": {
-      "maxLength": 2000,
-      "minLength": 3,
-      "title": "Note",
+     "question": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Question",
       "type": "string"
      }
     },
     "required": [
-     "approve",
-     "note"
+     "question"
     ],
     "title": "ReviewIn",
     "type": "object"
@@ -52710,7 +53143,7 @@
     "properties": {
      "note": {
       "maxLength": 4000,
-      "minLength": 10,
+      "minLength": 20,
       "title": "Note",
       "type": "string"
      }
@@ -54759,6 +55192,19 @@
       ],
       "default": null,
       "title": "Method Note"
+     },
+     "dataset_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Dataset Id"
      }
     },
     "required": [
@@ -54770,6 +55216,182 @@
      "source_date"
     ],
     "title": "TerritoryIndicatorIn",
+    "type": "object"
+   },
+   "DatasetIn": {
+    "additionalProperties": false,
+    "description": "Registro de um conjunto de dados externo. Tudo o que descreve de onde o número veio.",
+    "properties": {
+     "key": {
+      "pattern": "^[a-z][a-z0-9_.-]{2,80}$",
+      "title": "Key",
+      "type": "string"
+     },
+     "version": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Version",
+      "type": "string"
+     },
+     "publisher": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Publisher",
+      "type": "string"
+     },
+     "dataset": {
+      "maxLength": 300,
+      "minLength": 2,
+      "title": "Dataset",
+      "type": "string"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Url"
+     },
+     "published_at": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Published At"
+     },
+     "retrieved_at": {
+      "format": "date",
+      "title": "Retrieved At",
+      "type": "string"
+     },
+     "geographic_scope": {
+      "pattern": "^(international|country|region|state|municipality|mixed)$",
+      "title": "Geographic Scope",
+      "type": "string"
+     },
+     "methodology": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Methodology"
+     },
+     "license": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "License",
+      "type": "string"
+     },
+     "license_url": {
+      "anyOf": [
+       {
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "License Url"
+     },
+     "file_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "File Name"
+     },
+     "file_sha256": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "File Sha256"
+     },
+     "rows_loaded": {
+      "anyOf": [
+       {
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Rows Loaded"
+     },
+     "stale_after_months": {
+      "anyOf": [
+       {
+        "maximum": 600,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Stale After Months"
+     },
+     "stale_note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Stale Note"
+     }
+    },
+    "required": [
+     "key",
+     "version",
+     "publisher",
+     "dataset",
+     "retrieved_at",
+     "geographic_scope",
+     "license"
+    ],
+    "title": "DatasetIn",
     "type": "object"
    },
    "MappingIn": {
@@ -55534,6 +56156,92 @@
      "reason"
     ],
     "title": "AssignmentEndIn",
+    "type": "object"
+   },
+   "RespondIn": {
+    "additionalProperties": false,
+    "properties": {
+     "body": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Body",
+      "type": "string"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     }
+    },
+    "required": [
+     "body"
+    ],
+    "title": "RespondIn",
+    "type": "object"
+   },
+   "ConcludeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "finding": {
+      "pattern": "^(substantiated|unsubstantiated)$",
+      "title": "Finding",
+      "type": "string"
+     },
+     "rationale": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+     },
+     "legal_referral": {
+      "default": false,
+      "title": "Legal Referral",
+      "type": "boolean"
+     },
+     "legal_referral_note": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Legal Referral Note"
+     }
+    },
+    "required": [
+     "finding",
+     "rationale"
+    ],
+    "title": "ConcludeIn",
+    "type": "object"
+   },
+   "DismissIn": {
+    "additionalProperties": false,
+    "properties": {
+     "rationale": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+     }
+    },
+    "required": [
+     "rationale"
+    ],
+    "title": "DismissIn",
     "type": "object"
    }
   },

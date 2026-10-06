@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (819)
+## Operações (830)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -68,6 +68,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/contribution-models/{model_id}/decide` | admin da plataforma + MFA | — | Decisão jurídica: aprova (vira utilizável em pagamentos) ou devolve ao rascunho, com parecer registrado |
 | GET | `/v1/admin/credentials` | admin da plataforma + MFA | — | credentials |
 | POST | `/v1/admin/credentials/{credential_id}/verify` | admin da plataforma + MFA | — | Verifica credencial profissional (registre a fonte consultada, ex.: cadastro público do conselho, e a data) |
+| POST | `/v1/admin/datasets` | admin da plataforma + MFA | — | Registra a procedência de um conjunto de dados externo (licença obrigatória) |
 | GET | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Inventário de chaves por impressão digital (a chave nunca é gravada) |
 | POST | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Registra no inventário as chaves em uso para uma finalidade |
 | POST | `/v1/admin/encryption/reencrypt` | admin da plataforma + MFA | — | Recifra a coluna com a chave corrente (idempotente, com auditoria do resultado) |
@@ -151,7 +152,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/payments/revenue` | admin da plataforma + MFA | — | Receita apurada, com o simulado em colunas próprias e nunca somado ao real |
 | PUT | `/v1/admin/plans/{plan_key}/price` | admin da plataforma + MFA | — | Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide) |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
-| POST | `/v1/admin/reports/{report_id}` | admin da plataforma + MFA | — | report decide |
+| GET | `/v1/admin/reports/queue` | admin da plataforma + MFA | — | Fila de apuração, com a distinção entre arquivada e não procedente |
+| POST | `/v1/admin/reports/{report_id}/conclude` | admin da plataforma + MFA | — | Conclusão fundamentada. Só 'substantiated' autoriza medida |
+| POST | `/v1/admin/reports/{report_id}/dismiss` | admin da plataforma + MFA | — | Arquiva SEM análise de mérito — o que é diferente de concluir pela improcedência |
+| POST | `/v1/admin/reports/{report_id}/request-response` | admin da plataforma + MFA | — | Abre o contraditório: chama quem foi denunciado a se manifestar |
+| GET | `/v1/admin/reports/{report_id}/responses` | admin da plataforma + MFA | — | Manifestações de quem foi denunciado |
+| POST | `/v1/admin/reports/{report_id}/review` | admin da plataforma + MFA | — | Leva para análise e registra quem analisa (continua não sendo achado) |
 | POST | `/v1/admin/reputation/disputes/{dispute_id}/resolution` | admin da plataforma + MFA | — | Resolve a contestação; corrigir produz ponto NOVO, nunca reescreve o antigo |
 | GET | `/v1/admin/risk/assessments` | admin da plataforma + MFA | — | list assessments |
 | POST | `/v1/admin/risk/orgs/{org_id}/block` | admin da plataforma + MFA | — | Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível |
@@ -260,6 +266,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/commitments/{commitment_id}/status` | membro da organização ativa | papel ≥ manager | Financiador informa desembolso/cancelamento; OSC confirma o recebimento |
 | GET | `/v1/compliance` | membro da organização ativa | papel ≥ viewer | Status de compliance/KYB da organização e verificações |
 | POST | `/v1/compliance/request-review` | membro da organização ativa | papel ≥ admin | Executa verificações automáticas e envia para análise humana da administração |
+| GET | `/v1/conta/denuncias` | membro da organização ativa | papel ≥ admin | O que é imputado à sua organização — sem revelar quem denunciou |
+| POST | `/v1/conta/denuncias/{report_id}/manifestacao` | membro da organização ativa | papel ≥ admin | Manifestação de quem foi denunciado (append-only) |
+| POST | `/v1/conta/denuncias/{report_id}/recurso` | membro da organização ativa | papel ≥ admin | Recurso da conclusão (a conclusão só muda por aqui) |
 | GET | `/v1/conta/moderacao` | membro da organização ativa | papel ≥ admin | Medidas de moderação contra a sua organização, com o direito de contestar |
 | POST | `/v1/conta/moderacao/{action_id}/contestar` | membro da organização ativa | papel ≥ admin | Contesta uma medida (uma vez por medida) |
 | POST | `/v1/contribution-models/{model_id}/retire` | membro da organização ativa | tipos: osc; papel ≥ manager | retire model |
@@ -272,6 +281,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/conversations/{conversation_id}/read` | membro da organização ativa | papel ≥ viewer | read conversation |
 | PUT | `/v1/conversations/{conversation_id}/status` | membro da organização ativa | papel ≥ member | set conversation status |
 | GET | `/v1/dashboard` | membro da organização ativa | papel ≥ viewer | Indicadores da organização ativa (dados reais do banco) |
+| GET | `/v1/datasets` | usuário autenticado | — | Conjuntos de dados externos carregados: publicador, licença, datas e hash do arquivo |
 | GET | `/v1/determinants` | membro da organização ativa | tipos: government, company, individual, platform; papel ≥ viewer | Camada agregada: projetos por domínio de determinante social e território (k-anonimato; sem ranking de grupos vulneráveis) |
 | GET | `/v1/diagnoses` | membro da organização ativa | tipos: osc; papel ≥ viewer | list diagnoses |
 | POST | `/v1/diagnoses` | membro da organização ativa | tipos: osc; papel ≥ member | Cria diagnóstico estruturado: necessidade → causas → objetivo → metas → plano de ação (sem dados pessoais de beneficiários) |
@@ -701,6 +711,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/report-center` | membro da organização ativa | papel ≥ viewer | Tipos de relatório disponíveis para o tipo da organização |
 | GET | `/v1/report-center/{rtype}` | membro da organização ativa | papel ≥ viewer | Gera o relatório (JSON ou CSV). Escopo: projetos próprios (OSC) ou com aporte (financiador) |
 | POST | `/v1/reports` | usuário autenticado | limite 20/3600s | Denuncia organização, projeto, edital, documento ou usuário (triagem humana pela administração) |
+| GET | `/v1/reports/vocabulary` | usuário autenticado | — | Os quatro níveis (denúncia, suspeita, infração comprovada, consequência jurídica) |
 | GET | `/v1/reputation/dimensions` | usuário autenticado | — | As dimensões, o que cada uma NÃO mede, e os sinais excluídos de propósito |
 | GET | `/v1/reputation/disputes` | membro da organização ativa | papel ≥ viewer | Contestações da organização, com a resolução quando houver |
 | POST | `/v1/reputation/disputes` | membro da organização ativa | papel ≥ manager | Contesta uma dimensão; a contestação aberta aparece no próprio perfil |

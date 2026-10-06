@@ -67,7 +67,29 @@ def profile(conn: Connection, *, code: str) -> dict:
         " p.reference_date, p.source_name, p.source_date, p.measured,"
         " d.name_pt AS determinant_name FROM territory_profile($1) p"
         " JOIN social_determinants d ON d.code = p.determinant_code", code)
+    # v0.20.0: procedência completa e FRESCURA do indicador vigente. Até aqui a plataforma sabia
+    # dizer que um número não havia sido substituído; não sabia dizer que ele envelheceu — e um
+    # indicador de 2010 aparecia com o mesmo peso de um de 2025.
+    frescura = {r["code"]: r for r in conn.query(
+        "SELECT code, publisher, dataset, dataset_version, license, published_at, retrieved_at,"
+        " file_sha256, freshness, months_old, freshness_note FROM territory_indicator_current($1)",
+        code)}
+    for r in rows:
+        extra = frescura.get(r["code"])
+        # `extra` existe para todo indicador vigente; a procedência só existe se o número foi
+        # ligado a um conjunto de dados. Devolver um bloco de nulos sugeriria procedência vazia em
+        # vez de procedência ausente — e são coisas diferentes.
+        r["provenance"] = ({k: extra[k] for k in ("publisher", "dataset", "dataset_version",
+                                                  "license", "published_at", "retrieved_at",
+                                                  "file_sha256")}
+                           if extra and extra["publisher"] else None)
+        r["freshness"] = (extra or {}).get("freshness", "unknown")
+        r["months_old"] = (extra or {}).get("months_old")
+        r["freshness_note"] = (extra or {}).get(
+            "freshness_note", "indicador não medido para este território")
     measured = [r for r in rows if r["measured"]]
+    desatualizados = [r["code"] for r in measured if r["freshness"] == "stale"]
+    sem_prazo = [r["code"] for r in measured if r["freshness"] == "undeclared"]
     needs = conn.one(
         "SELECT count(*) AS total, count(*) FILTER (WHERE source_name IS NOT NULL) AS with_source,"
         " count(*) FILTER (WHERE priority = 'critical') AS critical"
@@ -76,6 +98,13 @@ def profile(conn: Connection, *, code: str) -> dict:
         "SELECT kind, value::float AS value, unit, reference_date, source_name, source_date"
         " FROM equity_denominators WHERE scope = 'territory' AND territory = $1"
         "   AND effective_until IS NULL ORDER BY kind", code)
+    resumo_frescura = {
+        "stale": desatualizados,
+        "undeclared": sem_prazo,
+        "note": ("Dado DESATUALIZADO é o que passou do prazo declarado pela própria carga. "
+                 "`undeclared` significa que ninguém declarou prazo para aquele conjunto — e a "
+                 "plataforma responde isso em vez de chamar o dado de atual."),
+    }
     return {
         "code": code,
         "label": conn.scalar("SELECT territory_label($1)", code),
@@ -86,6 +115,7 @@ def profile(conn: Connection, *, code: str) -> dict:
         "definition_count": len(rows),
         "needs": needs,
         "denominators": denominators,
+        "freshness": resumo_frescura,
         "note": ("Toda definição ativa aparece, medida ou não: `measured = false` é informação, não "
                  "ausência de informação. Nenhum número foi estimado — cada valor carrega a fonte e "
                  "a data de referência de quem o publicou."
@@ -135,17 +165,19 @@ def definitions(conn: Connection) -> dict:
 def set_indicator(conn: Connection, *, territory: str, code: str, value: float,
                   reference_date: Any, source_name: str, source_date: Any,
                   source_url: str | None = None, method_note: str | None = None,
-                  actor: str | None = None) -> dict:
+                  dataset_id: str | None = None, actor: str | None = None) -> dict:
     spec = conn.one("SELECT unit FROM determinant_indicator_defs WHERE code = $1 AND active", code)
     if not spec:
         raise not_found("Definição de indicador territorial não encontrada")
     if not conn.one("SELECT 1 FROM territories WHERE code = $1 AND active", territory):
         raise not_found("Território não está no catálogo: importe-o antes de publicar indicador")
+    if dataset_id and not conn.one("SELECT 1 FROM external_datasets WHERE id = $1", dataset_id):
+        raise not_found("Conjunto de dados não registrado: registre a procedência antes do número")
     return conn.one(
         "INSERT INTO territory_indicators(territory, code, value, unit, reference_date,"
-        " source_name, source_url, source_date, method_note, created_by)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
+        " source_name, source_url, source_date, method_note, dataset_id, created_by)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)"
         " RETURNING id::text AS id, territory, code, value::float AS value, unit, reference_date,"
-        " source_name, source_date",
+        " source_name, source_date, dataset_id::text AS dataset_id",
         territory, code, value, spec["unit"], reference_date, source_name, source_url, source_date,
-        method_note, actor)
+        method_note, dataset_id, actor)

@@ -100,7 +100,13 @@ def notify_once(c, org_id: str, kind: str, ref: str, title: str, body: str, link
 # ------------------------------------------------------------------------------------------------ preço e desconto (servidor é a autoridade)
 #: Moeda padrão da tabela de preços. Vive aqui porque é decisão de produto, não de cada chamada — e porque o cliente
 #: NUNCA escolhe a moeda da cobrança: escolher moeda é escolher preço.
-DEFAULT_CURRENCY = "USD"
+#:
+#: v0.17.0: voltou de USD para **BRL**. A v0.16.0 havia adotado o dólar junto com a regra comercial de
+#: US$ 19,99/mês; essa regra foi aposentada por decisão do proprietário, e o núcleo da receita passou a
+#: ser institucional e B2G — onde PIX, boleto, nota fiscal, prefeitura e contratação pública não
+#: existem em dólar. A coluna `currency` continua em `plan_price_versions`, então uma tabela em outra
+#: moeda permanece possível sem mudar código: o que muda aqui é só o padrão.
+DEFAULT_CURRENCY = "BRL"
 
 
 def price_version(c, plan_key: str, interval: str, currency: str = DEFAULT_CURRENCY) -> dict | None:

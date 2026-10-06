@@ -144,6 +144,21 @@ def _sync_price_versions(conn: Connection, plans: dict) -> int:
     n = 0
     for it in items:
         tier = it.get("applies_to_tier")
+        # APOSENTAR um preço é diferente de mudá-lo. A v0.17.0 retirou a regra comercial em dólar da
+        # v0.16.0 por decisão do proprietário, e retirar não podia ser "apagar a linha do arquivo":
+        # isso deixaria a versão vigente no banco para sempre. Um item com `retire: true` fecha a
+        # vigência e **não** abre nenhuma nova — o histórico fica, e a plataforma volta a recusar
+        # contratação online daquele plano naquela moeda.
+        if it.get("retire"):
+            for plan_key in ([it["plan_key"]] if it.get("plan_key") else
+                             [k for k, pl in plans["plans"].items()
+                              if (tier is None or pl.get("tier") == tier) and pl.get("interval") != "custom"]):
+                closed = conn.execute(
+                    "UPDATE plan_price_versions SET effective_until = now()"
+                    " WHERE plan_key = $1 AND interval = $2 AND currency = $3 AND effective_until IS NULL",
+                    (plan_key, it["interval"], it["currency"].upper())).rowcount
+                n += int(closed or 0)
+            continue
         if it.get("plan_key"):
             targets = [it["plan_key"]]
         else:

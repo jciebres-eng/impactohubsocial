@@ -166,3 +166,73 @@ class AiPriceIn(In):
 class AiCostQ(In):
     days: Annotated[int, Field(ge=1, le=365)] = 30
     org_id: Uuid | None = None
+
+
+# ---------------------------------------------------------------- monetização
+RevenueEngine = Literal["saas_institutional", "b2g", "enterprise", "implementation",
+                        "marketplace_take_rate", "success_fee", "proponent_premium",
+                        "data_intelligence"]
+Certainty = Literal["low", "medium", "high"]
+CardStatus = Literal["green", "yellow", "red"]
+LegalStatus = Literal["review_required", "validated", "refused"]
+BillableStatus = Literal["candidate", "blocked_legal", "blocked_no_price", "eligible", "billed",
+                         "waived"]
+
+
+class RulesQ(In):
+    engine: RevenueEngine | None = None
+
+
+class RulePatch(In):
+    """Ajusta uma regra de receita. O portão de ativação é no banco, não aqui."""
+    amount_cents: Cents | None = None
+    percentage: Annotated[float, Field(gt=0, le=100)] | None = None
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")] | None = None
+    legal_status: LegalStatus | None = None
+    legal_card_id: Uuid | None = None
+    active: bool | None = None
+    hypothesis_min_cents: Cents | None = None
+    hypothesis_max_cents: Cents | None = None
+    hypothesis_note: Annotated[str, Field(max_length=2000)] | None = None
+
+
+class LegalCardIn(In):
+    """Pesquisa de base normativa de uma receita. NÃO é parecer jurídico.
+
+    `certainty` é o grau de certeza da PESQUISA. `needs_lawyer` e `needs_accountant` nascem
+    verdadeiros, e marcar verde exige base, fonte, data, certeza alta e `needs_lawyer = false`.
+    """
+    rule_key: Annotated[str, Field(max_length=60, pattern=r"^[a-z][a-z0-9_.]*$")]
+    payer: Annotated[str, Field(min_length=3, max_length=200)]
+    beneficiary: Annotated[str, Field(min_length=3, max_length=200)]
+    billing_event: Annotated[str, Field(min_length=5, max_length=300)]
+    revenue_nature: Annotated[str, Field(min_length=5, max_length=300)]
+    contractual_relation: Annotated[str, Field(min_length=5, max_length=500)]
+    certainty: Certainty
+    status: CardStatus
+    required_document: Annotated[str, Field(max_length=500)] | None = None
+    required_terms: Annotated[str, Field(max_length=500)] | None = None
+    cancellation_policy: Annotated[str, Field(max_length=1000)] | None = None
+    refund_policy: Annotated[str, Field(max_length=1000)] | None = None
+    tax_notes: Annotated[str, Field(max_length=4000)] | None = None
+    invoice_notes: Annotated[str, Field(max_length=2000)] | None = None
+    regulatory_notes: Annotated[str, Field(max_length=4000)] | None = None
+    legal_basis: Annotated[str, Field(max_length=4000)] | None = None
+    source_name: Annotated[str, Field(min_length=3, max_length=300)] | None = None
+    source_url: Annotated[str, Field(max_length=500, pattern=r"^https?://")] | None = None
+    verified_on: date | None = None
+    needs_lawyer: bool = True
+    needs_accountant: bool = True
+    open_questions: Annotated[str, Field(max_length=4000)] | None = None
+    note: Annotated[str, Field(max_length=4000)] | None = None
+
+
+class PipelineQ(In):
+    status: BillableStatus | None = None
+    org_id: Uuid | None = None
+    limit: Annotated[int, Field(ge=1, le=100)] = 50
+    offset: Annotated[int, Field(ge=0, le=100000)] = 0
+
+
+class WaiveIn(In):
+    reason: Reason

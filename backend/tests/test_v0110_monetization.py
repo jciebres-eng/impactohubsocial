@@ -12,6 +12,8 @@ import unittest
 import urllib.parse
 import uuid
 
+from impacto.services.monetization import DEFAULT_CURRENCY
+from tests.support import TEST_PRICE_REASON
 from tests.support import PASSWORD, Client, db_system, last_token_for, make_admin, new_account, owner_conn, server
 
 PRICES = {"osc_premium": "price_prem_m", "osc_premium_year": "price_prem_y", "osc_plus": "price_plus_m", "osc_plus_year": "price_plus_y"}
@@ -105,10 +107,14 @@ class Base(unittest.TestCase):
         server()
         cls.adm1, _ = make_admin()
         cls.adm2, _ = make_admin()
-        # A AUTORIDADE DE PREÇO MUDOU NA v0.16.0: `plan_price_versions` (com moeda e vigência) manda sobre
-        # `plan_prices`. Estes testes verificam o cálculo do servidor, o voucher e o fluxo do Stripe — não a regra
-        # comercial em dólar —, então eles fecham a vigência das versões semeadas e publicam as suas próprias, em
-        # BRL e sem promoção de entrada. É o mesmo caminho que o proprietário usa para definir preço.
+        # A AUTORIDADE DE PREÇO É `plan_price_versions` (com moeda e vigência) desde a v0.16.0, e manda
+        # sobre `plan_prices`. Estes testes verificam o cálculo do servidor, o voucher e o fluxo do
+        # Stripe — não a regra comercial —, então fecham a vigência das versões vigentes e publicam as
+        # suas próprias, sem promoção de entrada. É o mesmo caminho que o proprietário usa.
+        #
+        # E **sem** `provider_price_id`: `billing.price_ref()` prefere, corretamente, o identificador
+        # gravado na versão de preço quando existe. Preenchê-lo aqui faria o teste medir a si mesmo em
+        # vez de medir o caminho que ele quer medir, que é o de `settings.stripe_prices`.
         with db_system() as d:
             for (pk, iv), v in VALUES.items():
                 d.run("INSERT INTO plan_prices(plan_key, interval, amount_cents) VALUES ($1,$2,$3) ON CONFLICT (plan_key, interval) DO UPDATE SET amount_cents = EXCLUDED.amount_cents", pk, iv, v)
@@ -117,18 +123,30 @@ class Base(unittest.TestCase):
                " AND effective_until IS NULL", [pk for pk, _ in VALUES])
         for (pk, iv), v in VALUES.items():
             oc.run("INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, trial_days,"
-                   " tax_behavior, provider, provider_price_id, reason)"
-                   " VALUES ($1,$2,'BRL',$3,14,'inclusive','stripe','price_teste_' || $1 || '_' || $2,"
-                   " 'preço do cenário de teste da v0.11.0 (sem promoção de entrada)')", pk, iv, v)
+                   " tax_behavior, provider, reason)"
+                   " VALUES ($1,$2,$4,$3,14,'inclusive','stripe',"
+                   " 'preço do cenário de teste da v0.11.0 (sem promoção de entrada)')",
+                   pk, iv, v, DEFAULT_CURRENCY)
 
     @classmethod
     def tearDownClass(cls):
         with db_system() as d:
             d.run("UPDATE plan_prices SET amount_cents = NULL WHERE plan_key IN ('osc_premium','osc_plus')")
         oc = owner_conn()
-        oc.run("DELETE FROM plan_price_versions WHERE reason LIKE 'preço do cenário de teste%'")
-        oc.run("UPDATE plan_price_versions SET effective_until = NULL WHERE plan_key = ANY($1::text[])"
-               " AND effective_until IS NOT NULL AND currency = 'USD'", [pk for pk, _ in VALUES])
+        # FECHA a vigência do cenário em vez de apagá-lo. Duas razões, e as duas importam:
+        #   1. apagar falha por chave estrangeira assim que alguma assinatura aponta para a versão
+        #      (`subscription_prices.price_version_id`), o que acontece quando mais de uma classe roda;
+        #   2. apagar histórico de preço é exatamente o que a arquitetura proíbe — "quanto esta
+        #      organização contratou em março?" precisa continuar respondível.
+        oc.run("UPDATE plan_price_versions SET effective_until = now()"
+               " WHERE reason LIKE 'preço do cenário de teste%' AND effective_until IS NULL")
+        # Reabre a vigência das versões DO AMBIENTE, identificadas pelo `reason`. Duas correções de
+        # uma vez: a moeda deixou de estar fixa em 'USD' (a v0.17.0 a aposentou, e isso deixava a suíte
+        # inteira sem preço vigente depois desta classe), e o filtro deixou de reabrir "qualquer versão
+        # fechada deste plano" — o que ressuscitava os cenários de classes anteriores e violava
+        # `ux_price_current`, porque passavam a existir duas vigentes ao mesmo tempo.
+        oc.run("UPDATE plan_price_versions SET effective_until = NULL"
+               " WHERE reason LIKE $1 AND effective_until IS NOT NULL", TEST_PRICE_REASON + "%")
 
     def license(self, org_id: str, plan_key: str, days=30, source="license"):
         r = self.adm1.post(f"/v1/admin/organizations/{org_id}/grants", {"plan_key": plan_key, "days": days, "source": source, "reason": "teste de licença"})

@@ -72,6 +72,11 @@ def record(conn: Connection, *, event_type: str, org_id: str, units: int,
             "SELECT app_record_value($1,$2,$3,$4,$5,$6,$7,$8,$9)",
             event_type, org_id, int(units), metrics or {}, project_id, program_id,
             subject_type, subject_id, engine_version)
+        # O valor acabou de ser registrado; agora se avalia se ALGUMA regra o alcança. Isto não cobra
+        # nada: cria candidato com o motivo do estado, de modo que "por que isto não foi cobrado" tenha
+        # resposta consultável. Fica no MESMO savepoint, porque promover é parte do mesmo registro.
+        if out:
+            conn.scalar("SELECT app_promote_billable($1)", out)
     except Exception as exc:  # noqa: BLE001 — instrumentação não derruba a operação do usuário
         conn.run("ROLLBACK TO SAVEPOINT value_ledger")
         # AVISO no log, e não silêncio. O savepoint protege o trabalho do usuário, mas protegeria

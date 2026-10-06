@@ -401,9 +401,14 @@ class NetworkInvariants(unittest.TestCase):
         self.assertEqual(q.status, 200, q)
         self.assertIn("currency", q.json)
         self.assertIn("tax_note", q.json)
+        # A moeda vem do produto (`monetization.DEFAULT_CURRENCY`), não está fixa no teste: a v0.17.0
+        # voltou de USD para BRL e o invariante é "UMA vigente", não "uma vigente em dólar".
+        from impacto.services.monetization import DEFAULT_CURRENCY
+        self.assertEqual(q.json["currency"], DEFAULT_CURRENCY)
         with db_system() as c:
             n = c.scalar("SELECT count(*) FROM plan_price_versions WHERE plan_key = 'osc_premium'"
-                         " AND interval = 'month' AND currency = 'USD' AND effective_until IS NULL")
+                         " AND interval = 'month' AND currency = $1 AND effective_until IS NULL",
+                         DEFAULT_CURRENCY)
         self.assertEqual(int(n), 1, "exatamente uma versão vigente por plano, intervalo e moeda")
 
     # ------------------------------------------------------------------ 15

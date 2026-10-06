@@ -177,27 +177,44 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual(offenders, [], f"Aviso fora de network.notify: {offenders}")
 
     def test_prices_are_not_hard_coded(self):
-        """Regra comercial v0.16.0: o preço vem de config/plans.json -> plan_price_versions, nunca de literal em código.
+        """Preço mora no banco (`plan_price_versions`, `monetization_rules`), nunca em código.
 
-        O teste lê os valores DECLARADOS e verifica que nenhum deles aparece como literal no backend ou no frontend.
-        Se alguém "ajudar" escrevendo 1999 numa tela, o teste quebra — que é o ponto: backend é a autoridade.
+        A primeira versão deste teste lia os valores declarados em `config/plans.json` e procurava por
+        eles no código. Deixou de valer na v0.17.0: o produto passou a NÃO declarar preço nenhum (as
+        faixas institucionais são hipóteses, e sem preço a plataforma recusa cobrar), então a lista
+        ficava vazia e o teste passava sem verificar nada.
+
+        Agora a verificação é estática e não depende de haver preço declarado: nenhum literal monetário
+        pode ser atribuído a um nome terminado em `_cents` no código de produção. Valor de centavos em
+        teste é legítimo e fica fora do escopo.
         """
-        import json
-        plans = json.loads((ROOT / "config" / "plans.json").read_text(encoding="utf-8"))
-        amounts = set()
-        for it in plans.get("price_versions", {}).get("items", []):
-            for k in ("amount_cents", "intro_amount_cents"):
-                v = it.get(k)
-                if isinstance(v, int) and v >= 1000:   # 199 e afins são comuns demais para servir de assinatura
-                    amounts.add(v)
-        self.assertTrue(amounts, "config/plans.json nao declara valores — o teste perderia o sentido")
-        files = [f for f in PKG.rglob("*.py")] + [f for f in (ROOT / "web" / "src").rglob("*.ts")] \
-            + [f for f in (ROOT / "web" / "src").rglob("*.tsx")]
+        # `x_cents = 1999`, `"amount_cents": 1999`, `amountCents: 1999` — com 3 ou mais dígitos, para
+        # não acusar índice, limite ou multiplicador pequeno.
+        pat = re.compile(r"""[A-Za-z_]*[cC]ents"?'?\s*[:=]\s*(\d{3,})""")
+        offenders = []
+        files = list(PKG.rglob("*.py")) + list((ROOT / "web" / "src").rglob("*.ts")) \
+            + list((ROOT / "web" / "src").rglob("*.tsx"))
         for f in files:
-            txt = f.read_text(encoding="utf-8")
-            for a in amounts:
-                self.assertNotRegex(txt, rf"(?<![0-9]){a}(?![0-9])",
-                                    f"{f.relative_to(ROOT)} tem o preco {a} em codigo; o preco mora no banco")
+            for i, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                if "#" in line and line.strip().startswith("#"):
+                    continue
+                for m in pat.finditer(line):
+                    # Zero e valores de teste explicitamente marcados não contam.
+                    if int(m.group(1)) == 0 or "noqa: price" in line:
+                        continue
+                    offenders.append(f"{f.relative_to(ROOT)}:{i}: {line.strip()[:120]}")
+        self.assertEqual(offenders, [], "preço fixado em código:\n" + "\n".join(offenders))
+
+    def test_the_commercial_rule_is_declared_in_configuration(self):
+        """A regra comercial é dado versionado em git, não decisão espalhada pelo código."""
+        import json
+        cfg = json.loads((ROOT / "config" / "plans.json").read_text(encoding="utf-8"))
+        self.assertIn("price_versions", cfg, "o bloco de regra comercial não pode desaparecer")
+        self.assertTrue(cfg["price_versions"].get("_rule"),
+                        "a regra vigente tem de estar escrita, para que mudá-la seja um ato explícito")
+        # E a aposentadoria da regra anterior fica registrada, em vez de a linha simplesmente sumir.
+        self.assertTrue(any(i.get("retire") for i in cfg["price_versions"]["items"]),
+                        "aposentar um preço é um item com `retire`, não a remoção silenciosa da linha")
 
     def test_no_string_formatted_sql_with_user_input(self):
         """Só nomes de tabela/coluna de listas fixas podem ser interpolados em SQL (f-strings revisadas)."""

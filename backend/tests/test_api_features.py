@@ -27,9 +27,12 @@ class BillingAndVoucherTests(unittest.TestCase):
         r = osc.post("/v1/saved-searches", {"name": "Editais de cultura", "filters": {"cause": "cultura"}})
         self.assertEqual((r.status, r.json["code"]), (402, "feature_not_in_plan"))
         self.assertEqual(osc.post("/v1/billing/checkout", {"plan_key": "company_premium"}).status, 404)  # plano de outro papel
-        # Desde a v0.16.0 o plano premium TEM preço publicado (regra comercial em `config/plans.json`), então a
-        # contratação funciona. O que continua valendo é que nada é fictício: no provedor de teste a resposta diz,
-        # em letras, que nenhuma cobrança real aconteceu.
+        # A v0.17.0 APOSENTOU a regra comercial em dólar da v0.16.0 e não fixa preço institucional em
+        # `config/plans.json`. Quem declara o preço exercitado aqui é o AMBIENTE DE TESTE
+        # (`support.TEST_PRICES`), então o teste lê o valor de lá em vez de fixá-lo — fixar aqui seria
+        # repetir em teste exatamente o que o produto deixou de fazer.
+        # O que continua valendo é que nada é fictício: no provedor de teste a resposta diz, em letras,
+        # que nenhuma cobrança real aconteceu.
         r = osc.post("/v1/billing/checkout", {"plan_key": "osc_premium"})
         self.assertEqual(r.status, 200, r)
         self.assertIn("SANDBOX", r.json["warning"])
@@ -37,8 +40,11 @@ class BillingAndVoucherTests(unittest.TestCase):
         # e o preço que ela aceitou ficou congelado, com a moeda e a promoção de entrada da regra vigente
         acc = osc.get("/v1/billing/price-history").json["accepted"]
         self.assertEqual(len(acc), 1)
+        from tests.support import TEST_PRICES
+        cents, intro = next((c, i) for p, iv, c, i, _, _ in TEST_PRICES
+                            if p == "osc_premium" and iv == "month")
         self.assertEqual((acc[0]["currency"], acc[0]["amount_cents"], acc[0]["intro_amount_cents"]),
-                         ("USD", 1999, 199))
+                         ("BRL", cents, intro))
 
     def test_paid_plan_with_price_via_sandbox(self):
         with db_system() as d:

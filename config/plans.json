@@ -1,5 +1,5 @@
 {
-  "version": "plans@1.2",
+  "version": "plans@2.0",
   "_note": "Preços null = a definir pelo proprietário (exibido como 'sob consulta'). Cobrança real exige BILLING_PROVIDER configurado. Nenhum plano altera match, elegibilidade, ordenação ou posição de prestador.",
   "invariants": [
     "no_plan_affects_match",
@@ -28,15 +28,15 @@
   "plans": {
     "osc_basic": {
       "role": "osc",
-      "name": "OSC Essencial",
+      "name": "OSC — gratuito",
       "price_cents": 0,
       "interval": "month",
       "limits": {
-        "active_projects": 2,
+        "active_projects": 10,
         "ai_requests_month": 20,
-        "storage_mb": 500,
-        "seats": 3,
-        "saved_searches": 0
+        "storage_mb": 1000,
+        "seats": 5,
+        "saved_searches": 3
       },
       "features": [
         "catalog.search",
@@ -44,7 +44,12 @@
         "applications.assisted",
         "documents.vault",
         "evidence.post",
-        "professional.request"
+        "professional.request",
+        "network.participate",
+        "marketplace.browse",
+        "programs.participate",
+        "readiness.basic",
+        "impact_report.submit"
       ],
       "tier": "free",
       "prices": {}
@@ -236,13 +241,15 @@
         "seats": 2,
         "ai_requests_month": 10,
         "storage_mb": 200,
-        "saved_searches": 0
+        "saved_searches": 3
       },
       "features": [
         "feed.projects",
         "match.explain",
         "portfolio.tracking",
-        "reports.basic"
+        "reports.basic",
+        "network.participate",
+        "marketplace.browse"
       ],
       "tier": "free",
       "prices": {}
@@ -348,36 +355,22 @@
     "stripe_min_seconds": 172800
   },
   "price_versions": {
-    "_note": "Preço por plano, intervalo e moeda. O sincronizador cria uma VERSÃO nova quando o valor difere do vigente, fechando a vigência da anterior — o histórico nunca é sobrescrito. provider_price_id fica nulo até ser criado na conta do provedor; sem ele a plataforma recusa cobrar em vez de tentar com um valor inventado.",
-    "_rule": "v0.16.0: 14 dias de teste com o produto completo; US$ 1,99/mês nos 3 primeiros meses pagos; depois US$ 19,99/mês ou o anual equivalente a US$ 14,99/mês (US$ 179,88 à vista).",
+    "_note": "Preço por plano, intervalo e moeda. O sincronizador cria uma VERSÃO nova quando o valor difere do vigente, fechando a vigência da anterior — o histórico nunca é sobrescrito. Um item com `retire: true` fecha a vigência e não abre nenhuma nova.",
+    "_rule": "v0.17.0 — MUDANÇA DE REGRA COMERCIAL, por decisão do proprietário. A regra da v0.16.0 (US$ 1,99/mês nos 3 primeiros meses pagos e depois US$ 19,99/mês, cobrados da organização que usa o produto, OSC inclusive) foi APOSENTADA. A hierarquia passou a ser a dos documentos desta rodada: SaaS institucional e B2G como núcleo, Enterprise como expansão, e premium do proponente como aquisição — nunca como portão de entrada. Cadastro, perfil, projeto, descoberta de oportunidade, participação na rede e acompanhamento básico são GRATUITOS, e não por tempo limitado: por desenho, porque o lado da oferta precisa crescer para a rede ter valor. As faixas institucionais estão em `monetization_rules.hypothesis_*`, declaradas como hipótese; nenhum preço institucional foi fixado, e sem preço a plataforma recusa contratação online em vez de inventar.",
     "items": [
       {
         "applies_to_tier": "premium",
         "interval": "month",
         "currency": "USD",
-        "amount_cents": 1999,
-        "intro_amount_cents": 199,
-        "intro_periods": 3,
-        "trial_days": 14,
-        "tax_behavior": "exclusive",
-        "provider": "stripe",
-        "provider_price_id": null,
-        "provider_intro_price_id": null,
-        "reason": "Regra comercial v0.16.0: US$ 1,99/mês nos 3 primeiros meses pagos, depois US$ 19,99/mês."
+        "retire": true,
+        "reason": "Regra comercial da v0.16.0 aposentada na v0.17.0: o proponente deixou de ser o pagador principal."
       },
       {
         "applies_to_tier": "premium",
         "interval": "year",
         "currency": "USD",
-        "amount_cents": 17988,
-        "intro_amount_cents": null,
-        "intro_periods": null,
-        "trial_days": 14,
-        "tax_behavior": "exclusive",
-        "provider": "stripe",
-        "provider_price_id": null,
-        "provider_intro_price_id": null,
-        "reason": "Regra comercial v0.16.0: anual equivalente a US$ 14,99/mês (12 x 14,99 = US$ 179,88 à vista)."
+        "retire": true,
+        "reason": "Regra comercial da v0.16.0 aposentada na v0.17.0: o proponente deixou de ser o pagador principal."
       }
     ]
   }

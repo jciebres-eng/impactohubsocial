@@ -17,6 +17,7 @@ Três observações para quem revisar:
 """
 from __future__ import annotations
 
+from ..economics import billable as BL
 from ..economics import programs as PG
 from ..economics import value_ledger as VL
 from ..http import Ctx, not_found, route
@@ -209,3 +210,64 @@ def ai_set_price(ctx: Ctx, body: E.AiPriceIn):
 def ai_cost(ctx: Ctx, q: E.AiCostQ):
     with ctx.tx(readonly=True) as c:
         return VL.ai_cost_summary(c, org_id=q.org_id, days=q.days)
+
+
+# ================================================================================================ monetização
+@route("GET", "/v1/monetization/rules", auth="user", query=E.RulesQ, tags=("monetizacao",),
+       summary="As regras de receita, em ordem de hierarquia, com o estado real e a carta legal")
+def monetization_rules(ctx: Ctx, q: E.RulesQ):
+    with ctx.tx(readonly=True) as c:
+        return BL.rules(c, engine=q.engine)
+
+
+@route("GET", "/v1/monetization/legal-cards", auth="user", tags=("monetizacao",),
+       summary="Pesquisa de base normativa por receita (não é parecer jurídico)")
+def monetization_legal_cards(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return {"items": BL.legal_cards(c),
+                "note": ("Estas cartas registram PESQUISA de base normativa com fonte e data, e o grau "
+                         "de certeza da pesquisa. Não substituem advogado nem contador, e nenhuma "
+                         "afirma que uma estrutura é lícita.")}
+
+
+@route("GET", "/v1/monetization/pipeline", min_role="viewer", query=E.PipelineQ, tags=("monetizacao",),
+       summary="O que a plataforma criou de valor que alguma regra alcança — e por que não é cobrado")
+def monetization_pipeline(ctx: Ctx, q: E.PipelineQ):
+    with ctx.tx(readonly=True) as c:
+        return BL.pipeline(c, org_id=ctx.org_id, status=q.status, limit=q.limit, offset=q.offset)
+
+
+@route("POST", "/v1/admin/monetization/legal-cards", body=E.LegalCardIn, auth="admin", status=201,
+       tags=("monetizacao",), summary="Registra a pesquisa de base normativa de uma receita")
+def admin_add_legal_card(ctx: Ctx, body: E.LegalCardIn):
+    with ctx.tx() as c:
+        return BL.add_legal_card(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
+
+
+@route("PATCH", "/v1/admin/monetization/rules/{rule_key}", body=E.RulePatch, auth="admin",
+       tags=("monetizacao",),
+       summary="Ajusta preço, situação jurídica e ativação de uma regra (o portão é no banco)")
+def admin_set_rule(ctx: Ctx, body: E.RulePatch):
+    with ctx.tx() as c:
+        return BL.set_rule(c, key=ctx.path["rule_key"], **body.model_dump(exclude_none=True))
+
+
+@route("GET", "/v1/admin/monetization/pipeline", auth="admin", query=E.PipelineQ,
+       tags=("monetizacao",), summary="A fila de monetização de todas as organizações")
+def admin_pipeline(ctx: Ctx, q: E.PipelineQ):
+    with ctx.tx(readonly=True) as c:
+        return BL.pipeline(c, org_id=q.org_id, status=q.status, limit=q.limit, offset=q.offset)
+
+
+# `billable_seq` e não `billable_id`: o roteador exige que TODO parâmetro de caminho terminado em
+# `_id` seja um UUID (`http.py`, a guarda que devolve 404 para identificador malformado). O candidato a
+# cobrança é sequencial, como o próprio `value_events`, então o nome do parâmetro respeita a convenção
+# em vez de abrir exceção nela.
+@route("POST", "/v1/admin/monetization/pipeline/{billable_seq}/waive", body=E.WaiveIn, auth="admin",
+       tags=("monetizacao",), summary="Dispensa um candidato a cobrança, com motivo escrito")
+def admin_waive(ctx: Ctx, body: E.WaiveIn):
+    seq = ctx.path["billable_seq"]
+    if not seq.isdigit():
+        raise not_found("Candidato a cobrança")
+    with ctx.tx() as c:
+        return BL.waive(c, billable_id=int(seq), reason=body.reason)

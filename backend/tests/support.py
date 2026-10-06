@@ -54,6 +54,42 @@ def _create_db() -> None:
     _psql("-c", f"ALTER ROLE impacto_owner PASSWORD '{OWNER_PW}'; ALTER ROLE impacto_app PASSWORD '{APP_PW}';")
     from impacto.db.migrate import migrate
     migrate(OWNER_DSN, log=lambda *_: None)
+    _declare_test_prices()
+
+
+#: A v0.17.0 APOSENTOU a regra comercial em dólar da v0.16.0 e **não** fixou preço institucional: as
+#: faixas são hipóteses declaradas, e sem preço a plataforma recusa contratação online. Isso é o
+#: comportamento certo do produto, mas deixa a suíte sem nada para exercitar na camada de cobrança.
+#:
+#: Então o AMBIENTE DE TESTE declara uma regra comercial própria, em BRL, como faria o proprietário ao
+#: publicar preço. Os valores abaixo existem só aqui: não estão em `config/plans.json`, não vão para
+#: produção, e o `reason` de cada versão diz isso em letras.
+#: Marcador do `reason` das versões de preço criadas pelo ambiente. Existe para que um cenário de
+#: teste consiga REABRIR exatamente estas — e não qualquer versão fechada do mesmo plano, que é o que
+#: produzia violação de `ux_price_current`.
+TEST_PRICE_REASON = "Preço declarado pelo AMBIENTE DE TESTE."
+TEST_PRICES = (
+    # (plano, intervalo, centavos, entrada, períodos de entrada, dias de teste)
+    ("osc_premium", "month", 9900, 1900, 3, 14),
+    ("osc_premium", "year", 99000, None, None, 14),
+    ("provider_premium", "month", 4900, None, None, 14),
+    ("company_premium", "month", 29900, None, None, 14),
+)
+
+
+def _declare_test_prices() -> None:
+    from impacto.db.pq import Connection
+    c = Connection(OWNER_DSN)
+    try:
+        for plan, interval, cents, intro, periods, trial in TEST_PRICES:
+            c.run("INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents,"
+                  " intro_amount_cents, intro_periods, trial_days, tax_behavior, provider, reason)"
+                  " VALUES ($1,$2,'BRL',$3,$4,$5,$6,'exclusive','stripe',$7)",
+                  plan, interval, cents, intro, periods, trial,
+                  TEST_PRICE_REASON + " A v0.17.0 não fixa preço institucional; este valor existe "
+                  "apenas para exercitar a camada de cobrança.")
+    finally:
+        c.close()
 
 
 def _drop_db() -> None:

@@ -1,7 +1,7 @@
-# Relatório de desempenho — v0.15.0
+# Relatório de desempenho — v0.16.0
 
 Medido, não estimado. O coletor é `backend/tests/test_v0150_performance.py`; a saída bruta está em
-`docs/evidence/perf_v0.15.0.log`.
+`docs/evidence/perf_v0.16.0.log` (a da versão anterior ficou em `docs/evidence/perf_v0.15.0.log`).
 
 ## 1. Como foi medido
 
@@ -112,7 +112,49 @@ o uso sem filtro nenhum.
 Enquanto o caminho 1 não for feito, o limite está **escrito na resposta da API** e repetido em
 `MATCH_ENGINE_FINAL.md` §6. Limite declarado é limite; limite escondido é defeito.
 
-## 6. O que NÃO foi medido
+## 6. Os caminhos novos da v0.16.0
+
+Volume de rede acrescentado ao mesmo cenário: relações entre as 1.000 organizações, anúncios publicados, propostas
+em várias situações e eventos de domínio. Orçamento de **2.500 ms** para todos.
+
+**Duas execuções**, na mesma máquina e no mesmo volume, para mostrar a variação real em vez de um número único:
+
+| Caminho | Execução A | Execução B | Orçamento |
+|---|---|---|---|
+| `GET /v1/network/graph?depth=2` | 15 ms | **14 ms** | 2.500 ms |
+| `GET /v1/relationships` | 11 ms | **11 ms** | 2.500 ms |
+| `GET /v1/marketplace` (público, sem sessão) | 17 ms | **18 ms** | 2.500 ms |
+| `GET /v1/readiness` | 8 ms | **12 ms** | 2.500 ms |
+| `GET /v1/readiness/purposes` | 8 ms | **10 ms** | 2.500 ms |
+| `GET /v1/projects/{id}/timeline` | 10 ms | **9 ms** | 2.500 ms |
+| `GET /v1/documents` | 13 ms | **11 ms** | 2.500 ms |
+| `GET /v1/proposals` (caixa de entrada) | 60 ms | **56 ms** | 2.500 ms |
+| `GET /v1/workspace` (investidor) | 71 ms | **82 ms** | 2.500 ms |
+| `GET /v1/workspace` (OSC) | 341 ms | **436 ms** | 2.500 ms |
+| `GET /v1/feed/projects` | 1.724 ms | **1.508 ms** | 2.500 ms |
+
+Duas leituras importantes:
+
+**O grafo a 14–15 ms é a razão documentada de NÃO adotar banco de grafos** (ADR-141). A travessia de profundidade 2
+é exatamente o caso que justificaria um armazenamento especializado, e com índices em `relationships(source_org_id)`
+e `(target_org_id)` ela é barata. Se a travessia chegar a profundidade 3 em volume, a decisão deve ser reaberta — e
+o teste já está no lugar para medir.
+
+**O workspace da OSC (341–436 ms) é o ponto a observar.** É a tela de abertura, e é o mais caro dos novos porque
+agrega oito seções, uma delas avaliando a prontidão de cada projeto da organização. A variação de ~100 ms entre
+execuções é ruído de máquina compartilhada, não regressão. O que fecharia isso, se incomodar:
+
+1. **Avaliação de prontidão em lote** por organização, em vez de por projeto — o mesmo padrão de carregador em lote
+   que resolveu o feed.
+2. **Retrato de prontidão em cache** (`readiness_snapshots` já existe e é append-only), lido na abertura e
+   recalculado por job ou por mudança no projeto. O cuidado é o mesmo de sempre: nota em cache com régua antiga é o
+   que as versões do motor existem para evitar.
+3. **Carregar as seções abaixo da dobra sob demanda** — decisão de design, não de banco.
+
+Nada disso foi feito nesta rodada porque **341–436 ms cabe no orçamento com folga de 5×**, e otimizar antes de doer
+é como a complexidade entra.
+
+## 7. O que NÃO foi medido
 
 | Item | Por quê |
 |---|---|
@@ -121,11 +163,13 @@ Enquanto o caminho 1 não for feito, o limite está **escrito na resposta da API
 | Desempenho com armazenamento S3 real | `STORAGE_PROVIDER=local` na medição |
 | Tempo de resposta do antivírus | `ANTIVIRUS_PROVIDER=none` na medição |
 | Crescimento ao longo de meses (fragmentação, bloat, vacuum) | exige ambiente de longa duração |
+| Grafo em profundidade 3 ou mais | a API expõe profundidade 1 e 2 (limite declarado); medir o que não é oferecido não diria nada |
+| Notificação em fan-out para equipe muito grande | o volume sintético usa equipes de poucos membros; uma organização com centenas de pessoas por projeto não foi simulada |
 
 Essas lacunas são de **medição**, não de implementação. Dizer "a plataforma aguenta X usuários simultâneos" sem ter
 medido seria invenção.
 
-## 7. Como reproduzir
+## 8. Como reproduzir
 
 ```bash
 # escala reduzida (rápida)

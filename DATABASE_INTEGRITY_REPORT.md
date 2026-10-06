@@ -1,27 +1,32 @@
-# Relatório de integridade do banco — v0.15.0
+# Relatório de integridade do banco — v0.16.0
 
 Todo número aqui vem de consulta ao catálogo do PostgreSQL, não de contagem à mão. O coletor é
-`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.15.0.txt`.
+`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.16.0.txt`
+(a da versão anterior ficou em `docs/evidence/db_integrity_v0.15.0.txt`).
 
-Banco medido: criado **do zero** pelas 15 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
+Banco medido: criado **do zero** pelas 17 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
 
 ## 1. Números
 
-| Medida | Valor |
-|---|---|
-| Tabelas | **205** |
-| Tabelas sem RLS habilitada | **1** — `schema_migrations` |
-| Políticas de RLS | **408**, cobrindo **203** tabelas |
-| Gatilhos (não internos) | **118** |
-| Funções | **224**, das quais **53** `SECURITY DEFINER` |
-| `SECURITY DEFINER` sem `search_path` fixo | **0** |
-| Chaves estrangeiras | **529** |
-| FK de caminho de acesso sem índice próprio | **0** (eram 92 antes da migração 0015) |
-| Restrições `CHECK` | **922** |
-| Restrições `UNIQUE`/`PRIMARY KEY` | **288** |
-| Índices | **552** |
-| Tabelas sem chave primária | **0** |
-| Migrações aplicadas | **15** |
+| Medida | v0.15.0 | **v0.16.0** |
+|---|---|---|
+| Tabelas | 205 | **231** |
+| Tabelas sem RLS habilitada | 1 | **1** — `schema_migrations` |
+| Políticas de RLS | 408 / 203 tabelas | **466**, cobrindo **229** tabelas |
+| Gatilhos (não internos) | 118 | **161** |
+| Funções | 224 | **247** |
+| das quais `SECURITY DEFINER` | 53 | **63** |
+| `SECURITY DEFINER` sem `search_path` fixo | 0 | **0** |
+| Chaves estrangeiras | 529 | **627** |
+| FK de caminho de acesso sem índice próprio | 0 | **0** |
+| Restrições `CHECK` | 922 | **1.082** |
+| Restrições `UNIQUE`/`PRIMARY KEY` | 288 | **315** |
+| Índices | 552 | **643** |
+| Tabelas sem chave primária | 0 | **0** |
+| Tabelas append-only | 17 | **22** |
+| Tabelas com coluna guardada | 20 | **26** |
+| Migrações aplicadas | 15 | **17** |
+| Arestas de máquina de estados como dado | 58 | **103** (projeto 58 · proposta 19 · rede 26) |
 
 ### Por que `schema_migrations` não tem RLS
 
@@ -42,9 +47,10 @@ não é só estrutural:
 | Contexto anônimo não vê nada | `test_anonymous_context_sees_nothing` |
 | O papel da aplicação não tem `BYPASSRLS` | `test_app_role_has_no_bypass` |
 | As tabelas novas da v0.15.0 isolam em SQL direto | `test_v0150_security.test_rls_blocks_the_new_tables_directly_in_sql` |
+| As 22 tabelas novas da v0.16.0 isolam em SQL direto, numa matriz entre inquilinos | `test_v0160_invariants.CrossTenantMatrix` |
 | Funções `SECURITY DEFINER` não entregam dado de outra organização | `test_security_definer_helpers_do_not_leak_other_tenant` |
 
-### `org_id` anulável: 18 tabelas, todas por desenho
+### `org_id` anulável: 21 tabelas, todas por desenho
 
 | Tabela | Por que `org_id` pode ser nulo |
 |---|---|
@@ -55,13 +61,16 @@ não é só estrutural:
 | `integration_events`, `trust_events`, `solution_events`, `solution_search_log` | evento de plataforma |
 | `course_certificates`, `course_enrollments`, `lesson_progress` (via `kb_*`), `hub_event_registrations` | pessoa física pode estudar sem organização |
 | `demo_requests`, `partnership_requests`, `trial_claims`, `support_tickets`, `kb_feedback`, `kb_checklist_progress`, `solution_people` | contato ou registro anterior ao cadastro da organização |
+| `domain_events` *(v0.16.0)* | fato de plataforma sem organização ativa; o fato **de rede** sempre tem as duas organizações nomeadas |
+| `professional_experiences` *(v0.16.0)* | a experiência pode citar organização que **não está** na plataforma — e aí não há `org_id` a apontar |
+| `public_profiles` *(v0.16.0)* | perfil de pessoa física que ainda não criou organização |
 
 Em todas, a política de RLS cobre o caso nulo explicitamente (`org_id IS NULL OR org_id = app_org() OR app_priv()`
 ou equivalente), de modo que linha de plataforma é legível e linha de outra organização não.
 
 ## 3. Imutabilidade
 
-### Append-only (17 tabelas)
+### Append-only (22 tabelas)
 
 `forbid_mutation()` recusa UPDATE e DELETE pelo papel da aplicação em:
 
@@ -70,13 +79,28 @@ ou equivalente), de modo que linha de plataforma é legível e linha de outra or
 `payment_events` · `project_snapshots` · `project_transitions` · `signature_revocations` · `signatures` ·
 `solution_intent_events` · `solution_versions` · `trust_events` · `trust_timestamps`
 
-### Colunas guardadas (20 tabelas)
+**Acrescentadas em v0.16.0:** `domain_events` (o fato aconteceu; apagá-lo é apagar a história da rede) ·
+`proposal_events` (a trilha da negociação) · `readiness_snapshots` (a nota de ontem explica a decisão de ontem) ·
+`handle_history` (quem foi `@nome` antes importa para quem confiou no endereço) · `price_change_notices` (o aviso
+enviado é prova de que foi enviado — só o "ciente" pode ser escrito depois, por `price_notice_ack_only()`)
+
+### Colunas guardadas (26 tabelas)
 
 `guard_columns(...)` recusa que a organização escreva colunas que o servidor apura ou que a administração decide:
 `calls` · `document_assemblies` · `document_templates` · `documents` · `fee_tables` · `ideas` ·
 `identity_documents` · `identity_verifications` · `milestones` · `organizations` · `professional_credentials` ·
 `quota_pledges` · `signature_providers` · `signed_agreement_parties` · `signed_agreements` ·
 `solution_disputes` · `solution_evidence` · `solution_results` · `users` · `verifiable_records`
+
+**Acrescentadas em v0.16.0:** `impact_updates` (as três colunas de número — `metrics`, `milestones`,
+`evidence_count` — são colhidas por `app_impact_metrics()`, não digitadas) · `relationships` ·
+`proposals` · `marketplace_listings` · `investment_intents` · `public_profiles`
+
+**Lição desta rodada:** `guard_columns` isenta `app_priv()`. Nas tabelas em que **só** o contexto privilegiado
+escreve — `plan_price_versions` é o caso — ela não guarda nada, e a trava precisa ser gatilho próprio
+(`price_version_immutable()`). E nas tabelas em que a organização legitimamente muda a situação do próprio
+registro, a guarda bloqueava o dono: a correção foi tirar as colunas de situação da guarda e passar a **derivá-las**
+por gatilho (`published_at`, `submitted_at`, `reviewed_by`, `decided_at`, `version`…).
 
 ### Guardas que nem o contexto privilegiado atravessa
 
@@ -87,6 +111,15 @@ ou equivalente), de modo que linha de plataforma é legível e linha de outra or
 | `document_identity_guard` | mudar `sha256`, `size_bytes`, `storage_key` ou `mime_type` de `documents` | a identidade do arquivo guardado não muda; nova versão é linha nova |
 | `template_field_guard` | alterar campo de modelo publicado | documento gerado precisa continuar explicável |
 | `quota_capacity_guard` | aporte acima da capacidade de cotas | `SECURITY DEFINER` para somar **todos** os aportes, com verificação explícita de nulo (ADR 103) |
+| `proposal_status_guard` *(v0.16.0)* | transição fora de `proposal_status_graph` | mesmo princípio da máquina do projeto, agora na negociação |
+| `network_initial_state` *(v0.16.0)* | situação inicial inventada em relação, anúncio ou relatório | a porta de entrada da máquina de estados também é máquina de estados |
+| `listing_publish_guard` *(v0.16.0)* | anúncio ao ar com projeto não publicado | vitrine aberta para coisa privada é vazamento |
+| `impact_update_guard` *(v0.16.0)* | relatório enviado sem os números colhidos pelo banco | impede "atendemos 400 pessoas" sem lastro |
+| `enforcement_target_guard` *(v0.16.0)* | o alvo de uma medida escrever qualquer coluna além da contestação | a GRANT de coluna deixava o alvo anular a própria punição |
+| `price_version_immutable` *(v0.16.0)* | alterar valor, moeda ou imposto de versão de preço existente | mudar preço cria versão; o histórico não se reescreve |
+| `price_apply_guard` *(v0.16.0)* | aumento de preço sem aviso prévio de 30 dias reconhecido | "nunca mudar preço em silêncio", no banco |
+| `counterpart_columns` *(v0.16.0)* | a contraparte escrever algo além de `status`/`ended_at`/`ended_reason` | aceitar uma relação não dá direito de reescrever a nota de quem convidou |
+| `handle_guard` *(v0.16.0)* | tomar identificador reservado ou já usado, sem registrar o histórico | endereço público é identidade |
 
 ### Encadeamento por hash
 
@@ -110,22 +143,34 @@ aplicação não lista "tudo que a pessoa X criou", e índice que ninguém usa �
 Resultado: de 460 para **552** índices, e `fk_without_index_hot` em **0**. A suíte completa (673 testes, que
 escrevem muito) manteve o mesmo tempo: 268 s antes, 268 s depois — o custo de escrita é irrelevante nesta escala.
 
+**Em v0.16.0** a mesma regra foi aplicada às 22 tabelas novas na própria migração 0016, e não como correção
+posterior: 643 índices no total, `fk_without_index_hot` continua em **0**. As 327 FK sem índice próprio são,
+todas, chaves para `users` (`created_by`, `decided_by`, `reviewed_by`…), que não são caminho de acesso — a
+aplicação não lista "tudo que a pessoa X criou" (ADR-137).
+
 ## 5. Integridade referencial
 
-- **529 chaves estrangeiras declaradas.** Não há referência "por convenção" entre tabelas do núcleo: toda ligação é
+- **627 chaves estrangeiras declaradas.** Não há referência "por convenção" entre tabelas do núcleo: toda ligação é
   FK, portanto não existe linha órfã possível.
 - `ON DELETE` é explícito em cada FK: `CASCADE` onde o filho não tem sentido sem o pai (marco sem projeto),
   `SET NULL` onde o filho sobrevive (documento cujo projeto foi apagado), `RESTRICT` onde apagar o pai seria perder
   prova (modelo usado por montagem).
-- **922 restrições `CHECK`** cobrem domínio de valor (situações, níveis, formatos), faixa (percentual 0–100,
+- **1.082 restrições `CHECK`** cobrem domínio de valor (situações, níveis, formatos), faixa (percentual 0–100,
   valores não negativos) e coerência entre colunas. Exemplos desta versão:
   `CHECK ((stage = 'promoted') = (promoted_project_id IS NOT NULL))` em `ideas`;
   `CHECK (approved_by IS NULL OR approved_by <> created_by)` em `document_assemblies`.
+  Exemplos de v0.16.0: `CHECK (reviewed_by IS NULL OR reviewed_by <> created_by)` em `impact_updates` (quem revisa
+  não é quem escreveu); `CHECK (appeal_decided_by IS NULL OR appeal_decided_by <> decided_by)` em
+  `enforcement_actions` (quem julga a contestação não é quem aplicou); `CHECK ((intro_amount_cents IS NULL) =
+  (intro_periods IS NULL))` e `CHECK (intro_amount_cents IS NULL OR intro_amount_cents < amount_cents)` em
+  `plan_price_versions` (preço de entrada mais caro que o regular é padrão obscuro, e o banco recusa);
+  `CHECK (char_length(reason) >= 10)` em `enforcement_actions` (medida sem motivo é arbítrio).
 
 ## 6. Caminho de atualização
 
 `backend/tests/test_v0150_upgrade.py` prepara um banco na **v0.12.1** (migrações 0001–0010), insere organização,
-usuário, projeto publicado, documento e entradas na trilha, e então aplica 0011 → 0012 → 0013 → 0015. Confere:
+usuário, projeto publicado, documento e entradas na trilha, e então aplica 0011 → 0012 → 0013 → 0015 → **0016 →
+0017**. Confere:
 
 | Verificação | Resultado |
 |---|---|
@@ -133,7 +178,7 @@ usuário, projeto publicado, documento e entradas na trilha, e então aplica 001
 | Trilha encadeada intacta, `ledger_verify` válido | ✔ |
 | Transições que o produto já fazia continuam no grafo | ✔ |
 | Consolidação dos ODS não deixou referência quebrada (`sdg_goals` removida, `ods_goals` com 17 linhas) | ✔ |
-| As 15 estruturas novas chegaram com RLS e política | ✔ |
+| As 15 estruturas da v0.15.0 **e as 23 da v0.16.0** chegaram com RLS e política | ✔ |
 | Modelos da plataforma e provedores de assinatura semeados | ✔ |
 | O papel da aplicação usa as tabelas novas; tabelas de chave invisíveis | ✔ |
 | **Esquema atualizado idêntico ao criado do zero** — colunas, índices, políticas e gatilhos | ✔ |
@@ -158,8 +203,8 @@ remoção não deixou referência pendurada.
 
 | Medida | Valor | Observação |
 |---|---|---|
-| Tabelas com `DELETE` para `impacto_app` | 181 | as 24 restantes são append-only ou de administração |
-| Concessões por coluna para `impacto_app` | 7.135 | é assim que `integration_credentials.secret_cipher` fica ilegível e que o nível jurídico de um provedor de assinatura não pode ser escrito pela aplicação |
+| Tabelas com `DELETE` para `impacto_app` | 194 | as 37 restantes são append-only ou de administração |
+| Concessões por coluna para `impacto_app` | 8.080 | é assim que `integration_credentials.secret_cipher` fica ilegível e que o nível jurídico de um provedor de assinatura não pode ser escrito pela aplicação |
 
 O papel da aplicação **não** tem `BYPASSRLS`, não é dono de nenhuma tabela e não pode criar nem alterar estrutura.
 
@@ -170,6 +215,6 @@ O papel da aplicação **não** tem `BYPASSRLS`, não é dono de nenhuma tabela 
 | Alguma tabela de dado de organização está sem RLS? | **Não.** |
 | Alguma `SECURITY DEFINER` está sem `search_path` fixo? | **Não.** |
 | Alguma tabela está sem chave primária? | **Não.** |
-| Alguma FK de caminho de acesso está sem índice? | **Não** (depois da 0015). |
-| Existe caminho pela aplicação para reescrever histórico? | **Não** — 17 tabelas append-only, 5 guardas que o contexto privilegiado não atravessa, encadeamento por hash verificável. |
+| Alguma FK de caminho de acesso está sem índice? | **Não** — nem nas 22 tabelas da v0.16.0, cujos índices vieram na própria migração. |
+| Existe caminho pela aplicação para reescrever histórico? | **Não** — 22 tabelas append-only, 15 guardas que o contexto privilegiado não atravessa, encadeamento por hash verificável. |
 | Atualizar de uma versão anterior produz o mesmo esquema que criar do zero? | **Sim**, verificado por teste. |

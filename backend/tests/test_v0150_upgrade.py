@@ -87,13 +87,15 @@ class UpgradePathTests(unittest.TestCase):
     # ------------------------------------------------------------------------------------ o caminho
     def test_01_v0121_has_no_v0150_structures(self):
         for table in ("ideas", "project_transitions", "diagnosis_versions", "document_assemblies",
-                      "signature_providers", "encryption_keys"):
+                      "signature_providers", "encryption_keys",
+                      "relationships", "proposals", "marketplace_listings", "impact_updates",
+                      "public_profiles", "plan_price_versions"):
             self.assertIsNone(self.conn.one("SELECT 1 FROM pg_tables WHERE tablename = $1", table),
                               f"{table} não deveria existir na v0.12.1")
         self.assertIsNotNone(self.conn.one("SELECT 1 FROM pg_tables WHERE tablename = 'ods_goals'"))
 
     def test_02_upgrade_step_by_step_succeeds(self):
-        steps = [(V0130, "v0.13.0"), (V0140, "v0.14.0"), (None, "v0.15.0")]
+        steps = [(V0130, "v0.13.0"), (V0140, "v0.14.0"), (None, "v0.15.0 + v0.16.0 (todas as restantes)")]
         for upto, label in steps:
             applied = self.migrate(OWNER_DSN, upto=upto, sync_reference=False, log=lambda *_: None)
             self.assertTrue(applied, f"nenhuma migration aplicada no passo {label}")
@@ -145,7 +147,14 @@ class UpgradePathTests(unittest.TestCase):
         for table in ("ideas", "project_transitions", "project_snapshots", "project_risks", "diagnosis_versions",
                       "diagnosis_actions", "document_templates", "document_template_fields", "document_assemblies",
                       "match_feedback", "signature_providers", "signature_policies", "encryption_keys",
-                      "encryption_rotations", "project_status_graph"):
+                      "encryption_rotations", "project_status_graph",
+                      # v0.16.0 — a rede de impacto e a cobrança versionada
+                      "relationships", "proposals", "proposal_events", "proposal_status_graph",
+                      "marketplace_listings", "impact_updates", "personas", "org_personas", "taxonomies",
+                      "taxonomy_terms", "public_profiles", "handle_history", "professional_experiences",
+                      "enforcement_actions", "territory_needs", "investment_intents", "recommendations",
+                      "readiness_snapshots", "domain_events", "network_status_graph",
+                      "plan_price_versions", "subscription_prices", "price_change_notices"):
             row = self.conn.one("SELECT relrowsecurity FROM pg_class WHERE relname = $1 AND relkind = 'r'", table)
             self.assertIsNotNone(row, f"{table} não foi criada")
             self.assertTrue(row["relrowsecurity"], f"{table} sem RLS habilitada")

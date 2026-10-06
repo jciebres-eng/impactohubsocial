@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.14.0",
+  "version": "0.16.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -4844,6 +4844,112 @@
       "description": "Erro (application/problem+json)"
      }
     }
+   }
+  },
+  "/v1/plans/price": {
+   "get": {
+    "summary": "Preço vigente de um plano: entrada, preço regular, equivalente mensal, total e imposto",
+    "operationId": "get_billing_routes_billing_price",
+    "tags": [
+     "billing"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "plan_key",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[a-z0-9_]{3,40}$",
+       "title": "Plan Key",
+       "type": "string"
+      }
+     },
+     {
+      "name": "interval",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "month",
+       "enum": [
+        "month",
+        "year"
+       ],
+       "title": "Interval",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/billing/price-history": {
+   "get": {
+    "summary": "Histórico de preço da organização e avisos de reajuste recebidos",
+    "operationId": "get_billing_routes_billing_price_history",
+    "tags": [
+     "billing"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner"
+   }
+  },
+  "/v1/billing/price-notices/{notice_id}/ack": {
+   "post": {
+    "summary": "Registra que a organização viu o aviso de reajuste",
+    "operationId": "post_billing_routes_ack_price_notice",
+    "tags": [
+     "billing"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "notice_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
    }
   },
   "/v1/billing": {
@@ -26366,6 +26472,3517 @@
     },
     "description": "Administração da plataforma com MFA"
    }
+  },
+  "/v1/network/relationship-kinds": {
+   "get": {
+    "summary": "Tipos de relação, com alvos aceitos e teto de visibilidade de cada um",
+    "operationId": "get_network_core_routes_relationship_kinds",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/network/relationships": {
+   "post": {
+    "summary": "Cria uma relação (idempotente por tipo, origem, destino e contexto)",
+    "operationId": "post_network_core_routes_create_relationship",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RelationshipIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "list relationships",
+    "operationId": "get_network_core_routes_list_relationships",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "favorite",
+          "watchlist",
+          "follow",
+          "block",
+          "contact",
+          "partnership",
+          "investment",
+          "sponsorship",
+          "service",
+          "mentorship",
+          "volunteer",
+          "collaboration",
+          "support",
+          "government_support",
+          "project_member",
+          "project_partner",
+          "project_sponsor",
+          "project_investor",
+          "referral",
+          "verified_by"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "pending",
+          "active",
+          "paused",
+          "ended",
+          "declined",
+          "revoked"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "direction",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "all",
+       "enum": [
+        "in",
+        "out",
+        "all"
+       ],
+       "title": "Direction",
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/network/relationships/counts": {
+   "get": {
+    "summary": "relationship counts",
+    "operationId": "get_network_core_routes_relationship_counts",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/network/graph": {
+   "get": {
+    "summary": "Vizinhança da organização no grafo (profundidade 1 ou 2, sem bloqueios)",
+    "operationId": "get_network_core_routes_network_graph",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "depth",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 1,
+       "maximum": 2,
+       "minimum": 1,
+       "title": "Depth",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/network/relationships/{rel_id}/transition": {
+   "post": {
+    "summary": "Aceita, recusa, pausa, encerra ou revoga — conforme o lado",
+    "operationId": "post_network_core_routes_transition_relationship",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "rel_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RelationshipTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/network/relationships/{rel_id}/visibility": {
+   "put": {
+    "summary": "Altera a visibilidade (limitada ao teto do tipo)",
+    "operationId": "put_network_core_routes_set_relationship_visibility",
+    "tags": [
+     "rede"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "rel_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VisibilityIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/public/relationships/{subject_type}/{subject_id}": {
+   "get": {
+    "summary": "Relações PÚBLICAS de um sujeito (filtradas por visibilidade, nunca por existência)",
+    "operationId": "get_network_core_routes_public_relationships",
+    "tags": [
+     "rede"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "subject_type",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/proposals/graph": {
+   "get": {
+    "summary": "Máquina de estados da proposta, como está no banco",
+    "operationId": "get_network_core_routes_proposal_graph",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/proposals": {
+   "post": {
+    "summary": "Cria a proposta em rascunho (exige contexto: projeto, necessidade, edital ou solução)",
+    "operationId": "post_network_core_routes_create_proposal",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProposalIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Caixa única de propostas (recebidas, enviadas ou todas)",
+    "operationId": "get_network_core_routes_list_proposals",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "box",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "received",
+       "enum": [
+        "received",
+        "sent",
+        "all"
+       ],
+       "title": "Box",
+       "type": "string"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "sent",
+          "viewed",
+          "in_review",
+          "changes_requested",
+          "accepted",
+          "declined",
+          "expired",
+          "withdrawn",
+          "cancelled"
+         ],
+         "type": "string"
+        },
+        {
+         "const": "open",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "investment",
+          "sponsorship",
+          "service",
+          "partnership",
+          "mentorship",
+          "volunteer",
+          "collaboration",
+          "project_support",
+          "government_support"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/proposals/counts": {
+   "get": {
+    "summary": "proposal counts",
+    "operationId": "get_network_core_routes_proposal_counts",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/proposals/{proposal_id}": {
+   "get": {
+    "summary": "Proposta com histórico, anexos e as ações disponíveis para o seu lado",
+    "operationId": "get_network_core_routes_get_proposal",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "proposal_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "Edita a proposta (só em rascunho ou após ajuste solicitado)",
+    "operationId": "patch_network_core_routes_patch_proposal",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "proposal_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProposalPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/proposals/{proposal_id}/transition": {
+   "post": {
+    "summary": "Envia, analisa, aceita, recusa, pede ajuste ou retira",
+    "operationId": "post_network_core_routes_transition_proposal",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "proposal_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProposalTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/proposals/{proposal_id}/attachments": {
+   "post": {
+    "summary": "Anexa documento do cofre à proposta e avisa a outra parte e a equipe",
+    "operationId": "post_network_core_routes_attach_to_proposal",
+    "tags": [
+     "propostas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "proposal_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProposalAttachIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations": {
+   "post": {
+    "summary": "Abre (ou reaproveita) a conversa naquele contexto",
+    "operationId": "post_network_core_routes_open_conversation",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ThreadIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "list conversations",
+    "operationId": "get_network_core_routes_list_conversations",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "open",
+          "archived",
+          "closed"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": "open",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 30,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/conversations/unread": {
+   "get": {
+    "summary": "unread",
+    "operationId": "get_network_core_routes_unread",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/conversations/{conversation_id}": {
+   "get": {
+    "summary": "get conversation",
+    "operationId": "get_network_core_routes_get_conversation",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "before",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "format": "date-time",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Before"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/conversations/{conversation_id}/messages": {
+   "post": {
+    "summary": "send message",
+    "operationId": "post_network_core_routes_send_message",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 60/60s por IP",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MessageIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/conversations/{conversation_id}/read": {
+   "post": {
+    "summary": "read conversation",
+    "operationId": "post_network_core_routes_read_conversation",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/conversations/{conversation_id}/status": {
+   "put": {
+    "summary": "set conversation status",
+    "operationId": "put_network_core_routes_set_conversation_status",
+    "tags": [
+     "conversas"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "conversation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ThreadStatusIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/workspace": {
+   "get": {
+    "summary": "WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem",
+    "operationId": "get_network_hub_routes_workspace",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "persona",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Persona"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/workspace/personas": {
+   "get": {
+    "summary": "Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano)",
+    "operationId": "get_network_hub_routes_list_personas",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   },
+   "post": {
+    "summary": "declare persona",
+    "operationId": "post_network_hub_routes_declare_persona",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PersonaIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/workspace/personas/{persona}": {
+   "delete": {
+    "summary": "undeclare persona",
+    "operationId": "delete_network_hub_routes_undeclare_persona",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "persona",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/readiness/purposes": {
+   "get": {
+    "summary": "Prontidão por finalidade: seis números, cada um com os critérios que o compuseram",
+    "operationId": "get_network_hub_routes_readiness",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/readiness/snapshots": {
+   "post": {
+    "summary": "Grava o retrato da prontidão (append-only, para comparar ao longo do tempo)",
+    "operationId": "post_network_hub_routes_readiness_snapshot",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/readiness/history": {
+   "get": {
+    "summary": "readiness history",
+    "operationId": "get_network_hub_routes_readiness_history",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/recommendations": {
+   "get": {
+    "summary": "Próximas ações, com razão e evidência (recomendação não é match)",
+    "operationId": "get_network_hub_routes_recommendations",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "open",
+       "enum": [
+        "open",
+        "done",
+        "dismissed",
+        "superseded",
+        "expired"
+       ],
+       "title": "Status",
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 30,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/recommendations/refresh": {
+   "post": {
+    "summary": "Recalcula as recomendações (as que deixaram de valer ficam como superseded, não desaparecem)",
+    "operationId": "post_network_hub_routes_refresh_recommendations",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member"
+   }
+  },
+  "/v1/recommendations/{rec_id}/resolve": {
+   "post": {
+    "summary": "resolve recommendation",
+    "operationId": "post_network_hub_routes_resolve_recommendation",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "rec_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecommendationResolveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/marketplace/feed": {
+   "get": {
+    "summary": "Feed público: lê SÓ anúncios publicados (a publicação é estado da entidade, não condição de consulta)",
+    "operationId": "get_network_hub_routes_marketplace_feed",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "subject_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "project",
+          "opportunity",
+          "need",
+          "service",
+          "solution",
+          "partnership",
+          "sponsorship"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Subject Type"
+      }
+     },
+     {
+      "name": "seeking",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "investment",
+          "sponsorship",
+          "partner",
+          "professional",
+          "volunteer",
+          "mentorship",
+          "equipment",
+          "knowledge",
+          "quota"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Seeking"
+      }
+     },
+     {
+      "name": "territory",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory"
+      }
+     },
+     {
+      "name": "cause",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Cause"
+      }
+     },
+     {
+      "name": "ods",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maximum": 17,
+         "minimum": 1,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Ods"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 120,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Q"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 20,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/marketplace/listings/{listing_id}": {
+   "get": {
+    "summary": "marketplace item",
+    "operationId": "get_network_hub_routes_marketplace_item",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "listing_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "patch listing",
+    "operationId": "patch_network_hub_routes_patch_listing",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "listing_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ListingPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/marketplace/graph": {
+   "get": {
+    "summary": "Máquina de estados do anúncio",
+    "operationId": "get_network_hub_routes_listing_graph",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/marketplace/listings": {
+   "post": {
+    "summary": "Cria o anúncio em rascunho (nada nasce no ar)",
+    "operationId": "post_network_hub_routes_create_listing",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ListingIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "my listings",
+    "operationId": "get_network_hub_routes_my_listings",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "state",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "review",
+          "approved",
+          "published",
+          "paused",
+          "expired",
+          "archived",
+          "suspended"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "State"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/marketplace/listings/{listing_id}/transition": {
+   "post": {
+    "summary": "Publica, pausa, arquiva (suspender e liberar são da administração)",
+    "operationId": "post_network_hub_routes_transition_listing",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "listing_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ListingTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/marketplace/listings/{listing_id}/transition": {
+   "post": {
+    "summary": "Suspende ou libera anúncio (exige motivo registrado)",
+    "operationId": "post_network_hub_routes_admin_transition_listing",
+    "tags": [
+     "marketplace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "listing_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ListingTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/impact-updates/graph": {
+   "get": {
+    "summary": "impact graph",
+    "operationId": "get_network_hub_routes_impact_graph",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/impact-updates/gather": {
+   "get": {
+    "summary": "Prévia da apuração do período (mostra ANTES do envio o que será colhido)",
+    "operationId": "get_network_hub_routes_impact_gather",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "name": "period_start",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "format": "date",
+       "title": "Period Start",
+       "type": "string"
+      }
+     },
+     {
+      "name": "period_end",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "format": "date",
+       "title": "Period End",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/impact-updates": {
+   "post": {
+    "summary": "create impact update",
+    "operationId": "post_network_hub_routes_create_impact_update",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImpactUpdateIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "list impact updates",
+    "operationId": "get_network_hub_routes_list_impact_updates",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "submitted",
+          "under_review",
+          "changes_requested",
+          "accepted",
+          "published"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 30,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/impact-updates/inbox": {
+   "get": {
+    "summary": "Relatórios que esta organização pode analisar (dos projetos que ela apoia)",
+    "operationId": "get_network_hub_routes_impact_inbox",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/impact-updates/{update_id}": {
+   "get": {
+    "summary": "get impact update",
+    "operationId": "get_network_hub_routes_get_impact_update",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "update_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "patch impact update",
+    "operationId": "patch_network_hub_routes_patch_impact_update",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "update_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImpactUpdatePatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/impact-updates/{update_id}/transition": {
+   "post": {
+    "summary": "Envia, analisa, pede ajuste, aceita ou publica — conforme o lado",
+    "operationId": "post_network_hub_routes_transition_impact_update",
+    "tags": [
+     "impacto"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "update_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImpactUpdateTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/public/projects/{project_id}/impact": {
+   "get": {
+    "summary": "Relatórios PUBLICADOS de um projeto publicado",
+    "operationId": "get_network_hub_routes_public_impact",
+    "tags": [
+     "impacto"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/profiles/{handle}": {
+   "get": {
+    "summary": "Perfil público: lê SÓ a projeção curada (public_fields), nunca tabela privada",
+    "operationId": "get_network_hub_routes_public_profile",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "handle",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/profiles/{handle}/open-graph": {
+   "get": {
+    "summary": "Metadados de compartilhamento, montados da mesma projeção",
+    "operationId": "get_network_hub_routes_profile_open_graph",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "handle",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/profiles/handle-available": {
+   "get": {
+    "summary": "handle available",
+    "operationId": "get_network_hub_routes_handle_available",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "handle",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maxLength": 30,
+       "minLength": 3,
+       "title": "Handle",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/profiles/handle-suggest": {
+   "get": {
+    "summary": "handle suggest",
+    "operationId": "get_network_hub_routes_handle_suggest",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "base",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maxLength": 120,
+       "minLength": 2,
+       "title": "Base",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/profiles/mine": {
+   "get": {
+    "summary": "my profiles",
+    "operationId": "get_network_hub_routes_my_profiles",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/profiles": {
+   "post": {
+    "summary": "Cria o perfil público (@identificador único, com normalização e reservas)",
+    "operationId": "post_network_hub_routes_create_profile",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProfileIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/profiles/{profile_id}": {
+   "patch": {
+    "summary": "Edita o perfil e remonta a projeção pública",
+    "operationId": "patch_network_hub_routes_patch_profile",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "profile_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProfilePatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/profiles/{profile_id}/rebuild": {
+   "post": {
+    "summary": "Remonta a projeção pública a partir do estado atual",
+    "operationId": "post_network_hub_routes_rebuild_profile",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "profile_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/profiles/{profile_id}/handle-history": {
+   "get": {
+    "summary": "Histórico de identificadores (append-only: trocar é permitido, apagar o rastro não)",
+    "operationId": "get_network_hub_routes_profile_handle_history",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "profile_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/taxonomies": {
+   "get": {
+    "summary": "Taxonomias versionadas com política de uso de cada uma",
+    "operationId": "get_network_hub_routes_taxonomies",
+    "tags": [
+     "taxonomia"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "taxonomy",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Taxonomy"
+      }
+     },
+     {
+      "name": "include_inactive",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Include Inactive",
+       "type": "boolean"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/territory/needs": {
+   "post": {
+    "summary": "Registra necessidade do território (estimativa exige fonte declarada)",
+    "operationId": "post_network_hub_routes_create_territory_need",
+    "tags": [
+     "territorio"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TerritoryNeedIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "list territory needs",
+    "operationId": "get_network_hub_routes_list_territory_needs",
+    "tags": [
+     "territorio"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "territory",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory"
+      }
+     },
+     {
+      "name": "cause",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Cause"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "open",
+          "partially_served",
+          "served",
+          "archived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/profile/experiences": {
+   "post": {
+    "summary": "Declara experiência profissional (nasce 'declarada'; confirmação é de quem administra a organização)",
+    "operationId": "post_network_hub_routes_create_experience",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExperienceIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "list experiences",
+    "operationId": "get_network_hub_routes_list_experiences",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/org/experience-requests": {
+   "get": {
+    "summary": "Experiências que pessoas declararam na sua organização e aguardam confirmação",
+    "operationId": "get_network_hub_routes_experience_requests",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager"
+   }
+  },
+  "/v1/org/experience-requests/{experience_id}/decide": {
+   "post": {
+    "summary": "Confirma ou contesta a experiência (quem confirma não pode ser a própria pessoa)",
+    "operationId": "post_network_hub_routes_decide_experience",
+    "tags": [
+     "perfil publico"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "experience_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExperienceDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/moderation/ladder": {
+   "get": {
+    "summary": "A escada de medidas, com o que cada degrau significa e se exige prazo",
+    "operationId": "get_network_hub_routes_moderation_ladder",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/conta/moderacao": {
+   "get": {
+    "summary": "Medidas de moderação contra a sua organização, com o direito de contestar",
+    "operationId": "get_network_hub_routes_my_enforcement",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin"
+   }
+  },
+  "/v1/conta/moderacao/{action_id}/contestar": {
+   "post": {
+    "summary": "Contesta uma medida (uma vez por medida)",
+    "operationId": "post_network_hub_routes_appeal_enforcement",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "parameters": [
+     {
+      "name": "action_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppealIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/enforcement": {
+   "get": {
+    "summary": "list enforcement",
+    "operationId": "get_network_hub_routes_list_enforcement",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "active",
+          "expired",
+          "lifted",
+          "under_appeal",
+          "upheld",
+          "overturned"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Aplica medida (proporcional ao histórico; contornar a escada exige justificativa registrada)",
+    "operationId": "post_network_hub_routes_apply_enforcement",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EnforcementIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/enforcement/history": {
+   "get": {
+    "summary": "Histórico de medidas contra um alvo — é o que torna a proporcionalidade verificável",
+    "operationId": "get_network_hub_routes_enforcement_history",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Org Id"
+      }
+     },
+     {
+      "name": "user_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "User Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/enforcement/{action_id}/lift": {
+   "post": {
+    "summary": "Levanta a medida (exige motivo, como aplicar)",
+    "operationId": "post_network_hub_routes_lift_enforcement",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "action_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppealIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/enforcement/{action_id}/appeal-decision": {
+   "post": {
+    "summary": "Julga a contestação (nunca quem aplicou a medida)",
+    "operationId": "post_network_hub_routes_decide_appeal",
+    "tags": [
+     "moderacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "action_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AppealDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/network/events": {
+   "get": {
+    "summary": "Fatos recentes da organização (a fonte única que alimenta avisos, linha de tempo e auditoria)",
+    "operationId": "get_network_hub_routes_domain_events",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/team": {
+   "get": {
+    "summary": "Quem é a equipe do projeto — e portanto quem será avisado em cada mudança",
+    "operationId": "get_network_hub_routes_project_team",
+    "tags": [
+     "workspace"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -31817,10 +35434,63 @@
     "additionalProperties": false,
     "properties": {
      "body": {
-      "maxLength": 2000,
+      "maxLength": 8000,
       "minLength": 1,
       "title": "Body",
       "type": "string"
+     },
+     "kind": {
+      "default": "text",
+      "enum": [
+       "text",
+       "proposal_ref",
+       "document_ref"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "ref_type": {
+      "anyOf": [
+       {
+        "enum": [
+         "proposal",
+         "document",
+         "project",
+         "relationship",
+         "impact_update",
+         "milestone"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ref Type"
+     },
+     "ref_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ref Id"
+     },
+     "document_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Document Ids",
+      "type": "array"
      }
     },
     "required": [
@@ -36776,7 +40446,15 @@
        "events",
        "support",
        "partnerships",
-       "opportunities"
+       "opportunities",
+       "network",
+       "proposal",
+       "message",
+       "funding",
+       "report",
+       "project",
+       "document",
+       "account"
       ],
       "title": "Grp",
       "type": "string"
@@ -42146,6 +45824,1983 @@
      }
     },
     "title": "ProviderUpdateIn",
+    "type": "object"
+   },
+   "RelationshipIn": {
+    "additionalProperties": false,
+    "properties": {
+     "kind": {
+      "enum": [
+       "favorite",
+       "watchlist",
+       "follow",
+       "block",
+       "contact",
+       "partnership",
+       "investment",
+       "sponsorship",
+       "service",
+       "mentorship",
+       "volunteer",
+       "collaboration",
+       "support",
+       "government_support",
+       "project_member",
+       "project_partner",
+       "project_sponsor",
+       "project_investor",
+       "referral",
+       "verified_by"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "target_type": {
+      "enum": [
+       "org",
+       "user",
+       "project",
+       "solution",
+       "call",
+       "need",
+       "idea"
+      ],
+      "title": "Target Type",
+      "type": "string"
+     },
+     "target_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Target Id",
+      "type": "string"
+     },
+     "context_project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Context Project Id"
+     },
+     "role": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z0-9_]{2,60}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Role"
+     },
+     "visibility": {
+      "default": "private",
+      "enum": [
+       "private",
+       "participants",
+       "organization",
+       "network",
+       "public"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
+     }
+    },
+    "required": [
+     "kind",
+     "target_type",
+     "target_id"
+    ],
+    "title": "RelationshipIn",
+    "type": "object"
+   },
+   "RelationshipTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to": {
+      "enum": [
+       "pending",
+       "active",
+       "paused",
+       "ended",
+       "declined",
+       "revoked"
+      ],
+      "title": "To",
+      "type": "string"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reason"
+     }
+    },
+    "required": [
+     "to"
+    ],
+    "title": "RelationshipTransitionIn",
+    "type": "object"
+   },
+   "VisibilityIn": {
+    "additionalProperties": false,
+    "properties": {
+     "visibility": {
+      "enum": [
+       "private",
+       "participants",
+       "organization",
+       "network",
+       "public"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     }
+    },
+    "required": [
+     "visibility"
+    ],
+    "title": "VisibilityIn",
+    "type": "object"
+   },
+   "ProposalIn": {
+    "additionalProperties": false,
+    "properties": {
+     "kind": {
+      "enum": [
+       "investment",
+       "sponsorship",
+       "service",
+       "partnership",
+       "mentorship",
+       "volunteer",
+       "collaboration",
+       "project_support",
+       "government_support"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "receiver_org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Receiver Org Id",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "purpose": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Purpose",
+      "type": "string"
+     },
+     "terms": {
+      "anyOf": [
+       {
+        "maxLength": 8000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Terms"
+     },
+     "amount_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Cents"
+     },
+     "currency": {
+      "default": "BRL",
+      "pattern": "^[A-Za-z]{3}$",
+      "title": "Currency",
+      "type": "string"
+     },
+     "support_mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "financial",
+         "service",
+         "equipment",
+         "knowledge",
+         "volunteer",
+         "sponsorship",
+         "mentorship",
+         "other"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Support Mode"
+     },
+     "compensation": {
+      "anyOf": [
+       {
+        "enum": [
+         "paid",
+         "pro_bono",
+         "volunteer",
+         "partnership",
+         "mentorship"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Compensation"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "need_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Need Id"
+     },
+     "call_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Call Id"
+     },
+     "solution_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Solution Id"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
+     }
+    },
+    "required": [
+     "kind",
+     "receiver_org_id",
+     "title",
+     "purpose"
+    ],
+    "title": "ProposalIn",
+    "type": "object"
+   },
+   "ProposalPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "purpose": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Purpose"
+     },
+     "terms": {
+      "anyOf": [
+       {
+        "maxLength": 8000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Terms"
+     },
+     "amount_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Cents"
+     },
+     "currency": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Za-z]{3}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Currency"
+     },
+     "support_mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "financial",
+         "service",
+         "equipment",
+         "knowledge",
+         "volunteer",
+         "sponsorship",
+         "mentorship",
+         "other"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Support Mode"
+     },
+     "compensation": {
+      "anyOf": [
+       {
+        "enum": [
+         "paid",
+         "pro_bono",
+         "volunteer",
+         "partnership",
+         "mentorship"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Compensation"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
+     }
+    },
+    "title": "ProposalPatch",
+    "type": "object"
+   },
+   "ProposalTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to": {
+      "enum": [
+       "sent",
+       "viewed",
+       "in_review",
+       "changes_requested",
+       "accepted",
+       "declined",
+       "withdrawn",
+       "cancelled"
+      ],
+      "title": "To",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "to"
+    ],
+    "title": "ProposalTransitionIn",
+    "type": "object"
+   },
+   "ProposalAttachIn": {
+    "additionalProperties": false,
+    "properties": {
+     "document_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Document Id",
+      "type": "string"
+     },
+     "label": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Label"
+     }
+    },
+    "required": [
+     "document_id"
+    ],
+    "title": "ProposalAttachIn",
+    "type": "object"
+   },
+   "ThreadIn": {
+    "additionalProperties": false,
+    "properties": {
+     "other_org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Other Org Id",
+      "type": "string"
+     },
+     "subject": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Subject"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "proposal_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Proposal Id"
+     },
+     "need_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Need Id"
+     },
+     "call_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Call Id"
+     },
+     "professional": {
+      "default": true,
+      "title": "Professional",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "other_org_id"
+    ],
+    "title": "ThreadIn",
+    "type": "object"
+   },
+   "ThreadStatusIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "open",
+       "archived",
+       "closed"
+      ],
+      "title": "Status",
+      "type": "string"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "ThreadStatusIn",
+    "type": "object"
+   },
+   "PersonaIn": {
+    "additionalProperties": false,
+    "properties": {
+     "persona": {
+      "pattern": "^[a-z0-9_]{2,60}$",
+      "title": "Persona",
+      "type": "string"
+     },
+     "primary": {
+      "default": false,
+      "title": "Primary",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "persona"
+    ],
+    "title": "PersonaIn",
+    "type": "object"
+   },
+   "RecommendationResolveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "done",
+       "dismissed"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reason"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "RecommendationResolveIn",
+    "type": "object"
+   },
+   "ListingIn": {
+    "additionalProperties": false,
+    "properties": {
+     "subject_type": {
+      "enum": [
+       "project",
+       "opportunity",
+       "need",
+       "service",
+       "solution",
+       "partnership",
+       "sponsorship"
+      ],
+      "title": "Subject Type",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "headline": {
+      "maxLength": 200,
+      "minLength": 10,
+      "title": "Headline",
+      "type": "string"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "seeking": {
+      "default": [],
+      "items": {
+       "enum": [
+        "investment",
+        "sponsorship",
+        "partner",
+        "professional",
+        "volunteer",
+        "mentorship",
+        "equipment",
+        "knowledge",
+        "quota"
+       ],
+       "type": "string"
+      },
+      "maxItems": 9,
+      "title": "Seeking",
+      "type": "array"
+     },
+     "amount_target_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Target Cents"
+     },
+     "currency": {
+      "default": "BRL",
+      "pattern": "^[A-Za-z]{3}$",
+      "title": "Currency",
+      "type": "string"
+     },
+     "territory": {
+      "anyOf": [
+       {
+        "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Territory"
+     },
+     "causes": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Causes",
+      "type": "array"
+     },
+     "ods": {
+      "default": [],
+      "items": {
+       "maximum": 17,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "maxItems": 17,
+      "title": "Ods",
+      "type": "array"
+     },
+     "esg_tags": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Esg Tags",
+      "type": "array"
+     },
+     "stage": {
+      "anyOf": [
+       {
+        "enum": [
+         "idea",
+         "building",
+         "ready",
+         "seeking",
+         "executing",
+         "completed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Stage"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
+     }
+    },
+    "required": [
+     "subject_type",
+     "subject_id",
+     "headline"
+    ],
+    "title": "ListingIn",
+    "type": "object"
+   },
+   "ListingPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "headline": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Headline"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "seeking": {
+      "anyOf": [
+       {
+        "items": {
+         "enum": [
+          "investment",
+          "sponsorship",
+          "partner",
+          "professional",
+          "volunteer",
+          "mentorship",
+          "equipment",
+          "knowledge",
+          "quota"
+         ],
+         "type": "string"
+        },
+        "maxItems": 9,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Seeking"
+     },
+     "amount_target_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Target Cents"
+     },
+     "currency": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Za-z]{3}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Currency"
+     },
+     "territory": {
+      "anyOf": [
+       {
+        "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Territory"
+     },
+     "causes": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        "maxItems": 10,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Causes"
+     },
+     "ods": {
+      "anyOf": [
+       {
+        "items": {
+         "maximum": 17,
+         "minimum": 1,
+         "type": "integer"
+        },
+        "maxItems": 17,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ods"
+     },
+     "esg_tags": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        "maxItems": 10,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Esg Tags"
+     },
+     "stage": {
+      "anyOf": [
+       {
+        "enum": [
+         "idea",
+         "building",
+         "ready",
+         "seeking",
+         "executing",
+         "completed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Stage"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expires At"
+     }
+    },
+    "title": "ListingPatch",
+    "type": "object"
+   },
+   "ListingTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to": {
+      "enum": [
+       "draft",
+       "review",
+       "approved",
+       "published",
+       "paused",
+       "expired",
+       "archived",
+       "suspended"
+      ],
+      "title": "To",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "to"
+    ],
+    "title": "ListingTransitionIn",
+    "type": "object"
+   },
+   "ImpactUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "project_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "period_start": {
+      "format": "date",
+      "title": "Period Start",
+      "type": "string"
+     },
+     "period_end": {
+      "format": "date",
+      "title": "Period End",
+      "type": "string"
+     },
+     "summary": {
+      "maxLength": 8000,
+      "minLength": 20,
+      "title": "Summary",
+      "type": "string"
+     },
+     "outputs": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Outputs"
+     },
+     "outcomes": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Outcomes"
+     },
+     "limitations": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Limitations"
+     },
+     "risks_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Risks Note"
+     }
+    },
+    "required": [
+     "project_id",
+     "period_start",
+     "period_end",
+     "summary"
+    ],
+    "title": "ImpactUpdateIn",
+    "type": "object"
+   },
+   "ImpactUpdatePatch": {
+    "additionalProperties": false,
+    "properties": {
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 8000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "outputs": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Outputs"
+     },
+     "outcomes": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Outcomes"
+     },
+     "limitations": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Limitations"
+     },
+     "risks_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Risks Note"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     }
+    },
+    "title": "ImpactUpdatePatch",
+    "type": "object"
+   },
+   "ImpactUpdateTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to": {
+      "enum": [
+       "submitted",
+       "under_review",
+       "changes_requested",
+       "accepted",
+       "published",
+       "draft"
+      ],
+      "title": "To",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "to"
+    ],
+    "title": "ImpactUpdateTransitionIn",
+    "type": "object"
+   },
+   "ProfileIn": {
+    "additionalProperties": false,
+    "properties": {
+     "handle": {
+      "maxLength": 30,
+      "minLength": 3,
+      "title": "Handle",
+      "type": "string"
+     },
+     "display_name": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Display Name",
+      "type": "string"
+     },
+     "headline": {
+      "anyOf": [
+       {
+        "maxLength": 160,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Headline"
+     },
+     "bio": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Bio"
+     },
+     "owner": {
+      "default": "org",
+      "enum": [
+       "org",
+       "user"
+      ],
+      "title": "Owner",
+      "type": "string"
+     }
+    },
+    "required": [
+     "handle",
+     "display_name"
+    ],
+    "title": "ProfileIn",
+    "type": "object"
+   },
+   "ProfileLink": {
+    "additionalProperties": false,
+    "properties": {
+     "label": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+     },
+     "url": {
+      "maxLength": 300,
+      "pattern": "^https?://",
+      "title": "Url",
+      "type": "string"
+     }
+    },
+    "required": [
+     "label",
+     "url"
+    ],
+    "title": "ProfileLink",
+    "type": "object"
+   },
+   "ProfilePatch": {
+    "additionalProperties": false,
+    "properties": {
+     "handle": {
+      "anyOf": [
+       {
+        "maxLength": 30,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Handle"
+     },
+     "display_name": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "minLength": 2,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Display Name"
+     },
+     "headline": {
+      "anyOf": [
+       {
+        "maxLength": 160,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Headline"
+     },
+     "bio": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Bio"
+     },
+     "visibility": {
+      "anyOf": [
+       {
+        "enum": [
+         "public",
+         "network",
+         "private"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Visibility"
+     },
+     "show_territory": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Territory"
+     },
+     "show_projects": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Projects"
+     },
+     "show_credentials": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Credentials"
+     },
+     "show_organizations": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Organizations"
+     },
+     "show_impact_history": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Impact History"
+     },
+     "show_contact": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Show Contact"
+     },
+     "links": {
+      "anyOf": [
+       {
+        "items": {
+         "$ref": "#/components/schemas/ProfileLink"
+        },
+        "maxItems": 8,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Links"
+     }
+    },
+    "title": "ProfilePatch",
+    "type": "object"
+   },
+   "TerritoryNeedIn": {
+    "additionalProperties": false,
+    "properties": {
+     "territory": {
+      "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+      "title": "Territory",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 5,
+      "title": "Title",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "cause": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z0-9_]{2,60}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cause"
+     },
+     "ods": {
+      "default": [],
+      "items": {
+       "maximum": 17,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "maxItems": 17,
+      "title": "Ods",
+      "type": "array"
+     },
+     "beneficiary_groups": {
+      "default": [],
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 10,
+      "title": "Beneficiary Groups",
+      "type": "array"
+     },
+     "people_estimate": {
+      "anyOf": [
+       {
+        "maximum": 100000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "People Estimate"
+     },
+     "source_name": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Name"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Date"
+     },
+     "priority": {
+      "default": "medium",
+      "enum": [
+       "low",
+       "medium",
+       "high",
+       "critical"
+      ],
+      "title": "Priority",
+      "type": "string"
+     }
+    },
+    "required": [
+     "territory",
+     "title"
+    ],
+    "title": "TerritoryNeedIn",
+    "type": "object"
+   },
+   "ExperienceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "org_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Org Name",
+      "type": "string"
+     },
+     "role": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Role",
+      "type": "string"
+     },
+     "org_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Org Id"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "started_on": {
+      "format": "date",
+      "title": "Started On",
+      "type": "string"
+     },
+     "ended_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ended On"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
+     },
+     "visibility": {
+      "default": "network",
+      "enum": [
+       "private",
+       "network",
+       "public"
+      ],
+      "title": "Visibility",
+      "type": "string"
+     }
+    },
+    "required": [
+     "org_name",
+     "role",
+     "started_on"
+    ],
+    "title": "ExperienceIn",
+    "type": "object"
+   },
+   "ExperienceDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "decision": {
+      "enum": [
+       "confirmed",
+       "disputed"
+      ],
+      "title": "Decision",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "decision"
+    ],
+    "title": "ExperienceDecisionIn",
+    "type": "object"
+   },
+   "AppealIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "note"
+    ],
+    "title": "AppealIn",
+    "type": "object"
+   },
+   "EnforcementIn": {
+    "additionalProperties": false,
+    "properties": {
+     "measure": {
+      "enum": [
+       "guidance",
+       "warning",
+       "formal_notice",
+       "partial_restriction",
+       "temporary_suspension",
+       "precautionary_freeze",
+       "unlinking",
+       "cancellation",
+       "ban",
+       "referral"
+      ],
+      "title": "Measure",
+      "type": "string"
+     },
+     "rule_ref": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Rule Ref",
+      "type": "string"
+     },
+     "reason": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     },
+     "target_org_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Org Id"
+     },
+     "target_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target User Id"
+     },
+     "report_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Report Id"
+     },
+     "evidence_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Note"
+     },
+     "ends_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ends At"
+     },
+     "override_reason": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Override Reason"
+     }
+    },
+    "required": [
+     "measure",
+     "rule_ref",
+     "reason"
+    ],
+    "title": "EnforcementIn",
+    "type": "object"
+   },
+   "AppealDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "uphold": {
+      "title": "Uphold",
+      "type": "boolean"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "uphold",
+     "note"
+    ],
+    "title": "AppealDecisionIn",
     "type": "object"
    }
   },

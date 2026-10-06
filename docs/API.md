@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.14.0)
+# API REST /v1 — referência gerada do código (v0.16.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (625)
+## Operações (704)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -69,6 +69,11 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Inventário de chaves por impressão digital (a chave nunca é gravada) |
 | POST | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Registra no inventário as chaves em uso para uma finalidade |
 | POST | `/v1/admin/encryption/reencrypt` | admin da plataforma + MFA | — | Recifra a coluna com a chave corrente (idempotente, com auditoria do resultado) |
+| GET | `/v1/admin/enforcement` | admin da plataforma + MFA | — | list enforcement |
+| POST | `/v1/admin/enforcement` | admin da plataforma + MFA | — | Aplica medida (proporcional ao histórico; contornar a escada exige justificativa registrada) |
+| GET | `/v1/admin/enforcement/history` | admin da plataforma + MFA | — | Histórico de medidas contra um alvo — é o que torna a proporcionalidade verificável |
+| POST | `/v1/admin/enforcement/{action_id}/appeal-decision` | admin da plataforma + MFA | — | Julga a contestação (nunca quem aplicou a medida) |
+| POST | `/v1/admin/enforcement/{action_id}/lift` | admin da plataforma + MFA | — | Levanta a medida (exige motivo, como aplicar) |
 | GET | `/v1/admin/errors` | admin da plataforma + MFA | — | Erros 5xx agregados por impressão digital (sem dados pessoais) |
 | POST | `/v1/admin/errors/{error_id}/resolve` | admin da plataforma + MFA | — | resolve error |
 | POST | `/v1/admin/fee-tables` | admin da plataforma + MFA | — | Cria tabela de honorários em rascunho (publicar exige fonte, URL e data de consulta) |
@@ -120,6 +125,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/invoices` | admin da plataforma + MFA | — | Emite cobrança manual (registro interno; NF-e é emitida no sistema fiscal da empresa) |
 | POST | `/v1/admin/invoices/{invoice_id}/paid` | admin da plataforma + MFA | — | invoice paid |
 | GET | `/v1/admin/jobs` | admin da plataforma + MFA | — | jobs |
+| POST | `/v1/admin/marketplace/listings/{listing_id}/transition` | admin da plataforma + MFA | — | Suspende ou libera anúncio (exige motivo registrado) |
 | GET | `/v1/admin/match/calibration` | admin da plataforma + MFA | — | Base para calibração futura do match (sem dado pessoal) |
 | GET | `/v1/admin/messages/{message_id}` | admin da plataforma + MFA | — | Lê uma mensagem denunciada (acesso auditado) |
 | POST | `/v1/admin/messages/{message_id}/remove` | admin da plataforma + MFA | — | Oculta o conteúdo de uma mensagem denunciada (registro permanece) |
@@ -206,6 +212,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/billing/change-plan` | membro da organização ativa | papel ≥ owner; limite 20/3600s | Upgrade/downgrade (sincronizado com o provedor) |
 | POST | `/v1/billing/checkout` | membro da organização ativa | papel ≥ owner; limite 20/3600s | Inicia contratação (Stripe Checkout) com trial quando houver. Sem gateway configurado, responde 503 de forma explícita. |
 | POST | `/v1/billing/portal` | membro da organização ativa | papel ≥ owner | Portal de pagamento do provedor (método de pagamento, faturas) |
+| GET | `/v1/billing/price-history` | membro da organização ativa | papel ≥ owner | Histórico de preço da organização e avisos de reajuste recebidos |
+| POST | `/v1/billing/price-notices/{notice_id}/ack` | membro da organização ativa | papel ≥ owner | Registra que a organização viu o aviso de reajuste |
 | POST | `/v1/billing/quote` | membro da organização ativa | papel ≥ viewer | Simulação do valor FINAL calculada no servidor (preço, desconto, trial, primeira cobrança). Não cobra nada. |
 | POST | `/v1/billing/reactivate` | membro da organização ativa | papel ≥ owner | Desfaz um cancelamento em andamento |
 | POST | `/v1/billing/webhooks/stripe` | pública | limite 600/60s | Webhook do Stripe (assinatura verificada, idempotente) |
@@ -222,8 +230,17 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/commitments/{commitment_id}/status` | membro da organização ativa | papel ≥ manager | Financiador informa desembolso/cancelamento; OSC confirma o recebimento |
 | GET | `/v1/compliance` | membro da organização ativa | papel ≥ viewer | Status de compliance/KYB da organização e verificações |
 | POST | `/v1/compliance/request-review` | membro da organização ativa | papel ≥ admin | Executa verificações automáticas e envia para análise humana da administração |
+| GET | `/v1/conta/moderacao` | membro da organização ativa | papel ≥ admin | Medidas de moderação contra a sua organização, com o direito de contestar |
+| POST | `/v1/conta/moderacao/{action_id}/contestar` | membro da organização ativa | papel ≥ admin | Contesta uma medida (uma vez por medida) |
 | POST | `/v1/contribution-models/{model_id}/retire` | membro da organização ativa | tipos: osc; papel ≥ manager | retire model |
 | POST | `/v1/contribution-models/{model_id}/submit` | membro da organização ativa | tipos: osc; papel ≥ manager | Envia o modelo à revisão jurídica da administração |
+| GET | `/v1/conversations` | membro da organização ativa | papel ≥ viewer | list conversations |
+| POST | `/v1/conversations` | membro da organização ativa | papel ≥ member | Abre (ou reaproveita) a conversa naquele contexto |
+| GET | `/v1/conversations/unread` | membro da organização ativa | papel ≥ viewer | unread |
+| GET | `/v1/conversations/{conversation_id}` | membro da organização ativa | papel ≥ viewer | get conversation |
+| POST | `/v1/conversations/{conversation_id}/messages` | membro da organização ativa | papel ≥ member; limite 60/60s | send message |
+| POST | `/v1/conversations/{conversation_id}/read` | membro da organização ativa | papel ≥ viewer | read conversation |
+| PUT | `/v1/conversations/{conversation_id}/status` | membro da organização ativa | papel ≥ member | set conversation status |
 | GET | `/v1/dashboard` | membro da organização ativa | papel ≥ viewer | Indicadores da organização ativa (dados reais do banco) |
 | GET | `/v1/determinants` | membro da organização ativa | tipos: government, company, individual, platform; papel ≥ viewer | Camada agregada: projetos por domínio de determinante social e território (k-anonimato; sem ranking de grupos vulneráveis) |
 | GET | `/v1/diagnoses` | membro da organização ativa | tipos: osc; papel ≥ viewer | list diagnoses |
@@ -337,6 +354,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/impact-tags` | membro da organização ativa | papel ≥ manager | Marca um objeto (projeto, solução, diagnóstico, necessidade…) com ODS, pilar ESG ou determinante social |
 | DELETE | `/v1/impact-tags/{tag_id}` | membro da organização ativa | papel ≥ manager | Remove um marcador |
 | GET | `/v1/impact-taxonomy` | membro da organização ativa | papel ≥ viewer | Catálogo ODS (17), pilares ESG e determinantes sociais, com código, nome e cor oficial |
+| GET | `/v1/impact-updates` | membro da organização ativa | papel ≥ viewer | list impact updates |
+| POST | `/v1/impact-updates` | membro da organização ativa | papel ≥ member | create impact update |
+| GET | `/v1/impact-updates/gather` | membro da organização ativa | papel ≥ viewer | Prévia da apuração do período (mostra ANTES do envio o que será colhido) |
+| GET | `/v1/impact-updates/graph` | usuário autenticado | — | impact graph |
+| GET | `/v1/impact-updates/inbox` | membro da organização ativa | papel ≥ viewer | Relatórios que esta organização pode analisar (dos projetos que ela apoia) |
+| GET | `/v1/impact-updates/{update_id}` | membro da organização ativa | papel ≥ viewer | get impact update |
+| PATCH | `/v1/impact-updates/{update_id}` | membro da organização ativa | papel ≥ member | patch impact update |
+| POST | `/v1/impact-updates/{update_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, pede ajuste, aceita ou publica — conforme o lado |
 | POST | `/v1/indicator-values/{value_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador do projeto valida ou rejeita um valor reportado (a OSC não valida o próprio valor — garantido no banco) |
 | GET | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ viewer | Catálogo de indicadores (plataforma, oficiais e definidos pela organização) |
 | POST | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ manager | Cria indicador próprio da organização (origem 'org_defined'; não é indicador oficial) |
@@ -406,6 +431,13 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/integrations/subscriptions/{id}/test` | membro da organização ativa | papel ≥ manager; limite 30/3600s | Emite um evento INTEGRATION.TEST para esta assinatura (entregue pelo trabalhador) |
 | GET | `/v1/legal/{doc}` | pública | — | Textos legais vigentes (Markdown) |
 | GET | `/v1/map/projects` | membro da organização ativa | papel ≥ viewer | Projetos publicados no mapa: pontos só conforme a precisão escolhida + contagem por UF (sem mapa-base externo) |
+| GET | `/v1/marketplace/feed` | pública | — | Feed público: lê SÓ anúncios publicados (a publicação é estado da entidade, não condição de consulta) |
+| GET | `/v1/marketplace/graph` | usuário autenticado | — | Máquina de estados do anúncio |
+| GET | `/v1/marketplace/listings` | membro da organização ativa | papel ≥ viewer | my listings |
+| POST | `/v1/marketplace/listings` | membro da organização ativa | papel ≥ manager | Cria o anúncio em rascunho (nada nasce no ar) |
+| GET | `/v1/marketplace/listings/{listing_id}` | pública | — | marketplace item |
+| PATCH | `/v1/marketplace/listings/{listing_id}` | membro da organização ativa | papel ≥ manager | patch listing |
+| POST | `/v1/marketplace/listings/{listing_id}/transition` | membro da organização ativa | papel ≥ manager | Publica, pausa, arquiva (suspender e liberar são da administração) |
 | GET | `/v1/match-runs/{match_run_id}/feedback` | membro da organização ativa | papel ≥ viewer | get match feedback |
 | POST | `/v1/match-runs/{match_run_id}/feedback` | membro da organização ativa | papel ≥ member | Retorno humano sobre uma recomendação (nada é treinado automaticamente) |
 | GET | `/v1/materials` | membro da organização ativa | papel ≥ viewer | Biblioteca de materiais governamentais e institucionais publicados |
@@ -417,6 +449,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/messages/conversations` | membro da organização ativa | papel ≥ viewer | conversations |
 | GET | `/v1/messages/conversations/{conversation_id}` | membro da organização ativa | papel ≥ viewer | get conversation |
 | POST | `/v1/messages/{org_id}` | membro da organização ativa | papel ≥ member; limite 120/3600s | Envia mensagem a outra organização (exige relação prévia; limites por hora; bloqueio respeitado) |
+| GET | `/v1/moderation/ladder` | usuário autenticado | — | A escada de medidas, com o que cada degrau significa e se exige prazo |
 | POST | `/v1/needs/{need_id}/close` | membro da organização ativa | tipos: osc; papel ≥ member | close need |
 | GET | `/v1/needs/{need_id}/offers` | membro da organização ativa | tipos: osc; papel ≥ viewer | Ofertas recebidas, com a compatibilidade explicável de cada profissional |
 | POST | `/v1/needs/{need_id}/offers` | membro da organização ativa | tipos: provider; papel ≥ member | Profissional oferece ajuda a uma necessidade (a contratação é livre entre as partes, fora da plataforma) |
@@ -424,8 +457,16 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/network` | membro da organização ativa | papel ≥ viewer | Quem a organização segue, quem a segue, bloqueios e conversas |
 | DELETE | `/v1/network/block/{org_id}` | membro da organização ativa | papel ≥ admin | unblock |
 | POST | `/v1/network/block/{org_id}` | membro da organização ativa | papel ≥ admin | Bloqueia uma organização (encerra o seguimento e impede mensagens nos dois sentidos) |
+| GET | `/v1/network/events` | membro da organização ativa | papel ≥ viewer | Fatos recentes da organização (a fonte única que alimenta avisos, linha de tempo e auditoria) |
 | DELETE | `/v1/network/follow/{org_id}` | membro da organização ativa | papel ≥ member | unfollow |
 | POST | `/v1/network/follow/{org_id}` | membro da organização ativa | papel ≥ member | Passa a seguir uma organização (seguimento mútuo habilita mensagens) |
+| GET | `/v1/network/graph` | membro da organização ativa | papel ≥ viewer | Vizinhança da organização no grafo (profundidade 1 ou 2, sem bloqueios) |
+| GET | `/v1/network/relationship-kinds` | usuário autenticado | — | Tipos de relação, com alvos aceitos e teto de visibilidade de cada um |
+| GET | `/v1/network/relationships` | membro da organização ativa | papel ≥ viewer | list relationships |
+| POST | `/v1/network/relationships` | membro da organização ativa | papel ≥ member | Cria uma relação (idempotente por tipo, origem, destino e contexto) |
+| GET | `/v1/network/relationships/counts` | membro da organização ativa | papel ≥ viewer | relationship counts |
+| POST | `/v1/network/relationships/{rel_id}/transition` | membro da organização ativa | papel ≥ member | Aceita, recusa, pausa, encerra ou revoga — conforme o lado |
+| PUT | `/v1/network/relationships/{rel_id}/visibility` | membro da organização ativa | papel ≥ manager | Altera a visibilidade (limitada ao teto do tipo) |
 | GET | `/v1/notifications` | membro da organização ativa | papel ≥ viewer | notifications |
 | GET | `/v1/notifications/prefs` | usuário autenticado | — | Preferências de notificação por grupo (app e e-mail) |
 | PUT | `/v1/notifications/prefs` | usuário autenticado | — | prefs put |
@@ -440,6 +481,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/org/credentials` | membro da organização ativa | tipos: provider; papel ≥ member | Registra credencial profissional (CRC, OAB...). Nasce 'autodeclarada' até verificação pela administração. |
 | POST | `/v1/org/credentials/{credential_id}/document` | membro da organização ativa | papel ≥ manager | Anexa o documento do conselho à credencial e a coloca na fila de conferência |
 | GET | `/v1/org/credentials/{credential_id}/history` | membro da organização ativa | papel ≥ viewer | Histórico append-only da verificação da credencial |
+| GET | `/v1/org/experience-requests` | membro da organização ativa | papel ≥ manager | Experiências que pessoas declararam na sua organização e aguardam confirmação |
+| POST | `/v1/org/experience-requests/{experience_id}/decide` | membro da organização ativa | papel ≥ manager | Confirma ou contesta a experiência (quem confirma não pode ser a própria pessoa) |
 | PUT | `/v1/org/funder-profile` | membro da organização ativa | tipos: company, individual; papel ≥ manager | Perfil de investimento: causas, ODS, ESG, território, ticket, restrições e documentos exigidos |
 | PUT | `/v1/org/geo` | membro da organização ativa | papel ≥ owner | Define a localização da organização; tornar pública exige consentimento explícito (registrado com data) |
 | GET | `/v1/org/invitations` | membro da organização ativa | papel ≥ admin | list invites |
@@ -460,6 +503,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/payments/{payment_id}/refunds` | membro da organização ativa | papel ≥ manager | Solicita estorno total ou parcial (a outra parte decide) |
 | POST | `/v1/payments/{payment_id}/transition` | membro da organização ativa | papel ≥ manager | Muda o estado (financiador: declara/cancela; OSC: confirma/recusa; ambos: abrem disputa). O banco recusa transições inválidas |
 | GET | `/v1/plans` | pública | — | Catálogo público de planos (tier, preços mensal/anual; preço null = sob consulta) |
+| GET | `/v1/plans/price` | pública | — | Preço vigente de um plano: entrada, preço regular, equivalente mensal, total e imposto |
 | GET | `/v1/portfolio` | membro da organização ativa | tipos: company, government, individual; papel ≥ viewer | Carteira do financiador: recurso comprometido → desembolsado → gasto comprovado → evidências e resultados |
 | POST | `/v1/privacy/consents` | usuário autenticado | — | Registra/revoga consentimento opcional (ex.: comunicações) |
 | POST | `/v1/privacy/delete-account` | usuário autenticado | limite 5/3600s | Elimina a conta: anonimiza dados pessoais e revoga sessões. Registros financeiros/auditoria são mantidos pseudonimizados (obrigação legal). |
@@ -480,6 +524,15 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PATCH | `/v1/professional-services/{service_id}` | membro da organização ativa | papel ≥ manager | Altera ou publica uma atividade |
 | GET | `/v1/professional/offers` | membro da organização ativa | tipos: provider; papel ≥ viewer | my offers |
 | GET | `/v1/professional/opportunities` | membro da organização ativa | tipos: provider; papel ≥ viewer | Necessidades abertas de projetos publicados, ordenadas por compatibilidade explicável (plano/voucher não influenciam) |
+| GET | `/v1/profile/experiences` | usuário autenticado | — | list experiences |
+| POST | `/v1/profile/experiences` | usuário autenticado | — | Declara experiência profissional (nasce 'declarada'; confirmação é de quem administra a organização) |
+| POST | `/v1/profiles` | membro da organização ativa | papel ≥ manager | Cria o perfil público (@identificador único, com normalização e reservas) |
+| GET | `/v1/profiles/handle-available` | usuário autenticado | — | handle available |
+| GET | `/v1/profiles/handle-suggest` | usuário autenticado | — | handle suggest |
+| GET | `/v1/profiles/mine` | membro da organização ativa | papel ≥ viewer | my profiles |
+| PATCH | `/v1/profiles/{profile_id}` | membro da organização ativa | papel ≥ viewer | Edita o perfil e remonta a projeção pública |
+| GET | `/v1/profiles/{profile_id}/handle-history` | membro da organização ativa | papel ≥ viewer | Histórico de identificadores (append-only: trocar é permitido, apagar o rastro não) |
+| POST | `/v1/profiles/{profile_id}/rebuild` | membro da organização ativa | papel ≥ viewer | Remonta a projeção pública a partir do estado atual |
 | POST | `/v1/project-indicators/{pi_id}/values` | membro da organização ativa | tipos: osc; papel ≥ member | Reporta valor medido (status 'reported'; só vira 'validated' por quem não reportou) |
 | GET | `/v1/project-status-graph` | membro da organização ativa | papel ≥ viewer | Máquina de situações do projeto (é DADO no banco, não código: um gatilho recusa o que não está aqui) |
 | GET | `/v1/projects` | membro da organização ativa | tipos: osc; papel ≥ viewer | Projetos da OSC |
@@ -526,16 +579,35 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/projects/{project_id}/snapshots` | membro da organização ativa | papel ≥ member | Guarda um retrato comparável do projeto neste instante |
 | GET | `/v1/projects/{project_id}/snapshots/compare` | membro da organização ativa | papel ≥ viewer | Compara dois retratos campo a campo (o que mudou, entrou e saiu) |
 | GET | `/v1/projects/{project_id}/state` | membro da organização ativa | papel ≥ viewer | Estado comparável do projeto agora (mesma estrutura dos retratos) |
+| GET | `/v1/projects/{project_id}/team` | membro da organização ativa | papel ≥ viewer | Quem é a equipe do projeto — e portanto quem será avisado em cada mudança |
 | GET | `/v1/projects/{project_id}/timeline` | membro da organização ativa | papel ≥ viewer | Linha de tempo imutável (trilha encadeada por hash) |
 | GET | `/v1/projects/{project_id}/timeline/integrity` | membro da organização ativa | papel ≥ viewer | Confere o encadeamento da linha de tempo |
 | POST | `/v1/projects/{project_id}/transitions` | membro da organização ativa | papel ≥ member | Muda a situação do projeto (recusa explícita quando a máquina não permite) |
 | POST | `/v1/projects/{project_id}/unpublish` | membro da organização ativa | tipos: osc; papel ≥ manager | unpublish |
+| GET | `/v1/proposals` | membro da organização ativa | papel ≥ viewer | Caixa única de propostas (recebidas, enviadas ou todas) |
+| POST | `/v1/proposals` | membro da organização ativa | papel ≥ manager | Cria a proposta em rascunho (exige contexto: projeto, necessidade, edital ou solução) |
+| GET | `/v1/proposals/counts` | membro da organização ativa | papel ≥ viewer | proposal counts |
+| GET | `/v1/proposals/graph` | usuário autenticado | — | Máquina de estados da proposta, como está no banco |
+| GET | `/v1/proposals/{proposal_id}` | membro da organização ativa | papel ≥ viewer | Proposta com histórico, anexos e as ações disponíveis para o seu lado |
+| PATCH | `/v1/proposals/{proposal_id}` | membro da organização ativa | papel ≥ manager | Edita a proposta (só em rascunho ou após ajuste solicitado) |
+| POST | `/v1/proposals/{proposal_id}/attachments` | membro da organização ativa | papel ≥ member | Anexa documento do cofre à proposta e avisa a outra parte e a equipe |
+| POST | `/v1/proposals/{proposal_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, aceita, recusa, pede ajuste ou retira |
 | GET | `/v1/public/campaigns/{slug}` | pública | limite 120/3600s | Campanha pública: história do projeto, meta e QUANTAS COTAS FALTAM |
 | GET | `/v1/public/locales` | pública | limite 120/3600s | Idiomas disponíveis, com a cobertura real de tradução declarada |
+| GET | `/v1/public/profiles/{handle}` | pública | — | Perfil público: lê SÓ a projeção curada (public_fields), nunca tabela privada |
+| GET | `/v1/public/profiles/{handle}/open-graph` | pública | — | Metadados de compartilhamento, montados da mesma projeção |
+| GET | `/v1/public/projects/{project_id}/impact` | pública | — | Relatórios PUBLICADOS de um projeto publicado |
+| GET | `/v1/public/relationships/{subject_type}/{subject_id}` | pública | — | Relações PÚBLICAS de um sujeito (filtradas por visibilidade, nunca por existência) |
 | GET | `/v1/public/translations` | pública | limite 240/3600s | Catálogo de traduções do idioma (chaves ausentes devem cair para pt-BR no cliente) |
 | GET | `/v1/public/verify/{code}` | pública | limite 120/3600s | Verificação pública: genuíno? qual versão foi assinada? integridade intacta? quem assinou? está revogado? |
 | GET | `/v1/public/verify/{code}/qr` | pública | limite 120/3600s | QR Code (SVG) da página pública de verificação deste código |
 | GET | `/v1/readiness` | membro da organização ativa | tipos: osc; papel ≥ viewer | Leitura de prontidão da organização agora (não grava nada) |
+| GET | `/v1/readiness/history` | membro da organização ativa | papel ≥ viewer | readiness history |
+| GET | `/v1/readiness/purposes` | membro da organização ativa | papel ≥ viewer | Prontidão por finalidade: seis números, cada um com os critérios que o compuseram |
+| POST | `/v1/readiness/snapshots` | membro da organização ativa | papel ≥ member | Grava o retrato da prontidão (append-only, para comparar ao longo do tempo) |
+| GET | `/v1/recommendations` | membro da organização ativa | papel ≥ viewer | Próximas ações, com razão e evidência (recomendação não é match) |
+| POST | `/v1/recommendations/refresh` | membro da organização ativa | papel ≥ member | Recalcula as recomendações (as que deixaram de valer ficam como superseded, não desaparecem) |
+| POST | `/v1/recommendations/{rec_id}/resolve` | membro da organização ativa | papel ≥ member | resolve recommendation |
 | POST | `/v1/refunds/{refund_id}/decide` | membro da organização ativa | papel ≥ manager | Aprova/rejeita (a parte que NÃO pediu) ou conclui (OSC registra a devolução) |
 | GET | `/v1/replications/marketplace` | membro da organização ativa | papel ≥ viewer | Marketplace de replicação: soluções que o autor autorizou replicar, com contagem de replicações |
 | GET | `/v1/report-center` | membro da organização ativa | papel ≥ viewer | Tipos de relatório disponíveis para o tipo da organização |
@@ -628,6 +700,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/support/tickets/{ticket_id}/close` | usuário autenticado | — | Encerra um chamado já resolvido |
 | POST | `/v1/support/tickets/{ticket_id}/messages` | usuário autenticado | limite 120/3600s | ticket reply |
 | POST | `/v1/support/tickets/{ticket_id}/rate` | usuário autenticado | — | Avalia o atendimento (após resolvido) |
+| GET | `/v1/taxonomies` | usuário autenticado | — | Taxonomias versionadas com política de uso de cada uma |
+| GET | `/v1/territory/needs` | usuário autenticado | — | list territory needs |
+| POST | `/v1/territory/needs` | membro da organização ativa | papel ≥ member | Registra necessidade do território (estimativa exige fonte declarada) |
 | GET | `/v1/trust/councils` | membro da organização ativa | papel ≥ viewer | Conselhos profissionais do catálogo (o formato do registro só é validado quando há padrão configurado) |
 | GET | `/v1/trust/custody` | membro da organização ativa | papel ≥ viewer | Cadeia de custódia do objeto e conferência do encadeamento por hash |
 | GET | `/v1/trust/identity` | usuário autenticado | — | Meu nível de identidade, pedidos e documentos enviados |
@@ -639,6 +714,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/verifiable-records/{record_id}/revoke` | membro da organização ativa | papel ≥ owner | Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data) |
 | POST | `/v1/verifiable-records/{record_id}/timestamp` | membro da organização ativa | papel ≥ manager | Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível) |
 | POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher (transação atômica; resposta genérica para códigos inválidos). Descontos ficam pendentes até o checkout. |
+| GET | `/v1/workspace` | membro da organização ativa | papel ≥ viewer | WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem |
+| GET | `/v1/workspace/personas` | usuário autenticado | — | Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano) |
+| POST | `/v1/workspace/personas` | membro da organização ativa | papel ≥ admin | declare persona |
+| DELETE | `/v1/workspace/personas/{persona}` | membro da organização ativa | papel ≥ admin | undeclare persona |
 
 Rotas de infraestrutura: `GET /healthz` (liveness), `GET /readyz` (banco + migrations), `GET /metrics` (Prometheus, Bearer `METRICS_TOKEN`),
 `GET /v1/openapi.json`, `GET /v1/meta/taxonomy`, `GET /v1/meta/config`.

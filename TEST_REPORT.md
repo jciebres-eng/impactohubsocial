@@ -1,3 +1,97 @@
+# TEST_REPORT — v0.16.0 (IMPACT NETWORK CORE, 2026-10-05)
+
+**788 testes, 0 falhas, 12 pulados** (eram 673 na v0.15.0). Log íntegro:
+`docs/evidence/test_run_v0.16.0.log`. Desempenho: `docs/evidence/perf_v0.16.0.log`. Integridade do banco:
+`docs/evidence/db_integrity_v0.16.0.txt`.
+
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 17 migrações), servidor HTTP real
+(uvicorn) e Chromium (Playwright). Comando:
+```
+cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" \
+  PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
+```
+
+Os **12 pulados** são a suíte de volume inteira, que roda em passo próprio porque o dado sintético muda o resultado
+de testes de ranking e de paginação no mesmo banco (ADR-138). Com `PERF_FULL=1` os 12 rodam e passam:
+```
+cd backend && PERF_FULL=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest tests.test_v0150_performance -v
+```
+
+Contagem por suíte, da maior para a menor (métodos `def test_*`, somando **788**):
+
+| Suíte | Testes | Suíte | Testes |
+|---|---|---|---|
+| `test_v0140_trust` | 88 | `test_v0101_institutional` | 20 |
+| `test_v0130_integrations` | 76 | `test_api_features` | 19 |
+| `test_v0120_knowledge` | 62 | `test_api_auth` | 19 |
+| **`test_v0160_network`** | **55** | `test_v0150_security` | 16 |
+| `test_v0100_institutional` | 48 | **`test_v0160_billing`** | **15** |
+| `test_v0150_core` | 39 | `test_architecture` | 13 |
+| `test_v080` | 34 | `test_v0150_performance` | 12 *(passo próprio)* |
+| `test_v0110_monetization` | 34 | `test_v0150_upgrade` | 10 |
+| `test_unit` | 33 | `test_e2e_knowledge` | 9 |
+| `test_v090_solutions` | 31 | `test_e2e_v0150_journeys` | 8 |
+| **`test_v0160_invariants`** | **28** | `test_e2e_v0140_trust` | 8 |
+| `test_v0120_hardening` | 27 | **`test_e2e_v0160_journeys`** | **7** |
+| `test_security_tenancy` | 25 | `test_e2e_v0150_web` | 6 |
+| `test_v0150_invariants` | 21 | demais `test_e2e_*` + `test_api_workflow` + `test_oidc` | 25 |
+
+## As suítes novas e ampliadas desta rodada
+
+| Suíte | Testes | O que prova |
+|---|---|---|
+| `test_v0160_network.py` | **55** | cada motor da rede pela API real: relação idempotente e com teto de visibilidade · transição recusada fora do grafo · proposta aceita cria relação e intenção (**nunca "investido"**) · anúncio não publica com projeto privado · conversa profissional exige contexto · prontidão devolve explicação e o que falta · recomendação com razão e destino · perfil público sem campo privado e **404** quando suspenso · relatório com números colhidos pelo banco · persona não dá permissão · escada de moderação recusando banimento como primeira resposta |
+| `test_v0160_invariants.py` | **28** | o que não pode mudar, incluindo a **matriz entre inquilinos nas 22 tabelas novas em SQL direto** · `beneficiary_groups` só existe em uma tabela e não é filtro de busca em nenhuma das 704 rotas · os três estágios financeiros não se somam · onze listas Python conferidas contra os CHECKs reais do banco · visibilidade travada percorrida nos cinco níveis · identidade do denunciante ausente da resposta ao alvo |
+| `test_v0160_billing.py` | **15** | versão de preço imutável · duas versões vigentes impossíveis · aumento sem aviso de 30 dias recusado · redução livre · "ciente" é a única escrita do avisado · entrada e cupom **não** se somam (vale o melhor) · checkout recusa sem `provider_price_id` quando o provedor exige · webhook reentregue não duplica nem estoura o contador de entrada |
+| `test_e2e_v0160_journeys.py` | **7** | as quatro personas do pedido percorrendo a cadeia inteira pela API real, mais marketplace público sem sessão, ciclo completo de relatório e uma jornada de moderação com contestação |
+| `test_architecture.py` | 6 → **13** | acrescentados: nenhuma rota duplicada (a segunda ficaria inalcançável em silêncio) · motor da rede nunca notifica direto · datas de produto em UTC · **todo destino de recomendação existe no roteador** · preço nunca em literal de código |
+| `test_v0150_performance.py` | 7 → **12** | acrescentados: workspace (duas personas), grafo em profundidade 2, marketplace público, caixa de propostas e relações, com volume de rede semeado |
+| `test_v0150_upgrade.py` | 10 (ampliado) | o caminho v0.12.1 → … → **0016 → 0017** com dado dentro; as 23 estruturas novas chegam com RLS e política; **esquema atualizado idêntico ao criado do zero** |
+
+## Verificação de SQL por `PREPARE`, não por leitura
+
+`scripts/sql_prepare_check.py` extrai por AST todo literal de SQL do código (inclusive f-strings, com mapa de
+preenchimento por arquivo) e roda `PREPARE` em cada consulta contra o banco real. **185 consultas conferidas, 0
+erros.**
+
+Foi construído depois de perceber que revisão de código **não** pega nome de coluna errado, e achou 5 defeitos
+reais no primeiro uso. Não substitui teste: prova que a consulta é válida contra o esquema, não que o resultado está
+certo. Rodar com:
+```
+DB="postgresql://impacto_owner@127.0.0.1:5432/impacto_dev" python3 scripts/sql_prepare_check.py backend/impacto/network
+```
+
+## As 7 jornadas de ponta a ponta desta rodada
+
+1. **Organização**: cadastro → persona → recomendação de primeiro passo → anúncio publicado → proposta recebida →
+   aceite (nasce a relação) → execução → relatório enviado → aceito por quem apoia → publicado → visível no perfil.
+2. **Investidor**: descoberta no marketplace → lista de acompanhamento (privada por força do teto) → leitura da
+   prontidão → conversa **com contexto** → proposta de investimento → aceite cria **intenção** → relatório analisado.
+3. **Profissional**: credencial → experiência declarada (pendente) → identificador `@` → perfil público ligado →
+   proposta de serviço aceita → a experiência só entra no perfil **depois** de confirmada pela organização citada.
+4. **Governo**: necessidade de território → edital publicado → candidatura → convênio proposto → acompanhamento →
+   relatório analisado.
+5. **Marketplace público sem sessão**: só o que está `published` aparece; projeto privado é invisível mesmo com o
+   identificador em mãos.
+6. **Ciclo completo de relatório**, incluindo o pedido de ajuste e a volta.
+7. **Moderação**: denúncia → medida proporcional → contestação → julgamento por quem não aplicou.
+
+## O que continua NÃO testado
+
+| Item | Por quê |
+|---|---|
+| **E2E de navegador para as 26 telas novas** | têm cobertura de API e de jornada, não de Playwright. É a lacuna mais relevante desta rodada, e está aqui declarada |
+| Verificação de viewport e contraste nas telas novas | o mesmo motivo; as telas antigas têm (25 combinações) |
+| Carga concorrente em ambiente dimensionado | 2 vCPU no ambiente de construção produziria número enganoso |
+| Integração contra sistema externo real | depende de acesso a instância de cliente ou órgão |
+| **Cobrança real** | não há conta Stripe, chave nem preço criado no provedor. O que está testado é o lado da plataforma |
+| Assinatura qualificada, Gov.br, ACT, biometria, SMS, KYC, identidade governamental | dependem de contratação; o que existe é o teste da **recusa explícita** |
+| `axe` e leitor de tela | registro npm bloqueado neste ambiente |
+| Teste de intrusão independente | nunca houve |
+| Push nativo | não existe (ver `MOBILE_READINESS_FINAL.md`) |
+
+---
+
 # TEST_REPORT — v0.15.0 (Núcleo do produto, 2026-10-05)
 
 **v0.15.0: 673 testes, 0 falhas, 7 pulados** (564 do v0.14.0 + **109** do núcleo do produto). Log íntegro:

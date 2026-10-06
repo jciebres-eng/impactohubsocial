@@ -94,4 +94,4 @@ Isso é o que permitiu a migração ser aditiva: nenhuma rota existente parou, e
 
 `relationships.graph(org_id, depth)` devolve a vizinhança em profundidade 1 ou 2, por consulta recursiva, somente com
 relações **ativas**, de visibilidade `network`/`public`/`organization`, e **excluindo bloqueios**. Medição com 10 mil
-relações: 12 ms em profundidade 2. A razão de não haver banco de grafos está em `IMPACT_NETWORK_ARCHITECTURE.md`.
+relações: 15 ms em profundidade 2. A razão de não haver banco de grafos está em `IMPACT_NETWORK_ARCHITECTURE.md`.

@@ -105,10 +105,10 @@ Escala cheia, com volume de rede semeado:
 
 | Workspace | Tempo |
 |---|---|
-| `workspace_osc` | **347 ms** |
-| `workspace_investidor` | **72 ms** |
+| `workspace_osc` | **341 ms** |
+| `workspace_investidor` | **71 ms** |
 
-Orçamento do teste de desempenho: 2500 ms. O workspace da OSC é o mais caro porque é o que agrega mais seções
+Orçamento do teste de desempenho: 2.500 ms. O workspace da OSC é o mais caro porque é o que agrega mais seções
 (prontidão por projeto, propostas, anúncios e prestação de contas). Fica registrado como o ponto a observar se o
 volume crescer uma ordem de magnitude.
 

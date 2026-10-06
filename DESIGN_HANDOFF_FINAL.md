@@ -44,7 +44,7 @@ Quando o pacote chegar, o trabalho é mapear tokens e componentes sobre uma AI j
 | Cobrança | preço versionado, aviso de 30 dias, imposto no checkout | `BILLING_V2.md` |
 | Perfil público | `impacto.app/@identificador`, projeção curada | `PRIVACY_VISIBILITY_MATRIX.md` |
 | Testes | 788, 0 falhas | `TEST_REPORT.md` |
-| Desempenho | escala cheia, maior caminho 1497 ms (orçamento 2500 ms) | `PERFORMANCE_REPORT.md` |
+| Desempenho | escala cheia, maior caminho 1.724 ms (orçamento 2.500 ms) | `PERFORMANCE_REPORT.md` |
 
 ## 3 · As 26 telas novas desta rodada
 

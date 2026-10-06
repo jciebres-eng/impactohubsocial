@@ -82,7 +82,7 @@ porque a decisão de **não** mexer foi tão deliberada quanto as mudanças:
 ## Por que não um banco de grafos
 
 A pergunta real do produto é "quem está a um ou dois passos de mim?". Em SQL, com índice em
-`relationships(source_org_id)` e `(target_org_id)`, a vizinhança de profundidade 2 responde em **12 ms** com 10 mil
+`relationships(source_org_id)` e `(target_org_id)`, a vizinhança de profundidade 2 responde em **15 ms** com 10 mil
 relações (`PERFORMANCE_REPORT.md`). Não há pergunta de caminho longo no produto — centralidade, menor caminho,
 comunidade — e introduzir um banco de grafos sem necessidade comprovada seria adicionar uma dependência operacional,
 um modelo de consistência e um backup a mais para resolver um problema que não existe. A decisão está registrada em

@@ -1,6 +1,121 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.16.0] — 2026-10-05 — IMPACT NETWORK CORE (cumulativo; snapshot do v0.15.0 em `history/v0.15.0/`)
+
+Esta rodada transforma o produto de "plataforma de projetos" em **infraestrutura de conexão, estruturação,
+financiamento, execução, acompanhamento e comprovação de impacto** — com **um núcleo** e experiências por papel, não
+quatro aplicações.
+
+### Adicionado
+- **Grafo de impacto como entidade relacional** (`relationships`): **uma** tabela de aresta, 22 tipos, 5 níveis de
+  visibilidade, máquina de estados própria, espelho das relações antigas (seguir, favoritar, bloquear) por gatilho.
+  Travessia até profundidade 2 por CTE recursiva — **15 ms** medidos na escala cheia, que é a razão documentada de
+  **não** adotar banco de grafos (ADR-141).
+- **Motor de propostas** (`proposals`): 9 tipos, 10 situações, grafo de transições como dado, versão, anexos, trilha
+  de eventos, reenvio, expiração por prazo. **Proposta ≠ contrato ≠ investimento ≠ pagamento** — aceitar cria
+  relação e, quando o tipo é financeiro, **intenção**; nunca "investido".
+- **Marketplace de impacto** (`marketplace_listings`): 7 situações, `publication_status`, e **um único** lugar que
+  filtra o que é público (`PUBLIC_STATES = ("published",)`). Anúncio só vai ao ar se o projeto também estiver
+  publicado — recusado no gatilho, não na rota.
+- **Mensagem com contexto obrigatório**: conversa profissional nasce **referenciando** proposta, projeto, anúncio ou
+  relação. Não há "abrir conversa" solto quando a relação é profissional.
+- **Notificação para toda a equipe envolvida**: 14 grupos, 4 prioridades (`low`/`normal`/`high`/`critical`), fan-out
+  por `project_team()` e `notify_org_members()`, idempotência por `dedupe()` (sha256), rótulo de ação e destino em
+  cada aviso. **Um fato, um aviso por pessoa.**
+- **Prontidão de impacto** (`readiness@1.0.0`): 6 dimensões (documentos, projeto, financiamento, governança,
+  execução, evidência), cada verificação com explicação e o que falta. Nota **nunca** sem porquê.
+- **Recomendação ≠ Match** (`recommendation@1.0.0`): 19 ações com razão, destino e prioridade, calculadas sobre o
+  estado real. O motor de match da v0.9.0 **não foi tocado**.
+- **Workspace por persona** (não "dashboard por perfil"): 10 personas, 24 seções ordenadas pelo servidor, 15
+  capacidades. `WorkspaceContext` devolve **próximas ações com destino e razão**, numa chamada.
+- **Perfil público `impacto.app/@identificador`**: projeção curada (`public_fields`), lista fechada de 18 campos
+  projetáveis, lista do que **nunca** é público, e `_assert_no_private()` que falha na gravação. A página pública
+  **não consulta nenhuma tabela privada**. Histórico de identificadores, identificadores reservados.
+- **Ciclo de relatório de impacto** (`impact_updates`): 6 situações, quem revisa ≠ quem escreveu (CHECK no banco),
+  campo de **limitações** de primeira classe, e os números **colhidos pelo banco** (`app_impact_metrics()`), não
+  digitados.
+- **Escada de moderação de 10 degraus** com severidade declarada, `MAX_JUMP = 2`, regra e motivo obrigatórios, prazo
+  obrigatório nas medidas temporárias, contestação julgada por quem não aplicou, e **nada automático**. 12 categorias
+  de denúncia. A identidade de quem denuncia nunca chega ao alvo.
+- **Separação financeira em três estágios**: intenção (`investment_intents`) → compromisso (`commitments`) →
+  transação (`payments`). Teste de invariante impede somar os três num número só.
+- **Necessidades de território** (`territory_needs`) com `beneficiary_groups` — **atributo do projeto, nunca da
+  pessoa**, com `usage_policy` gravada no banco e invariante que verifica que a coluna não existe em nenhuma outra
+  tabela nem em nenhum filtro de busca.
+- **Taxonomias centralizadas e versionadas** (`taxonomies`, `taxonomy_terms`) com rótulo em pt/en, sensibilidade e
+  política de uso.
+- **Experiências profissionais declaradas** (`professional_experiences`): entram no perfil público **só** depois de a
+  organização citada confirmar.
+- **Eventos de domínio** (`domain_events`): 37 fatos no formato `Entidade.fato`, gravados por
+  `app_record_event()` (SECURITY DEFINER, porque um fato de rede envolve **duas** organizações e uma política de
+  inquilino o recusaria), com `REVOKE INSERT` direto.
+- **Cobrança v2**: `plan_price_versions` com vigência e **imutabilidade** por gatilho, `price_change_notices` com
+  **30 dias** de aviso obrigatório, `subscription_prices` registrando o preço aceito, imposto declarado no checkout,
+  moeda no formatador do frontend. Regra comercial: **14 dias de teste com o produto completo · US$ 1,99/mês nos 3
+  primeiros meses pagos · depois US$ 19,99/mês ou US$ 179,88/ano (equivalente a US$ 14,99/mês)**, declarada em
+  `config/plans.json` e **nunca** em código.
+- **`impacto/clock.py`**: `now()` e `today()` em UTC. 28 usos de `date.today()` substituídos em 15 arquivos.
+- **79 rotas novas (704 no total)**, **26 telas funcionais** novas, `migrations/0016_v0160_impact_network.sql`
+  (22 tabelas) e `0017_v0160_billing_v2.sql` (3 tabelas).
+- **+115 testes (788 no total)**: rede (55), cobrança (15), jornadas de ponta a ponta (7), invariantes (27),
+  arquitetura (+6), desempenho (+5).
+- **`scripts/sql_prepare_check.py`**: extrai o SQL do código por AST e roda `PREPARE` em cada consulta. **185
+  consultas conferidas, 0 erros** — encontrou 5 defeitos reais de nome de coluna que a leitura de código não pegou.
+- Documentos: `IMPACT_NETWORK_ARCHITECTURE.md`, `IMPACT_GRAPH.md`, `RELATIONSHIP_MODEL.md`, `PROPOSAL_ENGINE.md`,
+  `IMPACT_MARKETPLACE.md`, `MESSAGING_ARCHITECTURE.md`, `NOTIFICATION_ARCHITECTURE.md`, `IMPACT_REPORTING.md`,
+  `ROLE_BASED_EXPERIENCE.md`, `WORKSPACE_ARCHITECTURE.md`, `PRIVACY_VISIBILITY_MATRIX.md`, `MODERATION_LADDER.md`,
+  `BILLING_V2.md`, `INFORMATION_ARCHITECTURE.md`, `NAVIGATION_MODEL.md`, `DESIGN_HANDOFF_FINAL.md`,
+  `MOBILE_READINESS_FINAL.md`, `FINAL_IMPACT_NETWORK_HARDENING_REPORT.md`.
+
+### Alterado
+- `app_related()` passou a conhecer os vínculos de rede, com **lista explícita de tipos** — não "todos menos
+  bloqueio". A versão permissiva deixava um seguir unilateral abrir conversa, quebrando a regra de reciprocidade da
+  v0.8.0 (pego por teste de regressão).
+- `conversations` trocou `UNIQUE(org_a, org_b)` por `ux_conv_pair_context`: o mesmo par pode conversar sobre
+  assuntos diferentes, e a conversa antiga continua válida.
+- Políticas `ledger_insert`/`ledger_read`, `impupd_read`/`impupd_update` e `rel_read` passaram a reconhecer
+  `app_project_supporter()`: quem apoia o projeto precisa poder registrar o próprio aceite.
+- `money()` no frontend passou a receber a moeda (`money(cents, currency)`), com cache de formatador.
+- `match()` do roteador passou a aceitar prefixo literal antes do parâmetro, para `/@identificador` funcionar.
+- `monetization.quote()` devolve `base_cents`, `first_cents`, `first_price_source`, `intro_cents`, `currency`,
+  `tax_behavior` e `provider_configured`. **Preço de entrada e cupom não se somam: vale o melhor dos dois.**
+- `VERSION` → `0.16.0`; 28 documentos da v0.15.0 preservados em `history/v0.15.0/` com `NOTE.md`.
+
+### Corrigido
+- **`date.today()` × banco em UTC**: o contêiner roda em UTC-4, então por algumas horas de cada dia a plataforma
+  gravava um dia a menos. 28 ocorrências em 15 arquivos, com teste de arquitetura para não voltar.
+- **Aviso duplicado**: cada fato notificava a organização **e** a equipe. Agora é um aviso por fato.
+- **Sete destinos de recomendação apontavam para telas inexistentes.** Corrigidos, com teste de arquitetura que
+  confere cada destino contra o roteador real.
+- **Organização nova recebia zero recomendações** (todas as regras dependiam de já haver projeto ou proposta). Três
+  recomendações de primeiro passo acrescentadas.
+- **O alvo de uma medida de moderação conseguia escrever `status`** — ou seja, anular a própria punição. GRANT de
+  coluna *adiciona* privilégio e não restringe; a correção foi o gatilho `enforcement_target_guard()`.
+- **Métricas de impacto eram calculadas em Python e gravadas em coluna guardada** — não passava. Movidas para
+  `app_impact_metrics()`, usada pela prévia e pelo gatilho, para que as duas nunca divirjam.
+- **`guard_columns` bloqueava a organização de publicar o próprio anúncio e enviar o próprio relatório.** Colunas de
+  situação saíram da guarda e passaram a ser **derivadas** por gatilho.
+- **`notify.PRIORITIES` dizia `urgent`; o CHECK do banco diz `critical`.** Corrigido, com invariante que compara
+  **onze** listas Python aos CHECKs reais do banco.
+- **`forbid_mutation` tornava o aviso de preço insatisfazível** (bloqueava até o "ciente"). `price_notice_ack_only()`.
+- **`provider_price_missing` bloqueava o provedor de desenvolvimento.** Condicionado a `needs_price_id`.
+- **`guard_columns` em `plan_price_versions` era inútil** (ela isenta `app_priv()`, o único contexto que escreve ali).
+  Substituída por `price_version_immutable()`.
+- **`DELETE /v1/workspace/personas/{persona}` respondia 200 com "removidas: 0".** Agora 404.
+- **Colisão de rota em `/v1/readiness`** → `/v1/readiness/purposes`.
+- Defeitos de nome de coluna encontrados por `sql_prepare_check.py`: `organizations.name` (usar
+  `coalesce(trade_name, legal_name)`), `calls.org_id` → `owner_org_id`, `diagnosis_versions.project_id` (junta via
+  `diagnoses`), `max(uuid)`/`min(uuid)` (não existem), `territory_needs.theme` → `cause`, `match_results` (não
+  existe: `match_runs` **é** uma linha por par), `taxonomies.label_en`, as colunas reais de
+  `professional_credentials` e de `professional_experiences`, `commitments.osc_org_id` +
+  `application_id NOT NULL`, `documents.uploaded_by` (não `created_by`).
+- **`network_initial_state()` falhava em tabelas que compartilham o gatilho**: `AND` em plpgsql **não** faz
+  curto-circuito, então `TG_TABLE_NAME = 'x' AND NEW.coluna_de_x` quebra nas outras. Reescrito com `IF` aninhado.
+- Variável plpgsql `grp` colidia com a coluna `grp` ("column reference is ambiguous") → `v_grp`.
+- **`INSERT ... RETURNING` exige que a política de SELECT passe**: era a razão de aceitar proposta responder 403 —
+  `rel_read` não incluía a organização dona do projeto.
+
 ## [0.15.0] — 2026-10-05 — Núcleo do produto, endurecimento final pré-design (cumulativo; snapshot do v0.14.0 em `history/v0.14.0/`)
 ### Adicionado
 - **Vocabulário comum de evidência** (`core/evidence.py`): 9 fontes, `verified` **derivado da fonte** (não dá para marcar declaração como verificada), frescura com meia-vida por tipo de dado, decaimento que reduz **confiança e não pontuação**, e `insufficient_data` como faixa própria de confiança (cobertura abaixo de 40% não vira "confiança baixa", vira "não dá para dizer").

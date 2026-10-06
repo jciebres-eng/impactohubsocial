@@ -1,0 +1,27 @@
+tables: 231
+tables_without_rls: schema_migrations
+policies: 466
+tables_with_policy: 229
+triggers: 161
+functions: 247
+security_definer_functions: 63
+security_definer_without_search_path: 
+foreign_keys: 627
+fk_without_index: 327
+fk_without_index_hot: 
+check_constraints: 1082
+unique_constraints: 315
+indexes: 643
+tables_without_primary_key: 
+nullable_org_id_columns: audit_events, course_certificates, course_enrollments, demo_requests, domain_events, hub_event_registrations, indicator_catalog, integration_events, kb_checklist_progress, kb_feedback, partnership_requests, professional_experiences, public_profiles, sessions, signature_policies, solution_events, solution_people, solution_search_log, support_tickets, trial_claims, trust_events
+append_only_tables: application_transitions, audit_events, credential_verifications, diagnosis_versions, domain_events, eligibility_evaluations, handle_history, ledger_entries, match_feedback, organization_qualification_events, payment_events, price_change_notices, project_snapshots, project_transitions, proposal_events, readiness_snapshots, signature_revocations, signatures, solution_intent_events, solution_versions, trust_events, trust_timestamps
+guarded_tables: calls, document_assemblies, document_templates, documents, fee_tables, ideas, identity_documents, identity_verifications, impact_updates, investment_intents, marketplace_listings, milestones, organizations, professional_credentials, proposals, public_profiles, quota_pledges, relationships, signature_providers, signed_agreement_parties, signed_agreements, solution_disputes, solution_evidence, solution_results, users, verifiable_records
+migrations_applied: 17
+migrations_list: 0001_schema, 0002_security, 0003_match_support, 0004_v080_modules, 0005_v090_solutions, 0006_v0100_institutional, 0007_v0101_institutional_extras, 0008_v0110_monetization, 0009_v0120_knowledge_hub, 0010_v0121_indexes, 0011_v0130_integration_hub, 0012_v0140_trust_layer, 0013_v0150_core_product, 0014_v0150_platform_templates, 0015_v0150_fk_indexes, 0016_v0160_impact_network, 0017_v0160_billing_v2
+app_role_tables_with_delete: 194
+app_role_column_grants: 8080
+orphan_rows_check: nenhuma verificação de órfão aplicável: toda referência é FK declarada
+ods_goals: 17
+status_graph_edges: 58
+signature_providers_in_production: 1
+document_templates_published: 3

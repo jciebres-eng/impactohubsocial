@@ -35,7 +35,7 @@ validação independente. **VERMELHO** = ausente.
 
 * São **26 telas novas** sem passagem pela verificação de viewport. O risco concreto são as tabelas largas: caixa de
   propostas, grafo da rede e a matriz de prontidão por finalidade.
-* O workspace da OSC custa **347 ms** na escala cheia. Em rede móvel ruim, isso soma à latência de rede num ponto que
+* O workspace da OSC custa **341 ms** na escala cheia. Em rede móvel ruim, isso soma à latência de rede num ponto que
   é a primeira tela do produto.
 * A navegação plana de 36 itens é pior no telefone do que no desktop.
 

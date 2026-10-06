@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from starlette.responses import Response
 
+from ..core import access as ACCESS
 from ..http import ApiError, Ctx, not_found, page, route
-from ..security import passwords
 from ..security.tokens import hmac_hex
 from ..trust import agreements as AG
 from ..trust import challenges as CH
@@ -424,10 +424,11 @@ def agreement_publish(ctx: Ctx):
        rate=("agrsign_ip", 30, 3600), tags=("agreements",),
        summary="Assina o acordo como parte (duas camadas: senha e código de uso único ligado ao hash)")
 def agreement_sign(ctx: Ctx, body: TSch.AgreementSignIn):
-    with ctx.system_tx() as c:
-        h = c.scalar("SELECT password_hash FROM users WHERE id = $1", ctx.user_id)
-    if not passwords.verify_password(body.password, h):
-        raise ApiError(401, "reauth_failed", "Senha incorreta — a assinatura exige reautenticação")
+    # Camada 1 pela implementação única (core/access.py). `always_password=True`: assinatura não
+    # aceita o atalho da janela de reautenticação — ver a docstring de `verify_identity`.
+    ACCESS.verify_identity(ctx, password=body.password,
+                           mfa_code=getattr(body, "mfa_code", None),
+                           stamp=False, always_password=True)
     with ctx.tx(readonly=True) as c:
         a = c.one("SELECT id::text AS id, status, content_sha256 FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"])
         if not a:

@@ -50,7 +50,7 @@ class OrgQ(S.Pagination):
     compliance: str | None = None
 
 
-@A("GET", "/v1/admin/organizations", query=OrgQ)
+@A("GET", "/v1/admin/organizations", permission="admin.organizations.read", query=OrgQ)
 def orgs(ctx: Ctx, q: OrgQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT id::text AS id, kind, legal_name, cnpj, uf, status, compliance_status, compliance_risk, created_at,"
@@ -83,7 +83,7 @@ def run_checks(ctx: Ctx):
         return compliance.run_checks(c, ctx.path["org_id"], ctx.user_id)
 
 
-@A("GET", "/v1/admin/compliance-reviews", query=S.Pagination)
+@A("GET", "/v1/admin/compliance-reviews", permission="compliance.read", query=S.Pagination)
 def compliance_queue(ctx: Ctx, q: S.Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT r.id::text AS id, r.status, r.risk_level, r.created_at, o.id::text AS org_id, o.legal_name, o.kind, o.cnpj,"
@@ -108,7 +108,7 @@ class UserQ(S.Pagination):
     q: str | None = None
 
 
-@A("GET", "/v1/admin/users", query=UserQ)
+@A("GET", "/v1/admin/users", permission="admin.users.read", query=UserQ)
 def users(ctx: Ctx, q: UserQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT id::text AS id, email::text AS email, full_name, status, is_platform_admin, email_verified_at IS NOT NULL AS verified,"
@@ -364,7 +364,7 @@ class BatchIn(S.In):
     valid_until: datetime | None = None
 
 
-@A("POST", "/v1/admin/voucher-batches", body=BatchIn, status=201,
+@A("POST", "/v1/admin/voucher-batches", permission="billing.write", body=BatchIn, status=201,
    summary="Gera lote de vouchers (códigos exibidos UMA vez; armazenados só como HMAC). Ativação exige segundo administrador.")
 def create_batch(ctx: Ctx, body: BatchIn):
     if body.type in ("grant_plan", "free_period") and not body.plan_key:
@@ -402,7 +402,7 @@ def create_batch(ctx: Ctx, body: BatchIn):
             "warning": "Guarde os códigos agora: eles não poderão ser exibidos novamente."}
 
 
-@A("GET", "/v1/admin/voucher-batches")
+@A("GET", "/v1/admin/voucher-batches", permission="billing.read")
 def list_batches(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT b.id::text AS id, b.campaign, b.status, b.created_at, b.approved_at, u.email::text AS created_by,"
@@ -415,7 +415,8 @@ class BatchActionIn(S.In):
     action: Literal["approve", "revoke"]
 
 
-@A("POST", "/v1/admin/voucher-batches/{batch_id}/action", body=BatchActionIn)
+@A("POST", "/v1/admin/voucher-batches/{batch_id}/action", permission="billing.write",
+   body=BatchActionIn)
 def batch_action(ctx: Ctx, body: BatchActionIn):
     with ctx.tx() as c:
         b = c.one("SELECT id::text AS id, status, created_by::text AS created_by FROM voucher_batches WHERE id = $1 FOR UPDATE", ctx.path["batch_id"])
@@ -441,7 +442,7 @@ class ManualSubIn(S.In):
     reference: Annotated[str, Field(min_length=3, max_length=200)]
 
 
-@A("POST", "/v1/admin/organizations/{org_id}/manual-subscription", body=ManualSubIn,
+@A("POST", "/v1/admin/organizations/{org_id}/manual-subscription", permission="billing.write", body=ManualSubIn,
    summary="Ativa assinatura sob contrato (Enterprise/Governo) com referência do contrato")
 def manual_sub(ctx: Ctx, body: ManualSubIn):
     with ctx.tx() as c:
@@ -464,7 +465,7 @@ class InvoiceIn(S.In):
     due_on: date
 
 
-@A("POST", "/v1/admin/invoices", body=InvoiceIn, status=201, summary="Emite cobrança manual (registro interno; NF-e é emitida no sistema fiscal da empresa)")
+@A("POST", "/v1/admin/invoices", permission="billing.write", body=InvoiceIn, status=201, summary="Emite cobrança manual (registro interno; NF-e é emitida no sistema fiscal da empresa)")
 def manual_invoice(ctx: Ctx, body: InvoiceIn):
     with ctx.tx() as c:
         iid = c.scalar("INSERT INTO invoices(org_id, provider, description, amount_cents, status, due_on) VALUES ($1,'manual',$2,$3::bigint,'open',$4::date)"
@@ -477,7 +478,7 @@ class PaidIn(S.In):
     payment_reference: Annotated[str, Field(min_length=3, max_length=200)]
 
 
-@A("POST", "/v1/admin/invoices/{invoice_id}/paid", body=PaidIn)
+@A("POST", "/v1/admin/invoices/{invoice_id}/paid", permission="billing.write", body=PaidIn)
 def invoice_paid(ctx: Ctx, body: PaidIn):
     with ctx.tx() as c:
         if not c.run("UPDATE invoices SET status = 'paid', paid_at = now(), payment_reference = $2 WHERE id = $1 AND provider = 'manual' AND status = 'open'",
@@ -495,7 +496,7 @@ class GrantIn(S.In):
     reason: Annotated[str, Field(min_length=3, max_length=500)]
 
 
-@A("POST", "/v1/admin/organizations/{org_id}/grants", body=GrantIn, status=201)
+@A("POST", "/v1/admin/organizations/{org_id}/grants", permission="billing.write", body=GrantIn, status=201)
 def grant(ctx: Ctx, body: GrantIn):
     if not (body.plan_key or body.feature_key):
         raise ApiError(422, "validation_error", "Informe plan_key ou feature_key")
@@ -536,7 +537,7 @@ class AuditQ(S.Pagination):
     action: str | None = None
 
 
-@A("GET", "/v1/admin/audit", query=AuditQ)
+@A("GET", "/v1/admin/audit", permission="security.audit.read", query=AuditQ)
 def audit_search(ctx: Ctx, q: AuditQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT id, org_id::text AS org_id, actor_user_id::text AS actor, action, object_type, object_id, ip, request_id, payload,"
@@ -555,7 +556,7 @@ def audit_verify(ctx: Ctx, q: VerifyQ):
         return c.one("SELECT * FROM audit_verify($1::uuid)", q.org_id)
 
 
-@A("GET", "/v1/admin/flags")
+@A("GET", "/v1/admin/flags", permission="maintenance.read")
 def flags(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT key, enabled, description, updated_at FROM feature_flags ORDER BY key")}
@@ -565,7 +566,7 @@ class FlagIn(S.In):
     enabled: bool
 
 
-@A("PUT", "/v1/admin/flags/{key}", body=FlagIn)
+@A("PUT", "/v1/admin/flags/{key}", permission="maintenance.execute", body=FlagIn)
 def set_flag(ctx: Ctx, body: FlagIn):
     with ctx.tx() as c:
         if not c.run("UPDATE feature_flags SET enabled = $2::bool, updated_by = $3, updated_at = now() WHERE key = $1", ctx.path["key"], body.enabled, ctx.user_id):
@@ -574,7 +575,7 @@ def set_flag(ctx: Ctx, body: FlagIn):
     return {"key": ctx.path["key"], "enabled": body.enabled}
 
 
-@A("GET", "/v1/admin/jobs")
+@A("GET", "/v1/admin/jobs", permission="maintenance.read")
 def jobs(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT job, status, details, started_at, finished_at FROM job_runs ORDER BY id DESC LIMIT 100"),

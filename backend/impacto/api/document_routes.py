@@ -7,8 +7,8 @@ from typing import Literal
 
 from starlette.responses import Response
 
+from ..core import access as ACCESS
 from ..http import ApiError, Ctx, not_found, page, route
-from ..security import passwords
 from ..security.tokens import hmac_hex, sign_payload, verify_payload
 from ..services import documents as docsvc
 from ..network import notify as NT
@@ -488,11 +488,11 @@ def sign(ctx: Ctx, body: S.SignIn):
 
     from ..trust import challenges as CH
     from ..trust import custody as CUST
-    # Camada 1: reautenticação por senha.
-    with ctx.system_tx() as c:
-        h = c.scalar("SELECT password_hash FROM users WHERE id = $1", ctx.user_id)
-    if not passwords.verify_password(body.password, h):
-        raise ApiError(401, "reauth_failed", "Senha incorreta — a assinatura exige reautenticação")
+    # Camada 1: confirmação de identidade, pela implementação única (core/access.py).
+    # `always_password=True`: assinatura não aceita o atalho da janela de reautenticação.
+    ACCESS.verify_identity(ctx, password=body.password,
+                           mfa_code=getattr(body, "mfa_code", None),
+                           stamp=False, always_password=True)
     # Camada 2: código de uso único, amarrado ao hash EXATO do conteúdo (muda o conteúdo, o código não serve mais).
     with ctx.tx(readonly=True) as c:
         _t, _col = ("drafts", "content_sha256") if body.subject_type == "draft" else ("documents", "sha256")

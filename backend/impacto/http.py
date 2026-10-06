@@ -203,6 +203,12 @@ class RouteSpec:
     rate: tuple[str, int, int] | None = None  # (bucket, limite, janela_segundos) por IP
     raw_body: bool = False       # handler recebe bytes do corpo (ex.: webhooks com assinatura)
     staff: tuple[str, ...] = ()  # auth="admin": além de administradores, aceita estes papéis internos (sempre com MFA)
+    # v0.22.0 — PERMISSÃO INTERNA exigida (ex.: "finance.read"). Vem de `staff_roles` via a matriz
+    # `staff_permissions`. Quando declarada, `is_platform_admin` sozinho NÃO basta: é preciso ter a
+    # permissão. A migração 0046 concedeu `super_admin` a todo administrador existente, então
+    # ninguém perdeu acesso — mas a próxima pessoa contratada pode receber `support` sem receber,
+    # de brinde, a receita da empresa.
+    permission: str | None = None
 
 
 ROUTES: list[RouteSpec] = []
@@ -289,11 +295,41 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
         raise ApiError(401, "unauthenticated", "Autenticação necessária")
     _check_csrf(ctx)
     if spec.auth == "admin":
-        if not p.is_platform_admin and not (spec.staff and set(spec.staff) & set(p.staff_roles)):
+        # A PORTA. Três chaves a abrem, e a terceira é a novidade da v0.22.0: ter a PERMISSÃO que a
+        # rota exige. Antes, a permissão era conferida depois da porta — e a porta só aceitava
+        # `is_platform_admin` ou um papel listado em `staff=`. Resultado: criar o papel `finance`
+        # com `finance.read` não dava acesso a nada, porque nenhuma rota lista `finance` em
+        # `staff=`. A permissão É a autorização; `staff=` fica como o caminho das rotas que não
+        # declaram permissão (as de conteúdo, da v0.12.0).
+        from .core import access as ACCESS
+        tem_permissao = bool(spec.permission) and ACCESS.of(ctx).has_permission(spec.permission)
+        if not (p.is_platform_admin
+                or (spec.staff and set(spec.staff) & set(p.staff_roles))
+                or tem_permissao):
+            # A MENSAGEM muda conforme quem bate na porta, e isso é decisão de segurança:
+            #   · quem JÁ é da equipe recebe o nome da permissão que falta — está dentro da casa, e
+            #     saber a quem pedir é melhor do que tentar de novo;
+            #   · quem NÃO é da equipe recebe apenas "área restrita" — não se confirma a existência
+            #     da rota nem o que ela exige a quem não deveria estar ali.
+            if p.staff_roles and spec.permission:
+                raise ApiError(403, "permission_denied",
+                               "Seu papel na equipe não inclui esta permissão",
+                               {"allowed": False, "reason": "permission_denied",
+                                "source": "staff_roles",
+                                "required_permission": spec.permission})
             raise forbidden("Área restrita à administração da plataforma", "admin_only")
         if ctx.settings.require_mfa_for_admins and not p.mfa_verified:
             raise forbidden("Administração exige MFA ativo e verificado nesta sessão", "mfa_required")
+        if spec.permission:
+            # Segunda conferência, ANTES de `admin_mode` ser ligado. Não é redundante com a porta:
+            # é aqui que entram o papel somente-leitura e a exigência de reautenticação recente.
+            # E a ordem importa — `admin_mode` desliga `require_role`, `require_feature` e
+            # `check_limit` e liga `app.platform_admin` na RLS; ligá-lo primeiro daria, por um
+            # instante, o privilégio a quem a conferência vai recusar.
+            ACCESS.of(ctx).can(permission=spec.permission).raise_if_denied()
         ctx.admin_mode = True
+        if p.staff_roles or p.is_platform_admin:
+            ACCESS.log_privileged(ctx, spec.permission)
         return
     if spec.auth == "org":
         if not p.org_id:

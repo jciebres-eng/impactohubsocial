@@ -91,7 +91,7 @@ def acceptances(ctx: Ctx):
 
 # --- administração ----------------------------------------------------------------------------
 
-@route("POST", "/v1/admin/free-periods", body=S.FreePeriodGrantIn, status=201, auth="admin",
+@route("POST", "/v1/admin/free-periods", permission="free_period.write", body=S.FreePeriodGrantIn, status=201, auth="admin",
        tags=T, summary="Concede período gratuito a uma organização (motivo obrigatório)")
 def grant_free_period(ctx: Ctx, body: S.FreePeriodGrantIn):
     with ctx.tx() as c:
@@ -106,7 +106,7 @@ def grant_free_period(ctx: Ctx, body: S.FreePeriodGrantIn):
     return out
 
 
-@route("POST", "/v1/admin/free-periods/{period_id}/cancel", body=S.FreePeriodCancelIn, auth="admin",
+@route("POST", "/v1/admin/free-periods/{period_id}/cancel", permission="free_period.write", body=S.FreePeriodCancelIn, auth="admin",
        tags=T, summary="Cancela um período gratuito (o registro permanece, com motivo e autor)")
 def cancel_free_period(ctx: Ctx, body: S.FreePeriodCancelIn):
     with ctx.tx() as c:
@@ -123,7 +123,7 @@ def cancel_free_period(ctx: Ctx, body: S.FreePeriodCancelIn):
     return {"cancelled": True}
 
 
-@route("GET", "/v1/admin/free-periods", auth="admin", tags=T,
+@route("GET", "/v1/admin/free-periods", permission="billing.read", auth="admin", tags=T,
        summary="Períodos gratuitos concedidos, por origem e situação")
 def list_free_periods(ctx: Ctx):
     with ctx.pool.tx(DbContext(system=True), readonly=True) as c:

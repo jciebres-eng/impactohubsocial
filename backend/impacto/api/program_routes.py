@@ -191,7 +191,7 @@ def value_events(ctx: Ctx, q: E.ValueFeedQ):
         return VL.feed(c, org_id=ctx.org_id, event_type=q.event_type, limit=q.limit, offset=q.offset)
 
 
-@route("POST", "/v1/admin/value/baselines", body=E.BaselineIn, auth="admin", status=201,
+@route("POST", "/v1/admin/value/baselines", permission="finance.write", body=E.BaselineIn, auth="admin", status=201,
        tags=("valor",),
        summary="Declara a linha de referência de um tipo de evento (cria versão; não reescreve)")
 def value_set_baseline(ctx: Ctx, body: E.BaselineIn):
@@ -199,14 +199,14 @@ def value_set_baseline(ctx: Ctx, body: E.BaselineIn):
         return VL.set_baseline(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
 
 
-@route("POST", "/v1/admin/ai/prices", body=E.AiPriceIn, auth="admin", status=201, tags=("valor",),
+@route("POST", "/v1/admin/ai/prices", permission="finance.write", body=E.AiPriceIn, auth="admin", status=201, tags=("valor",),
        summary="Declara o preço de um modelo de IA (versionado, com fonte)")
 def ai_set_price(ctx: Ctx, body: E.AiPriceIn):
     with ctx.tx() as c:
         return VL.set_ai_price(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
 
 
-@route("GET", "/v1/admin/ai/cost", query=E.AiCostQ, auth="admin", tags=("valor",),
+@route("GET", "/v1/admin/ai/cost", permission="finance.read", query=E.AiCostQ, auth="admin", tags=("valor",),
        summary="Custo estimado de IA por provedor, modelo e recurso — insumo da margem")
 def ai_cost(ctx: Ctx, q: E.AiCostQ):
     with ctx.tx(readonly=True) as c:
@@ -238,14 +238,15 @@ def monetization_pipeline(ctx: Ctx, q: E.PipelineQ):
         return BL.pipeline(c, org_id=ctx.org_id, status=q.status, limit=q.limit, offset=q.offset)
 
 
-@route("POST", "/v1/admin/monetization/legal-cards", body=E.LegalCardIn, auth="admin", status=201,
+@route("POST", "/v1/admin/monetization/legal-cards", permission="finance.write",
+       body=E.LegalCardIn, auth="admin", status=201,
        tags=("monetizacao",), summary="Registra a pesquisa de base normativa de uma receita")
 def admin_add_legal_card(ctx: Ctx, body: E.LegalCardIn):
     with ctx.tx() as c:
         return BL.add_legal_card(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
 
 
-@route("PATCH", "/v1/admin/monetization/rules/{rule_key}", body=E.RulePatch, auth="admin",
+@route("PATCH", "/v1/admin/monetization/rules/{rule_key}", permission="finance.approve", body=E.RulePatch, auth="admin",
        tags=("monetizacao",),
        summary="Ajusta preço, situação jurídica e ativação de uma regra (o portão é no banco)")
 def admin_set_rule(ctx: Ctx, body: E.RulePatch):
@@ -256,7 +257,7 @@ def admin_set_rule(ctx: Ctx, body: E.RulePatch):
     return out
 
 
-@route("GET", "/v1/admin/monetization/pipeline", auth="admin", query=E.PipelineQ,
+@route("GET", "/v1/admin/monetization/pipeline", permission="finance.read", auth="admin", query=E.PipelineQ,
        tags=("monetizacao",), summary="A fila de monetização de todas as organizações")
 def admin_pipeline(ctx: Ctx, q: E.PipelineQ):
     with ctx.tx(readonly=True) as c:
@@ -267,7 +268,7 @@ def admin_pipeline(ctx: Ctx, q: E.PipelineQ):
 # `_id` seja um UUID (`http.py`, a guarda que devolve 404 para identificador malformado). O candidato a
 # cobrança é sequencial, como o próprio `value_events`, então o nome do parâmetro respeita a convenção
 # em vez de abrir exceção nela.
-@route("POST", "/v1/admin/monetization/pipeline/{billable_seq}/waive", body=E.WaiveIn, auth="admin",
+@route("POST", "/v1/admin/monetization/pipeline/{billable_seq}/waive", permission="finance.write", body=E.WaiveIn, auth="admin",
        tags=("monetizacao",), summary="Dispensa um candidato a cobrança, com motivo escrito")
 def admin_waive(ctx: Ctx, body: E.WaiveIn):
     seq = ctx.path["billable_seq"]
@@ -342,7 +343,7 @@ def charge_transition(ctx: Ctx, body: E.ChargeTransitionIn):
                               failure_code=body.failure_code, failure_message=body.failure_message)
 
 
-@route("GET", "/v1/admin/payments/revenue", query=E.RevenueQ, auth="admin", tags=("pagamento",),
+@route("GET", "/v1/admin/payments/revenue", permission="finance.read", query=E.RevenueQ, auth="admin", tags=("pagamento",),
        summary="Receita apurada, com o simulado em colunas próprias e nunca somado ao real")
 def admin_revenue(ctx: Ctx, q: E.RevenueQ):
     from datetime import timedelta
@@ -354,7 +355,7 @@ def admin_revenue(ctx: Ctx, q: E.RevenueQ):
     return {**out, "provider_status": PAY.status(ctx.settings)}
 
 
-@route("GET", "/v1/admin/payments/reconciliation", query=E.ReconciliationQ, auth="admin",
+@route("GET", "/v1/admin/payments/reconciliation", permission="finance.read", query=E.ReconciliationQ, auth="admin",
        tags=("pagamento",),
        summary="Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura")
 def admin_reconciliation(ctx: Ctx, q: E.ReconciliationQ):

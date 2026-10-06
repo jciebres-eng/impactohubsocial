@@ -42,7 +42,7 @@ def _j(v) -> str:
 
 
 # ------------------------------------------------------------------------------------------------ papéis internos
-@A("GET", "/v1/admin/staff-roles", summary="Papéis internos (editor, reviewer, support)")
+@A("GET", "/v1/admin/staff-roles", permission="admin.users.read", summary="Papéis internos (editor, reviewer, support)")
 def staff_list(ctx: Ctx):
     if not _is_admin(ctx):
         raise ApiError(403, "admin_only", "Somente administradores da plataforma")
@@ -50,7 +50,7 @@ def staff_list(ctx: Ctx):
         return {"items": c.query("SELECT s.user_id::text AS user_id, u.email::text AS email, u.full_name, s.role, s.granted_at FROM staff_roles s JOIN users u ON u.id = s.user_id ORDER BY u.full_name, s.role")}
 
 
-@A("POST", "/v1/admin/staff-roles", body=H.StaffRoleIn, status=201, summary="Concede papel interno (auditado)")
+@A("POST", "/v1/admin/staff-roles", permission="admin.users.write", body=H.StaffRoleIn, status=201, summary="Concede papel interno (auditado)")
 def staff_grant(ctx: Ctx, body: H.StaffRoleIn):
     if not _is_admin(ctx):
         raise ApiError(403, "admin_only", "Somente administradores da plataforma")
@@ -63,7 +63,7 @@ def staff_grant(ctx: Ctx, body: H.StaffRoleIn):
     return {"user_id": u["id"], "role": body.role}
 
 
-@A("DELETE", "/v1/admin/staff-roles/{user_id}/{role}", query=H.StaffRevokeQ,
+@A("DELETE", "/v1/admin/staff-roles/{user_id}/{role}", permission="admin.users.write", query=H.StaffRevokeQ,
    summary="Revoga papel interno, com motivo registrado")
 def staff_revoke(ctx: Ctx, q: H.StaffRevokeQ):
     """v0.20.0: revogar um papel interno é tirar acesso de uma pessoa, e a operação não registrava

@@ -359,6 +359,21 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
         secret = c.post("/v1/auth/mfa/setup").json["secret"]
         assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)}).status == 200
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
+    # v0.22.0 — ADMINISTRADOR TRABALHANDO. A partir desta versão, as permissões de
+    # `core/access.py::STEP_UP_PERMISSIONS` exigem identidade confirmada há menos de 15 minutos:
+    # aprovar preço, lançar no financeiro, estornar, conceder papel interno, executar manutenção.
+    #
+    # Este arranjo representa alguém que acabou de entrar para trabalhar, então ele confirma. Sem
+    # isso, catorze testes de domínio passariam a reprovar por um motivo que não é o assunto deles
+    # — e a tentação seria tirar a exigência das rotas.
+    #
+    # A exigência em si é exercitada em `test_v0220_authorization.StepUpTests`, com `make_staff`,
+    # que de propósito NÃO confirma: lá o assunto é o step-up.
+    if mfa:
+        from impacto.security import totp as _totp
+        assert c.post("/v1/auth/reauth", {"password": PASSWORD,
+                                          "mfa_code": _totp.totp(secret)}).status == 200
+        c.mfa_secret = secret
     return c, secret
 
 
@@ -370,3 +385,62 @@ def grant_premium(c: Client, plan: str | None = None) -> None:
     assert plan, f"sem plano conhecido para organização do tipo {kind!r}"
     with db_system() as d:
         d.run("INSERT INTO entitlement_grants(org_id, plan_key, source, ends_at) VALUES ($1,$2,'admin', now() + interval '30 days')", c.org_id, plan)
+
+
+def make_staff(*roles: str, mfa: bool = True) -> Client:
+    """Pessoa da EQUIPE INTERNA com papéis nomeados — e SEM `is_platform_admin`.
+
+    Esta é a diferença que a v0.22.0 trouxe e que `make_admin` não exercita: até então havia um
+    booleano só para toda a equipe, e qualquer administrador alcançava receita, custo de IA e
+    tabela de preço. `make_staff("support")` cria alguém que atende chamado e NÃO vê dinheiro —
+    exatamente o cenário que não era possível representar.
+
+    O MFA é ligado porque toda rota `auth="admin"` o exige na sessão.
+    """
+    from impacto.security import totp
+    c = new_account("osc")
+    with db_system() as db:
+        plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
+            "INSERT INTO organizations(kind, legal_name, compliance_status)"
+            " VALUES ('platform','Plataforma','approved') RETURNING id::text")
+        db.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'viewer')"
+               " ON CONFLICT DO NOTHING", c.user["id"], plat)
+        for papel in roles:
+            db.run("INSERT INTO staff_roles(user_id, role, granted_by) VALUES ($1,$2,$1)"
+                   " ON CONFLICT DO NOTHING", c.user["id"], papel)
+    if mfa:
+        segredo = c.post("/v1/auth/mfa/setup").json["secret"]
+        assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(segredo)}).status == 200
+        c.mfa_secret = segredo
+    assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
+    c.staff_roles = tuple(roles)
+    return c
+
+
+def reauth(c: Client) -> None:
+    """Confirma a identidade da sessão — exigido pelas permissões de STEP_UP_PERMISSIONS."""
+    from impacto.security import totp
+    corpo = {"password": PASSWORD}
+    segredo = getattr(c, "mfa_secret", None)
+    if segredo:
+        corpo["mfa_code"] = totp.totp(segredo)
+    r = c.post("/v1/auth/reauth", corpo)
+    assert r.status == 200, r
+
+
+def make_admin_without_reauth() -> Client:
+    """Administrador com MFA e SEM identidade confirmada — para provar que o step-up é real."""
+    from impacto.security import totp
+    c = new_account("osc")
+    with db_system() as db:
+        plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
+            "INSERT INTO organizations(kind, legal_name, compliance_status)"
+            " VALUES ('platform','Plataforma','approved') RETURNING id::text")
+        db.run("UPDATE users SET is_platform_admin = true WHERE id = $1", c.user["id"])
+        db.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'owner')"
+               " ON CONFLICT DO NOTHING", c.user["id"], plat)
+    segredo = c.post("/v1/auth/mfa/setup").json["secret"]
+    assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(segredo)}).status == 200
+    c.mfa_secret = segredo
+    assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
+    return c

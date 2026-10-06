@@ -79,7 +79,7 @@ def unblock_org(ctx: Ctx, body: S.RiskBlockIn):
 
 
 # ------------------------------------------------------------------------------------------------ erros agregados
-@route("GET", "/v1/admin/errors", auth="admin", query=S.Pagination, tags=T, summary="Erros 5xx agregados por impressão digital (sem dados pessoais)")
+@route("GET", "/v1/admin/errors", permission="security.audit.read", auth="admin", query=S.Pagination, tags=T, summary="Erros 5xx agregados por impressão digital (sem dados pessoais)")
 def list_errors(ctx: Ctx, q: S.Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT id::text AS id, route, status, exception_type, message, occurrences, first_seen, last_seen, last_request_id, last_trace_id, resolved"
@@ -119,7 +119,7 @@ def remove_message(ctx: Ctx, body: S.MessageRemoveIn):
 
 
 # ============================================================ operação: backup e e-mail (v0.19.0)
-@route("GET", "/v1/admin/ops/health", auth="admin", tags=T,
+@route("GET", "/v1/admin/ops/health", permission="health.read", auth="admin", tags=T,
        summary="Última execução de cada tarefa de operação e falhas de e-mail na janela")
 def ops_health(ctx: Ctx):
     """A pergunta que não tinha resposta: "o backup rodou?".

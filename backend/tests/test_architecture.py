@@ -56,7 +56,25 @@ class ArchitectureTests(unittest.TestCase):
                    #   GET /v1/admin/free-periods → painel de administração: precisa ver as
                    #       concessões de TODAS as organizações, que é justamente o que a RLS por
                    #       organização impede. A rota é auth="admin".
-                   "commercial_routes.py"}
+                   "commercial_routes.py",
+                   # v0.22.0 — motor de acesso. Três usos, todos revisados:
+                   #   GET /v1/me/context → lê `staff_permissions_of()` e o carimbo de
+                   #       reautenticação da sessão; são dados da PRÓPRIA pessoa, e `staff_roles`
+                   #       não é visível pelo contexto de organização.
+                   #   POST /v1/auth/reauth → lê o hash de senha e o segredo de MFA do próprio
+                   #       usuário e carimba a sessão dele; nenhum desses é alcançável por RLS de
+                   #       organização, e é o mesmo caminho que `services/auth.py` já usa.
+                   #   GET /v1/admin/privileged-access e /v1/admin/permissions → painel de
+                   #       auditoria: precisa ver a trilha de TODAS as pessoas, que é exatamente o
+                   #       que a RLS por organização impede. As duas são auth="admin" com
+                   #       permissão declarada.
+                   "access_routes.py",
+                   #   core/access.py → monta o AccessContext. Precisa de contexto de sistema por
+                   #       duas razões: `staff_permissions_of()` lê `staff_roles`, que a RLS de
+                   #       organização não alcança; e o registro de acesso privilegiado escreve
+                   #       numa trilha que a própria pessoa registrada não pode escrever pelo
+                   #       contexto dela. O `user_id` vem sempre do principal da sessão.
+                   "access.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:

@@ -5,8 +5,8 @@ import uuid
 
 from starlette.responses import Response
 
+from ..core import access as ACCESS
 from ..http import ApiError, Ctx, json_response, route
-from ..security import passwords
 from . import schemas as S
 
 T = ("privacy",)
@@ -49,10 +49,12 @@ class DeleteIn(S.In):
 def delete_account(ctx: Ctx, body: DeleteIn):
     if not body.confirm:
         raise ApiError(422, "confirmation_required", "Confirme a exclusão")
+    # v0.22.0 — UMA implementação de confirmação de identidade (core/access.py). Eram três cópias,
+    # cada uma conferindo a senha no próprio handler; três cópias de uma regra de segurança
+    # divergem na primeira vez que alguém endurece uma e esquece as outras. Esta aqui ganhou MFA de
+    # brinde: antes, apagar a conta de quem tem segundo fator pedia apenas a senha.
+    ACCESS.verify_identity(ctx, password=body.password, mfa_code=getattr(body, "mfa_code", None))
     with ctx.system_tx() as c:
-        u = c.one("SELECT password_hash, is_platform_admin FROM users WHERE id = $1", ctx.user_id)
-        if not passwords.verify_password(body.password, u["password_hash"]):
-            raise ApiError(401, "reauth_failed", "Senha incorreta")
         owned = c.query("SELECT m.org_id::text AS org_id, o.legal_name, (SELECT count(*) FROM memberships x WHERE x.org_id = m.org_id) AS members,"
                         " (SELECT count(*) FROM memberships x WHERE x.org_id = m.org_id AND x.role = 'owner') AS owners,"
                         " (SELECT count(*) FROM commitments cm WHERE cm.osc_org_id = m.org_id OR cm.funder_org_id = m.org_id) AS financial"

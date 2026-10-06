@@ -461,7 +461,7 @@ def data_quality_vocabulary(ctx: Ctx):
     return DQ.vocabulary()
 
 
-@route("GET", "/v1/admin/risk-levels", auth="admin", tags=("admin",),
+@route("GET", "/v1/admin/risk-levels", permission="security.audit.read", auth="admin", tags=("admin",),
        summary="Inventário de risco por operação (§40): nível, controle humano exigido e se ele existe")
 def risk_levels(ctx: Ctx):
     """Onde o controle humano precisa existir — e se ele existe mesmo.

@@ -1283,3 +1283,28 @@ class SpendLimitIn(In):
     """Teto de gasto mensal da organização. `action` diz o que fazer ao bater o teto."""
     limit_cents: int | None = Field(default=None, ge=0)
     action: Literal["warn", "hard_stop"] = "warn"
+
+
+# --- v0.22.0 — contexto de acesso e reautenticação -----------------------------------------------
+
+class AccessCheckIn(In):
+    """Pergunta ao motor: posso executar esta ação? Devolve decisão COM MOTIVO.
+
+    Existe para que a tela possa perguntar antes de tentar — e, ao receber não, dizer à pessoa o
+    que fazer (pedir permissão a quem, mudar de plano, confirmar identidade) em vez de mostrar um
+    botão que falha.
+    """
+    permission: Annotated[str, StringConstraints(min_length=3, max_length=60)] | None = None
+    feature: Annotated[str, StringConstraints(min_length=2, max_length=60)] | None = None
+    min_role: Literal["viewer", "member", "analyst", "manager", "admin", "owner"] | None = None
+
+
+class ReauthIn(In):
+    """Confirmação de identidade para operação sensível.
+
+    A senha é sempre exigida. O código de MFA é exigido quando a pessoa tem MFA ativo — não aceitar
+    só a senha de quem tem segundo fator seria oferecer o fator mais fraco justamente na operação
+    mais perigosa.
+    """
+    password: Annotated[str, StringConstraints(min_length=1, max_length=200)]
+    mfa_code: Annotated[str, StringConstraints(min_length=6, max_length=8)] | None = None

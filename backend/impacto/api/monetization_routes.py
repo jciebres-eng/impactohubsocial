@@ -35,7 +35,7 @@ def join(ctx: Ctx, body: S.AgreementJoinIn):
 
 
 # ------------------------------------------------------------------------------------------------ administração: visão de cobrança
-@A("GET", "/v1/admin/billing/organizations/{org_id}", summary="Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização")
+@A("GET", "/v1/admin/billing/organizations/{org_id}", permission="billing.read", summary="Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização")
 def org_billing(ctx: Ctx):
     oid = ctx.path["org_id"]
     with ctx.tx(readonly=True) as c:
@@ -58,7 +58,7 @@ class TrialGrantIn(S.In):
     reason: Annotated[str, Field(min_length=5, max_length=500)]
 
 
-@A("POST", "/v1/admin/organizations/{org_id}/trial", body=TrialGrantIn, status=201, summary="Concede trial a uma organização que ainda não o teve (motivo obrigatório)")
+@A("POST", "/v1/admin/organizations/{org_id}/trial", permission="billing.write", body=TrialGrantIn, status=201, summary="Concede trial a uma organização que ainda não o teve (motivo obrigatório)")
 def grant_trial(ctx: Ctx, body: TrialGrantIn):
     oid = ctx.path["org_id"]
     with ctx.tx() as c:
@@ -95,7 +95,7 @@ class PriceIn(S.In):
     reason: Annotated[str, Field(min_length=5, max_length=500)]
 
 
-@A("PUT", "/v1/admin/plans/{plan_key}/price", body=PriceIn, summary="Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide)")
+@A("PUT", "/v1/admin/plans/{plan_key}/price", permission="finance.approve", body=PriceIn, summary="Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide)")
 def set_price(ctx: Ctx, body: PriceIn):
     pk = ctx.path["plan_key"]
     with ctx.tx() as c:
@@ -143,7 +143,7 @@ def create_agreement(ctx: Ctx, body: AgreementIn):
     return {"id": aid, "status": "draft", "code": code, "warning": "Guarde o código agora: ele não poderá ser exibido novamente."}
 
 
-@A("GET", "/v1/admin/agreements", summary="Lista convênios (sem o código)")
+@A("GET", "/v1/admin/agreements", permission="billing.read", summary="Lista convênios (sem o código)")
 def list_agreements(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT id::text AS id, name, kind, status, plan_key, grant_days, discount_percent, seats, seats_used, email_domains, valid_from, valid_until,"
@@ -196,7 +196,7 @@ def revoke_member(ctx: Ctx, body: RevokeIn):
     return {"revoked": True}
 
 
-@A("GET", "/v1/admin/voucher-batches/{batch_id}/redemptions", summary="Utilizações de um lote de vouchers (quem usou e quando; código só pelo final)")
+@A("GET", "/v1/admin/voucher-batches/{batch_id}/redemptions", permission="billing.read", summary="Utilizações de um lote de vouchers (quem usou e quando; código só pelo final)")
 def batch_redemptions(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT v.code_hint, v.type, v.max_redemptions, v.redeemed_count, v.valid_until, v.status AS voucher_status, r.status, r.redeemed_at,"
@@ -205,7 +205,7 @@ def batch_redemptions(ctx: Ctx):
                                  " ORDER BY r.redeemed_at DESC NULLS LAST, v.code_hint", ctx.path["batch_id"])}
 
 
-@route("GET", "/v1/admin/price-benchmark", auth="admin", tags=("monetizacao",),
+@route("GET", "/v1/admin/price-benchmark", permission="finance.read", auth="admin", tags=("monetizacao",),
        summary="Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido")
 def price_benchmark(ctx: Ctx):
     """O que o MERCADO cobra, lido nas páginas dos próprios fornecedores, com data e fonte.

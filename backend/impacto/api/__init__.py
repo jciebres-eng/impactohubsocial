@@ -7,6 +7,8 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            "lifecycle_routes", "diagnostic_routes", "assembly_routes",
            # v0.21.0 — camada comercial: oferta, aceite, período gratuito, uso
            "commercial_routes",
+           # v0.22.0 — contexto de acesso, permissão granular, reautenticação
+           "access_routes",
            # v0.16.0 — camada de rede
            "network_core_routes", "network_hub_routes",
            # v0.17.0 — camada econômica

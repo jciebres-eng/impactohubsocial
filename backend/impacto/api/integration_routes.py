@@ -452,7 +452,7 @@ def exports_list(ctx: Ctx):
 
 
 # ------------------------------------------------------------------------------------------------ administração (visão operacional)
-@route("GET", "/v1/admin/integrations/overview", auth="admin", tags=T, summary="Qual integração está quebrada agora? Saúde, filas, falhas, dead-letters")
+@route("GET", "/v1/admin/integrations/overview", permission="integration.read", auth="admin", tags=T, summary="Qual integração está quebrada agora? Saúde, filas, falhas, dead-letters")
 def admin_overview(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         out = HUB.operations_overview(c)
@@ -460,7 +460,7 @@ def admin_overview(ctx: Ctx):
         return out
 
 
-@route("POST", "/v1/admin/integrations/providers/{key}/maturity", auth="admin", body=I.MaturityIn, tags=T,
+@route("POST", "/v1/admin/integrations/providers/{key}/maturity", permission="integration.write", auth="admin", body=I.MaturityIn, tags=T,
        summary="Promove/rebaixa a maturidade de um provedor COM evidência registrada (nunca automático)")
 def admin_maturity(ctx: Ctx, body: I.MaturityIn):
     with ctx.tx() as c:
@@ -471,7 +471,7 @@ def admin_maturity(ctx: Ctx, body: I.MaturityIn):
     return {"key": ctx.path["key"], "maturity": body.maturity}
 
 
-@route("POST", "/v1/admin/integrations/run-worker", auth="admin", tags=T, summary="Executa um ciclo do trabalhador agora (jobs devidos + entregas devidas)")
+@route("POST", "/v1/admin/integrations/run-worker", permission="maintenance.execute", auth="admin", tags=T, summary="Executa um ciclo do trabalhador agora (jobs devidos + entregas devidas)")
 def admin_run_worker(ctx: Ctx):
     with ctx.system_tx() as c:
         jobs = HUB.process_due(ctx.app, c)

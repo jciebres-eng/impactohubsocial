@@ -1,12 +1,19 @@
-# PRODUCTION_READINESS — v0.15.0
+# PRODUCTION_READINESS — v0.16.0
 
-**Veredito: NÚCLEO DO PRODUTO FECHADO E PRONTO PARA A ETAPA DE DESIGN. Pronto para homologação / piloto
-controlado. NÃO pronto para produção aberta.**
+**Veredito: REDE DE IMPACTO FECHADA E PRONTA PARA A ETAPA DE DESIGN. Pronta para homologação / piloto
+controlado. NÃO pronta para produção aberta.**
 
 O semáforo portão por portão, com a prova de cada um e a lista fechada do que esta versão **não** entrega, está em
-**`RELEASE_READINESS.md`**. Em resumo: 22 portões verdes; três vermelhos, nenhum de engenharia interna
-(validação de segurança externa que não foi contratada, camada de design que é a etapa seguinte, aplicativo nativo
-que não foi iniciado).
+**`RELEASE_READINESS.md`**. Em resumo: **30 portões**, 29 verdes e um amarelo declarado (navegador real nas 27
+telas novas); os vermelhos continuam sendo os mesmos e **nenhum é de engenharia interna** — validação de segurança
+externa que não foi contratada, camada de design que é a etapa seguinte, aplicativo nativo que não foi iniciado.
+
+**Acrescentado em v0.16.0, e que pesa na decisão de produção:** a **cobrança real não está integrada**. Não há conta
+no provedor, chave, nem preço criado — `provider_price_id` é nulo e o checkout **recusa cobrar** (503
+`provider_price_missing`) em vez de tentar com valor inventado. Toda a camada da plataforma está pronta e testada
+(versão de preço imutável, vigência, aviso obrigatório de 30 dias, aceite registrado, cotação com imposto,
+idempotência de webhook); ligar o provedor é criar os dois preços na conta, gravar os identificadores e configurar a
+chave — **sem mudança de código**. Ver `BILLING_V2.md`.
 
 O que falta é majoritariamente externo (contas, provedores, jurídico, tributário) e de validação operacional (carga, pentest, build de contêiner/apps).
 

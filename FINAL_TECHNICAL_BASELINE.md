@@ -4,6 +4,17 @@
 **Não é** “pronto para produção aberta” nem “pronto para as lojas” — o que falta é externo (conteúdo oficial, jurídico, credenciais, provedores, publicação) e está declarado item por item.
 Legenda: **PROVADO** (teste/execução neste ambiente) · **NÃO PROVADO** · **PENDENTE** · **BLOQUEADO POR SERVIÇO EXTERNO** · **PENDENTE DE VALIDAÇÃO HUMANA/JURÍDICA**.
 
+## 0. Nota de versão (v0.16.0)
+
+Este documento é a **baseline técnica da v0.12.1** e está preservado como registro daquele marco. A baseline em
+vigor é a **v0.16.0**: leia `FINAL_IMPACT_NETWORK_HARDENING_REPORT.md` (o relatório desta rodada),
+`RELEASE_READINESS.md` (os 30 portões) e `DATABASE_INTEGRITY_REPORT.md` (os números medidos). Os documentos da
+v0.15.0 estão íntegros em `history/v0.15.0/`.
+
+O veredito abaixo — "aprovada para receber a camada de design" — continua valendo, e a camada de design continua
+sendo a etapa seguinte. O que mudou desde então: 475 → **704** operações, 191 → **231** tabelas, 392 → **788**
+testes, e a rede de impacto inteira (`IMPACT_NETWORK_ARCHITECTURE.md`).
+
 ## 1. Versão
 `VERSION` = **0.12.1** (PATCH sobre 0.12.0: correções e endurecimento, sem nova capacidade nem mudança de contrato). `backend/pyproject.toml` e `web/package.json` acompanham. Snapshot dos documentos do v0.12.0 em `history/v0.12.0/`.
 

@@ -56,7 +56,7 @@ quatro aplicações.
   primeiros meses pagos · depois US$ 19,99/mês ou US$ 179,88/ano (equivalente a US$ 14,99/mês)**, declarada em
   `config/plans.json` e **nunca** em código.
 - **`impacto/clock.py`**: `now()` e `today()` em UTC. 28 usos de `date.today()` substituídos em 15 arquivos.
-- **79 rotas novas (704 no total)**, **26 telas funcionais** novas, `migrations/0016_v0160_impact_network.sql`
+- **79 rotas novas (704 no total)**, **27 telas funcionais** novas, `migrations/0016_v0160_impact_network.sql`
   (23 tabelas) e `0017_v0160_billing_v2.sql` (3 tabelas).
 - **788 testes no total** (eram 673): rede (55), invariantes (28), cobrança (15), jornadas de ponta a ponta (7),
   arquitetura (6 → 13), desempenho (7 → 12).

@@ -1,9 +1,35 @@
 # DATABASE_SCHEMA
 
-**v0.15.0 — 205 tabelas, 15 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
+**v0.16.0 — 231 tabelas, 17 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
 `SECURITY DEFINER`, chaves estrangeiras, índices, imutabilidade e caminho de atualização) está em
 **`DATABASE_INTEGRITY_REPORT.md`**, com os números colhidos do catálogo do PostgreSQL por
 `scripts/db_integrity_report.py`.
+
+## Migrações da v0.16.0
+
+| Migração | O que faz |
+|---|---|
+| `0016_v0160_impact_network.sql` | **23 tabelas** da rede: `relationships` (a aresta única, 22 tipos, 5 níveis de visibilidade), `proposals` + `proposal_events` + `proposal_attachments` + `proposal_status_graph`, `marketplace_listings`, `message_attachments`, `impact_updates`, `network_status_graph`, `personas` + `org_personas`, `taxonomies` + `taxonomy_terms`, `public_profiles` + `handle_history` + `reserved_handles`, `professional_experiences`, `enforcement_actions`, `territory_needs`, `investment_intents`, `recommendations`, `readiness_snapshots`, `domain_events`. Acrescenta `relationships.origin_proposal_id`; troca `conversations UNIQUE(org_a, org_b)` por `ux_conv_pair_context`; estende `app_related()` com lista **explícita** de tipos; cria `app_project_supporter()`, `app_record_event()`, `app_impact_metrics()`, `project_team()`, `notify_team()`, `notify_org_members()`, `rel_is_party()`, `proposal_is_party()`; 10 gatilhos de guarda; `REVOKE INSERT ON domain_events`; RLS, políticas, GRANT por coluna e os índices de chave estrangeira na própria migração |
+| `0017_v0160_billing_v2.sql` | **3 tabelas** da cobrança versionada: `plan_price_versions` (com `ux_price_current` parcial único, CHECKs `intro_pair`, `intro_is_cheaper`, `effective_order`), `subscription_prices`, `price_change_notices`; funções `price_current()`; gatilhos `price_version_immutable()`, `price_notice_guard()` (30 dias), `price_apply_guard()`, `price_notice_ack_only()` |
+
+### As quatro estruturas que merecem leitura
+
+**`relationships`** — uma tabela de aresta para os 22 tipos. `source_org_id`, `target_org_id`, `kind`,
+`subject_type`/`subject_id` (o contexto), `visibility`, `status`, `origin_proposal_id`. Índices nas duas pontas, que
+é o que faz a travessia de profundidade 2 custar 14–15 ms. Ver `RELATIONSHIP_MODEL.md`.
+
+**`domain_events`** — append-only, com `REVOKE INSERT` para o papel da aplicação. A gravação passa **só** por
+`app_record_event()`, que é SECURITY DEFINER porque um fato de rede envolve **duas** organizações e a política de
+inquilino recusaria a gravação da contraparte. Autoria derivada de `app_uid()`/`app_org()`, não do parâmetro.
+
+**`impact_updates`** — `metrics`, `milestones` e `evidence_count` em `guard_columns`: **nem o motor** escreve. O
+gatilho `impact_update_guard()` as preenche a partir de `app_impact_metrics()`, que lê `indicator_values`,
+`milestones` e `evidences`. CHECK `reviewed_by <> created_by`.
+
+**`plan_price_versions`** — vigência por `(plano, intervalo, moeda)` com índice único **parcial**, de modo que duas
+versões vigentes ao mesmo tempo são impossíveis. `price_version_immutable()` recusa alterar valor, moeda ou imposto
+de versão existente: mudar preço **cria versão**. Aqui `guard_columns` seria inútil, porque isenta `app_priv()`, que
+é o único escritor da tabela.
 
 ## Migrações da v0.15.0
 

@@ -80,7 +80,7 @@ DB="postgresql://impacto_owner@127.0.0.1:5432/impacto_dev" python3 scripts/sql_p
 
 | Item | Por quê |
 |---|---|
-| **E2E de navegador para as 26 telas novas** | têm cobertura de API e de jornada, não de Playwright. É a lacuna mais relevante desta rodada, e está aqui declarada |
+| **E2E de navegador para as 27 telas novas** | têm cobertura de API e de jornada, não de Playwright. É a lacuna mais relevante desta rodada, e está aqui declarada |
 | Verificação de viewport e contraste nas telas novas | o mesmo motivo; as telas antigas têm (25 combinações) |
 | Carga concorrente em ambiente dimensionado | 2 vCPU no ambiente de construção produziria número enganoso |
 | Integração contra sistema externo real | depende de acesso a instância de cliente ou órgão |

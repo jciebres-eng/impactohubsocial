@@ -14,7 +14,7 @@
 **Classificação honesta: AMARELO.** A preferência de navegação continua **não atendida**. Não foi atendida nesta
 rodada por decisão explícita — o pedido desta vez abre com "eu não mandaria o Manus começar pelo visual" e manda a
 sequência de 13 passos que coloca Design System e UX/UI **depois** da reconstrução de domínio. Mudar a navegação
-agora, com a AI ainda crescendo 26 telas, seria refazer duas vezes.
+agora, com a AI ainda crescendo 27 telas, seria refazer duas vezes.
 
 **Portanto isto é entrega de design, não de engenharia, e está aqui especificada para o designer executar.**
 
@@ -69,7 +69,7 @@ Regras do modelo:
 
 ## O que **não** deve mudar
 
-* As URLs. Cada uma das 145 telas tem endereço estável; mudar endereço quebra link compartilhado, aviso por e-mail e
+* As URLs. Cada uma das 178 telas tem endereço estável; mudar endereço quebra link compartilhado, aviso por e-mail e
   o destino que a recomendação devolve (`recommendation.LINKS`). Há teste de arquitetura —
   `test_recommendation_links_exist_in_the_app` — que falha se um destino deixar de existir. **O designer pode
   reagrupar o menu sem tocar em URL.**

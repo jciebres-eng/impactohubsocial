@@ -28,7 +28,7 @@ dificuldade técnica, mas por ausência do insumo. Nada foi inventado para preen
 viu.
 
 O que **foi** feito no lugar: a camada de produto que o Design System precisava representar (os onze motores, as dez
-personas, as 26 telas novas) e os documentos de AI e navegação acima, que são o insumo que o Design System consome.
+personas, as 27 telas novas) e os documentos de AI e navegação acima, que são o insumo que o Design System consome.
 Quando o pacote chegar, o trabalho é mapear tokens e componentes sobre uma AI já decidida — que é a ordem correta.
 
 ## 2 · O que está pronto e provado
@@ -46,19 +46,42 @@ Quando o pacote chegar, o trabalho é mapear tokens e componentes sobre uma AI j
 | Testes | 788, 0 falhas | `TEST_REPORT.md` |
 | Desempenho | escala cheia, maior caminho 1.724 ms (orçamento 2.500 ms) | `PERFORMANCE_REPORT.md` |
 
-## 3 · As 26 telas novas desta rodada
+## 3 · As 27 telas novas desta rodada
 
-Funcionais, sem tratamento visual — é o que o designer vai vestir:
+Funcionais, sem tratamento visual — é o que o designer vai vestir. Conferidas contra o roteador em
+`web/src/app.tsx` (eram 151 telas, são **178**):
 
-`/area` workspace · `/rede/relacoes` relações · `/rede/grafo` grafo · `/rede/atividade` atividade ·
-`/rede/experiencias` experiências · `/propostas` caixa de propostas · `/propostas/:id` proposta ·
-`/propostas/nova` nova proposta · `/marketplace` descobrir · `/marketplace/meus` meus anúncios ·
-`/marketplace/:id` anúncio · `/marketplace/novo` novo anúncio · `/conversas` conversas · `/conversas/:id` conversa ·
-`/relatorios-impacto` relatórios · `/relatorios-impacto/:id` relatório · `/relatorios-impacto/novo` novo ·
-`/perfil-publico` meu perfil público · `/perfil-publico/experiencias` experiências · `/prontidao/finalidades`
-prontidão por finalidade · `/territorio/necessidades` necessidades · `/vocabulario` taxonomias ·
-`/admin/denuncias` denúncias · `/admin/medidas` medidas · `/@:identificador` **página pública** ·
-`/marketplace` público (sem sessão).
+| Caminho | Tela |
+|---|---|
+| `/area` | **workspace** da persona ativa |
+| `/rede/relacoes` | relações |
+| `/rede/grafo` | grafo da rede |
+| `/rede/atividade` | atividade da rede (eventos de domínio) |
+| `/rede/experiencias` | experiências declaradas |
+| `/propostas` | caixa de propostas |
+| `/propostas/:id` | proposta |
+| `/propostas/nova` | nova proposta |
+| `/marketplace` | descobrir |
+| `/marketplace/meus` | meus anúncios |
+| `/marketplace/:id` | anúncio |
+| `/marketplace/novo` | novo anúncio |
+| `/conversas` | conversas |
+| `/conversas/:id` | conversa |
+| `/relatorios-impacto` | relatórios (caixa de análise) |
+| `/relatorios-impacto/:id` | relatório |
+| `/projetos/:id/relatorios` | relatórios do projeto |
+| `/projetos/:id/equipe` | equipe do projeto (quem é notificado) |
+| `/perfil-publico` | meu perfil público |
+| `/perfil-publico/experiencias` | minhas experiências |
+| `/perfil-publico/:id/identificadores` | histórico de identificadores |
+| `/prontidao/finalidades` | prontidão por finalidade |
+| `/territorio/necessidades` | necessidades do território |
+| `/vocabulario` | taxonomias |
+| `/conta/moderacao` | **a medida que me atingiu**, com regra, motivo, prazo e contestação |
+| `/admin/medidas` | medidas de moderação (administração) |
+| **`/@identificador`** | **página pública, sem sessão** |
+
+Mais a entrada pública do marketplace, que usa `/marketplace` sem sessão.
 
 ## 4 · Oito invariantes de design — quebrar qualquer um destes é defeito, não escolha estética
 
@@ -101,7 +124,7 @@ de uso da arte oficial é tarefa externa, registrada em `IP_REGISTER.md` e detal
 * **Navegação lateral plana** — AMARELO consciente; é a entrega de design, especificada em `NAVIGATION_MODEL.md`.
 * **`provider_price_id` nulo** — não há conta Stripe real. O checkout recusa cobrar em vez de inventar.
 * **Hub de integração sem tela** — 36 rotas funcionais, interface ainda não desenhada.
-* **E2E de navegador cobre as telas de v0.15.0** — as 26 novas têm cobertura de API e de jornada, não de Playwright.
+* **E2E de navegador cobre as telas de v0.15.0** — as 27 novas têm cobertura de API e de jornada, não de Playwright.
   Registrado em `TEST_REPORT.md`.
 * **Nada de biometria, assinatura qualificada, ICP-Brasil, gov.br, SMS, ACT, Stripe real, provedor fiscal real, KYC
   real ou identidade governamental real.** Nenhum desses está simulado em nenhum caminho; onde o produto depende

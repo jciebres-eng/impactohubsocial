@@ -9,7 +9,7 @@ componentes precisam representar**".
 | | Quantidade |
 |---|---|
 | Rotas de API | 704 |
-| Telas autenticadas (`ROUTES` em `app.tsx`) | 145 |
+| Telas registradas no roteador (`app.tsx`) | 178 |
 | Arquivos de página (`web/src/pages/*.tsx`) | 35 |
 | Tabelas | 231 |
 | Itens de menu, por tipo de organização | OSC 36 · Empresa 26 · Governo 22 · Profissional 22 · Apoiador 18 · Administração 27 |
@@ -70,7 +70,7 @@ A informação tem três densidades, e hoje a interface só distingue duas:
 | Nível | Pergunta | Onde vive |
 |---|---|---|
 | **Decidir** | "o que faço agora?" | `GET /v1/workspace` — próximas ações com razão e destino |
-| **Trabalhar** | "deixe-me fazer esta coisa" | as 145 telas |
+| **Trabalhar** | "deixe-me fazer esta coisa" | as 178 telas |
 | **Comprovar** | "mostre-me o que aconteceu" | linha do tempo, ledger, relatório publicado, atividade da rede |
 
 O nível **decidir** foi construído nesta rodada (o workspace) e é o que ainda não tem forma visual à altura: hoje ele

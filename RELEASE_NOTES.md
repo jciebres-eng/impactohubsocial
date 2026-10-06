@@ -1,4 +1,64 @@
-# Release notes — v0.14.0
+# Release notes — v0.16.0
+
+## v0.16.0 — IMPACT NETWORK CORE
+
+**Resumo:** a plataforma deixou de ser um lugar com projetos e passou a ser **infraestrutura de impacto** — onde
+quem precisa, quem financia, quem executa e quem fiscaliza participam do **mesmo ciclo**, cada um com o seu ambiente
+de trabalho, sem quatro aplicações separadas.
+
+**Para a organização que executa:** uma Área de trabalho que diz **o que fazer agora** — não um painel de números.
+Anuncia o projeto no marketplace, recebe propostas, aceita e a relação nasce formalizada. No fim do período, presta
+contas no mesmo lugar: escreve o relatório, e os **números vêm do que foi lançado** (indicadores, marcos,
+evidências) — não há campo para digitar "atendemos 400 pessoas".
+
+**Para quem financia:** descobre projetos, lê a **prontidão** em seis dimensões *com a explicação do que falta*,
+acompanha em lista privada, conversa **sempre com contexto**, propõe, e depois recebe a prestação de contas e aceita
+ou pede ajuste. E a plataforma nunca diz "investido" quando só houve intenção — intenção, compromisso e transação
+são três coisas distintas, com nomes distintos.
+
+**Para o profissional:** página pública própria em **`impacto.app/@seunome`**, com registro profissional conferido e
+experiência que só aparece **depois** de a organização citada confirmar. Recebe propostas de serviço e mentoria.
+
+**Para o governo:** registra necessidades do território, publica edital, propõe convênio, acompanha execução e
+analisa relatório. O indicador do território se move com o resultado.
+
+**Para toda a equipe:** cada evolução, mudança de etapa ou documento anexado **avisa quem está envolvido** — não só
+quem é dono. Catorze grupos de aviso, com preferência por grupo e por canal, e um aviso por fato (nunca dois).
+
+**Também entrou:**
+
+- **Rede visível e controlada:** 22 tipos de relação, cada uma com cinco níveis possíveis de visibilidade — e
+  bloquear, favoritar e acompanhar são **sempre privados**. A existência de uma relação nunca implica que ela seja
+  pública.
+- **Marketplace** onde só o que está publicado aparece, com um único lugar no código que decide isso.
+- **Escada de moderação** de dez degraus com regra, motivo, prazo e **direito de contestar** — julgado por quem não
+  aplicou. Nada automático, e banimento nunca como primeira resposta.
+- **Preço com regra escrita:** 14 dias de teste com o produto completo, **US$ 1,99/mês nos 3 primeiros meses
+  pagos**, depois US$ 19,99/mês ou US$ 179,88/ano (equivalente a US$ 14,99/mês), com o total sempre visível e
+  imposto declarado no checkout. Aumento de preço exige **30 dias de aviso**; o preço nunca muda em silêncio.
+- **Vocabulário comum** (taxonomias versionadas no banco, não listas soltas em cada tela).
+
+**O que esta versão NÃO entrega:** cobrança real (não há conta, chave nem preço no provedor — a plataforma **recusa
+cobrar** em vez de inventar), camada de design, aplicativo em loja, notificação no aparelho e validação de segurança
+por terceiro. O pacote de Design System "Convergência" **não foi recebido**, e as seções que dependiam dele não
+foram executadas. Tudo nomeado em `RELEASE_READINESS.md` §5.
+
+**Números:** 788 testes (0 falhas) · 704 operações de API · 231 tabelas · 17 migrações · 27 telas novas.
+
+**Leia:** `IMPACT_NETWORK_ARCHITECTURE.md`, `DESIGN_HANDOFF_FINAL.md`, `FINAL_IMPACT_NETWORK_HARDENING_REPORT.md`.
+
+---
+
+## v0.15.0 — Núcleo do produto
+
+**Resumo:** as seis peças (ideia, diagnóstico, projeto, documento, match, acompanhamento) passaram a ser **um
+sistema**, compartilhando o mesmo vocabulário de evidência — com fonte, data e frescura —, as mesmas versões de
+motor e a mesma trilha encadeada por hash. A ideia não é apagada ao virar projeto; a máquina de 17 situações é dado
+no banco; o diagnóstico separa FATO, INFERÊNCIA, RECOMENDAÇÃO e **DESCONHECIDO**; a montagem de documento recusa
+gerar incompleto dizendo o que falta e exige quatro olhos para aprovar. 673 testes, 625 operações, 205 tabelas.
+Documentos: `CORE_PRODUCT_ARCHITECTURE.md`, `FINAL_PRE_DESIGN_HARDENING_REPORT.md`.
+
+---
 
 ## v0.14.0 — Confiança, identidade e assinatura digital
 **Resumo:** documento assinado na plataforma passou a ser **conferível por qualquer pessoa autorizada**, sem conta: pelo

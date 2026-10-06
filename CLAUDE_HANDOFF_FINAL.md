@@ -1,4 +1,53 @@
-# CLAUDE_HANDOFF_FINAL — continuação a partir do v0.15.0
+# CLAUDE_HANDOFF_FINAL — continuação a partir do v0.16.0
+
+> **Estado em v0.16.0:** a rede de impacto está fechada. A cadeia inteira existe como dado — Pessoa/Organização →
+> Contexto → Necessidade → Rede → Match → Proposta → Relação → Projeto → Execução → Evidência → Resultado → Novo
+> Match — e as dez personas percorrem o **mesmo** núcleo. A próxima etapa é **DESIGN**, não engenharia.
+>
+> **Comece por:** `FINAL_IMPACT_NETWORK_HARDENING_REPORT.md` (o relatório honesto desta rodada, seções A–N),
+> `IMPACT_NETWORK_ARCHITECTURE.md` (a cadeia e os onze motores), `DESIGN_HANDOFF_FINAL.md` (o que o designer recebe,
+> incluindo §1: **o pacote "Convergência" não chegou**), `INFORMATION_ARCHITECTURE.md` e `NAVIGATION_MODEL.md`.
+>
+> **Se for continuar engenharia**, nesta ordem de valor:
+> 1. **E2E de navegador nas 27 telas novas** — a lacuna mais relevante; siga o padrão de `test_e2e_v0150_web.py`.
+> 2. **Verificação de viewport e contraste** nessas telas (o padrão existe e cobre 25 combinações nas antigas).
+> 3. **Exportação de dados pessoais** cobrindo as entidades novas da rede — leia `LGPD_AUDIT.md` primeiro: a
+>    pergunta "o que de uma proposta entre duas organizações pertence ao titular pessoa física" é jurídica antes de
+>    ser técnica.
+> 4. **Prontidão em lote** para baixar o workspace da OSC (341–436 ms) — mesmo padrão de carregador em lote que
+>    resolveu o feed, e o mesmo cuidado: foi em `SECURITY DEFINER` que apareceram os defeitos de RLS (ADR 103–105).
+> 5. **Carregadores em lote do feed** (`PERFORMANCE_REPORT.md` §5), que continua sendo o caminho mais caro.
+>
+> **Ferramentas desta rodada que valem reusar:**
+> * `scripts/sql_prepare_check.py` — roda `PREPARE` em todo SQL extraído por AST. Rode **antes** de confiar em
+>   consulta nova; achou 5 defeitos de nome de coluna que a revisão de código não pegou.
+> * `backend/impacto/clock.py` — **nunca** use `date.today()`; há teste de arquitetura que falha.
+> * `backend/impacto/network/notify.py` — todo aviso sai por aqui, com chave de idempotência. Motor nunca notifica
+>   direto (teste de arquitetura).
+>
+> **Armadilhas de PostgreSQL aprendidas aqui, para não repetir:**
+> 1. `AND` em plpgsql **não** faz curto-circuito: `TG_TABLE_NAME = 'x' AND NEW.coluna_de_x` quebra nas outras
+>    tabelas que compartilham o gatilho. Use `IF` aninhado.
+> 2. Variável plpgsql com o nome de uma coluna dá "column reference is ambiguous". Prefixe com `v_`.
+> 3. `INSERT ... RETURNING` exige que a política de **SELECT** passe, não só a de INSERT.
+> 4. `max(uuid)`/`min(uuid)` não existem. Use `ORDER BY ... LIMIT 1`.
+> 5. **GRANT de coluna adiciona privilégio e não consegue restringir.** Para restringir, gatilho.
+> 6. `guard_columns` isenta `app_priv()` — é inútil em tabela onde só o contexto privilegiado escreve.
+>
+> **Ambiente:** o PostgreSQL morre quando o contêiner recicla (`pg_ctlcluster 16 main start`). O envio de **tag**
+> ao remoto é recusado pelo proxy com 403 — use branch de savepoint (`savepoint/v0.16.0-impact-network-core`). Os
+> registros npm e PyPI estão bloqueados, então `npm audit` e `pip-audit` **precisam** rodar em CI.
+>
+> **Regras do proprietário que continuam valendo:** não inventar teste, integração, publicação, segurança,
+> compliance nem benefício fiscal — **PROVE**. Nada de segredo em entregável. Sem ZIP dentro de ZIP. Relatório
+> final em português com VERDE/AMARELO/VERMELHO honesto. Versão sempre sobe, documentos anteriores vão para
+> `history/vX/`, nada é sobrescrito em silêncio. Nunca enfraquecer nem apagar teste para ficar verde. Nunca
+> simular biometria, assinatura qualificada, ICP-Brasil, gov.br, SMS, ACT, Stripe real, provedor fiscal real, KYC
+> real ou identidade governamental real.
+
+---
+
+## Estado anterior (v0.15.0)
 
 > **Estado em v0.15.0:** o núcleo do produto está fechado (ideia → diagnóstico → projeto → documento → match →
 > acompanhamento). A próxima etapa é **DESIGN**, não engenharia. Comece por `FINAL_PRE_DESIGN_HARDENING_REPORT.md`,

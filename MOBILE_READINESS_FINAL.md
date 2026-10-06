@@ -10,7 +10,7 @@ validação independente. **VERMELHO** = ausente.
 | API consumível por app nativo (Bearer, sem depender de cookie) | **VERDE** | `auth="user"` aceita `Authorization: Bearer`; refresh rotativo; 704 rotas |
 | PWA (manifest, service worker, offline) | **VERDE** | `web/public/manifest.webmanifest`, `sw.js` gerado no build com pré-cache, `offline.html`; registro desligado quando roda sob Capacitor |
 | Layout responsivo das telas antigas | **VERDE** | 25 combinações de página × viewport verificadas sem rolagem horizontal a 390 px (v0.12.1) |
-| Layout responsivo das **26 telas novas** | **AMARELO** | usam as mesmas classes e grades, mas **não** passaram pela verificação automática de viewport desta rodada |
+| Layout responsivo das **27 telas novas** | **AMARELO** | usam as mesmas classes e grades, mas **não** passaram pela verificação automática de viewport desta rodada |
 | Contraste AA (claro e escuro) | **VERDE** | verificação automática nos dois temas (v0.12.1) |
 | Acessibilidade com `axe` e leitor de tela | **AMARELO** | nunca executado; `axe` não instalável neste ambiente (registro npm bloqueado) |
 | Navegação móvel | **AMARELO** | gaveta deslizante funcional; a barra inferior de cinco destinos é entrega de design (`NAVIGATION_MODEL.md` §6) |
@@ -33,7 +33,7 @@ validação independente. **VERMELHO** = ausente.
 
 **Contra:**
 
-* São **26 telas novas** sem passagem pela verificação de viewport. O risco concreto são as tabelas largas: caixa de
+* São **27 telas novas** sem passagem pela verificação de viewport. O risco concreto são as tabelas largas: caixa de
   propostas, grafo da rede e a matriz de prontidão por finalidade.
 * O workspace da OSC custa **341 ms** na escala cheia. Em rede móvel ruim, isso soma à latência de rede num ponto que
   é a primeira tela do produto.
@@ -41,7 +41,7 @@ validação independente. **VERMELHO** = ausente.
 
 ## O caminho para publicar, em ordem
 
-1. Design: navegação móvel e tratamento visual das 26 telas (`NAVIGATION_MODEL.md`, `DESIGN_HANDOFF_FINAL.md`).
+1. Design: navegação móvel e tratamento visual das 27 telas (`NAVIGATION_MODEL.md`, `DESIGN_HANDOFF_FINAL.md`).
 2. Verificação de viewport e `axe` nas telas novas, em CI com registro npm liberado.
 3. Decidir compra in-app: é decisão comercial e jurídica do proprietário, não técnica.
 4. Push nativo, se for requisito: FCM + APNs, tabela de token de dispositivo, e o canal `push` acrescentado às

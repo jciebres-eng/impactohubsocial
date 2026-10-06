@@ -1,7 +1,7 @@
 # Escada de moderação (v0.16.0)
 
 Medida proporcional, com regra, motivo e direito de contestar. Motor: `backend/impacto/network/enforcement.py` ·
-Tabela: `enforcement_actions` · Rotas: `/v1/moderation/*` · Tela: `web/src/pages/moderation.tsx`
+Tabela: `enforcement_actions` · Rotas: `/v1/moderation/ladder`, `/v1/conta/moderacao*`, `/v1/admin/enforcement*` · Tela: `web/src/pages/moderation.tsx`
 
 O pedido é textual: **"nunca criar punição automática irreversível baseada somente em heurística"**. Abaixo está como
 isso virou estrutura e não boa intenção.

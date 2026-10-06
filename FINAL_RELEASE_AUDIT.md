@@ -1,5 +1,10 @@
 # FINAL_RELEASE_AUDIT — Plataforma Impacto v0.10.0
 
+> **Nota de versão (v0.16.0):** esta auditoria é a do **v0.10.0** e está preservada como registro forense daquele
+> marco (a reconstrução sobre PostgreSQL). A auditoria em vigor é
+> **`FINAL_IMPACT_NETWORK_HARDENING_REPORT.md`**, com os 30 portões em `RELEASE_READINESS.md`. Nada aqui foi
+> sobrescrito; os documentos de cada versão estão em `history/vX/`.
+
 Data: 2026-10-05 · Base auditada: `plataforma-impacto_docs_v0.6.0.zip` (preservada em `history/v0.6.0/`).
 Método: leitura forense do pacote v0.6.0 (docs × código × testes × config), reconstrução da camada de execução e prova por testes.
 **Nenhum item abaixo é "pronto" sem a evidência indicada.** Legenda: GREEN = implementado e validado por teste/execução neste ambiente · YELLOW = implementado, mas depende de ação/serviço externo ou não foi exercitado com o serviço real · RED = ausente.

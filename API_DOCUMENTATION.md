@@ -1,6 +1,50 @@
-# API — documentação (v0.15.0)
+# API — documentação (v0.16.0)
 
-Referência completa **gerada do código**: `docs/API.md` (625 operações) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (**704 operações**) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+
+## Rede de impacto (79 operações novas, v0.16.0)
+
+Caminhos conferidos contra `docs/API.md`, que é gerado do código.
+
+| Grupo | Rotas |
+|---|---|
+| **Workspace** | `GET /v1/workspace` · `GET /v1/workspace/personas` · `POST /v1/workspace/personas` · `DELETE /v1/workspace/personas/{persona}` |
+| **Relações** | `GET·POST /v1/network/relationships` · `GET /v1/network/relationships/counts` · `POST /v1/network/relationships/{rel_id}/transition` · `PUT /v1/network/relationships/{rel_id}/visibility` · `GET /v1/network/relationship-kinds` |
+| **Grafo e atividade** | `GET /v1/network/graph` · `GET /v1/network/events` · `GET /v1/projects/{project_id}/team` |
+| **Propostas** | `GET·POST /v1/proposals` · `GET·PATCH /v1/proposals/{proposal_id}` · `POST /v1/proposals/{proposal_id}/transition` · `POST /v1/proposals/{proposal_id}/attachments` · `GET /v1/proposals/counts` · `GET /v1/proposals/graph` |
+| **Conversas** | `GET·POST /v1/conversations` · `GET /v1/conversations/{conversation_id}` · `POST /v1/conversations/{conversation_id}/messages` · `POST /v1/conversations/{conversation_id}/read` · `PUT /v1/conversations/{conversation_id}/status` · `GET /v1/conversations/unread` |
+| **Marketplace** | `GET /v1/marketplace/feed` **(pública)** · `GET /v1/marketplace/listings/{listing_id}` **(pública)** · `GET·POST /v1/marketplace/listings` · `PATCH /v1/marketplace/listings/{listing_id}` · `POST /v1/marketplace/listings/{listing_id}/transition` · `POST /v1/admin/marketplace/listings/{listing_id}/transition` · `GET /v1/marketplace/graph` |
+| **Prontidão** | `GET /v1/readiness/purposes` · `GET /v1/readiness/history` · `POST /v1/readiness/snapshots` |
+| **Recomendações** | `GET /v1/recommendations` · `POST /v1/recommendations/refresh` · `POST /v1/recommendations/{rec_id}/resolve` |
+| **Relatórios de impacto** | `GET·POST /v1/impact-updates` · `GET·PATCH /v1/impact-updates/{update_id}` · `POST /v1/impact-updates/{update_id}/transition` · `GET /v1/impact-updates/gather` · `GET /v1/impact-updates/inbox` · `GET /v1/impact-updates/graph` |
+| **Perfil público** | `POST /v1/profiles` · `GET /v1/profiles/mine` · `PATCH /v1/profiles/{profile_id}` · `POST /v1/profiles/{profile_id}/rebuild` · `GET /v1/profiles/{profile_id}/handle-history` · `GET /v1/profiles/handle-available` · `GET /v1/profiles/handle-suggest` |
+| **Páginas públicas** | `GET /v1/public/profiles/{handle}` · `GET /v1/public/profiles/{handle}/open-graph` · `GET /v1/public/projects/{project_id}/impact` · `GET /v1/public/relationships/{subject_type}/{subject_id}` — **as quatro sem sessão** |
+| **Experiências** | `GET·POST /v1/profile/experiences` · `GET /v1/org/experience-requests` · `POST /v1/org/experience-requests/{experience_id}/decide` |
+| **Território** | `GET /v1/territory/needs` · `POST /v1/territory/needs` |
+| **Taxonomias** | `GET /v1/taxonomies` |
+| **Moderação (a escada)** | `GET /v1/moderation/ladder` · `GET /v1/conta/moderacao` · `POST /v1/conta/moderacao/{action_id}/contestar` |
+| **Moderação (administração)** | `GET·POST /v1/admin/enforcement` · `GET /v1/admin/enforcement/history` · `POST /v1/admin/enforcement/{action_id}/lift` · `POST /v1/admin/enforcement/{action_id}/appeal-decision` |
+| **Preço** | `GET /v1/plans/price` **(pública)** · `GET /v1/billing/price-history` · `POST /v1/billing/price-notices/{notice_id}/ack` |
+
+### Notas de contrato
+
+**Sete rotas públicas novas** — `/v1/marketplace/feed`, `/v1/marketplace/listings/{listing_id}`, `/v1/plans/price`,
+`/v1/public/profiles/{handle}`, `/v1/public/profiles/{handle}/open-graph`, `/v1/public/projects/{project_id}/impact` e
+`/v1/public/relationships/{subject_type}/{subject_id}`. Todas constam da lista de permissão de
+`test_handlers_declare_auth`, que **falha** se alguma rota passar a ser pública sem ser acrescentada ali
+deliberadamente.
+
+**`/v1/conta/moderacao`** é a única leitura que o alvo de uma medida tem. Devolve a medida, o efeito em português, a
+regra citada, o motivo, o prazo e se ainda cabe contestação — e **nunca** quem denunciou.
+
+**`/v1/impact-updates/gather`** é prévia: chama a **mesma** função SQL (`app_impact_metrics()`) que o gatilho usa ao
+enviar, para que o que a organização vê antes nunca divirja do que fica registrado.
+
+**`PATCH`** é o método das edições parciais desta camada (proposta em rascunho, anúncio, relatório, perfil), em vez
+de `PUT`: o recurso tem campos derivados que o cliente não envia.
+
+**`GET …/graph`** (propostas, anúncios, relatórios) devolve a **máquina de estados como dado** — de onde para onde é
+possível ir, quem move e se exige nota. A interface desenha os botões a partir disso, em vez de repetir a regra.
 
 ## Núcleo do produto (51 operações novas, v0.15.0)
 

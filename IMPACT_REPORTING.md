@@ -3,7 +3,7 @@
 O elo que diferencia a plataforma de um marketplace: **quem apoiou recebe prestação de contas no mesmo lugar onde
 apoiou**, e os números não são digitados — são colhidos.
 
-Motor: `backend/impacto/network/impact_report.py` · Tabela: `impact_updates` · Rotas: `/v1/impact-reports*`
+Motor: `backend/impacto/network/impact_report.py` · Tabela: `impact_updates` · Rotas: `/v1/impact-updates*`
 Tela: `web/src/pages/impactreport.tsx`
 
 ## O ciclo

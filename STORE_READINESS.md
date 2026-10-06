@@ -41,3 +41,22 @@ Não há SDK novo, não há permissão nova de dispositivo e **nenhuma biometria
 declarar dado biométrico). Os bloqueios anteriores continuam: apps não construídos nem assinados, sem conta de
 desenvolvedor, sem política publicada em domínio próprio.
 
+## v0.16.0 — efeito nas lojas
+
+A rede de impacto **não muda** nada do ponto de vista das lojas em termos de permissão de aparelho ou SDK de
+terceiro: não há SDK novo, não há permissão nova e nenhum dado novo é coletado do aparelho. A avaliação completa
+está em **`MOBILE_READINESS_FINAL.md`**; o que muda aqui é o seguinte:
+
+| Item | Efeito |
+|---|---|
+| **Página pública `impacto.app/@identificador`** | o app passa a ter conteúdo público compartilhável, o que **ajuda** na ficha da loja. Exige que a política de privacidade descreva essa superfície — **pendente** |
+| **Assinatura com preço em dólar** | reabre a questão de **compra dentro do app**: Apple e Google exigem compra in-app para conteúdo digital em muitos casos, e a cobrança aqui é web. **Decisão comercial e jurídica do proprietário**, não técnica |
+| **Notificação** | o produto tem notificação **no produto**, com 14 grupos e preferência por canal. **Push nativo não existe** (sem FCM, sem APNs, sem token de dispositivo) — e app de rede sem push é expectativa frustrada, então isto deve ser decidido antes de publicar |
+| **27 telas novas** | não passaram pela verificação de viewport; o risco concreto são as tabelas largas (propostas, grafo, prontidão por finalidade) |
+| **Moderação e denúncia** | as lojas exigem mecanismo de denúncia e de moderação para produto com conteúdo gerado por usuário. **Isto agora existe**: 12 categorias, escada de 10 degraus, contestação. É um requisito de loja **atendido** nesta rodada |
+| **Exclusão de conta** | continua existindo como rota, o que Apple e Google exigem |
+
+**Conclusão inalterada:** pronto para a camada de design e para publicação **web**; **não** pronto para as lojas —
+faltam builds assinados, decisão sobre compra in-app, push nativo (se for requisito), rótulos de privacidade
+preenchidos, política publicada em domínio próprio e revisão jurídica.
+

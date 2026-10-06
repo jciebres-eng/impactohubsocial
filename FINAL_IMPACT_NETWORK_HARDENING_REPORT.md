@@ -27,10 +27,10 @@ acompanhamento e comprovação de impacto*, com **um núcleo** e experiência po
 | Banco, integridade e caminho de atualização | 🟢 |
 | API (704 operações) | 🟢 |
 | Isolamento entre organizações | 🟢 |
-| Frontend funcional (26 telas novas) | 🟢 |
+| Frontend funcional (27 telas novas) | 🟢 |
 | **Cobrança** | 🟡 toda a camada da plataforma pronta e testada; **sem conta, chave ou preço real no provedor** |
 | **Navegação horizontal retrátil** | 🟡 pedida em rodada anterior, **não atendida**; é entrega de design, especificada |
-| **E2E de navegador nas 26 telas novas** | 🟡 têm cobertura de API e de jornada, não de Playwright |
+| **E2E de navegador nas 27 telas novas** | 🟡 têm cobertura de API e de jornada, não de Playwright |
 | **Desempenho do workspace da OSC** | 🟡 341–436 ms, dentro do orçamento com folga de 5×, mas é a tela de abertura |
 | **Exportação de dados pessoais** | 🟡 ainda não cobre as entidades novas da rede |
 | **Design System "Convergência"** | 🔴 **NÃO FOI RECEBIDO** — ver §B |
@@ -56,7 +56,7 @@ inventado para preencher a lacuna — não há tokens "Convergência" no CSS, n�
 afirmação de conformidade com um sistema que ninguém viu.
 
 O que foi feito no lugar foi o insumo que um Design System consome: a camada de produto que ele precisa representar
-(onze motores, dez personas, 26 telas) e os documentos de arquitetura da informação e de navegação
+(onze motores, dez personas, 27 telas) e os documentos de arquitetura da informação e de navegação
 (`INFORMATION_ARCHITECTURE.md`, `NAVIGATION_MODEL.md`), que decidem *o que* os componentes precisam representar
 antes de decidir como se parecem. Quando o pacote chegar, o trabalho é mapear tokens e componentes sobre uma AI já
 decidida — que é a ordem correta.
@@ -78,7 +78,7 @@ decidida — que é a ordem correta.
 | Restrições `CHECK` | 922 | **1.082** |
 | Índices | 552 | **643** |
 | Tabelas append-only | 17 | **22** |
-| Telas do frontend | 119 | **145** |
+| Telas registradas no roteador | 151 | **178** |
 | Consultas SQL conferidas por `PREPARE` | — | **185 · 0 erros** |
 
 ---
@@ -207,7 +207,7 @@ Os que valem registro, com o que cada um ensina:
 |---|---|---|
 | Design System "Convergência" | 🔴 | o pacote em si (§B) |
 | Navegação horizontal retrátil com área de trabalho ampla | 🟡 | entrega de design; mapeamento item-a-item já escrito em `NAVIGATION_MODEL.md` |
-| E2E de navegador nas 26 telas novas | 🟡 | estender `test_e2e_v0150_web.py` |
+| E2E de navegador nas 27 telas novas | 🟡 | estender `test_e2e_v0150_web.py` |
 | Verificação de viewport e contraste nas telas novas | 🟡 | mesma razão; as antigas têm 25 combinações verificadas |
 | Cobrança real | 🟡 | conta no provedor, chave, dois preços criados, gravar `provider_price_id` |
 | Exportação de dados pessoais nas entidades novas | 🟡 | decisão jurídica antes de técnica: o que de uma proposta entre duas organizações pertence ao titular pessoa física |

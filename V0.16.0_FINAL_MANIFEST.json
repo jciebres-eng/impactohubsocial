@@ -1,9 +1,9 @@
 {
   "version": "0.16.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-06T02:48:24+00:00",
+  "generated_at": "2026-10-06T02:55:31+00:00",
   "files_total": 784,
-  "size_bytes_total": 15458420,
+  "size_bytes_total": 15481715,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 42,
@@ -31,7 +31,7 @@
     },
     "documentação da raiz": {
       "files": 96,
-      "size_bytes": 788488
+      "size_bytes": 811783
     },
     "documentação técnica": {
       "files": 24,
@@ -157,8 +157,8 @@
     },
     {
       "file": "API_DOCUMENTATION.md",
-      "sha256": "c765df1804f37a5e1b7d2c4fe3c487759cdeb95a10f46cdda3ee93d8a6c51749",
-      "size_bytes": 13342,
+      "sha256": "b09379d6f9d1f715023835af09b4330f1769145926b19c59cfa6197c14e137f3",
+      "size_bytes": 18094,
       "category": "documentação da raiz"
     },
     {
@@ -169,14 +169,14 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "9e4f089b982963e3095bf7f46c9fe490e8ee72812ecc5435dd291a13c401e303",
+      "sha256": "a0a30dfd2ffd6d74694af8e4d16e48fefd54378c5bf741a1acd2fa402c074597",
       "size_bytes": 52146,
       "category": "documentação da raiz"
     },
     {
       "file": "CLAUDE_HANDOFF_FINAL.md",
-      "sha256": "f044ac8f78bc0cd49c3861604c8696e5bceff473b01a2ffb4aa627b23bf0e685",
-      "size_bytes": 8056,
+      "sha256": "b7a5485515330d2bc855956262bc3a5296dc384d54a2cb5eb2f77c090feb03d2",
+      "size_bytes": 11869,
       "category": "documentação da raiz"
     },
     {
@@ -199,8 +199,8 @@
     },
     {
       "file": "DATABASE_SCHEMA.md",
-      "sha256": "962d630413f3802d4ab214bc72a2ec657dd20fefc4c9aa4c21e6e27e318dd2a9",
-      "size_bytes": 14405,
+      "sha256": "d3534c05ccbd32b5b2e87d45738944c630535b7b9e75017de5fee6fff0485e4f",
+      "size_bytes": 17338,
       "category": "documentação da raiz"
     },
     {
@@ -211,7 +211,7 @@
     },
     {
       "file": "DECISIONS.md",
-      "sha256": "5a019bcb67eb22f46d6020d7f47565e4c34fa98e13205e6f0b6963f3e6380ca2",
+      "sha256": "67402c47066cd88182ebb2c5de83fb262bfef37096242fd0e5548a07c9b19aa3",
       "size_bytes": 42332,
       "category": "documentação da raiz"
     },
@@ -229,8 +229,8 @@
     },
     {
       "file": "DESIGN_HANDOFF_FINAL.md",
-      "sha256": "37c534a59f8654bb2babae36c1fa363913e9ca819ddf72d9c7598bb39758a8e7",
-      "size_bytes": 7895,
+      "sha256": "31f29969db432a45309a0780b0550c165d8d4c52704f5229d34065c39befa80a",
+      "size_bytes": 8499,
       "category": "documentação da raiz"
     },
     {
@@ -277,8 +277,8 @@
     },
     {
       "file": "FINAL_IMPACT_NETWORK_HARDENING_REPORT.md",
-      "sha256": "1410ba56fcf02406ceaea4bda38f61a51a6436f099c71f31c3697eca3dc71264",
-      "size_bytes": 18043,
+      "sha256": "81228c6d5d9472fb2077c5bf6a8184ed4db51379e61b084b391434d3a1d9e85b",
+      "size_bytes": 18055,
       "category": "documentação da raiz"
     },
     {
@@ -301,8 +301,8 @@
     },
     {
       "file": "FINAL_RELEASE_AUDIT.md",
-      "sha256": "9decbcff34735f5084fd6506372209770d48142f8d543a75739259e379238785",
-      "size_bytes": 23364,
+      "sha256": "12a36d85fe8b29470616644414e5dc3aff9c5f91768cb6e4a0503c85011038e5",
+      "size_bytes": 23731,
       "category": "documentação da raiz"
     },
     {
@@ -313,8 +313,8 @@
     },
     {
       "file": "FINAL_TECHNICAL_BASELINE.md",
-      "sha256": "540c87af2b8b0a13f577d5fb8c35b39b8e428c5a76f9739337b96afbec110a30",
-      "size_bytes": 12682,
+      "sha256": "ef0e914d168e17ede09d69da0be7c954883fd57b682f0a5257cd6b636ead5fa8",
+      "size_bytes": 13403,
       "category": "documentação da raiz"
     },
     {
@@ -367,14 +367,14 @@
     },
     {
       "file": "IMPACT_REPORTING.md",
-      "sha256": "103ed9ed9a359e72ed9fcf2a5b3f0cfdedeb37338bf27c91b2c3c13495a822cc",
+      "sha256": "c7ab82291f528f1096bb183984d3a430d4f9002eec9f51bb0de5ea01eec35e1a",
       "size_bytes": 5063,
       "category": "documentação da raiz"
     },
     {
       "file": "INFORMATION_ARCHITECTURE.md",
-      "sha256": "272b2c0dc8ad5b3be18b579d1efd39b0ca1fb2eaa528950fb72904ca768c3d7a",
-      "size_bytes": 5552,
+      "sha256": "ff1923793a219dc93d6bd574836b6644687fbc93ba2cbfa0473840c4a4994695",
+      "size_bytes": 5551,
       "category": "documentação da raiz"
     },
     {
@@ -493,14 +493,14 @@
     },
     {
       "file": "MOBILE_READINESS_FINAL.md",
-      "sha256": "8fb35e7d90674fe86b38f00aedae4a8666b38a850d393104034e5a057070eae7",
+      "sha256": "0372eb73d40c3851f86b9a6c1466cb535d6a60d65ea2bc0ae1df67381c62b310",
       "size_bytes": 4379,
       "category": "documentação da raiz"
     },
     {
       "file": "MODERATION_LADDER.md",
-      "sha256": "0aacb9357f33bdb403d89a6eca7e66e2ea7bf8df402f7e0efdadd5fe09f37628",
-      "size_bytes": 5515,
+      "sha256": "77c9f7fa9672bbd120e8634deb82b320f8416e24234ec8341f4b46e00be2d8f8",
+      "size_bytes": 5570,
       "category": "documentação da raiz"
     },
     {
@@ -511,7 +511,7 @@
     },
     {
       "file": "NAVIGATION_MODEL.md",
-      "sha256": "7756070f13e6526b46ca951726b131b4ea12fd9f05356939c0f53d16a0e4c495",
+      "sha256": "34494c1ab45f6033ce0ee5270c87fcad0811d36ab6fb50168ee56a26410dbf74",
       "size_bytes": 5762,
       "category": "documentação da raiz"
     },
@@ -547,8 +547,8 @@
     },
     {
       "file": "PRODUCTION_READINESS.md",
-      "sha256": "362d3a0285fdeb4c572084e7fddbbbf8ef86f0a242334aaba3725e3516faa009",
-      "size_bytes": 12238,
+      "sha256": "fd057004dc1d4e25345ba613873bcc5dbeac8cd861f80885dd405a9afe2b8515",
+      "size_bytes": 12976,
       "category": "documentação da raiz"
     },
     {
@@ -589,14 +589,14 @@
     },
     {
       "file": "RELEASE_NOTES.md",
-      "sha256": "7a1b376de94d08c0d3dd5953294a7cf5dd2a5d51a8dab5b5497573019b32e2fc",
-      "size_bytes": 10767,
+      "sha256": "5089180b01174a4f41cd39b4e24d1a9c40702104e2956df3f6cc792e93b6a5c5",
+      "size_bytes": 14953,
       "category": "documentação da raiz"
     },
     {
       "file": "RELEASE_READINESS.md",
-      "sha256": "c2fc9ff2f22267d89d8e1c7485349ed5645b111b09a5db9078a0a3326478779e",
-      "size_bytes": 9233,
+      "sha256": "2658809377dd1d22f978eb116b437993f2e701fd424602ba24bb40e05bf5835b",
+      "size_bytes": 12398,
       "category": "documentação da raiz"
     },
     {
@@ -667,8 +667,8 @@
     },
     {
       "file": "STORE_READINESS.md",
-      "sha256": "5ff7e538efe512a92707f07e2c3e28ebdec7afb6bb21d698a1c22631df0182ab",
-      "size_bytes": 5346,
+      "sha256": "6ed48d6e0a96ffe9ba151647a763b1ba495bd8e358c8375900fdc9919b0d0e8a",
+      "size_bytes": 7296,
       "category": "documentação da raiz"
     },
     {
@@ -679,7 +679,7 @@
     },
     {
       "file": "TEST_REPORT.md",
-      "sha256": "7f41b30b058c01bf05e1fe2fb574d55e089599092f227beb1d941fb2ef6ca007",
+      "sha256": "f2fb58028d1198ee0cbfbe38d3d4f4df058bedadbd49eef410822d82cbb653bb",
       "size_bytes": 31321,
       "category": "documentação da raiz"
     },

@@ -1,9 +1,27 @@
-# SECURITY_AUDIT — v0.17.0 (2026-10-06)
+# SECURITY_AUDIT — v0.18.0 (2026-10-06)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
 A lista linha a linha, com a prova de cada item e as **9 pendências honestas**, está em
 **`SECURITY_FINAL_CHECKLIST.md`**.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
+
+## v0.18.0 — a camada de impacto contextualizado sob auditoria
+
+| # | Verificação | Situação | Prova |
+|---|---|---|---|
+| 1 | RLS habilitada nas **33 tabelas** das migrações 0025–0031 | 🟢 | lido de `pg_class` · `test_v0180_security.py` |
+| 2 | Política em cada uma (RLS ligada sem política nega tudo e quebra em silêncio) | 🟢 | lido de `pg_policies` |
+| 3 | Inventário **declarado** das tabelas de leitura aberta, com o motivo de cada uma | 🟢 | `OPEN_ON_PURPOSE` (19 tabelas) + teste que falha se aparecer uma nova sem motivo |
+| 4 | Escrita de reputação e de selo **fora do alcance da aplicação** | 🟢 | sem `INSERT` em `reputation_snapshots`, `seal_awards`, `seal_evaluations`; só `app_record_reputation()` e `app_award_seal()`, `SECURITY DEFINER` com `search_path` fixo |
+| 5 | Onde o `INSERT` existe, a **política** exige contexto privilegiado | 🟢 | teste lê `with_check` de `pg_policies` procurando `app_priv` (7 tabelas) |
+| 6 | Trilhas append-only sem `UPDATE` nem `DELETE` para o papel da aplicação | 🟢 | 10 trilhas conferidas uma a uma |
+| 7 | Recursão entre políticas de RLS resolvida sem afrouxar nenhuma | 🟢 | `app_claim_invited()` responde só "fui convidado?", sem devolver conteúdo |
+| 8 | Isolamento entre organizações, linha a linha, **com o teste par** | 🟢 | 9 tabelas; o teste par prova que o cenário escreveu dado |
+| 9 | Nenhuma coluna de CPF, RG ou documento nas tabelas novas | 🟢 | `information_schema`, casamento por **palavra** (`LIKE '%rg%'` acusava `org_id`) |
+| 10 | Único nome de pessoa é `responsibility_assignments.external_name`, sem documento ao lado | 🟢 | teste explícito |
+| 11 | Busca incremental sem vazamento: fornecedor, projeto e indicador próprio são da organização | 🟢 | três testes de isolamento · autocomplete é a forma mais silenciosa de vazar dado |
+| 12 | `%` e `_` digitados tratados como texto, não curinga | 🟢 | sem escapar, quem digita `%` recebia o catálogo inteiro |
+| 13 | Nenhuma decisão automática sobre pessoa a partir de nota | 🟢 | reputação não alimenta busca, match, recomendação, elegibilidade nem selo (varredura no SQL da migração de selos) |
 
 ## v0.17.0 — a camada econômica sob auditoria
 

@@ -1,4 +1,31 @@
-# LGPD_AUDIT — v0.17.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.18.0 (técnico; não é parecer jurídico)
+
+## v0.18.0 — o que a camada de impacto contextualizado acrescentou (e o que ela recusou coletar)
+
+A rodada criou 33 tabelas e **nenhum dado pessoal novo**, com uma exceção declarada: o **nome** da pessoa externa
+designada como responsável (`responsibility_assignments.external_name`), sem CPF, RG ou qualquer documento ao lado —
+minimização aplicada no desenho, não depois. Um teste lê o `information_schema` e falha se uma coluna de documento
+aparecer nestas tabelas.
+
+Quatro decisões de privacidade desta rodada:
+
+1. **Barreira de acesso é atributo do PROJETO, não da pessoa.** `project_barriers` descreve a barreira que o projeto
+   enfrenta no território; não existe registro de que *a pessoa X* tem *a barreira Y*. É a mesma regra da governança
+   de taxonomia da v0.16.0 ("vulnerabilidade é atributo do projeto"), aplicada à equidade.
+2. **Determinante social continua agregado e com k-anonimato**; esta rodada acrescentou **definições de indicador**
+   e dado **territorial**, nunca individual.
+3. **Reputação de pessoa física não existe publicamente.** `kind = 'individual'` recebe 403
+   `no_public_profile_for_person` para terceiros, e a própria pessoa vê o perfil marcado `private`. Reputação
+   pública de pessoa física seria cadastro restritivo com outro nome.
+4. **Nenhuma decisão automatizada sobre pessoa.** Nenhum valor de reputação, situação de alegação ou selo bloqueia,
+   libera ou ordena qualquer coisa — e o direito de contestação (art. 20) está implementado como dado:
+   `reputation_disputes` é aberto pela organização, **aparece no perfil**, e a resolução é fato novo com motivo
+   obrigatório.
+
+Pendência honesta nova: a **retenção** das trilhas desta rodada (verificações de alegação, avaliações de selo,
+snapshots de reputação) **não tem prazo definido** — são fatos sobre organização, não sobre pessoa, e por isso não
+entraram no job de retenção; se um prazo for decidido, ele é decisão do responsável pelo tratamento, não do código.
+
 
 A matriz por categoria de dado — base legal, finalidade, prazo, o que acontece no fim do prazo e quem tem acesso —
 está em **`DATA_RETENTION_MATRIX.md`**, inclusive a lista do que a plataforma **deliberadamente não coleta** (sem

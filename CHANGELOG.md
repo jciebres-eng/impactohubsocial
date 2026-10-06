@@ -1,6 +1,96 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.18.0] — 2026-10-06 — IMPACTO CONTEXTUALIZADO: EQUIDADE, REFERENCIAIS E CONFIANÇA (cumulativo; snapshot do v0.17.0 em `history/v0.17.0/`)
+
+A v0.17.0 havia declarado DESIGN como a próxima fase. Esta rodada reordena outra vez, pela mesma razão da anterior:
+**o que o design vai representar ainda estava sendo decidido.** Uma tela de "impacto" desenhada antes de existir o
+modelo de equidade desenharia o número errado com capricho.
+
+A tese que a rodada implementa: **impacto não é quantidade; impacto é resultado contextualizado.**
+
+### Adicionado
+- **Motor de equidade e contexto** (`equity_contexts`, `equity_denominators`, `equity_barrier_catalog`,
+  `project_barriers`, `equity_assessments`): sete métodos de normalização, cada um declarando o denominador que
+  exige; **sem denominador com fonte, data e método, nenhum método está disponível** (a resposta é "indisponível"
+  com o motivo, nunca uma estimativa); a avaliação **não produz nota**; `compare()` devolve `comparable: false` com
+  os motivos e **nunca um veredito**. Escada de prova das barreiras: declarada → documentada → com evidência.
+  ADR-191 a ADR-193.
+- **Território como catálogo** (`territories`, `determinant_indicator_defs`, `territory_indicators`) com
+  `from_official_load` separando carga oficial de conhecimento da plataforma — as 27 UFs semeadas dizem, na própria
+  linha, "conhecimento da plataforma; conferir na carga oficial". `territory_profile()` devolve **toda** definição
+  ativa com `measured` booleano: território sem dado aparece como sem dado. Dois importadores que exigem fonte, URL
+  e data, e recusam o arquivo inteiro se uma linha for inválida. ADR-194.
+- **Registro de 19 referenciais de impacto** (`impact_frameworks`) — 4 em uso, 7 mapeáveis, 8 só registrados, cada
+  um destes com `license_note` dizendo por que não é mapeado — e **mapeamento de indicador** (`framework_mappings`)
+  com escada de seis degraus: `aligned`, `mapped`, `assessed`, `reported`, `verified`, `audited`. **`certified` é
+  recusado por gatilho**: a plataforma não é organismo certificador. `coverage()` responde "consigo relatar?" com
+  número. ADR-195.
+- **Materialidade** (`materiality_topics`, `materiality_assessments`, `materiality_entries`) com as três lentes
+  (impacto, financeira, dupla), limiar declarado e `is_material` **derivada** por `materiality_derive()` — nunca
+  escrita. ADR-196.
+- **Integridade de alegação** (`claims`, `claim_rules`, `claim_checks`, `claim_review_requests`, `claim_reviews`):
+  11 regras **determinísticas** (consulta SQL e léxico declarado em código, com `CHECK rules_are_deterministic`), o
+  léxico **público** na rota do catálogo, e a situação **derivada** por `claim_status()` — **não existe coluna de
+  situação em `claims`**, de propósito. O verificador devolve `attention`/`serious` e **nunca "fraude"**; alegação
+  marcada exige revisão humana de OUTRA organização, **por convite nomeado**, e aceitar produz
+  `flagged_accepted_by_review`: a marca é qualificada, não apagada. ADR-197 a ADR-200.
+- **Reputação explicável** (`reputation_dimensions`, `reputation_snapshots`, `reputation_disputes`,
+  `reputation_dispute_resolutions`): seis dimensões, **sem nota única** — divergência consciente dos prompts, porque
+  nota única vira ranking e ranking vira critério de acesso. Dimensão sem base suficiente **não tem valor**
+  (organização nova começa sem medida, não com nota baixa); órgão público recebe **perfil de governança e
+  transparência** sem nota; pessoa física **não tem perfil público**; nenhum sinal comercial entra (varredura AST);
+  contestação **aparece no perfil** e correção gera **ponto novo** em vez de reescrever o antigo. ADR-201 a ADR-206.
+- **Motor de selos** (`seal_rules`, `seal_definitions`, `seal_criteria`, `seal_awards`, `seal_revocations`,
+  `seal_evaluations`): o critério é avaliado **em SQL** (`seal_evaluate()`), e `app_award_seal()` o reavalia antes de
+  inserir — **a aplicação não tem INSERT em `seal_awards`**, então nenhuma rota concede selo sem critério. Definição
+  **versionada e imutável** depois de publicada, validade igual ao **menor** prazo entre definição e critérios,
+  revogação como **fato novo**, avaliação recusada **também registrada** ("por que eu não recebi"), e **zero
+  definições embarcadas**. ADR-207 a ADR-211.
+- **Busca incremental com procedência** (13 buscas) e **componente de autocomplete** que mostra a origem de cada
+  sugestão (carga oficial ≠ conhecimento da plataforma ≠ lista editorial ≠ histórico da própria organização) e
+  **nunca sobrescreve** em silêncio o que a pessoa escreveu: pergunta, mostra a origem e oferece voltar. Formulário
+  em etapas que **não esconde trabalho já feito**. ADR-212 a ADR-215.
+- **Responsabilidade designada** (`responsibility_roles`, `responsibility_assignments`,
+  `responsibility_decision_kinds`, `responsibility_decisions`): responsável × papel × escopo × período × decisão ×
+  **versão**, **separada da assinatura**. Designação não é reescrita, encerrar exige motivo, decisão fora do período
+  é recusada, decisão sobre documento aponta para a **versão**, quatro-olhos é declarado em dado e exige **pessoas**
+  diferentes, e pessoa externa entra por **nome, sem CPF**. ADR-216 a ADR-220.
+
+### Corrigido
+- **Linha de base de indicador sem fonte** passava no banco (dívida herdada da v0.17.0, onde a trava existia só para
+  programas): `project_indicator_baseline_source()` passou a recusar, a API recusa antes do banco com
+  `baseline_source_required`, e a visão `project_baselines_without_source` torna a dívida **contável** em vez de
+  silenciosa.
+- **Valor de reputação publicado com faixa de confiança insuficiente**: havia observações bastando e verificação por
+  terceiro baixa, e o perfil publicava número que a própria faixa dizia não sustentar. A restrição
+  `insufficient_has_no_value` recusou a gravação; **corrigiu-se o cálculo, não a restrição**.
+- **A recusa de selo desfazia o registro da própria recusa**: a exceção dentro da função levava embora o
+  `seal_evaluations` recém-inserido. A função passou a devolver `NULL` e o 422 é levantado **fora** da transação.
+  ADR-208.
+
+### Segurança e privacidade
+- RLS e política em **todas as 33 tabelas novas**, com inventário declarado das que têm leitura aberta **de
+  propósito** e o motivo de cada uma.
+- **Nenhuma coluna de CPF, RG ou documento** nas tabelas desta rodada (teste lê `information_schema`); a única
+  coluna de nome de pessoa é `responsibility_assignments.external_name`, sem documento ao lado.
+- Trilhas append-only sem `UPDATE` nem `DELETE` para o papel da aplicação; escrita por função `SECURITY DEFINER`
+  onde a invenção de dado seria possível (`app_record_reputation`, `app_award_seal`).
+- Testes de **viés** (projeto pequeno e território remoto não são penalizados; reputação é proporção, não volume;
+  organização nova não começa com nota baixa) e de **gaming** (alegação não verificada não conta; retirar alegação
+  marcada não limpa o registro; autovalidação recusada; revisão sem convite recusada; selo não autoconcedido;
+  denominador mínimo não fabrica veredito).
+
+### Não entregue, com nome
+- **169 metas oficiais dos ODS** e **dados do IBGE**: a rede do ambiente alcança só registros de pacote. Estrutura e
+  importadores entregues; o dado entra quando houver o arquivo.
+- **Mapeamento para GRI, ISSB e IRIS+**: depende de decisão de produto **e** jurídica, porque as minutas legais da
+  v0.17.0 excluem expressamente esses relatórios.
+- **Nenhuma definição de selo publicada** e nenhuma arte de selo.
+- **Decaimento por idade nas dimensões de reputação**: observação de três anos pesa como a de ontem.
+- **Detecção de conluio**: duas organizações que validam medições uma da outra sobem nas dimensões; o sinal existe
+  no banco desde a v0.8.0, a detecção não.
+
 ## [0.17.0] — 2026-10-06 — CAMADA ECONÔMICA, LEGAL E DE PAGAMENTO (cumulativo; snapshot do v0.16.0 em `history/v0.16.0/`)
 
 Esta rodada inverte a ordem do roteiro a pedido do proprietário: **monetização, pagamento e auditoria legal vêm

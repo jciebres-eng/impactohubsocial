@@ -1,12 +1,44 @@
-# Relatório de integridade do banco — v0.17.0
+# Relatório de integridade do banco — v0.18.0
 
 Todo número aqui vem de consulta ao catálogo do PostgreSQL, não de contagem à mão. O coletor é
-`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.17.0.txt`
+`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.18.0.txt`
 (as anteriores ficaram em `docs/evidence/db_integrity_v0.16.0.txt` e `_v0.15.0.txt`).
 
-Banco medido: criado **do zero** pelas 24 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
+Banco medido: criado **do zero** pelas 32 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
 
-## 0. Os números da v0.17.0, e o que o coletor apontou
+## 0. Os números da v0.18.0, e o que o coletor apontou
+
+| Medida | v0.17.0 | **v0.18.0** |
+|---|---|---|
+| Tabelas | 253 | **285** |
+| Tabelas sem RLS | `schema_migrations` | **`schema_migrations`** (única) |
+| Políticas | 521 | **593** |
+| Gatilhos | 194 | **231** |
+| Funções | 277 (75 `SECURITY DEFINER`) | **308**, das quais **78** `SECURITY DEFINER` |
+| `SECURITY DEFINER` sem `search_path` fixo | nenhuma | **nenhuma** |
+| Chaves estrangeiras | 680 | **756** |
+| FK **quente** sem índice | nenhuma | **nenhuma** (uma apareceu e foi corrigida — abaixo) |
+| CHECKs | 1.216 | **1.378** |
+| Índices | 714 | **797** |
+| Tabelas sem chave primária | nenhuma | **nenhuma** |
+| Tabelas append-only | 26 | **37** (entram `claim_checks`, `claim_reviews`, `equity_assessments`, `reputation_snapshots`, `reputation_disputes`, `reputation_dispute_resolutions`, `seal_awards`, `seal_revocations`, `seal_evaluations`, `responsibility_assignments`, `responsibility_decisions`) |
+| Migrações aplicadas | 24 | **32** |
+
+**O coletor achou um defeito real nesta rodada:** `materiality_assessments.project_id` era FK **quente** sem índice
+— apagar um projeto fazia o banco varrer a tabela inteira para resolver o `ON DELETE`, e a listagem de
+materialidade por projeto fazia o mesmo. Corrigido na migração **0032**, respeitando a regra da 0015: índice só em
+coluna de inquilino ou de pai percorrido, nunca em toda FK — por isso **384** FKs continuam sem índice, de propósito
+(as de `users`: `declared_by`, `reviewed_by`, `opened_by`, `resolved_by`).
+
+As três funções `SECURITY DEFINER` novas e por que cada uma precisa ser:
+
+| Função | Por que `SECURITY DEFINER` | O que ela **não** permite |
+|---|---|---|
+| `app_record_reputation()` | a aplicação não tem `INSERT` em `reputation_snapshots`: valor de reputação não pode ser escrito por rota | recusa valor sem observação que o sustente |
+| `app_award_seal()` | reavalia os critérios no banco antes de inserir a concessão | não concede quando um critério falha, nem por contexto privilegiado |
+| `app_claim_invited()` | quebra a recursão entre a política de `claims` e a de `claim_review_requests`, que o PostgreSQL recusa inteira | responde só "esta organização foi convidada?"; não devolve conteúdo nem responde sobre outra organização |
+
+## 0.1 Os números da v0.17.0, e o que o coletor apontou então
 
 | Medida | v0.16.0 | **v0.17.0** |
 |---|---|---|

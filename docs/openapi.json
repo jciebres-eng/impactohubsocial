@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -31992,6 +31992,2795 @@
      }
     ]
    }
+  },
+  "/v1/equity/catalog": {
+   "get": {
+    "summary": "Barreiras, escadas de prova, tipos de denominador e métodos de normalização",
+    "operationId": "get_equity_routes_catalog",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/equity": {
+   "get": {
+    "summary": "O contexto declarado do projeto, as barreiras e o que é normalizável",
+    "operationId": "get_equity_routes_project_equity",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/equity/context": {
+   "put": {
+    "summary": "Declara necessidade, adicionalidade e cenário-base (com a escada de prova)",
+    "operationId": "put_equity_routes_set_context",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EquityContextIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/equity/barriers": {
+   "post": {
+    "summary": "Declara uma barreira do contexto ('evidenciada' exige evidência registrada)",
+    "operationId": "post_equity_routes_add_barrier",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BarrierIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/equity/barriers/{barrier_code}": {
+   "delete": {
+    "summary": "Desfaz a declaração de uma barreira",
+    "operationId": "delete_equity_routes_remove_barrier",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "barrier_code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/equity/normalization": {
+   "get": {
+    "summary": "Normalização rotulada; método sem denominador com fonte vem indisponível",
+    "operationId": "get_equity_routes_normalization",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "indicator_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Indicator Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/equity/assessments": {
+   "post": {
+    "summary": "Grava o retrato do contexto (append-only; não produz nota de equidade)",
+    "operationId": "post_equity_routes_assess",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssessIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Histórico dos retratos de contexto do projeto",
+    "operationId": "get_equity_routes_assessments",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 24,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/equity/denominators": {
+   "get": {
+    "summary": "Denominadores vigentes, com fonte e data de cada um",
+    "operationId": "get_equity_routes_denominators",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     },
+     {
+      "name": "program_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Program Id"
+      }
+     },
+     {
+      "name": "territory",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory"
+      }
+     },
+     {
+      "name": "include_closed",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Include Closed",
+       "type": "boolean"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Declara denominador do projeto ou do programa (fonte e método obrigatórios)",
+    "operationId": "post_equity_routes_set_denominator",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DenominatorIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/equity/denominators": {
+   "post": {
+    "summary": "Declara denominador de TERRITÓRIO (bem comum: só a administração publica)",
+    "operationId": "post_equity_routes_set_territory_denominator",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TerritoryDenominatorIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/equity/compare": {
+   "post": {
+    "summary": "Compara contextos — e devolve comparable=false com o motivo quando não há base",
+    "operationId": "post_equity_routes_compare",
+    "tags": [
+     "equidade"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CompareIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/territories/search": {
+   "get": {
+    "summary": "Busca território por nome ou código, para preenchimento incremental",
+    "operationId": "get_territory_routes_search",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maxLength": 120,
+       "minLength": 1,
+       "title": "Q",
+       "type": "string"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(international|country|region|state|municipality)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "uf",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[A-Za-z]{2}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Uf"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 20,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/territories/catalog-status": {
+   "get": {
+    "summary": "Quão completo está o catálogo — e o que depende de carga oficial",
+    "operationId": "get_territory_routes_catalog_status",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/territories/definitions": {
+   "get": {
+    "summary": "O que a plataforma pretende medir por determinante social",
+    "operationId": "get_territory_routes_definitions",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/territories/{code}": {
+   "get": {
+    "summary": "Perfil do território: cadeia, indicadores com fonte e o que NÃO foi medido",
+    "operationId": "get_territory_routes_profile",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "code",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/territory-indicators": {
+   "post": {
+    "summary": "Publica um indicador territorial (fonte e data de referência obrigatórias)",
+    "operationId": "post_territory_routes_set_indicator",
+    "tags": [
+     "território"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TerritoryIndicatorIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/frameworks": {
+   "get": {
+    "summary": "Referenciais reconhecidos, com o que a plataforma implementa e o que NÃO mapeia",
+    "operationId": "get_framework_routes_registry",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(in_use|mappable|registry_only)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/frameworks/mappings": {
+   "get": {
+    "summary": "Mapeamentos de indicador para referencial",
+    "operationId": "get_framework_routes_mappings",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "framework_key",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z][a-z0-9_]{2,40}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Framework Key"
+      }
+     },
+     {
+      "name": "indicator_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Indicator Id"
+      }
+     },
+     {
+      "name": "mine",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Mine",
+       "type": "boolean"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Mapeia um indicador (a escada vai até 'audited'; 'certified' é recusado)",
+    "operationId": "post_framework_routes_add_mapping",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MappingIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/frameworks/mappings/{mapping_id}": {
+   "delete": {
+    "summary": "Remove um mapeamento da própria organização",
+    "operationId": "delete_framework_routes_remove_mapping",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "mapping_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/frameworks/{framework_key}/coverage": {
+   "get": {
+    "summary": "Consigo relatar neste referencial? Responde com número, não com impressão",
+    "operationId": "get_framework_routes_coverage",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "framework_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/materiality/topics": {
+   "get": {
+    "summary": "Temas candidatos a materialidade e as três lentes",
+    "operationId": "get_framework_routes_topics",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/materiality": {
+   "get": {
+    "summary": "Avaliações de materialidade da organização",
+    "operationId": "get_framework_routes_assessments",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   },
+   "post": {
+    "summary": "Abre uma avaliação (a lente e o limiar são declarados, não subentendidos)",
+    "operationId": "post_framework_routes_open_assessment",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MaterialityIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/materiality/{assessment_id}": {
+   "get": {
+    "summary": "A matriz, com `is_material` DERIVADA do eixo e do limiar",
+    "operationId": "get_framework_routes_assessment",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "assessment_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/materiality/{assessment_id}/topics": {
+   "put": {
+    "summary": "Avalia um tema nos eixos permitidos pela lente",
+    "operationId": "put_framework_routes_set_entry",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "assessment_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MaterialityEntryIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/materiality/{assessment_id}/publish": {
+   "post": {
+    "summary": "Publica a avaliação (exige ao menos três temas avaliados)",
+    "operationId": "post_framework_routes_publish",
+    "tags": [
+     "frameworks"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "assessment_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/claims/rules": {
+   "get": {
+    "summary": "As regras de integridade e os léxicos usados — quem é marcado tem direito de saber",
+    "operationId": "get_claim_routes_rules",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/claims": {
+   "post": {
+    "summary": "Declara a alegação no texto exato em que será publicada",
+    "operationId": "post_claim_routes_declare",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClaimIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Alegações com a situação DERIVADA da última verificação",
+    "operationId": "get_claim_routes_listing",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "subject_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(project|program|organization|solution|impact_update)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Subject Type"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Subject Id"
+      }
+     },
+     {
+      "name": "mine",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": true,
+       "title": "Mine",
+       "type": "boolean"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 10000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/claims/{claim_id}": {
+   "get": {
+    "summary": "A alegação, a situação derivada, todas as rodadas de verificação e as revisões",
+    "operationId": "get_claim_routes_get",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "claim_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/claims/{claim_id}/check": {
+   "post": {
+    "summary": "Roda as regras determinísticas e grava uma nova rodada (nunca apaga a anterior)",
+    "operationId": "post_claim_routes_check",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "claim_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/claims/{claim_id}/withdraw": {
+   "post": {
+    "summary": "Retira a alegação (o histórico de verificação permanece legível)",
+    "operationId": "post_claim_routes_withdraw",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "claim_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClaimWithdrawIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/claims/review-requests": {
+   "get": {
+    "summary": "Convites de revisão recebidos pela organização — a fila de quem é convidado",
+    "operationId": "get_claim_routes_review_requests",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/claims/{claim_id}/review-requests": {
+   "post": {
+    "summary": "Convida uma organização nomeada a revisar a rodada (é o convite que abre a leitura)",
+    "operationId": "post_claim_routes_request_review",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "claim_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClaimReviewRequestIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/claims/{claim_id}/review": {
+   "post": {
+    "summary": "Revisão humana por organização DIFERENTE; aceitar não apaga a marca, qualifica",
+    "operationId": "post_claim_routes_review",
+    "tags": [
+     "claims"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "claim_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClaimReviewIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/reputation/dimensions": {
+   "get": {
+    "summary": "As dimensões, o que cada uma NÃO mede, e os sinais excluídos de propósito",
+    "operationId": "get_reputation_routes_dimensions",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/reputation/me": {
+   "get": {
+    "summary": "A reputação da própria organização, calculada na leitura",
+    "operationId": "get_reputation_routes_me",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/organizations/{org_id}/reputation": {
+   "get": {
+    "summary": "Perfil de reputação por dimensão (ou de governança, se for órgão público)",
+    "operationId": "get_reputation_routes_profile",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/reputation/snapshots": {
+   "post": {
+    "summary": "Congela a leitura atual na linha do tempo (append-only)",
+    "operationId": "post_reputation_routes_snapshot",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager"
+   }
+  },
+  "/v1/organizations/{org_id}/reputation/timeline": {
+   "get": {
+    "summary": "Evolução registrada, com a versão do motor de cada ponto",
+    "operationId": "get_reputation_routes_timeline",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "dimension",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z][a-z0-9_]{2,40}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Dimension"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 120,
+       "maximum": 365,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/reputation/disputes": {
+   "post": {
+    "summary": "Contesta uma dimensão; a contestação aberta aparece no próprio perfil",
+    "operationId": "post_reputation_routes_open_dispute",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DisputeIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Contestações da organização, com a resolução quando houver",
+    "operationId": "get_reputation_routes_disputes",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "only_open",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Only Open",
+       "type": "boolean"
+      }
+     },
+     {
+      "name": "all_orgs",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "All Orgs",
+       "type": "boolean"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/reputation/disputes/{dispute_id}/resolution": {
+   "post": {
+    "summary": "Resolve a contestação; corrigir produz ponto NOVO, nunca reescreve o antigo",
+    "operationId": "post_reputation_routes_resolve",
+    "tags": [
+     "reputation"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "dispute_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DisputeResolutionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/seals/rules": {
+   "get": {
+    "summary": "Conjunto fechado de critérios implementados em SQL",
+    "operationId": "get_seal_routes_rules",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/seals/definitions": {
+   "get": {
+    "summary": "Definições com critérios, incluindo rascunhos (para ninguém ser surpreendido)",
+    "operationId": "get_seal_routes_definitions",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(organization|project)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Scope"
+      }
+     },
+     {
+      "name": "code",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z][a-z0-9_]{2,40}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Code"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(draft|published|retired)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/seals/definitions": {
+   "post": {
+    "summary": "Cria definição (nasce RASCUNHO; rascunho não concede selo)",
+    "operationId": "post_seal_routes_create_definition",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SealDefinitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/seals/definitions/{definition_id}/publish": {
+   "post": {
+    "summary": "Publica; a versão anterior é aposentada e suas concessões ficam 'superadas'",
+    "operationId": "post_seal_routes_publish",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "definition_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/seals/definitions/{definition_id}/retire": {
+   "post": {
+    "summary": "Aposenta a definição (não revoga as concessões)",
+    "operationId": "post_seal_routes_retire",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "definition_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/seals/evaluate": {
+   "post": {
+    "summary": "A mesma avaliação que a concessão usa — mostra critério por critério",
+    "operationId": "post_seal_routes_evaluate",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SealEvaluateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/seals/awards": {
+   "post": {
+    "summary": "Concede; o banco reavalia e RECUSA se faltar critério",
+    "operationId": "post_seal_routes_award",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SealEvaluateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/seals/awards": {
+   "get": {
+    "summary": "Concessões com situação derivada (ativo, expirado, revogado, superado)",
+    "operationId": "get_seal_routes_awards",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(organization|project)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Scope"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Subject Id"
+      }
+     },
+     {
+      "name": "mine",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Mine",
+       "type": "boolean"
+      }
+     },
+     {
+      "name": "active_only",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": false,
+       "title": "Active Only",
+       "type": "boolean"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/seals/awards/{award_id}": {
+   "get": {
+    "summary": "O selo, o que ele atesta, o que NÃO atesta e a evidência de cada critério",
+    "operationId": "get_seal_routes_get",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "award_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/seals/awards/{award_id}/revoke": {
+   "post": {
+    "summary": "Revoga como fato novo, com motivo (não apaga a concessão)",
+    "operationId": "post_seal_routes_revoke",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "award_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SealRevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/seals/evaluations": {
+   "get": {
+    "summary": "Por que eu não recebi: avaliações da organização, inclusive as que não concederam",
+    "operationId": "get_seal_routes_evaluations",
+    "tags": [
+     "seals"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/lookups": {
+   "get": {
+    "summary": "As buscas disponíveis e as origens que cada uma pode devolver",
+    "operationId": "get_lookup_routes_catalog",
+    "tags": [
+     "lookups"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/lookups/{lookup_key}": {
+   "get": {
+    "summary": "Sugestões com origem, fonte e data — nenhuma é aplicada sozinha",
+    "operationId": "get_lookup_routes_search",
+    "tags": [
+     "lookups"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "lookup_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "q",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "",
+       "maxLength": 120,
+       "title": "Q",
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 10,
+       "maximum": 25,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/responsibility/roles": {
+   "get": {
+    "summary": "Papéis, o que cada um NÃO responde, e os tipos de decisão (com quatro-olhos)",
+    "operationId": "get_responsibility_routes_roles",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/responsibility/assignments": {
+   "post": {
+    "summary": "Designa quem responde por um escopo (um papel, um responsável)",
+    "operationId": "post_responsibility_routes_assign",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssignmentIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/responsibility/assignments/{assignment_id}/end": {
+   "post": {
+    "summary": "Encerra a designação com motivo (responsabilidade não se transfere em silêncio)",
+    "operationId": "post_responsibility_routes_end",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "assignment_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AssignmentEndIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/responsibility/current": {
+   "get": {
+    "summary": "Quem responde agora, e quais papéis estão SEM responsável",
+    "operationId": "get_responsibility_routes_current",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^(organization|program|project|document)$",
+       "title": "Scope",
+       "type": "string"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "Subject Id",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/responsibility/history": {
+   "get": {
+    "summary": "Histórico completo de designações do escopo, com períodos e motivos",
+    "operationId": "get_responsibility_routes_history",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^(organization|program|project|document)$",
+       "title": "Scope",
+       "type": "string"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "title": "Subject Id",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/responsibility/mine": {
+   "get": {
+    "summary": "O que eu respondo hoje e o que respondi antes",
+    "operationId": "get_responsibility_routes_mine",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/responsibility/decisions": {
+   "post": {
+    "summary": "Registra a decisão; sobre documento, aponta para a VERSÃO",
+    "operationId": "post_responsibility_routes_decide",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DecisionIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Decisões registradas, com papel, pessoa e segunda confirmação quando exigida",
+    "operationId": "get_responsibility_routes_decisions",
+    "tags": [
+     "responsibility"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "scope",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(organization|program|project|document)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Scope"
+      }
+     },
+     {
+      "name": "subject_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Subject Id"
+      }
+     },
+     {
+      "name": "assignment_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Assignment Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -36539,6 +39328,33 @@
       ],
       "default": null,
       "title": "Baseline"
+     },
+     "baseline_source": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Baseline Source"
+     },
+     "baseline_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Baseline Date"
      },
      "target": {
       "anyOf": [
@@ -44801,20 +47617,26 @@
    "DecisionIn": {
     "additionalProperties": false,
     "properties": {
-     "approve": {
-      "title": "Approve",
-      "type": "boolean"
-     },
-     "note": {
-      "maxLength": 2000,
-      "minLength": 5,
-      "title": "Note",
+     "assignment_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Assignment Id",
       "type": "string"
      },
-     "expires_at": {
+     "kind": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Kind",
+      "type": "string"
+     },
+     "statement": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Statement",
+      "type": "string"
+     },
+     "document_id": {
       "anyOf": [
        {
-        "format": "date-time",
+        "pattern": "^[0-9a-fA-F-]{36}$",
         "type": "string"
        },
        {
@@ -44822,12 +47644,80 @@
        }
       ],
       "default": null,
-      "title": "Expires At"
+      "title": "Document Id"
+     },
+     "document_version": {
+      "anyOf": [
+       {
+        "maximum": 9999,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Version"
+     },
+     "signature_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Signature Id"
+     },
+     "second_assignment_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Second Assignment Id"
+     },
+     "second_statement": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Second Statement"
+     },
+     "taken_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Taken On"
      }
     },
     "required": [
-     "approve",
-     "note"
+     "assignment_id",
+     "kind",
+     "statement"
     ],
     "title": "DecisionIn",
     "type": "object"
@@ -51216,6 +54106,1276 @@
      "review_reference"
     ],
     "title": "ApproveIn",
+    "type": "object"
+   },
+   "EquityContextIn": {
+    "additionalProperties": false,
+    "properties": {
+     "need_statement": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Need Statement",
+      "type": "string"
+     },
+     "additionality": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Additionality",
+      "type": "string"
+     },
+     "counterfactual": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Counterfactual"
+     },
+     "additionality_standing": {
+      "default": "declared",
+      "pattern": "^(declared|documented|evidenced)$",
+      "title": "Additionality Standing",
+      "type": "string"
+     },
+     "additionality_evidence_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Additionality Evidence Id"
+     },
+     "need_source_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Need Source Name"
+     },
+     "need_source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Need Source Url"
+     },
+     "need_source_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Need Source Date"
+     },
+     "context_note": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Context Note"
+     }
+    },
+    "required": [
+     "need_statement",
+     "additionality"
+    ],
+    "title": "EquityContextIn",
+    "type": "object"
+   },
+   "BarrierIn": {
+    "additionalProperties": false,
+    "properties": {
+     "barrier_code": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Barrier Code",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     },
+     "standing": {
+      "default": "declared",
+      "pattern": "^(declared|documented|evidenced)$",
+      "title": "Standing",
+      "type": "string"
+     },
+     "source_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Name"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Date"
+     },
+     "evidence_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Id"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     }
+    },
+    "required": [
+     "barrier_code",
+     "note"
+    ],
+    "title": "BarrierIn",
+    "type": "object"
+   },
+   "AssessIn": {
+    "additionalProperties": false,
+    "properties": {
+     "indicator_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Indicator Id"
+     }
+    },
+    "title": "AssessIn",
+    "type": "object"
+   },
+   "DenominatorIn": {
+    "additionalProperties": false,
+    "properties": {
+     "scope": {
+      "default": "project",
+      "pattern": "^(project|program)$",
+      "title": "Scope",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "program_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Program Id"
+     },
+     "kind": {
+      "pattern": "^(eligible_population|reference_population|households|enrolled|area_km2|service_units|resource_cents)$",
+      "title": "Kind",
+      "type": "string"
+     },
+     "value": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000000.0,
+      "title": "Value",
+      "type": "number"
+     },
+     "unit": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Unit",
+      "type": "string"
+     },
+     "reference_date": {
+      "format": "date",
+      "title": "Reference Date",
+      "type": "string"
+     },
+     "source_name": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "format": "date",
+      "title": "Source Date",
+      "type": "string"
+     },
+     "method_note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Method Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "value",
+     "unit",
+     "reference_date",
+     "source_name",
+     "source_date",
+     "method_note"
+    ],
+    "title": "DenominatorIn",
+    "type": "object"
+   },
+   "TerritoryDenominatorIn": {
+    "additionalProperties": false,
+    "properties": {
+     "territory": {
+      "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+      "title": "Territory",
+      "type": "string"
+     },
+     "kind": {
+      "pattern": "^(reference_population|households|enrolled|area_km2|service_units)$",
+      "title": "Kind",
+      "type": "string"
+     },
+     "value": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000000.0,
+      "title": "Value",
+      "type": "number"
+     },
+     "unit": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Unit",
+      "type": "string"
+     },
+     "reference_date": {
+      "format": "date",
+      "title": "Reference Date",
+      "type": "string"
+     },
+     "source_name": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "format": "date",
+      "title": "Source Date",
+      "type": "string"
+     },
+     "method_note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Method Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "territory",
+     "kind",
+     "value",
+     "unit",
+     "reference_date",
+     "source_name",
+     "source_date",
+     "method_note"
+    ],
+    "title": "TerritoryDenominatorIn",
+    "type": "object"
+   },
+   "CompareIn": {
+    "additionalProperties": false,
+    "properties": {
+     "project_ids": {
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 2,
+      "title": "Project Ids",
+      "type": "array"
+     },
+     "indicator_code": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Indicator Code"
+     }
+    },
+    "required": [
+     "project_ids"
+    ],
+    "title": "CompareIn",
+    "type": "object"
+   },
+   "TerritoryIndicatorIn": {
+    "additionalProperties": false,
+    "properties": {
+     "territory": {
+      "pattern": "^(INT|BR-R[1-5]|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+      "title": "Territory",
+      "type": "string"
+     },
+     "code": {
+      "pattern": "^[a-z][a-z0-9_]{3,50}$",
+      "title": "Code",
+      "type": "string"
+     },
+     "value": {
+      "title": "Value",
+      "type": "number"
+     },
+     "reference_date": {
+      "format": "date",
+      "title": "Reference Date",
+      "type": "string"
+     },
+     "source_name": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "source_date": {
+      "format": "date",
+      "title": "Source Date",
+      "type": "string"
+     },
+     "method_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Method Note"
+     }
+    },
+    "required": [
+     "territory",
+     "code",
+     "value",
+     "reference_date",
+     "source_name",
+     "source_date"
+    ],
+    "title": "TerritoryIndicatorIn",
+    "type": "object"
+   },
+   "MappingIn": {
+    "additionalProperties": false,
+    "properties": {
+     "framework_key": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Framework Key",
+      "type": "string"
+     },
+     "indicator_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Indicator Id",
+      "type": "string"
+     },
+     "relation": {
+      "maxLength": 20,
+      "minLength": 3,
+      "title": "Relation",
+      "type": "string"
+     },
+     "rationale": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+     },
+     "external_code": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "External Code"
+     },
+     "external_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "External Name"
+     },
+     "source_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Name"
+     },
+     "reviewer_org_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reviewer Org Id"
+     },
+     "reviewer_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reviewer User Id"
+     }
+    },
+    "required": [
+     "framework_key",
+     "indicator_id",
+     "relation",
+     "rationale"
+    ],
+    "title": "MappingIn",
+    "type": "object"
+   },
+   "MaterialityIn": {
+    "additionalProperties": false,
+    "properties": {
+     "scope": {
+      "default": "organization",
+      "pattern": "^(organization|program|project)$",
+      "title": "Scope",
+      "type": "string"
+     },
+     "program_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Program Id"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "period_label": {
+      "maxLength": 60,
+      "minLength": 4,
+      "title": "Period Label",
+      "type": "string"
+     },
+     "method_note": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Method Note",
+      "type": "string"
+     },
+     "lens": {
+      "default": "double",
+      "pattern": "^(impact_only|financial_only|double)$",
+      "title": "Lens",
+      "type": "string"
+     },
+     "threshold": {
+      "default": 4,
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Threshold",
+      "type": "integer"
+     },
+     "framework_key": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z][a-z0-9_]{2,40}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Framework Key"
+     }
+    },
+    "required": [
+     "period_label",
+     "method_note"
+    ],
+    "title": "MaterialityIn",
+    "type": "object"
+   },
+   "MaterialityEntryIn": {
+    "additionalProperties": false,
+    "properties": {
+     "topic_code": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Topic Code",
+      "type": "string"
+     },
+     "rationale": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+     },
+     "impact_score": {
+      "anyOf": [
+       {
+        "maximum": 5,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Impact Score"
+     },
+     "financial_score": {
+      "anyOf": [
+       {
+        "maximum": 5,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Financial Score"
+     },
+     "stakeholder_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Stakeholder Note"
+     },
+     "evidence_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Id"
+     },
+     "indicator_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Indicator Id"
+     }
+    },
+    "required": [
+     "topic_code",
+     "rationale"
+    ],
+    "title": "MaterialityEntryIn",
+    "type": "object"
+   },
+   "ClaimIn": {
+    "additionalProperties": false,
+    "properties": {
+     "subject_type": {
+      "pattern": "^(project|program|organization|solution|impact_update)$",
+      "title": "Subject Type",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "claim_kind": {
+      "pattern": "^(result|ods_contribution|esg|environmental|social|governance|efficiency|financial|comparative|certification)$",
+      "title": "Claim Kind",
+      "type": "string"
+     },
+     "statement": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Statement",
+      "type": "string"
+     },
+     "scope_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Scope Note"
+     },
+     "period_start": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Period Start"
+     },
+     "period_end": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Period End"
+     },
+     "indicator_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Indicator Id"
+     },
+     "evidence_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Id"
+     }
+    },
+    "required": [
+     "subject_type",
+     "subject_id",
+     "claim_kind",
+     "statement"
+    ],
+    "title": "ClaimIn",
+    "type": "object"
+   },
+   "ClaimWithdrawIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "ClaimWithdrawIn",
+    "type": "object"
+   },
+   "ClaimReviewRequestIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reviewer_org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Reviewer Org Id",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "reviewer_org_id"
+    ],
+    "title": "ClaimReviewRequestIn",
+    "type": "object"
+   },
+   "ClaimReviewIn": {
+    "additionalProperties": false,
+    "properties": {
+     "decision": {
+      "pattern": "^(accepted|needs_change|rejected)$",
+      "title": "Decision",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "decision",
+     "note"
+    ],
+    "title": "ClaimReviewIn",
+    "type": "object"
+   },
+   "DisputeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "dimension": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Dimension",
+      "type": "string"
+     },
+     "what_is_contested": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "What Is Contested",
+      "type": "string"
+     },
+     "expected_correction": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Expected Correction",
+      "type": "string"
+     },
+     "evidence_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Id"
+     }
+    },
+    "required": [
+     "dimension",
+     "what_is_contested",
+     "expected_correction"
+    ],
+    "title": "DisputeIn",
+    "type": "object"
+   },
+   "DisputeResolutionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "outcome": {
+      "pattern": "^(corrected|no_change|partially_corrected|needs_more_information)$",
+      "title": "Outcome",
+      "type": "string"
+     },
+     "rationale": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Rationale",
+      "type": "string"
+     },
+     "what_changed": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "What Changed"
+     }
+    },
+    "required": [
+     "outcome",
+     "rationale"
+    ],
+    "title": "DisputeResolutionIn",
+    "type": "object"
+   },
+   "SealCriterionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "rule_code": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Rule Code",
+      "type": "string"
+     },
+     "params": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Params"
+     }
+    },
+    "required": [
+     "rule_code"
+    ],
+    "title": "SealCriterionIn",
+    "type": "object"
+   },
+   "SealDefinitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Code",
+      "type": "string"
+     },
+     "scope": {
+      "pattern": "^(organization|project)$",
+      "title": "Scope",
+      "type": "string"
+     },
+     "title": {
+      "maxLength": 200,
+      "minLength": 5,
+      "title": "Title",
+      "type": "string"
+     },
+     "what_it_attests": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "What It Attests",
+      "type": "string"
+     },
+     "what_it_does_not_attest": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "What It Does Not Attest",
+      "type": "string"
+     },
+     "validity_days": {
+      "maximum": 1095,
+      "minimum": 30,
+      "title": "Validity Days",
+      "type": "integer"
+     },
+     "criteria": {
+      "items": {
+       "$ref": "#/components/schemas/SealCriterionIn"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Criteria",
+      "type": "array"
+     }
+    },
+    "required": [
+     "code",
+     "scope",
+     "title",
+     "what_it_attests",
+     "what_it_does_not_attest",
+     "validity_days",
+     "criteria"
+    ],
+    "title": "SealDefinitionIn",
+    "type": "object"
+   },
+   "SealEvaluateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "definition_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Definition Id",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "definition_id",
+     "subject_id"
+    ],
+    "title": "SealEvaluateIn",
+    "type": "object"
+   },
+   "SealRevokeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "pattern": "^(criterion_no_longer_met|definition_retired|data_correction|request_of_holder|misconduct)$",
+      "title": "Reason",
+      "type": "string"
+     },
+     "detail": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Detail",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason",
+     "detail"
+    ],
+    "title": "SealRevokeIn",
+    "type": "object"
+   },
+   "AssignmentIn": {
+    "additionalProperties": false,
+    "properties": {
+     "scope": {
+      "pattern": "^(organization|program|project|document)$",
+      "title": "Scope",
+      "type": "string"
+     },
+     "subject_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Subject Id",
+      "type": "string"
+     },
+     "role_code": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Role Code",
+      "type": "string"
+     },
+     "mandate_basis": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Mandate Basis",
+      "type": "string"
+     },
+     "user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "User Id"
+     },
+     "external_name": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "External Name"
+     },
+     "external_note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "minLength": 5,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "External Note"
+     },
+     "starts_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts On"
+     }
+    },
+    "required": [
+     "scope",
+     "subject_id",
+     "role_code",
+     "mandate_basis"
+    ],
+    "title": "AssignmentIn",
+    "type": "object"
+   },
+   "AssignmentEndIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     },
+     "ended_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ended On"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "AssignmentEndIn",
     "type": "object"
    }
   },

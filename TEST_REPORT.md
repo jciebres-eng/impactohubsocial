@@ -1,4 +1,56 @@
-# TEST_REPORT — v0.17.0 (camada econômica, legal e de pagamento, 2026-10-06)
+# TEST_REPORT — v0.18.0 (impacto contextualizado: equidade, referenciais e confiança, 2026-10-06)
+
+**1.223 testes, 0 falhas, 26 pulados** (eram 961 na v0.17.0, 788 na v0.16.0 e 673 na v0.15.0). Log íntegro:
+`docs/evidence/test_run_v0.18.0.log`. Desempenho: `docs/evidence/perf_v0.18.0.log`. Integridade do banco:
+`docs/evidence/db_integrity_v0.18.0.txt`. Lint: `docs/evidence/ruff_v0.18.0.log`.
+
+Os **262 testes novos** desta rodada, por arquivo:
+
+| Arquivo | Testes | O que ele protege |
+|---|---|---|
+| `test_v0180_equity.py` | **30** | impacto não é quantidade: sem denominador com fonte, data e método, nenhum método de normalização está disponível (resposta "indisponível" com motivo, nunca estimativa); avaliação **sem nota**; `compare()` com `comparable: false` e **nunca** veredito; denominador versionado e imutável; barreira com escada de prova |
+| `test_v0180_territory.py` | **20** | `from_official_load` separando carga oficial de conhecimento da plataforma; as 27 UFs semeadas dizendo "conferir na carga oficial"; perfil territorial mostrando o **não medido** com peso igual; importadores recusando arquivo sem fonte, URL e data, e recusando o arquivo inteiro por uma linha inválida |
+| `test_v0180_frameworks.py` | **24** | 19 referenciais com o que a plataforma **não** mapeia; escada de seis degraus; **`certified` recusado por gatilho**; `verified` exigindo outro revisor; cobertura respondendo "consigo relatar?" com número; `is_material` **derivada** e não escrevível |
+| `test_v0180_claims.py` | **42** | **não existe coluna de situação em `claims`** (lido do `information_schema`); as 11 regras determinísticas e o mesmo veredito para o mesmo texto; linguagem absoluta punida só **sem base**; causalidade sobre elo fraco; rodada nova que não apaga a anterior; revisão **por convite nomeado** de outra organização; aceitar que **qualifica sem apagar** a marca |
+| `test_v0180_reputation.py` | **30** | **nenhum campo agregado** na resposta nem coluna agregada no banco; organização nova **sem medida**, não com nota baixa; faixa insuficiente que não publica número; varredura AST recusando sinal comercial; plano pago que não muda dimensão; órgão público sem nota; pessoa física sem perfil público; contestação que aparece no perfil; correção que gera ponto novo |
+| `test_v0180_seals.py` | **23** | **a aplicação não concede selo**: INSERT direto recusado, e `app_award_seal()` recusando até para o dono do banco; definição publicada imutável; versão nova aposentando a anterior; validade igual ao **menor** prazo; recusa **registrada** para quem foi recusado; revogação como fato novo; varredura de sinal comercial no módulo **e** na migração |
+| `test_v0180_lookups.py` | **17** | origem em **toda** sugestão de **todas** as buscas; UFs semeadas como conhecimento da plataforma; `%` e `_` como texto; isolamento de fornecedor, projeto e indicador próprio; e o componente lido do arquivo (pergunta antes de substituir, mostra origem, devolve procedência, não esconde trabalho feito) |
+| `test_v0180_responsibility.py` | **25** | um papel por escopo; papel fora do escopo recusado pelo banco; designação **não reescrita**; encerramento com motivo e imutável; decisão fora do período recusada; decisão sobre documento apontando para a **versão**; quatro-olhos exigindo **pessoas** diferentes; pessoa externa sem coluna de documento |
+| `test_v0180_security.py` | **24** | RLS e política nas **33 tabelas novas**; inventário declarado do que é aberto de propósito; nenhuma coluna de CPF/RG/documento; trilhas append-only sem UPDATE nem DELETE; matriz de isolamento linha a linha **com o teste par**; **gaming** (alegação não verificada, retirada de alegação marcada, autovalidação, revisão sem convite, autoconcessão de selo, denominador mínimo); **viés** (projeto pequeno, território remoto, reputação proporcional, organização nova) |
+| `test_v0180_docs.py` | **18** | **os números dos documentos conferidos contra o banco**: 11 regras, 6 dimensões, 12 critérios de selo, 8 papéis, 6 tipos de decisão, 13 buscas, zero definições de selo embarcadas, zero metas de ODS carregadas; cada código do banco citado no documento; ADR sem duplicata e com consequência |
+| `test_v0180_performance.py` | **9** | as consultas com `CROSS JOIN LATERAL` sobre função, que funcionam com dez linhas e param com dez mil: listagem de alegação, perfil de reputação, listagem e avaliação de selo, designações e a busca incremental (medida em percepção: abaixo de 800 ms) |
+
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 32 migrações), servidor HTTP real
+(uvicorn) e Chromium (Playwright). Comando:
+```
+cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" \
+  PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t .
+```
+
+Os **26 pulados** são as duas suítes de volume (v0.15.0 com 17, v0.18.0 com 9), que rodam em passo próprio porque o
+dado sintético muda o resultado de testes de ranking e de paginação no mesmo banco (ADR-138):
+```
+cd backend && PERF=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest tests.test_v0180_performance
+cd backend && PERF_FULL=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest tests.test_v0150_performance
+```
+
+## Dois defeitos que os testes desta rodada pegaram no produto
+
+1. **Reputação publicando número que a confiança não sustentava.** Havia observações bastando e verificação por
+   terceiro baixa; a restrição `insufficient_has_no_value` recusou a gravação do snapshot. Corrigiu-se o **cálculo**,
+   não a restrição, e o caso virou teste
+   (`test_a_dimension_with_enough_observations_but_low_verification_publishes_no_value`).
+2. **A recusa de selo apagava o registro da própria recusa.** `test_the_refused_evaluation_is_recorded_for_whoever_was_refused`
+   veio vazio: a exceção dentro da função desfazia a transação e levava embora o `seal_evaluations` recém-inserido.
+   A função passou a devolver `NULL` e o 422 é levantado fora da transação (ADR-208).
+
+Nenhum teste foi enfraquecido ou removido para fechar esta rodada. Quatro testes **meus** foram corrigidos porque
+mediam a coisa errada: varredura por substring acusando `org_id` (contém "rg") e `name_pt` (contém "name"); lista de
+parâmetros maior que a consulta; e expectativa de exceção onde o desenho correto passou a devolver `NULL`.
+
+---
+
+# Histórico — TEST_REPORT da v0.17.0
 
 **961 testes, 0 falhas, 17 pulados** (eram 788 na v0.16.0 e 673 na v0.15.0). Log íntegro:
 `docs/evidence/test_run_v0.17.0.log`. Desempenho: `docs/evidence/perf_v0.17.0.log` (duas execuções). Integridade do

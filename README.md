@@ -1,11 +1,40 @@
-# Plataforma Impacto — v0.17.0
+# Plataforma Impacto — v0.18.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** camada econômica, legal e de pagamento fechada; **tecnicamente pronta para a etapa de design**, que é a próxima; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+> **Estado:** camada de impacto contextualizado fechada (equidade, território, referenciais, integridade de alegação, reputação, selos, formulários inteligentes e responsabilidade); **tecnicamente pronta para a etapa de design**, que é a próxima; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.18.0 (interoperabilidade de referenciais de impacto, equidade e confiança):** a rodada implementa uma
+tese só — **impacto não é quantidade; impacto é resultado contextualizado.** "50 pessoas numa comunidade indígena
+remota" não é automaticamente menos impacto que "5.000 pessoas num centro urbano", e a consequência é
+desconfortável de propósito: **sem denominador declarado com fonte, data e método, não existe número normalizado**
+(sete métodos, cada um dizendo qual denominador exige), a avaliação de equidade **não produz nota**, e a comparação
+entre projetos devolve `comparable: false` com os motivos — **nunca um veredito**. Entram: **território como
+catálogo** separando `from_official_load` do conhecimento da plataforma (as 27 UFs semeadas dizem "conferir na carga
+oficial"); **registro de 19 referenciais** (ODS, ESG, GRI, ISSB, TCFD, TNFD, IRIS+, SROI, MCDA, LCA e outros) com
+escada de relação de **seis degraus que para em `audited`** — `certified` é recusado por gatilho, porque a
+plataforma não é organismo certificador; **materialidade** com `is_material` **derivada** da lente e do limiar;
+**integridade de alegação** com 11 regras determinísticas e situação **derivada** (não existe coluna de situação em
+`claims`), revisão humana **por convite nomeado** de outra organização, e a marca que a revisão qualifica sem
+apagar; **reputação explicável em seis dimensões e SEM nota única** (divergência declarada dos prompts: nota única
+vira ranking, e ranking vira critério de acesso), em que organização nova **começa sem medida, não com nota baixa**,
+órgão público recebe perfil de governança sem nota e pessoa física não tem perfil público, com contestação que
+aparece no próprio perfil e correção que gera ponto novo; **motor de selos** cujo critério é avaliado **em SQL** —
+a aplicação não tem INSERT em `seal_awards`, então nenhuma rota concede selo sem critério — com definição
+versionada e imutável, revogação como fato novo e **zero definições embarcadas**; **busca incremental com
+procedência em cada sugestão** e componente que **nunca sobrescreve** o que a pessoa escreveu em silêncio; e
+**responsabilidade** como responsável × papel × escopo × período × decisão × **versão**, separada da assinatura,
+com quatro-olhos declarado em dado.
+
+**1.223 testes, 815 operações, 285 tabelas, 31 migrações.** O que esta versão **não** entrega continua escrito com
+nome: as 169 metas oficiais dos ODS e os dados do IBGE **não foram carregados** (a rede do ambiente alcança só
+registros de pacote — a estrutura e os importadores estão prontos); mapeamento para GRI/ISSB/IRIS+ depende de
+decisão de produto **e** jurídica; nenhum selo publicado; nenhuma arte de selo. Comece por
+`IMPACT_FRAMEWORK_AUDIT.md`, `CLAIM_INTEGRITY.md`, `REPUTATION_ARCHITECTURE.md`, `SEAL_ENGINE.md`,
+`SMART_FORMS.md`, `RESPONSIBILITY_ENGINE.md` e `FINAL_IMPACT_FRAMEWORK_REPORT.md`.
 
 **Novo no v0.17.0 (camada econômica, legal e de pagamento):** a rodada inverte a ordem do roteiro a pedido do
 proprietário — **monetização, pagamento e auditoria legal vêm antes do design** — e implementa uma tese só: **o
@@ -23,7 +52,7 @@ legais versionados** com aceite que guarda o **sha256 do texto aceito** — e o 
 minuta não revisada por advogado(a)**, o que trava o produto de propósito; e o **registro de 28 motores
 operacionais** com cinco testes que provam que IA aqui é motor, não chatbot.
 
-**961 testes, 749 operações, 253 tabelas, 24 migrações.** O que esta versão **não** entrega está escrito com nome:
+**(v0.17.0: 961 testes, 749 operações, 253 tabelas, 24 migrações.)** O que aquela versão **não** entregou está escrito com nome:
 nenhuma receita ativa, nenhum aceite registrável, nenhum provedor de pagamento, nenhuma nota fiscal, nenhum SLA.
 Comece por `ECONOMICS.md`, `MONETIZATION_LEGAL_MATRIX.md` e `FINAL_ECONOMIC_HARDENING_REPORT.md`.
 

@@ -1,4 +1,4 @@
-# Prontidão da liberação — v0.17.0
+# Prontidão da liberação — v0.18.0
 
 Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o motivo. Não há "parcialmente verde".
 
@@ -6,8 +6,8 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 
 | # | Portão | Situação | Prova |
 |---|---|---|---|
-| 1 | Suíte completa verde, banco criado do zero | 🟢 | **961** testes, 0 falhas, 17 pulados · `docs/evidence/test_run_v0.17.0.log` |
-| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.17.0.log` |
+| 1 | Suíte completa verde, banco criado do zero | 🟢 | **1.223** testes, 0 falhas, 26 pulados · `docs/evidence/test_run_v0.18.0.log` |
+| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.18.0.log` |
 | 3 | Tipos do frontend sem erro | 🟢 | `tsc --noEmit` limpo |
 | 4 | Build do frontend | 🟢 | `node build.mjs` · 14 arquivos no pré-cache |
 | 5 | Compilação de todo o Python | 🟢 | `python3 -m compileall impacto` |
@@ -46,6 +46,20 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 | 36 | **Só os pontos declarados chamam o modelo de linguagem** | 🟢 | varredura em `test_architecture`; registro de 28 motores com o que cada um nunca decide |
 | 37 | **Os números dos documentos conferidos contra o banco** | 🟢 | `test_v0170_docs.py` (17 testes) — pegou três afirmações falsas minhas nesta rodada |
 | 38 | **A prova de aceite sobrevive à exclusão da conta, sem o dado pessoal** | 🟢 | `acceptance_anonymize_only()`; portabilidade inclui o hash · `test_v0170_security.py` |
+| 39 | **Nenhum número normalizado sem denominador declarado com fonte** | 🟢 | sete métodos, cada um exigindo o denominador; resposta "indisponível" com motivo · `test_v0180_equity.py` (30 testes) |
+| 40 | **Nenhuma comparação entre projetos devolve veredito** | 🟢 | `compare()` com `comparable: false` + motivos; `verdict` sempre nulo · teste de viés com projeto remoto × urbano |
+| 41 | **Carga oficial nunca confundida com conhecimento da plataforma** | 🟢 | `from_official_load`; as 27 UFs semeadas dizem "conferir na carga oficial" · `test_v0180_territory.py` |
+| 42 | **A escada de referencial para em `audited`; `certified` é recusado** | 🟢 | `framework_relation_gate()` com a mensagem explicando · `test_v0180_frameworks.py` |
+| 43 | **A situação da alegação não é escrevível** | 🟢 | `claims` sem coluna de situação (lido do `information_schema`); `claim_status()` deriva · `test_v0180_claims.py` (42 testes) |
+| 44 | **Nenhuma alegação é classificada como fraude, e nada é automático** | 🟢 | `attention`/`serious`; revisão humana por convite de outra organização; aceitar **qualifica sem apagar** |
+| 45 | **Não existe nota única de reputação, nem coluna agregada** | 🟢 | resposta sem campo agregado; `information_schema` sem coluna agregada · ADR-201 |
+| 46 | **Organização nova não começa com nota baixa** | 🟢 | `insufficient_has_no_value`; `value` nulo com motivo escrito · teste de viés |
+| 47 | **Nenhum sinal comercial entra em reputação ou em selo** | 🟢 | varredura AST nos dois módulos **e** no SQL da migração de selos · ADR-203 e ADR-211 |
+| 48 | **Nenhuma rota concede selo sem critério** | 🟢 | critério avaliado em SQL; app sem INSERT em `seal_awards`; recusa até para o dono do banco · ADR-207 |
+| 49 | **Toda sugestão de formulário declara a origem, e nenhuma sobrescreve em silêncio** | 🟢 | `origin`/`origin_label` em todas as buscas; componente que pergunta e oferece voltar · ADR-212/213 |
+| 50 | **Responsabilidade registrada sem CPF e separada da assinatura** | 🟢 | nenhuma coluna de documento (lido do `information_schema`); `signature_id` opcional nos dois sentidos · ADR-216/220 |
+| 51 | **Os números dos documentos desta rodada conferidos contra o banco** | 🟢 | `test_v0180_docs.py` (18 testes), incluindo "zero definições de selo embarcadas" e "zero metas de ODS carregadas" |
+| 52 | **Nenhuma chave estrangeira quente sem índice** | 🟢 | achado do relatório (`materiality_assessments.project_id`) corrigido na migração 0032 · `docs/evidence/db_integrity_v0.18.0.txt` |
 
 Portões 31 a 38 são da v0.17.0. O 37 nasceu de um achado embaraçoso: o documento do Value Ledger afirmava que a
 tabela de linhas de base "nasce vazia", e ela nasce com uma linha por tipo **sem número**. A diferença importa, e

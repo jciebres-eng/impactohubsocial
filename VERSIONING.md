@@ -1,6 +1,6 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.17.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+Produto: SemVer (`VERSION` = `0.18.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
 (migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: o registro completo e versionado está em `backend/impacto/engines/registry.py` e em
 `GET /v1/engines`, com teste conferindo cada versão declarada contra a constante do módulo; pesos `weights@1.0`; planos `plans@2.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
@@ -9,7 +9,7 @@ Produto: SemVer (`VERSION` = `0.17.0`; pré-1.0 = sem garantia de compatibilidad
 O v0.6.0 **não foi sobrescrito**: está íntegro em `history/v0.6.0/` (com seu `MANIFEST.sha256` original).
 
 Release: `python3 scripts/make_release.py` gera `RELEASE_MANIFEST.sha256` e `FINAL_FULL_RELEASE.zip` (sem ZIP aninhado, sem segredos, sem `node_modules`); `--verify` confere o manifesto.
-Histórico: `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos e log de um estado **nunca empacotado**; ver `NOTE.md`) (documentos e log do release anterior, não sobrescritos). Git recomendado: tag assinada `v0.9.0`, Conventional Commits, `main` protegida.
+Histórico: `history/v0.17.0/` (documentos do release anterior, snapshot de 31 arquivos), `history/v0.6.0/`, `history/v0.7.0/`, `history/v0.8.0/` (documentos e log de um estado **nunca empacotado**; ver `NOTE.md`) (documentos e log do release anterior, não sobrescritos). Git recomendado: tag assinada `v0.9.0`, Conventional Commits, `main` protegida.
 
 **Por que 0.9.0:** nova capacidade grande (Biblioteca de Soluções, +60 operações, +20 tabelas) sobre o 0.8.0 → MINOR. Motores novos versionados: `intent-parser@1.0.0`, `solution-match@1.0.0`, `adaptation@1.0.0`, `combine@1.0.0`, `replicability@1.0`; pesos em `config/solution_weights.json`.
 

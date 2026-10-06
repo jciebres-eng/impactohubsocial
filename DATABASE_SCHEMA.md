@@ -1,6 +1,6 @@
 # DATABASE_SCHEMA
 
-**v0.17.0 — 253 tabelas, 24 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
+**v0.18.0 — 285 tabelas, 32 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
 `SECURITY DEFINER`, chaves estrangeiras, índices, imutabilidade e caminho de atualização) está em
 **`DATABASE_INTEGRITY_REPORT.md`**, com os números colhidos do catálogo do PostgreSQL por
 `scripts/db_integrity_report.py`.

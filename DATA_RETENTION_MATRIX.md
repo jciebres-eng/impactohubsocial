@@ -6,6 +6,21 @@ tem acesso**. Complementa `LGPD_AUDIT.md` (que trata do processo) e `docs/LGPD.m
 Esta matriz descreve o que o **código** faz hoje. Onde o prazo é decisão do responsável pelo tratamento e não está
 implementado, está escrito assim.
 
+## 0. v0.18.0 — as categorias novas
+
+| Categoria | Base legal | Finalidade | Prazo | No fim do prazo | Quem acessa |
+|---|---|---|---|---|---|
+| Contexto de equidade, denominador, barreira do projeto | legítimo interesse (análise de impacto) | contextualizar resultado; **nenhum dado individual** | vida do projeto + histórico | permanece (é prova do contexto declarado) | organização, apoiadora do projeto, administração |
+| Alegação, verificação e revisão (`claims`, `claim_checks`, `claim_reviews`) | legítimo interesse (integridade de informação publicada) | confrontar o que é publicado com o registrado | **sem prazo definido** — fato sobre organização | permanece | organização, convidada a revisar, apoiadora do projeto |
+| Reputação (snapshots, contestações, resoluções) | legítimo interesse | mostrar evolução e sustentar contestação | **sem prazo definido** — fato sobre organização | permanece | qualquer autenticado (é o ponto) |
+| Selos (definições, concessões, revogações, avaliações) | legítimo interesse | atestar critério verificável | validade do selo; trilha permanece | permanece (revogação é fato, não apagamento) | público (concessão/revogação); organização (avaliação recusada) |
+| Designação de responsabilidade e decisão | obrigação/legítimo interesse (governança) | registrar quem respondeu, quando e por quê | permanece (é o objetivo do registro) | permanece | organização, apoiadora do projeto, administração |
+| Nome de pessoa externa designada | legítimo interesse (governança) | identificar quem respondeu por um escopo | enquanto a designação existir no histórico | permanece; **sem documento associado** | organização e administração |
+
+Nenhuma dessas categorias guarda dado pessoal de beneficiário, e a única coluna de nome de pessoa é a da designação
+externa. A **pendência honesta** correspondente está em `LGPD_AUDIT.md`: as três primeiras trilhas não têm prazo
+definido, porque definir prazo de prova é decisão do responsável pelo tratamento, não do código.
+
 ## 1. O que a plataforma deliberadamente NÃO coleta
 
 Começa por aqui porque é a parte mais importante da matriz:

@@ -1,4 +1,36 @@
-# Relatório de desempenho — v0.17.0
+# Relatório de desempenho — v0.18.0
+
+## 0. v0.18.0 — as consultas da camada de impacto contextualizado
+
+As consultas desta rodada têm um risco próprio: várias são `CROSS JOIN LATERAL` sobre função
+(`claim_status`, `seal_status`, `dispute_status`, `responsible_now`), e função chamada por linha é a forma mais
+fácil de escrever algo que funciona com dez linhas e para com dez mil. O coletor é
+`backend/tests/test_v0180_performance.py` (passo próprio: `PERF=1`), e a saída bruta está em
+`docs/evidence/perf_v0.18.0.log`.
+
+**Volume sintético** (escala padrão): 1.200 alegações com uma rodada de verificação cada, 200 concessões de selo,
+400 designações de responsabilidade. Com `PERF_FULL=1`: 8.000, 2.000 e 4.000.
+
+| Operação | Tempo (ms) | Orçamento | O que ela exercita |
+|---|---|---|---|
+| `GET /v1/reputation/me` | **48** | 2.500 | onze consultas de sinal + faixa de confiança por dimensão |
+| `GET /v1/claims?limit=50` | **32** | 2.500 | `claim_status()` por linha, 50 linhas, sobre 1.200 alegações |
+| `GET /v1/seals/awards` | **25** | 2.500 | `seal_status()` por linha sobre 200 concessões |
+| `GET /v1/claims/{id}` | **16** | 2.500 | alegação + todas as rodadas + revisões |
+| `GET /v1/responsibility/mine` | **13** | 2.500 | designações da pessoa sobre 400 linhas |
+| `POST /v1/seals/evaluate` | **9** | 2.500 | a avaliação em SQL, critério por critério |
+| `GET /v1/lookups/territories?q=ma` | **9** | **800** | busca incremental — medida em percepção, não em orçamento de servidor |
+
+O orçamento da busca incremental é **três vezes menor** de propósito: acima de meio segundo a pessoa já digitou
+outra coisa, e o número que importa ali é o da percepção.
+
+Um teste confere no `EXPLAIN` que a consulta de verificação de alegação usa índice — **e declara quando não pode
+concluir**: abaixo de 1.000 linhas em `claim_checks` a varredura sequencial é o planejador acertando, e exigir
+índice ali ensinaria a ignorar o teste (mesma lição da ADR-190).
+
+---
+
+# Histórico — relatório de desempenho da v0.17.0
 
 Medido, não estimado. O coletor é `backend/tests/test_v0150_performance.py`; a saída bruta das duas execuções
 desta versão está em `docs/evidence/perf_v0.17.0.log` (as anteriores ficaram em

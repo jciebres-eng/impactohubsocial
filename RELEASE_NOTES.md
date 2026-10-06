@@ -1,3 +1,41 @@
+# Notas da versão — v0.18.0 (impacto contextualizado)
+
+**Uma tese:** impacto não é quantidade; impacto é resultado contextualizado. "50 pessoas numa comunidade indígena
+remota" não é automaticamente menos impacto que "5.000 pessoas num centro urbano".
+
+**O que isso custou, de propósito:** sem denominador declarado com fonte, data e método, **não existe número
+normalizado** — a resposta é "indisponível" com o motivo, nunca uma estimativa. A avaliação de equidade **não produz
+nota**, e a comparação entre dois projetos devolve `comparable: false` com os motivos, **nunca um veredito**.
+
+**Oito entregas:**
+
+1. **Equidade e contexto** — sete métodos de normalização, denominador versionado com fonte obrigatória, barreiras
+   com escada de prova (declarada → documentada → com evidência).
+2. **Território** — catálogo com `from_official_load` separando carga oficial de conhecimento da plataforma; perfil
+   territorial que mostra o **não medido** com o mesmo peso do medido; dois importadores que exigem fonte.
+3. **Referenciais** — 19 registrados (ODS, ESG, GRI, ISSB, TCFD, TNFD, IRIS+, SROI, MCDA, LCA e outros), escada de
+   relação de seis degraus que **para em `audited`**; `certified` é recusado por gatilho.
+4. **Materialidade** — três lentes, limiar declarado, `is_material` **derivada**.
+5. **Integridade de alegação** — 11 regras determinísticas com léxico público; situação **derivada** (não existe
+   coluna de situação); revisão humana por **convite nomeado** de outra organização.
+6. **Reputação** — seis dimensões, **sem nota única**; organização nova começa **sem medida**; órgão público recebe
+   perfil de governança; pessoa física não tem perfil público; contestação aparece no perfil.
+7. **Selos** — critério avaliado **em SQL**; a aplicação não tem INSERT na concessão; definição versionada e
+   imutável; revogação como fato novo; **zero definições embarcadas**.
+8. **Formulários inteligentes e responsabilidade** — sugestão com procedência que **nunca sobrescreve** em silêncio;
+   responsável × papel × escopo × período × decisão × **versão**, separado da assinatura.
+
+**Números:** 1.223 testes (0 falhas, 26 pulados), 815 operações, 285 tabelas, 32 migrações, 70 rotas novas.
+
+**O que esta versão NÃO entrega**, com nome: as 169 metas oficiais dos ODS e os dados do IBGE (a rede do ambiente
+alcança só registros de pacote; estrutura e importadores prontos); mapeamento para GRI/ISSB/IRIS+ (decisão de
+produto **e** jurídica); nenhuma definição de selo publicada; nenhuma arte de selo; decaimento por idade nas
+dimensões de reputação; detecção de conluio.
+
+**Próxima fase:** design, agora com o modelo de impacto decidido.
+
+---
+
 # Release notes — v0.17.0
 
 ## v0.17.0 — Camada econômica, legal e de pagamento

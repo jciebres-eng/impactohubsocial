@@ -139,12 +139,65 @@ class VolumeTests(unittest.TestCase):
               " SELECT 'Relationship.created', p.org_id, p.id, 'project', p.id, '{}'::jsonb"
               " FROM generate_series(1, $1) g JOIN projs p ON p.n = g % $2", DOCUMENTS, PROJECTS)
 
+        # ------------------------------------------------------------------ v0.17.0: camada econômica
+        # Programas de DONOS diferentes, por volume e por honestidade do plano: concentrar tudo numa
+        # organização tornaria `owner_org_id` não seletivo e o planejador escolheria varredura
+        # sequencial — corretamente. Foi a lição que `relationships` ensinou acima.
+        c.run("WITH orgs AS (SELECT id, row_number() OVER (ORDER BY created_at) - 1 AS n"
+              "              FROM organizations WHERE legal_name LIKE 'Volume Org %')"
+              " INSERT INTO programs(owner_org_id, title, summary, objective, visibility,"
+              " published_at, status)"
+              " SELECT o.id, 'Programa volume ' || g,"
+              "        'Resumo do programa de volume numero ' || g || ' para medir consulta.',"
+              "        'Objetivo declarado do programa de volume numero ' || g || '.',"
+              "        CASE WHEN g % 3 = 0 THEN 'public' ELSE 'network' END, NULL, 'draft'"
+              " FROM generate_series(1, $1) g JOIN orgs o ON o.n = (g * 3) % $2", PROJECTS, ORGS)
+        # Programa NASCE em rascunho — o gatilho recusa qualquer outra situação inicial, inclusive para
+        # o papel dono. Então o volume publica pela transição, como o produto faz, e é a transição que
+        # deriva `published_at`. Inserir já publicado seria mais rápido e mediria um dado que o
+        # produto nunca produz.
+        c.run("UPDATE programs SET status = 'open' WHERE title LIKE 'Programa volume %'"
+              " AND visibility = 'public'")
+        c.run("WITH progs AS (SELECT id, owner_org_id, row_number() OVER (ORDER BY created_at) - 1 AS n"
+              "               FROM programs WHERE title LIKE 'Programa volume %'),"
+              "     projs AS (SELECT id, org_id, row_number() OVER (ORDER BY created_at) - 1 AS n"
+              "               FROM projects WHERE title LIKE 'Projeto volume %')"
+              " INSERT INTO program_projects(program_id, project_id, org_id, role, added_by)"
+              " SELECT pr.id, pj.id, pr.owner_org_id,"
+              "        CASE WHEN g % 4 = 0 THEN 'funded' WHEN g % 4 = 1 THEN 'selected'"
+              "             WHEN g % 4 = 2 THEN 'monitored' ELSE 'candidate' END, NULL"
+              " FROM generate_series(1, $1) g"
+              " JOIN progs pr ON pr.n = g % $2 JOIN projs pj ON pj.n = (g * 5) % $3"
+              " ON CONFLICT DO NOTHING", PROJECTS, PROJECTS, PROJECTS)
+        # Eventos de valor pela porta do produto seriam lentos de criar em volume; aqui o que se mede é
+        # a CONSULTA, então as linhas entram em lote. `estimate_status` fica 'no_baseline' porque é o
+        # estado verdadeiro: a tabela de linhas de base nasce vazia.
+        c.run("WITH orgs AS (SELECT id, row_number() OVER (ORDER BY created_at) - 1 AS n"
+              "              FROM organizations WHERE legal_name LIKE 'Volume Org %')"
+              " INSERT INTO value_events(event_type, org_id, subject_type, units, estimate_status,"
+              " engine_version) SELECT 'readiness.evaluated', o.id, 'organization', 1, 'no_baseline',"
+              " 'volume@1.0' FROM generate_series(1, $1) g JOIN orgs o ON o.n = g % $2",
+              MATCH_RUNS, ORGS)
+        c.run("WITH orgs AS (SELECT id, row_number() OVER (ORDER BY created_at) - 1 AS n"
+              "              FROM organizations WHERE legal_name LIKE 'Volume Org %')"
+              " INSERT INTO platform_charges(org_id, kind, method, amount_cents, currency, provider)"
+              " SELECT o.id, 'one_off', 'card', 1000 + g, 'BRL', 'sandbox'"
+              " FROM generate_series(1, $1) g JOIN orgs o ON o.n = g % $2", PROJECTS, ORGS)
+        c.run("ANALYZE programs")
+        c.run("ANALYZE program_projects")
+        c.run("ANALYZE value_events")
+        c.run("ANALYZE platform_charges")
+
     # ---------------------------------------------------------------------------------------- consultas quentes
     def test_volume_was_really_created(self):
         n = {t: self.own.scalar(f"SELECT count(*) FROM {t}") for t in
              ("organizations", "projects", "solutions", "documents", "match_runs",
               "relationships", "proposals", "marketplace_listings", "notifications", "domain_events")}
-        for t in ("relationships", "proposals", "marketplace_listings", "notifications", "domain_events"):
+        n.update({t: self.own.scalar(f"SELECT count(*) FROM {t}") for t in
+                  ("programs", "program_projects", "value_events", "platform_charges")})
+        for t in ("relationships", "proposals", "marketplace_listings", "notifications",
+                  "domain_events", "programs", "program_projects", "value_events",
+                  "platform_charges"):
             self.assertGreater(n[t], 100, f"sem volume em {t} o plano de execução não diz nada: {n}")
         self.assertGreaterEqual(n["projects"], PROJECTS)
         self.assertGreaterEqual(n["solutions"], SOLUTIONS)
@@ -223,6 +276,47 @@ class VolumeTests(unittest.TestCase):
         self.assertEqual(r.status, 200, r)
         self.assertLess(TIMINGS["prontidao_finalidades"], BUDGET_MS, TIMINGS)
 
+    # ------------------------------------------------------------------------------ v0.17.0: econômica
+    def test_public_program_feed_stays_within_budget(self):
+        r = timed("feed_programas", lambda: Client().get("/v1/programs/feed?limit=25"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["feed_programas"], BUDGET_MS, TIMINGS)
+
+    def test_value_summary_stays_within_budget(self):
+        r = timed("resumo_valor", lambda: self.osc.get("/v1/value/summary"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["resumo_valor"], BUDGET_MS, TIMINGS)
+
+    def test_charge_list_stays_within_budget(self):
+        r = timed("cobrancas", lambda: self.osc.get("/v1/payments/charges?limit=25"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["cobrancas"], BUDGET_MS, TIMINGS)
+
+    def test_legal_registry_stays_within_budget(self):
+        r = timed("registro_legal", lambda: Client().get("/v1/legal/registry"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["registro_legal"], BUDGET_MS, TIMINGS)
+
+    def test_the_sql_functions_of_the_economic_layer_stay_within_budget(self):
+        """Mede as FUNÇÕES, não as rotas: é nelas que mora a conta, e é nelas que a regressão aparece.
+
+        `platform_revenue()` varre todas as cobranças e `legal_overview()` conta todos os aceites —
+        duas consultas que crescem com o uso e que ninguém olharia até ficarem lentas.
+        """
+        prog = self.own.scalar("SELECT id::text FROM programs WHERE title LIKE 'Programa volume %'"
+                               " LIMIT 1")
+        for label, sql, arg in (
+                ("fn_programa_financeiro", "SELECT * FROM program_financials($1)", prog),
+                ("fn_cadeia_resultado", "SELECT * FROM result_chain($1)", prog),
+                ("fn_receita_plataforma", "SELECT * FROM platform_revenue()", None),
+                ("fn_panorama_legal", "SELECT * FROM legal_overview()", None),
+                ("fn_lacuna_territorial", "SELECT * FROM territorial_gap(NULL)", None)):
+            if arg is None:
+                timed(label, lambda sql=sql: self.own.query(sql))
+            else:
+                timed(label, lambda sql=sql, arg=arg: self.own.query(sql, arg))
+            self.assertLess(TIMINGS[label], BUDGET_MS, f"{label}: {TIMINGS[label]:.0f}ms")
+
     # ---------------------------------------------------------------------------------------- planos de execução
     def _plan(self, sql: str, *args) -> str:
         rows = self.own.query("EXPLAIN (ANALYZE false, COSTS false) " + sql, *args)
@@ -232,6 +326,17 @@ class VolumeTests(unittest.TestCase):
         org = self.own.scalar("SELECT org_id::text FROM projects WHERE title LIKE 'Projeto volume %' LIMIT 1")
         pid = self.own.scalar("SELECT id::text FROM projects WHERE title LIKE 'Projeto volume %' LIMIT 1")
         rel_org = self.own.scalar("SELECT org_id::text FROM relationships WHERE kind = 'favorite' LIMIT 1")
+        prog = self.own.scalar("SELECT id::text FROM programs WHERE title LIKE 'Programa volume %' LIMIT 1")
+        prog_org = self.own.scalar("SELECT owner_org_id::text FROM programs"
+                                   " WHERE title LIKE 'Programa volume %' LIMIT 1")
+        val_org = self.own.scalar("SELECT org_id::text FROM value_events"
+                                  " WHERE engine_version = 'volume@1.0' LIMIT 1")
+        chg_org = self.own.scalar("SELECT org_id::text FROM platform_charges"
+                                  " WHERE provider = 'sandbox' LIMIT 1")
+        # Tabela pequena ganha varredura sequencial porque o planejador está CERTO: ler 150 linhas
+        # inteiras é mais barato que navegar índice. Então o teste só conclui algo onde há volume, e
+        # diz quais verificações ficaram inconclusivas em vez de fingir que passaram.
+        MIN_ROWS = 500
         checks = {
             "documentos por projeto": ("SELECT id FROM documents WHERE project_id = $1 AND deleted_at IS NULL", pid),
             "projetos da organização": ("SELECT id FROM projects WHERE org_id = $1 ORDER BY updated_at DESC LIMIT 25", org),
@@ -249,13 +354,36 @@ class VolumeTests(unittest.TestCase):
                                  " ORDER BY created_at DESC LIMIT 25", self.osc.user["id"]),
             "fatos do projeto": ("SELECT id FROM domain_events WHERE project_id = $1 ORDER BY id DESC LIMIT 25",
                                  pid),
+            # v0.17.0 — os acessos quentes da camada econômica
+            "programas da organização": ("SELECT id FROM programs WHERE owner_org_id = $1 LIMIT 25",
+                                         prog_org),
+            "feed público de programas": ("SELECT id FROM programs WHERE visibility = 'public'"
+                                          " ORDER BY published_at DESC LIMIT 25", None),
+            "carteira do programa": ("SELECT project_id FROM program_projects WHERE program_id = $1"
+                                     " LIMIT 50", prog),
+            "eventos de valor da organização": ("SELECT id FROM value_events WHERE org_id = $1"
+                                                " ORDER BY created_at DESC LIMIT 25", val_org),
+            "cobranças da organização": ("SELECT id FROM platform_charges WHERE org_id = $1"
+                                         " ORDER BY created_at DESC LIMIT 25", chg_org),
+            "cobranças a vencer": ("SELECT id FROM platform_charges WHERE state = 'pending'"
+                                   " AND expires_at < now() LIMIT 50", None),
+            "aceites do titular": ("SELECT id FROM legal_acceptances WHERE user_id = $1"
+                                   " ORDER BY accepted_at DESC LIMIT 25", self.osc.user["id"]),
         }
-        seq_scans = []
+        seq_scans, inconclusive = [], []
         for label, (sql, arg) in checks.items():
+            table = sql.split(" FROM ")[1].split()[0]
+            if self.own.scalar(f"SELECT count(*) FROM {table}") < MIN_ROWS:   # noqa: S608
+                inconclusive.append(f"{label} ({table} com menos de {MIN_ROWS} linhas)")
+                continue
             plan = self._plan(sql, arg) if arg is not None else self._plan(sql)
             if "Seq Scan" in plan:
                 seq_scans.append(f"{label}:\n{plan}")
+        if inconclusive:
+            print("\n[desempenho] inconclusivo nesta escala: " + "; ".join(inconclusive))
         self.assertEqual(seq_scans, [], "consulta quente sem índice:\n" + "\n\n".join(seq_scans))
+        self.assertGreaterEqual(len(checks) - len(inconclusive), 6,
+                                "escala baixa demais: quase nada foi conferido de verdade")
 
     @classmethod
     def tearDownClass(cls):

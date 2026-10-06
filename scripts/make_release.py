@@ -27,7 +27,9 @@ EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", 
                   ".dump", ".bak", ".tar", ".gz", ".bz2", ".xz", ".7z", ".rar"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.16.0.log", "docs/evidence/ruff_v0.16.0.log",
+KEEP_EXACT = {"docs/evidence/test_run_v0.17.0.log", "docs/evidence/ruff_v0.17.0.log",
+              "docs/evidence/perf_v0.17.0.log",
+              "docs/evidence/test_run_v0.16.0.log", "docs/evidence/ruff_v0.16.0.log",
               "docs/evidence/perf_v0.16.0.log", "history/v0.15.0/test_run_v0.15.0.log",
               "history/v0.15.0/VERSION",
               "docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log", "docs/evidence/perf_v0.15.0.log", "history/v0.14.0/test_run_v0.14.0.log", "history/v0.14.0/VERSION", "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
@@ -108,7 +110,30 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "web/src/pages/territory.tsx", "web/src/pages/moderation.tsx",
             "docs/evidence/test_run_v0.16.0.log", "docs/evidence/ruff_v0.16.0.log",
             "docs/evidence/perf_v0.16.0.log", "docs/evidence/db_integrity_v0.16.0.txt",
-            "history/v0.15.0/VERSION"]
+            "history/v0.15.0/VERSION",
+            # v0.17.0 — camada econômica, legal e de pagamento
+            "ECONOMICS.md", "PROGRAM_ARCHITECTURE.md", "VALUE_LEDGER.md", "MONETIZATION.md",
+            "PAYMENT_ARCHITECTURE.md", "MONETIZATION_LEGAL_MATRIX.md", "SAAS_ECONOMIC_AUDIT.md",
+            "FINAL_ECONOMIC_HARDENING_REPORT.md", "docs/LEGAL_FRAMEWORK.md", "docs/AI_ENGINES.md",
+            "docs/legal/SUBSCRIPTION.md", "docs/legal/MARKETPLACE.md", "docs/legal/INTERMEDIATION.md",
+            "docs/legal/PAYMENT.md", "docs/legal/CANCELLATION.md", "docs/legal/REFUND.md",
+            "docs/legal/B2B.md", "docs/legal/B2G.md",
+            "backend/migrations/0018_v0170_programs.sql", "backend/migrations/0019_v0170_value_ledger.sql",
+            "backend/migrations/0020_v0170_monetization.sql", "backend/migrations/0021_v0170_legal_cards.sql",
+            "backend/migrations/0022_v0170_payments.sql", "backend/migrations/0023_v0170_legal.sql",
+            "backend/migrations/0024_v0170_privacy_hardening.sql",
+            "backend/impacto/economics/programs.py", "backend/impacto/economics/value_ledger.py",
+            "backend/impacto/economics/billable.py", "backend/impacto/economics/payments.py",
+            "backend/impacto/services/legal.py", "backend/impacto/engines/registry.py",
+            "backend/impacto/api/program_routes.py", "backend/impacto/api/legal_routes.py",
+            "backend/tests/test_v0170_programs.py", "backend/tests/test_v0170_value.py",
+            "backend/tests/test_v0170_monetization.py", "backend/tests/test_v0170_payments.py",
+            "backend/tests/test_v0170_legal.py", "backend/tests/test_v0170_security.py",
+            "backend/tests/test_v0170_engines.py", "backend/tests/test_v0170_docs.py",
+            "scripts/gen_legal_registry.py",
+            "docs/evidence/test_run_v0.17.0.log", "docs/evidence/ruff_v0.17.0.log",
+            "docs/evidence/perf_v0.17.0.log", "docs/evidence/db_integrity_v0.17.0.txt",
+            "history/v0.16.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

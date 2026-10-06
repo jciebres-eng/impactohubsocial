@@ -13,5 +13,18 @@ BROKEN=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT p.id FROM projects p C
 AUDIT=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM (SELECT DISTINCT org_id FROM audit_events) o CROSS JOIN LATERAL audit_verify(o.org_id) v WHERE NOT v.valid")
 if [ -n "$BROKEN" ] || [ "$AUDIT" != "0" ]; then echo "FALHA: cadeia de hash inconsistente ($BROKEN / audit=$AUDIT)"; exit 1; fi
 echo "ledger e auditoria íntegros"
+
+# v0.17.0: um restore que ligasse uma receita ou aprovasse uma minuta em silêncio seria pior que um
+# restore que falha. Então o estado DESLIGADO também é conferido — é parte da integridade.
+ACTIVE=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM monetization_rules WHERE active")
+GREEN=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM monetization_legal_cards WHERE status = 'green'")
+APPROVED=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM legal_documents WHERE status = 'approved'")
+REALCHARGE=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM platform_charges WHERE NOT is_simulated")
+BASELINE=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM value_baselines WHERE minutes_per_unit IS NOT NULL AND source_name IS NULL")
+if [ "$ACTIVE" != "0" ] || [ "$GREEN" != "0" ] || [ "$APPROVED" != "0" ] || [ "$REALCHARGE" != "0" ] || [ "$BASELINE" != "0" ]; then
+  echo "FALHA: o restore trouxe estado que não deveria existir (regra ativa=$ACTIVE, cartão verde=$GREEN, minuta aprovada=$APPROVED, cobrança real=$REALCHARGE, linha de base sem fonte=$BASELINE)"
+  exit 1
+fi
+echo "camada econômica restaurada DESLIGADA: nenhuma receita ativa, nenhum cartão verde, nenhuma minuta aprovada, nenhuma cobrança real"
 psql "$ADMIN_DATABASE_URL" -q -c "DROP DATABASE $DB WITH (FORCE)"
 echo "restore OK"

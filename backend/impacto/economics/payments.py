@@ -249,7 +249,8 @@ def mine(conn: Connection, *, org_id: str, state: str | None = None, limit: int 
             "limit": limit, "offset": offset}
 
 
-def revenue(conn: Connection, *, since: Any = None, until: Any = None) -> dict:
+def revenue(conn: Connection, *, since: Any = None, until: Any = None,
+            provider_configured: bool = False) -> dict:
     """Receita apurada, com o simulado em colunas próprias.
 
     Somar simulado com real mostraria dinheiro que não entrou. A separação está na função SQL, não
@@ -272,17 +273,23 @@ def revenue(conn: Connection, *, since: Any = None, until: Any = None) -> dict:
         " WHERE ($1::timestamptz IS NULL OR created_at >= $1)"
         "   AND ($2::timestamptz IS NULL OR created_at < $2)"
         " GROUP BY currency ORDER BY currency",
-        since, until, list(REAL_PROVIDERS))
+        since, until, list(REAL_PROVIDERS) if provider_configured else [])
     return {
         "items": rows,
         "subscriptions": {
             "items": subs,
             "note": ("Assinatura é apurada em `invoices` e fica em bloco separado de propósito: "
-                     "`platform_charges` cobre avulso, parcelado, PIX e boleto. Mesma regra de "
-                     f"provedor real ({', '.join(REAL_PROVIDERS)}); fatura em provedor de teste "
-                     "conta como simulada."),
+                     "`platform_charges` cobre avulso, parcelado, PIX e boleto."
+                     + (f" Provedor real: {', '.join(REAL_PROVIDERS)}; fatura em provedor de teste "
+                        "conta como simulada." if provider_configured else
+                        " SEM provedor configurado nesta instalação, NENHUMA fatura conta como "
+                        "real — nem as que têm 'stripe' na coluna de provedor. Coluna dizendo "
+                        "'stripe' não é prova de chave ao vivo, e é exatamente o que um cenário "
+                        "de teste escreve. Classificar por nome de provedor foi o erro que o "
+                        "teste `test_the_consolidated_total_contains_only_real_money` pegou.")),
         },
         "total_real_paid_cents_by_currency": _merge_real(rows, subs),
+        "provider_configured": provider_configured,
         "note": ("`real_*` conta apenas cobranças em provedor real. `simulated_*` conta as de "
                  "provedor de teste e NUNCA entra no real. Nesta instalação não há provedor "
                  "configurado, então a receita real é zero por construção — e isso é o estado "

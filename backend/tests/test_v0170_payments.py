@@ -344,6 +344,28 @@ class RevenueShapeTests(PayBase):
         self.assertIn("items", rev["subscriptions"])
         self.assertIn("separado", rev["subscriptions"]["note"].lower())
 
+    def test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money(self):
+        """A lição mais cara desta fase.
+
+        A primeira versão deste relatório classificava fatura como real pelo NOME do provedor. A
+        suíte completa pegou o erro: os cenários da v0.11.0 gravam `provider = 'stripe'` com uma
+        chave falsa, e o total consolidado passou a mostrar R$ 396,00 de receita que não existe.
+        Coluna dizendo 'stripe' não é prova de chave ao vivo.
+        """
+        oc = owner_conn()
+        try:
+            oc.run("INSERT INTO invoices(org_id, provider, amount_cents, currency, status, paid_at)"
+                   " VALUES ($1,'stripe',777700,'BRL','paid', now())", self.org.org_id)
+        finally:
+            oc.close()
+        rev = self.admin.get("/v1/admin/payments/revenue").json
+        self.assertFalse(rev["provider_configured"])
+        self.assertEqual(rev["total_real_paid_cents_by_currency"].get("BRL", 0), 0)
+        brl = next(i for i in rev["subscriptions"]["items"] if i["currency"] == "BRL")
+        self.assertEqual(brl["real_paid_cents"], 0)
+        self.assertGreaterEqual(brl["simulated_cents"], 777700,
+                                "a fatura tem de aparecer, do lado simulado")
+
     def test_the_consolidated_total_contains_only_real_money(self):
         c = self.charge(amount_cents=123_400)
         for s in ("checkout_started", "pending", "paid"):

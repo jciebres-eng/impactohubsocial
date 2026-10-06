@@ -8,7 +8,7 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            # v0.16.0 — camada de rede
            "network_core_routes", "network_hub_routes",
            # v0.17.0 — camada econômica
-           "program_routes"]
+           "program_routes", "legal_routes"]
 _loaded = False
 
 

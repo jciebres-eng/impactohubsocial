@@ -1,8 +1,10 @@
 # Política de Privacidade — Plataforma Impacto
 
-> **MINUTA — [VALIDAR JURÍDICO]**. Redigida a partir do tratamento de dados que o código v0.7.0 efetivamente realiza.
+> **MINUTA — DRAFT FOR LEGAL REVIEW — [VALIDAR JURÍDICO]**. Redigida a partir do tratamento de dados que o código v0.7.0 efetivamente realiza.
 > Bases legais, prazos de retenção e transferências internacionais **precisam ser confirmados por advogado(a)/DPO** antes da
 > publicação. Campos `{{ }}` dependem do proprietário.
+> Registrada em `legal_documents` como MINUTA: enquanto não houver aprovação com revisor nomeado, o banco
+> **recusa registrar aceite** deste documento (ver `docs/LEGAL_FRAMEWORK.md`).
 
 Versão da minuta: 2026-10-04
 

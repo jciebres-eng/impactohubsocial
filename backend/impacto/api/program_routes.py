@@ -344,7 +344,8 @@ def admin_revenue(ctx: Ctx, q: E.RevenueQ):
 
     from ..clock import now as _now
     with ctx.tx(readonly=True) as c:
-        out = PAY.revenue(c, since=_now() - timedelta(days=q.days))
+        out = PAY.revenue(c, since=_now() - timedelta(days=q.days),
+                          provider_configured=PAY.status(ctx.settings)["configured"])
     return {**out, "provider_status": PAY.status(ctx.settings)}
 
 

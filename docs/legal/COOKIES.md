@@ -1,6 +1,6 @@
 # Política de Cookies — Plataforma Impacto
 
-> **MINUTA — [VALIDAR JURÍDICO]**. Lista extraída do código v0.7.0 (`backend/impacto/api/auth_routes.py`, `web/sw.template.js`).
+> **MINUTA — DRAFT FOR LEGAL REVIEW — [VALIDAR JURÍDICO]**. Lista extraída do código v0.7.0 (`backend/impacto/api/auth_routes.py`, `web/sw.template.js`).
 
 A Plataforma usa **somente cookies e armazenamentos estritamente necessários** ao funcionamento e à segurança.
 Não há cookies de publicidade, rastreamento ou análise de terceiros; por isso não exibimos banner de consentimento.

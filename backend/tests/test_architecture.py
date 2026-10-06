@@ -102,7 +102,12 @@ class ArchitectureTests(unittest.TestCase):
                            # v0.17.0 — programa que a dona escolheu publicar. `programs_read` exige
                            # visibility='public' AND published_at IS NOT NULL AND status<>'suspended', e
                            # programs.public_feed() repete o filtro num único lugar.
-                           "/v1/programs/feed", "/v1/programs/{program_id}"}
+                           "/v1/programs/feed", "/v1/programs/{program_id}",
+                           # v0.17.0 — texto legal e situação dele. É público por obrigação: quem vai
+                           # aceitar um documento precisa poder lê-lo ANTES de ter conta, e a minuta
+                           # já se identifica como minuta na primeira linha. `legal_text()` nunca
+                           # devolve versão superada, e aceite de minuta é recusado pelo banco.
+                           "/v1/legal/registry", "/v1/legal/documents/{doc_key}"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):

@@ -1,8 +1,10 @@
 # Termos de Uso — Plataforma Impacto
 
-> **MINUTA — [VALIDAR JURÍDICO]**. Rascunho técnico preparado a partir do funcionamento real do software (v0.7.0).
+> **MINUTA — DRAFT FOR LEGAL REVIEW — [VALIDAR JURÍDICO]**. Rascunho técnico preparado a partir do funcionamento real do software (v0.7.0).
 > Não é aconselhamento jurídico e **não pode ser publicado sem revisão de advogado(a)**. Campos entre `{{ }}` dependem
 > de decisão do proprietário (razão social, CNPJ, foro, contato do encarregado).
+> Registrada em `legal_documents` como MINUTA: enquanto não houver aprovação com revisor nomeado, o banco
+> **recusa registrar aceite** deste documento (ver `docs/LEGAL_FRAMEWORK.md`).
 
 Versão da minuta: 2026-10-04 · Aplica-se à versão de software 0.7.0
 

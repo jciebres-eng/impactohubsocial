@@ -2,11 +2,9 @@
 from __future__ import annotations
 
 import uuid
-from pathlib import Path
 
 from starlette.responses import Response
 
-from ..config import ROOT
 from ..http import ApiError, Ctx, json_response, route
 from ..security import passwords
 from . import schemas as S
@@ -91,14 +89,20 @@ def consent(ctx: Ctx, body: ConsentIn):
     return {"kind": body.kind, "granted": body.granted}
 
 
-LEGAL = {"termos": "TERMS_OF_USE.md", "privacidade": "PRIVACY_POLICY.md", "cookies": "COOKIES.md"}
-
-
-@route("GET", "/v1/legal/{doc}", auth="none", raw=True, tags=T, summary="Textos legais vigentes (Markdown)")
+@route("GET", "/v1/legal/{doc}", auth="none", raw=True, tags=T,
+       summary="Texto legal em Markdown, servido do registro versionado (minuta vem marcada como minuta)")
 def legal(ctx: Ctx):
-    name = LEGAL.get(ctx.path["doc"])
-    if not name:
-        raise ApiError(404, "not_found", "Documento não encontrado")
-    p = Path(ROOT) / "docs" / "legal" / name
-    return Response(p.read_text(encoding="utf-8"), media_type="text/markdown; charset=utf-8",
-                    headers={"Cache-Control": "public, max-age=600"})
+    """Serve do registro, não do disco.
+
+    Até a v0.16.0 esta rota lia o arquivo e se chamava "textos legais VIGENTES" — e nenhum deles
+    estava vigente. Agora ela serve a mesma linha cujo sha256 um aceite referenciaria, e diz no
+    cabeçalho em que situação o documento está.
+    """
+    from ..services import legal as REG
+    with ctx.tx(readonly=True) as c:
+        doc = REG.text(c, key=ctx.path["doc"])
+    return Response(doc["body_md"], media_type="text/markdown; charset=utf-8",
+                    headers={"Cache-Control": "public, max-age=600",
+                             "X-Legal-Status": doc["status"],
+                             "X-Legal-Version": str(doc["version"]),
+                             "X-Legal-Sha256": doc["body_sha256"]})

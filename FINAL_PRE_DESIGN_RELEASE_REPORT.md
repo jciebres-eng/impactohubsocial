@@ -266,8 +266,22 @@ webhook de entrega de e-mail.
 
 ## J · Git e pacote
 
-Preenchido no fecho da rodada, após o commit e o empacotamento — ver a última seção deste arquivo e
-`FINAL_RELEASE_MANIFEST.json`.
+| | |
+|---|---|
+| Ramo | `chore/v0.19.0-vocabulary-firstrun-ops` |
+| Commit do trabalho | `d6306a821ffb2b56cf960865c4c388709f250f8d` |
+| Árvore de trabalho | limpa após o commit de fecho |
+| Manifesto de arquivos | `V0.19.0_FINAL_MANIFEST.json` — 1.046 arquivos, 28 categorias, 20,69 MB |
+| Manifesto de release (§59) | `FINAL_RELEASE_MANIFEST.json` |
+| Pacote | `IMPACTO_v0.19.0_VOCABULARY_FIRSTRUN_OPS.zip` |
+
+**Sobre o sha256 do pacote:** um ZIP não pode conter o próprio hash. Ele é calculado depois do
+empacotamento, informado na entrega e conferível por `python3 scripts/make_release.py --verify DIR`
+contra o `RELEASE_MANIFEST.sha256` que vai dentro do pacote — que é a conferência que importa, porque
+cobre **cada arquivo**, e não só o invólucro.
+
+**Nada de segredo no pacote:** o empacotador recusa `.env` real, chaves, tokens e dumps; `unzip -t`
+confere a integridade; e não há ZIP dentro de ZIP.
 
 ---
 

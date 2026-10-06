@@ -1,90 +1,178 @@
 {
-  "version": "0.12.1",
-  "git_commit": "f8fe9d6bd0bcc756f0e0ba8f8e2250b1ba5e6cf7",
-  "git_branch": "inc/v0.12.0-central-conhecimento",
-  "git_tag": "v0.12.1-final-baseline",
-  "generated_at": "2026-10-05T17:09:36+00:00",
-  "build_status": "PASS",
-  "lint_status": "PASS",
-  "typecheck_status": "PASS",
-  "test_status": "PASS",
-  "e2e_status": "PASS",
-  "security_status": "PARTIAL",
-  "dependency_audit_status": "BLOCKED",
-  "database_status": "PASS",
-  "migration_status": "PASS",
-  "accessibility_status": "PARTIAL",
-  "zip_filename": "FINAL_FULL_RELEASE.zip",
-  "tests": {
-    "total": 392,
-    "passed": 392,
-    "failed": 0,
-    "skipped": 0,
-    "unit": 33,
-    "api_integration": 325,
-    "architecture": 6,
-    "e2e_browser": 28,
-    "evidence": "docs/evidence/test_run_v0.12.1.log"
+  "version": "0.19.0",
+  "commit": "d6306a821ffb2b56cf960865c4c388709f250f8d",
+  "branch": "chore/v0.19.0-vocabulary-firstrun-ops",
+  "timestamp": "2026-10-06T15:19:05+00:00",
+  "note": "Manifesto de release no formato pedido pelo PROMPT MASTER §59. Cada campo de status diz o que foi MEDIDO nesta rodada. Onde não foi possível medir, o campo diz BLOCKED — nunca OK.",
+  "test_summary": {
+    "total": 1355,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 26,
+    "duration_seconds": 484,
+    "previous_version_total": 1298,
+    "added_this_round": 57,
+    "command": "TEST_ADMIN_DATABASE_URL=... python3 -m unittest discover -s tests -t .",
+    "evidence": "docs/evidence/test_run_v0.19.0.log",
+    "new_suites": {
+      "test_v0190_glossary.py": 13,
+      "test_v0190_firstrun.py": 16,
+      "test_v0190_lgpd_deletion.py": 13,
+      "test_v0190_ops.py": 15
+    }
   },
-  "api": {
-    "operations": 475,
-    "spec": "docs/openapi.json",
-    "parity_checked": true
-  },
-  "database": {
-    "tables": 152,
-    "migrations": 10,
-    "rls_on_all_tables_except": [
-      "schema_migrations"
+  "migration_status": {
+    "status": "OK",
+    "applied": 36,
+    "new_this_round": [
+      "0035_v0190_acceptance_org_anonymization",
+      "0036_v0190_ops_observability"
     ],
-    "created_from_scratch_each_test_run": true,
-    "incremental_migration_verified": true
+    "forward_only": true,
+    "checksum_per_file": true,
+    "upgrade_path_tested": "test_v0181_migrations.py (v0.17.0 -> atual, com dado)",
+    "evidence": "docs/evidence/db_integrity_v0.19.0.txt"
   },
-  "commands": {
-    "test": "cd backend && TEST_ADMIN_DATABASE_URL=\"postgresql://postgres@127.0.0.1:5432/postgres\" PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v",
-    "lint": "cd backend && ruff check impacto tests",
-    "typecheck": "cd web && node node_modules/typescript/bin/tsc -p tsconfig.offline.json --noEmit",
-    "build": "cd web && node build.mjs",
-    "release": "python3 scripts/make_release.py",
-    "verify_release": "python3 scripts/make_release.py --verify <dir>"
-  },
-  "blocked": {
-    "dependency_audit": {
-      "npm": "npm install --package-lock-only --ignore-scripts -> 403 Forbidden (registry.npmjs.org); npm audit exige lockfile",
-      "pip": "pip install pip-audit -> No matching distribution found; pip download requests -> idem (PyPI bloqueado)",
-      "impact": "nenhuma afirmacao sobre vulnerabilidades de dependencias; executar em CI",
-      "required_in_ci": [
-        "npm audit --omit=dev",
-        "pip-audit -r backend/requirements.txt"
-      ]
-    },
-    "accessibility": {
-      "axe_core": "instalacao bloqueada (registry npm)",
-      "done_instead": "verificacao propria em navegador: rotulos, foco, lang, IDs, cabecalhos, overflow, contraste AA (claro e escuro)"
-    },
-    "external": [
-      "Stripe real",
-      "SMTP real",
-      "clamd real",
-      "S3 real",
-      "IdP real",
-      "conteudo oficial",
-      "precos",
-      "nota fiscal",
-      "pentest",
-      "builds assinados Apple/Google"
+  "security_status": {
+    "status": "OK_WITH_CONDITIONS",
+    "tenant_isolation": "testado",
+    "rls_policies": 598,
+    "mfa_for_admin": true,
+    "rate_limit": "testado (429 asserido em test_api_auth.py)",
+    "new_public_route_reviewed": "/v1/public/glossary — serve só o arquivo versionado de vocabulário",
+    "pending": [
+      "provedores externos em modo simulado",
+      "auditoria de dependência bloqueada"
     ]
   },
-  "readiness": {
-    "technical_baseline": "READY",
-    "design": "READY",
-    "web": "READY",
-    "app_api": "READY",
-    "production": "NOT READY"
+  "postgres_status": {
+    "status": "OK",
+    "version": "16",
+    "tables": 287,
+    "functions": 309,
+    "policies": 598,
+    "indexes": 802,
+    "suite_runs_against_real_db": true
   },
-  "note": "git_commit identifica o commit do CONTEUDO auditado (codigo, testes, docs, migrations). O commit seguinte adiciona apenas artefatos de release (este manifesto e RELEASE_MANIFEST.sha256/csv); a tag v0.12.1-final-baseline aponta para o commit de conteudo.",
-  "zip_alias": "IMPACTO_v0.12_FINAL_BASELINE.zip (copia byte a byte, mesmo sha256)",
-  "zip_files": 517,
-  "zip_sha256_file": "dist-release/FINAL_FULL_RELEASE.zip.sha256",
-  "zip_note": "O digest do pacote nao pode ficar dentro do proprio pacote (auto-referencia): ele fica em dist-release/FINAL_FULL_RELEASE.zip.sha256 e no relatorio de entrega. A integridade do CONTEUDO e verificavel por RELEASE_MANIFEST.sha256 (517 arquivos) com 'python3 scripts/make_release.py --verify <dir>'."
+  "e2e_status": {
+    "status": "OK",
+    "journey": "test_e2e_v0181_journeys.py (18 passos, sem atalho de banco)",
+    "browser": "test_e2e_web.py (cadastro -> projeto -> publicação)",
+    "first_access_zero_data": "test_v0190_firstrun.py + smoke firstrun (12 áreas, 12 vazias, todas com motivo e próximo passo)",
+    "gap": "as seis telas da camada v0.18.0 não existem — declaradas em DESIGN_HANDOFF_FINAL.md §3"
+  },
+  "backup_status": {
+    "status": "OK_LOCAL_ONLY",
+    "scheduled": "tarefa `backup` em impacto/jobs.py, janela própria (BACKUP_INTERVAL_HOURS)",
+    "verified": [
+      "tamanho",
+      "sha256 contra o .sha256 gravado",
+      "pg_restore --list"
+    ],
+    "restore_tested": "scripts/restore_test.sh — restore OK, 36 migrações, camada de operação íntegra",
+    "evidence": "docs/evidence/restore_test_v0.19.0.log",
+    "offsite": "BLOCKED_EXTERNAL — gancho BACKUP_OFFSITE_CMD pronto, destino depende de conta do proprietário",
+    "rpo_rto": "DATA_TO_CONFIRM — o que a configuração entrega está no runbook §4-A; os alvos são decisão do proprietário"
+  },
+  "email_status": {
+    "status": "OK_IN_SIMULATION",
+    "events_recorded": "tabela email_events, ligada no mailer (não nos 8 pontos de envio)",
+    "canary": "tarefa `email_canary`, envio real pelo mailer configurado",
+    "stored": "domínio do destinatário; NUNCA o endereço nem o corpo",
+    "success_state": "accepted_by_smtp — aceitação pelo servidor, NÃO entrega",
+    "delivery_confirmation": "BLOCKED_EXTERNAL — exige webhook de bounce/entrega do provedor"
+  },
+  "accessibility_status": {
+    "status": "PARTIAL",
+    "verified": 12,
+    "not_verified": 6,
+    "evidence": "ACCESSIBILITY_REPORT.md",
+    "not_verified_list": [
+      "axe-core",
+      "leitor de tela real",
+      "segundo navegador",
+      "zoom 200%",
+      "daltonismo",
+      "navegação por voz"
+    ]
+  },
+  "dependency_status": {
+    "status": "BLOCKED_BY_ENVIRONMENT",
+    "npm_audit": "403 Forbidden no registry",
+    "pip_audit": "índice do PyPI indisponível",
+    "explicit": "NÃO se afirma ausência de vulnerabilidade; ver SECURITY_AUDIT.md §0",
+    "offline_controls_verified": [
+      "fixação de versão",
+      "inventário de terceiros",
+      "import não declarado"
+    ]
+  },
+  "observability_status": {
+    "status": "PARTIAL",
+    "new": [
+      "ops_job_runs",
+      "email_events",
+      "GET /v1/admin/ops/health"
+    ],
+    "existing": [
+      "/metrics",
+      "logs com request_id e trace_id",
+      "job_runs"
+    ],
+    "gap": "nenhum coletor configurado"
+  },
+  "known_external_dependencies": [
+    "SMTP",
+    "armazenamento S3",
+    "antivírus ClamAV",
+    "pagamento (Stripe)",
+    "provedor fiscal",
+    "IdP/OIDC",
+    "registry de dependências",
+    "destino de backup externo",
+    "coletor de métricas"
+  ],
+  "data_to_confirm": [
+    "RPO alvo",
+    "RTO alvo",
+    "endereço do canário de e-mail",
+    "destino da cópia externa de backup",
+    "aprovação jurídica das 11 minutas",
+    "regime tributário, município emissor e provedor fiscal",
+    "domínio, certificado e credenciais dos provedores",
+    "tradução dos termos editoriais do banco"
+  ],
+  "blocked_external": [
+    "auditoria de dependências",
+    "build e execução da imagem Docker",
+    "axe-core",
+    "entrega real de e-mail",
+    "restauração a partir de cópia externa",
+    "carga com rede real",
+    "provedores externos em modo produtivo"
+  ],
+  "post_design_items": [
+    "mapeamento GRI/ISSB/IRIS+",
+    "decaimento por idade na reputação",
+    "detecção de conluio",
+    "arte e níveis de selo",
+    "aplicativo móvel",
+    "tradução do conteúdo editorial do banco",
+    "procedência do preenchimento persistida",
+    "webhook de entrega de e-mail"
+  ],
+  "release_decision": "GO WITH CONDITIONS",
+  "release_decision_note": "A base técnica está pronta para a camada de design e nada TÉCNICO impede a publicação. As condições são externas — credencial, conta, infraestrutura e decisão jurídica — e cada uma tem o suporte técnico pronto para recebê-la. Não é GO porque auditoria de dependências, imagem Docker e carga com rede real continuam não provadas; não é NO-GO porque nenhuma delas é defeito do software.",
+  "report": "FINAL_PRE_DESIGN_RELEASE_REPORT.md",
+  "file_manifest": "V0.19.0_FINAL_MANIFEST.json",
+  "package": {
+    "name": "IMPACTO_v0.19.0_VOCABULARY_FIRSTRUN_OPS.zip",
+    "files": 1047,
+    "size_mb": 6.04,
+    "sha256": "e26953e204f7cced5e9d265ee9512345855928075b369562b905a59a389d614d",
+    "integrity": "unzip -t sem erro; 1047 arquivos conferidos por make_release.py --verify no pacote extraído",
+    "nested_zip": false,
+    "secrets": false,
+    "note": "Este hash é do pacote construído no commit do trabalho. O commit de FECHO acrescenta este campo e os manifestos, então o pacote entregue é o construído antes dele — a conferência que vale é a de cada arquivo (RELEASE_MANIFEST.sha256 dentro do pacote), não a do invólucro."
+  }
 }

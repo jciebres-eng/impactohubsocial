@@ -46,6 +46,7 @@ HOLES = {
     # camada de impacto contextualizado (0025+)
     "equity.py": {}, "territory.py": {}, "frameworks.py": {},
     "claims.py": {"{owner_col}": "org_id", "{table}": "projects"},
+    "reputation.py": {}, "seals.py": {}, "lookups.py": {}, "responsibility.py": {"{owner}": "org_id", "{table}": "projects"},
 }
 
 

@@ -314,8 +314,32 @@ def payment_deadlines(app) -> dict:
         return PAY.expire_due(c)
 
 
+def reputation_timeline(app) -> dict:
+    """Congela um ponto da linha do tempo de reputação por organização ativa.
+
+    A reputação corrente é sempre CALCULADA; este job só registra o ponto histórico, para que a
+    evolução exista e para que uma correção futura não apague o que foi publicado antes dela.
+    Organizações sem nenhuma observação não geram ponto: linha do tempo de quem não tem base é
+    ruído com aparência de dado.
+    """
+    from .impact import reputation as REP
+    done = 0
+    with app.pool.tx(DbContext(system=True)) as c:
+        orgs = [r["id"] for r in c.query(
+            "SELECT id::text AS id FROM organizations WHERE status = 'active'"
+            "   AND kind <> 'platform' ORDER BY created_at LIMIT 500")]
+    for org_id in orgs:
+        with app.pool.tx(DbContext(system=True)) as c:
+            prof = REP.profile(c, org_id=org_id, privileged=True)
+            if not any(d["observations"] for d in prof["dimensions"]):
+                continue
+            REP.snapshot(c, org_id=org_id)
+            done += 1
+    return {"organizations": len(orgs), "recorded": done}
+
+
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops)]
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline)]
 
 
 def run_once(app) -> list[dict]:

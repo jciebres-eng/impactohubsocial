@@ -412,3 +412,29 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .meter > span { display: block; height: 100%; background: var(--mata, var(--ipe)); }
 .article { max-width: 78ch; }
 @media (max-width: 640px) { .ctxhelp-box { position: static; max-width: none; } }
+
+/* ---------------------------------------------------------------- autocomplete com procedência */
+/* A etiqueta de origem é parte do controle, não enfeite: ela é o que permite avaliar a sugestão. */
+.suggest { position: relative; display: grid; gap: 6px; }
+.suggest-list { position: absolute; z-index: 30; top: 100%; left: 0; right: 0; margin: 4px 0 0; padding: 4px; list-style: none; max-height: 320px; overflow: auto; background: var(--folha); border: 1px solid var(--linha); border-radius: var(--raio-m); box-shadow: 0 10px 30px rgb(0 0 0 / 12%); }
+.suggest-item > button { width: 100%; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 10px; background: none; border: 0; border-radius: var(--raio-s); text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.suggest-item-on > button, .suggest-item > button:hover { background: var(--ipe-claro); }
+.suggest-label { font-weight: 600; }
+.suggest-sub { color: var(--texto-3); font-size: 13.5px; }
+.pill-origin { font-size: 12px; }
+.suggest-origin { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: 13.5px; color: var(--texto-3); }
+.suggest-source { font-size: 13px; }
+.suggest-confirm { padding: 10px 12px; background: var(--ipe-claro); border: 1px solid var(--linha); border-radius: var(--raio-s); display: grid; gap: 8px; }
+.suggest-confirm p { margin: 0; }
+.suggest-confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.suggest-empty { margin: 0; font-size: 13.5px; color: var(--texto-3); }
+
+/* ------------------------------------------------------------------- formulário em etapas */
+/* Etapa bloqueada mostra o motivo E oferece abrir de todo modo: ninguém fica preso ao caminho. */
+.form-steps { display: grid; gap: 22px; }
+.form-step { display: grid; gap: 10px; }
+.form-step-title { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 17px; }
+.form-step-n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--ipe-claro); border: 1px solid var(--linha); font-size: 14px; }
+.form-step-hint { margin: 0; color: var(--texto-3); font-size: 14px; }
+.form-step-blocked { margin: 0; padding: 10px 12px; background: var(--folha); border: 1px dashed var(--linha); border-radius: var(--raio-s); color: var(--texto-3); font-size: 14px; }
+.form-step-locked .form-step-title { color: var(--texto-3); }

@@ -174,3 +174,114 @@ class ClaimReviewIn(In):
 class ClaimReviewRequestIn(In):
     reviewer_org_id: Uuid
     note: Annotated[str, Field(min_length=10, max_length=2000)] | None = None
+
+
+# ================================================================================================ reputação
+class TimelineQ(In):
+    dimension: Slug | None = None
+    limit: Annotated[int, Field(ge=1, le=365)] = 120
+
+
+class DisputeIn(In):
+    dimension: Slug
+    what_is_contested: Annotated[str, Field(min_length=20, max_length=4000)]
+    expected_correction: Annotated[str, Field(min_length=20, max_length=4000)]
+    evidence_id: Uuid | None = None
+
+
+class DisputeQ(In):
+    only_open: bool = False
+    all_orgs: bool = False
+
+
+class DisputeResolutionIn(In):
+    outcome: Annotated[str, Field(
+        pattern="^(corrected|no_change|partially_corrected|needs_more_information)$")]
+    rationale: Annotated[str, Field(min_length=20, max_length=4000)]
+    what_changed: Annotated[str, Field(min_length=10, max_length=4000)] | None = None
+
+
+# ================================================================================================ selos
+class SealCriterionIn(In):
+    rule_code: Slug
+    params: dict | None = None
+
+
+class SealDefinitionIn(In):
+    code: Slug
+    scope: Annotated[str, Field(pattern="^(organization|project)$")]
+    title: Annotated[str, Field(min_length=5, max_length=200)]
+    what_it_attests: Annotated[str, Field(min_length=20, max_length=2000)]
+    what_it_does_not_attest: Annotated[str, Field(min_length=20, max_length=2000)]
+    validity_days: Annotated[int, Field(ge=30, le=1095)]
+    criteria: Annotated[list[SealCriterionIn], Field(min_length=1, max_length=12)]
+
+
+class SealDefinitionQ(In):
+    scope: Annotated[str, Field(pattern="^(organization|project)$")] | None = None
+    code: Slug | None = None
+    status: Annotated[str, Field(pattern="^(draft|published|retired)$")] | None = None
+
+
+class SealEvaluateIn(In):
+    definition_id: Uuid
+    subject_id: Uuid
+
+
+class SealAwardQ(In):
+    scope: Annotated[str, Field(pattern="^(organization|project)$")] | None = None
+    subject_id: Uuid | None = None
+    mine: bool = False
+    active_only: bool = False
+
+
+class SealRevokeIn(In):
+    reason: Annotated[str, Field(pattern="^(criterion_no_longer_met|definition_retired|"
+                                         "data_correction|request_of_holder|misconduct)$")]
+    detail: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class LookupQ(In):
+    q: Annotated[str, Field(max_length=120)] = ""
+    limit: Annotated[int, Field(ge=1, le=25)] = 10
+
+
+# ================================================================================================ responsabilidade
+class AssignmentIn(In):
+    scope: Annotated[str, Field(pattern="^(organization|program|project|document)$")]
+    subject_id: Uuid
+    role_code: Slug
+    mandate_basis: Annotated[str, Field(min_length=10, max_length=2000)]
+    user_id: Uuid | None = None
+    external_name: Annotated[str, Field(min_length=3, max_length=200)] | None = None
+    external_note: Annotated[str, Field(min_length=5, max_length=500)] | None = None
+    starts_on: date | None = None
+
+
+class AssignmentEndIn(In):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+    ended_on: date | None = None
+
+
+class ResponsibleQ(In):
+    scope: Annotated[str, Field(pattern="^(organization|program|project|document)$")]
+    subject_id: Uuid
+
+
+class DecisionIn(In):
+    assignment_id: Uuid
+    kind: Slug
+    statement: Annotated[str, Field(min_length=20, max_length=4000)]
+    document_id: Uuid | None = None
+    document_version: Annotated[int, Field(ge=1, le=9999)] | None = None
+    signature_id: Uuid | None = None
+    second_assignment_id: Uuid | None = None
+    second_statement: Annotated[str, Field(min_length=20, max_length=4000)] | None = None
+    taken_on: date | None = None
+
+
+class DecisionQ(In):
+    scope: Annotated[str, Field(pattern="^(organization|program|project|document)$")] | None = None
+    subject_id: Uuid | None = None
+    assignment_id: Uuid | None = None
+    limit: Annotated[int, Field(ge=1, le=200)] = 100

@@ -5,6 +5,7 @@ import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Button, Chips, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
 import { MatchVerdict } from "../ui/trail";
+import { Suggest } from "../ui/suggest";
 
 const SPHERES: [string, string][] = [["private", "Privado"], ["federal", "Federal"], ["state", "Estadual"], ["municipal", "Municipal"], ["local", "Local"], ["international", "Internacional"]];
 const INSTRUMENTS: [string, string][] = [["edital", "Edital"], ["grant", "Doação/grant"], ["fund", "Fundo"], ["financing", "Financiamento"], ["prize", "Prêmio"], ["incentive_law", "Lei de incentivo"], ["donation", "Doação direta"], ["other", "Outro"]];
@@ -88,7 +89,11 @@ function Search() {
         <Field label="Esfera"><Select value={f.v.sphere} onChange={f.set("sphere")} placeholder="Todas" options={SPHERES} /></Field>
         <Field label="Tipo"><Select value={f.v.instrument} onChange={f.set("instrument")} placeholder="Todos" options={INSTRUMENTS} /></Field>
         <Field label="Causa"><Select value={f.v.cause} onChange={f.set("cause")} placeholder="Todas" options={Object.entries(tax?.causes || {}) as any} /></Field>
-        <Field label="Território" hint="BR-MT ou BR-MT-5105259"><Input value={f.v.territory} onChange={(v) => f.set("territory")(v.toUpperCase())} /></Field>
+        <Field label="Território" hint="Digite o nome ou o código; cada sugestão diz de onde veio.">
+          <Suggest lookup="territories" value={f.v.territory}
+            onChange={(v, item) => f.set("territory")(item ? item.value : v.toUpperCase())}
+            placeholder="ex.: Mato Grosso, BR-MT" />
+        </Field>
         <Field label="Situação"><Select value={f.v.status} onChange={f.set("status")} options={[["open", "Abertas"], ["closed", "Encerradas"], ["all", "Todas"]]} /></Field>
         <Button type="submit" variant="ink">Buscar</Button>
       </form>
@@ -127,7 +132,11 @@ function SavedSearches() {
           <Field label="Nome"><Input value={f.v.name} onChange={f.set("name")} placeholder="Cultura no Mato Grosso" /></Field>
           <Field label="Causa"><Select value={f.v.cause} onChange={f.set("cause")} placeholder="Qualquer" options={Object.entries(tax?.causes || {}) as any} /></Field>
           <Field label="Esfera"><Select value={f.v.sphere} onChange={f.set("sphere")} placeholder="Qualquer" options={SPHERES} /></Field>
-          <Field label="Território"><Input value={f.v.territory} onChange={(v) => f.set("territory")(v.toUpperCase())} placeholder="BR-MT" /></Field>
+          <Field label="Território" hint="A sugestão mostra a origem e nunca substitui o que você escreveu sem perguntar.">
+            <Suggest lookup="territories" value={f.v.territory}
+              onChange={(v, item) => f.set("territory")(item ? item.value : v.toUpperCase())}
+              placeholder="BR-MT" />
+          </Field>
           <Field label="Compatibilidade mínima" hint="0 a 100 (opcional)"><Input inputMode="numeric" value={f.v.min_score} onChange={f.set("min_score")} /></Field>
           <Field label="Frequência"><Select value={f.v.frequency} onChange={f.set("frequency")} options={[["instant", "A cada rodada"], ["daily", "Diária"], ["weekly", "Semanal"]]} /></Field>
           <Button type="submit" variant="primary" busy={busy}>Salvar e acompanhar</Button>

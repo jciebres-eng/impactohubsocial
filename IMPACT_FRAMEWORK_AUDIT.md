@@ -165,3 +165,23 @@ político e contra decisão automatizada sobre pessoas. A conciliação:
   produto **e** jurídica, porque as minutas da v0.17.0 excluem esses relatórios.
 - **Próxima:** FASE 6 — reputação explicável, com contestação e correção, sem transformar a nota em
   caixa-preta que determina acesso.
+
+## PHASE STATUS — FASES 6 a 9
+
+| Fase | Entregue | Prova |
+|---|---|---|
+| 6 | Reputação explicável em 6 dimensões, **sem nota única**, com contestação que aparece no perfil e correção que gera ponto novo | `0029_v0180_reputation.sql`, `impact/reputation.py`, 8 rotas, job `reputation_timeline`, `test_v0180_reputation.py` (30), `REPUTATION_ARCHITECTURE.md` |
+| 7 | Motor de selos: definição versionada e imutável, **critério avaliado em SQL**, concessão que o banco confere, revogação como fato novo | `0030_v0180_seals.sql`, `impact/seals.py`, 11 rotas, `test_v0180_seals.py` (23), `SEAL_ENGINE.md` |
+| 8 | Busca incremental com **procedência em cada sugestão** + componente que não sobrescreve em silêncio + formulário em etapas | `impact/lookups.py`, 2 rotas, `web/src/ui/suggest.tsx`, `test_v0180_lookups.py` (17), `SMART_FORMS.md` |
+| 9 | Responsabilidade: responsável × papel × escopo × período × decisão × **versão**, separada da assinatura, com quatro-olhos em dado | `0031_v0180_responsibility.sql`, `impact/responsibility.py`, 8 rotas, `test_v0180_responsibility.py` (25), `RESPONSIBILITY_ENGINE.md` |
+
+- **Decisões registradas:** ADR-201 a ADR-220.
+- **Divergências declaradas nesta metade:** (a) reputação **sem nota única**, contra o "score" dos
+  prompts (ADR-201); (b) selo **binário**, sem níveis bronze/prata/ouro (ADR-210); (c) dimensão de
+  contagem (`contribution_to_others`) **sem valor** de 0 a 100, por não existir denominador.
+- **Dois erros de desenho encontrados pelos próprios testes**, e corrigidos no produto: o valor de
+  reputação publicado com faixa de confiança insuficiente (pego pela restrição
+  `insufficient_has_no_value`) e a recusa de selo que desfazia o registro da própria recusa
+  (ADR-208).
+- **Próxima:** FASE 10 — revisão de segurança, LGPD e isolamento das tabelas novas, testes de viés
+  e de gaming, desempenho, documentação conferida contra o banco, release e pacote.

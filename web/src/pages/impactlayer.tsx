@@ -146,10 +146,16 @@ export function Seals() {
 export function Claims() {
   const { data, error, loading, reload } = useLoad<any>("/v1/claims");
   const rules = useLoad<any>("/v1/claims/rules");
+  const projetos = useLoad<any>("/v1/projects");
   const act = useAction();
   const [novo, setNovo] = useState(false);
-  const f = useForm({ kind: "result", statement: "", period_start: "", period_end: "" });
+  // Uma afirmação é SEMPRE sobre alguma coisa: projeto, programa, organização, solução ou
+  // relatório. Afirmação sem sujeito não tem como ser verificada — e a primeira versão desta tela
+  // esquecia o sujeito, o que a API recusava com 422. Quem encontrou foi o teste adversarial.
+  const f = useForm({ subject_type: "project", subject_id: "", claim_kind: "result",
+                      statement: "", period_start: "", period_end: "" });
   const criar = async () => {
+    if (!f.v.subject_id) { alert("Escolha o projeto sobre o qual é a afirmação."); return; }
     if (await act.run(() => api.post("/v1/claims", f.v), "Afirmação registrada")) {
       setNovo(false);
       reload();
@@ -166,8 +172,12 @@ export function Claims() {
       {novo && (
         <Panel title="Declarar uma afirmação">
           <div className="form-grid">
+            <Field label="Sobre qual projeto" hint="Afirmação sem sujeito não tem como ser verificada.">
+              <Select value={f.v.subject_id} onChange={f.set("subject_id")} placeholder="escolha"
+                      options={(projetos.data?.items || []).map((p: any) => [p.id, p.title])} />
+            </Field>
             <Field label="Tipo">
-              <Select value={f.v.kind} onChange={f.set("kind")}
+              <Select value={f.v.claim_kind} onChange={f.set("claim_kind")}
                       options={Object.entries(CLAIM_KIND)} />
             </Field>
             <Field label="Período (início)"><Input type="date" value={f.v.period_start} onChange={f.set("period_start")} /></Field>
@@ -186,7 +196,7 @@ export function Claims() {
                  actions={<Pill tone={c.status === "supported" ? "good" : c.status === "unsupported" ? "bad" : ""}>
                    {CLAIM_STATUS[c.status] || c.status}</Pill>}>
             <KeyValue items={[
-              ["Tipo", CLAIM_KIND[c.kind] || c.kind],
+              ["Tipo", CLAIM_KIND[c.claim_kind] || c.claim_kind],
               ["Período", `${date(c.period_start)} a ${date(c.period_end)}`],
               ["Rodadas de verificação", String(c.check_rounds ?? 0)],
             ]} />

@@ -140,3 +140,67 @@ class ScreensSayWhatTheyAreNotTests(unittest.TestCase):
 
 class FirstRunNoLongerCallsThemUndesignedTests:
     """Ver tests/test_v0190_firstrun.py: a declaração `to_be_designed` foi atualizada lá."""
+
+
+class ScreenFormsMatchTheApiSchemaTests(unittest.TestCase):
+    """O formulário da tela envia o que a rota exige — conferido campo a campo.
+
+    ESTE TESTE NASCEU DE UM DEFEITO REAL. A primeira versão da tela de afirmações enviava
+    `{kind, statement, period_start, period_end}` e a rota exige `subject_type`, `subject_id` e
+    `claim_kind`: a tela respondia 422 em toda tentativa. Quem encontrou foi um teste adversarial,
+    por acaso, ao montar uma afirmação para outra finalidade.
+
+    Confiar no acaso não serve. Aqui a conferência é estrutural: para cada `useForm({...})` ligado a
+    um `api.post`, todo campo OBRIGATÓRIO do esquema da rota tem de estar no formulário. É o tipo de
+    erro que nenhuma revisão humana pega de forma confiável, porque exige abrir dois arquivos e
+    comparar listas.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        from impacto import api
+        api.load_all()
+
+    @staticmethod
+    def _formularios(fonte: str) -> list[tuple[str, set[str]]]:
+        """Pares (caminho da rota, campos do formulário) achados na página."""
+        pares = []
+        for bloco in re.split(r"export function ", fonte)[1:]:
+            form = re.search(r"useForm\(\{(.*?)\}\)", bloco, re.S)
+            if not form:
+                continue
+            campos = set(re.findall(r"(\w+)\s*:", form.group(1)))
+            for caminho in re.findall(r'api\.post\(\s*[`"]([^`"]+)[`"]', bloco):
+                pares.append((caminho, campos))
+        return pares
+
+    def test_every_form_carries_the_required_fields_of_the_route_it_posts_to(self):
+        from impacto.http import ROUTES
+        por_caminho = {r.path: r for r in ROUTES if r.method == "POST" and r.body}
+        fonte = PAGINA.read_text(encoding="utf-8")
+        pares = self._formularios(fonte)
+        self.assertTrue(pares, "nenhum formulário encontrado: o teste seria vazio")
+        faltando = []
+        conferidos = 0
+        for caminho, campos in pares:
+            normalizado = re.sub(r"\$\{[^}]+\}", "{}", caminho)
+            rota = next((r for p, r in por_caminho.items()
+                         if re.sub(r"\{[a-z_]+\}", "{}", p) == normalizado), None)
+            if rota is None:
+                continue
+            conferidos += 1
+            obrigatorios = {nome for nome, campo in rota.body.model_fields.items()
+                            if campo.is_required()}
+            ausentes = obrigatorios - campos
+            if ausentes:
+                faltando.append(f"{caminho}: o formulário não tem {sorted(ausentes)}")
+        self.assertGreater(conferidos, 0, "nenhum formulário casou com uma rota: teste vazio")
+        self.assertEqual(faltando, [],
+                         "formulário da tela não envia campo obrigatório da rota:\n"
+                         + "\n".join(faltando))
+
+    def test_the_check_would_notice_a_missing_field(self):
+        """Prova de que o teste acima não passa por vacuidade."""
+        pares = self._formularios(
+            'export function X() { const f = useForm({ a: 1 }); api.post("/v1/claims", f.v); }')
+        self.assertEqual(pares, [("/v1/claims", {"a"})])

@@ -168,6 +168,29 @@ class ArchitectureTests(unittest.TestCase):
                     offenders.append(f"{f.name}: {bad}")
         self.assertEqual(offenders, [], f"Aviso fora de network.notify: {offenders}")
 
+    def test_prices_are_not_hard_coded(self):
+        """Regra comercial v0.16.0: o preço vem de config/plans.json -> plan_price_versions, nunca de literal em código.
+
+        O teste lê os valores DECLARADOS e verifica que nenhum deles aparece como literal no backend ou no frontend.
+        Se alguém "ajudar" escrevendo 1999 numa tela, o teste quebra — que é o ponto: backend é a autoridade.
+        """
+        import json
+        plans = json.loads((ROOT / "config" / "plans.json").read_text(encoding="utf-8"))
+        amounts = set()
+        for it in plans.get("price_versions", {}).get("items", []):
+            for k in ("amount_cents", "intro_amount_cents"):
+                v = it.get(k)
+                if isinstance(v, int) and v >= 1000:   # 199 e afins são comuns demais para servir de assinatura
+                    amounts.add(v)
+        self.assertTrue(amounts, "config/plans.json nao declara valores — o teste perderia o sentido")
+        files = [f for f in PKG.rglob("*.py")] + [f for f in (ROOT / "web" / "src").rglob("*.ts")] \
+            + [f for f in (ROOT / "web" / "src").rglob("*.tsx")]
+        for f in files:
+            txt = f.read_text(encoding="utf-8")
+            for a in amounts:
+                self.assertNotRegex(txt, rf"(?<![0-9]){a}(?![0-9])",
+                                    f"{f.relative_to(ROOT)} tem o preco {a} em codigo; o preco mora no banco")
+
     def test_no_string_formatted_sql_with_user_input(self):
         """Só nomes de tabela/coluna de listas fixas podem ser interpolados em SQL (f-strings revisadas)."""
         risky = re.compile(r'c\.(query|one|scalar|run)\(f".*\{(body|q|ctx\.path|form)\.')

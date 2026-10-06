@@ -14,7 +14,7 @@ import os
 import time
 import unittest
 
-from tests.support import grant_premium, new_account, owner_conn, server
+from tests.support import Client, grant_premium, new_account, owner_conn, server
 
 # O volume sintético vive no MESMO banco de teste do processo. Rodar junto com a suíte funcional mudaria o resultado
 # de testes que dependem de ranking e de listagem (foi o que aconteceu: ordenação de soluções e página de documentos).
@@ -92,10 +92,60 @@ class VolumeTests(unittest.TestCase):
               " INSERT INTO ledger_entries(project_id, org_id, entry_type, ref_type, ref_id, payload)"
               " SELECT p.id, p.org_id, 'project_created', 'project', p.id, '{}'::jsonb FROM projs p")
 
+        # ------------------------------------------------------------------ v0.16.0: volume na REDE
+        #
+        # POR QUE ISTO É NECESSÁRIO: o teste de plano de execução usa EXPLAIN, e o planejador escolhe varredura
+        # sequencial quando a tabela é pequena — corretamente. Sem volume nas tabelas da rede, "esta consulta usa
+        # índice?" não tem resposta significativa: o plano diria Seq Scan mesmo com o índice no lugar. Volume aqui
+        # é o que torna a verificação honesta.
+        c.run("WITH projs AS (SELECT id, org_id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM projects"
+              "               WHERE title LIKE 'Projeto volume %'),"
+              "     orgs AS (SELECT id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM organizations"
+              "              WHERE legal_name LIKE 'Volume Org %')"
+              " INSERT INTO relationships(kind, source_org_id, target_project_id, org_id, visibility, status)"
+              " SELECT CASE WHEN g % 3 = 0 THEN 'favorite' WHEN g % 3 = 1 THEN 'watchlist' ELSE 'support' END,"
+              # A relação parte de ORGANIZAÇÕES DIFERENTES, como no mundo real. Concentrar tudo numa só
+              # organização tornava `org_id` não seletivo, e o planejador escolhia varredura sequencial —
+              # corretamente. O teste de índice só diz algo quando o dado tem a forma do dado de verdade.
+              "        o.id, p.id, o.id, 'private', 'active'"
+              " FROM generate_series(1, $1) g JOIN projs p ON p.n = g % $2"
+              # o índice da organização é módulo ORGS (há menos organizações que projetos): usar PROJECTS aqui
+              # fazia o JOIN não casar e o INSERT inserir quase nada, em silêncio
+              " JOIN orgs o ON o.n = (g * 7) % $3"
+              " WHERE o.id <> p.org_id ON CONFLICT DO NOTHING", PROJECTS, PROJECTS, ORGS)
+        c.run("ANALYZE relationships")
+        c.run("WITH orgs AS (SELECT id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM organizations"
+              "              WHERE legal_name LIKE 'Volume Org %'),"
+              "     projs AS (SELECT id, org_id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM projects"
+              "               WHERE title LIKE 'Projeto volume %')"
+              " INSERT INTO proposals(kind, sender_org_id, receiver_org_id, project_id, title, purpose, status,"
+              " sent_at) SELECT 'investment', $3, p.org_id, p.id, 'Proposta volume ' || g,"
+              " 'Proposito da proposta de volume para medir consulta', 'sent', now()"
+              " FROM generate_series(1, $1) g JOIN projs p ON p.n = g % $2 WHERE p.org_id <> $3", PROJECTS,
+              PROJECTS, own_org)
+        c.run("WITH projs AS (SELECT id, org_id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM projects"
+              "               WHERE title LIKE 'Projeto volume %')"
+              " INSERT INTO marketplace_listings(org_id, subject_type, project_id, seeking, headline,"
+              " publication_state, published_at) SELECT p.org_id, 'project', p.id, '{investment}',"
+              " 'Anuncio de volume numero ' || g || ' para medir a consulta publica', 'published', now()"
+              " FROM generate_series(1, $1) g JOIN projs p ON p.n = g % $2"
+              " ON CONFLICT DO NOTHING", PROJECTS, PROJECTS)
+        c.run("INSERT INTO notifications(org_id, user_id, kind, title, priority)"
+              " SELECT $2, $3, 'network.notice', 'Aviso de volume ' || g, 'normal'"
+              " FROM generate_series(1, $1) g", DOCUMENTS, own_org, own_user)
+        c.run("WITH projs AS (SELECT id, org_id, row_number() OVER (ORDER BY created_at) - 1 AS n FROM projects"
+              "               WHERE title LIKE 'Projeto volume %')"
+              " INSERT INTO domain_events(event, org_id, project_id, subject_type, subject_id, payload)"
+              " SELECT 'Relationship.created', p.org_id, p.id, 'project', p.id, '{}'::jsonb"
+              " FROM generate_series(1, $1) g JOIN projs p ON p.n = g % $2", DOCUMENTS, PROJECTS)
+
     # ---------------------------------------------------------------------------------------- consultas quentes
     def test_volume_was_really_created(self):
         n = {t: self.own.scalar(f"SELECT count(*) FROM {t}") for t in
-             ("organizations", "projects", "solutions", "documents", "match_runs")}
+             ("organizations", "projects", "solutions", "documents", "match_runs",
+              "relationships", "proposals", "marketplace_listings", "notifications", "domain_events")}
+        for t in ("relationships", "proposals", "marketplace_listings", "notifications", "domain_events"):
+            self.assertGreater(n[t], 100, f"sem volume em {t} o plano de execução não diz nada: {n}")
         self.assertGreaterEqual(n["projects"], PROJECTS)
         self.assertGreaterEqual(n["solutions"], SOLUTIONS)
         self.assertGreaterEqual(n["documents"], DOCUMENTS)
@@ -133,6 +183,46 @@ class VolumeTests(unittest.TestCase):
         ratio = TIMINGS["projetos_100"] / max(TIMINGS["projetos_5"], 1.0)
         self.assertLess(ratio, 8.0, f"página 20× maior custou {ratio:.1f}× — indício de consulta por linha: {TIMINGS}")
 
+    # ---------------------------------------------------------------------------------------- v0.16.0: a rede
+    def test_workspace_stays_within_budget(self):
+        """O workspace é a tela de ABERTURA de todas as personas, e chama vários motores de uma vez.
+
+        Se esta medição estourar, a primeira impressão do produto é uma tela lenta. O orçamento vale para a
+        resposta inteira — persona, capacidades, contadores, próximas ações e todas as seções.
+        """
+        r = timed("workspace_osc", lambda: self.osc.get("/v1/workspace"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["workspace_osc"], BUDGET_MS, TIMINGS)
+        r2 = timed("workspace_investidor", lambda: self.company.get("/v1/workspace"))
+        self.assertEqual(r2.status, 200, r2)
+        self.assertLess(TIMINGS["workspace_investidor"], BUDGET_MS, TIMINGS)
+
+    def test_public_marketplace_feed_stays_within_budget(self):
+        """O feed público é a porta de entrada de quem ainda não tem conta: é a página mais exposta do produto."""
+        anon = Client()
+        r = timed("marketplace_publico", lambda: anon.get("/v1/marketplace/feed?limit=20"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["marketplace_publico"], BUDGET_MS, TIMINGS)
+
+    def test_proposal_inbox_and_relationships_stay_within_budget(self):
+        r = timed("propostas", lambda: self.osc.get("/v1/proposals?box=all&limit=25"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["propostas"], BUDGET_MS, TIMINGS)
+        r2 = timed("relacoes", lambda: self.osc.get("/v1/network/relationships?limit=25"))
+        self.assertEqual(r2.status, 200, r2)
+        self.assertLess(TIMINGS["relacoes"], BUDGET_MS, TIMINGS)
+
+    def test_network_graph_depth_two_stays_within_budget(self):
+        """Profundidade 2 é o caso que justificaria um banco de grafos — a medição é o que decide isso."""
+        r = timed("grafo_2", lambda: self.osc.get("/v1/network/graph?depth=2&limit=100"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["grafo_2"], BUDGET_MS, TIMINGS)
+
+    def test_readiness_purposes_stays_within_budget(self):
+        r = timed("prontidao_finalidades", lambda: self.osc.get("/v1/readiness/purposes"))
+        self.assertEqual(r.status, 200, r)
+        self.assertLess(TIMINGS["prontidao_finalidades"], BUDGET_MS, TIMINGS)
+
     # ---------------------------------------------------------------------------------------- planos de execução
     def _plan(self, sql: str, *args) -> str:
         rows = self.own.query("EXPLAIN (ANALYZE false, COSTS false) " + sql, *args)
@@ -141,16 +231,28 @@ class VolumeTests(unittest.TestCase):
     def test_hot_queries_use_an_index(self):
         org = self.own.scalar("SELECT org_id::text FROM projects WHERE title LIKE 'Projeto volume %' LIMIT 1")
         pid = self.own.scalar("SELECT id::text FROM projects WHERE title LIKE 'Projeto volume %' LIMIT 1")
+        rel_org = self.own.scalar("SELECT org_id::text FROM relationships WHERE kind = 'favorite' LIMIT 1")
         checks = {
             "documentos por projeto": ("SELECT id FROM documents WHERE project_id = $1 AND deleted_at IS NULL", pid),
             "projetos da organização": ("SELECT id FROM projects WHERE org_id = $1 ORDER BY updated_at DESC LIMIT 25", org),
             "trilha do projeto": ("SELECT seq FROM ledger_entries WHERE project_id = $1 ORDER BY seq DESC LIMIT 50", pid),
             "avaliações da organização": ("SELECT id FROM match_runs WHERE viewer_org_id = $1"
                                           " ORDER BY created_at DESC LIMIT 25", self.osc.org_id),
+            # v0.16.0 — os acessos quentes da rede
+            "relações da organização": ("SELECT id FROM relationships WHERE org_id = $1 AND kind = 'favorite'"
+                                        " AND status = 'active' LIMIT 25", rel_org),
+            "propostas recebidas": ("SELECT id FROM proposals WHERE receiver_org_id = $1 AND status = 'sent'"
+                                    " ORDER BY created_at DESC LIMIT 25", self.osc.org_id),
+            "anúncios publicados": ("SELECT id FROM marketplace_listings WHERE publication_state = 'published'"
+                                    " ORDER BY published_at DESC LIMIT 25", None),
+            "avisos não lidos": ("SELECT id FROM notifications WHERE user_id = $1 AND read_at IS NULL"
+                                 " ORDER BY created_at DESC LIMIT 25", self.osc.user["id"]),
+            "fatos do projeto": ("SELECT id FROM domain_events WHERE project_id = $1 ORDER BY id DESC LIMIT 25",
+                                 pid),
         }
         seq_scans = []
         for label, (sql, arg) in checks.items():
-            plan = self._plan(sql, arg)
+            plan = self._plan(sql, arg) if arg is not None else self._plan(sql)
             if "Seq Scan" in plan:
                 seq_scans.append(f"{label}:\n{plan}")
         self.assertEqual(seq_scans, [], "consulta quente sem índice:\n" + "\n\n".join(seq_scans))

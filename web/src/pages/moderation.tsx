@@ -219,3 +219,60 @@ function NewMeasure({ ladder, onDone }: any) {
     </Panel>
   );
 }
+
+
+/** O que é imputado à minha organização — e o direito de ser ouvida.
+ *
+ * Esta tela não existia. Quem era denunciado não sabia, não era ouvido antes da conclusão e não
+ * tinha como recorrer dela. A tela NUNCA mostra quem denunciou: a projeção servida pela API não
+ * seleciona o denunciante, e a política de leitura do banco também não o alcança.
+ */
+export function MyReports() {
+  const { data, error, loading, reload } = useLoad<any>("/v1/conta/denuncias");
+  const { run } = useAction();
+  const [aberta, setAberta] = useState<string | null>(null);
+  const f = useForm({ texto: "" });
+  const curto = f.v.texto.trim().length < 20;
+  const enviar = (id: string, tipo: "manifestacao" | "recurso") =>
+    run(() => api.post(`/v1/conta/denuncias/${id}/${tipo}`,
+      tipo === "manifestacao" ? { body: f.v.texto } : { note: f.v.texto }),
+      tipo === "manifestacao" ? "Manifestação registrada" : "Recurso registrado")
+      .then(() => { f.set("texto")(""); setAberta(null); reload(); });
+
+  return (
+    <>
+      <PageHead title="Denúncias sobre a minha organização"
+        sub="Você vê o que lhe é imputado e pode se manifestar. Quem denunciou não é revelado." />
+      <StateView loading={loading} error={error} onRetry={reload}
+        empty={data?.items.length === 0 && "Nenhuma denúncia em situação que exija sua manifestação."}>
+        <p className="muted">{data?.separation}</p>
+        <div className="rows">
+          {data?.items.map((r: any) => (
+            <Panel key={r.id} title={`${r.category || r.reason} · ${r.status_label}`}>
+              {r.finding_label && <p><strong>{r.finding_label}</strong></p>}
+              {r.decision_rationale && <p>{r.decision_rationale}</p>}
+              {r.legal_referral && <Pill tone="warn">encaminhado a autoridade competente</Pill>}
+              <p className="small">Registrada em {date(r.created_at)} · {r.responses} manifestação(ões) sua(s)</p>
+              {(r.can_respond || r.can_appeal) && (
+                <>
+                  <Button variant="link" onClick={() => setAberta(aberta === r.id ? null : r.id)}>
+                    {r.can_respond ? "Manifestar-se" : "Recorrer da conclusão"}
+                  </Button>
+                  {aberta === r.id && (
+                    <>
+                      <Field label={r.can_respond ? "Sua manifestação" : "O que você contesta"} hint="Mínimo de 20 caracteres">
+                        <TextArea rows={4} value={f.v.texto} onChange={f.set("texto")} />
+                      </Field>
+                      <Button variant="primary" disabled={curto}
+                        onClick={() => enviar(r.id, r.can_respond ? "manifestacao" : "recurso")}>Enviar</Button>
+                    </>
+                  )}
+                </>
+              )}
+            </Panel>
+          ))}
+        </div>
+      </StateView>
+    </>
+  );
+}

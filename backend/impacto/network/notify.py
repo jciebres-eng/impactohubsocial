@@ -25,6 +25,8 @@ legítima (equipe de uma pessoa que foi quem agiu) e fica visível em vez de ser
 """
 from __future__ import annotations
 
+import re
+
 import hashlib
 from typing import Any
 
@@ -40,6 +42,8 @@ GRP = {
     # `program` é grupo PRÓPRIO, não "project": quem administra um programa com 40 projetos não quer o
     # mesmo interruptor das notificações de execução de cada um deles.
     "program": "program",
+    # v0.20.0 — apuração de denúncia. Grupo `account`: é assunto da conta, não da rede.
+    "report": "account",
 }
 
 # Prioridade: muda ordenação e destaque na caixa, nunca o canal. `critical` é para o que trava o trabalho da
@@ -59,7 +63,17 @@ def dedupe(*parts: Any) -> str:
 
 
 def _grp(event: str) -> str:
-    return GRP.get(event.split(".", 1)[0].lower(), "network")
+    """Prefixo do evento -> grupo de preferência.
+
+    A conversão de CamelCase para snake_case existe por um defeito real: `ImpactUpdate.submitted`
+    virava `impactupdate`, que não está em `GRP`, e caía no grupo `network`. Com isso o grupo de
+    preferência `report` era INALCANÇÁVEL — silenciá-lo não silenciava coisa nenhuma, porque nenhum
+    evento chegava lá. O teste `test_todo_prefixo_de_evento_resolve_para_um_grupo_declarado` impede
+    que volte a acontecer.
+    """
+    prefixo = event.split(".", 1)[0]
+    snake = re.sub(r"(?<!^)(?=[A-Z])", "_", prefixo).lower()
+    return GRP.get(snake, GRP.get(prefixo.lower(), "network"))
 
 
 def team(conn: Connection, project_id: str) -> list[dict]:

@@ -116,6 +116,8 @@ def create(conn: Connection, *, kind: str, org_id: str, actor: str | None, targe
     A idempotência não é conveniência — é correção. "Favoritar" é um botão que o dedo aperta duas vezes, e duas linhas
     de favorito significariam dois avisos e dois pontos na contagem de interesse de um projeto.
     """
+    from . import enforcement as _ENF
+    _ENF.ensure_allowed(conn, capability="new_relationship", org_id=org_id)
     if kind in ENGINE_ONLY:
         raise unprocessable(f"Relação '{kind}' é criada pelo motor correspondente, não diretamente")
     if kind not in KINDS:

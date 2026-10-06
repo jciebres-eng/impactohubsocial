@@ -200,10 +200,14 @@ def read_one(ctx: Ctx):
 @route("POST", "/v1/reports", auth="user", body=S.ReportIn, status=201, rate=("report_ip", 20, 3600), tags=("trust",),
        summary="Denuncia organização, projeto, edital, documento ou usuário (triagem humana pela administração)")
 def create_report(ctx: Ctx, body: S.ReportIn):
+    from ..network import complaints as REP
     with ctx.tx() as c:
-        rid = c.scalar("INSERT INTO reports(reporter_user_id, reporter_org_id, target_type, target_id, reason, details)"
-                       " VALUES ($1,$2,$3,$4,$5,$6) RETURNING id::text", ctx.user_id, ctx.principal.org_id, body.target_type,
-                       body.target_id, body.reason, body.details)
+        out = REP.open_report(c, reporter_user_id=ctx.user_id, reporter_org_id=ctx.principal.org_id,
+                              target_type=body.target_type, target_id=body.target_id,
+                              reason=body.reason, details=body.details, category=body.category,
+                              evidence_document_id=body.evidence_document_id)
     with ctx.system_tx() as c:
-        ctx.audit(c, "report.created", "report", rid, {"target_type": body.target_type, "reason": body.reason}, org_id=ctx.principal.org_id)
-    return {"id": rid, "status": "open"}
+        ctx.audit(c, "report.created", "report", out["id"],
+                  {"target_type": body.target_type, "reason": body.reason, "category": body.category},
+                  org_id=ctx.principal.org_id)
+    return out

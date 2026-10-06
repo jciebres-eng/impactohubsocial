@@ -242,12 +242,25 @@ class PrivacyAndAdminTests(unittest.TestCase):
         self.assertEqual(self.adm.post(f"/v1/admin/users/{self.adm.user['id']}/status", {"status": "disabled", "reason": "x"}).status, 422)
 
     def test_reports_flow(self):
+        """Fluxo de denúncia no vocabulário da v0.20.0.
+
+        A rota `POST /v1/admin/reports/{id}` com `triaged|actioned|dismissed` foi RETIRADA: ela
+        misturava andamento com conclusão e não permitia registrar improcedência nem ouvir quem foi
+        denunciado. A apuração agora corre por rotas próprias, e arquivar continua sendo possível —
+        mas é outra coisa, declaradamente, do que concluir pela improcedência.
+        """
         c = new_account("osc")
         target = new_account("osc")
-        rid = c.post("/v1/reports", {"target_type": "organization", "target_id": target.org_id, "reason": "fraud", "details": "Suspeita"}).json["id"]
+        rid = c.post("/v1/reports", {"target_type": "organization", "target_id": target.org_id,
+                                     "reason": "fraud", "details": "Suspeita"}).json["id"]
         items = self.adm.get("/v1/admin/reports").json["items"]
         self.assertIn(rid, [i["id"] for i in items])
-        self.assertEqual(self.adm.post(f"/v1/admin/reports/{rid}", {"status": "dismissed", "resolution": "Sem evidências"}).status, 200)
+        fila = self.adm.get("/v1/admin/reports/queue?status=reported").json
+        self.assertIn(rid, [i["id"] for i in fila["items"]])
+        r = self.adm.post(f"/v1/admin/reports/{rid}/dismiss",
+                          {"rationale": "Relato sem elementos que permitam qualquer apuração."})
+        self.assertEqual(r.status, 200, r.body)
+        self.assertEqual(r.json["status"], "dismissed")
 
     def test_admin_overview_and_audit_chain(self):
         ov = self.adm.get("/v1/admin/overview").json

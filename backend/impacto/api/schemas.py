@@ -505,6 +505,10 @@ class ReportIn(In):
     target_id: Uuid
     reason: Literal["fraud", "inappropriate", "incorrect_data", "conflict", "privacy", "other"]
     details: Annotated[str | None, Field(max_length=4000)] = None
+    #: Colunas que existiam no banco desde a v0.16.0 e que NENHUMA rota escrevia. A categoria é a
+    #: mesma lista do CHECK da tabela e de ENF.CATEGORIES — uma só, desde a migração 0038.
+    category: Annotated[str | None, Field(pattern="^[a-z_]{3,30}$")] = None
+    evidence_document_id: Uuid | None = None
 
 
 class FeedFeedbackIn(In):

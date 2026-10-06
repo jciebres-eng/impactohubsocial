@@ -12,7 +12,10 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            # v0.18.0 — equidade, frameworks e confiança
            "equity_routes", "territory_routes", "framework_routes", "claim_routes", "reputation_routes", "seal_routes", "lookup_routes", "responsibility_routes",
            # v0.19.0 — primeiro acesso e retorno de contexto
-           "firstrun_routes"]
+           "firstrun_routes",
+           # v0.20.0 — denúncia com os quatro níveis separados (a Central de Relatórios
+           # continua em report_routes, que já estava na lista desde a v0.10.0)
+           "complaint_routes"]
 _loaded = False
 
 

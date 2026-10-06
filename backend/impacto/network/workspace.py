@@ -411,7 +411,7 @@ def _s_indicators(conn: Connection, *, org_id: str, **_: Any) -> Any:
 def _s_moderation(conn: Connection, *, org_id: str, **_: Any) -> Any:
     return {
         "open_reports": int(conn.scalar(
-            "SELECT count(*) FROM reports WHERE status IN ('open','triage','investigating')") or 0),
+            "SELECT count(*) FROM reports WHERE status IN ('reported','under_review','information_requested')") or 0),
         "recent_actions": conn.query(
             "SELECT id::text AS id, measure, rule_ref, created_at, ends_at, status FROM enforcement_actions"
             " ORDER BY created_at DESC LIMIT 10"),

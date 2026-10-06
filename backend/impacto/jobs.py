@@ -338,6 +338,18 @@ def reputation_timeline(app) -> dict:
     return {"organizations": len(orgs), "recorded": done}
 
 
+def enforcement_expiry(app) -> dict:
+    """Encerra medidas vencidas.
+
+    `enforcement.expire_due()` existia desde a v0.16.0 e NUNCA foi chamada: a situação `expired`
+    jamais era atingida, então uma suspensão "de 30 dias" valia para sempre no banco. Com a v0.20.0 a
+    medida passou a restringir de verdade, e uma medida que não expira vira punição perpétua.
+    """
+    from .network import enforcement as ENF
+    with app.pool.tx(DbContext(system=True)) as c:
+        return ENF.expire_due(c)
+
+
 def backup_job(app) -> dict:
     """Backup agendado. Roda no executor que já existe, em vez de um timer que ninguém exercita.
 
@@ -359,7 +371,8 @@ def email_canary_job(app) -> dict:
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
         ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
         # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
-        ("backup", backup_job), ("email_canary", email_canary_job)]
+        ("backup", backup_job), ("email_canary", email_canary_job),
+        ("enforcement_expiry", enforcement_expiry)]
 
 
 def run_once(app) -> list[dict]:

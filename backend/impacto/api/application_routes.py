@@ -41,6 +41,8 @@ def list_apps(ctx: Ctx, q: AppListQ):
 def apply(ctx: Ctx, body: S.ApplyIn):
     with ctx.tx() as c:
         risk.ensure_not_blocked(c, ctx.org_id)
+        from ..network import enforcement as ENF
+        ENF.ensure_allowed(c, capability="apply_to_call", org_id=ctx.org_id)
         call = c.one("SELECT c.*, c.id::text AS id, c.owner_org_id::text AS owner_org_id FROM calls c WHERE c.id = $1", body.call_id)
         if not call:
             raise not_found("Edital/chamada")
@@ -187,6 +189,8 @@ def conflict(ctx: Ctx, body: S.ConflictIn):
 def commit(ctx: Ctx, body: S.CommitmentIn):
     with ctx.tx() as c:
         risk.ensure_not_blocked(c, ctx.org_id)
+        from ..network import enforcement as ENF
+        ENF.ensure_allowed(c, capability="receive_funding", org_id=ctx.org_id)
         a = c.one(f"SELECT {APP_COLS} FROM applications a WHERE a.id = $1 AND a.funder_org_id = $2 FOR UPDATE", ctx.path["application_id"], ctx.org_id)
         if not a:
             raise not_found("Candidatura")

@@ -117,6 +117,9 @@ def transition(conn: Connection, *, listing_id: str, to: str, org_id: str, actor
     lst = _load(conn, listing_id)
     if to == lst["publication_state"]:
         return {**lst, "unchanged": True}
+    if to == "published" and not (admin or by_platform):
+        from . import enforcement as _ENF
+        _ENF.ensure_allowed(conn, capability="publish_listing", org_id=org_id)
     rule = conn.one("SELECT actor, requires_note FROM network_status_graph"
                     " WHERE entity = 'listing' AND from_status = $1 AND to_status = $2",
                     lst["publication_state"], to)

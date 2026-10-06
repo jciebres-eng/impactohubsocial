@@ -35,7 +35,7 @@ class ArchitectureTests(unittest.TestCase):
     def test_system_context_only_in_allowed_modules(self):
         allowed = {"auth.py", "billing.py", "compliance.py", "workflow.py", "ratelimit.py", "http.py", "jobs.py", "cli.py", "seed_dev.py",
                    "app.py", "auth_routes.py", "org_routes.py", "application_routes.py", "execution_routes.py", "document_routes.py",
-                   "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py", "trust_routes.py", "platform_routes.py", "identity.py", "credentials.py",
+                   "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "complaint_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py", "trust_routes.py", "platform_routes.py", "identity.py", "credentials.py",
                    "challenges.py", "agreements.py",
                    # v0.17.0: program_routes serve o programa PÚBLICO a quem não tem sessão. O contexto de
                    # sistema ali não é atalho — é o que permite responder sem organização ativa. A proteção

@@ -56,17 +56,110 @@ LABEL = {m: lb for m, _, lb, _, _ in LADDER}
 NEEDS_END = {m for m, _, _, needs, _ in LADDER if needs}
 EFFECT = {m: eff for m, _, _, _, eff in LADDER}
 
-#: As 12 categorias de denúncia do pedido.
+#: Categorias de denúncia. ESTA LISTA É A MESMA DO CHECK DE `reports.category` (migração 0038).
+#: Até a v0.20.0 havia duas listas de doze valores, com cinco diferentes entre si — e nenhuma rota
+#: escrevia a coluna, então a divergência nunca aparecia. Apareceria na primeira vez que alguém a
+#: usasse. O teste `test_as_categorias_do_codigo_sao_as_do_banco` mantém as duas iguais.
 CATEGORIES: tuple[tuple[str, str], ...] = (
     ("fraud", "Fraude ou falsidade"), ("abuse", "Abuso"), ("harassment", "Assédio"),
-    ("hate_speech", "Discurso de ódio"), ("spam", "Spam ou abordagem em massa"),
-    ("impersonation", "Falsa identidade"), ("misinformation", "Informação falsa"),
-    ("privacy", "Violação de privacidade"), ("intellectual_property", "Propriedade intelectual"),
-    ("illegal_content", "Conteúdo ilícito"), ("child_safety", "Risco a criança ou adolescente"),
-    ("other", "Outro"),
+    ("hate_speech", "Discurso de ódio"), ("impersonation", "Falsa identidade"),
+    ("spam", "Spam ou abordagem em massa"), ("non_payment", "Não pagamento ou não repasse"),
+    ("unethical_conduct", "Conduta antiética"), ("conflict_of_interest", "Conflito de interesse"),
+    ("false_information", "Informação falsa prestada à plataforma"),
+    ("data_misuse", "Uso indevido de dados"), ("illegal_content", "Conteúdo ilícito"),
+    ("child_safety", "Risco a criança ou adolescente"),
+    ("intellectual_property", "Propriedade intelectual"), ("privacy", "Violação de privacidade"),
+    ("misinformation", "Desinformação"), ("other", "Outro"),
 )
 
 STATUSES = ("active", "expired", "lifted", "under_appeal", "upheld", "overturned")
+
+#: O que cada capacidade significa. Vocabulário declarado: a rota pede a capacidade pelo nome, e não
+#: interpreta a medida por conta própria.
+CAPABILITIES: dict[str, str] = {
+    "publish_project": "publicar projeto",
+    "apply_to_call": "candidatar-se a edital",
+    "send_proposal": "enviar proposta",
+    "send_message": "enviar recado",
+    "publish_listing": "publicar anúncio no marketplace",
+    "new_relationship": "abrir relação nova com outra organização",
+    "receive_funding": "registrar aporte recebido",
+}
+
+#: Medida -> capacidades que ela RESTRINGE DE VERDADE.
+#:
+#: POR QUE ISTO EXISTE. Até a v0.20.0 a escada de dez degraus era aplicada, notificada, contestável e
+#: auditada — e **não restringia nada**. `active_for()` nunca era chamada; nenhuma rota consultava
+#: `enforcement_actions`. Uma suspensão temporária era um aviso bonito: a organização suspensa seguia
+#: publicando, propondo e se candidatando. A única restrição real do produto era o bloqueio por risco
+#: (`risk_assessments.level = 'blocked'`), que é outra coisa e cobre outros três pontos.
+#:
+#: Os três primeiros degraus NÃO restringem de propósito: orientação, advertência e notificação formal
+#: existem justamente para dizer o que mudar ANTES de restringir.
+RESTRICTS: dict[str, tuple[str, ...]] = {
+    "guidance": (),
+    "warning": (),
+    "formal_notice": (),
+    "referral": (),          # encaminhar à autoridade não é punição da plataforma
+    "partial_restriction": ("publish_project", "send_proposal", "publish_listing", "send_message"),
+    "temporary_suspension": tuple(CAPABILITIES),
+    "precautionary_freeze": ("publish_project", "apply_to_call", "send_proposal",
+                             "publish_listing", "receive_funding"),
+    "unlinking": ("new_relationship", "send_proposal"),
+    "cancellation": tuple(CAPABILITIES),
+    "ban": tuple(CAPABILITIES),
+}
+
+#: Situações em que a medida está VALENDO. `under_appeal` continua valendo: contestar não suspende o
+#: efeito — se suspendesse, bastaria contestar para destravar. `upheld` é a contestação julgada
+#: improcedente, então vale também.
+ACTIVE_STATUSES = ("active", "under_appeal", "upheld")
+
+
+def restrictions(conn: Connection, *, org_id: str | None = None,
+                 user_id: str | None = None) -> dict[str, dict]:
+    """Capacidades restritas AGORA para esta organização ou pessoa, com a medida que as restringe.
+
+    Devolve ``{capacidade: {measure, label, rule_ref, action_id, ends_at}}``. Vazio significa nada
+    restrito — e é o caso normal.
+    """
+    rows = conn.query(
+        "SELECT id::text AS id, measure, rule_ref, ends_at, status FROM enforcement_actions"
+        " WHERE ($1::uuid IS NULL OR target_org_id = $1)"
+        "   AND ($2::uuid IS NULL OR target_user_id = $2)"
+        "   AND status = ANY($3::text[])"
+        "   AND (ends_at IS NULL OR ends_at > now())"
+        " ORDER BY created_at", org_id, user_id, list(ACTIVE_STATUSES))
+    out: dict[str, dict] = {}
+    for r in rows:
+        for cap in RESTRICTS.get(r["measure"], ()):
+            # A medida mais severa prevalece quando duas restringem a mesma capacidade.
+            atual = out.get(cap)
+            if atual and SEVERITY.get(atual["measure"], 0) >= SEVERITY.get(r["measure"], 0):
+                continue
+            out[cap] = {"measure": r["measure"], "label": LABEL.get(r["measure"], r["measure"]),
+                        "rule_ref": r["rule_ref"], "action_id": r["id"], "ends_at": r["ends_at"]}
+    return out
+
+
+def ensure_allowed(conn: Connection, *, capability: str, org_id: str | None = None,
+                   user_id: str | None = None) -> None:
+    """Recusa a operação quando uma medida em vigor restringe esta capacidade.
+
+    Devolve 423 (como o bloqueio por risco), com a medida, a regra citada e a data de fim — porque
+    quem é restringido tem direito de saber por qual medida, sob qual regra e até quando.
+    """
+    if capability not in CAPABILITIES:
+        raise AssertionError(f"capacidade não declarada: {capability}")
+    atual = restrictions(conn, org_id=org_id, user_id=user_id).get(capability)
+    if not atual:
+        return
+    raise ApiError(423, "restricted_by_measure",
+                   f"Esta organização está sob {atual['label'].lower()} e não pode "
+                   f"{CAPABILITIES[capability]}.",
+                   {"measure": atual["measure"], "rule_ref": atual["rule_ref"],
+                    "ends_at": atual["ends_at"].isoformat() if atual["ends_at"] else None,
+                    "where_to_see": "/conta/moderacao", "can_appeal": True})
 
 #: Quantos degraus de severidade se pode subir de uma vez sem histórico contra o mesmo alvo.
 #: Dois é a folga que permite responder a algo sério sem transformar a escada em formalidade vazia — e sem permitir

@@ -88,6 +88,8 @@ def send(conn: Connection, *, conversation_id: str, org_id: str, actor: str | No
     c = _party(conn, conversation_id, org_id)
     if c["status"] != "open":
         raise ApiError(409, "closed", "Conversa encerrada; abra uma nova com o contexto atual")
+    from . import enforcement as _ENF
+    _ENF.ensure_allowed(conn, capability="send_message", org_id=org_id)
     if kind not in KINDS:
         raise unprocessable(f"Tipo de recado desconhecido: {kind}")
     if ref_type and ref_type not in REFS:

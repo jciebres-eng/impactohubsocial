@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { api } from "../api";
 import { date, dateTime, label, money } from "../format";
 import { Link, navigate } from "../router";
@@ -270,23 +270,93 @@ export function Orgs() {
   );
 }
 
+/** Apuração de denúncia com os quatro níveis separados.
+ *
+ * A tela anterior oferecia três botões — Triar, Providência, Arquivar — e pedia um texto por
+ * `prompt()`. "Providência" não dizia se a denúncia procedia, e não havia como registrar que a
+ * análise concluiu pela IMPROCEDÊNCIA: arquivar e absolver eram o mesmo botão. Para quem foi
+ * denunciado, essa diferença é a única que importa.
+ */
 export function Reports() {
-  const [status, setStatus] = useState("open");
-  const { data, error, loading, reload } = useLoad<any>(`/v1/admin/reports?status=${status}`, [status]);
+  const [status, setStatus] = useState("reported");
+  const { data, error, loading, reload } = useLoad<any>(`/v1/admin/reports/queue?status=${status}`, [status]);
+  const voc = useLoad<any>("/v1/reports/vocabulary");
   const { run } = useAction();
-  const decide = (id: string, st: string) => { const resolution = prompt("Registro da decisão:"); if (resolution) run(() => api.post(`/v1/admin/reports/${id}`, { status: st, resolution }), "Denúncia atualizada").then(reload); };
+  const [aberta, setAberta] = useState<string | null>(null);
+
+  const acao = (id: string, path: string, corpo: any, msg: string) =>
+    run(() => api.post(`/v1/admin/reports/${id}/${path}`, corpo), msg).then(() => { setAberta(null); reload(); });
+
   return (
     <AdminGate>
-      <PageHead title="Denúncias" sub="Denúncia não é fato verificado: apure, registre e dê direito de resposta." />
-      <div className="filters"><Field label="Situação"><Select value={status} onChange={setStatus} options={[["open", "Abertas"], ["triaged", "Em triagem"], ["actioned", "Com providência"], ["dismissed", "Arquivadas"]]} /></Field></div>
+      <PageHead title="Denúncias" sub="Denúncia não é suspeita, suspeita não é infração, e infração apurada aqui não é decisão judicial." />
+      {voc.data && (
+        <Panel title="O que cada nível significa" quiet>
+          <dl className="empty-facts">
+            {voc.data.levels.map((n: any) => (<React.Fragment key={n.key}><dt>{n.label}</dt><dd>{n.means} — <em>{n.effects}</em></dd></React.Fragment>))}
+          </dl>
+        </Panel>
+      )}
+      <div className="filters"><Field label="Situação"><Select value={status} onChange={setStatus}
+        options={(voc.data?.statuses || []).map((s: any) => [s.key, s.label])} /></Field></div>
       <StateView loading={loading} error={error} onRetry={reload} empty={data?.items.length === 0 && "Nenhuma denúncia nesta situação."}>
-        <table className="table"><thead><tr><th>Alvo</th><th>Motivo</th><th>Detalhes</th><th>Recebida</th><th /></tr></thead>
+        <p className="muted">{data?.note}</p>
+        <table className="table"><thead><tr><th>Alvo</th><th>Categoria</th><th>Detalhes</th><th>Situação</th><th>Manifestações</th><th /></tr></thead>
           <tbody>{data?.items.map((r: any) => (
-            <tr key={r.id}><td>{r.target_type}<br /><code className="hash">{r.target_id.slice(0, 8)}</code></td><td>{r.reason}</td><td>{r.details}</td><td>{date(r.created_at)}</td>
-              <td className="row-actions"><Button variant="link" onClick={() => decide(r.id, "triaged")}>Triar</Button><Button variant="link" onClick={() => decide(r.id, "actioned")}>Providência</Button><Button variant="link" onClick={() => decide(r.id, "dismissed")}>Arquivar</Button></td></tr>
+            <tr key={r.id}>
+              <td>{r.target_type}<br /><code className="hash">{r.target_id.slice(0, 8)}</code></td>
+              <td>{r.category || r.reason}</td>
+              <td>{r.details}</td>
+              <td><Pill tone={r.finding === "substantiated" ? "bad" : r.finding === "unsubstantiated" ? "good" : "warn"}>{r.status_label}</Pill>
+                {r.finding_label && <><br /><span className="small">{r.finding_label}</span></>}
+                {r.legal_referral && <><br /><Pill tone="warn">encaminhado a autoridade</Pill></>}</td>
+              <td>{r.responses}</td>
+              <td className="row-actions">
+                {r.status === "reported" && <Button variant="link" onClick={() => acao(r.id, "review", {}, "Em análise")}>Analisar</Button>}
+                {(r.status === "reported" || r.status === "under_review") && <Button variant="link" onClick={() => setAberta(aberta === r.id + ":ask" ? null : r.id + ":ask")}>Pedir manifestação</Button>}
+                {(r.status === "under_review" || r.status === "information_requested" || r.status === "appealed") && <Button variant="link" onClick={() => setAberta(aberta === r.id + ":end" ? null : r.id + ":end")}>Concluir</Button>}
+                {["reported", "under_review", "information_requested"].includes(r.status) && <Button variant="link" onClick={() => setAberta(aberta === r.id + ":dis" ? null : r.id + ":dis")}>Arquivar</Button>}
+              </td>
+            </tr>
           ))}</tbody></table>
+        {aberta && <ReportAction token={aberta} onDo={acao} onCancel={() => setAberta(null)} />}
       </StateView>
     </AdminGate>
+  );
+}
+
+/** Formulário da ação escolhida. Toda conclusão exige fundamentação escrita — não há botão sozinho. */
+function ReportAction({ token, onDo, onCancel }: { token: string; onDo: (id: string, p: string, b: any, m: string) => void; onCancel: () => void }) {
+  const [id, tipo] = token.split(":");
+  const f = useForm({ texto: "", finding: "substantiated", referral: false, referralNote: "" });
+  const curto = f.v.texto.trim().length < 20;
+  return (
+    <Panel title={tipo === "ask" ? "Pedir manifestação a quem foi denunciado" : tipo === "end" ? "Concluir a análise" : "Arquivar sem análise de mérito"}>
+      {tipo === "end" && (
+        <Field label="Conclusão">
+          <Select value={f.v.finding} onChange={f.set("finding")} options={[["substantiated", "Procede — autoriza medida"], ["unsubstantiated", "Não procede — é uma absolvição"]]} />
+        </Field>
+      )}
+      {tipo === "dis" && <p className="muted">Arquivar NÃO é concluir pela improcedência. Se a análise concluiu que não procede, use “Concluir”.</p>}
+      <Field label={tipo === "ask" ? "O que está sendo pedido" : "Fundamentação"} hint="Mínimo de 20 caracteres">
+        <TextArea rows={3} value={f.v.texto} onChange={f.set("texto")} />
+      </Field>
+      {tipo === "end" && (
+        <>
+          <label className="check"><input type="checkbox" checked={f.v.referral} onChange={(e: any) => f.set("referral")(e.target.checked)} />
+            <span>Encaminhar a autoridade competente (a plataforma não declara crime nem tipifica conduta)</span></label>
+          {f.v.referral && <Field label="Por que encaminhar" hint="Mínimo de 20 caracteres"><TextArea rows={2} value={f.v.referralNote} onChange={f.set("referralNote")} /></Field>}
+        </>
+      )}
+      <div className="panel-actions">
+        <Button variant="primary" disabled={curto} onClick={() => {
+          if (tipo === "ask") onDo(id, "request-response", { question: f.v.texto }, "Manifestação pedida");
+          else if (tipo === "dis") onDo(id, "dismiss", { rationale: f.v.texto }, "Arquivada");
+          else onDo(id, "conclude", { finding: f.v.finding, rationale: f.v.texto, legal_referral: f.v.referral, legal_referral_note: f.v.referral ? f.v.referralNote : null }, "Concluída");
+        }}>Registrar</Button>
+        <Button variant="ghost" onClick={onCancel}>Cancelar</Button>
+      </div>
+    </Panel>
   );
 }
 

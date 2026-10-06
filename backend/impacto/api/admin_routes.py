@@ -34,7 +34,8 @@ def overview(ctx: Ctx):
             "funding": c.one("SELECT coalesce(sum(amount_cents) FILTER (WHERE status <> 'cancelled'),0) AS committed_cents,"
                              " coalesce(sum(amount_cents) FILTER (WHERE status = 'confirmed'),0) AS confirmed_cents FROM commitments"),
             "queues": {"compliance_open": c.scalar("SELECT count(*) FROM compliance_reviews WHERE status = 'open'"),
-                       "reports_open": c.scalar("SELECT count(*) FROM reports WHERE status IN ('open','triaged')"),
+                       "reports_open": c.scalar("SELECT count(*) FROM reports WHERE status IN"
+                                                " ('reported','under_review','information_requested')"),
                        "credentials_pending": c.scalar("SELECT count(*) FROM professional_credentials WHERE verification_status IN ('self_declared','document_submitted')"),
                        "fiscal_pending": c.scalar("SELECT count(*) FROM fiscal_rules WHERE status = 'pending_review'"),
                        "documents_pending_scan": c.scalar("SELECT count(*) FROM documents WHERE status = 'pending_scan' AND deleted_at IS NULL")},
@@ -505,7 +506,10 @@ def grant(ctx: Ctx, body: GrantIn):
 
 # ------------------------------------------------------------------------------------------------ denúncias, auditoria, flags, jobs
 class ReportQ(S.Pagination):
-    status: str | None = "open"
+    #: A situação inicial passou a se chamar `reported` na v0.20.0 (`open` misturava "ninguém olhou"
+    #: com "está em aberto"). Esta rota continua existindo para leitura bruta com o denunciante à
+    #: vista; a fila de apuração, que é a tela de trabalho, está em `/v1/admin/reports/queue`.
+    status: str | None = "reported"
 
 
 @A("GET", "/v1/admin/reports", query=ReportQ)
@@ -517,19 +521,10 @@ def reports(ctx: Ctx, q: ReportQ):
     return page(rows, q.limit, q.offset)
 
 
-class ReportDecisionIn(S.In):
-    status: Literal["triaged", "actioned", "dismissed"]
-    resolution: Annotated[str, Field(min_length=3, max_length=4000)]
-
-
-@A("POST", "/v1/admin/reports/{report_id}", body=ReportDecisionIn)
-def report_decide(ctx: Ctx, body: ReportDecisionIn):
-    with ctx.tx() as c:
-        if not c.run("UPDATE reports SET status = $2, resolution = $3, handled_by = $4, resolved_at = CASE WHEN $2 <> 'triaged' THEN now() END"
-                     " WHERE id = $1", ctx.path["report_id"], body.status, body.resolution, ctx.user_id):
-            raise not_found("Denúncia")
-        ctx.audit(c, "admin.report_handled", "report", ctx.path["report_id"], {"status": body.status}, org_id=None)
-    return {"status": body.status}
+# A rota `POST /v1/admin/reports/{id}` com os estados `triaged|actioned|dismissed` foi RETIRADA na
+# v0.20.0. Ela misturava andamento com conclusão ("actioned" não dizia se a denúncia procedia) e não
+# tinha como registrar improcedência nem ouvir quem foi denunciado. A apuração agora corre por
+# `api/report_routes.py`: review -> request-response -> conclude (com fundamentação) ou dismiss.
 
 
 class AuditQ(S.Pagination):

@@ -184,6 +184,9 @@ def del_milestone(ctx: Ctx):
 def publish(ctx: Ctx):
     with ctx.tx() as c:
         risk.ensure_not_blocked(c, ctx.org_id)
+        # Medida de moderação em vigor também restringe — até a v0.20.0 não restringia nada.
+        from ..network import enforcement as ENF
+        ENF.ensure_allowed(c, capability="publish_project", org_id=ctx.org_id)
         p = _get_own(c, ctx, ctx.path["project_id"])
         problems = []
         if not p["summary"]:

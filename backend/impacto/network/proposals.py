@@ -197,6 +197,11 @@ def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, acto
     p = _load(conn, proposal_id)
     if to == p["status"]:
         return {**p, "unchanged": True}
+    # Medida em vigor restringe o ENVIO, não o rascunho: montar a proposta continua possível, o que a
+    # medida impede é ela chegar à outra parte.
+    if to == "sent" and not by_platform:
+        from . import enforcement as _ENF
+        _ENF.ensure_allowed(conn, capability="send_proposal", org_id=org_id)
     side = _side(p, org_id, by_platform=by_platform)
     rule = conn.one("SELECT actor, requires_note FROM proposal_status_graph WHERE from_status = $1 AND to_status = $2",
                     p["status"], to)

@@ -82,8 +82,22 @@ def run_checks(c: Connection, org_id: str, actor: str | None) -> dict:
         "cofre_documentos")
     gaps = [k for k in ("founded_on", "description", "uf") if not org[k]] + ([] if org["causes"] else ["causes"])
     add("profile_completeness", "pass" if not gaps else "warning", {"missing_fields": gaps}, "cadastro")
-    open_reports = c.scalar("SELECT count(*) FROM reports WHERE target_type = 'organization' AND target_id = $1 AND status IN ('open','triaged')", org_id)
-    add("open_reports", "warning" if open_reports else "pass", {"open_reports": open_reports}, "denuncias")
+    # DENÚNCIA NÃO É INFRAÇÃO. Até a v0.20.0 este check contava denúncias ABERTAS e devolvia
+    # `warning`, que entra em `risk_level` e vira `organizations.compliance_risk`. Ou seja: bastava
+    # alguém denunciar para a organização piorar de risco, sem apuração nenhuma — o caminho mais
+    # barato para prejudicar um concorrente. Agora só CONCLUSÃO DE PROCEDÊNCIA pesa; a análise em
+    # curso é informada, e não pontua.
+    comprovadas = c.scalar(
+        "SELECT count(*) FROM reports WHERE target_type = 'organization' AND target_id = $1"
+        " AND finding = 'substantiated'", org_id)
+    em_apuracao = c.scalar(
+        "SELECT count(*) FROM reports WHERE target_type = 'organization' AND target_id = $1"
+        " AND status IN ('reported','under_review','information_requested')", org_id)
+    add("substantiated_reports", "warning" if comprovadas else "pass",
+        {"substantiated": comprovadas, "under_review": em_apuracao,
+         "note": ("Apenas denúncia com conclusão humana de procedência pesa aqui. Denúncia em "
+                  "apuração é informada e NÃO altera o risco: acusação não é infração.")},
+        "denuncias")
     fails = sum(1 for r in results if r["status"] == "fail")
     warns = sum(1 for r in results if r["status"] in ("warning", "error", "not_configured"))
     risk = "high" if fails else ("medium" if warns >= 2 else "low")

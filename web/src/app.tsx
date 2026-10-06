@@ -190,6 +190,7 @@ const ROUTES: R[] = [
   ["/territorio/necessidades", () => <Terr.TerritoryNeeds />],
   ["/vocabulario", () => <Terr.Taxonomies />],
   ["/conta/moderacao", () => <Mod.MyModeration />],
+  ["/conta/denuncias", () => <Mod.MyReports />],
   ["/admin/medidas", () => <Mod.EnforcementAdmin />, ["platform"]],
 ];
 

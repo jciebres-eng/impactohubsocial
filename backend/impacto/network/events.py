@@ -50,6 +50,10 @@ EVENTS: dict[str, str] = {
     "Team.member_added": "Pessoa acrescentada à equipe do projeto",
     "Team.member_removed": "Pessoa retirada da equipe do projeto",
     "Enforcement.applied": "Medida de moderação aplicada",
+    # v0.20.0 — apuração de denúncia. O fato da DENÚNCIA em si não entra aqui de propósito: quem
+    # denunciou e quem foi denunciado não viram evento de domínio legível pela rede.
+    "Report.response_requested": "Manifestação pedida a quem foi denunciado",
+    "Report.concluded": "Apuração de denúncia concluída",
     # os fatos do NÚCLEO que a rede também precisa observar para notificar a equipe
     "Project.status_changed": "Situação do projeto alterada",
     "Project.published": "Projeto publicado",

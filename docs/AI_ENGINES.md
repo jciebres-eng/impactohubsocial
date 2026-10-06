@@ -23,13 +23,21 @@ Cinco testes transformam a declaração em compromisso:
 
 ## O estado real
 
-28 motores. Três naturezas, e a distinção muda o que se pode prometer:
+40 motores. Três naturezas, e a distinção muda o que se pode prometer:
 
 | Natureza | Quantos | O que significa |
 |---|---|---|
-| `deterministic` | 23 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
+| `deterministic` | 35 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
 | `grounded_retrieval` | 2 | responde por **extração** do conteúdo cadastrado; nenhum texto é gerado por modelo |
 | `llm_assisted` | 3 | um modelo reescreve ou complementa **sobre base determinística**, como rascunho |
+
+> **v0.20.0 — o registro estava incompleto, e isso era pior que não ter registro.** A auditoria desta
+> rodada encontrou **doze** módulos que decidem algo sobre organização ou projeto e não apareciam
+> aqui, entre eles a camada de impacto INTEIRA: afirmações, equidade, reputação e selos — justamente
+> os motores que sustentam a promessa da plataforma. Um inventário incompleto dá a impressão de
+> inventário. O teste `test_every_module_with_its_own_engine_version_is_declared` passou a reprovar
+> a suíte quando um módulo com `ENGINE_VERSION` fica de fora, e o critério é objetivo: declarar-se
+> motor é entrar no registro.
 
 ### Os dois "assistentes" não são chatbots
 
@@ -72,8 +80,26 @@ de prestação de contas — esses são colhidos pelo banco e protegidos por `gu
 
 Agrupados como no registro: **prontidão** (2), **compatibilidade** (4), **conformidade** (3),
 **documento** (2), **evidência** (3), **fiscal** (1), **busca** (3), **soluções** (4), **econômico** (3),
-**IA** (3). A lista completa, com caminho de módulo e função, está em `engines/registry.py` — e é a mesma
-que a rota devolve, porque é a mesma fonte.
+**IA** (3), **impacto** (4), **confiança** (4), **orientação** (1), **operação** (1), **governança** (1),
+**vocabulário** (1). A lista completa, com caminho de módulo e função, está em `engines/registry.py` — e
+é a mesma que a rota devolve, porque é a mesma fonte.
+
+## Cobertura: onde a cadeia é forte, e onde não é
+
+`ENGINE_COVERAGE.md` traz os 40 motores com seis colunas — **implemented, integrated, tested, E2E,
+security, observability** — e `GET /v1/engines/coverage` devolve o mesmo cálculo.
+
+**Nenhuma das seis colunas é declarada.** Todas são derivadas do código, do roteador, da suíte de testes
+e do esquema do banco. Isso importa porque o diferencial desta plataforma não está numa tela: está na
+cadeia necessidade → match → oportunidade → execução → serviço → evidência → prestação de contas →
+resultado → impacto → reputação → inteligência. Uma cadeia vale o seu elo mais fraco, e um elo fraco é
+exatamente o que uma tabela escrita à mão esconde — porque quem escreve é quem construiu. Um motor não
+ganha uma coluna sendo descrito como completo; ganha quando o fato existe.
+
+A tabela devolve `false`, e devolve de propósito: oito motores calculam e **não deixam rastro durável**,
+isto é, depois do fato não há como responder "este motor rodou? com qual versão?". Isso aparece como
+`NÃO` em vez de ficar escondido atrás de uma boa descrição. `n/a` em E2E e em segurança significa motor
+sem rota própria — herda a barreira de quem o chama, e não é falha.
 
 ## Uma correção que esta fase produziu
 

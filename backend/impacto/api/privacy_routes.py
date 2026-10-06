@@ -113,3 +113,32 @@ def legal(ctx: Ctx):
                              "X-Legal-Status": doc["status"],
                              "X-Legal-Version": str(doc["version"]),
                              "X-Legal-Sha256": doc["body_sha256"]})
+
+
+@route("GET", "/v1/privacy/retention", auth="user", tags=T,
+       summary="O que a plataforma guarda, por quanto tempo e o que ela NÃO consegue apagar")
+def retention(ctx: Ctx):
+    """A política de retenção CONFERIDA contra o banco, não apenas declarada.
+
+    Até a v0.20.0 este motor existia (`core/retention.py`, v0.19.0), produzia a conferência e só
+    era alcançável por um script de linha de comando — isto é, a pessoa de quem são os dados não
+    tinha como ler. Uma política de retenção que o titular não consegue ler não cumpre a função
+    que a justifica.
+
+    O que sai daqui é a classe EFETIVA de cada vínculo, apurada nos gatilhos reais do banco. Quando
+    a declaração diverge do que o banco faz, a divergência aparece — e é a declaração que está
+    errada, nunca o banco.
+    """
+    from ..core import retention as RET
+    with ctx.tx(readonly=True) as c:
+        doc = RET.load()
+        conferencia = RET.audit(c, doc)
+    return {
+        "classes": doc["classes"],
+        "audit": conferencia,
+        "effective_class_note": doc.get("effective_class_note"),
+        "note": ("`append_only` significa que o banco IMPEDE a remoção por gatilho: a plataforma "
+                 "não promete apagar o que ela própria bloqueia. Em particular, A PLATAFORMA NÃO "
+                 "REMOVE ORGANIZAÇÃO — o vínculo é anonimizado e o registro histórico permanece, "
+                 "porque apagá-lo apagaria também a prestação de contas de terceiros."),
+    }

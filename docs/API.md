@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (831)
+## Operações (833)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -328,6 +328,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/drafts/{draft_id}/export-pdf` | membro da organização ativa | papel ≥ member | Gera PDF do rascunho e guarda no cofre (documento hasheado, pronto para assinatura) |
 | POST | `/v1/drafts/{draft_id}/new-version` | membro da organização ativa | papel ≥ member | new version |
 | GET | `/v1/engines` | usuário autenticado | — | Os motores operacionais: natureza, versão, o que produzem e o que nunca decidem |
+| GET | `/v1/engines/coverage` | usuário autenticado | — | Cobertura por motor: implementado, integrado, testado, E2E, segurança, observabilidade — tudo DERIVADO do código, nada declarado |
 | GET | `/v1/equity/catalog` | usuário autenticado | — | Barreiras, escadas de prova, tipos de denominador e métodos de normalização |
 | POST | `/v1/equity/compare` | membro da organização ativa | papel ≥ viewer | Compara contextos — e devolve comparable=false com o motivo quando não há base |
 | GET | `/v1/equity/denominators` | membro da organização ativa | papel ≥ viewer | Denominadores vigentes, com fonte e data de cada um |
@@ -585,6 +586,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/privacy/consents` | usuário autenticado | — | Registra/revoga consentimento opcional (ex.: comunicações) |
 | POST | `/v1/privacy/delete-account` | usuário autenticado | limite 5/3600s | Elimina a conta: anonimiza dados pessoais e revoga sessões. Registros financeiros/auditoria são mantidos pseudonimizados (obrigação legal). |
 | GET | `/v1/privacy/export` | usuário autenticado | limite 10/3600s | Exporta os dados pessoais do titular em JSON (art. 18, II e V da LGPD) |
+| GET | `/v1/privacy/retention` | usuário autenticado | — | O que a plataforma guarda, por quanto tempo e o que ela NÃO consegue apagar |
 | GET | `/v1/procurement/policy` | membro da organização ativa | tipos: osc; papel ≥ viewer | Política de cotações da organização (padrão: 3 cotações) |
 | PUT | `/v1/procurement/policy` | membro da organização ativa | tipos: osc; papel ≥ admin | Configura nº mínimo de cotações, valor a partir do qual exige, limite de desvio e aprovação de exceções |
 | GET | `/v1/procurement/{request_id}` | membro da organização ativa | papel ≥ viewer | Pedido com cotações, benchmark (média, mediana, mín., máx., desvio) e conformidade com a política |

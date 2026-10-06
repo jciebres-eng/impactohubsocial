@@ -389,11 +389,33 @@ class MailDelivery(unittest.TestCase):
             self.assertGreaterEqual(out["emails_failed"], 1, out)
             with db_system() as d:
                 self.assertEqual(d.scalar("SELECT count(*) FROM notifications WHERE user_id = $1 AND kind = 'billing.notice' AND emailed_at IS NULL", org.user["id"]), 1)
+            # v0.20.0 — a falha deixou de sumir: ela fica registrada, com erro e com a HORA DA
+            # PRÓXIMA TENTATIVA. Antes, o ciclo seguinte tentava na hora, o que em uma queda de
+            # SMTP vira marretada no servidor que já está fora do ar.
+            with db_system() as d:
+                entrega = d.one("SELECT d.status, d.attempts, d.last_error, d.next_retry_at > now()"
+                                " AS aguardando FROM notification_deliveries d"
+                                " JOIN notifications n ON n.id = d.notification_id"
+                                " WHERE n.user_id = $1 AND n.kind = 'billing.notice'", org.user["id"])
+            self.assertEqual(entrega["status"], "failed")
+            self.assertEqual(entrega["attempts"], 1)
+            self.assertIn("SMTP indisponível", entrega["last_error"])
+            self.assertTrue(entrega["aguardando"], "a próxima tentativa tem de ser agendada")
+            with db_system() as d:
+                self.assertEqual(hub.notification_emails(st, d)["emails_sent"], 0,
+                                 "dentro da janela de recuo, não se tenta de novo")
         finally:
             st.mailer = original
+        # Vencida a janela de recuo, o aviso SAI — e o `emailed_at` só avança agora.
         with db_system() as d:
+            d.run("UPDATE notification_deliveries SET next_retry_at = now() - interval '1 minute'"
+                  " WHERE status = 'failed'")
             self.assertGreaterEqual(hub.notification_emails(st, d)["emails_sent"], 1)
             self.assertEqual(d.scalar("SELECT count(*) FROM notifications WHERE user_id = $1 AND kind = 'billing.notice' AND emailed_at IS NULL", org.user["id"]), 0)
+            self.assertEqual(d.scalar("SELECT status FROM notification_deliveries d"
+                                      " JOIN notifications n ON n.id = d.notification_id"
+                                      " WHERE n.user_id = $1 AND n.kind = 'billing.notice'",
+                                      org.user["id"]), "sent")
         with db_system() as d:
             self.assertEqual(hub.notification_emails(st, d)["emails_sent"], 0, "aviso já enviado foi reenviado")
 

@@ -363,3 +363,18 @@ def admin_reconciliation(ctx: Ctx, q: E.ReconciliationQ):
 def engines_registry(ctx: Ctx):
     from ..engines.registry import describe
     return describe()
+
+
+@route("GET", "/v1/engines/coverage", auth="user", tags=("motores",),
+       summary="Cobertura por motor: implementado, integrado, testado, E2E, segurança, "
+               "observabilidade — tudo DERIVADO do código, nada declarado")
+def engines_coverage(ctx: Ctx):
+    """A tabela que diz onde a cadeia é forte e onde ela não é.
+
+    Nenhuma das seis colunas é escrita: todas são derivadas do código, do roteador, da suíte de
+    testes e do esquema. Um motor não ganha uma coluna sendo descrito como completo — ganha quando
+    o fato existe. Por isso esta rota pode devolver `false`, e devolve: oito motores calculam e não
+    deixam rastro durável, e isso aparece em vez de ficar escondido atrás de uma descrição boa.
+    """
+    from ..engines import coverage
+    return coverage.table()

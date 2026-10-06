@@ -20,7 +20,7 @@ import sys
 import unittest
 
 from impacto.core import glossary as G
-from tests.support import ROOT, db_system
+from tests.support import ROOT, db_system, new_account
 
 
 class GlossaryContractTests(unittest.TestCase):
@@ -180,3 +180,35 @@ class GlossaryInDatabaseTests(unittest.TestCase):
                 if not (str(r["explica"] or "")).strip():
                     faltas.append(f"{tabela}.{r['code']}: sem {spec['explains']}")
         self.assertEqual(faltas, [], "\n".join(faltas))
+
+
+class GlossaryOverHttpTests(unittest.TestCase):
+    """v0.20.0 — a rota pública exercitada de ponta a ponta.
+
+    O vocabulário era conferido contra o código e contra o banco, e NUNCA pelo HTTP. A rota é
+    pública e sem autenticação: é justamente a que mais precisa ser atravessada por teste, porque
+    é a única superfície do vocabulário que a interface consome.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.c = new_account("osc")
+
+    def test_the_public_route_serves_the_official_vocabulary(self):
+        r = self.c.get("/v1/public/glossary")
+        self.assertEqual(r.status, 200, r)
+        self.assertGreaterEqual(len(r.json["domains"]), 20)
+        termos = {t["key"] for d in r.json["domains"] for t in d["terms"]}
+        self.assertIn("substantiated", termos,
+                      "o vocabulário da apuração de denúncia tem de sair pela rota pública")
+
+    def test_a_single_domain_can_be_requested(self):
+        r = self.c.get("/v1/public/glossary?domain=claim_status")
+        self.assertEqual(r.status, 200, r)
+        self.assertEqual([d["key"] for d in r.json["domains"]], ["claim_status"])
+
+    def test_the_route_answers_in_the_requested_locale(self):
+        r = self.c.get("/v1/public/glossary?locale=en")
+        self.assertEqual(r.status, 200, r)
+        rotulos = [t["label"] for d in r.json["domains"] for t in d["terms"]]
+        self.assertTrue(rotulos, "nenhum rótulo devolvido")

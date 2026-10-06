@@ -49,6 +49,9 @@ class Engine:
     routes: tuple[str, ...] = ()
     notes: str = ""
     config: tuple[str, ...] = field(default=())
+    #: Rotas deste motor que são PÚBLICAS de propósito. Declarar aqui é assumir a exposição; a
+    #: revisão de segurança global continua sendo a do teste de arquitetura.
+    public_routes: tuple[str, ...] = ()
 
 
 ENGINES: tuple[Engine, ...] = (
@@ -95,7 +98,8 @@ ENGINES: tuple[Engine, ...] = (
         version="solution-match@1.0.0", group="compatibilidade",
         routes=("/v1/solutions/{solution_id}/match", "/v1/solutions/recommendations"),
         produces="Aderência entre solução cadastrada e tese declarada do financiador.",
-        never="Não promete aporte."),
+        never="Não promete aporte nem decide financiamento: devolve ADERÊNCIA à tese declarada "
+              "pelo financiador, que é uma leitura, não um compromisso de ninguém."),
     Engine(
         key="recommendation", name="Próxima ação recomendada",
         module="impacto.network.recommendation", entrypoint="compute", kind="deterministic",
@@ -198,12 +202,14 @@ ENGINES: tuple[Engine, ...] = (
         version="help-search@1.0.0", group="busca",
         routes=("/v1/help/search", "/v1/help/context"),
         config=("config/help_synonyms.json",),
+        public_routes=("/v1/help/search", "/v1/help/context",),
         produces="Resultados ordenados por texto completo, título, tópico, contexto e público.",
         never="Não há embeddings nem modelo: a camada semântica é vocabulário de sinônimos."),
     Engine(
         key="help_assistant", name="Assistente da Central de Conhecimento",
         module="impacto.services.knowledge", entrypoint="assistant", kind="grounded_retrieval",
         version=None, group="busca", routes=("/v1/help/assistant",),
+        public_routes=("/v1/help/assistant",),
         produces="Resposta extraída de artigo ou FAQ cadastrado, com fonte, versão e confiança — ou "
                  "a recusa honesta de que não há informação suficiente na base.",
         never="**Não é chatbot.** Nenhum modelo gera texto: a resposta é concatenação de campos do "
@@ -295,6 +301,128 @@ ENGINES: tuple[Engine, ...] = (
         version=None, group="ia", routes=("/v1/ai/summarize-project",),
         produces="Resumo do projeto em até quatro frases para o financiador.",
         never="Qualquer falha cai no resumo local. Nada é enviado sem redação de dado pessoal."),
+
+    # ------------------------------------------------------------------ v0.20.0: os que existiam
+    # e não estavam declarados. A auditoria desta rodada encontrou DOZE módulos que decidem algo
+    # sobre organização ou projeto e não apareciam no registro — inclusive toda a camada de
+    # impacto. Um registro incompleto é pior que registro nenhum: ele dá a impressão de inventário.
+    Engine(
+        key="firstrun", name="Primeiro acesso: o que já existe e o que falta",
+        module="impacto.core.firstrun", entrypoint="state", kind="deterministic",
+        version="firstrun@1.0.0", group="orientação",
+        routes=("/v1/firstrun", "/v1/projects/{project_id}/context-return"),
+        produces="Para cada uma das 12 áreas: o que é, o que já existe, o que falta, o que a área "
+                 "devolve e se a tela existe — tudo a partir de CONTAGEM REAL no banco.",
+        never="Não finge que uma tela existe: `screen_status` diz `to_be_designed` quando a tela "
+              "ainda não foi feita. E `context_return` NUNCA é ranking entre organizações."),
+    Engine(
+        key="claim_integrity", name="Integridade de afirmação de impacto",
+        module="impacto.impact.claims", entrypoint="check", kind="deterministic",
+        version="claim-integrity@1.0.0", group="impacto",
+        routes=("/v1/claims", "/v1/claims/{claim_id}/check", "/v1/claims/{claim_id}/review",
+                "/v1/claims/rules"),
+        produces="Rodada de verificação de uma afirmação, com o que sustenta e o que não sustenta.",
+        never="Não declara a afirmação verdadeira nem falsa: devolve o que a evidência suporta. "
+              "Revisão só existe por convite de quem declarou — não há revisão não solicitada, "
+              "que seria canal para pressionar concorrente."),
+    Engine(
+        key="equity_context", name="Contexto de equidade e normalização",
+        module="impacto.impact.equity", entrypoint="assess", kind="deterministic",
+        version="equity-context@1.0.0", group="impacto",
+        routes=("/v1/projects/{project_id}/equity", "/v1/projects/{project_id}/equity/assessments",
+                "/v1/equity/compare", "/v1/equity/catalog"),
+        produces="Avaliação de equidade com denominador declarado, método e barreiras.",
+        never="Não compara projetos sem denominador comum declarado, e não transforma contexto em "
+              "nota de desempenho."),
+    Engine(
+        key="reputation", name="Reputação por dimensão observada",
+        module="impacto.impact.reputation", entrypoint="profile", kind="deterministic",
+        version="reputation-dimensions@1.0.0", group="impacto",
+        routes=("/v1/reputation/me", "/v1/organizations/{org_id}/reputation",
+                "/v1/reputation/disputes", "/v1/reputation/dimensions"),
+        produces="Valor, confiança e faixa por dimensão, com as observações que os sustentam.",
+        never="Não produz nota única nem ranking, e NENHUMA faixa vem de denúncia: só infração "
+              "apurada e concluída entra. Reputação aqui é leitura do observado, não punição.",
+        notes="A leitura corrente é SEMPRE calculada; o snapshot existe para mostrar evolução."),
+    Engine(
+        key="seals", name="Selos: regra pública, concessão e revogação",
+        module="impacto.impact.seals", entrypoint="award", kind="deterministic",
+        version="seal-rules@1.0.0", group="impacto",
+        routes=("/v1/seals/definitions", "/v1/seals/evaluate", "/v1/seals/awards",
+                "/v1/seals/awards/{award_id}"),
+        produces="Concessão com os critérios conferidos no banco, ou a RECUSA registrada com o "
+                 "critério que faltou.",
+        never="Não concede por tempo de casa nem por pagamento, e não apaga selo revogado: a "
+              "revogação é fato novo. `recheck()` reavalia e revoga o que deixou de valer.",
+        notes="v0.20.0: `recheck()` existia e nunca era chamada — agora é a tarefa `seal_recheck`."),
+    Engine(
+        key="report_integrity", name="Apuração de denúncia em quatro níveis",
+        module="impacto.network.complaints", entrypoint="conclude", kind="deterministic",
+        version="report-integrity@1.0.0", group="confiança",
+        routes=("/v1/reports", "/v1/reports/vocabulary", "/v1/conta/denuncias",
+                "/v1/admin/reports/queue"),
+        produces="O trâmite DENÚNCIA → SUSPEITA → INFRAÇÃO APURADA → CONSEQUÊNCIA, com direito de "
+                 "manifestação e recurso.",
+        never="Denúncia NÃO tem efeito por si: nenhuma medida, nenhum ponto de reputação. Só "
+              "`substantiated`, decidido por pessoa com fundamentação escrita, autoriza medida — "
+              "e isso é travado por gatilho no banco, não por disciplina de quem programa. A "
+              "plataforma registra ENCAMINHAMENTO jurídico; nunca declara crime."),
+    Engine(
+        key="deadline_sweep", name="Varredura de prazos",
+        module="impacto.ops.deadlines", entrypoint="sweep", kind="deterministic",
+        version="deadline-sweep@1.0.0", group="operação",
+        produces="Avisos em D-30, D-7 e D-1 sobre marcos, chamadas, propostas, selos e marcos de "
+                 "instrumento.",
+        never="Não estima data nenhuma: varre apenas prazos DECLARADOS pelas próprias organizações.",
+        notes="Tarefa `deadline_sweep`. Até a v0.20.0 a plataforma registrava cinco prazos e "
+              "varria um."),
+    Engine(
+        key="risk_signals", name="Sinais de risco operacional",
+        module="impacto.services.risk", entrypoint="scan", kind="deterministic",
+        version=None, group="confiança",
+        routes=("/v1/admin/risk/signals", "/v1/admin/risk/scan", "/v1/risk-rules",
+                "/v1/projects/{project_id}/risks"),
+        produces="Sinais de regra (documento repetido, evidência reaproveitada, despesa acima do "
+                 "item, preço fora da curva, contas relacionadas) e nível de risco.",
+        never="Sinal de regra NÃO é acusação nem fraude comprovada: é indício que pede olhar "
+              "humano. Nenhum sinal aplica medida sozinho."),
+    Engine(
+        key="compliance_checks", name="Conferências de conformidade",
+        module="impacto.services.compliance", entrypoint="run_checks", kind="deterministic",
+        version=None, group="confiança",
+        routes=("/v1/compliance", "/v1/organizations/{org_id}/compliance",
+                "/v1/admin/compliance-reviews"),
+        produces="Conferências com estado e o que falta para cada uma.",
+        never="Não declara a organização idônea nem apta: diz o que foi conferido e o que não foi. "
+              "Desde a v0.20.0 só denúncia APURADA entra na pontuação; denúncia aberta apenas "
+              "informa."),
+    Engine(
+        key="enforcement_ladder", name="Escada de medidas de moderação",
+        module="impacto.network.enforcement", entrypoint="apply", kind="deterministic",
+        version=None, group="confiança",
+        routes=("/v1/admin/enforcement", "/v1/admin/enforcement/history",
+                "/v1/admin/enforcement/{action_id}/lift"),
+        produces="Dez degraus de medida, com as capacidades que cada um restringe e prazo próprio.",
+        never="Nenhum degrau é aplicado por máquina: medida é sempre decisão de pessoa, e exige "
+              "denúncia apurada. Medida vencida expira (tarefa `enforcement_expiry`) — suspensão "
+              "'de 30 dias' não vale para sempre."),
+    Engine(
+        key="glossary_drift", name="Detector de divergência de vocabulário",
+        module="impacto.core.glossary", entrypoint="missing", kind="deterministic",
+        version=None, group="vocabulário",
+        routes=("/v1/public/glossary",),
+        public_routes=("/v1/public/glossary",),
+        produces="O que o código usa e o glossário não documenta (`undocumented`), e o que o "
+                 "glossário documenta e o código não usa mais (`stale`).",
+        never="Não inventa rótulo para termo não documentado: a lacuna FALHA a suíte."),
+    Engine(
+        key="retention_policy", name="Conferência da política de retenção",
+        module="impacto.core.retention", entrypoint="links", kind="deterministic",
+        version=None, group="governança",
+        routes=("/v1/privacy/retention",),
+        produces="Classe EFETIVA de cada vínculo, conferida contra os gatilhos reais do banco.",
+        never="Não promete apagar o que o banco impede de apagar: tabela append-only aparece como "
+              "`append_only`, e a plataforma declara que NÃO remove organização."),
 )
 
 #: Os ÚNICOS pontos do código autorizados a chamar o modelo. O teste de arquitetura compara esta

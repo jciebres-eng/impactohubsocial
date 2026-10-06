@@ -7095,6 +7095,31 @@
     ]
    }
   },
+  "/v1/privacy/retention": {
+   "get": {
+    "summary": "O que a plataforma guarda, por quanto tempo e o que ela NÃO consegue apagar",
+    "operationId": "get_privacy_routes_retention",
+    "tags": [
+     "privacy"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
   "/v1/ods": {
    "get": {
     "summary": "17 ODS e quantidade de metas oficiais carregadas (metas/indicadores oficiais entram por importação)",
@@ -31779,6 +31804,31 @@
    "get": {
     "summary": "Os motores operacionais: natureza, versão, o que produzem e o que nunca decidem",
     "operationId": "get_program_routes_engines_registry",
+    "tags": [
+     "motores"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/engines/coverage": {
+   "get": {
+    "summary": "Cobertura por motor: implementado, integrado, testado, E2E, segurança, observabilidade — tudo DERIVADO do código, nada declarado",
+    "operationId": "get_program_routes_engines_coverage",
     "tags": [
      "motores"
     ],

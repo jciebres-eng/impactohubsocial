@@ -277,6 +277,32 @@ def billing_lifecycle(app) -> dict:
     return monetization.lifecycle_job(app)
 
 
+def commercial_sweep(app) -> dict:
+    """Período gratuito: encerra o que venceu e avisa 90/60/30/7/1 dia antes, mais o semanal.
+
+    Separado de `billing_lifecycle` de propósito: aquele cuida do trial de 14 dias, que é um
+    mecanismo de AQUISIÇÃO; este cuida da gratuidade temporal, que é uma decisão COMERCIAL. Os dois
+    coexistem numa mesma conta, e misturá-los faria um cancelar o aviso do outro.
+    """
+    from .services import free_period as FP
+    with app.pool.tx(DbContext(system=True)) as c:
+        return FP.sweep(c)
+
+
+def usage_alerts(app) -> dict:
+    """Alertas de 70%, 90% e 100% do limite do plano, uma vez por limiar e por período.
+
+    Varre só as organizações ativas: um alerta é um aviso para alguém decidir alguma coisa, e não
+    há ninguém para decidir numa conta encerrada.
+    """
+    from .services import usage as U
+    enviados = 0
+    with app.pool.tx(DbContext(system=True)) as c:
+        for org in c.query("SELECT id::text AS id, kind FROM organizations WHERE status = 'active'"):
+            enviados += U.check_alerts(c, org["id"], org["kind"])
+    return {"alerts": enviados}
+
+
 def hub_ops(app) -> dict:
     """Central de Conhecimento: escalonamento de SLA, lembretes de evento, envio do boletim (duplo opt-in), e-mails de cobrança/teste/suporte/eventos e retenção de analytics (18 meses)."""
     from .services import hub
@@ -409,7 +435,7 @@ def deadline_sweep(app) -> dict:
 
 
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("commercial_sweep", commercial_sweep), ("usage_alerts", usage_alerts), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
         # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
         ("backup", backup_job), ("email_canary", email_canary_job),
         ("enforcement_expiry", enforcement_expiry),

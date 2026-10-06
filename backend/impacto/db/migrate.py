@@ -154,7 +154,7 @@ def _sync_price_versions(conn: Connection, plans: dict) -> int:
                              [k for k, pl in plans["plans"].items()
                               if (tier is None or pl.get("tier") == tier) and pl.get("interval") != "custom"]):
                 closed = conn.execute(
-                    "UPDATE plan_price_versions SET effective_until = now()"
+                    "UPDATE plan_price_versions SET effective_until = greatest(now(), effective_from + interval '1 microsecond')"
                     " WHERE plan_key = $1 AND interval = $2 AND currency = $3 AND effective_until IS NULL",
                     (plan_key, it["interval"], it["currency"].upper())).rowcount
                 n += int(closed or 0)
@@ -185,8 +185,18 @@ def _sync_price_versions(conn: Connection, plans: dict) -> int:
                                  (cur[0]["id"], it["provider_price_id"], it.get("provider_intro_price_id")))
                 continue
             if cur:
-                conn.execute("UPDATE plan_price_versions SET effective_until = now() WHERE id = $1",
-                             (cur[0]["id"],))
+                # A expressão, e não `now()`: uma versão com vigência AGENDADA para o futuro
+                # (reajuste anunciado) tem `effective_from > now()`, e fechá-la em `now()` viola
+                # `effective_order` (effective_until > effective_from) — a migração morria ao
+                # encontrar um reajuste agendado. Fechar uma versão que ainda não começou significa
+                # que ela nunca vigorou; a janela fica vazia em vez de negativa.
+                #
+                # Escrita inline, e não como função de banco: o sincronizador roda em TODA versão
+                # do schema, inclusive nas antigas que o teste de atualização percorre. Depender de
+                # uma função criada na 0044 faria a migração a partir da v0.17.0 falhar.
+                conn.execute("UPDATE plan_price_versions SET effective_until ="
+                             " greatest(now(), effective_from + interval '1 microsecond')"
+                             " WHERE id = $1", (cur[0]["id"],))
             conn.execute(
                 "INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, intro_amount_cents,"
                 " intro_periods, trial_days, tax_behavior, provider, provider_price_id, provider_intro_price_id,"

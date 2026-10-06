@@ -1,0 +1,222 @@
+{
+  "version": "0.21.0",
+  "pricing_version": "2027.01",
+  "released_on": "2026-10-06",
+  "scope": "Reengenharia da monetização e fechamento técnico comercial, antes da camada de Designer.",
+  "version_rationale": "0.21.0 e não 1.0.0: esta versão publica a PRIMEIRA tabela de preços da plataforma e o motor de gratuidade temporal, mas nenhum fluxo de cobrança foi exercitado com provedor real, e as 11 minutas jurídicas continuam em rascunho. Chamar de 1.0 declararia pronto para cobrar de gente de verdade, o que exige contratação e aprovação jurídica — decisões que não são técnicas.",
+
+  "what_the_audit_found_before_any_change": {
+    "central_finding": "Toda a infraestrutura comercial existia e estava vazia.",
+    "evidence": {
+      "plan_price_versions": "0 linhas",
+      "plan_prices": "10 linhas, todas amount_cents NULL",
+      "paid_plans_with_price": "0 de 7",
+      "subscriptions_invoices_charges": "0 linhas cada",
+      "price_change_notices": "0 linhas",
+      "value_events_billable_events": "0 linhas cada",
+      "monetization_rules": "9 linhas, todas active = false",
+      "legal_documents": "11 minutas, todas status draft",
+      "legal_acceptances": "0 linhas",
+      "full_free_occurrences_in_repo": 0,
+      "commercial_i18n_keys": 0,
+      "hardcoded_prices_in_code": 0
+    },
+    "consequence_at_the_time": "Todo plano pago exibia 'Preço não divulgado' e o botão de contratar estava desabilitado. A plataforma recusava contratação em vez de inventar valor — comportamento correto, e o ponto de partida desta rodada."
+  },
+
+  "delivered": {
+    "pricing_catalog": {
+      "live_price_versions": 8,
+      "retired_price_versions": 2,
+      "published_quote_floors": 2,
+      "free_plans": 5,
+      "currency": "BRL",
+      "tax_behavior": "unspecified",
+      "tax_behavior_rationale": "A PRICING_BIBLE.md não declara se os valores são com ou sem tributos. Declarar 'inclusive' sem parecer fiscal seria inventar um fato tributário. A interface exibe a indefinição.",
+      "hardcoded_price_figures_in_code": 0,
+      "source_of_truth": "config/plans.json -> plan_price_versions"
+    },
+    "free_period_engine": {
+      "table": "free_periods",
+      "granularity": "por conta, nunca data global no código",
+      "sources": ["2026_CAMPAIGN", "2027_NEW_SUBSCRIPTION", "PROMOTION", "GRANT", "PARTNERSHIP", "MANUAL_EXCEPTION"],
+      "three_months_semantics": "MESES DE CALENDÁRIO, não 90 dias (ADR-268)",
+      "ends_at_semantics": "EXCLUSIVO: o período é [started_at, ends_at)",
+      "commercial_timezone": "America/Sao_Paulo, aplicado na fronteira; armazenamento continua em UTC",
+      "single_source": "free_period_end(org_id) -> FREE_PERIOD_END",
+      "on_expiry": "a conta volta ao plano gratuito permanente. Sem cobrança, sem suspensão, sem perda de dados."
+    },
+    "free_access_is_not_authorization": {
+      "tables": ["commercial_offers", "offer_acceptances"],
+      "consent_values": ["free_access", "authorized"],
+      "recorded_fields": ["offer_id", "pricing_version", "plan_key", "price_version_id", "free_period_id", "billing_frequency", "payment_method", "terms_version", "privacy_version", "commercial_terms_version", "accepted_at", "accepted_by", "ip", "user_agent", "consent_status"],
+      "enforced_by": "gatilho charge_requires_authorization, no BANCO",
+      "why_in_the_database": "Um módulo pode ser contornado por outro caminho de escrita — rota nova, job, script, console. Um gatilho, não."
+    },
+    "payments": {
+      "billing_frequency": ["one_time", "installment", "recurring"],
+      "installments_are_not_recurrence": true,
+      "boleto_installments_require_cnpj": true,
+      "validated_where": "backend (services/offers.py), com teste que chama o serviço sem passar por rota",
+      "idempotency_key": "platform_charges(org_id, idempotency_key) UNIQUE, escopada por organização"
+    },
+    "usage_engine": {
+      "tables": ["usage_counters", "usage_alerts", "spend_limits"],
+      "thresholds": [70, 90, 100],
+      "spend_limit_actions": ["warn", "hard_stop"],
+      "overage_policy": "Exceder o limite do plano NÃO gera cobrança adicional: o excedente é interrompido. Não há preço de excedente publicado.",
+      "live_count_still_blocks": "sim — o contador persistido avisa e lembra; quem bloqueia continua sendo a contagem ao vivo"
+    },
+    "commercial_notifications": {
+      "windows_days": [90, 60, 30, 7, 1],
+      "weekly_reminder_within_days": 30,
+      "end_notice": true,
+      "source": "FREE_PERIOD_END",
+      "frontend_computes_dates": false,
+      "jobs": ["commercial_sweep", "usage_alerts"]
+    },
+    "commercial_ui": {
+      "public_pricing_page": "/planos",
+      "screens": ["/planos", "/conta/comercial", "/conta/consumo", "/conta/plano (faixa de período gratuito)"],
+      "commercial_routes": 11,
+      "i18n_namespaces": ["billing", "pricing", "subscription", "free_period", "commercial", "checkout", "invoice", "payment", "cancellation", "usage"],
+      "i18n_keys_per_locale": 82,
+      "i18n_keys_total": 246,
+      "i18n_locales": ["pt-BR", "en", "es"],
+      "i18n_keys_before_this_round": 0
+    }
+  },
+
+  "migrations": ["0042_v0210_free_period.sql", "0043_v0210_commercial_offer.sql", "0044_v0210_usage_engine.sql"],
+
+  "tests": {
+    "new_test_files": ["test_v0210_pricing_catalog.py", "test_v0210_free_period.py", "test_v0210_offer.py", "test_v0210_usage.py", "test_v0210_commercial_ui.py"],
+    "new_tests": 109,
+    "full_suite": 1666,
+    "failures": 0,
+    "skipped": 26,
+    "duration_seconds": 522,
+    "temporal_boundary_instants_tested": ["2026-12-31 23:59:58", "2026-12-31 23:59:59", "2027-01-01 00:00:00", "2027-01-01 00:00:01", "2027-01-01 02:00 UTC"],
+    "subscription_dates_tested": ["2027-01-01", "2027-02-01", "2027-02-15", "2027-02-28", "2027-03-31"]
+  },
+
+  "defects_found_and_fixed_in_this_round": [
+    {
+      "defect": "A exigência de autorização de cobrança podia ser burlada",
+      "how": "Gatilhos BEFORE INSERT disparam em ordem alfabética do nome, e trg_charge_requires_authorization vem antes de trg_charge_simulated. O gatilho lia a coluna is_simulated, que naquele instante ainda continha o valor enviado pelo chamador. Bastava mandar is_simulated = true com provider = 'stripe'.",
+      "fix": "Ambos consultam charge_is_simulated(provider).",
+      "found_by": "teste próprio desta rodada",
+      "severity": "alta"
+    },
+    {
+      "defect": "FORCE ROW LEVEL SECURITY quebrava o pg_dump",
+      "how": "FORCE aplica as políticas ao dono da tabela, e o dono é quem roda o backup. Nenhuma outra migração do projeto usava FORCE.",
+      "fix": "Trocado por ENABLE. A proteção real é o gatilho de imutabilidade, que dispara para todos.",
+      "found_by": "teste de backup da v0.19.0",
+      "severity": "alta — backup que falha em silêncio"
+    },
+    {
+      "defect": "Reajuste de preço agendado para o futuro quebrava a migração",
+      "how": "Fechar vigência em now() viola effective_until > effective_from quando a versão ainda não começou. Presente desde a v0.16.0, invisível enquanto o catálogo estava vazio.",
+      "fix": "greatest(now(), effective_from + 1 microsecond), inline no sincronizador porque ele roda em toda versão do schema.",
+      "found_by": "regressão completa",
+      "severity": "alta — qualquer implantação com reajuste anunciado pendente morria"
+    },
+    {
+      "defect": "Cota de IA contada de dois jeitos",
+      "how": "O bloqueio excluía pedidos recusados; o painel não. A tela podia dizer '80 de 100' onde o bloqueio contava 60.",
+      "fix": "Função única ai_usage_this_month(). Teste varre o código em busca de uma terceira cópia.",
+      "found_by": "auditoria desta rodada",
+      "severity": "média"
+    },
+    {
+      "defect": "company_premium com intervalo errado",
+      "how": "plans.interval = 'year' com preço publicado mensal: o catálogo anunciaria R$ 1.490 POR ANO para um plano de R$ 1.490 por mês.",
+      "fix": "interval passou a 'month'.",
+      "found_by": "teste de catálogo desta rodada",
+      "severity": "alta — desconto de 92% que ninguém decidiu"
+    },
+    {
+      "defect": "BILLING_V2.md descrevia regra comercial aposentada",
+      "how": "Documentava a regra em dólar da v0.16.0 (US$ 1,99 -> US$ 19,99), que config/plans.json aposentou na v0.17.0.",
+      "fix": "Aviso no topo apontando para a regra vigente. O documento permanece: ele descreve mecanismos que continuam valendo.",
+      "found_by": "auditoria desta rodada",
+      "severity": "baixa"
+    }
+  ],
+
+  "not_done_and_why": [
+    {
+      "item": "Ativar o take rate de 10% do marketplace",
+      "why": "ADR-022 / ADR-178: a plataforma não custodia nem processa o valor, então cobrar percentual sobre ele não é verificável, e receber para repassar pode exigir autorização do Banco Central (Lei 12.865/2013). A própria PRICING_BIBLE.md §20 condiciona o take rate a 'service + contract + transaction'. A regra está DECLARADA com 10% e active = false, e o banco recusa ativá-la.",
+      "blocker_type": "jurídico e arquitetural"
+    },
+    {
+      "item": "Aprovar as 11 minutas jurídicas",
+      "why": "Aprovar minuta é ato humano com responsabilidade profissional. Enquanto estiverem em draft, o banco recusa registrar aceite legal.",
+      "blocker_type": "humano"
+    },
+    {
+      "item": "Criar valor anual para PROFESSIONAL PRO e FUNDER PRO",
+      "why": "A PRICING_BIBLE.md não publica esses valores. Criar um desconto plausível seria inventar preço.",
+      "blocker_type": "decisão do proprietário"
+    },
+    {
+      "item": "Criar o plano FUNDER CORPORATE",
+      "why": "Exige decisão do proprietário sobre separá-lo de company_enterprise. Registrado como R-11 em PRICING_RECONCILIATION.md e tratado como escopo de proposta.",
+      "blocker_type": "decisão do proprietário"
+    },
+    {
+      "item": "Cobrar excedente de uso",
+      "why": "Não há preço de excedente publicado. Sem preço, o excedente é bloqueado ou avisado — nunca cobrado.",
+      "blocker_type": "decisão do proprietário"
+    },
+    {
+      "item": "Fechar tax_behavior",
+      "why": "Exige validação fiscal. A interface exibe a indefinição em vez de escondê-la.",
+      "blocker_type": "fiscal"
+    },
+    {
+      "item": "Exercitar checkout, fatura, boleto, pix, estorno e disputa com provedor real",
+      "why": "Exige credencial e contrato com provedor de pagamento. Todos os testes rodam em sandbox, e a interface declara isso.",
+      "blocker_type": "contratual"
+    },
+    {
+      "item": "Preencher unit economics e o modelo de 24 meses com números",
+      "why": "A plataforma nunca cobrou: não há custo medido, não há churn, não há conversão. Preencher produziria um documento que parece análise e funciona como invenção (ADR-280). O lado da receita e o calendário de caixa estão preenchidos porque são fato.",
+      "blocker_type": "falta de operação"
+    }
+  ],
+
+  "invariants_enforced_in_the_database": [
+    {"invariant": "Não há cobrança sem autorização vigente", "trigger": "charge_requires_authorization", "migration": "0043"},
+    {"invariant": "Preço não se sobrescreve", "trigger": "price_version_immutable", "migration": "0017"},
+    {"invariant": "Aumento exige aviso de 30 dias", "trigger": "price_apply_guard", "migration": "0017"},
+    {"invariant": "Período gratuito concedido não se reescreve", "trigger": "free_period_immutable", "migration": "0042"},
+    {"invariant": "Aceite é prova e não se altera", "trigger": "acceptance_immutable", "migration": "0043"},
+    {"invariant": "Take rate e success fee não se ativam sem custódia", "trigger": "monetization_rule_gate", "migration": "0020"},
+    {"invariant": "is_simulated é derivada do provedor", "trigger": "charge_simulated_flag", "migration": "0022 (revisto em 0043)"}
+  ],
+
+  "payment_never_buys": ["reputação", "verificação/selo", "impacto", "evidência", "veracidade de afirmação", "elegibilidade", "qualidade de match", "posição em ranking"],
+  "payment_never_buys_enforced_by": "test_no_code_path_turns_a_plan_into_a_score — nenhum módulo de reputação, impacto, match, selo, afirmação, equidade ou elegibilidade consulta qualquer tabela comercial",
+
+  "documents": [
+    "PRICING_BIBLE.md", "PRICING_RECONCILIATION.md", "PRICING_CATALOG.md", "PRICING_VERSION_2027_01.md",
+    "MONETIZATION_ARCHITECTURE.md", "BILLING_ARCHITECTURE.md", "FULL_FREE_2026.md", "COMMERCIAL_TERMS.md",
+    "COMMERCIAL_UX_SPEC.md", "PRICING_BENCHMARKS.md", "UNIT_ECONOMICS.md", "24_MONTH_FINANCIAL_MODEL.md",
+    "BILLING_SECURITY.md", "DESIGNER_HANDOFF_MONETIZATION.md"
+  ],
+
+  "adrs": "267 a 280",
+  "history_snapshot": "history/v0.20.0/ (20 arquivos)",
+
+  "verdict": {
+    "designer_layer": "GO",
+    "designer_rationale": "A camada comercial está completa, testada e documentada, com as quatro telas construídas e o i18n nos três idiomas. O que falta para cobrar não muda a interface.",
+    "web_publication": "NO-GO",
+    "web_publication_rationale": "As 11 minutas jurídicas estão em rascunho, não há provedor de pagamento contratado e tax_behavior está indefinido. Publicar permitiria que alguém tentasse contratar e recebesse uma recusa, ou pior, aceitasse termos que ainda não existem. O caminho restante é contratual e jurídico, não técnico.",
+    "charging_real_customers": "NO-GO",
+    "charging_rationale": "Nenhum fluxo de cobrança foi exercitado com provedor real. A plataforma opera em sandbox e declara isso na interface."
+  }
+}

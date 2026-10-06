@@ -49,7 +49,18 @@ class MonBase(unittest.TestCase):
 # ================================================================================================ regra nova
 class CommercialRuleTests(MonBase):
     def test_the_shipped_product_declares_no_price_at_all(self):
-        """A regra em dólar da v0.16.0 foi aposentada e nenhum preço institucional foi fixado.
+        """Todo preço declarado nomeia a versão de preço que o decidiu, e a regra em dólar continua aposentada.
+
+        v0.21.0 — REESCRITO, não afrouxado. Até a v0.20.0 este teste afirmava que o produto não
+        declarava preço NENHUM, porque a v0.17.0 havia aposentado a regra em dólar e o proprietário
+        ainda não tinha fixado valores. A Pricing Version 2027.01 fixou, e exigir ausência de preço
+        passaria a exigir que o produto nunca pudesse cobrar.
+
+        O que continua valendo — e é o que este teste passa a verificar — são três coisas:
+          1. a aposentadoria da regra em dólar NÃO foi revertida;
+          2. todo preço declarado diz de onde veio (versão de preço e seção da PRICING_BIBLE.md),
+             para que nenhum valor apareça sem decisão rastreável;
+          3. `plans.price_cents` continua sendo espelho do catálogo, nunca uma segunda fonte.
 
         A verificação é sobre o que o PRODUTO declara (`config/plans.json`), não sobre o banco de
         teste: o ambiente de teste declara preços próprios para poder exercitar a camada de cobrança,
@@ -61,19 +72,50 @@ class CommercialRuleTests(MonBase):
                          .read_text(encoding="utf-8"))
         items = cfg["price_versions"]["items"]
         self.assertTrue(items, "o bloco de preços não pode desaparecer: a aposentadoria vive nele")
+
+        # 1. A regra em dólar segue aposentada: nenhum item em USD sem `retire`.
         for it in items:
-            self.assertTrue(it.get("retire"),
-                            f"{it} declara preço; a v0.17.0 não fixa preço institucional")
+            if (it.get("currency") or "").upper() == "USD":
+                self.assertTrue(it.get("retire"),
+                                f"{it} ressuscita a regra em dólar que a v0.17.0 aposentou")
+        self.assertEqual(sum(1 for it in items if it.get("retire")), 2,
+                         "os dois itens aposentados sumiram do arquivo")
+
+        # 2. Todo preço vivo nomeia a decisão que o criou.
+        vivos = [it for it in items if not it.get("retire")]
+        self.assertTrue(vivos, "a Pricing Version 2027.01 deveria declarar preços")
+        for it in vivos:
+            self.assertIn(cfg["pricing_version"], it["reason"],
+                          f"{it['plan_key']} declara preço sem nomear a versão de preço")
+            self.assertIn("PRICING_BIBLE", it["reason"],
+                          f"{it['plan_key']} declara preço sem apontar a decisão comercial")
+            self.assertGreater(it["amount_cents"], 0)
+            self.assertEqual(it["currency"], "BRL")
+
+        # 3. `price_cents` é espelho do catálogo, nunca segunda fonte de verdade.
+        mensal = {it["plan_key"]: it["amount_cents"] for it in vivos if it["interval"] == "month"}
         for key, plan in cfg["plans"].items():
-            self.assertIn(plan.get("price_cents"), (None, 0),
-                          f"{key} tem preço fixado em config/plans.json")
+            if plan.get("tier") == "free":
+                self.assertEqual(plan.get("price_cents"), 0, f"{key} é gratuito e não custa 0")
+            elif key in mensal:
+                self.assertEqual(plan.get("price_cents"), mensal[key],
+                                 f"{key}: price_cents diverge da versão de preço vigente")
+            else:
+                self.assertIsNone(plan.get("price_cents"),
+                                  f"{key} tem preço sem versão de preço correspondente")
 
     def test_a_plan_without_a_declared_price_refuses_contracting(self):
-        """E sem preço declarado a plataforma recusa — em vez de inventar um valor."""
-        # `company_plus` não é declarado pelo ambiente de teste, de propósito.
-        r = self.osc.get("/v1/plans/price?plan_key=company_plus&interval=month")
-        self.assertEqual(r.status, 404, r)
-        self.assertEqual(r.json["code"], "price_not_defined")
+        """E sem preço declarado a plataforma recusa — em vez de inventar um valor.
+
+        v0.21.0: o plano usado mudou. `company_plus` ganhou preço na Pricing Version 2027.01, então
+        ele deixou de servir de exemplo. `company_enterprise` e `gov_institutional` continuam SEM
+        preço de tabela por decisão — são contratados por proposta — e é neles que a recusa precisa
+        continuar acontecendo.
+        """
+        for plano in ("company_enterprise", "gov_institutional"):
+            r = self.osc.get(f"/v1/plans/price?plan_key={plano}&interval=month")
+            self.assertEqual(r.status, 404, f"{plano}: {r}")
+            self.assertEqual(r.json["code"], "price_not_defined")
 
     def test_the_retired_usd_rule_stays_in_history_with_its_period_closed(self):
         """Aposentar não é apagar: o preço de ontem explica o contrato de ontem."""
@@ -90,6 +132,15 @@ class CommercialRuleTests(MonBase):
                            " FROM plan_price_versions WHERE currency = 'USD'")
         finally:
             c.close()
+            # `sync_reference_data` reaplica `config/plans.json` ao banco INTEIRO. A partir da
+            # v0.21.0 isso tem efeito de verdade: a Pricing Version 2027.01 publicou preços, e o
+            # sync fecha a tabela que o ambiente de teste havia publicado por cima e abre a de
+            # produção. Classes seguintes então encontravam o cenário trocado, e a que reabre as
+            # suas versões no `tearDownClass` batia em `ux_price_current` com duas vigentes.
+            #
+            # Um teste que mexe num global o devolve como encontrou.
+            from tests.support import _declare_test_prices
+            _declare_test_prices()
         self.assertTrue(rows, "a versão em dólar tem de continuar no histórico")
         self.assertTrue(all(not r["current"] for r in rows),
                         "nenhuma versão em dólar pode continuar vigente")

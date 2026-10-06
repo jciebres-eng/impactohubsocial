@@ -1,6 +1,78 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.21.0] — 2026-10-06
+
+### Monetização: a infraestrutura comercial deixou de estar vazia
+
+A auditoria desta rodada encontrou **toda a infraestrutura de preço construída e sem um único
+valor**: versionamento com gatilho de imutabilidade, aviso de 30 dias, aceite congelado — e
+`plan_price_versions` com 0 linhas, 7 planos pagos com `price_cents = NULL`. E nenhuma ocorrência de
+"FULL FREE" no repositório inteiro.
+
+### Adicionado
+
+- **`PRICING_BIBLE.md`** no repositório como fonte de verdade comercial, e
+  **`PRICING_RECONCILIATION.md`** com a matriz REGRA → LOCALIZAÇÃO → STATUS → GAP → IMPLEMENTAÇÃO →
+  TESTE (39 regras auditadas).
+- **Pricing Version 2027.01**: 8 versões de preço vigentes em BRL, 2 pisos de proposta publicados,
+  5 planos gratuitos. Nenhum valor escrito em código — teste varre Python e TSX.
+- **`free_periods`** (migração 0042): gratuidade temporal **por conta**, com origem, motivo, versão
+  de preço e autor. FULL FREE 2026 e 3 meses de calendário para assinaturas novas de 2027.
+  `ends_at` exclusivo; fuso comercial `America/Sao_Paulo` na fronteira, UTC no armazenamento.
+- **`commercial_offers` + `offer_acceptances`** (migração 0043): **ACESSO GRATUITO ≠ AUTORIZAÇÃO DE
+  COBRANÇA**, com os 14 campos do aceite e gatilho de banco que recusa cobrança sem autorização
+  vigente.
+- **Parcelamento distinto de recorrência**; boleto parcelado exclusivo para CNPJ, validado no
+  servidor; `idempotency_key` escopada por organização em eventos financeiros.
+- **Motor de uso** (migração 0044): `usage_counters`, `usage_alerts` com limiares de 70/90/100%,
+  `spend_limits` com `warn` ou `hard_stop`.
+- **Avisos comerciais** 90/60/30/7/1 dia + semanal nos últimos 30, a partir de `FREE_PERIOD_END`
+  como fonte única; tarefas `commercial_sweep` e `usage_alerts`.
+- **Interface comercial**: página pública de preços (`/planos`), situação comercial, consumo e faixa
+  de período gratuito. **82 chaves de i18n comercial em 10 namespaces, nos três idiomas** — antes
+  havia zero.
+- **108 testes novos** (`test_v0210_*`), incluindo fronteira temporal segundo a segundo na virada
+  2026→2027 e as cinco datas de assinatura exigidas.
+- Documentos: `FULL_FREE_2026.md`, `MONETIZATION_ARCHITECTURE.md`, `BILLING_ARCHITECTURE.md`,
+  `PRICING_VERSION_2027_01.md`, `PRICING_CATALOG.md` (gerado), `COMMERCIAL_TERMS.md`,
+  `COMMERCIAL_UX_SPEC.md`, `BILLING_SECURITY.md`, `PRICING_BENCHMARKS.md`, `UNIT_ECONOMICS.md`,
+  `24_MONTH_FINANCIAL_MODEL.md`, `DESIGNER_HANDOFF_MONETIZATION.md`.
+
+### Corrigido
+
+- **Exigência de autorização podia ser burlada.** Gatilhos `BEFORE INSERT` disparam em ordem
+  alfabética, e o de autorização vinha antes do que deriva `is_simulated` do provedor: bastava
+  enviar `is_simulated = true` com provedor real para escapar. Ambos passaram a consultar
+  `charge_is_simulated(provider)`.
+- **`FORCE ROW LEVEL SECURITY` quebrava o `pg_dump`.** Nenhuma outra migração do projeto usava; a
+  proteção real é o gatilho de imutabilidade, que vale para todos. Achado pelo teste de backup.
+- **Reajuste agendado quebrava a migração.** Fechar vigência em `now()` viola
+  `effective_until > effective_from` quando a versão ainda não começou — defeito presente desde a
+  v0.16.0, invisível enquanto o catálogo estava vazio.
+- **Cota de IA contada de dois jeitos**: o painel podia mostrar mais consumo do que o que de fato
+  bloqueava. Função única `ai_usage_this_month()`.
+- **`company_premium` com intervalo errado**: o catálogo anunciaria R$ 1.490 **por ano** para um
+  plano de R$ 1.490 por mês.
+- **`BILLING_V2.md`** descrevia a regra em dólar da v0.16.0, aposentada na v0.17.0 — divergência
+  entre documento e código, agora declarada no topo do arquivo.
+
+### Alterado
+
+- `config/plans.json` → `plans@3.0`, com `pricing_version: "2027.01"` e `quote_floor_cents`.
+- Testes que afirmavam a realidade comercial da v0.17.0 ("nenhum preço fixado") foram **reescritos
+  para afirmar a invariante que permanece**, não removidos: todo preço declarado nomeia a versão e a
+  decisão que o criou, e um plano sem preço anual publicado continua sem economia anual.
+
+### Não feito, e por quê
+
+- **Take rate de 10% permanece inativo.** A ADR-022 é barreira estrutural: sem custódia do valor, a
+  cobrança não é verificável e o repasse pode exigir autorização do Bacen (Lei 12.865/2013). A
+  própria `PRICING_BIBLE.md` §20 condiciona o take rate a `service + contract + transaction`.
+- **As 11 minutas jurídicas continuam em `draft`.** Aprovar minuta é ato humano.
+- **Sem valor anual** para PROFESSIONAL PRO e FUNDER PRO — a Bíblia não publica, e não foi inventado.
+- **Unit economics sem números** — ver ADR-280.
+
 ## [0.20.0] — 2026-10-06
 
 **Fechamento da engenharia antes do Designer.** Rodada de auditoria, não de funcionalidade,

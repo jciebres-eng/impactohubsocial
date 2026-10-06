@@ -87,9 +87,21 @@ class BenchmarkIsNotPriceTests(unittest.TestCase):
             textos = [n.value for n in ast.walk(arvore)
                       if isinstance(n, ast.Constant) and isinstance(n.value, str)
                       and id(n.value) not in docstrings]
-            codigo = "\n".join(textos) + "\n" + "\n".join(
-                a.module or "" for a in ast.walk(arvore) if isinstance(a, ast.ImportFrom))
-            le_benchmark = "price_benchmark.json" in codigo or "pricing" in codigo
+            # Os NOMES importados entram junto com os módulos: é `from ..core import pricing` que
+            # revela a leitura do benchmark, e o módulo ali se chama `core`, não `pricing`.
+            importados = set()
+            for a in ast.walk(arvore):
+                if isinstance(a, (ast.Import, ast.ImportFrom)):
+                    importados |= {al.name.split(".")[-1] for al in a.names}
+                    if isinstance(a, ast.ImportFrom) and a.module:
+                        importados |= set(a.module.split("."))
+            codigo = "\n".join(textos)
+            # v0.21.0 — detector PRECISO. Antes bastava a substring "pricing" aparecer em qualquer
+            # texto do arquivo. Isso bastava enquanto "pricing" só existia no benchmark; a Pricing
+            # Version 2027.01 tornou `pricing_version` um conceito corrente, e a regra passou a
+            # acusar módulos que apenas nomeiam a versão de preço. O que o teste quer achar é quem
+            # LÊ o benchmark — ou seja, quem cita o arquivo dele ou importa o módulo que o lê.
+            le_benchmark = "price_benchmark" in codigo or "pricing" in importados
             le_planos = "plans.json" in codigo
             if le_benchmark and le_planos:
                 culpados.append(f.name)

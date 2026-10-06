@@ -426,3 +426,26 @@ def lifecycle_job(app) -> dict:
                         " AND current_period_end IS NOT NULL AND current_period_end <= now() AND cancel_at_period_end")
         c.run("DELETE FROM trial_claims WHERE created_at < now() - interval '24 months'")        # retenção: identidade só pelo tempo necessário à antifraude
     return {"reminders": reminders, "trials_ended": ended, "sandbox_converted": converted_sbx, "periods_ended": expired}
+
+# --- v0.21.0: catálogo lido da configuração ------------------------------------------------------
+
+def _plans_config() -> dict:
+    from pathlib import Path
+    import json
+    return json.loads((Path(__file__).resolve().parents[3] / "config" / "plans.json")
+                      .read_text(encoding="utf-8"))
+
+
+def quote_floors() -> dict[str, int]:
+    """Piso publicado de proposta comercial, por plano.
+
+    Piso NÃO é preço: um plano com piso não tem versão vigente em `plan_price_versions`, e o
+    checkout o recusa. Ele existe para que "sob consulta" venha com uma ordem de grandeza — sem
+    isso, quem avalia o produto descobre que ele não cabe no orçamento depois de duas reuniões.
+    """
+    return {k: p["quote_floor_cents"] for k, p in _plans_config()["plans"].items()
+            if p.get("quote_floor_cents") is not None}
+
+
+def pricing_version_name() -> str:
+    return _plans_config().get("pricing_version") or "unversioned"

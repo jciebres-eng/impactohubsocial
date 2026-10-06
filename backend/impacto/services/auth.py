@@ -175,6 +175,11 @@ def register(ctx: Ctx, body) -> dict:
                 c.run("INSERT INTO provider_profiles(org_id) VALUES ($1)", org_id)
             from . import monetization
             monetization.start_trial(c, ctx.settings, org_id=org_id, org_kind=org.kind, email=email, cnpj=cnpj, user_id=uid, source="signup")
+            # GRATUIDADE TEMPORAL. Concedida por conta, no cadastro, e não deduzida de uma data no
+            # código: é a linha em `free_periods` que responde "esta conta está gratuita até
+            # quando, e por quê" — e é dela que a tela, o aviso e a cobrança leem.
+            from . import free_period as FREE
+            FREE.grant_campaign_2026(c, org_id=org_id)
         # PROVA DO ACEITE. `consents` guarda a string de versão do arquivo de configuração; a prova
         # que serve a um questionamento jurídico é outra: documento, versão e HASH do texto, em
         # `legal_acceptances`. Até a v0.20.0 o cadastro não escrevia lá — a caixa "Li e aceito" era

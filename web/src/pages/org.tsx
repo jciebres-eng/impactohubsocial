@@ -4,6 +4,7 @@ import { centsToInput, date, dateTime, label, money, n, parseMoney } from "../fo
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { FreePeriodBanner } from "./commercial";
 import { ContextHelp } from "./help";
 import { Preferences } from "./prefs";
 import { UFS } from "./public";
@@ -407,6 +408,8 @@ export function Plan() {
   return (
     <>
       <PageHead title="Plano e cobrança" sub={b ? `${b.tier_label}${me?.entitlements?.plan_names?.length ? " · " + me.entitlements.plan_names.join(" + ") : ""}` : undefined} />
+      {/* A faixa lê `free_period_end` do servidor; esta tela não calcula prazo. */}
+      <FreePeriodBanner />
       {plans.data && !plans.data.billing_live && <p className="banner">Cobrança online em modo {plans.data.billing_provider === "sandbox" ? "de testes (nenhuma cobrança real)" : "não configurado"}. Contratações podem ser feitas por proposta comercial ou voucher.</p>}
       {b?.notices?.map((n: any) => <p key={n.code} className={`banner banner-${n.level}`} role={n.level === "warning" ? "alert" : "status"}>{n.text}</p>)}
       {sub?.payment_issue && <p className="banner banner-warning" role="alert">{PAYMENT_ISSUE[sub.payment_issue]} <Button variant="link" busy={busy} onClick={() => run(() => api.post("/v1/billing/portal")).then((r: any) => r?.url && (location.href = r.url))}>Atualizar pagamento</Button></p>}

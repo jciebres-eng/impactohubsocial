@@ -294,6 +294,7 @@ def checkout(ctx: Ctx, plan_key: str, interval: str | None = None, voucher: str 
             if disc and disc.get("redemption_id"):
                 c.run("UPDATE voucher_redemptions SET status = 'consumed', consumed_by_subscription = $2 WHERE id = $1", disc["redemption_id"], sid)
             record_accepted_price(c, org_id=ctx.org_id, subscription_id=sid, quote=q, accepted_by=ctx.user_id)
+            _grant_new_subscription_free_period(c, ctx.org_id, sid, plan_key, res)
             res["subscription_id"] = sid
             res["warning"] = "Assinatura SANDBOX: nenhuma cobrança real foi feita."
         else:
@@ -302,10 +303,27 @@ def checkout(ctx: Ctx, plan_key: str, interval: str | None = None, voucher: str 
                             ctx.org_id, plan_key, ctx.app.billing.name, res["checkout_id"], q["interval"], q["final_cents"], Json(disc) if disc else None, trial_end)
             # O preço é congelado já na ida ao provedor: é o valor que a pessoa viu na tela antes de clicar.
             record_accepted_price(c, org_id=ctx.org_id, subscription_id=isid, quote=q, accepted_by=ctx.user_id)
+            _grant_new_subscription_free_period(c, ctx.org_id, isid, plan_key, res)
         _audit(ctx, c, "billing.checkout_started", "plan", plan_key,
                {"provider": ctx.app.billing.name, "interval": q["interval"], "final_cents": q["final_cents"], "trial": bool(trial_end)})
     res["quote"] = q
     return res
+
+
+def _grant_new_subscription_free_period(c, org_id: str, subscription_id: str, plan_key: str,
+                                        res: dict) -> None:
+    """Concede os meses gratuitos da assinatura nova e põe o fato na resposta do checkout.
+
+    Fica na resposta porque a tela precisa dizer "hoje você paga R$ 0,00, a primeira cobrança é em
+    <data>" ANTES do clique. Um benefício que só aparece na fatura seguinte não é um benefício: é
+    uma surpresa, ainda que agradável.
+    """
+    from . import free_period as FP
+    fp = FP.grant_new_subscription(c, org_id=org_id, subscription_id=subscription_id,
+                                   plan_key=plan_key)
+    if fp:
+        res["free_period"] = {"months": fp["months"], "ends_at": fp["ends_at"],
+                              "source": fp["source"]}
 
 
 def cancel(ctx: Ctx) -> dict:

@@ -483,3 +483,18 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
    de o jurídico aprovar; errado seria esconder. */
 .form-notice { border-left: 3px solid var(--warn, #b26b00); padding: .5rem .75rem; margin: .5rem 0;
   background: color-mix(in srgb, var(--warn, #b26b00) 8%, transparent); font-size: .9rem; border-radius: 4px; }
+
+/* v0.21.0 — página pública de preços e consumo.
+   As medidas seguem o resto da folha: o guard de largura da v0.20.0 (min-width:0, max-width:100%)
+   continua valendo, e a grade cai para uma coluna no celular em vez de produzir rolagem lateral. */
+.public-page { max-width: 72rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+.plan-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 1.5rem 0; }
+.plan-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem; display: flex; flex-direction: column; gap: .5rem; min-width: 0; }
+.plan-card h3 { margin: 0; font-size: 1.05rem; }
+.plan-card .btn { margin-top: auto; }
+.plan-features { list-style: none; padding: 0; margin: .5rem 0; display: flex; flex-direction: column; gap: .25rem; font-size: .875rem; color: var(--muted); }
+.plan-features li::before { content: "·"; margin-right: .5rem; }
+.plan-note { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1.5rem; max-width: 48rem; }
+.plan-note h2 { font-size: 1rem; margin: 0 0 .5rem; }
+.row-warn > td { background: color-mix(in srgb, var(--alerta, #b45309) 8%, transparent); }
+@media (max-width: 480px) { .plan-grid { grid-template-columns: 1fr; } }

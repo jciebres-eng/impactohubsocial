@@ -47,7 +47,16 @@ class ArchitectureTests(unittest.TestCase):
                    #                             (passa por relationships.visible_to, que filtra por visibility)
                    #   network_hub_routes.py   → feed público do marketplace, perfil público (lê só public_fields),
                    #                             unicidade GLOBAL de @identificador (ADR 105) e moderação de anúncio
-                   "network_core_routes.py", "network_hub_routes.py"}
+                   "network_core_routes.py", "network_hub_routes.py",
+                   # v0.21.0 — camada comercial. Dois usos, ambos revisados:
+                   #   GET /v1/commercial/usage  → a leitura SINCRONIZA o contador do período, e
+                   #       `usage_counters` é escrita pela plataforma, não pela organização: se a
+                   #       organização pudesse escrever nele, o histórico de consumo deixaria de ser
+                   #       prova de consumo. O org_id continua preso ao da sessão.
+                   #   GET /v1/admin/free-periods → painel de administração: precisa ver as
+                   #       concessões de TODAS as organizações, que é justamente o que a RLS por
+                   #       organização impede. A rota é auth="admin".
+                   "commercial_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:

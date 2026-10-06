@@ -1234,3 +1234,52 @@ class AdminDocQ(Pagination):
     # a fila cresce; quem revisa precisa poder olhar uma organização ou um tipo por vez
     org_id: Uuid | None = None
     doc_type: Annotated[str | None, Field(max_length=60)] = None
+
+
+# --- v0.21.0 — oferta comercial e período gratuito ---------------------------------------------
+
+class CommercialOfferIn(In):
+    """Pedido de oferta. O VALOR não vem daqui: ele é lido do catálogo pelo plano e intervalo.
+
+    Aceitar `amount_cents` do cliente permitiria uma oferta com preço que não existe em
+    `plan_price_versions` — e o catálogo deixaria de ser a fonte única exatamente onde importa.
+    """
+    plan_key: Annotated[str, StringConstraints(min_length=2, max_length=40)]
+    interval: Literal["month", "year"] = "month"
+    billing_frequency: Literal["one_time", "installment", "recurring"] = "recurring"
+    payment_method: Literal["card", "boleto", "pix", "manual"] = "card"
+    installments: int | None = Field(default=None, ge=2, le=24)
+    free_period_months: int | None = Field(default=None, ge=1, le=60)
+
+
+class CommercialAcceptIn(In):
+    """O aceite. `consent_status` é escolha explícita, nunca deduzida da oferta.
+
+    free_access = aceito usar de graça; authorized = autorizo cobrar. Deduzir o segundo a partir
+    da existência de uma oferta é como a cobrança surpresa nasce.
+    """
+    consent_status: Literal["free_access", "authorized"]
+
+
+class ConsentRevokeIn(In):
+    reason: Annotated[str, StringConstraints(min_length=3, max_length=500)]
+
+
+class FreePeriodGrantIn(In):
+    """Concessão manual de período gratuito. Motivo é obrigatório: cortesia sem motivo registrado
+    é indistinguível de erro de operação quando alguém for auditar."""
+    org_id: str
+    source: Literal["PROMOTION", "GRANT", "PARTNERSHIP", "MANUAL_EXCEPTION"]
+    months: int = Field(ge=1, le=60)
+    reason: Annotated[str, StringConstraints(min_length=3, max_length=500)]
+    plan_key: Annotated[str, StringConstraints(min_length=2, max_length=40)] | None = None
+
+
+class FreePeriodCancelIn(In):
+    reason: Annotated[str, StringConstraints(min_length=3, max_length=500)]
+
+
+class SpendLimitIn(In):
+    """Teto de gasto mensal da organização. `action` diz o que fazer ao bater o teto."""
+    limit_cents: int | None = Field(default=None, ge=0)
+    action: Literal["warn", "hard_stop"] = "warn"

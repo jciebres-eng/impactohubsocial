@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.20.0)
+# API REST /v1 — referência gerada do código (v0.21.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (837)
+## Operações (848)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -88,6 +88,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/fiscal-rules/{rule_id}/action` | admin da plataforma + MFA | — | Fluxo: draft → pending_review → approved (dois aprovadores distintos) → retired |
 | GET | `/v1/admin/flags` | admin da plataforma + MFA | — | flags |
 | PUT | `/v1/admin/flags/{key}` | admin da plataforma + MFA | — | set flag |
+| GET | `/v1/admin/free-periods` | admin da plataforma + MFA | — | Períodos gratuitos concedidos, por origem e situação |
+| POST | `/v1/admin/free-periods` | admin da plataforma + MFA | — | Concede período gratuito a uma organização (motivo obrigatório) |
+| POST | `/v1/admin/free-periods/{period_id}/cancel` | admin da plataforma + MFA | — | Cancela um período gratuito (o registro permanece, com motivo e autor) |
 | POST | `/v1/admin/funding-quotas/pledges/{pledge_id}/confirm` | admin da plataforma + MFA | — | Confirma o recebimento de um apoio (registro humano; a reserva não se confirma sozinha) |
 | POST | `/v1/admin/grants/{grant_id}/revoke` | admin da plataforma + MFA | — | Revoga uma licença/grant (motivo obrigatório); o histórico é preservado |
 | GET | `/v1/admin/hub/analytics` | admin da plataforma + MFA | — | Analytics da Central: buscas, lacunas, utilidade, chamados, academia, eventos, parcerias |
@@ -264,6 +267,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/claims/{claim_id}/review` | membro da organização ativa | papel ≥ manager | Revisão humana por organização DIFERENTE; aceitar não apaga a marca, qualifica |
 | POST | `/v1/claims/{claim_id}/review-requests` | membro da organização ativa | papel ≥ manager | Convida uma organização nomeada a revisar a rodada (é o convite que abre a leitura) |
 | POST | `/v1/claims/{claim_id}/withdraw` | membro da organização ativa | papel ≥ manager | Retira a alegação (o histórico de verificação permanece legível) |
+| GET | `/v1/commercial/acceptances` | membro da organização ativa | — | Histórico de aceites desta organização |
+| POST | `/v1/commercial/consent/revoke` | membro da organização ativa | — | Revoga a autorização de cobrança (o aceite permanece registrado) |
+| GET | `/v1/commercial/offers` | membro da organização ativa | — | Ofertas desta organização |
+| POST | `/v1/commercial/offers` | membro da organização ativa | limite 60/3600s | Monta uma oferta a partir do catálogo (valor nunca vem do cliente) |
+| POST | `/v1/commercial/offers/{offer_id}/accept` | membro da organização ativa | limite 60/3600s | Aceita a oferta — acesso gratuito OU autorização de cobrança |
+| PUT | `/v1/commercial/spend-limit` | membro da organização ativa | — | Define o teto de gasto mensal e o que fazer ao atingi-lo (avisar ou parar) |
+| GET | `/v1/commercial/state` | membro da organização ativa | — | Estado comercial da conta: FREE_PERIOD_END, estado e se a cobrança foi autorizada |
+| GET | `/v1/commercial/usage` | membro da organização ativa | — | Consumo do período por métrica, com percentual e limite do plano |
 | POST | `/v1/commitments/{commitment_id}/payments` | membro da organização ativa | tipos: company, government, individual; papel ≥ manager | Registra um pagamento (parcela) do aporte — declarado pelo financiador; a plataforma não movimenta dinheiro |
 | POST | `/v1/commitments/{commitment_id}/status` | membro da organização ativa | papel ≥ manager | Financiador informa desembolso/cancelamento; OSC confirma o recebimento |
 | GET | `/v1/compliance` | membro da organização ativa | papel ≥ viewer | Status de compliance/KYB da organização e verificações |

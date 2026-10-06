@@ -1,5 +1,20 @@
 # Cobrança v2 — preço versionado (v0.16.0)
 
+> ⚠️ **ESTE DOCUMENTO DESCREVE A ARQUITETURA DA v0.16.0, NÃO A REGRA COMERCIAL VIGENTE.**
+>
+> A regra comercial que ele cita (US$ 1,99 nos três primeiros meses, depois US$ 19,99, cobrados do
+> proponente) foi **APOSENTADA na v0.17.0** por decisão do proprietário, e `config/plans.json` já
+> fechou a vigência daquela tabela. A auditoria da v0.21.0 encontrou esta divergência entre o
+> documento e o código.
+>
+> A regra comercial vigente é a **Pricing Version 2027.01**:
+> `PRICING_BIBLE.md` (decisão) · `PRICING_CATALOG.md` (catálogo gerado) ·
+> `PRICING_VERSION_2027_01.md` (a versão) · `BILLING_ARCHITECTURE.md` (como se cobra hoje).
+>
+> O que continua válido aqui é a descrição dos **mecanismos** — versionamento de preço,
+> imutabilidade, aviso de 30 dias, congelamento do preço aceito —, que a v0.21.0 preservou e usa.
+
+
 A regra comercial desta rodada, verbatim do pedido:
 
 > 14 dias de teste com o produto completo; **US$ 1,99/mês nos 3 primeiros meses pagos**; depois **US$ 19,99/mês** ou o

@@ -289,12 +289,37 @@ class TierAccessTests(Base):
         self.assertIn("calls.publish", features(gov))
 
     def test_plans_catalog_has_tiers_and_real_prices_only(self):
+        """O catálogo mostra o preço que existe, e nenhum que não exista.
+
+        v0.21.0 — ATUALIZADO, não afrouxado. Até a v0.20.0 este teste afirmava que `company_plus`
+        não tinha economia anual PORQUE não tinha preço: a v0.17.0 aposentou a regra em dólar e o
+        proprietário não havia fixado preço institucional. A Pricing Version 2027.01 fixou. Então a
+        asserção passa a ser a que continua valendo em qualquer versão de preço: a economia anual é
+        CONSEQUÊNCIA de dois valores publicados, e um plano sem anual publicado não ganha economia
+        nenhuma — que é a mesma proibição de antes, dita sobre o plano certo.
+        """
         items = {p["plan_key"]: p for p in Client().get("/v1/plans").json["items"]}
         self.assertEqual(items["osc_plus"]["tier"], "plus")
         self.assertEqual(items["gov_institutional"]["tier"], "gov")
+        # Preços do AMBIENTE de teste (ver `_declare_test_prices` em support.py), não os de produção.
         self.assertEqual(items["osc_premium"]["prices"], {"month": 9900, "year": 99000})
         self.assertEqual(items["osc_premium"]["annual_savings"], {"cents": 19800, "percent": 17})
-        self.assertIsNone(items["company_plus"]["annual_savings"])      # sem preço definido → nenhuma economia inventada
+
+        # `company_plus` agora TEM os dois preços: a economia é derivada deles, não inventada.
+        pr = items["company_plus"]["prices"]
+        self.assertIsNotNone(pr.get("month"))
+        self.assertIsNotNone(pr.get("year"))
+        self.assertEqual(items["company_plus"]["annual_savings"]["cents"], pr["month"] * 12 - pr["year"])
+
+        # E a proibição original continua, no plano a que ela agora se aplica: a PRICING_BIBLE.md não
+        # publica valor anual para FUNDER PRO, e nenhum foi criado — logo, nenhuma economia anual.
+        self.assertIsNone(items["company_premium"]["prices"].get("year"))
+        self.assertIsNone(items["company_premium"]["annual_savings"],
+                          "economia anual inventada para um plano sem preço anual publicado")
+
+        # Plano sob proposta: piso publicado, nenhum preço contratável.
+        self.assertEqual(items["company_enterprise"]["prices"], {})
+        self.assertEqual(items["company_enterprise"]["quote_floor_cents"], 250000)
 
     def test_gov_cannot_be_bought_online(self):
         g = acct("government", trial=False)

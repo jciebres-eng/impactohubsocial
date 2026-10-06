@@ -282,6 +282,108 @@
         "unknown": "não informado",
         "unavailable": "indisponível",
         "not_applicable": "não se aplica"
+      },
+      "billing": {
+        "title": "Cobrança",
+        "subscription": "Assinatura",
+        "invoices": "Faturas",
+        "payment_method": "Forma de pagamento",
+        "no_charge_yet": "Nenhuma cobrança foi feita",
+        "sandbox_notice": "Cobrança em modo de testes: nenhuma cobrança real acontece.",
+        "history": "Histórico de cobrança"
+      },
+      "pricing": {
+        "title": "Planos e preços",
+        "per_month": "por mês",
+        "per_year": "por ano",
+        "monthly": "Mensal",
+        "yearly": "Anual",
+        "from": "a partir de",
+        "on_request": "Sob proposta comercial",
+        "request_quote": "Solicitar proposta",
+        "not_published": "Preço não divulgado",
+        "tax_unspecified": "Tributos ainda não definidos para este valor.",
+        "annual_saving": "Economia no plano anual",
+        "current_plan": "Seu plano atual",
+        "free_forever": "Gratuito, sem prazo",
+        "never_sold": "Nenhum plano compra reputação, selo, evidência ou posição em ranking."
+      },
+      "subscription": {
+        "active": "Assinatura ativa",
+        "none": "Sem assinatura paga",
+        "cancel": "Cancelar assinatura",
+        "reactivate": "Reativar",
+        "cancels_at": "Cancela em",
+        "renews_at": "Renova em",
+        "change_plan": "Mudar de plano"
+      },
+      "free_period": {
+        "title": "Período gratuito",
+        "ends_on": "Termina em",
+        "days_left": "dias restantes",
+        "full_free_2026": "Tudo gratuito até 31/12/2026",
+        "three_months": "3 meses gratuitos",
+        "wont_be_charged": "Você não será cobrado. Sem autorização de cobrança, a conta volta ao plano gratuito.",
+        "will_be_charged": "A cobrança já está autorizada: a primeira fatura sai no fim do período gratuito.",
+        "ended": "Seu período gratuito terminou",
+        "nothing_lost": "Nenhum dado foi apagado."
+      },
+      "commercial": {
+        "offer": "Oferta comercial",
+        "accept_free_access": "Aceitar acesso gratuito",
+        "authorize_charge": "Autorizar cobrança",
+        "authorize_explained": "Autorizar cobrança é diferente de aceitar acesso gratuito. Sem esta autorização, nada é cobrado.",
+        "revoke_authorization": "Revogar autorização de cobrança",
+        "authorization_active": "Cobrança autorizada",
+        "authorization_absent": "Cobrança não autorizada",
+        "terms_version": "Versão dos termos aceitos",
+        "accepted_at": "Aceito em"
+      },
+      "checkout": {
+        "title": "Confirme sua contratação",
+        "today_you_pay": "Hoje você paga",
+        "first_charge_on": "Primeira cobrança em",
+        "plan_price": "Preço do plano",
+        "confirm": "Confirmar",
+        "one_time": "Pagamento único",
+        "installment": "Parcelado",
+        "recurring": "Recorrente",
+        "installments_note": "Parcelamento divide uma única cobrança. Não é assinatura.",
+        "boleto_cnpj_only": "Boleto parcelado é exclusivo para pessoa jurídica com CNPJ."
+      },
+      "invoice": {
+        "status_paid": "Paga",
+        "status_open": "Em aberto",
+        "status_void": "Cancelada",
+        "due_on": "Vence em",
+        "amount": "Valor",
+        "download": "Baixar fatura"
+      },
+      "payment": {
+        "card": "Cartão",
+        "boleto": "Boleto",
+        "pix": "Pix",
+        "manual": "Pagamento combinado",
+        "failed": "Pagamento não concluído",
+        "retry": "Tentar novamente"
+      },
+      "cancellation": {
+        "title": "Cancelar assinatura",
+        "keeps_access": "O acesso continua até o fim do período já pago.",
+        "no_penalty": "Sem multa e sem perda de dados.",
+        "confirm": "Confirmar cancelamento"
+      },
+      "usage": {
+        "title": "Consumo",
+        "of_limit": "do limite do plano",
+        "unlimited": "Ilimitado",
+        "spend_limit": "Teto de gasto mensal",
+        "spend_limit_action_warn": "Avisar ao atingir",
+        "spend_limit_action_stop": "Parar ao atingir",
+        "no_overage_charge": "Exceder o limite não gera cobrança adicional: o excedente é interrompido.",
+        "threshold_70": "70% utilizado",
+        "threshold_90": "90% utilizado",
+        "threshold_100": "Limite atingido"
       }
     },
     "en": {
@@ -563,6 +665,108 @@
         "unknown": "not informed",
         "unavailable": "unavailable",
         "not_applicable": "not applicable"
+      },
+      "billing": {
+        "title": "Billing",
+        "subscription": "Subscription",
+        "invoices": "Invoices",
+        "payment_method": "Payment method",
+        "no_charge_yet": "No charge has been made",
+        "sandbox_notice": "Billing in test mode: no real charge happens.",
+        "history": "Billing history"
+      },
+      "pricing": {
+        "title": "Plans and pricing",
+        "per_month": "per month",
+        "per_year": "per year",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "from": "from",
+        "on_request": "By commercial proposal",
+        "request_quote": "Request a quote",
+        "not_published": "Price not published",
+        "tax_unspecified": "Taxes not yet defined for this amount.",
+        "annual_saving": "Annual plan saving",
+        "current_plan": "Your current plan",
+        "free_forever": "Free, with no time limit",
+        "never_sold": "No plan buys reputation, verification, evidence or ranking position."
+      },
+      "subscription": {
+        "active": "Active subscription",
+        "none": "No paid subscription",
+        "cancel": "Cancel subscription",
+        "reactivate": "Reactivate",
+        "cancels_at": "Cancels on",
+        "renews_at": "Renews on",
+        "change_plan": "Change plan"
+      },
+      "free_period": {
+        "title": "Free period",
+        "ends_on": "Ends on",
+        "days_left": "days left",
+        "full_free_2026": "Everything free until 31 Dec 2026",
+        "three_months": "3 free months",
+        "wont_be_charged": "You will not be charged. Without a charge authorization, the account returns to the free plan.",
+        "will_be_charged": "Charging is already authorized: the first invoice goes out at the end of the free period.",
+        "ended": "Your free period has ended",
+        "nothing_lost": "No data was deleted."
+      },
+      "commercial": {
+        "offer": "Commercial offer",
+        "accept_free_access": "Accept free access",
+        "authorize_charge": "Authorize charging",
+        "authorize_explained": "Authorizing a charge is different from accepting free access. Without this authorization, nothing is charged.",
+        "revoke_authorization": "Revoke charge authorization",
+        "authorization_active": "Charging authorized",
+        "authorization_absent": "Charging not authorized",
+        "terms_version": "Accepted terms version",
+        "accepted_at": "Accepted on"
+      },
+      "checkout": {
+        "title": "Confirm your purchase",
+        "today_you_pay": "Today you pay",
+        "first_charge_on": "First charge on",
+        "plan_price": "Plan price",
+        "confirm": "Confirm",
+        "one_time": "One-time payment",
+        "installment": "In installments",
+        "recurring": "Recurring",
+        "installments_note": "Installments split a single charge. It is not a subscription.",
+        "boleto_cnpj_only": "Instalment bank slips are available only to companies with a CNPJ."
+      },
+      "invoice": {
+        "status_paid": "Paid",
+        "status_open": "Open",
+        "status_void": "Void",
+        "due_on": "Due on",
+        "amount": "Amount",
+        "download": "Download invoice"
+      },
+      "payment": {
+        "card": "Card",
+        "boleto": "Bank slip",
+        "pix": "Pix",
+        "manual": "Arranged payment",
+        "failed": "Payment not completed",
+        "retry": "Try again"
+      },
+      "cancellation": {
+        "title": "Cancel subscription",
+        "keeps_access": "Access continues until the end of the period already paid for.",
+        "no_penalty": "No penalty and no data loss.",
+        "confirm": "Confirm cancellation"
+      },
+      "usage": {
+        "title": "Usage",
+        "of_limit": "of the plan limit",
+        "unlimited": "Unlimited",
+        "spend_limit": "Monthly spend limit",
+        "spend_limit_action_warn": "Warn when reached",
+        "spend_limit_action_stop": "Stop when reached",
+        "no_overage_charge": "Exceeding the limit does not create an extra charge: the excess is stopped.",
+        "threshold_70": "70% used",
+        "threshold_90": "90% used",
+        "threshold_100": "Limit reached"
       }
     },
     "es": {
@@ -844,6 +1048,108 @@
         "unknown": "no informado",
         "unavailable": "no disponible",
         "not_applicable": "no aplica"
+      },
+      "billing": {
+        "title": "Facturación",
+        "subscription": "Suscripción",
+        "invoices": "Facturas",
+        "payment_method": "Forma de pago",
+        "no_charge_yet": "No se ha realizado ningún cargo",
+        "sandbox_notice": "Facturación en modo de prueba: no se realiza ningún cargo real.",
+        "history": "Historial de facturación"
+      },
+      "pricing": {
+        "title": "Planes y precios",
+        "per_month": "por mes",
+        "per_year": "por año",
+        "monthly": "Mensual",
+        "yearly": "Anual",
+        "from": "desde",
+        "on_request": "Bajo propuesta comercial",
+        "request_quote": "Solicitar propuesta",
+        "not_published": "Precio no publicado",
+        "tax_unspecified": "Impuestos aún no definidos para este importe.",
+        "annual_saving": "Ahorro en el plan anual",
+        "current_plan": "Tu plan actual",
+        "free_forever": "Gratis, sin plazo",
+        "never_sold": "Ningún plan compra reputación, sello, evidencia ni posición en el ranking."
+      },
+      "subscription": {
+        "active": "Suscripción activa",
+        "none": "Sin suscripción de pago",
+        "cancel": "Cancelar suscripción",
+        "reactivate": "Reactivar",
+        "cancels_at": "Cancela el",
+        "renews_at": "Renueva el",
+        "change_plan": "Cambiar de plan"
+      },
+      "free_period": {
+        "title": "Período gratuito",
+        "ends_on": "Termina el",
+        "days_left": "días restantes",
+        "full_free_2026": "Todo gratis hasta el 31/12/2026",
+        "three_months": "3 meses gratis",
+        "wont_be_charged": "No se te cobrará. Sin autorización de cobro, la cuenta vuelve al plan gratuito.",
+        "will_be_charged": "El cobro ya está autorizado: la primera factura se emite al final del período gratuito.",
+        "ended": "Tu período gratuito terminó",
+        "nothing_lost": "No se eliminó ningún dato."
+      },
+      "commercial": {
+        "offer": "Oferta comercial",
+        "accept_free_access": "Aceptar acceso gratuito",
+        "authorize_charge": "Autorizar el cobro",
+        "authorize_explained": "Autorizar el cobro es distinto de aceptar el acceso gratuito. Sin esta autorización, no se cobra nada.",
+        "revoke_authorization": "Revocar la autorización de cobro",
+        "authorization_active": "Cobro autorizado",
+        "authorization_absent": "Cobro no autorizado",
+        "terms_version": "Versión de los términos aceptados",
+        "accepted_at": "Aceptado el"
+      },
+      "checkout": {
+        "title": "Confirma tu contratación",
+        "today_you_pay": "Hoy pagas",
+        "first_charge_on": "Primer cobro el",
+        "plan_price": "Precio del plan",
+        "confirm": "Confirmar",
+        "one_time": "Pago único",
+        "installment": "En cuotas",
+        "recurring": "Recurrente",
+        "installments_note": "Las cuotas dividen un único cobro. No es una suscripción.",
+        "boleto_cnpj_only": "El boleto en cuotas es exclusivo para personas jurídicas con CNPJ."
+      },
+      "invoice": {
+        "status_paid": "Pagada",
+        "status_open": "Abierta",
+        "status_void": "Anulada",
+        "due_on": "Vence el",
+        "amount": "Importe",
+        "download": "Descargar factura"
+      },
+      "payment": {
+        "card": "Tarjeta",
+        "boleto": "Boleto",
+        "pix": "Pix",
+        "manual": "Pago acordado",
+        "failed": "Pago no completado",
+        "retry": "Intentar de nuevo"
+      },
+      "cancellation": {
+        "title": "Cancelar suscripción",
+        "keeps_access": "El acceso continúa hasta el final del período ya pagado.",
+        "no_penalty": "Sin multa y sin pérdida de datos.",
+        "confirm": "Confirmar cancelación"
+      },
+      "usage": {
+        "title": "Consumo",
+        "of_limit": "del límite del plan",
+        "unlimited": "Ilimitado",
+        "spend_limit": "Límite de gasto mensual",
+        "spend_limit_action_warn": "Avisar al alcanzarlo",
+        "spend_limit_action_stop": "Detener al alcanzarlo",
+        "no_overage_charge": "Superar el límite no genera un cargo adicional: el excedente se interrumpe.",
+        "threshold_70": "70% utilizado",
+        "threshold_90": "90% utilizado",
+        "threshold_100": "Límite alcanzado"
       }
     }
   },

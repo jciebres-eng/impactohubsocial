@@ -5,6 +5,7 @@ import { Link, match, navigate, useLocation } from "./router";
 import { useSession } from "./session";
 import { Button, StateView, useAction } from "./ui/kit";
 import * as Pub from "./pages/public";
+import * as Com from "./pages/commercial";
 import * as Home from "./pages/home";
 import * as Calls from "./pages/calls";
 import * as Proj from "./pages/projects";
@@ -95,6 +96,7 @@ const ROUTES: R[] = [
   ["/admin/credenciais-profissionais", () => <TrustA.CredentialQueue />, ["platform"]],
   ["/admin/honorarios", () => <TrustA.FeeTables />, ["platform"]],
   ["/conta/plano", () => <Org.Plan />],
+  ["/conta/comercial", () => <Com.Commercial />], ["/conta/consumo", () => <Com.Usage />],
   ["/settings/billing", () => <Org.Plan />],
   ["/fiscal", () => <Org.Fiscal />, ["company"]],
   ["/materiais", () => <Org.Materials />],
@@ -246,7 +248,7 @@ const HELP: HR[] = [
 const PUBLIC: [string, () => ReactNode][] = [
   ["/entrar", () => <Pub.Login />], ["/cadastro", () => <Pub.Register />], ["/verificar-email", () => <Pub.VerifyEmail />],
   ["/esqueci-senha", () => <Pub.Forgot />], ["/redefinir-senha", () => <Pub.Reset />], ["/convite", () => <Pub.AcceptInvite />],
-  ["/legal/termos", () => <Pub.Legal doc="termos" />], ["/legal/privacidade", () => <Pub.Legal doc="privacidade" />],
+  ["/planos", () => <Com.Pricing />], ["/legal/termos", () => <Pub.Legal doc="termos" />], ["/legal/privacidade", () => <Pub.Legal doc="privacidade" />],
 ];
 
 const NAV: Record<string, [string, string][]> = {

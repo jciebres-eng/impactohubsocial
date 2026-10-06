@@ -27,6 +27,7 @@ def plans(ctx: Ctx):
         # v0.16.0: a tabela de preços vigente, com moeda, preço de entrada, imposto e o TOTAL à vista. Cada plano
         # carrega as duas leituras (mensal e anual) para que a tela compare sem fazer conta própria — conta feita no
         # navegador é conta que divergirá do que será cobrado.
+        pisos = mon.quote_floors()
         quotes = {}
         for r in rows:
             for iv in ("month", "year"):
@@ -46,8 +47,14 @@ def plans(ctx: Ctx):
         r["currency"] = next((q["currency"] for q in pq.values()), "BRL")
         r["annual_savings"] = mon.annual_savings(pr.get("month"), pr.get("year"))
         r["tier_label"] = mon.TIER_LABEL.get(r["tier"], r["tier"])
+        # PISO de proposta comercial. Não é preço: planos com piso não têm linha vigente em
+        # `plan_price_versions` e o checkout os recusa. Publicá-lo é honestidade com quem avalia o
+        # produto — "sob consulta" sem nenhuma ordem de grandeza faz a pessoa perder tempo
+        # descobrindo que o plano não cabe no orçamento dela.
+        r["quote_floor_cents"] = pisos.get(r["plan_key"])
     return {"items": rows, "billing_provider": ctx.app.billing.name, "billing_live": flags.get("billing_live", False),
             "trial_days": ctx.settings.trial_days, "trial_auto_start": ctx.settings.trial_auto_start,
+            "pricing_version": mon.pricing_version_name(),
             "pricing_note": "Valores definidos no servidor, com vigência. Imposto e total aparecem antes do "
                             "pagamento; o preço de entrada diz por quantos períodos vale e quanto passa a ser "
                             "depois."}

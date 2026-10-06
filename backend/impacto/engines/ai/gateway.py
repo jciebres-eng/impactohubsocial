@@ -90,8 +90,10 @@ class AiGateway:
         if "*" in ent["features"]:
             return
         lim = ent["limits"].get("ai_requests_month", 0)
-        used = conn.scalar("SELECT count(*) FROM ai_usage WHERE org_id = $1 AND created_at >= date_trunc('month', now())"
-                           " AND status <> 'rejected'", ctx.org_id)
+        # UMA contagem. Até a v0.20.0 esta consulta e a de `GET /v1/ai/usage` eram cópias que
+        # divergiam: aquela não excluía `rejected`, então o painel podia mostrar consumo maior do
+        # que o que de fato bloqueava, e a pessoa planejava o mês com o número errado.
+        used = conn.scalar("SELECT ai_usage_this_month($1)", ctx.org_id)
         if lim is not None and used >= lim:
             raise ApiError(402, "ai_quota_exceeded", f"Cota mensal de assistência por IA atingida ({lim}). Faça upgrade do plano.",
                            {"limit": lim, "used": used})

@@ -1,5 +1,5 @@
 {
-  "version": "plans@2.0",
+  "version": "plans@3.0",
   "_note": "Preços null = a definir pelo proprietário (exibido como 'sob consulta'). Cobrança real exige BILLING_PROVIDER configurado. Nenhum plano altera match, elegibilidade, ordenação ou posição de prestador.",
   "invariants": {
     "no_plan_affects_match": {
@@ -61,12 +61,15 @@
         "impact_report.submit"
       ],
       "tier": "free",
-      "prices": {}
+      "prices": {
+        "month": 0
+      },
+      "pricing_label": "FREE — OSC"
     },
     "osc_premium": {
       "role": "osc",
       "name": "OSC Captação",
-      "price_cents": null,
+      "price_cents": 79900,
       "interval": "month",
       "requires_flag": "premium_osc",
       "limits": {
@@ -91,9 +94,10 @@
       ],
       "tier": "premium",
       "prices": {
-        "month": null,
-        "year": null
-      }
+        "month": 79900,
+        "year": 799000
+      },
+      "pricing_label": "BUSINESS (Bíblia §13)"
     },
     "company_basic": {
       "role": "company",
@@ -114,13 +118,16 @@
         "reports.basic"
       ],
       "tier": "free",
-      "prices": {}
+      "prices": {
+        "month": 0
+      },
+      "pricing_label": "FREE — Empresa"
     },
     "company_premium": {
       "role": "company",
       "name": "Empresa Impacto",
-      "price_cents": null,
-      "interval": "year",
+      "price_cents": 149000,
+      "interval": "month",
       "limits": {
         "programs": 10,
         "seats": 25,
@@ -142,9 +149,10 @@
       ],
       "tier": "premium",
       "prices": {
-        "month": null,
-        "year": null
-      }
+        "month": 149000
+      },
+      "pricing_label": "FUNDER PRO (Bíblia §24)",
+      "_interval_note": "v0.21.0: era `year`. A PRICING_BIBLE.md §24 publica FUNDER PRO em R$ 1.490 POR MÊS e não publica valor anual. Com `interval: year`, o catálogo público preenchia `prices.year` com o valor mensal e a tela anunciava R$ 1.490 por ANO — um desconto de 92% que ninguém decidiu. O intervalo padrão do plano passa a ser o do preço que existe."
     },
     "company_enterprise": {
       "role": "company",
@@ -175,7 +183,9 @@
         "api.access"
       ],
       "tier": "premium",
-      "prices": {}
+      "prices": {},
+      "quote_floor_cents": 250000,
+      "pricing_label": "ENTERPRISE (Bíblia §14) — proposta comercial"
     },
     "provider_basic": {
       "role": "provider",
@@ -194,12 +204,15 @@
         "signatures.sign"
       ],
       "tier": "free",
-      "prices": {}
+      "prices": {
+        "month": 0
+      },
+      "pricing_label": "FREE — Profissional"
     },
     "provider_premium": {
       "role": "provider",
       "name": "Profissional Parceiro Plus",
-      "price_cents": null,
+      "price_cents": 4900,
       "interval": "month",
       "requires_flag": "premium_provider",
       "limits": {
@@ -217,9 +230,9 @@
       ],
       "tier": "premium",
       "prices": {
-        "month": null,
-        "year": null
-      }
+        "month": 4900
+      },
+      "pricing_label": "PROFESSIONAL PRO (Bíblia §17)"
     },
     "government_basic": {
       "role": "government",
@@ -239,7 +252,10 @@
         "reports.basic"
       ],
       "tier": "free",
-      "prices": {}
+      "prices": {
+        "month": 0
+      },
+      "pricing_label": "FREE — Governo"
     },
     "individual_basic": {
       "role": "individual",
@@ -261,18 +277,21 @@
         "marketplace.browse"
       ],
       "tier": "free",
-      "prices": {}
+      "prices": {
+        "month": 0
+      },
+      "pricing_label": "FREE — Pessoa"
     },
     "osc_plus": {
       "role": "osc",
       "name": "OSC Plus",
       "tier": "plus",
-      "price_cents": null,
+      "price_cents": 29900,
       "interval": "month",
       "requires_flag": "premium_osc",
       "prices": {
-        "month": null,
-        "year": null
+        "month": 29900,
+        "year": 299000
       },
       "limits": {
         "active_projects": 8,
@@ -290,17 +309,18 @@
         "professional.request",
         "alerts.saved_search",
         "opportunity.tracking"
-      ]
+      ],
+      "pricing_label": "PRO (Bíblia §12)"
     },
     "company_plus": {
       "role": "company",
       "name": "Empresa Plus",
       "tier": "plus",
-      "price_cents": null,
+      "price_cents": 79900,
       "interval": "month",
       "prices": {
-        "month": null,
-        "year": null
+        "month": 79900,
+        "year": 799000
       },
       "limits": {
         "programs": 3,
@@ -316,7 +336,8 @@
         "reports.basic",
         "reports.advanced",
         "alerts.saved_search"
-      ]
+      ],
+      "pricing_label": "BUSINESS (Bíblia §13)"
     },
     "gov_institutional": {
       "role": "government",
@@ -339,7 +360,9 @@
         "reports.basic",
         "reports.advanced",
         "audit.export"
-      ]
+      ],
+      "quote_floor_cents": 350000,
+      "pricing_label": "GOV (Bíblia §15) — proposta comercial"
     }
   },
   "never_sellable": [
@@ -380,9 +403,78 @@
         "currency": "USD",
         "retire": true,
         "reason": "Regra comercial da v0.16.0 aposentada na v0.17.0: o proponente deixou de ser o pagador principal."
+      },
+      {
+        "plan_key": "provider_premium",
+        "interval": "month",
+        "currency": "BRL",
+        "amount_cents": 4900,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — PROFESSIONAL PRO (Bíblia §17); PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "osc_plus",
+        "interval": "month",
+        "currency": "BRL",
+        "amount_cents": 29900,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — PRO (Bíblia §12); PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "osc_plus",
+        "interval": "year",
+        "currency": "BRL",
+        "amount_cents": 299000,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — PRO (Bíblia §12) anual; PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "osc_premium",
+        "interval": "month",
+        "currency": "BRL",
+        "amount_cents": 79900,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — BUSINESS (Bíblia §13); PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "osc_premium",
+        "interval": "year",
+        "currency": "BRL",
+        "amount_cents": 799000,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — BUSINESS (Bíblia §13) anual; PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "company_plus",
+        "interval": "month",
+        "currency": "BRL",
+        "amount_cents": 79900,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — BUSINESS (Bíblia §13); PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "company_plus",
+        "interval": "year",
+        "currency": "BRL",
+        "amount_cents": 799000,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — BUSINESS (Bíblia §13) anual; PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
+      },
+      {
+        "plan_key": "company_premium",
+        "interval": "month",
+        "currency": "BRL",
+        "amount_cents": 149000,
+        "tax_behavior": "unspecified",
+        "reason": "Pricing Version 2027.01 — FUNDER PRO (Bíblia §24); PRICING_BIBLE.md §3. Valor de referência inicial, pendente de validação jurídica e fiscal."
       }
-    ]
+    ],
+    "_tax_note": "`tax_behavior: unspecified` é a resposta HONESTA hoje: a PRICING_BIBLE.md não declara se o valor é com ou sem tributos, e declarar 'inclusive' sem parecer fiscal seria inventar um fato tributário. A interface exibe essa indefinição em vez de escondê-la. Fechar isso exige validação fiscal — está em PRICING_BIBLE.md §10."
   },
   "_invariants_note": "Cada invariante aponta para o teste que o verifica. Até a v0.20.0 esta lista era só três strings que nenhum código lia e nenhum teste conferia — isto é, uma promessa escrita no arquivo de configuração. `test_v0200_cleanup.py` passou a exigir que cada invariante declarado aqui tenha um teste real e que o teste exista no repositório.",
-  "_downgrade_grace_days_note": "DECLARAÇÃO, não comportamento implementado. Nenhum código lê esta chave hoje: o rebaixamento de plano cessa o acesso ao recurso pago e não apaga dado (ver invariante acima), mas não há período de carência automático. A chave fica porque o número é a intenção declarada do proprietário; quando a carência for implementada, é daqui que ela lê o prazo. Registrado em TECHNICAL_DEBT_REGISTER.md."
+  "_downgrade_grace_days_note": "DECLARAÇÃO, não comportamento implementado. Nenhum código lê esta chave hoje: o rebaixamento de plano cessa o acesso ao recurso pago e não apaga dado (ver invariante acima), mas não há período de carência automático. A chave fica porque o número é a intenção declarada do proprietário; quando a carência for implementada, é daqui que ela lê o prazo. Registrado em TECHNICAL_DEBT_REGISTER.md.",
+  "pricing_version": "2027.01",
+  "currency": "BRL",
+  "_quote_floor_note": "`quote_floor_cents` é PISO PUBLICADO de proposta comercial, não preço contratável. Planos com piso NÃO recebem linha em `plan_price_versions` e o checkout os recusa: a interface mostra 'a partir de R$ X — sob proposta'. Publicar o piso é honestidade com quem avalia o produto; tratá-lo como preço seria oferecer autosserviço para algo que exige negociação.",
+  "_rule": "v0.21.0 — PRICING VERSION 2027.01, por decisão do proprietário, registrada em PRICING_BIBLE.md e reconciliada em PRICING_RECONCILIATION.md. Substitui o estado da v0.17.0, em que nenhum preço institucional estava fixado e a plataforma recusava contratação online por falta de valor. A regra da v0.16.0 (US$ 1,99 -> US$ 19,99 em dólar, cobrados do proponente) continua APOSENTADA — ela não voltou, e os itens com `retire: true` abaixo preservam esse fechamento. O núcleo do produto continua gratuito por desenho, e não por prazo: os planos `tier: free` custam R$ 0 permanentemente. A gratuidade TEMPORAL (FULL FREE 2026 e os 3 meses de 2027) não está aqui — ela é concedida por conta, em `free_periods`, nunca por data global."
 }

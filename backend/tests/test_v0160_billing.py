@@ -169,11 +169,16 @@ class PricingTests(unittest.TestCase):
     def test_price_increase_requires_a_notice_with_thirty_days(self):
         """"Nunca mudar preço silenciosamente" é uma trava do banco, não uma frase na documentação.
 
-        Usa `osc_plus` e não `osc_premium` porque o ambiente de teste já declara uma versão vigente
-        para o segundo, e `ux_price_current` — corretamente — recusa duas vigentes ao mesmo tempo.
+        v0.21.0: a razão original para escolher `osc_plus` era que o ambiente de teste não declarava
+        versão vigente para ele. A Pricing Version 2027.01 publicou preço para TODO plano pago, então
+        não existe mais plano "livre" — e isso é o certo. O cenário passa a fazer o que a publicação
+        de preço faz em produção: fecha a vigência atual antes de abrir a sua.
         """
         org = new_account("osc", compliance="approved")
         oc = owner_conn()
+        oc.run("UPDATE plan_price_versions SET effective_until = now()"
+               " WHERE plan_key = 'osc_plus' AND interval = 'month' AND currency = 'BRL'"
+               " AND effective_until IS NULL")
         v_low = oc.scalar(
             "INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, tax_behavior, reason)"
             " VALUES ('osc_plus','month','BRL',1000,'inclusive','preço inicial do teste') RETURNING id::text")
@@ -204,6 +209,14 @@ class PricingTests(unittest.TestCase):
         """A carência protege quem paga, não a plataforma: baixar preço não precisa de 30 dias."""
         org = new_account("osc", compliance="approved")
         oc = owner_conn()
+        # v0.21.0: fecha a vigência atual antes de publicar a do cenário. Até a v0.20.0 `osc_plus`
+        # não tinha preço anual nenhum e a inserção direta passava; a Pricing Version 2027.01
+        # publicou um, e `ux_price_current` — que existe justamente para garantir UMA versão vigente
+        # por (plano, intervalo, moeda) — passou a recusar a segunda. Fechar antes de abrir é o que
+        # a publicação de preço faz em produção.
+        oc.run("UPDATE plan_price_versions SET effective_until = now()"
+               " WHERE plan_key = 'osc_plus' AND interval = 'year' AND currency = 'BRL'"
+               " AND effective_until IS NULL")
         v_high = oc.scalar(
             "INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, tax_behavior, reason)"
             " VALUES ('osc_plus','year','BRL',50000,'inclusive','preço alto do teste') RETURNING id::text")

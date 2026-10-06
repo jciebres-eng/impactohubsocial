@@ -54,6 +54,7 @@ def classify(ctx: Ctx):
 def usage(ctx: Ctx):
     from ..services.entitlements import effective
     with ctx.tx(readonly=True) as c:
-        used = c.scalar("SELECT count(*) FROM ai_usage WHERE org_id = $1 AND created_at >= date_trunc('month', now())", ctx.org_id)
+        # A MESMA função que o bloqueio usa: o número exibido é o número que limita.
+        used = c.scalar("SELECT ai_usage_this_month($1)", ctx.org_id)
         ent = effective(c, ctx.org_id, ctx.principal.org_kind)
     return {"used_this_month": used, "limit": ent["limits"].get("ai_requests_month"), "provider": ctx.app.ai.provider_name}

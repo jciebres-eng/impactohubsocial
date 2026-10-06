@@ -173,13 +173,14 @@ class TokenIn(In):
 
 class PrefItem(In):
     grp: Literal["billing", "content", "events", "support", "partnerships", "opportunities",
-                 "network", "proposal", "message", "funding", "report", "project", "document", "account"]
+                 "network", "proposal", "message", "funding", "report", "project", "document", "account",
+                 "program"]
     in_app: bool
     email: bool
 
 
 class PrefsIn(In):
-    items: Annotated[list[PrefItem], Field(min_length=1, max_length=14)]   # 14 grupos desde a 0016
+    items: Annotated[list[PrefItem], Field(min_length=1, max_length=15)]   # 15 grupos desde a 0018
 
 
 class PartnershipMoveIn(In):

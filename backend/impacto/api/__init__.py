@@ -6,7 +6,9 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            "impact_routes", "procurement_routes", "finance_routes", "network_routes", "geo_routes", "report_routes", "ops_routes", "solution_routes", "solution_flow_routes", "institutional_routes", "institutional_admin_routes", "institutional_extra_routes", "monetization_routes", "knowledge_routes", "content_admin_routes", "integration_routes", "trust_routes", "platform_routes",
            "lifecycle_routes", "diagnostic_routes", "assembly_routes",
            # v0.16.0 — camada de rede
-           "network_core_routes", "network_hub_routes"]
+           "network_core_routes", "network_hub_routes",
+           # v0.17.0 — camada econômica
+           "program_routes"]
 _loaded = False
 
 

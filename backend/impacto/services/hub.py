@@ -465,7 +465,10 @@ def newsletter_unsubscribe(c, token: str) -> bool:
 # ------------------------------------------------------------------------------------------------ preferências e notificações
 GROUPS = ("billing", "content", "events", "support", "partnerships", "opportunities",
           # grupos da rede (0016): a pessoa silencia propostas sem silenciar cobrança.
-          "network", "proposal", "message", "funding", "report", "project", "document", "account")
+          "network", "proposal", "message", "funding", "report", "project", "document", "account",
+          # grupo da camada econômica (0018): quem administra programa com dezenas de projetos não quer o
+          # mesmo interruptor das notificações de execução de cada projeto.
+          "program")
 
 
 def prefs_get(c, user_id: str) -> list[dict]:

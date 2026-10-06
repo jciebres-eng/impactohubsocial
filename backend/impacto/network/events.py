@@ -16,6 +16,13 @@ from ..db.pq import Connection, Json
 
 # Eventos de domínio da rede. Nome no formato Entidade.fato, para que a leitura do log seja óbvia.
 EVENTS: dict[str, str] = {
+    "Program.created": "Programa criado",
+    "Program.opened": "Programa aberto",
+    "Program.in_execution": "Programa em execução",
+    "Program.suspended": "Programa suspenso",
+    "Program.closed": "Programa encerrado",
+    "Program.project_linked": "Projeto vinculado ao programa",
+    "Program.project_role_changed": "Papel do projeto no programa alterado",
     "Relationship.created": "Relação criada",
     "Relationship.ended": "Relação encerrada",
     "Proposal.created": "Proposta criada",

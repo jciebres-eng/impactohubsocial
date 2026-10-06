@@ -36,6 +36,11 @@ HOLES = {
     "workspace.py": {"{', '.join(sets)}": "status = 'x'"},
     "impact_report.py": {"{', '.join(sets)}": "summary = 'x'"},
     "messaging.py": {"{', '.join(sets)}": "subject = 'x'"},
+    # camada econômica (0018+)
+    "programs.py": {"{', '.join(sets)}": "title = 'x'", "{len(args) - 1}": "1", "{len(args)}": "2"},
+    "value_ledger.py": {"{', '.join(sets)}": "note = 'x'"},
+    "billable.py": {"{', '.join(sets)}": "active = false"},
+    "legal.py": {"{', '.join(sets)}": "status = 'yellow'"},
 }
 
 

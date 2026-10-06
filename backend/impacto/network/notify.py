@@ -37,6 +37,9 @@ GRP = {
     "message": "message", "investment": "funding", "impact_update": "report", "experience": "network",
     "team": "project", "enforcement": "account", "project": "project", "document": "document",
     "diagnosis": "project", "milestone": "project", "indicator": "project", "risk": "project",
+    # `program` é grupo PRÓPRIO, não "project": quem administra um programa com 40 projetos não quer o
+    # mesmo interruptor das notificações de execução de cada um deles.
+    "program": "program",
 }
 
 # Prioridade: muda ordenação e destaque na caixa, nunca o canal. `critical` é para o que trava o trabalho da

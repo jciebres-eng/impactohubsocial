@@ -37,6 +37,10 @@ class ArchitectureTests(unittest.TestCase):
                    "app.py", "auth_routes.py", "org_routes.py", "application_routes.py", "execution_routes.py", "document_routes.py",
                    "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py", "trust_routes.py", "platform_routes.py", "identity.py", "credentials.py",
                    "challenges.py", "agreements.py",
+                   # v0.17.0: program_routes serve o programa PÚBLICO a quem não tem sessão. O contexto de
+                   # sistema ali não é atalho — é o que permite responder sem organização ativa. A proteção
+                   # vem de a consulta exigir visibility='public' AND published_at IS NOT NULL.
+                   "program_routes.py",
                    "lifecycle_routes.py", "assembly_routes.py",
                    # v0.16.0 — camada de rede. Cada uso foi revisado e tem razão nomeada no próprio arquivo:
                    #   network_core_routes.py  → leitura de relações PÚBLICAS para quem não tem conta
@@ -94,7 +98,11 @@ class ArchitectureTests(unittest.TestCase):
                            "/v1/public/relationships/{subject_type}/{subject_id}",
                            "/v1/public/projects/{project_id}/impact",
                            # tabela de preços: é pública por natureza, e o valor vem do servidor (nunca do cliente)
-                           "/v1/plans/price"}
+                           "/v1/plans/price",
+                           # v0.17.0 — programa que a dona escolheu publicar. `programs_read` exige
+                           # visibility='public' AND published_at IS NOT NULL AND status<>'suspended', e
+                           # programs.public_feed() repete o filtro num único lugar.
+                           "/v1/programs/feed", "/v1/programs/{program_id}"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):

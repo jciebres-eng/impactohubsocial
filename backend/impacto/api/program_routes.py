@@ -1,0 +1,158 @@
+"""Rotas do Programa e da análise que ele habilita (cadeia de resultado, lacuna territorial).
+
+Três observações para quem revisar:
+
+* ``GET /v1/programs/feed`` e ``GET /v1/programs/{id}`` de programa público são as rotas **sem sessão**
+  desta camada. A proteção não vem de condição escrita na rota: vem de `programs_read` exigir
+  `visibility = 'public' AND published_at IS NOT NULL AND status <> 'suspended'`, e de
+  `programs.public_feed()` repetir o filtro num único lugar. Mesmo princípio de
+  `marketplace.PUBLIC_STATES`.
+
+* ``GET /v1/programs/{id}`` devolve **declarado** e **apurado** em objetos separados e nomeados. Isso é
+  contrato, não apresentação: somar orçamento declarado com valor executado num número chamado
+  "captado" é exatamente o que o invariante dos três estágios financeiros existe para impedir.
+
+* ``GET /v1/territorial-gap`` é agregada e **não** devolve dado de pessoa. Devolve `needs_with_source`
+  junto, para que lacuna apoiada em estimativa sem fonte não passe por fato.
+"""
+from __future__ import annotations
+
+from ..economics import programs as PG
+from ..http import Ctx, not_found, route
+from . import economics_schemas as E
+
+TP = ("programa",)
+TG = ("territorio",)
+
+
+# ================================================================================================ programa
+@route("GET", "/v1/programs/status-graph", auth="user", tags=TP,
+       summary="Transições possíveis de um programa, com quem move e se exige motivo")
+def program_graph(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return {"items": PG.graph(c), "labels": PG.ST_LABEL, "roles": PG.ROLE_LABEL}
+
+
+@route("GET", "/v1/programs/feed", auth="none", query=E.ProgramFeedQ, tags=TP,
+       summary="Programas publicados (público, sem sessão)")
+def program_feed(ctx: Ctx, q: E.ProgramFeedQ):
+    with ctx.system_tx() as c:
+        return PG.public_feed(c, territory=q.territory, cause=q.cause, limit=q.limit, offset=q.offset)
+
+
+@route("GET", "/v1/programs", query=E.ProgramQ, min_role="viewer", tags=TP,
+       summary="Programas da organização")
+def program_list(ctx: Ctx, q: E.ProgramQ):
+    with ctx.tx(readonly=True) as c:
+        return PG.mine(c, org_id=ctx.org_id, status=q.status, limit=q.limit, offset=q.offset)
+
+
+@route("POST", "/v1/programs", body=E.ProgramIn, min_role="manager", status=201, tags=TP,
+       summary="Cria um programa (nasce em rascunho; o limite do plano é conferido aqui)")
+def program_create(ctx: Ctx, body: E.ProgramIn):
+    with ctx.tx() as c:
+        # O limite `programs` do plano existia e era aplicado contra `calls` — o produto anunciava uma
+        # entidade que não existia (SAAS_ECONOMIC_AUDIT.md §1 item 1). Agora é contado contra a coisa
+        # certa.
+        from ..services.entitlements import check_limit
+        n = c.scalar("SELECT count(*) FROM programs WHERE owner_org_id = $1"
+                     " AND status IN ('draft','open','in_execution','suspended')", ctx.org_id)
+        check_limit(c, ctx, "programs", n)
+        return PG.create(c, org_id=ctx.org_id, actor=ctx.user_id, **body.model_dump())
+
+
+@route("GET", "/v1/programs/{program_id}", auth="none", tags=TP,
+       summary="Um programa, com o declarado e o apurado em objetos separados")
+def program_get(ctx: Ctx):
+    pid = ctx.path["program_id"]
+    # `ctx.org_id` LEVANTA 409 quando não há organização ativa, então a pergunta tem de ser feita no
+    # principal. Perguntar por `ctx.org_id` aqui fazia um programa em rascunho responder
+    # "selecione uma organização" a quem não tem sessão — o que é vazamento de existência.
+    org = ctx.principal.org_id if ctx.principal else None
+    if org:
+        with ctx.tx(readonly=True) as c:
+            return PG.get(c, program_id=pid, org_id=org)
+    # Sem sessão: a política `programs_read` é quem decide, e ela só libera programa público publicado.
+    # O filtro é repetido aqui de propósito — esta é uma rota sem sessão, e a redundância é barata.
+    with ctx.system_tx() as c:
+        row = c.one("SELECT 1 FROM programs WHERE id = $1 AND visibility = 'public'"
+                    " AND published_at IS NOT NULL AND status <> 'suspended'", pid)
+        if not row:
+            raise not_found("Programa")
+        return PG.get(c, program_id=pid, org_id=None)
+
+
+@route("PATCH", "/v1/programs/{program_id}", body=E.ProgramPatch, min_role="manager", tags=TP,
+       summary="Edita o que é declarado (situação e datas derivadas não passam por aqui)")
+def program_patch(ctx: Ctx, body: E.ProgramPatch):
+    with ctx.tx() as c:
+        return PG.update(c, program_id=ctx.path["program_id"], org_id=ctx.org_id,
+                         **body.model_dump(exclude_none=True))
+
+
+@route("POST", "/v1/programs/{program_id}/transition", body=E.ProgramTransitionIn,
+       min_role="manager", tags=TP,
+       summary="Move a situação do programa (recusada se não estiver no grafo)")
+def program_transition(ctx: Ctx, body: E.ProgramTransitionIn):
+    with ctx.tx() as c:
+        return PG.transition(c, program_id=ctx.path["program_id"], org_id=ctx.org_id,
+                             actor=ctx.user_id, to_status=body.to_status, reason=body.reason)
+
+
+# ---------------------------------------------------------------- o que o programa agrega
+@route("POST", "/v1/programs/{program_id}/calls", body=E.ProgramCallIn, min_role="manager",
+       status=201, tags=TP, summary="Pendura um edital da própria organização no programa")
+def program_add_call(ctx: Ctx, body: E.ProgramCallIn):
+    with ctx.tx() as c:
+        return PG.add_call(c, program_id=ctx.path["program_id"], call_id=body.call_id,
+                           org_id=ctx.org_id, actor=ctx.user_id)
+
+
+@route("DELETE", "/v1/programs/{program_id}/calls/{call_id}", min_role="manager", tags=TP,
+       summary="Desfaz o vínculo com o edital")
+def program_del_call(ctx: Ctx):
+    with ctx.tx() as c:
+        return PG.remove_call(c, program_id=ctx.path["program_id"], call_id=ctx.path["call_id"],
+                              org_id=ctx.org_id)
+
+
+@route("POST", "/v1/programs/{program_id}/projects", body=E.ProgramProjectIn, min_role="manager",
+       status=201, tags=TP,
+       summary="Põe ou move um projeto no programa, com o papel que ele tem ali")
+def program_set_project(ctx: Ctx, body: E.ProgramProjectIn):
+    with ctx.tx() as c:
+        return PG.set_project(c, program_id=ctx.path["program_id"], org_id=ctx.org_id,
+                              actor=ctx.user_id, **body.model_dump())
+
+
+@route("POST", "/v1/programs/{program_id}/indicators", body=E.ProgramIndicatorIn,
+       min_role="manager", status=201, tags=TP,
+       summary="Acrescenta indicador ao programa (linha de base exige fonte)")
+def program_add_indicator(ctx: Ctx, body: E.ProgramIndicatorIn):
+    with ctx.tx() as c:
+        return PG.add_indicator(c, program_id=ctx.path["program_id"], org_id=ctx.org_id,
+                                actor=ctx.user_id, **body.model_dump())
+
+
+@route("POST", "/v1/programs/{program_id}/needs", body=E.ProgramNeedIn, min_role="manager",
+       status=201, tags=TP,
+       summary="Liga o programa a uma necessidade de território (habilita a análise de lacuna)")
+def program_add_need(ctx: Ctx, body: E.ProgramNeedIn):
+    with ctx.tx() as c:
+        return PG.add_need(c, program_id=ctx.path["program_id"], need_id=body.need_id,
+                           org_id=ctx.org_id, actor=ctx.user_id)
+
+
+# ================================================================================================ análise
+@route("GET", "/v1/projects/{project_id}/result-chain", min_role="viewer", tags=TP,
+       summary="Cadeia de resultado do projeto, com a força declarada de cada elo")
+def project_result_chain(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return PG.result_chain(c, project_id=ctx.path["project_id"])
+
+
+@route("GET", "/v1/territorial-gap", query=E.GapQ, min_role="viewer", tags=TG,
+       summary="Demanda registrada contra oferta, por território — agregado, sem dado de pessoa")
+def territorial_gap(ctx: Ctx, q: E.GapQ):
+    with ctx.tx(readonly=True) as c:
+        return PG.territorial_gap(c, territory_prefix=q.territory_prefix)

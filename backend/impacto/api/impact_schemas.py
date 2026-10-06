@@ -223,6 +223,12 @@ class SealDefinitionQ(In):
     status: Annotated[str, Field(pattern="^(draft|published|retired)$")] | None = None
 
 
+class SealRetireIn(In):
+    """Aposentar uma definição de selo muda o que a plataforma afirma daqui para a frente."""
+
+    reason: Annotated[str, Field(min_length=20, max_length=2000)]
+
+
 class SealEvaluateIn(In):
     definition_id: Uuid
     subject_id: Uuid

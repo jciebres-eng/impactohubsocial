@@ -48,12 +48,15 @@ def publish(ctx: Ctx):
     return out
 
 
-@route("POST", "/v1/admin/seals/definitions/{definition_id}/retire", auth="admin", tags=T,
-       summary="Aposenta a definição (não revoga as concessões)")
-def retire(ctx: Ctx):
+@route("POST", "/v1/admin/seals/definitions/{definition_id}/retire", auth="admin",
+       body=S.SealRetireIn, tags=T,
+       summary="Aposenta a definição com motivo registrado (não revoga as concessões)")
+def retire(ctx: Ctx, body: S.SealRetireIn):
     with ctx.tx() as c:
-        out = SEAL.retire_definition(c, definition_id=ctx.path["definition_id"])
-        ctx.audit(c, "seal.definition_retired", "seal_definition", out["id"], org_id=None)
+        out = SEAL.retire_definition(c, definition_id=ctx.path["definition_id"],
+                                     reason=body.reason, actor=ctx.user_id)
+        ctx.audit(c, "seal.definition_retired", "seal_definition", out["id"],
+                  {"reason": body.reason}, org_id=None)
     return out
 
 

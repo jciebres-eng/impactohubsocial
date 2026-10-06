@@ -250,7 +250,10 @@ def admin_add_legal_card(ctx: Ctx, body: E.LegalCardIn):
        summary="Ajusta preço, situação jurídica e ativação de uma regra (o portão é no banco)")
 def admin_set_rule(ctx: Ctx, body: E.RulePatch):
     with ctx.tx() as c:
-        return BL.set_rule(c, key=ctx.path["rule_key"], **body.model_dump(exclude_none=True))
+        out = BL.set_rule(c, key=ctx.path["rule_key"], **body.model_dump(exclude_none=True))
+        ctx.audit(c, "monetization.rule_changed", "monetization_rule", ctx.path["rule_key"],
+                  body.model_dump(exclude_none=True), org_id=None)
+    return out
 
 
 @route("GET", "/v1/admin/monetization/pipeline", auth="admin", query=E.PipelineQ,
@@ -271,7 +274,9 @@ def admin_waive(ctx: Ctx, body: E.WaiveIn):
     if not seq.isdigit():
         raise not_found("Candidato a cobrança")
     with ctx.tx() as c:
-        return BL.waive(c, billable_id=int(seq), reason=body.reason)
+        out = BL.waive(c, billable_id=int(seq), reason=body.reason)
+        ctx.audit(c, "monetization.waived", "billable", seq, {"reason": body.reason}, org_id=None)
+    return out
 
 
 # ================================================================================================ pagamento

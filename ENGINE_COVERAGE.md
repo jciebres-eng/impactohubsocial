@@ -15,7 +15,7 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 
 `n/a` = motor sem rota própria: herda a barreira de quem o chama. Não é falha.
 
-**40 motores.** implemented: 40 sim / 0 não · integrated: 40 sim / 0 não · tested: 40 sim / 0 não · e2e: 35 sim / 2 não / 3 n/a · security: 37 sim / 0 não / 3 n/a · observability: 32 sim / 8 não
+**42 motores.** implemented: 42 sim / 0 não · integrated: 42 sim / 0 não · tested: 42 sim / 0 não · e2e: 36 sim / 3 não / 3 n/a · security: 39 sim / 0 não / 3 n/a · observability: 34 sim / 8 não
 
 ## busca
 
@@ -85,6 +85,7 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 | motor | natureza | versão | implemented | integrated | tested | E2E | security | observability |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `retention_policy` — Conferência da política de retenção | deterministic | — | sim | sim | sim | **NÃO** | sim | **NÃO** |
+| `risk_levels` — Inventário de risco por operação | deterministic | — | sim | sim | sim | **NÃO** | sim | sim |
 
 ## ia
 
@@ -99,6 +100,7 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 | motor | natureza | versão | implemented | integrated | tested | E2E | security | observability |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `claim_integrity` — Integridade de afirmação de impacto | deterministic | claim-integrity@1.0.0 | sim | sim | sim | sim | sim | sim |
+| `data_quality` — Qualidade do dado declarado | deterministic | data-quality@1.0.0 | sim | sim | sim | sim | sim | sim |
 | `equity_context` — Contexto de equidade e normalização | deterministic | equity-context@1.0.0 | sim | sim | sim | sim | sim | sim |
 | `reputation` — Reputação por dimensão observada | deterministic | reputation-dimensions@1.0.0 | sim | sim | sim | sim | sim | sim |
 | `seals` — Selos: regra pública, concessão e revogação | deterministic | seal-rules@1.0.0 | sim | sim | sim | sim | sim | sim |

@@ -73,7 +73,10 @@ def accept(ctx: Ctx, body: AcceptIn):
        summary="Marca a minuta como enviada para revisão jurídica")
 def to_review(ctx: Ctx):
     with ctx.tx() as c:
-        return LEGAL.submit_for_review(c, doc_id=ctx.path["doc_id"])
+        out = LEGAL.submit_for_review(c, doc_id=ctx.path["doc_id"])
+        ctx.audit(c, "legal.submitted_for_review", "legal_document", ctx.path["doc_id"],
+                  org_id=None)
+    return out
 
 
 @route("POST", "/v1/admin/legal/documents/{doc_id}/approve", auth="admin", body=ApproveIn, tags=T,

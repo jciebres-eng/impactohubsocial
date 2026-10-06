@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (833)
+## Operações (836)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -159,6 +159,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/reports/{report_id}/responses` | admin da plataforma + MFA | — | Manifestações de quem foi denunciado |
 | POST | `/v1/admin/reports/{report_id}/review` | admin da plataforma + MFA | — | Leva para análise e registra quem analisa (continua não sendo achado) |
 | POST | `/v1/admin/reputation/disputes/{dispute_id}/resolution` | admin da plataforma + MFA | — | Resolve a contestação; corrigir produz ponto NOVO, nunca reescreve o antigo |
+| GET | `/v1/admin/risk-levels` | admin da plataforma + MFA | — | Inventário de risco por operação (§40): nível, controle humano exigido e se ele existe |
 | GET | `/v1/admin/risk/assessments` | admin da plataforma + MFA | — | list assessments |
 | POST | `/v1/admin/risk/orgs/{org_id}/block` | admin da plataforma + MFA | — | Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível |
 | POST | `/v1/admin/risk/orgs/{org_id}/unblock` | admin da plataforma + MFA | — | unblock org |
@@ -169,7 +170,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/seals/awards/{award_id}/revoke` | admin da plataforma + MFA | — | Revoga como fato novo, com motivo (não apaga a concessão) |
 | POST | `/v1/admin/seals/definitions` | admin da plataforma + MFA | — | Cria definição (nasce RASCUNHO; rascunho não concede selo) |
 | POST | `/v1/admin/seals/definitions/{definition_id}/publish` | admin da plataforma + MFA | — | Publica; a versão anterior é aposentada e suas concessões ficam 'superadas' |
-| POST | `/v1/admin/seals/definitions/{definition_id}/retire` | admin da plataforma + MFA | — | Aposenta a definição (não revoga as concessões) |
+| POST | `/v1/admin/seals/definitions/{definition_id}/retire` | admin da plataforma + MFA | — | Aposenta a definição com motivo registrado (não revoga as concessões) |
 | PUT | `/v1/admin/signature-providers/{provider_key}` | admin da plataforma + MFA | — | Ajusta o estado real de um provedor de assinatura (passar para produção exige dependência resolvida) |
 | POST | `/v1/admin/solution-disputes/{dispute_id}/decide` | admin da plataforma + MFA | — | Decide uma contestação (humano; registra decisor e nota) |
 | POST | `/v1/admin/solution-evidence/{evidence_id}/review` | admin da plataforma + MFA | — | Aceita ou rejeita uma evidência (registra revisor e nota) |
@@ -179,7 +180,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/solutions/{solution_id}/verify` | admin da plataforma + MFA | — | Define o nível de confiança. Níveis altos exigem evidências aceitas (regras no servidor) |
 | GET | `/v1/admin/staff-roles` | admin da plataforma + MFA | — | Papéis internos (editor, reviewer, support) |
 | POST | `/v1/admin/staff-roles` | admin da plataforma + MFA | — | Concede papel interno (auditado) |
-| DELETE | `/v1/admin/staff-roles/{user_id}/{role}` | admin da plataforma + MFA | — | Revoga papel interno |
+| DELETE | `/v1/admin/staff-roles/{user_id}/{role}` | admin da plataforma + MFA | — | Revoga papel interno, com motivo registrado |
 | GET | `/v1/admin/support/sla` | admin da plataforma + MFA | — | SLA por prioridade (valores iniciais são hipótese operacional, configuráveis) |
 | PUT | `/v1/admin/support/sla/{priority}` | admin da plataforma + MFA | — | Ajusta o SLA de uma prioridade (administradores) |
 | GET | `/v1/admin/support/tickets` | admin da plataforma + MFA | — | Fila de chamados (por estado, prioridade e atraso de SLA) |
@@ -281,6 +282,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/conversations/{conversation_id}/read` | membro da organização ativa | papel ≥ viewer | read conversation |
 | PUT | `/v1/conversations/{conversation_id}/status` | membro da organização ativa | papel ≥ member | set conversation status |
 | GET | `/v1/dashboard` | membro da organização ativa | papel ≥ viewer | Indicadores da organização ativa (dados reais do banco) |
+| GET | `/v1/data-quality/vocabulary` | usuário autenticado | — | Os sete tipos de achado de qualidade de dado e o que cada um significa |
 | GET | `/v1/datasets` | usuário autenticado | — | Conjuntos de dados externos carregados: publicador, licença, datas e hash do arquivo |
 | GET | `/v1/determinants` | membro da organização ativa | tipos: government, company, individual, platform; papel ≥ viewer | Camada agregada: projetos por domínio de determinante social e território (k-anonimato; sem ranking de grupos vulneráveis) |
 | GET | `/v1/diagnoses` | membro da organização ativa | tipos: osc; papel ≥ viewer | list diagnoses |
@@ -636,6 +638,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/projects/{project_id}/context-return` | membro da organização ativa | papel ≥ viewer | O que declarar contexto destravou, e o que cada peça que falta destravaria (sem ranking) |
 | GET | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | papel ≥ viewer | Modelos de contribuição do projeto (a OSC vê todos; os demais, só os aprovados juridicamente) |
 | POST | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | tipos: osc; papel ≥ manager | Propõe um modelo (doação, patrocínio, cotas, lei de incentivo, investimento de impacto). Nasce em rascunho |
+| GET | `/v1/projects/{project_id}/data-quality` | membro da organização ativa | papel ≥ viewer | Achados sobre o DADO declarado — nunca avaliação do projeto (§69) |
 | GET | `/v1/projects/{project_id}/equity` | membro da organização ativa | papel ≥ viewer | O contexto declarado do projeto, as barreiras e o que é normalizável |
 | GET | `/v1/projects/{project_id}/equity/assessments` | membro da organização ativa | papel ≥ viewer | Histórico dos retratos de contexto do projeto |
 | POST | `/v1/projects/{project_id}/equity/assessments` | membro da organização ativa | papel ≥ manager | Grava o retrato do contexto (append-only; não produz nota de equidade) |

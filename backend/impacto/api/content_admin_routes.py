@@ -67,14 +67,18 @@ def staff_grant(ctx: Ctx, body: H.StaffRoleIn):
     return {"user_id": u["id"], "role": body.role}
 
 
-@A("DELETE", "/v1/admin/staff-roles/{user_id}/{role}", summary="Revoga papel interno")
-def staff_revoke(ctx: Ctx):
+@A("DELETE", "/v1/admin/staff-roles/{user_id}/{role}", query=H.StaffRevokeQ,
+   summary="Revoga papel interno, com motivo registrado")
+def staff_revoke(ctx: Ctx, q: H.StaffRevokeQ):
+    """v0.20.0: revogar um papel interno é tirar acesso de uma pessoa, e a operação não registrava
+    por quê. O inventário de risco a classificou como CRITICAL e o teste cobrou o motivo."""
     if not _is_admin(ctx):
         raise ApiError(403, "admin_only", "Somente administradores da plataforma")
     with ctx.tx() as c:
         c.run("DELETE FROM staff_roles WHERE user_id = $1 AND role = $2", ctx.path["user_id"], ctx.path["role"])
-        ctx.audit(c, "staff.role_revoked", "user", ctx.path["user_id"], {"role": ctx.path["role"]})
-    return {"revoked": True}
+        ctx.audit(c, "staff.role_revoked", "user", ctx.path["user_id"],
+                  {"role": ctx.path["role"], "reason": q.reason})
+    return {"revoked": True, "reason": q.reason}
 
 
 # ------------------------------------------------------------------------------------------------ painel editorial

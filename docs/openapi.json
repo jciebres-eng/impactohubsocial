@@ -8071,6 +8071,93 @@
     ]
    }
   },
+  "/v1/projects/{project_id}/data-quality": {
+   "get": {
+    "summary": "Achados sobre o DADO declarado — nunca avaliação do projeto (§69)",
+    "operationId": "get_impact_routes_data_quality",
+    "tags": [
+     "impact"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/data-quality/vocabulary": {
+   "get": {
+    "summary": "Os sete tipos de achado de qualidade de dado e o que cada um significa",
+    "operationId": "get_impact_routes_data_quality_vocabulary",
+    "tags": [
+     "impact"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/admin/risk-levels": {
+   "get": {
+    "summary": "Inventário de risco por operação (§40): nível, controle humano exigido e se ele existe",
+    "operationId": "get_impact_routes_risk_levels",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
   "/v1/procurement/policy": {
    "get": {
     "summary": "Política de cotações da organização (padrão: 3 cotações)",
@@ -17630,7 +17717,7 @@
   },
   "/v1/admin/staff-roles/{user_id}/{role}": {
    "delete": {
-    "summary": "Revoga papel interno",
+    "summary": "Revoga papel interno, com motivo registrado",
     "operationId": "delete_content_admin_routes_staff_revoke",
     "tags": [
      "admin",
@@ -17667,6 +17754,17 @@
       "in": "path",
       "required": true,
       "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "reason",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maxLength": 500,
+       "minLength": 10,
+       "title": "Reason",
        "type": "string"
       }
      }
@@ -34247,7 +34345,7 @@
   },
   "/v1/admin/seals/definitions/{definition_id}/retire": {
    "post": {
-    "summary": "Aposenta a definição (não revoga as concessões)",
+    "summary": "Aposenta a definição com motivo registrado (não revoga as concessões)",
     "operationId": "post_seal_routes_retire",
     "tags": [
      "seals"
@@ -34278,7 +34376,17 @@
        "type": "string"
       }
      }
-    ]
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SealRetireIn"
+       }
+      }
+     }
+    }
    }
   },
   "/v1/seals/evaluate": {
@@ -56154,6 +56262,23 @@
      "criteria"
     ],
     "title": "SealDefinitionIn",
+    "type": "object"
+   },
+   "SealRetireIn": {
+    "additionalProperties": false,
+    "description": "Aposentar uma definição de selo muda o que a plataforma afirma daqui para a frente.",
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "SealRetireIn",
     "type": "object"
    },
    "SealEvaluateIn": {

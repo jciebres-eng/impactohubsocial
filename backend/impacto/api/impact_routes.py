@@ -435,3 +435,43 @@ def apply_diagnosis(ctx: Ctx):
         c.run("UPDATE diagnoses SET status = 'applied', applied_at = now() WHERE id = $1", d["id"])
         ctx.audit(c, "diagnosis.applied", "diagnosis", d["id"], {"project_id": pid, "indicators_linked": linked})
     return {"id": d["id"], "status": "applied", "indicators_linked": linked}
+
+
+# ================================================================================================ qualidade do dado (v0.20.0)
+@route("GET", "/v1/projects/{project_id}/data-quality", min_role="viewer", tags=T,
+       summary="Achados sobre o DADO declarado — nunca avaliação do projeto (§69)")
+def data_quality(ctx: Ctx):
+    """Sete tipos de achado sobre o dado, com a linha exata que cada um aponta.
+
+    Não devolve nota, faixa nem percentual, e nada daqui alimenta reputação, selo ou
+    compatibilidade. A razão está escrita no motor: projeto em território sem dado público produz
+    dado incompleto, e transformar isso em desempenho baixo faria a plataforma medir orçamento de
+    monitoramento e chamar o resultado de impacto — invertendo exatamente a desigualdade que ela
+    existe para enxergar.
+    """
+    from ..impact import quality as DQ
+    with ctx.tx(readonly=True) as c:
+        return DQ.assess(c, project_id=ctx.path["project_id"])
+
+
+@route("GET", "/v1/data-quality/vocabulary", auth="user", tags=T,
+       summary="Os sete tipos de achado de qualidade de dado e o que cada um significa")
+def data_quality_vocabulary(ctx: Ctx):
+    from ..impact import quality as DQ
+    return DQ.vocabulary()
+
+
+@route("GET", "/v1/admin/risk-levels", auth="admin", tags=("admin",),
+       summary="Inventário de risco por operação (§40): nível, controle humano exigido e se ele existe")
+def risk_levels(ctx: Ctx):
+    """Onde o controle humano precisa existir — e se ele existe mesmo.
+
+    O nível é DERIVADO do que cada operação declara no roteador; os casos que a regra não alcança
+    estão declarados um a um, com o motivo escrito. Este inventário não bloqueia nada: o bloqueio
+    está nas políticas do banco, nos gatilhos e nas verificações de cada rota.
+    """
+    from .. import api
+    from ..core import risk_levels as RL
+    from ..http import ROUTES
+    api.load_all()
+    return RL.inventory(list(ROUTES))

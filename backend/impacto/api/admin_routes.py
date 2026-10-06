@@ -249,7 +249,11 @@ def run_source(ctx: Ctx):
         s = c.one("SELECT * FROM call_sources WHERE id = $1", ctx.path["source_id"])
     if not s:
         raise not_found("Fonte")
-    return import_source(ctx.app, s)
+    out = import_source(ctx.app, s)
+    with ctx.tx() as c:
+        ctx.audit(c, "call_source.run", "call_source", ctx.path["source_id"],
+                  {"imported": out.get("imported"), "source": s.get("name")}, org_id=None)
+    return out
 
 
 # ------------------------------------------------------------------------------------------------ regras fiscais

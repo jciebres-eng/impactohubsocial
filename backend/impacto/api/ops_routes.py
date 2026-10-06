@@ -92,6 +92,7 @@ def resolve_error(ctx: Ctx):
     with ctx.tx() as c:
         if not c.run("UPDATE error_events SET resolved = true WHERE id = $1", ctx.path["error_id"]):
             raise not_found("Erro")
+        ctx.audit(c, "error_event.resolved", "error_event", ctx.path["error_id"], org_id=None)
     return {"resolved": True}
 
 

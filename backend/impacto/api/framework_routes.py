@@ -84,4 +84,7 @@ def set_entry(ctx: Ctx, body: S.MaterialityEntryIn):
        summary="Publica a avaliação (exige ao menos três temas avaliados)")
 def publish(ctx: Ctx):
     with ctx.tx() as c:
-        return FW.publish(c, assessment_id=ctx.path["assessment_id"], org_id=ctx.org_id)
+        out = FW.publish(c, assessment_id=ctx.path["assessment_id"], org_id=ctx.org_id)
+        ctx.audit(c, "materiality.published", "materiality_assessment",
+                  ctx.path["assessment_id"], {"themes": out.get("themes")})
+    return out

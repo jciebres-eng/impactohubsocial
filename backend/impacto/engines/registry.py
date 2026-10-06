@@ -423,6 +423,28 @@ ENGINES: tuple[Engine, ...] = (
         produces="Classe EFETIVA de cada vínculo, conferida contra os gatilhos reais do banco.",
         never="Não promete apagar o que o banco impede de apagar: tabela append-only aparece como "
               "`append_only`, e a plataforma declara que NÃO remove organização."),
+    Engine(
+        key="data_quality", name="Qualidade do dado declarado",
+        module="impacto.impact.quality", entrypoint="assess", kind="deterministic",
+        version="data-quality@1.0.0", group="impacto",
+        routes=("/v1/projects/{project_id}/data-quality", "/v1/data-quality/vocabulary"),
+        produces="Sete tipos de achado sobre o DADO — não preenchido, contado duas vezes, não "
+                 "fecha, parado no tempo, fora da unidade, contraditório, sem como conferir — cada "
+                 "um apontando para a linha exata.",
+        never="NÃO transforma baixa qualidade de dado em baixo desempenho do projeto, e não produz "
+              "nota, faixa nem percentual. Nada daqui alimenta reputação, selo ou compatibilidade: "
+              "projeto em território sem dado público produz dado incompleto, e pontuar isso faria "
+              "a plataforma medir orçamento de monitoramento e chamar o resultado de impacto."),
+    Engine(
+        key="risk_levels", name="Inventário de risco por operação",
+        module="impacto.core.risk_levels", entrypoint="inventory", kind="deterministic",
+        version=None, group="governança",
+        routes=("/v1/admin/risk-levels",),
+        produces="Nível (LOW/MEDIUM/HIGH/CRITICAL) de cada uma das operações da API, o controle "
+                 "humano que cada nível exige e se esse controle existe no código.",
+        never="Não bloqueia nada em tempo de execução: o bloqueio está nas políticas do banco, nos "
+              "gatilhos e nas verificações de cada rota. Aqui se responde ONDE o controle precisa "
+              "existir — e o teste confere se ele existe."),
 )
 
 #: Os ÚNICOS pontos do código autorizados a chamar o modelo. O teste de arquitetura compara esta

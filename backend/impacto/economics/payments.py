@@ -201,6 +201,12 @@ def transition(conn: Connection, *, charge_id: str, to_state: str, org_id: str |
         " WHERE id = $1 RETURNING id::text AS id, state, is_simulated, paid_at, settled_at,"
         " refunded_cents", charge_id, to_state, provider_charge_id, refunded_cents, failure_code,
         failure_message)
+    # NÃO se escreve a trilha aqui. `charge_record_event()` (migração 0022) grava em
+    # `charge_events` por GATILHO, com `app_uid()` como autor — e isso é melhor do que gravar
+    # daqui: código de aplicação pode esquecer de registrar uma transição, gatilho não pode.
+    # (Eu cheguei a acrescentar um INSERT nesta função na v0.20.0, convencido por uma contagem
+    # zerada em banco de desenvolvimento vazio. Era duplicata; a suíte reprovou e a trilha voltou
+    # a ter uma dona só.)
     return _decorate(row)
 
 
@@ -225,7 +231,8 @@ def get(conn: Connection, *, charge_id: str, org_id: str | None) -> dict:
         raise not_found("Cobrança")
     out = _decorate(c)
     out["events"] = conn.query(
-        "SELECT from_state, to_state, origin, provider_event_id, amount_cents, note, at"
+        "SELECT from_state, to_state, origin, provider_event_id, amount_cents, note, at,"
+        " user_display_name(actor_user_id) AS actor"
         " FROM charge_events WHERE charge_id = $1 ORDER BY id", charge_id)
     out["installments_schedule"] = conn.query(
         "SELECT n, amount_cents, due_on, state, paid_at FROM charge_installments"

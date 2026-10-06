@@ -171,6 +171,12 @@ class TokenIn(In):
     token: Annotated[str, Field(min_length=20, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")]
 
 
+class StaffRevokeQ(In):
+    """Revogar papel interno é tirar acesso de uma pessoa: o motivo fica na auditoria."""
+
+    reason: Annotated[str, Field(min_length=10, max_length=500)]
+
+
 class PrefItem(In):
     grp: Literal["billing", "content", "events", "support", "partnerships", "opportunities",
                  "network", "proposal", "message", "funding", "report", "project", "document", "account",

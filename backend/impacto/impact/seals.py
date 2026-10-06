@@ -131,15 +131,28 @@ def publish_definition(conn: Connection, *, definition_id: str) -> dict:
                      "nem silenciosamente convertido.")}
 
 
-def retire_definition(conn: Connection, *, definition_id: str) -> dict:
+def retire_definition(conn: Connection, *, definition_id: str, reason: str,
+                      actor: str | None = None) -> dict:
+    """Aposenta a definição. O MOTIVO é obrigatório.
+
+    v0.20.0: aposentar uma definição de selo muda o que a plataforma afirma publicamente daqui para
+    a frente, e até aqui a operação não registrava por quê. Um ano depois, ninguém — nem quem
+    decidiu — saberia responder a pergunta óbvia. O inventário de risco classificou esta operação
+    como CRITICAL e o teste cobrou o controle que faltava.
+    """
+    if len((reason or "").strip()) < 20:
+        raise unprocessable("Aposentar uma definição de selo exige motivo escrito (mín. 20 "
+                            "caracteres): é o que responde 'por quê' depois.",
+                            code="reason_required")
     row = conn.one(
         "UPDATE seal_definitions SET status = 'retired', retired_at = now()"
         " WHERE id = $1 AND status = 'published'"
         " RETURNING id::text AS id, code, version, retired_at", definition_id)
     if not row:
         raise unprocessable("Só definição publicada é aposentada.", code="not_published")
-    return {**row, "note": "Aposentar não revoga as concessões: elas passam a aparecer como de "
-                           "definição aposentada, com a data em que isso aconteceu."}
+    return {**row, "reason": reason.strip(),
+            "note": "Aposentar não revoga as concessões: elas passam a aparecer como de "
+                    "definição aposentada, com a data em que isso aconteceu."}
 
 
 # ================================================================================================ avaliação

@@ -6,6 +6,50 @@
 > Severidade: **CRITICAL** (corrigir antes de publicar) · **HIGH** (corrigir na primeira janela
 > depois do design) · **MEDIUM** · **LOW** · **FUTURE**.
 
+## v0.20.0 — dívida encontrada pelo inventário de risco (§40)
+
+### D1 · Dezesseis operações de alto risco sem controle conferível de perto
+
+`GET /v1/admin/risk-levels` classifica as 836 operações da API e confere, no código alcançável a
+UMA chamada da rota, se o controle humano que o nível exige existe. **As 10 operações CRÍTICAS têm
+o controle.** Dezesseis operações de alto risco não têm controle conferível nessa distância:
+
+* `POST /v1/billing/quote`, `/cancel`, `/reactivate`, `/change-plan`, `/portal`
+* `POST /v1/billing/webhooks/stripe`
+* `PUT /v1/admin/content/article-versions/{id}`, `/resources/{id}`, `/faqs/{id}`, `/courses/{id}`
+* `POST /v1/admin/content/events/{id}/attendance`
+* `POST /v1/admin/support/tickets/{id}/to-article`
+* `POST /v1/integrations/inbound/{connection_id}`
+* `POST /v1/admin/fee-tables/{table_id}/items`
+* `PUT /v1/payments/charges/{charge_id}/installments`
+* `POST /v1/payments/charges/{charge_id}/transition`
+
+Parte disto é limitação da varredura, não da operação: a transição de cobrança, por exemplo, tem
+a trilha escrita por GATILHO (`charge_record_event`, migração 0022), e varredura estática não
+enxerga gatilho. Parte pode ser ausência real de registro. **Não foi conferido caso a caso**, e
+dizer que foi seria o tipo de afirmação que esta rodada inteira existe para evitar.
+
+Há catraca: `test_the_high_risk_gap_cannot_grow` reprova a suíte se o número passar de 16.
+
+### D2 · Oito motores não deixam rastro durável
+
+`ENGINE_COVERAGE.md`, coluna `observability`: `funding_readiness`, `document_classification`,
+`evidence`, `report_center`, `solution_scoring`, `intent_parser`, `glossary_drift` e
+`retention_policy` calculam e não registram que rodaram. Depois do fato, não há como responder
+"este motor rodou? com qual versão?". São todos motores de leitura/derivação, o que explica a
+ausência mas não a resolve.
+
+### D3 · Uma correção que esta rodada quase introduziu como defeito
+
+Acrescentei um `INSERT INTO charge_events` em `economics/payments.transition`, convencido por uma
+contagem zerada em banco de desenvolvimento vazio de que a trilha da cobrança não era escrita por
+ninguém. Era: pelo gatilho `charge_record_event()`, desde a v0.17.0. A suíte reprovou
+(`test_the_trail_is_written_by_the_trigger_and_is_append_only`) e o código foi revertido. Fica
+registrado porque o erro é instrutivo: **tabela vazia em ambiente de desenvolvimento não é prova
+de que ninguém escreve nela.** Há agora um teste que impede qualquer código de aplicação de
+escrever nessa trilha.
+
+
 ## CRITICAL — nada aqui bloqueia o Designer; tudo aqui bloqueia a publicação
 
 | # | Item | Impacto | Solução | Esforço | Dependência | Risco de não corrigir | Bloqueia design? | Bloqueia web? |

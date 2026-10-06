@@ -23,11 +23,11 @@ Cinco testes transformam a declaração em compromisso:
 
 ## O estado real
 
-40 motores. Três naturezas, e a distinção muda o que se pode prometer:
+42 motores. Três naturezas, e a distinção muda o que se pode prometer:
 
 | Natureza | Quantos | O que significa |
 |---|---|---|
-| `deterministic` | 35 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
+| `deterministic` | 37 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
 | `grounded_retrieval` | 2 | responde por **extração** do conteúdo cadastrado; nenhum texto é gerado por modelo |
 | `llm_assisted` | 3 | um modelo reescreve ou complementa **sobre base determinística**, como rascunho |
 
@@ -80,13 +80,13 @@ de prestação de contas — esses são colhidos pelo banco e protegidos por `gu
 
 Agrupados como no registro: **prontidão** (2), **compatibilidade** (4), **conformidade** (3),
 **documento** (2), **evidência** (3), **fiscal** (1), **busca** (3), **soluções** (4), **econômico** (3),
-**IA** (3), **impacto** (4), **confiança** (4), **orientação** (1), **operação** (1), **governança** (1),
+**IA** (3), **impacto** (5), **confiança** (4), **orientação** (1), **operação** (1), **governança** (2),
 **vocabulário** (1). A lista completa, com caminho de módulo e função, está em `engines/registry.py` — e
 é a mesma que a rota devolve, porque é a mesma fonte.
 
 ## Cobertura: onde a cadeia é forte, e onde não é
 
-`ENGINE_COVERAGE.md` traz os 40 motores com seis colunas — **implemented, integrated, tested, E2E,
+`ENGINE_COVERAGE.md` traz os 42 motores com seis colunas — **implemented, integrated, tested, E2E,
 security, observability** — e `GET /v1/engines/coverage` devolve o mesmo cálculo.
 
 **Nenhuma das seis colunas é declarada.** Todas são derivadas do código, do roteador, da suíte de testes

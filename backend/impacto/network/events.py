@@ -67,6 +67,27 @@ EVENTS: dict[str, str] = {
     "Indicator.validated": "Indicador validado",
     "Risk.created": "Risco registrado",
     "Risk.resolved": "Risco resolvido",
+    # v0.20.0 — prazos. A plataforma registrava cinco prazos e varria um: o resto vencia em
+    # silêncio. Ver `impacto.ops.deadlines`.
+    "Milestone.due_soon": "Marco do projeto a vencer",
+    "Seal.expiring": "Selo a vencer",
+    "Proposal.expiring": "Proposta a vencer",
+    "Agreement.milestone_due": "Marco de instrumento a vencer",
+    "Call.closing": "Chamada a fechar",
+    "Listing.expired": "Anúncio expirado",
+    # v0.20.0 — fatos da camada de impacto, que não avisava ninguém sobre nada.
+    "Seal.awarded": "Selo concedido",
+    "Seal.revoked": "Selo revogado",
+    "Reputation.band_changed": "Faixa de reputação alterada",
+    "Claim.review_requested": "Revisão de afirmação solicitada",
+    # v0.20.0 — assinatura.
+    "Agreement.signature_required": "Assinatura pendente em instrumento",
+    # NÃO existe `Security.*` aqui, e a ausência é deliberada. O reuso de credencial de sessão é
+    # detectado durante a RENOVAÇÃO do token, quando ainda não há sessão autenticada —
+    # `app_record_event()` amarra a autoria a `app_uid()` e recusaria o registro. O fato fica onde
+    # ele pertence: na auditoria (`auth.refresh_reuse_detected`) e em um aviso `critical` à dona da
+    # conta. Declarar aqui um evento que o caminho não consegue emitir seria repetir exatamente o
+    # defeito que esta rodada corrigiu em outros dezoito.
 }
 
 

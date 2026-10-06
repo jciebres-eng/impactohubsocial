@@ -170,15 +170,52 @@ def public_org(ctx: Ctx):
 # ------------------------------------------------------------------------------------------------ notificações
 class NotifQ(S.Pagination):
     unread: bool = False
+    grp: str | None = None
+    priority: str | None = None
 
 
 @route("GET", "/v1/notifications", query=NotifQ, min_role="viewer", tags=("notifications",))
 def notifications(ctx: Ctx, q: NotifQ):
+    """A caixa de avisos, com o que torna um aviso acionável em vez de apenas lido.
+
+    `priority` e `action_label` existiam na tabela desde a v0.16.0 e NÃO saíam por esta rota: a
+    pessoa recebia "Medida aplicada à sua organização" com o mesmo peso visual de "novo conteúdo
+    publicado", e sem saber o que fazer a respeito. `throttled` e `deliver_after` dizem quando o
+    aviso foi retido pelo limite diário ou pela janela de silêncio — retido, nunca descartado.
+    """
     with ctx.tx(readonly=True) as c:
-        rows = c.query("SELECT id::text AS id, kind, title, body, link, read_at, created_at FROM notifications"
-                       " WHERE ($1::bool = false OR read_at IS NULL) ORDER BY created_at DESC LIMIT $2 OFFSET $3",
-                       q.unread, q.limit + 1, q.offset)
+        rows = c.query(
+            "SELECT n.id::text AS id, n.kind, n.grp, n.title, n.body, n.link, n.priority,"
+            " n.action_label, n.ref_type, n.ref_id::text AS ref_id, n.throttled, n.deliver_after,"
+            " n.read_at, n.created_at, k.label_pt AS kind_label,"
+            " d.status AS email_status, d.skipped_reason AS email_skipped_reason"
+            " FROM notifications n"
+            " LEFT JOIN notification_kinds k ON k.kind = split_part(n.kind, '.', 1)"
+            " LEFT JOIN notification_deliveries d ON d.notification_id = n.id AND d.channel = 'email'"
+            " WHERE ($1::bool = false OR n.read_at IS NULL)"
+            "   AND ($4::text IS NULL OR n.grp = $4) AND ($5::text IS NULL OR n.priority = $5)"
+            " ORDER BY CASE n.priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1"
+            "          WHEN 'normal' THEN 2 ELSE 3 END, n.created_at DESC LIMIT $2 OFFSET $3",
+            q.unread, q.limit + 1, q.offset, q.grp, q.priority)
     return page(rows, q.limit, q.offset)
+
+
+@route("GET", "/v1/notifications/catalog", auth="user", tags=("notifications",),
+       summary="Quais avisos existem, a qual interruptor pertencem e quais podem sair por e-mail")
+def notification_catalog(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        kinds = c.query("SELECT kind, grp, label_pt, default_priority, emailable, description"
+                        " FROM notification_kinds ORDER BY grp, label_pt")
+        pol = c.one("SELECT max_per_day, quiet_from::text AS quiet_from, quiet_to::text AS quiet_to,"
+                    " digest_hour, retry_max, retry_backoff_minutes, note FROM notification_policy")
+    return {
+        "items": kinds, "policy": pol,
+        "note": ("Todo aviso da plataforma pertence a um destes tipos, e todo tipo pertence a um "
+                 "interruptor de preferência. Antes da v0.20.0, 15 destes tipos não pertenciam a "
+                 "interruptor nenhum: a pessoa desligava tudo o que a tela oferecia e continuava "
+                 "recebendo. Aviso de prioridade CRÍTICA ignora a janela de silêncio e o limite "
+                 "diário — e isso está dito aqui para não ser descoberto no susto."),
+    }
 
 
 @route("POST", "/v1/notifications/read-all", min_role="viewer", allow_unverified=True, tags=("notifications",))

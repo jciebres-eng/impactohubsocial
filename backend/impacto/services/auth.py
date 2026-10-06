@@ -304,6 +304,16 @@ def refresh(ctx: Ctx, body):
             record(c, org_id=s["org_id"], actor=s["user_id"], action="auth.refresh_reuse_detected", object_type="session",
                    object_id=s["id"], payload={}, ip=ctx.ip, request_id=ctx.request_id)
             log(logger, logging.WARNING, "refresh_reuse_detected", user_id=s["user_id"])
+            # v0.20.0: a plataforma derrubava TODAS as sessões da família e não contava nada à dona
+            # da conta. Quem foi desconectado sem explicação conclui que o sistema falhou — e o
+            # sinal mais forte de roubo de sessão que a plataforma tem ficava só na auditoria, que
+            # a pessoa não lê. O aviso é `critical`: atravessa janela de silêncio e limite diário.
+            c.scalar("SELECT app_notify($1, $2, 'security', $3, $4, '/conta/seguranca')",
+                     s["org_id"], s["user_id"], "Suas sessões foram encerradas por segurança",
+                     "Detectamos o reuso de uma credencial de sessão já renovada, o que pode "
+                     "indicar que ela foi copiada. Por precaução, todas as sessões desta conta "
+                     "foram encerradas. Entre de novo e, se não reconhecer o acesso, troque a "
+                     "senha e revise os dispositivos conectados.")
             error = ApiError(401, "refresh_reuse", "Sessão invalidada por segurança. Faça login novamente.")
         else:
             u = c.one("SELECT status FROM users WHERE id = $1", s["user_id"])
@@ -547,6 +557,14 @@ def accept_invite(ctx: Ctx, token: str) -> dict:
             # aceitar convite enviado ao e-mail comprova a posse do endereço
             c.run("UPDATE users SET email_verified_at = now() WHERE id = $1", p.user_id)
         from .audit import record
+        from ..network import notify as _NT
+        _NT.org_event(
+            c, event="Team.member_added", org_id=inv["org_id"],
+            title="Pessoa entrou na organização",
+            body=f"Convite aceito com o perfil {inv['role']}.", link="/organizacao/equipe",
+            priority="normal", min_role="admin", ref_type="user", ref_id=p.user_id,
+            action_label="Ver equipe", payload={"role": inv["role"]},
+            dedupe_parts=("Team.member_added", inv["id"]))
         record(c, org_id=inv["org_id"], actor=p.user_id, action="member.joined", object_type="invitation", object_id=inv["id"],
                payload={"role": inv["role"]}, ip=ctx.ip, request_id=ctx.request_id)
     return {"org_id": inv["org_id"]}

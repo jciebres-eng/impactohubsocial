@@ -8,6 +8,7 @@ import io
 from starlette.responses import Response
 
 from ..http import ApiError, Ctx, not_found, page, route
+from ..network import notify as NT
 from ..services.audit import ledger
 from ..services.validators import cnpj_valid, only_digits
 from . import schemas as S
@@ -133,7 +134,20 @@ def review_evidence(ctx: Ctx, body: S.ReviewDecisionIn):
         ctx.audit(c, "execution.evidence_reviewed", "evidence", e["id"], {"status": body.status})
     if body.status == "accepted" and e["milestone_id"]:
         with ctx.system_tx() as c:
-            c.run("UPDATE milestones SET status = 'accepted' WHERE id = $1 AND status = 'evidence_submitted'", e["milestone_id"])
+            aceito = c.run("UPDATE milestones SET status = 'accepted' WHERE id = $1 AND status = 'evidence_submitted'", e["milestone_id"])
+            # v0.20.0 — `Milestone.completed` estava declarado desde a v0.16.0 e nunca era emitido:
+            # o marco era aceito e a equipe que o executou não era avisada de que o compromisso
+            # tinha sido dado por cumprido.
+            if aceito:
+                m = c.one("SELECT title FROM milestones WHERE id = $1", e["milestone_id"])
+                NT.project_event(
+                    c, event="Milestone.completed", project_id=e["project_id"], org_id=e["org_id"],
+                    title=f"Marco concluído: {m['title'] if m else ''}",
+                    body="A evidência do marco foi aceita por quem financia.",
+                    link=f"/projetos/{e['project_id']}", priority="normal",
+                    ref_type="milestone", ref_id=e["milestone_id"], action_label="Abrir projeto",
+                    payload={"evidence_id": e["id"]},
+                    dedupe_parts=("Milestone.completed", e["milestone_id"]))
     return {"id": e["id"], "status": body.status}
 
 

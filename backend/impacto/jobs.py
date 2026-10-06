@@ -368,11 +368,54 @@ def email_canary_job(app) -> dict:
         return EC.run(c, app)
 
 
+def proposal_expiry(app) -> dict:
+    """Expira propostas vencidas — e, com isso, AVISA as duas partes.
+
+    `proposals.expire_due()` existe desde a v0.16.0 e nunca teve chamador. A consequência não era só
+    um estado parado: `transition(..., to="expired")` é o que emite `Proposal.expired`, então a
+    proposta com prazo vencido ficava em `sent` para sempre e ninguém era avisado de nada. O aviso
+    estava escrito, testado e inalcançável — o mesmo defeito de `enforcement.expire_due`.
+    """
+    from .network import proposals as PROP
+    with app.pool.tx(DbContext(system=True)) as c:
+        return PROP.expire_due(c)
+
+
+def listing_expiry(app) -> dict:
+    """Expira anúncios vencidos. `marketplace.expire_due()` também nunca teve chamador."""
+    from .network import marketplace as MKT
+    with app.pool.tx(DbContext(system=True)) as c:
+        return MKT.expire_due(c)
+
+
+def seal_recheck(app) -> dict:
+    """Reavalia selos ativos e revoga os que deixaram de satisfazer o critério.
+
+    `seals.recheck()` nunca teve chamador. O próprio docstring dela diz que selo que continua
+    aparecendo depois de o critério cair é pior que não ter selo — e era exatamente o que acontecia,
+    porque nada a executava. Um selo é uma afirmação da plataforma sobre terceiros: mantê-lo sem
+    reavaliar é a plataforma atestando o que não é mais verdade.
+    """
+    from .impact import seals as SEALS
+    with app.pool.tx(DbContext(system=True)) as c:
+        return SEALS.recheck(c)
+
+
+def deadline_sweep(app) -> dict:
+    """Avisa os prazos que cruzaram D-30, D-7 ou D-1. Ver `impacto.ops.deadlines`."""
+    from .ops import deadlines as DL
+    with app.pool.tx(DbContext(system=True)) as c:
+        return DL.sweep(c)
+
+
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
         ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
         # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
         ("backup", backup_job), ("email_canary", email_canary_job),
-        ("enforcement_expiry", enforcement_expiry)]
+        ("enforcement_expiry", enforcement_expiry),
+        # v0.20.0 — três funções que existiam e nunca eram chamadas. Ver docstrings acima.
+        ("proposal_expiry", proposal_expiry), ("listing_expiry", listing_expiry),
+        ("seal_recheck", seal_recheck), ("deadline_sweep", deadline_sweep)]
 
 
 def run_once(app) -> list[dict]:

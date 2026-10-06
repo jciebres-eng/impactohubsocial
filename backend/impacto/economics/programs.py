@@ -63,6 +63,10 @@ def create(conn: Connection, *, org_id: str, actor: str | None, title: str, summ
         " RETURNING id::text AS id, status, created_at",
         org_id, title, summary, objective, description, budget_total_cents, currency,
         territories or [], causes or [], ods or [], sphere, instrument, starts_on, ends_on, actor)
+    # v0.20.0 — `Program.created` estava declarado e nunca era gravado. Só o FATO: criar um
+    # programa ainda não envolve ninguém de fora, logo não há a quem avisar.
+    notify.fact_only(conn, event="Program.created", org_id=org_id, actor_user_id=actor,
+                     ref_type="program", ref_id=row["id"], payload={"title": title})
     return {**row, "status_label": ST_LABEL[row["status"]]}
 
 
@@ -148,6 +152,11 @@ def set_project(conn: Connection, *, program_id: str, project_id: str, org_id: s
         raise unprocessable(f"Papel inválido: {role}", {"possiveis": list(PROJECT_ROLES)})
     if not conn.one("SELECT 1 FROM projects WHERE id = $1", project_id):
         raise not_found("Projeto")
+    # `Program.project_linked` e `Program.project_role_changed` são fatos DIFERENTES, e a operação
+    # abaixo é um upsert: sem esta leitura, entrar num programa e mudar de papel dentro dele viravam
+    # o mesmo registro. Por isso `Program.project_linked` estava declarado e nunca acontecia.
+    ja_estava = bool(conn.one("SELECT 1 FROM program_projects WHERE program_id = $1"
+                              " AND project_id = $2", program_id, project_id))
     row = conn.one(
         "INSERT INTO program_projects(program_id, project_id, org_id, role, allocated_cents, note, added_by)"
         " VALUES ($1,$2,$3,$4,$5,$6,$7)"
@@ -158,12 +167,13 @@ def set_project(conn: Connection, *, program_id: str, project_id: str, org_id: s
         program_id, project_id, org_id, role, allocated_cents, note, actor)
     # Quem executa o projeto precisa saber que entrou (ou saiu) de um programa: é informação que muda
     # a obrigação dele. Por isso o aviso vai para a equipe do PROJETO, não para a dona do programa.
-    notify.project_event(conn, event="Program.project_role_changed", project_id=project_id,
+    evento = "Program.project_role_changed" if ja_estava else "Program.project_linked"
+    notify.project_event(conn, event=evento, project_id=project_id,
                          org_id=org_id,
                          title=f"Seu projeto agora é {ROLE_LABEL[role]} em um programa",
                          body=note, ref_type="program", ref_id=program_id,
                          action_label="Ver programa", link=f"/programas/{program_id}",
-                         dedupe_parts=("Program.project_role_changed", program_id, project_id, role))
+                         dedupe_parts=(evento, program_id, project_id, role))
     from . import value_ledger
     value_ledger.record(conn, event_type="program.projects_screened", org_id=org_id, units=1,
                         project_id=project_id, program_id=program_id, subject_type="project",

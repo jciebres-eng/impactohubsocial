@@ -11,6 +11,7 @@ from ..http import ApiError, Ctx, not_found, page, route
 from ..security import passwords
 from ..security.tokens import hmac_hex, sign_payload, verify_payload
 from ..services import documents as docsvc
+from ..network import notify as NT
 from ..services.audit import ledger
 from ..services.entitlements import check_limit
 from ..services.validators import safe_filename
@@ -107,6 +108,19 @@ def upload(ctx: Ctx, form):
                 c.run("UPDATE application_steps SET status = 'done', document_id = $3, completed_at = now(), completed_by = $4"
                       " WHERE application_id = $1 AND code = $2 AND status <> 'done'", application_id, f"doc_{doc_type}", did, ctx.user_id)
             ctx.audit(c, "document.uploaded", "document", did, {"sha256": digest, "size": len(data), "doc_type": doc_type, "scan": status})
+            # v0.20.0 — este é LITERALMENTE o caso que originou o módulo de notificação (ver o
+            # docstring de network/notify.py: "quando um documento era anexado, ninguém além de
+            # quem anexou sabia"). O evento era emitido só no fluxo de propostas; o anexo direto
+            # ao projeto continuava silencioso.
+            if project_id:
+                NT.project_event(
+                    c, event="Document.attached", project_id=project_id, org_id=ctx.org_id,
+                    title=f"Documento anexado: {title or filename}",
+                    body=f"Tipo: {doc_type}.", link=f"/projetos/{project_id}",
+                    actor_user_id=ctx.user_id, priority="normal", ref_type="document", ref_id=did,
+                    action_label="Abrir documento",
+                    payload={"doc_type": doc_type, "sha256": digest},
+                    dedupe_parts=("Document.attached", did))
     except Exception:  # noqa: BLE001 - qualquer falha após gravar o arquivo apaga o objeto órfão e RELANÇA
         ctx.app.storage.delete(key)
         raise
@@ -289,6 +303,14 @@ def export_pdf(ctx: Ctx):
                        " status, scan_engine, scanned_at, origin, uploaded_by) VALUES ($1,$2,$3,'proposta_projeto',$4,$5,'application/pdf',$6::bigint,$7,$8,"
                        " 'clean','generated', now(), 'generated', $9) RETURNING id::text",
                        ctx.org_id, d["project_id"], d["application_id"], d["title"][:200], safe_filename(d["title"]) + ".pdf", len(data), digest, key, ctx.user_id)
+        if d["project_id"]:
+            NT.project_event(
+                c, event="Document.generated", project_id=d["project_id"], org_id=ctx.org_id,
+                title=f"Documento gerado: {d['title'][:120]}",
+                body="Gerado pela plataforma a partir de um rascunho, em PDF.",
+                link=f"/projetos/{d['project_id']}", actor_user_id=ctx.user_id, priority="normal",
+                ref_type="document", ref_id=did, action_label="Abrir documento",
+                payload={"sha256": digest}, dedupe_parts=("Document.generated", did))
         ctx.audit(c, "draft.exported_pdf", "document", did, {"draft": d["id"], "sha256": digest})
     return {"document_id": did, "sha256": digest}
 
@@ -421,6 +443,18 @@ def respond_review(ctx: Ctx, body: S.ReviewRespondIn):
     if body.status == "approved" and r["subject_type"] == "draft":
         with ctx.system_tx() as c:
             c.run("UPDATE drafts SET status = 'approved' WHERE id = $1 AND content_sha256 = $2", r["subject_id"], r["subject_sha256"])
+            d = c.one("SELECT project_id::text AS project_id, org_id::text AS org_id, title"
+                      " FROM drafts WHERE id = $1", r["subject_id"])
+            if d and d["project_id"]:
+                NT.project_event(
+                    c, event="Document.approved", project_id=d["project_id"], org_id=d["org_id"],
+                    title=f"Documento aprovado: {d['title'][:120]}",
+                    body=("Aprovado por revisão profissional, amarrado ao conteúdo exato que foi "
+                          "revisado. Alterar o texto invalida a aprovação."),
+                    link=f"/projetos/{d['project_id']}", priority="normal",
+                    ref_type="draft", ref_id=r["subject_id"], action_label="Abrir documento",
+                    payload={"content_sha256": r["subject_sha256"]},
+                    dedupe_parts=("Document.approved", r["subject_id"], r["subject_sha256"]))
     return {"id": r["id"], "status": body.status}
 
 
@@ -510,6 +544,16 @@ def sign(ctx: Ctx, body: S.SignIn):
         if subj["project_id"]:
             ledger(c, project_id=subj["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="professional_signature",
                    ref_type="signature", ref_id=sid, payload={"role": body.role, "subject_sha256": subj["h"]})
+        if subj["project_id"]:
+            NT.project_event(
+                c, event="Document.signed", project_id=subj["project_id"], org_id=ctx.org_id,
+                title="Documento assinado",
+                body=("Assinatura AVANÇADA da plataforma, amarrada ao conteúdo exato. A "
+                      "plataforma não emite nem homologa assinatura qualificada."),
+                link=f"/projetos/{subj['project_id']}", actor_user_id=ctx.user_id, priority="high",
+                ref_type="signature", ref_id=sid, action_label="Verificar assinatura",
+                payload={"role": body.role, "subject_sha256": subj["h"]},
+                dedupe_parts=("Document.signed", sid))
         ctx.audit(c, "signature.created", "signature", sid, {"role": body.role, "subject_type": body.subject_type})
     if body.review_id and body.role == "professional":
         with ctx.system_tx() as c:

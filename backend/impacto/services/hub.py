@@ -472,15 +472,47 @@ GROUPS = ("billing", "content", "events", "support", "partnerships", "opportunit
 
 
 def prefs_get(c, user_id: str) -> list[dict]:
-    have = {r["grp"]: r for r in c.query("SELECT grp, in_app, email FROM notification_prefs WHERE user_id = $1", user_id)}
-    return [{"grp": g, "in_app": have.get(g, {}).get("in_app", True), "email": have.get(g, {}).get("email", True)} for g in GROUPS]
+    """Os 15 interruptores, com o que cada um governa — e com a janela de silêncio e o teto diário.
+
+    v0.20.0: `kinds` existe porque um interruptor sem rótulo do que ele desliga é um interruptor que
+    ninguém usa. Até aqui a tela oferecia "project" e a pessoa tinha de adivinhar se evidência,
+    marco e despesa estavam ali dentro.
+    """
+    have = {r["grp"]: r for r in c.query(
+        "SELECT grp, in_app, email, quiet_from::text AS quiet_from, quiet_to::text AS quiet_to,"
+        " max_per_day, digest FROM notification_prefs WHERE user_id = $1", user_id)}
+    catalogo: dict[str, list[dict]] = {}
+    for k in c.query("SELECT kind, grp, label_pt, default_priority, emailable FROM notification_kinds"
+                     " ORDER BY grp, label_pt"):
+        catalogo.setdefault(k["grp"], []).append(k)
+    return [{"grp": g,
+             "in_app": have.get(g, {}).get("in_app", True),
+             "email": have.get(g, {}).get("email", True),
+             "quiet_from": have.get(g, {}).get("quiet_from"),
+             "quiet_to": have.get(g, {}).get("quiet_to"),
+             "max_per_day": have.get(g, {}).get("max_per_day"),
+             "digest": have.get(g, {}).get("digest", "off"),
+             "kinds": catalogo.get(g, [])} for g in GROUPS]
 
 
 def prefs_set(c, user_id: str, items: list[dict]) -> list[dict]:
     for it in items:
-        c.run("INSERT INTO notification_prefs(user_id, grp, in_app, email) VALUES ($1,$2,$3,$4) ON CONFLICT (user_id, grp) DO UPDATE SET in_app = EXCLUDED.in_app, email = EXCLUDED.email",
-              user_id, it["grp"], it["in_app"], it["email"])
+        c.run("INSERT INTO notification_prefs(user_id, grp, in_app, email, quiet_from, quiet_to,"
+              " max_per_day, digest) VALUES ($1,$2,$3,$4,$5,$6,$7,coalesce($8,'off'))"
+              " ON CONFLICT (user_id, grp) DO UPDATE SET in_app = EXCLUDED.in_app,"
+              " email = EXCLUDED.email, quiet_from = EXCLUDED.quiet_from,"
+              " quiet_to = EXCLUDED.quiet_to, max_per_day = EXCLUDED.max_per_day,"
+              " digest = EXCLUDED.digest",
+              user_id, it["grp"], it["in_app"], it["email"], it.get("quiet_from"),
+              it.get("quiet_to"), it.get("max_per_day"), it.get("digest"))
     return prefs_get(c, user_id)
+
+
+def notification_policy(c) -> dict:
+    """A política declarada da plataforma, para a tela não repetir números escritos à mão."""
+    row = c.one("SELECT max_per_day, quiet_from::text AS quiet_from, quiet_to::text AS quiet_to,"
+                " digest_hour, retry_max, retry_backoff_minutes, note FROM notification_policy")
+    return row or {}
 
 
 def _pref(c, user_id: str, grp: str, channel: str) -> bool:
@@ -530,37 +562,104 @@ def send_mail(app, c, *, to: str, subject: str, text: str, user_id: str | None =
         return False
 
 
-EMAIL_GROUPS = {"billing": "billing", "support": "support", "events": "events"}
+def _delivery(c, notification_id: str, *, status: str, error: str | None = None,
+              skipped_reason: str | None = None, next_retry_at=None) -> None:
+    """Registra o estado REAL da entrega, inclusive quando ela não aconteceu e por quê.
+
+    `sent` aqui significa aceito pelo servidor de e-mail. Não significa entregue na caixa da pessoa
+    nem lido — duas coisas que a plataforma não tem como saber e por isso não afirma.
+    """
+    c.run("INSERT INTO notification_deliveries(notification_id, channel, status, attempts,"
+          " last_error, skipped_reason, next_retry_at, sent_at)"
+          " VALUES ($1,'email',$2, CASE WHEN $2 IN ('sent','failed','given_up') THEN 1 ELSE 0 END,"
+          " $3,$4,$5, CASE WHEN $2 = 'sent' THEN now() END)"
+          " ON CONFLICT (notification_id, channel) DO UPDATE SET status = EXCLUDED.status,"
+          " attempts = notification_deliveries.attempts + EXCLUDED.attempts,"
+          " last_error = EXCLUDED.last_error, skipped_reason = EXCLUDED.skipped_reason,"
+          " next_retry_at = EXCLUDED.next_retry_at,"
+          " sent_at = coalesce(notification_deliveries.sent_at, EXCLUDED.sent_at)",
+          notification_id, status, (error or "")[:500] or None, skipped_reason, next_retry_at)
 
 
 def notification_emails(app, c, *, limit: int = 200) -> dict:
-    """Envia por e-mail os avisos de cobrança/teste, suporte e eventos (grupos com preferência `email`), UMA vez por notificação.
-    Cobrança sem usuária específica vai aos proprietários/administradores verificados da organização. Falha de envio não derruba o job (tenta no ciclo seguinte)."""
+    """Entrega por e-mail os avisos cujo TIPO é `emailable` no catálogo, mais os de prioridade crítica.
+
+    O QUE MUDOU NA v0.20.0, e por quê
+
+    * A seleção era por três grupos escritos à mão (`billing`, `support`, `events`). Agora é o
+      catálogo `notification_kinds` que decide, então incluir um tipo no e-mail é uma linha de dado
+      declarada — e a apuração de denúncia, a medida de moderação e a conformidade, que travam o
+      trabalho de quem recebe, deixaram de depender de a pessoa abrir o sistema para descobrir.
+    * `deliver_after` é respeitado: janela de silêncio e agrupamento diário seguram o e-mail sem
+      descartar o aviso.
+    * A falha de envio deixou de sumir. `notification_deliveries` guarda tentativa, erro e quando
+      repetir; `emailed_at` só avança quando o envio REALMENTE saiu, e depois de `retry_max`
+      tentativas o estado vira `given_up` em vez de ficar tentando para sempre.
+
+    O QUE `sent` SIGNIFICA: e-mails ACEITOS pelo servidor de envio. Não significa entregue na caixa
+    da pessoa, e muito menos lido — duas coisas que a plataforma não tem como saber e por isso não
+    afirma em lugar nenhum.
+    """
     base = app.settings.public_base_url.rstrip("/")
-    rows = c.query("SELECT n.id::text AS id, n.org_id::text AS org_id, n.user_id::text AS user_id, split_part(n.kind, '.', 1) AS grp, n.title, n.body, n.link FROM notifications n"
-                   " WHERE n.emailed_at IS NULL AND n.created_at > now() - interval '3 days' AND split_part(n.kind, '.', 1) = ANY($1::text[]) ORDER BY n.created_at LIMIT $2",
-                   list(EMAIL_GROUPS), limit)
-    sent = skipped = failed = 0
+    pol = c.one("SELECT retry_max, retry_backoff_minutes FROM notification_policy") or {
+        "retry_max": 3, "retry_backoff_minutes": 30}
+    rows = c.query(
+        "SELECT n.id::text AS id, n.org_id::text AS org_id, n.user_id::text AS user_id, n.grp,"
+        " n.title, n.body, n.link, n.priority,"
+        " coalesce(d.attempts, 0) AS attempts"
+        " FROM notifications n"
+        " JOIN notification_kinds k ON k.kind = split_part(n.kind, '.', 1)"
+        " LEFT JOIN notification_deliveries d ON d.notification_id = n.id AND d.channel = 'email'"
+        " WHERE n.emailed_at IS NULL AND n.created_at > now() - interval '3 days'"
+        "   AND n.deliver_after <= now()"
+        "   AND (k.emailable OR n.priority = 'critical')"
+        "   AND coalesce(d.status, 'pending') NOT IN ('given_up', 'skipped')"
+        "   AND (d.next_retry_at IS NULL OR d.next_retry_at <= now())"
+        " ORDER BY n.priority = 'critical' DESC, n.created_at LIMIT $1", limit)
+    sent = skipped = failed = given_up = 0
     for n in rows:
         if n["user_id"]:
             to = c.query("SELECT id::text AS uid, email::text AS email FROM users WHERE id = $1 AND status = 'active' AND email_verified_at IS NOT NULL", n["user_id"])
         else:
             to = c.query("SELECT u.id::text AS uid, u.email::text AS email FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.org_id = $1 AND m.role IN ('owner','admin')"
                          " AND u.status = 'active' AND u.email_verified_at IS NOT NULL", n["org_id"])
-        ok_all = True
+        if not to:
+            _delivery(c, n["id"], status="skipped", skipped_reason="no_verified_email")
+            skipped += 1
+            continue
+        enviados = recusados = 0
+        erro: str | None = None
         for r in to:
             if not _pref(c, r["uid"], n["grp"], "email"):
-                skipped += 1
+                recusados += 1
                 continue
             try:
                 app.mailer.send(r["email"], f"[Impacto] {n['title']}", f"{n['title']}\n\n{n['body'] or ''}\n\n{base}{n['link'] or ''}\n\nVocê pode ajustar estes avisos em Conta > Notificações.\n")
-                sent += 1
-            except Exception:  # noqa: BLE001
-                ok_all = False
-                failed += 1
-        if ok_all:
-            c.run("UPDATE notifications SET emailed_at = now() WHERE id = $1", n["id"])
-    return {"emails_sent": sent, "emails_skipped_by_preference": skipped, "emails_failed": failed}
+                enviados += 1
+            except Exception as e:  # noqa: BLE001
+                erro = f"{type(e).__name__}: {e}"
+        if erro:
+            tentativas = int(n["attempts"]) + 1
+            if tentativas >= int(pol["retry_max"]):
+                _delivery(c, n["id"], status="given_up", error=erro)
+                given_up += 1
+            else:
+                prox = c.scalar("SELECT now() + make_interval(mins => $1)",
+                                int(pol["retry_backoff_minutes"]))
+                _delivery(c, n["id"], status="failed", error=erro, next_retry_at=prox)
+            failed += 1
+            continue
+        if enviados:
+            _delivery(c, n["id"], status="sent")
+            sent += enviados
+        else:
+            _delivery(c, n["id"], status="skipped", skipped_reason="preference")
+            skipped += recusados
+        c.run("UPDATE notifications SET emailed_at = now() WHERE id = $1", n["id"])
+    return {"emails_sent": sent, "emails_skipped_by_preference": skipped,
+            "emails_failed": failed, "emails_given_up": given_up,
+            "note": ("`emails_sent` conta e-mails ACEITOS pelo servidor de envio. A plataforma não "
+                     "afirma entrega nem leitura: não tem como saber.")}
 
 
 def bulletin_dispatch(app, c) -> dict:

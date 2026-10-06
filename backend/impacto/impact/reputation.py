@@ -28,6 +28,7 @@ from typing import Any
 from ..core.evidence import BAND_LABEL, ConfidenceBand, band
 from ..db.pq import Connection
 from ..http import ApiError, forbidden, not_found, unprocessable
+from ..network import notify
 
 ENGINE_VERSION = "reputation-dimensions@1.0.0"
 
@@ -331,16 +332,40 @@ def _reason(value: float | None, enough: bool, d: dict, no_score: bool,
 
 # ================================================================================================ linha do tempo
 def snapshot(conn: Connection, *, org_id: str) -> dict:
-    """Congela a leitura atual na linha do tempo. Append-only, por `app_record_reputation()`."""
+    """Congela a leitura atual na linha do tempo. Append-only, por `app_record_reputation()`.
+
+    v0.20.0 — avisa a organização quando uma dimensão MUDA DE FAIXA, e só então. Avisar a cada
+    snapshot transformaria a reputação em ruído diário; não avisar nunca, que era o estado anterior,
+    faz a organização descobrir que caiu de faixa quando alguém de fora comenta. A faixa é o que a
+    rede efetivamente lê, e por isso é o que merece aviso.
+    """
+    anterior = {r["dimension"]: r["band"] for r in conn.query(
+        "SELECT DISTINCT ON (dimension) dimension, band FROM reputation_snapshots"
+        " WHERE org_id = $1 ORDER BY dimension, created_at DESC", org_id)}
     prof = profile(conn, org_id=org_id, viewer_org_id=org_id)
     ids = []
+    mudancas = []
     for d in prof["dimensions"]:
         ids.append(conn.scalar(
             "SELECT app_record_reputation($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)",
             org_id, d["dimension"], d["value"], d["confidence"], d["band"], d["observations"],
             d["verified_observations"], d["self_declared_observations"],
             json.dumps({"inputs": d["inputs"], "how": d["how"]}), ENGINE_VERSION))
-    return {"recorded": len(ids), "engine_version": ENGINE_VERSION,
+        antes = anterior.get(d["dimension"])
+        if antes is not None and antes != d["band"]:
+            mudancas.append({"dimension": d["dimension"], "from": antes, "to": d["band"]})
+    for m in mudancas:
+        notify.org_event(
+            conn, event="Reputation.band_changed", org_id=org_id,
+            title=f"Faixa de reputação alterada: {m['dimension']}",
+            body=(f"De {m['from']} para {m['to']}. A faixa vem do que foi OBSERVADO e verificado; "
+                  "nenhuma faixa é atribuída por decisão da plataforma, e a leitura corrente "
+                  "continua sendo calculada, não armazenada."),
+            link="/organizacao/reputacao", priority="high", min_role="admin",
+            ref_type="reputation_dimension", action_label="Ver como foi calculada",
+            payload=m, dedupe_parts=("Reputation.band_changed", org_id, m["dimension"],
+                                     m["from"], m["to"]))
+    return {"recorded": len(ids), "band_changes": mudancas, "engine_version": ENGINE_VERSION,
             "note": ("O snapshot não substitui a leitura: a reputação corrente continua sendo "
                      "CALCULADA. Ele existe para mostrar evolução e para que uma correção não "
                      "apague o que foi publicado antes dela.")}

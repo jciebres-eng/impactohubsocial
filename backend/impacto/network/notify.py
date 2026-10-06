@@ -44,6 +44,13 @@ GRP = {
     "program": "program",
     # v0.20.0 — apuração de denúncia. Grupo `account`: é assunto da conta, não da rede.
     "report": "account",
+    # v0.20.0 — prazos, impacto, assinatura e segurança. Os quatro usam grupos que JÁ EXISTEM em
+    # vez de abrir interruptores novos: um décimo sexto grupo acrescenta uma decisão à tela de
+    # preferências sem acrescentar escolha real a quem a usa. Selo, reputação e assinatura são
+    # afirmações sobre a organização, logo `account`; afirmação de impacto pertence ao projeto;
+    # chamada a fechar é oportunidade.
+    "seal": "account", "reputation": "account", "security": "account", "agreement": "account",
+    "claim": "project", "call": "opportunities",
 }
 
 # Prioridade: muda ordenação e destaque na caixa, nunca o canal. `critical` é para o que trava o trabalho da

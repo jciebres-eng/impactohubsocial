@@ -105,6 +105,11 @@ def create(conn: Connection, *, kind: str, sender_org_id: str, receiver_org_id: 
         kind, sender_org_id, actor, receiver_org_id, project_id, need_id, call_id, solution_id, title, purpose,
         terms, amount_cents, currency.upper(), support_mode, compensation, expires_at)
     _event(conn, row["id"], None, "draft", actor, sender_org_id, None)
+    # v0.20.0 — `Proposal.created` estava declarado e nunca era gravado. Só o FATO entra aqui:
+    # rascunho de proposta não avisa a destinatária, que não deve saber que está sendo cogitada.
+    notify.fact_only(conn, event="Proposal.created", org_id=sender_org_id, actor_user_id=actor,
+                     project_id=project_id, ref_type="proposal", ref_id=row["id"],
+                     payload={"kind": kind})
     return {**row, "kind": kind, "label": LABEL[kind]}
 
 
@@ -292,6 +297,13 @@ def _on_accept(conn: Connection, p: dict, *, actor: str | None) -> dict | None:
             p["sender_org_id"], p["project_id"], p["amount_cents"], p["currency"],
             p["support_mode"] or "financial",   # a intenção exige modalidade; proposta sem modalidade é financeira
             "Intenção registrada pelo aceite da proposta. NÃO é compromisso nem valor recebido.", p["id"], actor)
+        # `Investment.intent` estava declarado e nunca era gravado. A distinção INTENÇÃO × COMPROMISSO
+        # é central nesta plataforma, e o fato que a sustenta não entrava na linha do tempo.
+        notify.fact_only(conn, event="Investment.intent", org_id=p["sender_org_id"],
+                         actor_user_id=actor, project_id=p["project_id"],
+                         ref_type="proposal", ref_id=p["id"],
+                         payload={"amount_cents": p["amount_cents"],
+                                  "aviso": "intenção; não é compromisso nem valor recebido"})
     if p["project_id"]:
         ledger(conn, project_id=p["project_id"], org_id=p["receiver_org_id"], actor=actor,
                entry_type="proposal_accepted", amount_cents=p["amount_cents"], ref_type="proposal", ref_id=p["id"],

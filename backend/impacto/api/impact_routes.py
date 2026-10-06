@@ -12,6 +12,7 @@ from ..db.pq import Json
 from ..http import ApiError, Ctx, not_found, page, route, unprocessable
 from ..services.audit import ledger
 from ..impact.longitudinal import summarize_measurements
+from ..network import notify as NT
 from . import schemas as S
 
 T = ("impact",)
@@ -148,6 +149,16 @@ def report_value(ctx: Ctx, body: S.IndicatorValueIn):
                        body.measured_on, body.evidence_id, body.note, ctx.user_id)
         ledger(c, project_id=pi["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="result_reported", ref_type="indicator_value", ref_id=vid,
                payload={"value": body.value, "measured_on": str(body.measured_on), "has_evidence": bool(body.evidence_id)})
+        # v0.20.0 — `Indicator.measured` estava declarado e nunca era emitido. Um número reportado
+        # é justamente o que quem financia precisa ver aparecer, e quem financia faz parte da
+        # equipe do projeto.
+        NT.project_event(
+            c, event="Indicator.measured", project_id=pi["project_id"], org_id=ctx.org_id,
+            title="Indicador medido", body=f"Valor {body.value} medido em {body.measured_on}."
+            + ("" if body.evidence_id else " SEM evidência anexada."),
+            link=f"/projetos/{pi['project_id']}", actor_user_id=ctx.user_id, priority="normal",
+            ref_type="indicator_value", ref_id=vid, action_label="Revisar valor",
+            payload={"value": body.value, "has_evidence": bool(body.evidence_id)})
         ctx.audit(c, "indicator.value_reported", "indicator_value", vid)
     return {"id": vid, "status": "reported"}
 
@@ -166,6 +177,14 @@ def review_value(ctx: Ctx, body: S.IndicatorValueReviewIn):
         if body.status == "validated":
             ledger(c, project_id=v["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="indicator_validated", ref_type="indicator_value", ref_id=v["id"])
         c.scalar("SELECT app_notify($1, NULL, 'impact', 'Indicador revisado', $2, $3)", v["org_id"], f"Status: {body.status}", f"/projetos/{v['project_id']}")
+        if body.status == "validated":
+            NT.project_event(
+                c, event="Indicator.validated", project_id=v["project_id"], org_id=v["org_id"],
+                title="Indicador validado",
+                body="O valor foi validado por quem financia, com evidência anexada.",
+                link=f"/projetos/{v['project_id']}", actor_user_id=ctx.user_id, priority="normal",
+                ref_type="indicator_value", ref_id=v["id"], action_label="Abrir projeto",
+                dedupe_parts=("Indicator.validated", v["id"]))
         ctx.audit(c, "indicator.value_reviewed", "indicator_value", v["id"], {"status": body.status})
     return {"id": v["id"], "status": body.status}
 

@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (830)
+## Operações (831)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -535,6 +535,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/network/relationships/{rel_id}/transition` | membro da organização ativa | papel ≥ member | Aceita, recusa, pausa, encerra ou revoga — conforme o lado |
 | PUT | `/v1/network/relationships/{rel_id}/visibility` | membro da organização ativa | papel ≥ manager | Altera a visibilidade (limitada ao teto do tipo) |
 | GET | `/v1/notifications` | membro da organização ativa | papel ≥ viewer | notifications |
+| GET | `/v1/notifications/catalog` | usuário autenticado | — | Quais avisos existem, a qual interruptor pertencem e quais podem sair por e-mail |
 | GET | `/v1/notifications/prefs` | usuário autenticado | — | Preferências de notificação por grupo (app e e-mail) |
 | PUT | `/v1/notifications/prefs` | usuário autenticado | — | prefs put |
 | POST | `/v1/notifications/read-all` | membro da organização ativa | papel ≥ viewer | read all |

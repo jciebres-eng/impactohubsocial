@@ -178,6 +178,14 @@ def expire_due(conn: Connection, *, limit: int = 500) -> dict:
                       " ORDER BY expires_at LIMIT $1", limit)
     for r in rows:
         conn.run("UPDATE marketplace_listings SET publication_state = 'expired' WHERE id = $1", r["id"])
+        # Tirar um anúncio do ar sem avisar quem o publicou é deixar a organização acreditando que
+        # continua anunciando.
+        notify.org_event(
+            conn, event="Listing.expired", org_id=r["org_id"],
+            title="Anúncio expirado", body="O prazo de publicação que você declarou terminou.",
+            link="/marketplace", priority="normal", min_role="member",
+            ref_type="listing", ref_id=r["id"], action_label="Republicar",
+            dedupe_parts=("Listing.expired", r["id"]))
     return {"expired": len(rows)}
 
 

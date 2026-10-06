@@ -57,6 +57,25 @@ def publish(conn: Connection, *, agreement_id: str, org_id: str, actor_user_id: 
     custody.record(conn, subject_type="agreement", subject_id=agreement_id, org_id=org_id, event_type="created",
                    actor_user_id=actor_user_id, content_sha256=a["content_sha256"],
                    payload={"status": "awaiting_signatures", "required_parties": required})
+    # v0.20.0: publicar um acordo o colocava em `awaiting_signatures` e NÃO avisava parte nenhuma.
+    # O instrumento ficava esperando uma assinatura que ninguém sabia dever. Cada parte obrigatória
+    # que ainda não assinou é avisada — menos quem publicou, que acabou de fazer isso.
+    from ..network import notify
+    for parte in conn.query(
+            "SELECT org_id::text AS org_id FROM signed_agreement_parties"
+            " WHERE agreement_id = $1 AND required AND signed_at IS NULL AND declined_at IS NULL",
+            agreement_id):
+        notify.org_event(
+            conn, event="Agreement.signature_required", org_id=parte["org_id"],
+            title="Assinatura pendente em instrumento",
+            body=("O conteúdo foi congelado e está aguardando assinatura. A plataforma oferece "
+                  "assinatura AVANÇADA própria; ela não emite nem homologa assinatura qualificada "
+                  "(ICP-Brasil ou gov.br)."),
+            link=f"/instrumentos/{agreement_id}", priority="high", min_role="admin",
+            actor_user_id=actor_user_id if parte["org_id"] == org_id else None,
+            ref_type="agreement", ref_id=agreement_id, action_label="Revisar e assinar",
+            payload={"content_sha256": a["content_sha256"]},
+            dedupe_parts=("Agreement.signature_required", agreement_id, parte["org_id"]))
     return {"id": agreement_id, "status": "awaiting_signatures", "required_parties": required}
 
 

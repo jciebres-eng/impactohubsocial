@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ..http import ApiError, Ctx, not_found, page, route
 from ..services import matching, risk, workflow
+from ..network import notify as NT
 from ..services.audit import ledger
 from . import schemas as S
 from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
@@ -206,6 +207,17 @@ def commit(ctx: Ctx, body: S.CommitmentIn):
             c.run("UPDATE applications SET status = 'committed' WHERE id = $1", a["id"])
         ledger(c, project_id=a["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="funding_committed",
                amount_cents=body.amount_cents, ref_type="commitment", ref_id=cid, payload={"milestone": body.milestone_id})
+        # v0.20.0 — `Investment.committed` estava declarado e nunca era gravado. COMPROMISSO é um
+        # fato diferente de INTENÇÃO e diferente de DESEMBOLSO; só o primeiro acontece aqui, e a
+        # linha do tempo do projeto precisa registrá-lo como tal.
+        NT.project_event(
+            c, event="Investment.committed", project_id=a["project_id"], org_id=a["osc_org_id"],
+            title="Aporte comprometido",
+            body=(f"{ctx.principal.org_name} comprometeu R$ {body.amount_cents / 100:,.2f}. "
+                  "Compromisso NÃO é valor recebido: o desembolso é um fato posterior."),
+            link=f"/candidaturas/{a['id']}", actor_user_id=ctx.user_id, priority="high",
+            ref_type="commitment", ref_id=cid, action_label="Abrir candidatura",
+            payload={"amount_cents": body.amount_cents, "milestone_id": body.milestone_id})
         c.scalar("SELECT app_notify($1, NULL, 'funding', $2, $3, $4)", a["osc_org_id"], "Aporte registrado",
                  f"{ctx.principal.org_name} registrou um aporte de R$ {body.amount_cents / 100:,.2f}.", f"/candidaturas/{a['id']}")
         ctx.audit(c, "funding.committed", "commitment", cid, {"amount_cents": body.amount_cents})

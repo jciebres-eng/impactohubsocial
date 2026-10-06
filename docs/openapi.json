@@ -1367,8 +1367,67 @@
        "title": "Unread",
        "type": "boolean"
       }
+     },
+     {
+      "name": "grp",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Grp"
+      }
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Priority"
+      }
      }
     ]
+   }
+  },
+  "/v1/notifications/catalog": {
+   "get": {
+    "summary": "Quais avisos existem, a qual interruptor pertencem e quais podem sair por e-mail",
+    "operationId": "get_org_routes_notification_catalog",
+    "tags": [
+     "notifications"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
    }
   },
   "/v1/notifications/read-all": {
@@ -45888,6 +45947,55 @@
      "email": {
       "title": "Email",
       "type": "boolean"
+     },
+     "quiet_from": {
+      "anyOf": [
+       {
+        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Quiet From"
+     },
+     "quiet_to": {
+      "anyOf": [
+       {
+        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Quiet To"
+     },
+     "max_per_day": {
+      "anyOf": [
+       {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Max Per Day"
+     },
+     "digest": {
+      "default": "off",
+      "enum": [
+       "off",
+       "daily"
+      ],
+      "title": "Digest",
+      "type": "string"
      }
     },
     "required": [

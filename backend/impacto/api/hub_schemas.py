@@ -177,6 +177,12 @@ class PrefItem(In):
                  "program"]
     in_app: bool
     email: bool
+    # v0.20.0 — §23: quiet period, rate limit e agrupamento. Nulo significa "use o da plataforma",
+    # que está declarado em `notification_policy` e sai na rota do catálogo.
+    quiet_from: Annotated[str | None, Field(pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")] = None
+    quiet_to: Annotated[str | None, Field(pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")] = None
+    max_per_day: Annotated[int | None, Field(ge=1, le=1000)] = None
+    digest: Literal["off", "daily"] = "off"
 
 
 class PrefsIn(In):

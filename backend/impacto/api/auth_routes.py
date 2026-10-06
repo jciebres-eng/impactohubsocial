@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from ..http import ApiError, Ctx, route
+from ..network import notify as NT
 from ..services import auth
 from . import schemas as S
 
@@ -182,6 +183,16 @@ def remove_member(ctx: Ctx):
             raise ApiError(409, "last_owner", "Não é possível remover o proprietário")
         c.run("DELETE FROM memberships WHERE org_id = $1 AND user_id = $2", ctx.org_id, target)
         ctx.audit(c, "member.removed", "user", target, {"role": cur["role"]})
+        # v0.20.0 — `Team.member_added` e `Team.member_removed` estavam declarados e nunca eram
+        # gravados. A ironia é precisa: a equipe é derivada de `memberships`, e o módulo de
+        # notificação existe para avisar a equipe — mas entrar e sair dela não era um fato.
+        NT.org_event(
+            c, event="Team.member_removed", org_id=ctx.org_id,
+            title="Pessoa retirada da organização",
+            body=f"Perfil anterior: {cur['role']}.", link="/organizacao/equipe",
+            actor_user_id=ctx.user_id, priority="high", min_role="admin",
+            ref_type="user", ref_id=target, action_label="Ver equipe",
+            payload={"role": cur["role"]})
     with ctx.system_tx() as c:
         c.run("UPDATE sessions SET org_id = NULL WHERE user_id = $1 AND org_id = $2", target, ctx.org_id)
     return None

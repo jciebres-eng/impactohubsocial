@@ -16,6 +16,7 @@ import json
 
 from ..db.pq import Connection, IntegrityError, InsufficientPrivilege
 from ..http import ApiError, not_found, unprocessable
+from ..network import notify
 
 ENGINE_VERSION = "seal-rules@1.0.0"
 
@@ -186,7 +187,19 @@ def award(conn: Connection, *, definition_id: str, subject_id: str) -> dict:
                            + "; ".join(f"{d['rule_code']} ({d['detail']})" for d in unmet),
                 "note": ("A avaliação que não concedeu ficou REGISTRADA e é legível pela "
                          "organização em /v1/seals/evaluations.")}
-    return {"awarded": True, **get(conn, award_id=award_id),
+    concedido = get(conn, award_id=award_id)
+    # v0.20.0: a camada de impacto não avisava NINGUÉM sobre NADA. Um selo é uma afirmação pública
+    # da plataforma sobre a organização — ela precisa saber que a afirmação existe, o que o selo
+    # atesta e, principalmente, o que ele NÃO atesta.
+    notify.org_event(
+        conn, event="Seal.awarded", org_id=concedido["org_id"],
+        title=f"Selo concedido: {concedido['title']}",
+        body=(f"O que este selo atesta: {concedido['what_it_attests']} "
+              f"O que ele NÃO atesta: {concedido['what_it_does_not_attest']}"),
+        link="/organizacao/selos", priority="normal", min_role="member",
+        ref_type="seal_award", ref_id=award_id, action_label="Ver selo",
+        payload={"code": concedido["code"], "definition_version": concedido["version"]})
+    return {"awarded": True, **concedido,
             "note": ("A concessão reavaliou os critérios NO BANCO antes de existir. Se algum "
                      "deixar de valer, a revogação é um fato novo — o selo não é apagado.")}
 
@@ -236,7 +249,17 @@ def revoke(conn: Connection, *, award_id: str, reason: str, detail: str,
                             code="already_revoked")
     conn.run("INSERT INTO seal_revocations(award_id, reason, detail, revoked_by)"
              " VALUES ($1,$2,$3,$4)", award_id, reason, detail.strip(), actor)
-    return get(conn, award_id=award_id)
+    revogado = get(conn, award_id=award_id)
+    # Revogar em silêncio seria a plataforma retirar uma afirmação pública sem contar a quem ela
+    # se refere. A organização recebe o MOTIVO, não apenas o fato.
+    notify.org_event(
+        conn, event="Seal.revoked", org_id=revogado["org_id"],
+        title=f"Selo revogado: {revogado['title']}",
+        body=f"Motivo: {revogado['revocation']['reason_label']}. {detail.strip()[:900]}",
+        link="/organizacao/selos", priority="high", min_role="admin",
+        actor_user_id=actor, ref_type="seal_award", ref_id=award_id,
+        action_label="Ver critérios", payload={"reason": reason})
+    return revogado
 
 
 def evaluations(conn: Connection, *, org_id: str, limit: int = 50) -> dict:

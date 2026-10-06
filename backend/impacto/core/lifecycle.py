@@ -111,6 +111,20 @@ def transition(conn: Connection, *, project_id: str, org_id: str, to_status: str
     ledger(conn, project_id=project_id, org_id=org_id, actor=actor_user_id, entry_type="status_changed",
            ref_type="project", ref_id=project_id,
            payload={"from": p["status"], "to": to_status, "automatic": automatic, "reason": reason})
+    # v0.20.0 — `Project.status_changed` e `Project.published` estavam DECLARADOS em
+    # `network.events.EVENTS` desde a v0.16.0 e nunca eram emitidos: a mudança de situação do
+    # projeto, que é o fato central da plataforma, não chegava à equipe. O módulo de notificação
+    # existe literalmente para isto, segundo o pedido que o originou.
+    from ..network import notify
+    notify.project_event(
+        conn, event="Project.published" if to_status == "published" else "Project.status_changed",
+        project_id=project_id, org_id=org_id,
+        title=f"Projeto: {LABELS.get(p['status'], p['status'])} → {LABELS.get(to_status, to_status)}",
+        body=(reason or "").strip()[:900] or None, link=f"/projetos/{project_id}",
+        actor_user_id=actor_user_id, priority="high" if to_status == "published" else "normal",
+        ref_type="project", ref_id=project_id, action_label="Abrir projeto",
+        payload={"from": p["status"], "to": to_status, "automatic": automatic},
+        dedupe_parts=("Project.status", project_id, p["status"], to_status))
     return {"changed": True, "from": p["status"], "status": to_status, "label": LABELS.get(to_status, to_status)}
 
 
@@ -291,6 +305,17 @@ def scan_risks(conn: Connection, *, project_id: str, org_id: str, actor_user_id:
                               actor_user_id)
             ledger(conn, project_id=project_id, org_id=org_id, actor=actor_user_id, entry_type="risk_created",
                    ref_type="risk", ref_id=rid, payload={"code": code, "severity": severity, "origin": "system_identified"})
+            from ..network import notify
+            notify.project_event(
+                conn, event="Risk.created", project_id=project_id, org_id=org_id,
+                title=f"Risco identificado: {title}",
+                body=("Identificado por regra automática a partir do estado do projeto. Severidade "
+                      f"{severity}. Quem conhece o projeto pode descartá-lo com justificativa."),
+                link=f"/projetos/{project_id}", actor_user_id=actor_user_id,
+                priority="high" if severity in ("high", "critical") else "normal",
+                ref_type="risk", ref_id=rid, action_label="Analisar risco",
+                payload={"code": code, "severity": severity},
+                dedupe_parts=("Risk.created", rid))
             found.append({"id": rid, "code": code, "title": title, "severity": severity})
         elif not hit and existing is not None and existing["status"] in ("open", "mitigating") \
                 and existing["origin"] == "system_identified":
@@ -299,6 +324,15 @@ def scan_risks(conn: Connection, *, project_id: str, org_id: str, actor_user_id:
                      existing["id"])
             ledger(conn, project_id=project_id, org_id=org_id, actor=actor_user_id, entry_type="risk_resolved",
                    ref_type="risk", ref_id=existing["id"], payload={"code": code, "automatic": True})
+            from ..network import notify
+            notify.project_event(
+                conn, event="Risk.resolved", project_id=project_id, org_id=org_id,
+                title=f"Risco encerrado: {title}",
+                body="A condição que gerou este risco deixou de existir.",
+                link=f"/projetos/{project_id}", actor_user_id=actor_user_id, priority="low",
+                ref_type="risk", ref_id=existing["id"], action_label="Ver riscos",
+                payload={"code": code, "automatic": True},
+                dedupe_parts=("Risk.resolved", existing["id"]))
             closed.append({"id": existing["id"], "code": code})
     from ..economics import value_ledger
     value_ledger.record(conn, event_type="risk.scan_completed", org_id=org_id, units=len(RISK_RULES),

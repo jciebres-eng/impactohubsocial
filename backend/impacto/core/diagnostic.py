@@ -287,6 +287,20 @@ def publish_version(conn: Connection, *, diagnosis_id: str, org_id: str, created
                    " VALUES ($1,$2,$3,$4::jsonb,$5,$6::jsonb,$7,$8,$9,$10) RETURNING id::text AS id, created_at",
                    diagnosis_id, org_id, version, Json(payload), digest, Json(changes),
                    payload["current_state"]["completeness"], payload["confidence"], ENGINE_VERSION, created_by)
+    # v0.20.0 — `Diagnosis.revised` estava declarado e nunca era emitido. Uma versão nova do
+    # diagnóstico muda o entendimento do problema que o projeto inteiro endereça: é exatamente o
+    # tipo de "alteração de etapa do processo" que a equipe precisa ver.
+    if d["project_id"]:
+        from ..network import notify
+        notify.project_event(
+            conn, event="Diagnosis.revised", project_id=d["project_id"], org_id=org_id,
+            title=f"Diagnóstico revisado (versão {version})",
+            body=f"{len(changes)} alteração(ões) em relação à versão anterior.",
+            link=f"/projetos/{d['project_id']}/diagnostico", actor_user_id=created_by,
+            priority="normal", ref_type="diagnosis", ref_id=diagnosis_id,
+            action_label="Ver o que mudou",
+            payload={"version": version, "completeness": payload["current_state"]["completeness"]},
+            dedupe_parts=("Diagnosis.revised", diagnosis_id, version))
     # ações: cria o que falta, fecha o que a lacuna deixou de existir. Ação já tratada pela pessoa não é mexida.
     created, closed = [], []
     for a in payload["recommended_actions"]:

@@ -26,6 +26,7 @@ from typing import Any
 
 from ..db.pq import Connection, IntegrityError, InsufficientPrivilege
 from ..http import ApiError, not_found, unprocessable
+from ..network import notify
 
 ENGINE_VERSION = "claim-integrity@1.0.0"
 
@@ -444,6 +445,19 @@ def request_review(conn: Connection, *, claim_id: str, org_id: str, reviewer_org
     if not row:
         raise unprocessable("Esta organização já foi convidada para esta rodada.",
                             code="already_requested")
+    # v0.20.0: o convite abria a leitura e NÃO avisava a convidada. Ela só descobriria puxando a
+    # própria fila — isto é, adivinhando que havia uma fila. Um convite que ninguém vê é um convite
+    # que não foi feito.
+    notify.org_event(
+        conn, event="Claim.review_requested", org_id=reviewer_org_id,
+        title="Convite para revisar uma afirmação de impacto",
+        body=((note or "").strip()[:900]
+              or "Uma organização pediu que você revise a última rodada de verificação."),
+        link="/impacto/revisoes", priority="normal", min_role="member", actor_user_id=actor,
+        ref_type="claim", ref_id=claim_id, action_label="Revisar",
+        payload={"check_round": row["check_round"]}, dedupe_parts=("Claim.review_requested",
+                                                                   claim_id, row["check_round"],
+                                                                   reviewer_org_id))
     return {"claim_id": claim_id, "reviewer_org_id": reviewer_org_id, **row,
             "note": (f"O convite vale para a RODADA {round_n}. Verificar de novo abre uma rodada "
                      "nova, e a rodada nova precisa de convite próprio — pelo mesmo princípio que "

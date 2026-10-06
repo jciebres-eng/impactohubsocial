@@ -3,7 +3,10 @@
 Para cada categoria de dado: **base legal**, **finalidade**, **prazo**, **o que acontece no fim do prazo** e **quem
 tem acesso**. Complementa `LGPD_AUDIT.md` (que trata do processo) e `docs/LGPD.md` (que trata do mapeamento).
 
-Esta matriz descreve o que o **código** faz hoje. Onde o prazo é decisão do responsável pelo tratamento e não está
+Esta matriz descreve o que o **código** faz hoje. Para o MECANISMO — qual a ação da chave
+estrangeira de cada vínculo, o que é indelével por gatilho append-only e o que a conferência automática encontrou —
+ver `DATA_RETENTION.md`, gerado contra o banco real por `python3 -m impacto.core.retention`. Esta matriz responde
+"com que base e por quanto tempo"; a outra responde "o que o banco faz quando alguém manda apagar". Onde o prazo é decisão do responsável pelo tratamento e não está
 implementado, está escrito assim.
 
 ## 0. v0.18.0 — as categorias novas

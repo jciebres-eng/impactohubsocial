@@ -1,8 +1,99 @@
-# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.18.1)
+# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.19.0)
 
-**Baseline:** 0.18.1 — **CONGELADA** (ver `TECHNICAL_BASELINE_LOCK.md`, decisão 1: **GO**) ·
-**Ramo:** `chore/v0.18.1-final-technical-hardening` · **Suíte:** 1.298 testes, 0 falhas (26 em
-passo próprio) · **API:** 815 operações · **Banco:** 285 tabelas, 34 migrações.
+**Baseline:** 0.19.0 · snapshot da anterior em `history/v0.18.1/` · Suíte, API e banco: ver
+`FINAL_PRE_DESIGN_RELEASE_REPORT.md` (números medidos nesta rodada, não repetidos de memória).
+
+## v0.19.0 — as três coisas que mudaram o seu trabalho
+
+Esta rodada foi feita **para** a camada de design. Três itens, cada um resolvendo uma decisão que,
+sem eles, você teria de tomar por conta — e que depois teria de ser desfeita.
+
+### 1 · O vocabulário é dado, não escolha sua
+
+Antes desta rodada, as palavras que a interface mostra estavam espalhadas por doze módulos Python,
+com uma terceira cópia dentro de uma página em TypeScript, e **nenhuma** no catálogo de tradução.
+Quem desenhasse inventaria os rótulos, e a tela passaria a dizer "sinalizada" onde a API devolve
+`flagged` e o texto de ajuda diz "marcada".
+
+**Agora existe uma origem única.** Leia `GLOSSARY.md`: 123 termos em 23 domínios, com rótulo em
+pt-BR, en e es, e a definição de cada um. Use assim:
+
+| O que você precisa | De onde tirar |
+|---|---|
+| rótulo de chip, etiqueta, cabeçalho de estado | `web/src/glossary.ts` (`import { CLAIM_STATUS, term } from "../glossary"`) |
+| a mesma coisa em outro idioma | `GET /v1/public/glossary?locale=en` ou `GET /v1/public/translations?locale=en` (namespaces `g_*`) |
+| o que o termo SIGNIFICA, para escrever ajuda | coluna **definição** do `GLOSSARY.md` — ela não é texto de tela |
+| onde o termo aparece na API | coluna `aparece em` de cada domínio no `GLOSSARY.md` |
+
+**A regra:** se o termo existe no glossário, a tela usa a palavra do glossário. Se você precisar de
+uma palavra melhor, **mude o glossário** (`config/glossary.json` + `python3 scripts/sync_glossary.py`)
+— não a tela. Um teste reprova quando os dois divergem, nos dois sentidos.
+
+Os termos EDITORIAIS longos (as 12 regras de alegação, as 12 de selo, as 6 dimensões de reputação, os
+8 papéis de responsabilidade, os tipos de decisão, o catálogo de barreiras) **não** estão no glossário
+de propósito: eles vivem no banco, com nome e explicação próprios, e a API os devolve. Pegue o texto
+de lá. Tradução deles está adiada para depois do design.
+
+### 2 · Estado vazio é contrato de API, não texto que você escreve
+
+Os 76 estados vazios do produto diziam "Nada aqui". Agora existe **`GET /v1/firstrun`**, que devolve,
+por área, as nove respostas que um estado vazio precisa dar:
+
+o que é esta área · por que está vazia · qual é o próximo passo (com método, rota e tela) · o que se
+ganha ao completar · o que é obrigatório · o que é opcional · de onde vem o dado · como se verifica ·
+e, quando falta pré-requisito, **qual** (`blocked_by`).
+
+Tudo isso sai de contagem real no banco. Nenhum valor de exemplo, nenhum dado de demonstração.
+`EmptyArea` e `FirstRunPanel` em `web/src/ui/kit.tsx` são a referência de como isso se desenha —
+deliberadamente sóbrios. **O que precisa resistir à sua reestilização é a hierarquia:** o motivo da
+ausência vem ANTES do botão, e nunca existe botão sem motivo ao lado.
+
+### 3 · As SEIS telas que ainda não existem
+
+Esta é a informação mais concreta deste documento. A camada v0.18.0 entregou a API inteira de seis
+áreas e **nenhuma tela**. A própria API declara isso (`screen_status: "to_be_designed"`), e um teste
+garante que a lista não mente:
+
+| Área | Rota da API que ela consome | Próxima ação que a tela precisa oferecer |
+|---|---|---|
+| **Contexto e equidade** | `PUT /v1/projects/{id}/equity/context` | declarar contexto e barreiras |
+| **ODS** | `PUT /v1/projects/{id}/ods-targets` | mapear o projeto a uma meta |
+| **Alegações** | `POST /v1/claims` | declarar alegação apoiada em evidência |
+| **Reputação** | `GET /v1/reputation/me` | ver o que cada dimensão mede e quantas observações faltam |
+| **Selos** | `POST /v1/seals/evaluate` | ver critério por critério o que falta |
+| **Responsabilidade** | `POST /v1/responsibility/assignments` | atribuir o primeiro responsável |
+
+As outras seis áreas já têm tela: diagnóstico (`/diagnosticos`), indicadores
+(`/projetos/:id/impacto`), evidência (`/projetos/:id`), território (`/dados-territoriais`), cadeia de
+impacto (`/projetos/:id/grafo`) e oportunidades (`/oportunidades`).
+
+### 4 · O retorno que a OSC recebe por declarar contexto (tela nova a desenhar)
+
+A plataforma pede o dado mais caro do produto — necessidade com fonte, barreiras, denominador com
+método — e até esta rodada **não devolvia nada visível** para quem preencheu. Agora devolve, em
+`GET /v1/projects/{id}/context-return`, oito itens com `available`, `total` e, para o que falta,
+`would_open` (a peça que falta e o que ela abre).
+
+Desenhe isso como **"o que você destravou"**, nunca como nota ou selo de progresso. O payload carrega
+`no_ranking_note` justamente porque a tentação é transformar isso em pontuação: mais contexto NÃO dá
+ranking, nem reputação, nem exposição. O que muda é operacional — cálculo que deixa de responder
+"indisponível", sinal de match que deixa de ser DESCONHECIDO, critério de selo que deixa de ser
+inalcançável.
+
+### 5 · Vocabulário transversal que vale em toda tela
+
+Quatro palavras, do domínio `data_availability` do glossário, que resolvem o erro mais comum deste
+produto:
+
+* **informado** — o dado existe, com origem registrada;
+* **não informado** — o dado não existe. **Não é zero, não é falha, não é sucesso**;
+* **indisponível** — o cálculo existe, falta um insumo obrigatório, e a tela diz qual;
+* **não se aplica** — a pergunta não cabe neste caso.
+
+Ausência tem de ser visível com o mesmo cuidado que presença. Espaço em branco onde deveria haver
+"não informado" é defeito de design nesta base, não minimalismo.
+
+---
 
 ## O que mudou para o Designer desde o handoff da v0.16.0
 

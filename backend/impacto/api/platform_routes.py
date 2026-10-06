@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from ..db.pq import Json
 from ..http import ApiError, Ctx, not_found, page, route
+from ..core import glossary as GLOSSARY
 from . import trust_schemas as TSch
 
 T = ("platform",)
@@ -96,6 +97,25 @@ def translations(ctx: Ctx, q: TSch.TranslationsQ):
     for r in rows:
         catalog.setdefault(r["namespace"], {})[r["key"]] = r["value"]
     return {"locale": q.locale, "catalog": catalog, "keys": sum(len(v) for v in catalog.values())}
+
+
+@route("GET", "/v1/public/glossary", auth="none", query=TSch.GlossaryQ, rate=("gloss_ip", 120, 3600),
+       tags=("public",),
+       summary="Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json)")
+def glossary(ctx: Ctx, q: TSch.GlossaryQ):
+    """Uma palavra por conceito, em todas as camadas.
+
+    Esta rota existe para que a interface NÃO invente sinônimo: o rótulo que a tela mostra sai daqui, e o
+    teste `test_v0190_glossary` reprova quando um valor novo de enum aparece no código sem entrada no
+    glossário. A definição vem sempre em pt-BR: ela é para quem desenha e para quem escreve texto de ajuda,
+    não é texto de tela.
+    """
+    doc = GLOSSARY.catalog(q.locale)
+    if q.domain:
+        doc["domains"] = [d for d in doc["domains"] if d["key"] == q.domain]
+        if not doc["domains"]:
+            raise not_found("Domínio do glossário")
+    return doc
 
 
 @route("GET", "/v1/me/preferences", auth="user", tags=T, summary="Idioma e tema da pessoa (tema: system, light ou dark)")

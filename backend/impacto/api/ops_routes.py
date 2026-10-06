@@ -115,3 +115,43 @@ def remove_message(ctx: Ctx, body: S.MessageRemoveIn):
             raise not_found("Mensagem")
         ctx.audit(c, "moderation.message_removed", "message", ctx.path["message_id"], {"reason": body.reason})
     return {"removed": True}
+
+
+# ============================================================ operação: backup e e-mail (v0.19.0)
+@route("GET", "/v1/admin/ops/health", auth="admin", tags=T,
+       summary="Última execução de cada tarefa de operação e falhas de e-mail na janela")
+def ops_health(ctx: Ctx):
+    """A pergunta que não tinha resposta: "o backup rodou?".
+
+    Devolve, por tarefa, a última execução com resultado — incluindo `not_configured`, que é o estado
+    mais importante de todos: ele diz que a tarefa NÃO rodou por falta de credencial ou destino, em
+    vez de deixar a ausência de registro parecer sucesso.
+    """
+    from ..ops import backup as BK
+    from ..ops import email_canary as EC
+    from ..ops import runs as RUNS
+    with ctx.system_tx() as c:
+        tarefas = []
+        for job, modulo in (("backup", BK), ("email_canary", EC)):
+            ultimo = RUNS.last(c, job)
+            ok, motivo = modulo.configured(ctx.app.settings)
+            tarefas.append({
+                "job": job, "configured": ok, "not_configured_reason": motivo or None,
+                "last_run": ultimo,
+                "verdict": ("nunca executou" if not ultimo else
+                            "última execução falhou" if ultimo["status"] == "failed" else
+                            "não configurado" if ultimo["status"] == "not_configured" else
+                            "última execução concluída"),
+            })
+        email = EC.recent_failures(c, minutes=60)
+        offsite = bool(ctx.app.settings.backup_offsite_cmd)
+    return {
+        "jobs": tarefas,
+        "email": email,
+        "backup_offsite_configured": offsite,
+        "note": ("Backup local conferido NÃO é recuperação de desastre: sem cópia externa, um "
+                 "incidente no mesmo host leva o banco e os dumps juntos."
+                 if not offsite else "Backup com cópia externa configurada."),
+        "delivery_note": ("E-mail com status accepted_by_smtp foi ACEITO pelo servidor. A plataforma "
+                          "não recebe retorno de entrega do provedor, então entrega não é afirmada."),
+    }

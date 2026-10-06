@@ -3,7 +3,7 @@ import { api } from "../api";
 import { date, daysUntil, label, money, n } from "../format";
 import { Link } from "../router";
 import { useSession } from "../session";
-import { Bars, Button, MoneyFlow, PageHead, Pager, Panel, Pill, StateView, useAction, useLoad, useTaxonomy } from "../ui/kit";
+import { Bars, Button, FirstRunPanel, MoneyFlow, PageHead, Pager, Panel, Pill, StateView, useAction, useLoad, useTaxonomy } from "../ui/kit";
 
 function countOf(rows: any[] | undefined, status: string) {
   return rows?.find((r) => r.status === status)?.n ?? 0;
@@ -21,6 +21,8 @@ export function Dashboard() {
         {data?.kind === "osc" && <OscHome d={data} />}
         {(data?.kind === "company" || data?.kind === "government" || data?.kind === "individual") && <FunderHome d={data} tax={tax} />}
         {data?.kind === "provider" && <ProviderHome d={data} />}
+        {/* Primeiro acesso: só aparece o que está vazio, com o próximo passo lido do servidor. */}
+        <FirstRunPanel onAct={(a) => { if (a.next_action?.screen) location.hash = `#${a.next_action.screen}`; }} />
       </StateView>
     </>
   );

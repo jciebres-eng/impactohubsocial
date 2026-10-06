@@ -1,0 +1,206 @@
+{
+  "base": "http://127.0.0.1:49241",
+  "generated_at": "2026-10-06T11:15:18-0400",
+  "checks": [
+    {
+      "key": "health",
+      "what": "/healthz responde e declara versão e ambiente",
+      "status": "PASSED",
+      "detail": "versão 0.19.0 · ambiente test · 4 ms",
+      "required": true,
+      "ms": 4.1
+    },
+    {
+      "key": "ready",
+      "what": "/readyz confere banco e migrations pendentes",
+      "status": "PASSED",
+      "detail": "banco ok · storage local · antivírus none · ia local · cobrança sandbox · 4 ms",
+      "required": true,
+      "ms": 3.6
+    },
+    {
+      "key": "ready_declares_providers",
+      "what": "o estado declara QUAL provedor está ligado",
+      "status": "PASSED",
+      "detail": "todos declarados · ATENÇÃO, em modo não produtivo: ['antivirus', 'ai', 'billing']",
+      "required": true,
+      "ms": 3.2
+    },
+    {
+      "key": "meta_config",
+      "what": "/v1/meta/config devolve versão de termos e privacidade",
+      "status": "PASSED",
+      "detail": "termos 2026-10-draft · privacidade 2026-10-draft",
+      "required": true,
+      "ms": 53.3
+    },
+    {
+      "key": "openapi",
+      "what": "/v1/openapi.json descreve as operações",
+      "status": "PASSED",
+      "detail": "819 operações em 701 caminhos",
+      "required": true,
+      "ms": 425.4
+    },
+    {
+      "key": "security_headers",
+      "what": "cabeçalhos de segurança presentes",
+      "status": "PASSED",
+      "detail": "X-Content-Type-Options e Referrer-Policy presentes",
+      "required": true,
+      "ms": 2.4
+    },
+    {
+      "key": "https_or_local",
+      "what": "TLS em produção (ou alvo local declarado)",
+      "status": "SKIPPED",
+      "detail": "alvo local: TLS não se aplica",
+      "required": true,
+      "ms": 0.0
+    },
+    {
+      "key": "unauth_is_denied",
+      "what": "rota privada recusa sem sessão",
+      "status": "PASSED",
+      "detail": "status 401 sem sessão",
+      "required": true,
+      "ms": 2.7
+    },
+    {
+      "key": "rate_limit_present",
+      "what": "limitador de taxa responde no login",
+      "status": "SKIPPED",
+      "detail": "não houve 429 em 12 tentativas (status vistos: [401]); confira RATE_LIMIT_MULTIPLIER do ambiente",
+      "required": true,
+      "ms": 864.2
+    },
+    {
+      "key": "login",
+      "what": "login com a conta de smoke",
+      "status": "PASSED",
+      "detail": "sessão estabelecida em 90 ms",
+      "required": true,
+      "ms": 89.9
+    },
+    {
+      "key": "session",
+      "what": "/v1/me devolve a sessão e a organização ativa",
+      "status": "PASSED",
+      "detail": "usuária osc-f972c86f8e@teste.org · organização ativa",
+      "required": true,
+      "ms": 10.1
+    },
+    {
+      "key": "db_read",
+      "what": "leitura de banco pela rota de projetos",
+      "status": "PASSED",
+      "detail": "0 projeto(s) · 10 ms",
+      "required": true,
+      "ms": 10.4
+    },
+    {
+      "key": "lookup",
+      "what": "busca incremental responde com procedência",
+      "status": "PASSED",
+      "detail": "3 sugestão(ões), todas com origem · 9 ms",
+      "required": false,
+      "ms": 9.3
+    },
+    {
+      "key": "claim_rules",
+      "what": "catálogo de regras de alegação carregado",
+      "status": "PASSED",
+      "detail": "12 regras determinísticas",
+      "required": false,
+      "ms": 9.7
+    },
+    {
+      "key": "reputation_dimensions",
+      "what": "dimensões de reputação carregadas",
+      "status": "PASSED",
+      "detail": "6 dimensões · sem nota única",
+      "required": false,
+      "ms": 9.6
+    },
+    {
+      "key": "glossary",
+      "what": "vocabulário oficial servido nos três idiomas",
+      "status": "PASSED",
+      "detail": "23 domínios, 123 termos · pt-BR e en",
+      "required": true,
+      "ms": 25.8
+    },
+    {
+      "key": "firstrun",
+      "what": "primeiro acesso responde com próximo passo",
+      "status": "PASSED",
+      "detail": "12 áreas, 12 vazia(s), todas com motivo e próximo passo",
+      "required": false,
+      "ms": 15.1
+    },
+    {
+      "key": "ops_health",
+      "what": "estado de backup e canário de e-mail é legível",
+      "status": "SKIPPED",
+      "detail": "exige sessão de administração com MFA",
+      "required": false,
+      "ms": 7.7
+    },
+    {
+      "key": "email_vocabulary",
+      "what": "o produto não afirma entrega de e-mail que não mediu",
+      "status": "SKIPPED",
+      "detail": "exige sessão de administração com MFA",
+      "required": false,
+      "ms": 6.4
+    },
+    {
+      "key": "legal_pending",
+      "what": "estado dos documentos legais é legível",
+      "status": "PASSED",
+      "detail": "0 documento(s) pendente(s) de aceite",
+      "required": false,
+      "ms": 10.1
+    },
+    {
+      "key": "storage_upload",
+      "what": "envio de arquivo chega ao armazenamento",
+      "status": "SKIPPED",
+      "detail": "envio exige multipart e documento de projeto: executar na suíte E2E",
+      "required": false,
+      "ms": 0.0
+    },
+    {
+      "key": "metrics",
+      "what": "endpoint de métricas protegido ou ausente",
+      "status": "PASSED",
+      "detail": "métricas abertas: aceitável só em rede interna",
+      "required": true,
+      "ms": 3.2
+    },
+    {
+      "key": "404_shape",
+      "what": "erro 404 devolve corpo estruturado",
+      "status": "PASSED",
+      "detail": "corpo com código de erro",
+      "required": true,
+      "ms": 3.3
+    },
+    {
+      "key": "no_server_banner",
+      "what": "resposta não expõe pilha de servidor",
+      "status": "PASSED",
+      "detail": "cabeçalho Server: ausente",
+      "required": true,
+      "ms": 1.7
+    }
+  ],
+  "summary": {
+    "total": 24,
+    "passed": 19,
+    "failed": 0,
+    "skipped": 5,
+    "required_failed": 0
+  },
+  "verdict": "GO WITH CONDITIONS"
+}

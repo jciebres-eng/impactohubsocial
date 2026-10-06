@@ -284,3 +284,54 @@ export function useForm<T extends Record<string, any>>(initial: T) {
   const set = <K extends keyof T>(k: K) => (val: T[K]) => setV((x) => ({ ...x, [k]: val }));
   return { v, set, setV };
 }
+
+// ------------------------------------------------------------------------- primeiro acesso (v0.19.0)
+/** Uma área vazia, com as respostas que o servidor dá: o que é, por que está vazia, o que fazer.
+ *
+ * O texto NÃO vive aqui. Ele vem de `GET /v1/firstrun`, que lê contagem real do banco. Este
+ * componente é a referência de como o contrato se desenha — a camada de design vai reestilizá-lo,
+ * e nenhuma palavra precisa ser reescrita para isso.
+ */
+export function EmptyArea({ area, onAct }: { area: any; onAct?: (area: any) => void }) {
+  const act = area.next_action || {};
+  const blocked = area.blocked_by;
+  return (
+    <div className="empty-area">
+      <h4>{area.title}</h4>
+      <p className="empty-why">{area.why_empty}</p>
+      <p className="muted">{area.what_it_is}</p>
+      <dl className="empty-facts">
+        <dt>O que você ganha</dt><dd>{area.what_you_gain}</dd>
+        <dt>Obrigatório</dt><dd>{(area.required_fields || []).join(" · ") || "—"}</dd>
+        {!!(area.optional_fields || []).length && (<><dt>Opcional</dt><dd>{area.optional_fields.join(" · ")}</dd></>)}
+        <dt>De onde vem o dado</dt><dd>{area.data_origin}</dd>
+        <dt>Como se verifica</dt><dd>{area.how_verified}</dd>
+      </dl>
+      {blocked ? (
+        <p className="empty-blocked">{blocked.label}.</p>
+      ) : act.screen_status === "to_be_designed" ? (
+        <p className="muted">Disponível pela API ({act.method} {act.route}); a tela desta área ainda será criada.</p>
+      ) : (
+        <Button variant="primary" onClick={() => onAct?.(area)}>{act.label}</Button>
+      )}
+    </div>
+  );
+}
+
+/** Painel de primeiro acesso: mostra só o que está vazio, com o próximo passo de cada área. */
+export function FirstRunPanel({ projectId, onAct }: { projectId?: string; onAct?: (area: any) => void }) {
+  const path = projectId ? `/v1/firstrun?project_id=${encodeURIComponent(projectId)}` : "/v1/firstrun";
+  const { data, error, loading, reload } = useLoad<any>(path);
+  const vazias = (data?.areas || []).filter((a: any) => !a.filled);
+  return (
+    <Panel title="Comece por aqui">
+      <StateView loading={loading} error={error} onRetry={reload}
+        empty={data && vazias.length === 0 && "Todas as áreas já têm registro. Nada pendente de primeiro acesso."}>
+        <p className="muted">{data?.note}</p>
+        <div className="empty-areas">
+          {vazias.map((a: any) => <EmptyArea key={a.key} area={a} onAct={onAct} />)}
+        </div>
+      </StateView>
+    </Panel>
+  );
+}

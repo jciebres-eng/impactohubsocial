@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.18.1",
+  "version": "0.19.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -10443,6 +10443,32 @@
       }
      }
     }
+   }
+  },
+  "/v1/admin/ops/health": {
+   "get": {
+    "summary": "Última execução de cada tarefa de operação e falhas de e-mail na janela",
+    "operationId": "get_ops_routes_ops_health",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
    }
   },
   "/v1/solutions": {
@@ -23202,6 +23228,56 @@
     ]
    }
   },
+  "/v1/public/glossary": {
+   "get": {
+    "summary": "Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json)",
+    "operationId": "get_platform_routes_glossary",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "locale",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "pt-BR",
+       "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+       "title": "Locale",
+       "type": "string"
+      }
+     },
+     {
+      "name": "domain",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,40}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Domain"
+      }
+     }
+    ]
+   }
+  },
   "/v1/me/preferences": {
    "get": {
     "summary": "Idioma e tema da pessoa (tema: system, light ou dark)",
@@ -34777,6 +34853,88 @@
        "minimum": 1,
        "title": "Limit",
        "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/firstrun": {
+   "get": {
+    "summary": "Estado de primeiro acesso por área: o que é, por que está vazia, próximo passo e o que se ganha",
+    "operationId": "get_firstrun_routes_state",
+    "tags": [
+     "firstrun"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Project Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/context-return": {
+   "get": {
+    "summary": "O que declarar contexto destravou, e o que cada peça que falta destravaria (sem ranking)",
+    "operationId": "get_firstrun_routes_context_return",
+    "tags": [
+     "firstrun"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
       }
      }
     ]

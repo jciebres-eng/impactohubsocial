@@ -73,6 +73,20 @@ class Settings:
     smtp_from: str = "no-reply@localhost"
     storage_provider: str = "local"       # local | s3
     storage_local_dir: str = str(ROOT / "data" / "storage")
+
+    # ---- operação (v0.19.0): backup agendado e canário de e-mail.
+    #: Destino dos dumps. Vazio = backup NÃO roda, e a tarefa registra `not_configured` em vez de
+    #: deixar a ausência de registro parecer sucesso.
+    backup_dir: str = ""
+    #: DSN com papel capaz de ler tudo (pg_dump). Vazio = não roda.
+    backup_database_url: str = ""
+    backup_interval_hours: int = 24
+    backup_keep: int = 14
+    #: Cópia externa: comando que recebe o arquivo como $1. Vazio = só cópia local, declarado como tal.
+    backup_offsite_cmd: str = ""
+    #: Endereço do canário. Vazio = canário não roda.
+    email_canary_to: str = ""
+    email_canary_interval_minutes: int = 60
     s3_endpoint: str = ""
     s3_region: str = "us-east-1"
     s3_bucket: str = ""
@@ -152,6 +166,13 @@ def load_settings() -> Settings:
         smtp_from=_env("SMTP_FROM", "no-reply@localhost"),
         storage_provider=_env("STORAGE_PROVIDER", "local"),
         storage_local_dir=_env("STORAGE_LOCAL_DIR", str(ROOT / "data" / "storage")),
+        backup_dir=_env("BACKUP_DIR", "") or "",
+        backup_database_url=_env("BACKUP_DATABASE_URL", "") or "",
+        backup_interval_hours=_int("BACKUP_INTERVAL_HOURS", 24),
+        backup_keep=_int("BACKUP_KEEP", 14),
+        backup_offsite_cmd=_env("BACKUP_OFFSITE_CMD", "") or "",
+        email_canary_to=_env("EMAIL_CANARY_TO", "") or "",
+        email_canary_interval_minutes=_int("EMAIL_CANARY_INTERVAL_MINUTES", 60),
         s3_endpoint=_env("S3_ENDPOINT", "") or "",
         s3_region=_env("S3_REGION", "us-east-1"),
         s3_bucket=_env("S3_BUCKET", "") or "",

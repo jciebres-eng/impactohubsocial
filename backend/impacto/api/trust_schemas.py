@@ -134,6 +134,11 @@ class TranslationsQ(In):
     namespace: Annotated[str | None, Field(pattern=r"^[a-z0-9_]{2,40}$")] = None
 
 
+class GlossaryQ(In):
+    locale: Annotated[str, Field(pattern=r"^[a-z]{2}(-[A-Z]{2})?$")] = "pt-BR"
+    domain: Annotated[str | None, Field(pattern=r"^[a-z0-9_]{2,40}$")] = None
+
+
 # ---------------------------------------------------------------- cotas e campanha
 class QuotaIn(In):
     project_id: Uuid

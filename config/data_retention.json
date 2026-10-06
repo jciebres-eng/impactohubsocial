@@ -1,0 +1,287 @@
+{
+  "version": "1.0",
+  "note": "CLASSIFICAÇÃO DE RETENÇÃO. Para cada tabela com vínculo a organização ou a titular, diz o que acontece quando a conta é excluída e por quê. A origem da verdade é o banco: a classe declarada aqui é CONFERIDA contra a regra real da chave estrangeira por tests/test_v0190_lgpd_deletion.py. Declarar uma coisa e o banco fazer outra reprova.",
+  "classes": {
+    "deletable_with_parent": {
+      "fk_action": "c",
+      "meaning": "A linha morre junto com a organização ou o titular (ON DELETE CASCADE). É o padrão.",
+      "basis": "Dado operacional sem obrigação de guarda própria."
+    },
+    "anonymizable": {
+      "fk_action": "n",
+      "meaning": "A linha SOBREVIVE sem o vínculo (ON DELETE SET NULL): o registro continua, o apontamento para a pessoa ou a organização cai.",
+      "basis": "O registro tem valor coletivo (histórico de evento, trilha de uso, aceite) e deixa de ser pessoal quando perde o vínculo."
+    },
+    "retainable": {
+      "fk_action": "a|r",
+      "meaning": "A linha IMPEDE a remoção do pai (NO ACTION/RESTRICT). Exclusão só acontece depois de tratar esses registros de forma explícita.",
+      "basis": "Obrigação legal de guarda (financeiro, fiscal) ou integridade que não pode ser desfeita em silêncio (evidência, revogação de assinatura, responsabilidade designada)."
+    },
+    "audit_only": {
+      "fk_action": "none",
+      "meaning": "Guarda o identificador SEM chave estrangeira, de propósito, para que a trilha sobreviva à remoção do registro de origem.",
+      "basis": "Trilha de auditoria precisa resistir à exclusão do que ela audita; com FK em cascata, apagar o objeto apagaria a prova de que ele existiu."
+    },
+    "append_only": {
+      "fk_action": "c + gatilho append-only",
+      "meaning": "A chave diz CASCADE, mas a tabela tem gatilho append-only (forbid_mutation) que recusa DELETE — inclusive para o papel proprietário do banco, porque gatilho não olha papel. Na prática a linha é INDELÉVEL e, com ela, a organização também.",
+      "basis": "Trilha que sustenta o que terceiros leram: conferência de alegação, revisão, retrato de reputação, concessão e revogação de selo, decisão registrada. Apagar seria reescrever o passado que outra organização usou para decidir."
+    }
+  },
+  "default_rule": "Toda coluna org_id/user_id que não esteja declarada abaixo DEVE ser deletable_with_parent (CASCADE). Uma coluna nova que não seja cascata reprova o teste: é exatamente assim que uma obrigação de guarda, ou um bloqueio de exclusão, entra sem ninguém decidir.",
+  "declared": {
+    "ledger_entries.org_id": {
+      "class": "retainable",
+      "reason": "Lançamento contábil. Guarda obrigatória; apagar reescreveria o histórico financeiro."
+    },
+    "expenses.org_id": {
+      "class": "retainable",
+      "reason": "Despesa com comprovante. Base de prestação de contas a quem financiou."
+    },
+    "evidences.org_id": {
+      "class": "retainable",
+      "reason": "Evidência sustenta medição e alegação de terceiros; remover orfanaria o que foi validado."
+    },
+    "signature_revocations.org_id": {
+      "class": "retainable",
+      "reason": "Revogação de assinatura é prova de que algo deixou de valer. Nunca desaparece."
+    },
+    "conflict_declarations.org_id": {
+      "class": "retainable",
+      "reason": "Declaração de conflito de interesse protege decisão de outras partes."
+    },
+    "conflict_declarations.user_id": {
+      "class": "retainable",
+      "reason": "Mesma razão: a declaração é sobre uma decisão, não sobre o perfil."
+    },
+    "responsibility_assignments.user_id": {
+      "class": "retainable",
+      "reason": "Responsabilidade designada não se transfere em silêncio: a remoção do titular é recusada enquanto houver mandato."
+    },
+    "solution_adaptations.user_id": {
+      "class": "retainable",
+      "reason": "Adaptação publicada é contribuição para a rede; sobrevive por integridade do que outros replicaram."
+    },
+    "solution_combinations.user_id": {
+      "class": "retainable",
+      "reason": "Idem adaptação."
+    },
+    "solution_intents.user_id": {
+      "class": "retainable",
+      "reason": "Intenção registrada em negociação entre partes."
+    },
+    "solution_reviews.user_id": {
+      "class": "retainable",
+      "reason": "Avaliação lida por terceiros ao decidir replicar."
+    },
+    "legal_acceptances.org_id": {
+      "class": "anonymizable",
+      "reason": "A prova de aceite sobrevive por obrigação legal; o gatilho acceptance_anonymize_only() permite apenas limpar IP e agente."
+    },
+    "sessions.org_id": {
+      "class": "anonymizable",
+      "reason": "Sessão é revogada e tem IP e agente limpos na exclusão da conta."
+    },
+    "ai_usage.user_id": {
+      "class": "anonymizable",
+      "reason": "Contabilidade de uso de IA é agregada; perde o vínculo e continua somando."
+    },
+    "course_certificates.org_id": {
+      "class": "anonymizable",
+      "reason": "Certificado emitido continua verificável pelo código."
+    },
+    "course_enrollments.org_id": {
+      "class": "anonymizable",
+      "reason": "Matrícula vira registro histórico sem vínculo."
+    },
+    "demo_requests.org_id": {
+      "class": "anonymizable",
+      "reason": "Pedido de demonstração é contato comercial."
+    },
+    "demo_requests.user_id": {
+      "class": "anonymizable",
+      "reason": "Idem."
+    },
+    "hub_event_registrations.org_id": {
+      "class": "anonymizable",
+      "reason": "Inscrição em evento vira contagem histórica."
+    },
+    "kb_feedback.org_id": {
+      "class": "anonymizable",
+      "reason": "Retorno sobre conteúdo tem valor coletivo e deixa de ser pessoal sem o vínculo."
+    },
+    "partnership_requests.org_id": {
+      "class": "anonymizable",
+      "reason": "Pedido de parceria envolve duas partes; a outra conserva o registro."
+    },
+    "partnership_requests.user_id": {
+      "class": "anonymizable",
+      "reason": "Idem."
+    },
+    "professional_experiences.org_id": {
+      "class": "anonymizable",
+      "reason": "Experiência declarada perde o vínculo com a organização encerrada."
+    },
+    "professional_services.user_id": {
+      "class": "anonymizable",
+      "reason": "Serviço anunciado perde o vínculo com o titular."
+    },
+    "signed_agreement_parties.user_id": {
+      "class": "anonymizable",
+      "reason": "Parte de acordo assinado: o acordo permanece, o apontamento pessoal cai."
+    },
+    "solution_events.user_id": {
+      "class": "anonymizable",
+      "reason": "Evento de solução vira histórico sem autor."
+    },
+    "solution_people.org_id": {
+      "class": "anonymizable",
+      "reason": "Pessoa ligada a solução perde o vínculo."
+    },
+    "solution_people.user_id": {
+      "class": "anonymizable",
+      "reason": "Idem."
+    },
+    "solution_search_log.user_id": {
+      "class": "anonymizable",
+      "reason": "Registro de busca perde o vínculo e continua servindo a métrica agregada."
+    },
+    "support_tickets.org_id": {
+      "class": "anonymizable",
+      "reason": "Atendimento permanece para histórico de suporte."
+    },
+    "trial_claims.org_id": {
+      "class": "anonymizable",
+      "reason": "Controle de uso de teste gratuito, para impedir reuso indevido."
+    },
+    "audit_events.org_id": {
+      "class": "audit_only",
+      "reason": "Trilha de auditoria sem FK de propósito: apagar a organização não pode apagar a prova do que ela fez."
+    },
+    "kb_events.user_id": {
+      "class": "audit_only",
+      "reason": "Trilha de uso da central de conhecimento, sem FK."
+    },
+    "organization_qualification_events.org_id": {
+      "class": "audit_only",
+      "reason": "Histórico de qualificação institucional, sem FK."
+    },
+    "claims.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "A linha da alegação é removível (o gatilho claim_statement_frozen congela o TEXTO, não impede remoção). Mas a trilha filha claim_checks é append-only, então na prática a remoção falha no filho — o que mantém a conclusão: a organização não é removível."
+    },
+    "equity_contexts.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "Contexto declarado é do projeto da organização."
+    },
+    "equity_denominators.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "Denominador declarado pela organização sai com ela; denominador de território é bem comum e tem org_id nulo."
+    },
+    "project_barriers.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "Barreira é atributo do contexto do projeto."
+    },
+    "materiality_assessments.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "Avaliação de materialidade é da organização."
+    },
+    "framework_mappings.org_id": {
+      "class": "deletable_with_parent",
+      "reason": "Mapeamento declarado pela organização."
+    },
+    "reputation_snapshots.org_id": {
+      "class": "append_only",
+      "reason": "Retrato de reputação é derivado; sem a organização não tem sujeito. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui."
+    },
+    "reputation_disputes.org_id": {
+      "class": "append_only",
+      "reason": "Contestação acompanha a organização contestante. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui."
+    },
+    "responsibility_assignments.org_id": {
+      "class": "append_only",
+      "reason": "A designação é da organização, e a trilha é append-only: responsabilidade registrada não se apaga."
+    },
+    "seal_awards.org_id": {
+      "class": "append_only",
+      "reason": "Selo concedido a uma organização que deixa de existir não tem portador. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui."
+    },
+    "seal_evaluations.org_id": {
+      "class": "append_only",
+      "reason": "Avaliação de critério acompanha a organização avaliada. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui."
+    },
+    "billable_events.org_id": {
+      "class": "append_only",
+      "reason": "Evento faturável: base do que foi cobrado. Append-only por obrigação de prestação de contas."
+    },
+    "credential_verifications.org_id": {
+      "class": "append_only",
+      "reason": "Conferência de credencial: alguém assumiu a verificação, com data."
+    },
+    "diagnosis_versions.org_id": {
+      "class": "append_only",
+      "reason": "Versão de diagnóstico: o histórico é o que permite comparar antes e depois."
+    },
+    "domain_events.org_id": {
+      "class": "append_only",
+      "reason": "Fato de domínio registrado; a trilha é o que reconstrói a história."
+    },
+    "eligibility_evaluations.org_id": {
+      "class": "append_only",
+      "reason": "Conferência de elegibilidade lida por quem decidiu."
+    },
+    "equity_assessments.org_id": {
+      "class": "append_only",
+      "reason": "Avaliação de equidade registrada com método e data."
+    },
+    "match_feedback.org_id": {
+      "class": "append_only",
+      "reason": "Retorno das duas pontas sobre o match; apagar reescreveria o que a outra parte disse."
+    },
+    "price_change_notices.org_id": {
+      "class": "append_only",
+      "reason": "Aviso de reajuste: prova de que a mudança foi comunicada."
+    },
+    "project_snapshots.org_id": {
+      "class": "append_only",
+      "reason": "Retrato do projeto num instante; é o que sustenta comparação longitudinal."
+    },
+    "project_transitions.org_id": {
+      "class": "append_only",
+      "reason": "Transição de estado do projeto, com autor e data."
+    },
+    "readiness_snapshots.org_id": {
+      "class": "append_only",
+      "reason": "Retrato de prontidão: a série temporal é a informação."
+    },
+    "trust_events.org_id": {
+      "class": "append_only",
+      "reason": "Evento de confiança (verificação, assinatura, revogação) lido por terceiros."
+    },
+    "value_events.org_id": {
+      "class": "append_only",
+      "reason": "Evento de valor entregue, base do ledger de valor."
+    }
+  },
+  "account_deletion_flow": {
+    "route": "POST /v1/privacy/delete-account",
+    "does": [
+      "exige senha e confirmação (reautenticação)",
+      "recusa quando o titular é o único proprietário de organização com outras pessoas (409 transfer_ownership_first)",
+      "fecha a organização quando o titular é o único membro (status closed), sem apagar o histórico dela",
+      "anonimiza users: e-mail substituído, nome trocado, senha e segredo de MFA removidos",
+      "revoga sessões e limpa IP e agente de usuário",
+      "apaga auth_tokens",
+      "limpa IP e agente dos aceites legais, mantendo a prova (gatilho acceptance_anonymize_only)",
+      "registra privacy_requests(kind=deletion, status=completed) e evento de auditoria"
+    ],
+    "does_not": [
+      "não apaga a organização nem o histórico institucional dela: organização é pessoa jurídica e seus registros servem a terceiros (quem financiou, quem revisou, quem replicou)",
+      "não apaga trilha de auditoria nem registro financeiro",
+      "não remove a linha da organização: além das guardas legais (evidência, financeiro), a camada de impacto é append-only e recusa remoção — e é essa a decisão de arquitetura, não um efeito colateral"
+    ]
+  },
+  "scope_note": "A conferência cobre as colunas org_id e user_id. Vínculos com nome próprio (claim_review_requests.requested_org_id, framework_mappings.reviewer_org_id, indicator_values.validated_by_org) são de ORGANIZAÇÃO TERCEIRA, não do titular do dado: estão cobertos pelos testes de isolamento entre organizações, não por esta política de retenção.",
+  "effective_class_note": "A classe EFETIVA não é a da chave estrangeira sozinha: quando a tabela tem gatilho append-only, o gatilho vence. Foi isso que a v0.19.0 descobriu ao tentar, pela primeira vez, remover uma organização com registro em todas as áreas: a remoção é recusada por claim_checks, e antes disso por evidences. A conclusão não é 'consertar a cascata' — é registrar a verdade: A PLATAFORMA NÃO REMOVE ORGANIZAÇÃO. O caminho suportado é fechamento da organização com anonimização do titular, que é o que POST /v1/privacy/delete-account faz e o que os testes provam.",
+  "discovery_note": "As treze tabelas append-only fora da camada de impacto (billable_events, credential_verifications, diagnosis_versions, domain_events, eligibility_evaluations, equity_assessments, match_feedback, price_change_notices, project_snapshots, project_transitions, readiness_snapshots, trust_events, value_events) foram DESCOBERTAS pela conferência automática da v0.19.0, não escritas a partir de memória. Cada uma tinha a trava certa e nenhuma política que a reconhecesse."
+}

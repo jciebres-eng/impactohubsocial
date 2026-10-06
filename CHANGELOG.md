@@ -1,6 +1,105 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.19.0] — 2026-10-06 — VOCABULÁRIO, PRIMEIRO ACESSO E OS GATES DE PUBLICAÇÃO (snapshot do v0.18.1 em `history/v0.18.1/`)
+
+Rodada de fechamento ANTES da camada de design. Seis itens: três que, se não fossem feitos antes,
+fariam o trabalho de design ser refeito; três que fariam a publicação falhar em silêncio. Em todos,
+o padrão foi o mesmo — executar o que nunca havia sido executado e corrigir o que apareceu.
+
+### 1. Vocabulário oficial (o item que mais muda o trabalho de quem desenha)
+- **`config/glossary.json` passa a ser a ORIGEM do rótulo**: 123 termos em 23 domínios, 369 rótulos
+  nos três idiomas, mais a definição em pt-BR de cada termo. ADR-228.
+- **Três cópias do mesmo vocabulário foram unificadas**: dicionários em doze módulos Python, uma
+  cópia em TypeScript dentro de `web/src/pages/core.tsx`, e nada no catálogo de tradução. O catálogo
+  passou de 98 para **221 chaves por idioma** (6 → 29 namespaces).
+- **`scripts/sync_glossary.py`** gera, de uma só origem: os namespaces `g_*` de `config/i18n.json`
+  (e daí a tabela `translations` e `GET /v1/public/translations`), o `GLOSSARY.md` e o
+  `web/src/glossary.ts`, que a interface agora **consome** em vez de copiar. `--check` reprova fora
+  de sincronia.
+- **Nova rota `GET /v1/public/glossary`**: termo da API, rótulo no idioma pedido, definição em pt-BR.
+- **A conferência roda nas duas direções** (`core/glossary.py`): cada domínio declara DE ONDE saem os
+  valores vivos (atributo Python, coluna de migração, varredura de código). Valor de enum sem rótulo
+  reprova; rótulo órfão reprova. Um dos 13 testes adultera o documento em memória de propósito, para
+  provar que a guarda não é decorativa. ADR-229, ADR-230.
+
+### 2. Primeiro acesso
+- **Nova rota `GET /v1/firstrun`**: por área, o que é, por que está vazia, qual é o próximo passo, o
+  que se ganha ao completar, o que é obrigatório, o que é opcional, de onde vem o dado e como se
+  verifica — tudo a partir de **contagem real no banco**, nunca de valor de exemplo. ADR-231.
+- **Seis áreas da camada v0.18.0 não têm tela** (equidade, ODS, alegação, reputação, selo,
+  responsabilidade): são declaradas como `to_be_designed` em vez de apontarem para link morto. É o
+  inventário que a camada de design recebe. ADR-232.
+- **Área sem projeto escolhido devolve `counted: false`, não zero.** ADR-233.
+- `EmptyArea` e `FirstRunPanel` em `web/src/ui/kit.tsx`, montados no painel inicial: referência de
+  como o contrato se desenha, com hierarquia (motivo antes do botão) que resiste à reestilização.
+
+### 3. Retorno por declarar contexto
+- **Nova rota `GET /v1/projects/{id}/context-return`** com oito chaves de retorno OPERACIONAL:
+  cobertura declarada peça por peça, métodos de normalização disponíveis, explicabilidade do match,
+  prontidão de evidência, prontidão de selo (critério por critério, com o mesmo cálculo da
+  concessão), prontidão de diagnóstico, o que um financiador vê, e o que trava elegibilidade por
+  falta de dado.
+- **Nenhum ganho de ranking ou de reputação**, declarado no payload e provado por teste que compara
+  os retratos de reputação antes e depois de declarar contexto. ADR-234.
+
+### 4. Exclusão de conta e retenção (LGPD)
+- **A plataforma NÃO remove organização — ela fecha.** As cascatas da camada nova estavam declaradas
+  nas migrações e nunca haviam sido executadas; ao executar, a remoção é recusada duas vezes (guarda
+  legal da evidência, e trilha append-only da conferência de alegação). A política passou a dizer
+  isso, com a classe `append_only`. ADR-236.
+- **13 tabelas append-only em todo o sistema foram DESCOBERTAS pela conferência automática** e não
+  tinham política que as reconhecesse (`billable_events`, `credential_verifications`,
+  `diagnosis_versions`, `domain_events`, `eligibility_evaluations`, `equity_assessments`,
+  `match_feedback`, `price_change_notices`, `project_snapshots`, `project_transitions`,
+  `readiness_snapshots`, `trust_events`, `value_events`).
+- **`config/data_retention.json` + `core/retention.py` + `DATA_RETENTION.md`** (gerado contra o banco
+  real): 184 vínculos a organização ou titular, 58 declarados, classe declarada conferida contra a
+  regra real da chave e contra o gatilho. Declarar uma coisa e o banco fazer outra reprova.
+- **Varredura de verdade**: depois da exclusão, o e-mail do titular é procurado em TODAS as colunas
+  de texto de TODAS as tabelas, numa só consulta (erro em laço com `try/except` abortaria a
+  transação e esconderia justamente o que importa).
+
+### 5. Backup agendado
+- **`scripts/backup.sh` existia desde a v0.7.0 e NADA o executava.** O agendamento passou a viver no
+  executor de tarefas que já existe, com janela própria. ADR-238.
+- Conferência do dump em três níveis: tamanho, sha256 contra o arquivo `.sha256` gravado, e
+  `pg_restore --list` (que pega o caso do arquivo que existe, tem tamanho e não é um backup válido).
+- Poda com retenção (`BACKUP_KEEP`), cópia externa por comando configurável (`BACKUP_OFFSITE_CMD`) e
+  recusa em declarar recuperação de desastre sem ela.
+- **A janela conta do último SUCESSO, não da última tentativa.** ADR-239.
+
+### 6. Canário de e-mail e observabilidade de envio
+- **Nova tabela `email_events`**: um registro por tentativa, com identificador da mensagem, tipo,
+  **domínio** do destinatário (nunca o endereço, nunca o corpo), provedor, número de tentativas,
+  duração e erro. O registro é ligado **no mailer**, não nos oito pontos que enviam e-mail. ADR-242.
+- **O estado de sucesso se chama `accepted_by_smtp`, nunca `delivered`**: a plataforma não recebe
+  retorno de entrega do provedor, e o CHECK do banco não aceita um estado chamado entrega. ADR-241.
+- **Tarefa `email_canary`** com endereço de monitoramento configurável.
+- **Nova rota `GET /v1/admin/ops/health`**: última execução de cada tarefa, com veredito, e falhas de
+  e-mail na janela. O estado `not_configured` é registrado como tal, nunca como ausência de linha.
+  ADR-240.
+
+### Corrigido (defeitos reais, achados por teste nesta rodada)
+- **`project_ods_targets` era anunciado com o método errado** (`POST` em vez de `PUT`) e
+  **`match_runs.org_id` não existe** (é `viewer_org_id`): os dois foram pegos pelo teste que exige que
+  toda rota de próximo passo esteja registrada no roteador — o segundo causava erro 500.
+- **Denominador de um projeto vazava para os outros projetos da mesma organização** na primeira versão
+  da rota de retorno: a disponibilidade passou a sair da mesma função que o cálculo usa. ADR-235.
+- **O gatilho da prova de aceite recusava o `SET NULL` que a própria chave promete** (migração 0035),
+  tornando impossível remover organização com um único aceite registrado. E a regra de IP confundia
+  "não pode trocar" com "tem de ficar sem IP" — a primeira versão da correção ainda quebrava. ADR-237.
+- `web/src/pages/core.tsx` tinha uma terceira cópia de `BAND_LABEL`; passou a importar do glossário.
+
+### Banco
+- `0035_v0190_acceptance_org_anonymization.sql` — gatilho da prova de aceite.
+- `0036_v0190_ops_observability.sql` — `ops_job_runs` e `email_events`, com RLS restrita à
+  administração da plataforma.
+
+### Configuração nova (todas opcionais; sem elas a tarefa registra `not_configured`)
+`BACKUP_DIR`, `BACKUP_DATABASE_URL`, `BACKUP_INTERVAL_HOURS`, `BACKUP_KEEP`, `BACKUP_OFFSITE_CMD`,
+`EMAIL_CANARY_TO`, `EMAIL_CANARY_INTERVAL_MINUTES` — documentadas em `.env.example`.
+
 ## [0.18.1] — 2026-10-06 — ENDURECIMENTO TÉCNICO FINAL E CONGELAMENTO DA BASE (snapshot do v0.18.0 em `history/v0.18.0/`)
 
 Rodada de **prova**, não de funcionalidade. O proprietário entregou um pacote

@@ -322,7 +322,15 @@ class JobsTests(unittest.TestCase):
         with db_system() as d:
             d.run("UPDATE call_sources SET active = false WHERE id = $1", sid)  # sem rede externa no restante
         out = jobs.run_once(st)
-        self.assertTrue(all(r["status"] in ("ok", "skipped") for r in out), out)
+        # `not_configured` entrou na v0.19.0 e é resultado legítimo: backup e canário de e-mail
+        # dependem de destino e credencial que o ambiente de teste não tem — e dizer isso em voz alta
+        # é o ponto, porque a alternativa (não registrar nada) faria falta de configuração parecer
+        # sucesso. O que NÃO pode acontecer é tarefa com falha, e é isso que a segunda asserção exige.
+        self.assertTrue(all(r["status"] in ("ok", "skipped", "not_configured") for r in out), out)
+        self.assertEqual([r for r in out if r["status"] == "failed"], [], out)
+        nomes = {r["job"] for r in out}
+        self.assertIn("backup", nomes, "a tarefa de backup saiu do ciclo do executor")
+        self.assertIn("email_canary", nomes, "o canário de e-mail saiu do ciclo do executor")
 
 
 class ContractTests(unittest.TestCase):

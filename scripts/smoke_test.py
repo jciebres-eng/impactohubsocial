@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke test de publicação: 20 verificações contra uma instância JÁ EM EXECUÇÃO.
+"""Smoke test de publicação: 24 verificações contra uma instância JÁ EM EXECUÇÃO.
 
 Para que serve: responder, em menos de um minuto e sem adivinhação, se a instância que acabou de
 subir está servindo o produto — e não apenas "respondendo 200 em /healthz". Cada verificação diz o
@@ -241,6 +241,58 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
         assert len(body.get("items") or []) >= 6, body
         assert "ranking" in (body.get("no_single_score") or ""), "a resposta perdeu o aviso de não-ranking"
         return f"{len(body['items'])} dimensões · sem nota única"
+
+    @s.check("glossary", "vocabulário oficial servido nos três idiomas")
+    def _():
+        st, body, _ms, _hd = h.call("GET", "/v1/public/glossary")
+        assert st == 200, f"status {st}"
+        dominios = body.get("domains") or []
+        assert len(dominios) >= 20, f"só {len(dominios)} domínios no glossário"
+        termos = sum(len(d.get("terms") or []) for d in dominios)
+        assert termos >= 100, f"só {termos} termos"
+        assert all(t.get("label") and t.get("definition")
+                   for d in dominios for t in d["terms"]), "termo sem rótulo ou sem definição"
+        st_en, body_en, _m, _h2 = h.call("GET", "/v1/public/glossary?locale=en")
+        assert st_en == 200 and body_en.get("locale") == "en", "idioma inglês não servido"
+        return f"{len(dominios)} domínios, {termos} termos · pt-BR e en"
+
+    @s.check("firstrun", "primeiro acesso responde com próximo passo", required=False)
+    def _():
+        if not h.token and not any(c.name.startswith("impacto") for c in h.jar):
+            raise Skip("sem sessão")
+        st, body, _ms, _hd = h.call("GET", "/v1/firstrun")
+        assert st == 200, f"status {st}"
+        areas = body.get("areas") or []
+        assert len(areas) >= 12, f"só {len(areas)} áreas"
+        vazias = [a for a in areas if not a["filled"]]
+        semacao = [a["key"] for a in vazias if not (a.get("next_action") or {}).get("label")]
+        assert not semacao, f"área vazia sem próximo passo: {semacao}"
+        semmotivo = [a["key"] for a in vazias if not a.get("why_empty")]
+        assert not semmotivo, f"área vazia sem motivo: {semmotivo}"
+        return f"{len(areas)} áreas, {len(vazias)} vazia(s), todas com motivo e próximo passo"
+
+    @s.check("ops_health", "estado de backup e canário de e-mail é legível", required=False)
+    def _():
+        st, body, _ms, _hd = h.call("GET", "/v1/admin/ops/health")
+        if st in (401, 403):
+            raise Skip("exige sessão de administração com MFA")
+        assert st == 200, f"status {st}"
+        jobs = {j["job"]: j for j in body.get("jobs") or []}
+        assert "backup" in jobs and "email_canary" in jobs, jobs
+        # O smoke NÃO reprova por tarefa não configurada: ele RELATA, porque configurar é decisão de
+        # infraestrutura. O que seria inaceitável é não haver resposta.
+        return (f"backup: {jobs['backup']['verdict']} · canário: {jobs['email_canary']['verdict']}"
+                f" · cópia externa: {'sim' if body.get('backup_offsite_configured') else 'NÃO'}")
+
+    @s.check("email_vocabulary", "o produto não afirma entrega de e-mail que não mediu", required=False)
+    def _():
+        st, body, _ms, _hd = h.call("GET", "/v1/admin/ops/health")
+        if st in (401, 403):
+            raise Skip("exige sessão de administração com MFA")
+        assert st == 200, f"status {st}"
+        nota = body.get("delivery_note") or ""
+        assert "accepted_by_smtp" in nota, "a resposta perdeu a distinção entre aceitação e entrega"
+        return "aceitação SMTP não é declarada como entrega"
 
     @s.check("legal_pending", "estado dos documentos legais é legível", required=False)
     def _():

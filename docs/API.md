@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.18.1)
+# API REST /v1 — referência gerada do código (v0.19.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (815)
+## Operações (819)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -139,6 +139,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/monetization/pipeline` | admin da plataforma + MFA | — | A fila de monetização de todas as organizações |
 | POST | `/v1/admin/monetization/pipeline/{billable_seq}/waive` | admin da plataforma + MFA | — | Dispensa um candidato a cobrança, com motivo escrito |
 | PATCH | `/v1/admin/monetization/rules/{rule_key}` | admin da plataforma + MFA | — | Ajusta preço, situação jurídica e ativação de uma regra (o portão é no banco) |
+| GET | `/v1/admin/ops/health` | admin da plataforma + MFA | — | Última execução de cada tarefa de operação e falhas de e-mail na janela |
 | GET | `/v1/admin/organizations` | admin da plataforma + MFA | — | orgs |
 | POST | `/v1/admin/organizations/{org_id}/compliance-checks` | admin da plataforma + MFA | — | Executa verificações automáticas de compliance |
 | POST | `/v1/admin/organizations/{org_id}/grants` | admin da plataforma + MFA | — | grant |
@@ -331,6 +332,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/feed/projects/{project_id}/favorite` | membro da organização ativa | tipos: company, individual; papel ≥ analyst | favorite |
 | POST | `/v1/feed/projects/{project_id}/feedback` | membro da organização ativa | tipos: company, individual; papel ≥ analyst | Salvar ou descartar com motivo (sinal de preferência para o ranking do próprio financiador) |
 | GET | `/v1/files/{token}` | pública | limite 600/3600s | Entrega do arquivo via token assinado e de curta duração (storage local) |
+| GET | `/v1/firstrun` | usuário autenticado | papel ≥ viewer | Estado de primeiro acesso por área: o que é, por que está vazia, próximo passo e o que se ganha |
 | GET | `/v1/fiscal/estimates` | membro da organização ativa | tipos: company; papel ≥ analyst; plano: `fiscal.estimates` | Mecanismos possivelmente aplicáveis (regras aprovadas e vigentes): REGRA × ELEGIBILIDADE PROVÁVEL × ESTIMATIVA × VALIDAÇÃO |
 | GET | `/v1/fiscal/rules` | membro da organização ativa | papel ≥ viewer | Regras fiscais aprovadas (fonte, versão e vigência) |
 | GET | `/v1/frameworks` | usuário autenticado | — | Referenciais reconhecidos, com o que a plataforma implementa e o que NÃO mapeia |
@@ -618,6 +620,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PATCH | `/v1/projects/{project_id}` | membro da organização ativa | tipos: osc; papel ≥ member | patch project |
 | POST | `/v1/projects/{project_id}/budget-items` | membro da organização ativa | tipos: osc; papel ≥ member | add item |
 | DELETE | `/v1/projects/{project_id}/budget-items/{item_id}` | membro da organização ativa | tipos: osc; papel ≥ member | del item |
+| GET | `/v1/projects/{project_id}/context-return` | membro da organização ativa | papel ≥ viewer | O que declarar contexto destravou, e o que cada peça que falta destravaria (sem ranking) |
 | GET | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | papel ≥ viewer | Modelos de contribuição do projeto (a OSC vê todos; os demais, só os aprovados juridicamente) |
 | POST | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | tipos: osc; papel ≥ manager | Propõe um modelo (doação, patrocínio, cotas, lei de incentivo, investimento de impacto). Nasce em rascunho |
 | GET | `/v1/projects/{project_id}/equity` | membro da organização ativa | papel ≥ viewer | O contexto declarado do projeto, as barreiras e o que é normalizável |
@@ -677,6 +680,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/proposals/{proposal_id}/attachments` | membro da organização ativa | papel ≥ member | Anexa documento do cofre à proposta e avisa a outra parte e a equipe |
 | POST | `/v1/proposals/{proposal_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, aceita, recusa, pede ajuste ou retira |
 | GET | `/v1/public/campaigns/{slug}` | pública | limite 120/3600s | Campanha pública: história do projeto, meta e QUANTAS COTAS FALTAM |
+| GET | `/v1/public/glossary` | pública | limite 120/3600s | Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json) |
 | GET | `/v1/public/locales` | pública | limite 120/3600s | Idiomas disponíveis, com a cobertura real de tradução declarada |
 | GET | `/v1/public/profiles/{handle}` | pública | — | Perfil público: lê SÓ a projeção curada (public_fields), nunca tabela privada |
 | GET | `/v1/public/profiles/{handle}/open-graph` | pública | — | Metadados de compartilhamento, montados da mesma projeção |

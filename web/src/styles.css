@@ -447,3 +447,17 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .form-step-hint { margin: 0; color: var(--texto-3); font-size: 14px; }
 .form-step-blocked { margin: 0; padding: 10px 12px; background: var(--folha); border: 1px dashed var(--linha); border-radius: var(--raio-s); color: var(--texto-3); font-size: 14px; }
 .form-step-locked .form-step-title { color: var(--texto-3); }
+
+/* ---------------------------------------------------------- primeiro acesso (v0.19.0)
+   Estilo deliberadamente sóbrio: a camada de design vai reestilizar. O que precisa resistir a
+   essa reestilização é a HIERARQUIA — motivo da ausência antes do botão, e nunca um botão sem
+   motivo ao lado. */
+.empty-areas { display: grid; gap: 1rem; }
+.empty-area { border: 1px solid var(--line); border-radius: 8px; padding: 1rem; }
+.empty-area h4 { margin: 0 0 .25rem; }
+.empty-why { margin: 0 0 .5rem; font-weight: 600; }
+.empty-facts { display: grid; grid-template-columns: minmax(8rem, auto) 1fr; gap: .25rem .75rem; margin: .75rem 0; font-size: .9rem; }
+.empty-facts dt { color: var(--muted); }
+.empty-facts dd { margin: 0; }
+.empty-blocked { margin: .5rem 0 0; font-weight: 600; }
+@media (max-width: 40rem) { .empty-facts { grid-template-columns: 1fr; } .empty-facts dd { margin-bottom: .4rem; } }

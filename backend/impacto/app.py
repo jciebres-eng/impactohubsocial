@@ -46,6 +46,19 @@ class AppState:
         self.ai = AiGateway(settings)
         from .services.billing import make_billing_provider
         self.billing = make_billing_provider(settings)
+        # Toda tentativa de envio passa a deixar registro em email_events. Fica aqui, e não nos oito
+        # pontos que enviam e-mail, para que nenhum deles possa esquecer.
+        self.mailer.on_event = self._record_email_event
+
+    def _record_email_event(self, event: dict) -> None:
+        """Grava a tentativa de envio. Guarda o DOMÍNIO do destinatário, nunca o endereço."""
+        from .db.pool import DbContext
+        with self.pool.tx(DbContext(system=True)) as c:
+            c.run("INSERT INTO email_events(message_id, kind, to_domain, status, provider,"
+                  " retry_count, duration_ms, error) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+                  event.get("message_id"), event["kind"], event["to_domain"], event["status"],
+                  event["provider"], event.get("retry_count", 0), event.get("duration_ms"),
+                  event.get("error"))
 
 
 def db_role_problems(pool) -> list[str]:

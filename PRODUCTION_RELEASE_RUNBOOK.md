@@ -1,4 +1,4 @@
-# Runbook de publicação — v0.18.1
+# Runbook de publicação — v0.19.0
 
 > Um item por linha, com **O QUÊ · POR QUÊ · ONDE · COMO · QUEM · QUANDO · VALIDAÇÃO · ROLLBACK**.
 > Escrito para ser executado por alguém que não participou da construção.
@@ -69,6 +69,79 @@ ADMIN_DATABASE_URL=... bash scripts/restore_test.sh backups/<arquivo>.dump
 
 **Critério de liberação:** smoke sem falha obrigatória · `/readyz` declarando provedores reais ·
 restauração provada · auditoria de dependências anexada · alertas da §5 ativos.
+
+## 4-A. Backup agendado, RPO e RTO (v0.19.0)
+
+Até a v0.18.1 este runbook mandava rodar `scripts/backup.sh` à mão antes de migrar, e isso era tudo
+que existia: **nada agendava o backup** — nenhum cron, nenhum serviço, nenhum passo de CI. A v0.19.0
+colocou o agendamento no executor de tarefas que já roda (`python3 -m impacto.jobs loop`), com janela
+própria.
+
+### Configurar (sem isto, NÃO existe backup)
+
+| Variável | Para quê | Sem ela |
+|---|---|---|
+| `BACKUP_DIR` | destino dos dumps | tarefa registra `not_configured` |
+| `BACKUP_DATABASE_URL` | papel com leitura completa (`impacto_owner`), **não** o da aplicação | tarefa registra `not_configured` |
+| `BACKUP_INTERVAL_HOURS` | janela (padrão 24) | — |
+| `BACKUP_KEEP` | quantos dumps manter (padrão 14) | — |
+| `BACKUP_OFFSITE_CMD` | comando que recebe o dump como `$1` (`rclone copy`, `aws s3 cp`) | só cópia local — **não é recuperação de desastre** |
+
+### Conferir que está rodando
+
+```bash
+# veredito por tarefa, incluindo "nunca executou" e "não configurado"
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" https://SEU-DOMINIO/v1/admin/ops/health | jq .
+```
+
+O que a tarefa confere em cada execução, e registra em `ops_job_runs.detail`: tamanho do arquivo,
+`sha256` contra o `.sha256` gravado, e `pg_restore --list` (que pega o caso do arquivo que existe,
+tem tamanho e **não** é um backup válido). Falha não é silenciosa: a execução fica `failed` com o
+erro, e a janela **não** se fecha — porque a janela conta do último SUCESSO, não da última tentativa.
+
+### RPO e RTO
+
+**Os números-alvo são decisão do proprietário — `DATA_TO_CONFIRM`.** O que é técnico e já está
+decidido é o que a configuração ENTREGA:
+
+| | O que a configuração entrega | O que ainda falta decidir |
+|---|---|---|
+| **RPO** (quanto de dado se aceita perder) | com `BACKUP_INTERVAL_HOURS=24`, até 24 h + a duração do dump. Com `=6`, até 6 h. O provedor de PostgreSQL gerenciado costuma oferecer PITR, que levaria o RPO a minutos — **somar os dois é o desenho correto**: este backup é camada ADICIONAL | o alvo aceitável para o negócio, e se o provedor terá PITR contratado |
+| **RTO** (quanto tempo até voltar) | `scripts/restore_test.sh` mede o ciclo completo (restaurar → migrar → subir → validar) no ambiente onde roda. **Use a medição, não uma estimativa** | o alvo aceitável, e onde fica o ambiente de recuperação |
+
+Preencha a tabela abaixo com a medição do SEU ambiente antes de abrir ao público:
+
+| Medida | Valor medido | Medido em | Por quem |
+|---|---|---|---|
+| Duração do `backup.sh` em produção | _a medir_ | | |
+| Tamanho do dump | _a medir_ | | |
+| Ciclo de `restore_test.sh` (RTO observado) | _a medir_ | | |
+| RPO alvo decidido | _a decidir_ | | |
+| RTO alvo decidido | _a decidir_ | | |
+
+### Cópia externa — `BLOCKED_EXTERNAL`
+
+A plataforma tem o gancho (`BACKUP_OFFSITE_CMD`) e **não** tem destino: isso depende de conta e
+credencial de armazenamento, que é decisão e contratação do proprietário. Enquanto não houver,
+`GET /v1/admin/ops/health` devolve `backup_offsite_configured: false` e o texto diz, sem rodeio, que
+backup local no mesmo host não é recuperação de desastre — um incidente leva o banco e os dumps
+juntos.
+
+## 4-B. Canário de e-mail (v0.19.0)
+
+O cadastro depende do e-mail de verificação. Com falha silenciosa de SMTP, o funil de entrada vai a
+zero e a plataforma continua respondendo 202 em `/v1/auth/register`.
+
+1. Defina `EMAIL_CANARY_TO` com um endereço **monitorado por pessoa** (caixa de operação, não um
+   alias que ninguém abre) e `EMAIL_CANARY_INTERVAL_MINUTES` (padrão 60).
+2. Configure o alerta sobre duas coisas, as duas em `GET /v1/admin/ops/health`:
+   * `jobs[job=email_canary].verdict` diferente de "última execução concluída";
+   * `email.failed > 0` na janela de 60 minutos.
+3. **Leia o vocabulário com cuidado:** `accepted_by_smtp` significa que o servidor ACEITOU a
+   mensagem. Não é entrega. A plataforma não recebe retorno de entrega do provedor (webhook de
+   bounce/delivery), e por isso não afirma entrega em nenhum lugar. Se o canário "passa" e as pessoas
+   não recebem, o problema está depois do SMTP — reputação de domínio, SPF/DKIM/DMARC, filtro do
+   destinatário — e isso se investiga no painel do provedor, não aqui.
 
 ## 5. Observabilidade mínima antes de abrir
 

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { api } from "../api";
+// Vocabulário oficial: o rótulo de banda sai de config/glossary.json (gerado em src/glossary.ts).
+import { CONFIDENCE_BAND, term } from "../glossary";
 import { date, dateTime } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea,
@@ -18,8 +20,6 @@ const LEVEL: [string, string][] = [["low", "Baixa"], ["medium", "Média"], ["hig
 const RISK_STATUS: [string, string][] = [["open", "Aberto"], ["mitigating", "Em mitigação"], ["accepted", "Aceito"],
   ["resolved", "Resolvido"], ["materialized", "Materializou"], ["dismissed", "Descartado"]];
 const SEVERITY_TONE: Record<string, string> = { critical: "bad", high: "bad", medium: "warn", low: "good" };
-const BAND_LABEL: Record<string, string> = { high: "confiança alta", medium: "confiança média",
-  low: "confiança baixa — trate como indício", insufficient_data: "dados insuficientes — não é recomendação" };
 const ASM_STATUS: Record<string, string> = { drafting: "Em preenchimento", ready: "Pronta para gerar", blocked: "Bloqueada",
   generated: "Documento gerado", in_review: "Em revisão", approved: "Aprovada", rejected: "Recusada na revisão",
   signed: "Assinada", archived: "Arquivada" };
@@ -405,7 +405,7 @@ export function AnalysisView({ a }: { a: any }) {
       <Panel title="Leitura da plataforma">
         <KeyValue items={[
           ["Completude", `${a.current_state.completeness}%`],
-          ["Confiança", `${a.confidence}% — ${BAND_LABEL[a.confidence_band] || a.confidence_band}`],
+          ["Confiança", `${a.confidence}% — ${term(CONFIDENCE_BAND, a.confidence_band)}`],
           ["Evidências conhecidas", `${a.evidence_summary.known} de ${a.evidence_summary.total} · ${a.evidence_summary.verified} verificada(s)`],
           ["Motor", a.engine_version],
         ]} />

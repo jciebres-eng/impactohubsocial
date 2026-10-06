@@ -285,3 +285,11 @@ class DecisionQ(In):
     subject_id: Uuid | None = None
     assignment_id: Uuid | None = None
     limit: Annotated[int, Field(ge=1, le=200)] = 100
+
+
+# ---------------------------------------------------------------- primeiro acesso (v0.19.0)
+class FirstRunQ(In):
+    """`project_id` é opcional de propósito: sem projeto escolhido, as áreas de escopo de projeto
+    voltam com o pré-requisito explícito em vez de uma contagem falsa de zero."""
+
+    project_id: Uuid | None = None

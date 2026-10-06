@@ -1,4 +1,4 @@
-# Registro de dívida técnica — v0.18.1
+# Registro de dívida técnica — v0.19.0
 
 > Uma linha por item, com impacto, solução, esforço, dependência, risco de não corrigir e as duas
 > perguntas que decidem a fase: **bloqueia o Designer?** **bloqueia a publicação web?**
@@ -16,7 +16,8 @@
 | C4 | **Docker não construído nem executado neste ambiente** | `Dockerfile` existe e está correto na leitura, mas build/run/healthcheck não foram exercitados aqui | `docker build` + `docker run` + `/healthz` + `/readyz` + migrations no contêiner | 2–4 h | docker disponível | descobrir no dia da publicação que a imagem não sobe | **Não** | **Sim** |
 | C5 | **Observabilidade sem coletor** | logs estruturados e `/metrics` existem; ninguém está lendo | Prometheus/Grafana (ou equivalente) + alertas da §41 do pedido | 4–8 h | infraestrutura | falha silenciosa em produção: fila parada, webhook falhando, e-mail não entregue | **Não** | **Sim** |
 | C6 | **Carga medida só na mesma máquina** | 160 rps com 12 threads, 0 erro — mas cliente, API e banco no mesmo host | repetir contra o ambiente de homologação, com rede real e banco separado | 2–4 h | ambiente de homologação | dimensionar errado e cair na primeira campanha | **Não** | **Sim** |
-
+| C7 | **Cópia externa de backup não configurada** (novo na v0.19.0) | o backup agora roda e é conferido, mas fica no mesmo host: um incidente leva o banco e os dumps juntos | definir `BACKUP_OFFSITE_CMD` para um destino fora da máquina (bucket versionado) e provar uma restauração a partir dele | 2–4 h | conta e credencial de armazenamento do proprietário | perder banco e backup no mesmo incidente | **Não** | **Sim** |
+| C8 | **RPO e RTO alvo não decididos** (novo na v0.19.0) | o que a configuração entrega está escrito no runbook §4-A; o que o negócio aceita perder, não | decidir os dois números e ajustar `BACKUP_INTERVAL_HOURS` (e contratar PITR do provedor, se o alvo for de minutos) | decisão | proprietário | descobrir o RPO real no dia do incidente | **Não** | **Sim** |
 ## HIGH — não bloqueia a publicação; bloqueia a *maturidade* do produto
 
 | # | Item | Impacto | Solução | Esforço | Bloqueia design? | Bloqueia web? |
@@ -25,11 +26,13 @@
 | H2 | **Mapeamento para GRI, ISSB e IRIS+ ausente** | relatório para esses referenciais não é possível; os três estão `registry_only` | decisão de produto + jurídica (as minutas da v0.17.0 os excluem), depois mapear indicador a indicador | dias | **Não** | **Não** |
 | H3 | **Decaimento por idade na reputação** | observação de três anos pesa como a de ontem | aplicar `core/evidence.freshness()` às dimensões, versionando o motor | 4–8 h | **Não** | **Não** |
 | H4 | **Detecção de conluio** | duas organizações que validam medições uma da outra sobem em duas dimensões | grafo de validação recíproca + marca de revisão humana (nunca acusação automática) | 1–2 dias | **Não** | **Não** |
-| H5 | **Sinal de impacto só no sentido financiador→projeto** | a OSC que olha um edital não vê o contexto de equidade influenciar o match dela | decidir se contexto entra como prontidão no sentido OSC→edital (não é critério de aderência ao edital) | 4–8 h | **Não** | **Não** |
-| H6 | **Telas da camada v0.18.0 não existem** | reputação, selo, alegação, responsabilidade e equidade só existem por API | é a fase de design, com o handoff desta rodada | — | **É o trabalho dele** | **Sim** (sem tela não há produto publicável) |
+| H5 | **Sinal de impacto só no sentido financiador→projeto** — *parcialmente endereçada na v0.19.0* | a assimetria do SINAL continua; o que mudou é que a OSC passou a ver o retorno OPERACIONAL de declarar contexto (`GET /v1/projects/{id}/context-return`, ADR-234), então o formulário mais caro do produto deixou de não devolver nada | decidir se contexto entra como prontidão no sentido OSC→edital (não é critério de aderência ao edital) | 4–8 h | **Não** | **Não** |
+| H6 | **Seis telas da camada v0.18.0 não existem** | equidade, ODS, alegação, reputação, selo e responsabilidade só existem por API. Na v0.19.0 isso deixou de ser conhecimento tácito: a própria API declara `screen_status: to_be_designed` e um teste garante que a lista não mente | é a fase de design, com `DESIGN_HANDOFF_FINAL.md` §3 (tabela tela a tela, com a rota que cada uma consome) | — | **É o trabalho dele** | **Sim** (sem tela não há produto publicável) |
 | H7 | **Procedência do preenchimento não é persistida** | `Suggest` devolve `{filled_by, origin, replaced_text}` e nenhum formulário grava | coluna/jsonb de procedência nos formulários que importam | 4–8 h | **Não** | **Não** |
 | H8 | **Verificação pública dos selos novos** | `/v1/public/verify/{code}` serve os registros da v0.14.0, não os selos da v0.18.0 | ligar `seal_awards` à verificação pública com código curto | 4–8 h | **Não** | **Não** |
-
+| H8 | **Tradução do conteúdo editorial do banco** (novo na v0.19.0) | as 12 regras de alegação, 12 de selo, 6 dimensões de reputação, 8 papéis e o catálogo de barreiras só existem em pt-BR | traduzir os textos de catálogo para en/es depois que o design estabilizar a redação | 1–2 dias | **Não** | **Não** (declarado em `locales.coverage_note`) |
+| H9 | **Entrega de e-mail não é confirmada pelo provedor** (novo na v0.19.0) | a plataforma sabe que o SMTP ACEITOU, não que a pessoa recebeu; bounce e caixa de spam são invisíveis | receber webhook de bounce/entrega do provedor e acrescentar os estados correspondentes a `email_events` | 4–8 h | provedor de e-mail escolhido | **Não** | **Não** (o vocabulário já não mente: `accepted_by_smtp`) |
+| H10 | **Procedência do preenchimento do primeiro acesso não é medida** (novo na v0.19.0) | não se sabe quais áreas vazias viram ação e quais são abandonadas | registrar evento ao executar a ação sugerida por `GET /v1/firstrun` | 2–4 h | **Não** | **Não** |
 ## MEDIUM
 
 | # | Item | Observação |

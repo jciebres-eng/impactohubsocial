@@ -295,7 +295,10 @@ class PrivacyTests(unittest.TestCase):
         with app_tx(self.c) as conn, self.assertRaises(Exception) as e:
             conn.run("UPDATE legal_acceptances SET ip = '198.51.100.9' WHERE user_id = $1",
                      self.c.user["id"])
-        self.assertIn("APAGADOS", str(e.exception),
+        # A migração 0035 separou as mensagens de IP e de agente de usuário (antes era uma só, no
+        # plural) para permitir a anonimização de org_id que a chave estrangeira promete. A RECUSA é
+        # a mesma; só o texto ficou específico.
+        self.assertIn("APAGADO", str(e.exception),
                       "o app TEM permissão nesta coluna; quem recusa é o gatilho")
 
     def test_deleting_the_account_erases_the_ip_and_keeps_the_proof(self):

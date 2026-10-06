@@ -245,6 +245,26 @@ def _current_denominators(conn: Connection, *, project_id: str, territory: str |
     return out
 
 
+def methods_available(conn: Connection, *, project_id: str) -> dict:
+    """Quais métodos de normalização existem HOJE para este projeto, e o que falta para os outros.
+
+    Usa a MESMA resolução de denominador que `normalize()` (`_current_denominators`): o do projeto
+    ganha do territorial, e denominador sem fonte não vale. Duplicar essa regra em outro módulo
+    criaria duas verdades sobre o que está disponível — e a tela mostraria uma, o cálculo outra.
+    """
+    territory = conn.scalar("SELECT territory FROM projects WHERE id = $1", project_id)
+    dens = _current_denominators(conn, project_id=project_id, territory=territory)
+    disponiveis, faltantes = [], []
+    for method, spec in METHODS.items():
+        item = {"method": method, "label": spec["label"], "denominator": spec["denominator"]}
+        if spec["denominator"] in dens:
+            den = dens[spec["denominator"]]
+            disponiveis.append({**item, "source_name": den["source_name"], "scope": den["scope"]})
+        else:
+            faltantes.append(item)
+    return {"available": disponiveis, "missing": faltantes, "total": len(METHODS)}
+
+
 # ================================================================================================ numerador
 def _numerator(conn: Connection, *, project_id: str, indicator_id: str | None) -> dict:
     """O numerador é escolhido por quem pergunta, nunca adivinhado.

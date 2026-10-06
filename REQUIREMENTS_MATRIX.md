@@ -1,4 +1,4 @@
-# Matriz de requisitos — reconciliação histórica (v0.7.0 → v0.18.1)
+# Matriz de requisitos — reconciliação histórica (v0.7.0 → v0.19.0)
 
 > Esta matriz responde à pergunta do pedido: **"tudo que foi pedido ao longo da evolução do Impacto
 > está realmente implementado, integrado e funcionando?"** — e não apenas "o que existe agora".
@@ -10,8 +10,9 @@
 >
 > Toda linha **A** aponta o arquivo de teste que a sustenta. Nenhuma linha diz A por documento.
 
-**Estado medido nesta rodada:** 285 tabelas · 34 migrações · 309 funções SQL · 593 políticas de RLS
-· 815 operações de API · 28 motores declarados · 1.298 testes (0 falhas, 26 em passo próprio).
+**Estado medido na v0.19.0:** 287 tabelas · 36 migrações · 309 funções SQL · 598 políticas de RLS ·
+802 índices · 819 operações de API · 65 arquivos de teste. Contagem de testes e resultado da suíte:
+`FINAL_PRE_DESIGN_RELEASE_REPORT.md` (medidos, não repetidos de memória).
 
 ## 1. Núcleo do produto (ciclo de impacto)
 
@@ -29,6 +30,31 @@
 | 10 | Inteligência (match, diagnóstico, recomendação) | **A** | `engines/match`, `core/diagnostic.py` | `test_unit.py` (match), jornada passos 03 e 08 |
 | 11 | Governança (auditoria, trilha, moderação) | **A** | `audit_events` encadeado, `moderação` (8 rotas) | `test_security_tenancy.py`, jornada passo 18 |
 | 12 | **Os módulos conversam** (não são ilhas) | **A** | a jornada percorre 18 passos sem atalho de banco | `test_e2e_v0181_journeys.py` — 1 projeto, 18 etapas, 1 trilha |
+
+## 1-A. Vocabulário, primeiro acesso e operação (v0.19.0)
+
+| # | Requisito (origem: PROMPT MASTER pré-designer, §6–§12, §33–§39) | Classe | Onde está | Prova |
+|---|---|---|---|---|
+| 61 | Dicionário central de termos, com terminologia consistente | **A** | `config/glossary.json` (123 termos, 23 domínios), `GLOSSARY.md` | `test_v0190_glossary.py` (13) |
+| 62 | I18N central com namespaces coerentes, sem refatoração destrutiva | **A** | 29 namespaces, 221 chaves por idioma; os 6 do núcleo intactos | `test_v0190_glossary.py::test_i18n_tem_os_namespaces...` |
+| 63 | Teste que detecta enum/status/origem/banda/revogação **sem rótulo** | **A** | `core/glossary.py::missing()` nas duas direções | `test_todo_valor_vivo_tem_rotulo...` + `test_o_detector_realmente_reprova` |
+| 64 | A interface consome o vocabulário em vez de copiá-lo | **A** | `web/src/glossary.ts` gerado; `core.tsx` importa | `sync_glossary.py --check` dentro da suíte |
+| 65 | Primeiro acesso: toda área vazia responde as nove perguntas | **A** | `GET /v1/firstrun`, 12 áreas | `test_v0190_firstrun.py` (16) |
+| 66 | Nenhum dado inventado para encher tela | **A** | contagem real; `counted:false` quando não há o que contar | `test_nenhuma_area_devolve_dado_inventado` |
+| 67 | Próxima ação por tela, sem CTA comercial artificial | **A** | `next_action` com método, rota e tela reais | `test_toda_rota_de_proximo_passo_existe_no_roteador` |
+| 68 | Valor devolvido por declarar contexto, **sem ranking** | **A** | `GET /v1/projects/{id}/context-return`, 8 chaves | `test_declarar_contexto_nao_mexe_na_reputacao` |
+| 69 | Exclusão (LGPD) ponta a ponta sobre as tabelas novas | **A** | varredura de todas as colunas de texto após a exclusão | `test_v0190_lgpd_deletion.py` (13) |
+| 70 | Classificação DELETABLE / RETAINABLE / ANONYMIZABLE / AUDIT_ONLY | **A** | `config/data_retention.json` + classe `append_only`; `DATA_RETENTION.md` gerado | `test_classe_declarada_bate_com_a_regra_real_da_chave` |
+| 71 | Trilha que precisa ser preservada **não** é destruída | **A** | remoção de organização recusada por evidência e por append-only | `OrganizationNotRemovableTests` (3) |
+| 72 | Backup com agendador de verdade | **A** | tarefa `backup` em `impacto/jobs.py`, com janela própria | `test_v0190_ops.py::BackupJobTests` (7), com `pg_dump` real |
+| 73 | Backup conferido, não apenas gerado | **A** | tamanho + sha256 + `pg_restore --list` | `test_o_backup_roda_de_verdade_e_o_dump_e_valido` |
+| 74 | RPO/RTO | **I** | runbook §4-A: o que a configuração ENTREGA está escrito; os **alvos** são decisão do proprietário | `DATA_TO_CONFIRM` declarado |
+| 75 | Backup externo (offsite) | **I** | gancho `BACKUP_OFFSITE_CMD` pronto; destino depende de conta e credencial | `BLOCKED_EXTERNAL` declarado; a rota de saúde devolve `offsite: false` |
+| 76 | Canário de e-mail | **A** | tarefa `email_canary`, envio real pelo mailer configurado | `test_o_canario_envia_de_verdade_e_registra_o_resultado` |
+| 77 | Observabilidade de e-mail (evento, id, status, provedor, erro, tentativas) | **A** | `email_events`, ligado no mailer e não nos 8 pontos de envio | `EmailObservabilityTests` (6) |
+| 78 | Não declarar entrega quando houve apenas aceitação SMTP | **A** | `accepted_by_smtp`; o CHECK do banco não aceita `delivered` | `test_o_estado_de_sucesso_se_chama_aceitacao_e_nao_entrega` |
+| 79 | Sem armazenar conteúdo sensível de e-mail | **A** | guarda o domínio; nunca endereço nem corpo | `test_o_registro_guarda_o_dominio_e_nunca_o_endereco` |
+| 80 | As seis telas que faltam são declaradas, não escondidas | **A** | `screen_status: to_be_designed` + `DESIGN_HANDOFF_FINAL.md` §3 | `test_area_sem_tela_declara_que_a_tela_sera_desenhada` |
 
 ## 2. Impacto contextualizado (v0.18.0–v0.18.1)
 
@@ -78,19 +104,19 @@
 
 | # | Requisito | Classe | Prova / pendência |
 |---|---|---|---|
-| 47 | Suíte PostgreSQL real, banco do zero | **A** | 1.298 testes; `docs/evidence/test_run_v0.18.1.log` |
+| 47 | Suíte PostgreSQL real, banco do zero | **A** | v0.19.0: ver `docs/evidence/test_run_v0.19.0.log` |
 | 48 | Caminho de atualização v0.17.0 → v0.18.x com dado | **A** | `test_v0181_migrations.py` (8) |
 | 49 | Migration que falha não deixa metade aplicada | **A** | mesmo arquivo, teste próprio |
 | 50 | Concorrência e corrida nas entidades novas | **A** | `test_v0181_concurrency.py` (9) |
 | 51 | E2E de jornada completa | **A** | `test_e2e_v0181_journeys.py` (18) |
-| 52 | E2E de navegador (SPA, desktop e mobile) | **B** | `test_e2e_web.py` cobre cadastro→projeto→publicação; **as telas da camada v0.18.0 não existem ainda** (fase de design) |
+| 52 | E2E de navegador (SPA, desktop e mobile) | **B** | `test_e2e_web.py` cobre cadastro→projeto→publicação; **as seis telas da camada v0.18.0 não existem** — declaradas uma a uma em `DESIGN_HANDOFF_FINAL.md` §3 e verificadas por teste |
 | 53 | Smoke de publicação | **A** | `scripts/smoke_test.py` (20 verificações) + `test_v0181_smoke.py` |
 | 54 | Carga concorrente | **B** | 12 threads, 3.207 req, 160 rps, 0 erro — **mesma máquina**, não é capacidade de produção |
 | 55 | Acessibilidade formal | **B** | 12 verificações no navegador; **axe e leitor de tela: NOT VERIFIED** |
 | 56 | Auditoria de dependências | **G** | **BLOCKED BY ENVIRONMENT** (npm 403, PyPI indisponível) — controles offline verificados |
 | 57 | Docker: build, run, healthcheck | **G** | `Dockerfile` com usuário não-root e `--no-server-header`; **docker não disponível neste ambiente** |
 | 58 | Backup → restore → aplicação | **A** | `restore_test.sh` com 6 conferidores novos da camada de impacto |
-| 59 | Observabilidade | **B** | `/metrics`, logs estruturados com `request_id`/`trace_id`, `job_runs`; **sem coletor configurado** |
+| 59 | Observabilidade | **B** | `/metrics`, logs com `request_id`/`trace_id`, `job_runs`, e na v0.19.0 `ops_job_runs` + `email_events` + `GET /v1/admin/ops/health`; **sem coletor configurado** |
 | 60 | Integrações externas (Stripe, SMTP, S3, ClamAV, IA, fiscal, OIDC) | **I** | todas em modo simulado/declarado; o `/readyz` **diz qual provedor está ligado** |
 
 ## 5. O que esta matriz NÃO afirma

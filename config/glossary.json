@@ -1,0 +1,1156 @@
+{
+  "version": "1.0",
+  "source_locale": "pt-BR",
+  "locales": [
+    "pt-BR",
+    "en",
+    "es"
+  ],
+  "note": "VOCABULÁRIO OFICIAL do Impacto Trust. Este arquivo é a origem: o rótulo que a interface mostra, o termo que a API devolve e o texto de ajuda têm de sair daqui. Os rótulos são sincronizados para config/i18n.json (e de lá para a tabela translations) por scripts/sync_glossary.py. A definição em pt-BR é para quem desenha e para quem escreve texto de ajuda — não é texto de tela.",
+  "tiers": {
+    "enum": "Valor de enum que a interface mostra e que NÃO tem tabela de catálogo. Cobertura obrigatória nos três idiomas. O teste tests/test_v0190_glossary.py reprova se um valor novo aparecer no código ou na migração sem entrada aqui.",
+    "catalog": "Termo que já vive em tabela de catálogo no banco, com name_pt e texto explicativo próprios (claim_rules, seal_rules, reputation_dimensions, responsibility_roles, responsibility_decision_kinds, equity_barrier_catalog). A origem desses termos é o banco, não este arquivo: duplicar aqui criaria duas verdades. O teste exige name_pt e explicação não vazios em todas as linhas. Tradução de catálogo é DEFER_POST_DESIGN — é conteúdo editorial longo e pt-BR é o idioma de origem declarado em locales.coverage_note."
+  },
+  "domains": {
+    "claim_status": {
+      "title": "Situação da alegação",
+      "appears_in": "GET /v1/claims, GET /v1/claims/{id} — campo status (derivado, não armazenado)",
+      "note": "A situação é DERIVADA das conferências e revisões; não existe coluna de status que alguém possa editar.",
+      "terms": {
+        "unchecked": {
+          "label": {
+            "pt-BR": "não verificada",
+            "en": "not checked",
+            "es": "no verificada"
+          },
+          "definition": "A alegação foi declarada e ainda não passou por nenhuma rodada de conferência automática."
+        },
+        "substantiated": {
+          "label": {
+            "pt-BR": "sustentada pelo que está registrado",
+            "en": "supported by the record",
+            "es": "sustentada por lo registrado"
+          },
+          "definition": "Nenhuma regra apontou problema: o texto encontra apoio nas medições, evidências e documentos já registrados. Não significa auditada nem certificada."
+        },
+        "attention": {
+          "label": {
+            "pt-BR": "pontos de atenção",
+            "en": "points of attention",
+            "es": "puntos de atención"
+          },
+          "definition": "As regras encontraram fragilidades de redação ou de base que não impedem a publicação, mas que um leitor atento vai questionar."
+        },
+        "flagged": {
+          "label": {
+            "pt-BR": "marcada — exige revisão humana de outra organização",
+            "en": "flagged — needs human review by another organization",
+            "es": "marcada — requiere revisión humana de otra organización"
+          },
+          "definition": "Pelo menos uma regra grave foi acionada. A marca só sai com revisão feita por pessoa de OUTRA organização, convidada para a rodada."
+        },
+        "flagged_accepted_by_review": {
+          "label": {
+            "pt-BR": "marcada e aceita em revisão, com a marca mantida",
+            "en": "flagged and accepted in review, flag kept",
+            "es": "marcada y aceptada en revisión, con la marca mantenida"
+          },
+          "definition": "Um revisor externo aceitou a alegação, mas a marca permanece visível: a aceitação humana não apaga o apontamento automático."
+        },
+        "needs_change": {
+          "label": {
+            "pt-BR": "revisão pediu alteração",
+            "en": "review requested changes",
+            "es": "la revisión solicitó cambios"
+          },
+          "definition": "Um revisor externo analisou e devolveu pedindo alteração no texto ou na base."
+        },
+        "rejected_by_review": {
+          "label": {
+            "pt-BR": "recusada em revisão",
+            "en": "rejected in review",
+            "es": "rechazada en revisión"
+          },
+          "definition": "Um revisor externo recusou a alegação. A recusa fica registrada de forma permanente."
+        },
+        "withdrawn": {
+          "label": {
+            "pt-BR": "retirada por quem a declarou",
+            "en": "withdrawn by the declarant",
+            "es": "retirada por quien la declaró"
+          },
+          "definition": "A própria organização retirou a alegação. O histórico da retirada permanece."
+        }
+      }
+    },
+    "claim_kind": {
+      "title": "Tipo de alegação",
+      "appears_in": "POST /v1/claims — campo claim_kind",
+      "terms": {
+        "result": {
+          "label": {
+            "pt-BR": "resultado",
+            "en": "result",
+            "es": "resultado"
+          },
+          "definition": "Afirmação sobre um resultado alcançado pelo projeto ou programa."
+        },
+        "ods_contribution": {
+          "label": {
+            "pt-BR": "contribuição a ODS",
+            "en": "SDG contribution",
+            "es": "contribución a los ODS"
+          },
+          "definition": "Afirmação de que o trabalho contribui para um Objetivo de Desenvolvimento Sustentável."
+        },
+        "esg": {
+          "label": {
+            "pt-BR": "ASG",
+            "en": "ESG",
+            "es": "ASG"
+          },
+          "definition": "Afirmação relativa a desempenho ambiental, social ou de governança."
+        },
+        "environmental": {
+          "label": {
+            "pt-BR": "ambiental",
+            "en": "environmental",
+            "es": "ambiental"
+          },
+          "definition": "Afirmação sobre efeito ambiental."
+        },
+        "social": {
+          "label": {
+            "pt-BR": "social",
+            "en": "social",
+            "es": "social"
+          },
+          "definition": "Afirmação sobre efeito social."
+        },
+        "governance": {
+          "label": {
+            "pt-BR": "governança",
+            "en": "governance",
+            "es": "gobernanza"
+          },
+          "definition": "Afirmação sobre práticas de governança da organização."
+        },
+        "efficiency": {
+          "label": {
+            "pt-BR": "eficiência",
+            "en": "efficiency",
+            "es": "eficiencia"
+          },
+          "definition": "Afirmação sobre custo por resultado, produtividade ou aproveitamento de recurso."
+        },
+        "financial": {
+          "label": {
+            "pt-BR": "financeira",
+            "en": "financial",
+            "es": "financiera"
+          },
+          "definition": "Afirmação sobre valores aplicados, captados ou economizados."
+        },
+        "comparative": {
+          "label": {
+            "pt-BR": "comparativa",
+            "en": "comparative",
+            "es": "comparativa"
+          },
+          "definition": "Afirmação que se compara a outras organizações, projetos ou médias."
+        },
+        "certification": {
+          "label": {
+            "pt-BR": "certificação",
+            "en": "certification",
+            "es": "certificación"
+          },
+          "definition": "Afirmação de que algo é certificado, homologado ou reconhecido oficialmente."
+        }
+      }
+    },
+    "claim_severity": {
+      "title": "Gravidade do apontamento",
+      "appears_in": "GET /v1/claims/{id} — checks[].severity; catálogo claim_rules.severity",
+      "terms": {
+        "info": {
+          "label": {
+            "pt-BR": "informação",
+            "en": "information",
+            "es": "información"
+          },
+          "definition": "Observação registrada para quem lê; não altera a situação da alegação."
+        },
+        "attention": {
+          "label": {
+            "pt-BR": "atenção",
+            "en": "attention",
+            "es": "atención"
+          },
+          "definition": "Fragilidade real que um leitor crítico vai apontar. Leva a alegação para 'pontos de atenção'."
+        },
+        "serious": {
+          "label": {
+            "pt-BR": "grave",
+            "en": "serious",
+            "es": "grave"
+          },
+          "definition": "Problema que impede sustentar a alegação sem revisão humana externa. Leva a alegação para 'marcada'."
+        }
+      }
+    },
+    "claim_review_decision": {
+      "title": "Decisão da revisão",
+      "appears_in": "POST /v1/claims/{id}/reviews — campo decision",
+      "terms": {
+        "accepted": {
+          "label": {
+            "pt-BR": "aceita",
+            "en": "accepted",
+            "es": "aceptada"
+          },
+          "definition": "O revisor externo considera a alegação sustentável. Se havia marca grave, a marca permanece visível."
+        },
+        "needs_change": {
+          "label": {
+            "pt-BR": "pede alteração",
+            "en": "changes requested",
+            "es": "solicita cambios"
+          },
+          "definition": "O revisor devolve para ajuste de texto, de base ou de período."
+        },
+        "rejected": {
+          "label": {
+            "pt-BR": "recusada",
+            "en": "rejected",
+            "es": "rechazada"
+          },
+          "definition": "O revisor conclui que a alegação não se sustenta com o que está registrado."
+        }
+      }
+    },
+    "reputation_band": {
+      "title": "Banda de confiança",
+      "appears_in": "GET /v1/reputation/{org} — dimensions[].band; coluna reputation_snapshots.band",
+      "note": "A banda qualifica a BASE do indício, não a qualidade da organização. Sem base suficiente não existe valor.",
+      "terms": {
+        "high": {
+          "label": {
+            "pt-BR": "confiança alta",
+            "en": "high confidence",
+            "es": "confianza alta"
+          },
+          "definition": "Há observações suficientes e recentes para tratar o indício como estável."
+        },
+        "medium": {
+          "label": {
+            "pt-BR": "confiança média",
+            "en": "medium confidence",
+            "es": "confianza media"
+          },
+          "definition": "Há base, mas em quantidade ou atualidade que pede cautela na leitura."
+        },
+        "low": {
+          "label": {
+            "pt-BR": "confiança baixa — trate como indício",
+            "en": "low confidence — treat as a hint",
+            "es": "confianza baja — trátelo como indicio"
+          },
+          "definition": "A base é pequena ou antiga. O número serve para conversar, não para decidir."
+        },
+        "insufficient": {
+          "label": {
+            "pt-BR": "dados insuficientes — não é recomendação",
+            "en": "insufficient data — not a recommendation",
+            "es": "datos insuficientes — no es una recomendación"
+          },
+          "definition": "Não há observações suficientes para calcular. Nesta banda o valor é obrigatoriamente vazio — o banco recusa qualquer número.",
+          "aliases": [
+            "insufficient_data"
+          ]
+        }
+      }
+    },
+    "reputation_dispute_outcome": {
+      "title": "Resultado da contestação de reputação",
+      "appears_in": "POST /v1/reputation/disputes/{id}/resolve — campo outcome",
+      "terms": {
+        "corrected": {
+          "label": {
+            "pt-BR": "corrigido",
+            "en": "corrected",
+            "es": "corregido"
+          },
+          "definition": "A contestação procedia e o dado de origem foi corrigido."
+        },
+        "partially_corrected": {
+          "label": {
+            "pt-BR": "corrigido em parte",
+            "en": "partially corrected",
+            "es": "corregido en parte"
+          },
+          "definition": "Parte do que foi contestado procedia e foi corrigida; o restante permanece."
+        },
+        "no_change": {
+          "label": {
+            "pt-BR": "sem alteração",
+            "en": "no change",
+            "es": "sin cambios"
+          },
+          "definition": "A análise não encontrou erro no dado de origem. A contestação continua registrada."
+        },
+        "needs_more_information": {
+          "label": {
+            "pt-BR": "falta informação",
+            "en": "needs more information",
+            "es": "falta información"
+          },
+          "definition": "Não foi possível concluir sem mais elementos de quem contestou."
+        }
+      }
+    },
+    "seal_status": {
+      "title": "Situação do selo concedido",
+      "appears_in": "GET /v1/seals/awards — status (derivado de seal_status())",
+      "terms": {
+        "active": {
+          "label": {
+            "pt-BR": "ativo",
+            "en": "active",
+            "es": "activo"
+          },
+          "definition": "O selo está válido: não expirou, não foi revogado e a definição segue publicada."
+        },
+        "expired": {
+          "label": {
+            "pt-BR": "expirado",
+            "en": "expired",
+            "es": "expirado"
+          },
+          "definition": "Passou a data de validade do selo. Expirar não é revogar."
+        },
+        "revoked": {
+          "label": {
+            "pt-BR": "revogado",
+            "en": "revoked",
+            "es": "revocado"
+          },
+          "definition": "O selo foi retirado por um motivo registrado."
+        },
+        "superseded_definition": {
+          "label": {
+            "pt-BR": "definição superada por versão nova",
+            "en": "definition superseded by a newer version",
+            "es": "definición superada por una versión nueva"
+          },
+          "definition": "O selo foi concedido sob uma versão da definição que já tem substituta. O que foi concedido não muda."
+        },
+        "definition_retired": {
+          "label": {
+            "pt-BR": "definição aposentada",
+            "en": "definition retired",
+            "es": "definición retirada"
+          },
+          "definition": "A definição que originou o selo foi aposentada e não concede mais."
+        }
+      }
+    },
+    "seal_revocation_reason": {
+      "title": "Motivo da revogação",
+      "appears_in": "POST /v1/admin/seals/awards/{id}/revoke — campo reason",
+      "terms": {
+        "criterion_no_longer_met": {
+          "label": {
+            "pt-BR": "critério deixou de ser satisfeito",
+            "en": "criterion no longer met",
+            "es": "el criterio dejó de cumplirse"
+          },
+          "definition": "O que sustentava o selo mudou: o critério conferido não vale mais."
+        },
+        "definition_retired": {
+          "label": {
+            "pt-BR": "definição aposentada",
+            "en": "definition retired",
+            "es": "definición retirada"
+          },
+          "definition": "A definição do selo saiu de uso."
+        },
+        "data_correction": {
+          "label": {
+            "pt-BR": "correção de dado",
+            "en": "data correction",
+            "es": "corrección de dato"
+          },
+          "definition": "Um dado usado na conferência estava errado e foi corrigido."
+        },
+        "request_of_holder": {
+          "label": {
+            "pt-BR": "pedido de quem recebeu",
+            "en": "holder's request",
+            "es": "a pedido de quien lo recibió"
+          },
+          "definition": "A própria organização pediu a retirada do selo."
+        },
+        "misconduct": {
+          "label": {
+            "pt-BR": "conduta",
+            "en": "misconduct",
+            "es": "conducta"
+          },
+          "definition": "Retirada por conduta apurada. O registro da revogação é permanente."
+        }
+      }
+    },
+    "seal_definition_status": {
+      "title": "Situação da definição de selo",
+      "appears_in": "GET /v1/seals/definitions — status",
+      "terms": {
+        "draft": {
+          "label": {
+            "pt-BR": "rascunho",
+            "en": "draft",
+            "es": "borrador"
+          },
+          "definition": "Em elaboração: ainda pode ter critério alterado e não concede selo."
+        },
+        "published": {
+          "label": {
+            "pt-BR": "publicada",
+            "en": "published",
+            "es": "publicada"
+          },
+          "definition": "Em vigor e imutável: critérios não podem mais ser alterados, só aposentados por uma versão nova."
+        },
+        "retired": {
+          "label": {
+            "pt-BR": "aposentada",
+            "en": "retired",
+            "es": "retirada"
+          },
+          "definition": "Saiu de uso e não concede mais. Os selos já concedidos permanecem."
+        }
+      }
+    },
+    "seal_scope": {
+      "title": "Abrangência do selo",
+      "appears_in": "seal_definitions.scope, seal_awards.scope",
+      "terms": {
+        "organization": {
+          "label": {
+            "pt-BR": "organização",
+            "en": "organization",
+            "es": "organización"
+          },
+          "definition": "O selo se refere à organização como um todo."
+        },
+        "project": {
+          "label": {
+            "pt-BR": "projeto",
+            "en": "project",
+            "es": "proyecto"
+          },
+          "definition": "O selo se refere a um projeto específico, não à organização."
+        }
+      }
+    },
+    "equity_standing": {
+      "title": "Firmeza da declaração de contexto",
+      "appears_in": "PUT /v1/projects/{id}/equity/context — additionality_standing; GET /v1/projects/{id}/equity",
+      "note": "Firmeza NÃO é nota: diz com que apoio a afirmação foi feita, não se ela é boa.",
+      "terms": {
+        "declared": {
+          "label": {
+            "pt-BR": "declarada",
+            "en": "declared",
+            "es": "declarada"
+          },
+          "definition": "A organização afirmou, sem documento nem evidência anexada. Vale como declaração própria."
+        },
+        "documented": {
+          "label": {
+            "pt-BR": "documentada (documento no cofre ou fonte citada com data)",
+            "en": "documented (document in the vault or a dated cited source)",
+            "es": "documentada (documento en la bóveda o fuente citada con fecha)"
+          },
+          "definition": "A afirmação aponta para um documento guardado na plataforma ou para uma fonte externa com nome e data."
+        },
+        "evidenced": {
+          "label": {
+            "pt-BR": "evidenciada (evidência registrada)",
+            "en": "evidenced (evidence on record)",
+            "es": "evidenciada (evidencia registrada)"
+          },
+          "definition": "A afirmação tem evidência registrada na plataforma, com origem e data verificáveis."
+        }
+      }
+    },
+    "equity_denominator": {
+      "title": "Tipo de denominador",
+      "appears_in": "POST /v1/equity/denominators — kind; GET /v1/equity/denominators",
+      "note": "Sem denominador vigente com fonte, o número normalizado devolve 'indisponível' — nunca uma estimativa.",
+      "terms": {
+        "eligible_population": {
+          "label": {
+            "pt-BR": "população elegível",
+            "en": "eligible population",
+            "es": "población elegible"
+          },
+          "definition": "Quantas pessoas se enquadram nos critérios do projeto no território."
+        },
+        "reference_population": {
+          "label": {
+            "pt-BR": "população de referência",
+            "en": "reference population",
+            "es": "población de referencia"
+          },
+          "definition": "População total do território usada como referência, de fonte oficial citada."
+        },
+        "households": {
+          "label": {
+            "pt-BR": "domicílios",
+            "en": "households",
+            "es": "hogares"
+          },
+          "definition": "Número de domicílios do território."
+        },
+        "enrolled": {
+          "label": {
+            "pt-BR": "matrículas ou cadastros",
+            "en": "enrolled",
+            "es": "matrículas o registros"
+          },
+          "definition": "Quantas pessoas estão matriculadas ou cadastradas no serviço."
+        },
+        "area_km2": {
+          "label": {
+            "pt-BR": "área em km²",
+            "en": "area in km²",
+            "es": "área en km²"
+          },
+          "definition": "Extensão territorial considerada."
+        },
+        "service_units": {
+          "label": {
+            "pt-BR": "unidades de serviço",
+            "en": "service units",
+            "es": "unidades de servicio"
+          },
+          "definition": "Equipamentos ou pontos de atendimento existentes no território."
+        },
+        "resource_cents": {
+          "label": {
+            "pt-BR": "recurso aplicado",
+            "en": "resources applied",
+            "es": "recurso aplicado"
+          },
+          "definition": "Valor efetivamente aplicado, em centavos, usado como denominador."
+        }
+      }
+    },
+    "equity_method": {
+      "title": "Método de normalização",
+      "appears_in": "GET /v1/projects/{id}/equity/normalization — method",
+      "note": "Número normalizado não é número absoluto, e a plataforma não converte um no outro.",
+      "terms": {
+        "per_eligible_population": {
+          "label": {
+            "pt-BR": "por 1.000 pessoas da população elegível declarada",
+            "en": "per 1,000 people in the declared eligible population",
+            "es": "por 1.000 personas de la población elegible declarada"
+          },
+          "definition": "Divide o resultado medido pela população elegível e apresenta por mil pessoas."
+        },
+        "per_reference_population": {
+          "label": {
+            "pt-BR": "por 1.000 pessoas da população de referência do território",
+            "en": "per 1,000 people in the territory's reference population",
+            "es": "por 1.000 personas de la población de referencia del territorio"
+          },
+          "definition": "Divide o resultado pela população total do território, de fonte oficial."
+        },
+        "per_household": {
+          "label": {
+            "pt-BR": "por 1.000 domicílios",
+            "en": "per 1,000 households",
+            "es": "por 1.000 hogares"
+          },
+          "definition": "Divide o resultado pelo número de domicílios do território."
+        },
+        "per_enrolled": {
+          "label": {
+            "pt-BR": "por 100 matrículas ou cadastros do serviço",
+            "en": "per 100 enrolments or registrations",
+            "es": "por 100 matrículas o registros del servicio"
+          },
+          "definition": "Divide o resultado pelo número de pessoas matriculadas ou cadastradas."
+        },
+        "per_area_km2": {
+          "label": {
+            "pt-BR": "por km² do território",
+            "en": "per km² of territory",
+            "es": "por km² del territorio"
+          },
+          "definition": "Divide o resultado pela área do território."
+        },
+        "per_service_unit": {
+          "label": {
+            "pt-BR": "por unidade de serviço existente no território",
+            "en": "per existing service unit in the territory",
+            "es": "por unidad de servicio existente en el territorio"
+          },
+          "definition": "Divide o resultado pelo número de equipamentos ou pontos de atendimento."
+        },
+        "per_resource": {
+          "label": {
+            "pt-BR": "por R$ 1.000 aplicados",
+            "en": "per BRL 1,000 applied",
+            "es": "por R$ 1.000 aplicados"
+          },
+          "definition": "Divide o resultado pelo recurso aplicado e apresenta por mil reais."
+        }
+      }
+    },
+    "responsibility_scope": {
+      "title": "Alcance da responsabilidade",
+      "appears_in": "POST /v1/responsibility/assignments — scope",
+      "terms": {
+        "organization": {
+          "label": {
+            "pt-BR": "organização",
+            "en": "organization",
+            "es": "organización"
+          },
+          "definition": "A pessoa responde pela organização inteira naquele papel."
+        },
+        "program": {
+          "label": {
+            "pt-BR": "programa",
+            "en": "programme",
+            "es": "programa"
+          },
+          "definition": "A responsabilidade vale para um programa."
+        },
+        "project": {
+          "label": {
+            "pt-BR": "projeto",
+            "en": "project",
+            "es": "proyecto"
+          },
+          "definition": "A responsabilidade vale para um projeto."
+        },
+        "document": {
+          "label": {
+            "pt-BR": "documento",
+            "en": "document",
+            "es": "documento"
+          },
+          "definition": "A responsabilidade vale para um documento específico e sua versão."
+        }
+      }
+    },
+    "framework_relation": {
+      "title": "Relação com o referencial",
+      "appears_in": "POST /v1/frameworks/mappings — relation",
+      "note": "A escada vai até 'auditado'. A plataforma NÃO é organismo certificador: 'certificado' é recusado pela API.",
+      "terms": {
+        "aligned": {
+          "label": {
+            "pt-BR": "alinhado — o indicador conversa com o referencial, sem conferência",
+            "en": "aligned — the indicator speaks to the framework, unchecked",
+            "es": "alineado — el indicador dialoga con el referencial, sin verificación"
+          },
+          "definition": "Degrau mais baixo: alguém afirma que há afinidade temática, e ninguém conferiu."
+        },
+        "mapped": {
+          "label": {
+            "pt-BR": "mapeado — há correspondência declarada com um código do referencial",
+            "en": "mapped — a declared correspondence to a framework code",
+            "es": "mapeado — hay correspondencia declarada con un código del referencial"
+          },
+          "definition": "Existe correspondência explícita a um código, declarada por quem mapeou."
+        },
+        "assessed": {
+          "label": {
+            "pt-BR": "avaliado — alguém analisou a correspondência e registrou a análise",
+            "en": "assessed — someone analysed the correspondence and recorded it",
+            "es": "evaluado — alguien analizó la correspondencia y registró el análisis"
+          },
+          "definition": "A correspondência foi analisada e a análise ficou registrada, com autor e data."
+        },
+        "reported": {
+          "label": {
+            "pt-BR": "relatado — o número foi publicado citando o referencial, com fonte",
+            "en": "reported — the figure was published citing the framework, with a source",
+            "es": "reportado — el número fue publicado citando el referencial, con fuente"
+          },
+          "definition": "O número foi efetivamente publicado em relatório citando o referencial."
+        },
+        "verified": {
+          "label": {
+            "pt-BR": "verificado — conferido por revisor de OUTRA organização",
+            "en": "verified — checked by a reviewer from ANOTHER organization",
+            "es": "verificado — verificado por un revisor de OTRA organización"
+          },
+          "definition": "Uma pessoa de outra organização conferiu e assinou a conferência."
+        },
+        "audited": {
+          "label": {
+            "pt-BR": "auditado — conferido por auditoria independente, com registro",
+            "en": "audited — checked by independent audit, on record",
+            "es": "auditado — verificado por auditoría independiente, con registro"
+          },
+          "definition": "Degrau mais alto: auditoria independente, com registro de quem auditou e quando."
+        }
+      }
+    },
+    "framework_lens": {
+      "title": "Lente de materialidade",
+      "appears_in": "POST /v1/materiality/assessments — lens",
+      "terms": {
+        "impact_only": {
+          "label": {
+            "pt-BR": "só impacto — quanto a organização afeta o mundo",
+            "en": "impact only — how the organization affects the world",
+            "es": "solo impacto — cuánto la organización afecta al mundo"
+          },
+          "definition": "Avalia apenas o efeito da organização para fora."
+        },
+        "financial_only": {
+          "label": {
+            "pt-BR": "só financeira — quanto o tema afeta a organização",
+            "en": "financial only — how the topic affects the organization",
+            "es": "solo financiera — cuánto el tema afecta a la organización"
+          },
+          "definition": "Avalia apenas o risco e a oportunidade que o tema traz para a organização."
+        },
+        "double": {
+          "label": {
+            "pt-BR": "dupla materialidade — os dois eixos",
+            "en": "double materiality — both axes",
+            "es": "doble materialidad — los dos ejes"
+          },
+          "definition": "Avalia os dois sentidos: o efeito para fora e o risco para dentro."
+        }
+      }
+    },
+    "evidence_source": {
+      "title": "Origem da evidência",
+      "appears_in": "Montagem de evidência (core/assembly.py) — provenance.source por campo",
+      "note": "A origem nunca é inferida da aparência do dado: ela é registrada no momento em que o dado entra.",
+      "terms": {
+        "absent": {
+          "label": {
+            "pt-BR": "ausente",
+            "en": "absent",
+            "es": "ausente"
+          },
+          "definition": "Não há dado. Ausência não é zero nem falha: é desconhecido."
+        },
+        "declared": {
+          "label": {
+            "pt-BR": "declarada pela organização",
+            "en": "declared by the organization",
+            "es": "declarada por la organización"
+          },
+          "definition": "A própria organização informou, sem comprovação anexada."
+        },
+        "inferred": {
+          "label": {
+            "pt-BR": "inferida pela plataforma",
+            "en": "inferred by the platform",
+            "es": "inferida por la plataforma"
+          },
+          "definition": "Derivada de outros dados por regra explícita. Nunca se apresenta como verificada."
+        },
+        "platform_record": {
+          "label": {
+            "pt-BR": "registro da plataforma",
+            "en": "platform record",
+            "es": "registro de la plataforma"
+          },
+          "definition": "Produzida pelo próprio funcionamento da plataforma, com data e autor."
+        },
+        "official_catalog": {
+          "label": {
+            "pt-BR": "catálogo oficial",
+            "en": "official catalogue",
+            "es": "catálogo oficial"
+          },
+          "definition": "Vem de carga oficial com fonte e data registradas."
+        },
+        "signed_document": {
+          "label": {
+            "pt-BR": "documento assinado",
+            "en": "signed document",
+            "es": "documento firmado"
+          },
+          "definition": "Documento com assinatura registrada na plataforma, ligada a versão."
+        },
+        "verified_document": {
+          "label": {
+            "pt-BR": "documento verificado",
+            "en": "verified document",
+            "es": "documento verificado"
+          },
+          "definition": "Documento conferido por quem tem competência para conferir, com registro."
+        },
+        "verified_credential": {
+          "label": {
+            "pt-BR": "credencial verificada",
+            "en": "verified credential",
+            "es": "credencial verificada"
+          },
+          "definition": "Registro profissional ou habilitação conferida junto à fonte."
+        },
+        "validated_measurement": {
+          "label": {
+            "pt-BR": "medição validada",
+            "en": "validated measurement",
+            "es": "medición validada"
+          },
+          "definition": "Medição conferida por organização diferente de quem mediu."
+        }
+      }
+    },
+    "confidence_band": {
+      "title": "Banda de confiança da evidência",
+      "appears_in": "Diagnóstico, match e reputação — band",
+      "note": "Mesmo vocabulário em todas as telas: a banda fala da BASE, não do mérito.",
+      "terms": {
+        "high": {
+          "label": {
+            "pt-BR": "confiança alta",
+            "en": "high confidence",
+            "es": "confianza alta"
+          },
+          "definition": "Base suficiente, recente e de origem forte."
+        },
+        "medium": {
+          "label": {
+            "pt-BR": "confiança média",
+            "en": "medium confidence",
+            "es": "confianza media"
+          },
+          "definition": "Base existente, com ressalva de quantidade ou de data."
+        },
+        "low": {
+          "label": {
+            "pt-BR": "confiança baixa — trate como indício",
+            "en": "low confidence — treat as a hint",
+            "es": "confianza baja — trátelo como indicio"
+          },
+          "definition": "Base fraca: serve para conversar, não para decidir."
+        },
+        "insufficient_data": {
+          "label": {
+            "pt-BR": "dados insuficientes — não é recomendação",
+            "en": "insufficient data — not a recommendation",
+            "es": "datos insuficientes — no es una recomendación"
+          },
+          "definition": "Sem base para calcular. Nesta banda não existe valor.",
+          "aliases": [
+            "insufficient"
+          ]
+        }
+      }
+    },
+    "suggestion_origin": {
+      "title": "Origem da sugestão em formulário",
+      "appears_in": "GET /v1/lookups/{key} — items[].origin; componente Suggest",
+      "note": "Toda sugestão diz de onde veio e nunca sobrescreve texto digitado sem confirmação.",
+      "terms": {
+        "official_load": {
+          "label": {
+            "pt-BR": "carga oficial (com fonte e data)",
+            "en": "official load (with source and date)",
+            "es": "carga oficial (con fuente y fecha)"
+          },
+          "definition": "Vem de uma carga de dado oficial, com fonte e data registradas."
+        },
+        "platform_knowledge": {
+          "label": {
+            "pt-BR": "conhecimento da plataforma — conferir na carga oficial",
+            "en": "platform knowledge — check against the official load",
+            "es": "conocimiento de la plataforma — verificar en la carga oficial"
+          },
+          "definition": "A plataforma conhece o termo, mas ele não veio de carga oficial: precisa ser conferido."
+        },
+        "platform_editorial": {
+          "label": {
+            "pt-BR": "lista editorial da plataforma",
+            "en": "platform editorial list",
+            "es": "lista editorial de la plataforma"
+          },
+          "definition": "Redação e agrupamento são da plataforma, não classificação oficial de nenhum órgão."
+        },
+        "your_organization": {
+          "label": {
+            "pt-BR": "histórico da sua organização",
+            "en": "your organization's history",
+            "es": "historial de su organización"
+          },
+          "definition": "Vem do que a sua própria organização já registrou antes."
+        },
+        "another_organization": {
+          "label": {
+            "pt-BR": "declarado por outra organização",
+            "en": "declared by another organization",
+            "es": "declarado por otra organización"
+          },
+          "definition": "Outra organização declarou este valor. Serve como pista, não como verificação."
+        }
+      }
+    },
+    "readiness": {
+      "title": "Prontidão",
+      "appears_in": "GET /v1/diagnoses/{id}/analysis — readiness.{chave}",
+      "note": "Cada prontidão diz QUAIS dimensões olhou. Nenhuma é nota geral do projeto.",
+      "terms": {
+        "project_readiness": {
+          "label": {
+            "pt-BR": "prontidão do projeto",
+            "en": "project readiness",
+            "es": "preparación del proyecto"
+          },
+          "definition": "Olha problema, território, solução, orçamento e medição."
+        },
+        "organization_readiness": {
+          "label": {
+            "pt-BR": "prontidão da organização",
+            "en": "organization readiness",
+            "es": "preparación de la organización"
+          },
+          "definition": "Olha identidade e governança."
+        },
+        "funding_readiness": {
+          "label": {
+            "pt-BR": "prontidão para captar",
+            "en": "funding readiness",
+            "es": "preparación para captar"
+          },
+          "definition": "Olha orçamento e conformidade."
+        },
+        "evidence_readiness": {
+          "label": {
+            "pt-BR": "prontidão de evidência",
+            "en": "evidence readiness",
+            "es": "preparación de evidencia"
+          },
+          "definition": "Olha problema e medição: há com o que sustentar o que se afirma?"
+        },
+        "compliance_readiness": {
+          "label": {
+            "pt-BR": "prontidão de conformidade",
+            "en": "compliance readiness",
+            "es": "preparación de conformidad"
+          },
+          "definition": "Olha identidade e conformidade documental."
+        },
+        "data_readiness": {
+          "label": {
+            "pt-BR": "prontidão de dado",
+            "en": "data readiness",
+            "es": "preparación de datos"
+          },
+          "definition": "Olha problema, território e medição."
+        },
+        "governance_readiness": {
+          "label": {
+            "pt-BR": "prontidão de governança",
+            "en": "governance readiness",
+            "es": "preparación de gobernanza"
+          },
+          "definition": "Olha governança e conformidade."
+        },
+        "impact_readiness": {
+          "label": {
+            "pt-BR": "prontidão de impacto",
+            "en": "impact readiness",
+            "es": "preparación de impacto"
+          },
+          "definition": "Olha problema, território e medição — o que permite falar de impacto sem confundir com alcance."
+        }
+      }
+    },
+    "readiness_status": {
+      "title": "Situação da prontidão",
+      "appears_in": "GET /v1/diagnoses/{id}/analysis — readiness.*.status",
+      "terms": {
+        "ready": {
+          "label": {
+            "pt-BR": "pronto",
+            "en": "ready",
+            "es": "listo"
+          },
+          "definition": "Todas as dimensões olhadas estão em 80% ou mais."
+        },
+        "needs_review": {
+          "label": {
+            "pt-BR": "precisa de revisão",
+            "en": "needs review",
+            "es": "necesita revisión"
+          },
+          "definition": "Há preenchimento parcial: parte das dimensões tem dado, parte não."
+        },
+        "unknown": {
+          "label": {
+            "pt-BR": "desconhecido",
+            "en": "unknown",
+            "es": "desconocido"
+          },
+          "definition": "Não há dado nas dimensões olhadas. Desconhecido não é reprovado."
+        }
+      }
+    },
+    "match_signal": {
+      "title": "Sinal do match",
+      "appears_in": "GET /v1/projects/{id} e /v1/matches — signals[].key",
+      "note": "Cada sinal é explicável e pode valer UNKNOWN. Sinal UNKNOWN não conta como zero.",
+      "terms": {
+        "cause": {
+          "label": {
+            "pt-BR": "causa",
+            "en": "cause",
+            "es": "causa"
+          },
+          "definition": "Afinidade entre a causa do projeto e o interesse declarado de quem financia."
+        },
+        "territory": {
+          "label": {
+            "pt-BR": "território",
+            "en": "territory",
+            "es": "territorio"
+          },
+          "definition": "Compatibilidade entre o território do projeto e o do edital ou do financiador."
+        },
+        "budget": {
+          "label": {
+            "pt-BR": "orçamento",
+            "en": "budget",
+            "es": "presupuesto"
+          },
+          "definition": "Compatibilidade entre o valor pedido e a faixa oferecida."
+        },
+        "readiness": {
+          "label": {
+            "pt-BR": "prontidão",
+            "en": "readiness",
+            "es": "preparación"
+          },
+          "definition": "O quanto o projeto está pronto para receber o recurso."
+        },
+        "ods": {
+          "label": {
+            "pt-BR": "ODS",
+            "en": "SDG",
+            "es": "ODS"
+          },
+          "definition": "Correspondência entre os ODS do projeto e os da oportunidade."
+        },
+        "deadline": {
+          "label": {
+            "pt-BR": "prazo",
+            "en": "deadline",
+            "es": "plazo"
+          },
+          "definition": "Se o prazo do edital é compatível com o momento do projeto."
+        },
+        "history": {
+          "label": {
+            "pt-BR": "histórico",
+            "en": "history",
+            "es": "historial"
+          },
+          "definition": "O que já aconteceu entre as duas partes na plataforma."
+        },
+        "ods_esg": {
+          "label": {
+            "pt-BR": "ODS e ASG",
+            "en": "SDG and ESG",
+            "es": "ODS y ASG"
+          },
+          "definition": "Correspondência combinada de ODS e temas ASG."
+        },
+        "capacity": {
+          "label": {
+            "pt-BR": "capacidade",
+            "en": "capacity",
+            "es": "capacidad"
+          },
+          "definition": "Capacidade registrada de executar o que se propõe."
+        },
+        "evidence_history": {
+          "label": {
+            "pt-BR": "histórico de evidência",
+            "en": "evidence history",
+            "es": "historial de evidencia"
+          },
+          "definition": "Como a organização costuma sustentar o que afirma."
+        },
+        "impact": {
+          "label": {
+            "pt-BR": "impacto",
+            "en": "impact",
+            "es": "impacto"
+          },
+          "definition": "Contexto agregado de necessidade, barreiras e evidência. Alcance declarado NÃO é impacto: sem contexto este sinal é UNKNOWN, mesmo havendo número de beneficiários."
+        },
+        "urgency": {
+          "label": {
+            "pt-BR": "urgência",
+            "en": "urgency",
+            "es": "urgencia"
+          },
+          "definition": "Urgência declarada da necessidade atendida."
+        },
+        "preference": {
+          "label": {
+            "pt-BR": "preferência",
+            "en": "preference",
+            "es": "preferencia"
+          },
+          "definition": "Preferências explícitas registradas por quem busca."
+        }
+      }
+    },
+    "data_availability": {
+      "title": "Disponibilidade do dado",
+      "appears_in": "Vocabulário transversal de todas as telas",
+      "note": "Este é o vocabulário que impede o erro mais comum do produto: tratar ausência como zero.",
+      "terms": {
+        "known": {
+          "label": {
+            "pt-BR": "informado",
+            "en": "known",
+            "es": "informado"
+          },
+          "definition": "O dado existe, com origem registrada."
+        },
+        "unknown": {
+          "label": {
+            "pt-BR": "não informado",
+            "en": "not informed",
+            "es": "no informado"
+          },
+          "definition": "O dado não existe ainda. Não equivale a zero, nem a falha, nem a sucesso."
+        },
+        "unavailable": {
+          "label": {
+            "pt-BR": "indisponível",
+            "en": "unavailable",
+            "es": "no disponible"
+          },
+          "definition": "O cálculo existe, mas falta um insumo obrigatório — e a tela diz qual."
+        },
+        "not_applicable": {
+          "label": {
+            "pt-BR": "não se aplica",
+            "en": "not applicable",
+            "es": "no aplica"
+          },
+          "definition": "A pergunta não cabe neste caso. Diferente de não informado."
+        }
+      }
+    }
+  }
+}

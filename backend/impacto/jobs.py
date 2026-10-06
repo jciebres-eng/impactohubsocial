@@ -338,8 +338,28 @@ def reputation_timeline(app) -> dict:
     return {"organizations": len(orgs), "recorded": done}
 
 
+def backup_job(app) -> dict:
+    """Backup agendado. Roda no executor que já existe, em vez de um timer que ninguém exercita.
+
+    O intervalo e a janela são da própria tarefa (ops.backup), porque este laço chama todas as tarefas
+    a cada ciclo: sem janela própria, o backup rodaria a cada quinze minutos.
+    """
+    from .ops import backup as BK
+    with app.pool.tx(DbContext(system=True)) as c:
+        return BK.run(c, app.settings)
+
+
+def email_canary_job(app) -> dict:
+    """Canário de e-mail: prova periódica de que o envio funciona."""
+    from .ops import email_canary as EC
+    with app.pool.tx(DbContext(system=True)) as c:
+        return EC.run(c, app)
+
+
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline)]
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
+        # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
+        ("backup", backup_job), ("email_canary", email_canary_job)]
 
 
 def run_once(app) -> list[dict]:

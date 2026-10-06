@@ -41,5 +41,20 @@ if [ "$DENOM" != "0" ] || [ "$SEALNOEV" != "0" ] || [ "$SEALDRAFT" != "0" ] || [
   exit 1
 fi
 echo "camada de impacto restaurada ÍNTEGRA: nenhum denominador sem fonte, nenhum selo sem evidência ou de rascunho, nenhuma linha de base sem fonte, nenhuma reputação sem observação, nenhuma relação fora da escada"
+
+# v0.19.0: a restauração precisa trazer de volta a camada de OPERAÇÃO. Um restore sem ops_job_runs
+# deixaria a plataforma sem a resposta para "quando foi o último backup?" exatamente depois de um
+# incidente — o momento em que a pergunta mais importa. E o vocabulário de e-mail é conferido aqui
+# também: um banco restaurado não pode passar a aceitar um estado chamado "entrega", que a
+# plataforma não sabe afirmar.
+OPSJOBS=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('ops_job_runs','email_events')")
+MAILDELIV=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM pg_constraint WHERE conrelid='email_events'::regclass AND pg_get_constraintdef(oid) LIKE '%delivered%'")
+MAILADDR=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM email_events WHERE to_domain LIKE '%@%'")
+GLOSS=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(DISTINCT namespace) FROM translations WHERE namespace LIKE 'g\\_%'")
+if [ "$OPSJOBS" != "2" ] || [ "$MAILDELIV" != "0" ] || [ "$MAILADDR" != "0" ] || [ "$GLOSS" -lt "20" ]; then
+  echo "FALHA: a restauração não trouxe a camada de operação íntegra (tabelas de operação=$OPSJOBS de 2, estado 'delivered' no banco=$MAILDELIV, endereço de e-mail guardado=$MAILADDR, namespaces de glossário=$GLOSS)"
+  exit 1
+fi
+echo "camada de operação restaurada ÍNTEGRA: $GLOSS namespaces de glossário, registro de tarefa e de e-mail presentes, nenhum endereço guardado, nenhum estado de entrega inventado"
 psql "$ADMIN_DATABASE_URL" -q -c "DROP DATABASE $DB WITH (FORCE)"
 echo "restore OK"

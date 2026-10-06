@@ -405,7 +405,10 @@ def handle_stripe_webhook(app_state, payload: bytes, signature: str) -> tuple[in
         event = json.loads(payload)
     except ValueError:
         return 400, {"error": "json inválido"}
-    return process_event(app_state, "stripe", event)
+    # `signature_verified=True` chega aqui e em nenhum outro lugar: é a única função que confere a
+    # assinatura. Quem chamar `process_event` por outro caminho grava o evento com a assinatura NÃO
+    # conferida, e o CHECK billing_events_signature_effect impede que ele chegue a `processed`.
+    return process_event(app_state, "stripe", event, signature_verified=True)
 
 
 def _sub_by_provider(c, obj: dict):
@@ -422,17 +425,28 @@ def _sub_by_provider(c, obj: dict):
     return row
 
 
-def process_event(app_state, provider: str, event: dict) -> tuple[int, dict]:
+def process_event(app_state, provider: str, event: dict, *,
+                  signature_verified: bool = False) -> tuple[int, dict]:
     eid, etype = str(event.get("id", "")), str(event.get("type", ""))
     if not eid or not etype:
         return 400, {"error": "evento inválido"}
     obj = (event.get("data") or {}).get("object") or {}
     created = event.get("created")
     with app_state.pool.tx(DbContext(system=True)) as c:
-        inserted = c.one("INSERT INTO billing_events(provider, event_id, type, payload) VALUES ($1,$2,$3,$4::jsonb)"
-                         " ON CONFLICT (provider, event_id) DO NOTHING RETURNING id", provider, eid, etype, Json(event))
+        inserted = c.one("INSERT INTO billing_events(provider, event_id, type, payload, signature_verified)"
+                         " VALUES ($1,$2,$3,$4::jsonb,$5)"
+                         " ON CONFLICT (provider, event_id) DO NOTHING RETURNING id", provider, eid, etype, Json(event),
+                         signature_verified)
         if not inserted:
+            # Reentrega do MESMO evento: o UNIQUE já impediu o efeito; o contador existe para a
+            # reconciliação enxergar que houve reentrega (v0.17.0).
+            c.run("UPDATE billing_events SET duplicate_count = duplicate_count + 1 WHERE provider = $1 AND event_id = $2",
+                  provider, eid)
             return 200, {"status": "duplicate_ignored"}
+        if not signature_verified:
+            c.run("UPDATE billing_events SET status = 'rejected_signature', processed_at = now() WHERE id = $1", inserted["id"])
+            log(logger, logging.WARNING, "billing_event_without_verified_signature", provider=provider, event_id=eid)
+            return 202, {"status": "rejected_signature"}
         status = "processed"
         if etype == "checkout.session.completed":
             md = obj.get("metadata") or {}

@@ -18,6 +18,7 @@ Três observações para quem revisar:
 from __future__ import annotations
 
 from ..economics import billable as BL
+from ..economics import payments as PAY
 from ..economics import programs as PG
 from ..economics import value_ledger as VL
 from ..http import Ctx, not_found, route
@@ -271,3 +272,85 @@ def admin_waive(ctx: Ctx, body: E.WaiveIn):
         raise not_found("Candidato a cobrança")
     with ctx.tx() as c:
         return BL.waive(c, billable_id=int(seq), reason=body.reason)
+
+
+# ================================================================================================ pagamento
+@route("GET", "/v1/payments/status", auth="user", tags=("pagamento",),
+       summary="O que está e o que não está configurado para cobrar de verdade")
+def payments_status(ctx: Ctx):
+    return PAY.status(ctx.settings)
+
+
+@route("GET", "/v1/payments/state-graph", auth="user", tags=("pagamento",),
+       summary="Transições possíveis de uma cobrança, com a origem de cada uma")
+def payments_graph(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return {"items": PAY.graph(c), "labels": PAY.STATE_LABEL, "methods": PAY.METHOD_LABEL}
+
+
+@route("GET", "/v1/payments/charges", query=E.ChargeQ, min_role="viewer", tags=("pagamento",),
+       summary="As cobranças da organização, com o aviso em cada simulada")
+def charges_list(ctx: Ctx, q: E.ChargeQ):
+    with ctx.tx(readonly=True) as c:
+        out = PAY.mine(c, org_id=ctx.org_id, state=q.state, limit=q.limit, offset=q.offset)
+    return {**out, "provider_status": PAY.status(ctx.settings)}
+
+
+@route("POST", "/v1/payments/charges", body=E.ChargeIn, min_role="owner", status=201,
+       tags=("pagamento",), summary="Abre uma cobrança (nada é cobrado: é a intenção de cobrar)")
+def charge_create(ctx: Ctx, body: E.ChargeIn):
+    st = PAY.status(ctx.settings)
+    with ctx.tx() as c:
+        out = PAY.create(c, org_id=ctx.org_id, actor=ctx.user_id, provider=st["provider"],
+                         kind=body.kind, method=body.method, amount_cents=body.amount_cents,
+                         currency=body.currency, subscription_id=body.subscription_id,
+                         invoice_id=body.invoice_id, billable_event_id=body.billable_event_seq,
+                         installments=body.installments, instrument_id=body.instrument_id,
+                         due_on=body.due_on)
+    return {**out, "provider_status": st}
+
+
+@route("GET", "/v1/payments/charges/{charge_id}", min_role="viewer", tags=("pagamento",),
+       summary="Uma cobrança com a trilha inteira: por que ela está neste estado")
+def charge_get(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        out = PAY.get(c, charge_id=ctx.path["charge_id"], org_id=ctx.org_id)
+    return {**out, "provider_status": PAY.status(ctx.settings)}
+
+
+@route("PUT", "/v1/payments/charges/{charge_id}/installments", body=E.InstallmentScheduleIn,
+       min_role="owner", tags=("pagamento",),
+       summary="Grava o cronograma do parcelamento (a soma tem de fechar com o total)")
+def charge_installments(ctx: Ctx, body: E.InstallmentScheduleIn):
+    with ctx.tx() as c:
+        return PAY.set_installments(c, charge_id=ctx.path["charge_id"], org_id=ctx.org_id,
+                                    schedule=[i.model_dump() for i in body.schedule])
+
+
+@route("POST", "/v1/payments/charges/{charge_id}/transition", body=E.ChargeTransitionIn,
+       min_role="owner", tags=("pagamento",),
+       summary="Move a cobrança (recusada se não estiver no grafo)")
+def charge_transition(ctx: Ctx, body: E.ChargeTransitionIn):
+    with ctx.tx() as c:
+        return PAY.transition(c, charge_id=ctx.path["charge_id"], org_id=ctx.org_id,
+                              to_state=body.to_state, refunded_cents=body.refunded_cents,
+                              failure_code=body.failure_code, failure_message=body.failure_message)
+
+
+@route("GET", "/v1/admin/payments/revenue", query=E.RevenueQ, auth="admin", tags=("pagamento",),
+       summary="Receita apurada, com o simulado em colunas próprias e nunca somado ao real")
+def admin_revenue(ctx: Ctx, q: E.RevenueQ):
+    from datetime import timedelta
+
+    from ..clock import now as _now
+    with ctx.tx(readonly=True) as c:
+        out = PAY.revenue(c, since=_now() - timedelta(days=q.days))
+    return {**out, "provider_status": PAY.status(ctx.settings)}
+
+
+@route("GET", "/v1/admin/payments/reconciliation", query=E.ReconciliationQ, auth="admin",
+       tags=("pagamento",),
+       summary="Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura")
+def admin_reconciliation(ctx: Ctx, q: E.ReconciliationQ):
+    with ctx.tx(readonly=True) as c:
+        return PAY.reconciliation(c, days=q.days)

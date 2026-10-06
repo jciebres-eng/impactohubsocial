@@ -293,7 +293,19 @@ def integration_ops(app) -> dict:
     return _run(app, "integration_ops", run)
 
 
-JOBS = [("close_calls", close_calls), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
+def payment_deadlines(app) -> dict:
+    """Fecha PIX e boleto vencidos.
+
+    Instrução de pagamento com prazo passado que continua `pending` é a pior mentira possível neste
+    módulo: a organização vê uma cobrança "aguardando pagamento" que nenhum banco aceita mais. O
+    fechamento é do grafo (`pending -> expired`), e não um UPDATE solto.
+    """
+    from .economics import payments as PAY
+    with app.pool.tx(DbContext(system=True)) as c:
+        return PAY.expire_due(c)
+
+
+JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
         ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("hub_ops", hub_ops)]
 
 

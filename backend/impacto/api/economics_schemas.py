@@ -236,3 +236,61 @@ class PipelineQ(In):
 
 class WaiveIn(In):
     reason: Reason
+
+
+# ---------------------------------------------------------------- pagamento
+ChargeKind = Literal["subscription", "one_off", "installment_plan", "operation"]
+ChargeMethod = Literal["card", "pix", "boleto", "manual"]
+ChargeState = Literal["created", "checkout_started", "pending", "authorized", "paid", "settled",
+                      "failed", "expired", "cancelled", "refunded", "partially_refunded",
+                      "disputed", "chargeback"]
+
+
+class ChargeIn(In):
+    """Abre uma cobrança. Nada é cobrado: é o registro da intenção de cobrar.
+
+    `provider` e `is_simulated` NÃO vêm do cliente: o provedor é o configurado na instalação, e
+    `is_simulated` é derivada dele por gatilho no banco.
+    """
+    kind: ChargeKind
+    method: ChargeMethod
+    amount_cents: Annotated[int, Field(gt=0, le=10_000_000_000_00)]
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")] = "BRL"
+    subscription_id: Uuid | None = None
+    invoice_id: Uuid | None = None
+    #: Liga a cobrança ao candidato que a originou, fechando valor → candidato → cobrança.
+    billable_event_seq: Annotated[int, Field(ge=1)] | None = None
+    installments: Annotated[int, Field(ge=2, le=24)] | None = None
+    instrument_id: Uuid | None = None
+    due_on: date | None = None
+
+
+class InstallmentItem(In):
+    amount_cents: Annotated[int, Field(gt=0)]
+    due_on: date
+
+
+class InstallmentScheduleIn(In):
+    #: A soma precisa fechar com o total — o banco confere por restrição postergada.
+    schedule: Annotated[list[InstallmentItem], Field(min_length=2, max_length=24)]
+
+
+class ChargeTransitionIn(In):
+    to_state: ChargeState
+    refunded_cents: Cents | None = None
+    failure_code: Annotated[str, Field(max_length=80)] | None = None
+    failure_message: Annotated[str, Field(max_length=500)] | None = None
+
+
+class ChargeQ(In):
+    state: ChargeState | None = None
+    limit: Annotated[int, Field(ge=1, le=100)] = 25
+    offset: Annotated[int, Field(ge=0, le=100000)] = 0
+
+
+class RevenueQ(In):
+    days: Annotated[int, Field(ge=1, le=1095)] = 90
+
+
+class ReconciliationQ(In):
+    days: Annotated[int, Field(ge=1, le=90)] = 7

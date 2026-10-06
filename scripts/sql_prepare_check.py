@@ -42,6 +42,7 @@ HOLES = {
     "billable.py": {"{', '.join(sets)}": "active = false", "{', '.join(names)}": "rule_key",
                     "{ph}": "'premium.readiness_analysis'", "{len(args)}": "1"},
     "legal.py": {"{', '.join(sets)}": "status = 'yellow'"},
+    "payments.py": {},
 }
 
 

@@ -115,7 +115,7 @@ AREAS: tuple[Area, ...] = (
                    "o que permite comparar projetos sem confundir alcance com impacto.",
         why_empty="O contexto do projeto ainda não foi declarado.",
         action_label="Declarar contexto e barreiras",
-        action_method="PUT", action_route="/v1/projects/{project_id}/equity/context", screen=None,
+        action_method="PUT", action_route="/v1/projects/{project_id}/equity/context", screen="/projetos/:id/equidade",
         what_you_gain="Métodos de normalização ficam disponíveis, o sinal de impacto do match sai de "
                       "DESCONHECIDO e critérios de selo passam a ser alcançáveis. Não dá ganho de ranking.",
         required=("necessidade declarada", "adicionalidade"),
@@ -130,7 +130,7 @@ AREAS: tuple[Area, ...] = (
         what_it_is="A ligação entre o que o projeto faz e as metas dos Objetivos de Desenvolvimento Sustentável.",
         why_empty="Nenhuma meta de ODS foi mapeada para este projeto.",
         action_label="Mapear o projeto a uma meta de ODS",
-        action_method="PUT", action_route="/v1/projects/{project_id}/ods-targets", screen=None,
+        action_method="PUT", action_route="/v1/projects/{project_id}/ods-targets", screen="/projetos/:id/ods",
         what_you_gain="Mapear é o primeiro degrau da escada do referencial. Alinhado NÃO é alcançado, e a "
                       "plataforma nunca converte um no outro.",
         required=("meta de ODS",),
@@ -145,7 +145,7 @@ AREAS: tuple[Area, ...] = (
         what_it_is="O que a organização afirma publicamente sobre resultado, contribuição ou eficiência.",
         why_empty="Nenhuma alegação foi declarada.",
         action_label="Declarar uma alegação apoiada em evidência",
-        action_method="POST", action_route="/v1/claims", screen=None,
+        action_method="POST", action_route="/v1/claims", screen="/afirmacoes",
         what_you_gain="Cada alegação passa por regras determinísticas e volta com a situação derivada do que "
                       "está registrado — antes de um financiador apontar a fragilidade.",
         required=("texto da alegação", "tipo", "assunto"),
@@ -188,7 +188,7 @@ AREAS: tuple[Area, ...] = (
         what_it_is="Seis dimensões independentes sobre o RASTRO da organização na plataforma. Não existe nota única.",
         why_empty="Ainda não há observações suficientes em nenhuma dimensão: sem base, não existe valor.",
         action_label="Ver o que cada dimensão mede e quantas observações faltam",
-        action_method="GET", action_route="/v1/reputation/me", screen=None,
+        action_method="GET", action_route="/v1/reputation/me", screen="/reputacao",
         what_you_gain="Cada dimensão diz o que mede, o que NÃO mede e de quais sinais vem — e a banda de "
                       "confiança impede que indício fraco seja lido como recomendação.",
         required=("mínimo de observações por dimensão (varia por dimensão)",),
@@ -203,7 +203,7 @@ AREAS: tuple[Area, ...] = (
                    "para conceder selo.",
         why_empty="Nenhum selo concedido. Normal no começo: todo critério depende de registro que ainda não existe.",
         action_label="Ver critério por critério o que falta para cada selo",
-        action_method="POST", action_route="/v1/seals/evaluate", screen=None,
+        action_method="POST", action_route="/v1/seals/evaluate", screen="/selos",
         what_you_gain="A avaliação mostra exatamente qual critério falta, com o mesmo cálculo que a concessão usa.",
         required=("uma definição de selo publicada", "critérios satisfeitos no banco"),
         optional=(),
@@ -216,7 +216,7 @@ AREAS: tuple[Area, ...] = (
         what_it_is="Quem responde por quê: papéis com período de mandato, e decisões que exigem duas pessoas.",
         why_empty="Nenhum papel de responsabilidade atribuído.",
         action_label="Atribuir o primeiro responsável",
-        action_method="POST", action_route="/v1/responsibility/assignments", screen=None,
+        action_method="POST", action_route="/v1/responsibility/assignments", screen="/responsabilidade",
         what_you_gain="Decisão crítica passa a ter nome, papel e período — e assinatura deixa de ser confundida "
                       "com responsabilidade.",
         required=("pessoa", "papel", "alcance", "início do mandato"),

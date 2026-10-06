@@ -90,13 +90,22 @@ class FirstRunStateTests(unittest.TestCase):
         self.assertEqual(faltando, [], f"tela declarada que não existe na interface: {faltando}")
 
     def test_area_sem_tela_declara_que_a_tela_sera_desenhada(self):
+        """O vocabulário continua valendo para a próxima área que nascer sem tela.
+
+        Na v0.19.0 este teste exigia que seis áreas — equidade, ODS, afirmações, reputação, selos e
+        responsabilidade — dissessem `to_be_designed`, porque era a verdade: tinham API, serviço,
+        banco, eventos, permissões, testes e documentação, e nenhuma tela. A v0.20.0 entregou as
+        seis (§94), então o teste mudou de alvo, não de rigor: agora exige que NENHUMA área declare
+        tela que não exista, e que o estado seja sempre um dos dois declarados. Se amanhã alguém
+        acrescentar uma área sem tela, `to_be_designed` continua sendo a resposta honesta — o que
+        não pode é apontar para uma tela inexistente, e disso cuida o teste acima.
+        """
         r = self.cli.get("/v1/firstrun")
         estados = {a["key"]: a["next_action"]["screen_status"] for a in r.json["areas"]}
         self.assertEqual(set(estados.values()) - {"exists", "to_be_designed"}, set())
-        # As seis áreas da camada v0.18.0 ainda não têm tela: é isso que a camada de design recebe.
         for chave in ("equity", "ods", "claims", "reputation", "seals", "governance"):
-            self.assertEqual(estados[chave], "to_be_designed",
-                             f"{chave} diz ter tela — confira web/src/app.tsx antes de mudar este teste")
+            self.assertEqual(estados[chave], "exists",
+                             f"{chave} perdeu a tela entregue na v0.20.0")
 
     def test_com_projeto_as_areas_de_projeto_passam_a_contar(self):
         proj = self.cli.post("/v1/projects", {

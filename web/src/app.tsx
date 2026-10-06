@@ -38,6 +38,7 @@ import * as IR from "./pages/impactreport";
 import * as PP from "./pages/publicprofile";
 import * as Terr from "./pages/territory";
 import * as Mod from "./pages/moderation";
+import * as IL from "./pages/impactlayer";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -99,6 +100,15 @@ const ROUTES: R[] = [
   ["/materiais", () => <Org.Materials />],
   ["/dados-territoriais", () => <Org.GovData />, ["government", "platform"]],
   ["/projetos/:id/impacto", (p) => <Impact.ProjectImpact id={p.id} />],
+  // v0.20.0 (§94) — as seis áreas que tinham API, serviço, banco, eventos, permissões, testes e
+  // documentação, e nenhuma tela. UI mínima funcional, para o fluxo poder ser validado por uma
+  // pessoa antes do refinamento visual do Designer.
+  ["/reputacao", () => <IL.Reputation />],
+  ["/selos", () => <IL.Seals />],
+  ["/afirmacoes", () => <IL.Claims />],
+  ["/responsabilidade", () => <IL.Responsibility />],
+  ["/projetos/:id/equidade", (p) => <IL.Equity id={p.id} />],
+  ["/projetos/:id/ods", (p) => <IL.OdsTargets id={p.id} />],
   ["/projetos/:id/grafo", (p) => <Impact.ImpactGraph id={p.id} />],
   ["/projetos/:id/compras", (p) => <Fin.Procurement id={p.id} />, ["osc"]],
   ["/projetos/:id/contribuicao", (p) => <Fin.ContributionModels id={p.id} />],
@@ -240,17 +250,17 @@ const PUBLIC: [string, () => ReactNode][] = [
 ];
 
 const NAV: Record<string, [string, string][]> = {
-  osc: [["/", "Início"], ["/area", "Área de trabalho"], ["/propostas", "Propostas"], ["/marketplace/meus", "Meus anúncios"], ["/marketplace", "Marketplace"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/prontidao/finalidades", "Prontidão por finalidade"], ["/rede/experiencias", "Experiências declaradas"], ["/rede/atividade", "Atividade da rede"], ["/vocabulario", "Vocabulário"], ["/oportunidades", "Oportunidades"], ["/ideias", "Ideias"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
+  osc: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/afirmacoes", "Afirmações de impacto"], ["/responsabilidade", "Responsabilidade"], ["/propostas", "Propostas"], ["/marketplace/meus", "Meus anúncios"], ["/marketplace", "Marketplace"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/prontidao/finalidades", "Prontidão por finalidade"], ["/rede/experiencias", "Experiências declaradas"], ["/rede/atividade", "Atividade da rede"], ["/vocabulario", "Vocabulário"], ["/oportunidades", "Oportunidades"], ["/ideias", "Ideias"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
     ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
     ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/solucoes/replicacao", "Replicação"],
     ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/materiais", "Materiais"]],
-  company: [["/", "Início"], ["/area", "Área de trabalho"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Relatórios para analisar"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/rede/atividade", "Atividade da rede"], ["/explorar", "Projetos para apoiar"], ["/editais", "Programas"], ["/candidaturas", "Candidaturas"],
+  company: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/responsabilidade", "Responsabilidade"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Relatórios para analisar"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/rede/atividade", "Atividade da rede"], ["/explorar", "Projetos para apoiar"], ["/editais", "Programas"], ["/candidaturas", "Candidaturas"],
     ["/carteira", "Carteira e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"],
     ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/documentos/montagens", "Montagem de documentos"], ["/materiais", "Materiais"]],
   individual: [["/", "Início"], ["/area", "Área de trabalho"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Prestação de contas recebida"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/explorar", "Projetos para apoiar"], ["/candidaturas", "Candidaturas"], ["/carteira", "Meu apoio e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"],
     ["/instituicao", "Perfil institucional"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/mensagens", "Mensagens"]],
-  provider: [["/", "Início"], ["/area", "Área de trabalho"], ["/marketplace", "Oportunidades no marketplace"], ["/propostas", "Propostas"], ["/perfil-publico", "Perfil público"], ["/perfil-publico/experiencias", "Minhas experiências"], ["/conversas", "Conversas"], ["/rede/relacoes", "Relações"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/minhas-atividades", "Minhas atividades"], ["/identidade", "Identidade"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
-  government: [["/", "Início"], ["/area", "Área de trabalho"], ["/territorio/necessidades", "Necessidades do território"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Relatórios para analisar"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/editais", "Editais"], ["/candidaturas", "Candidaturas"], ["/carteira", "Execução e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"],
+  provider: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/marketplace", "Oportunidades no marketplace"], ["/propostas", "Propostas"], ["/perfil-publico", "Perfil público"], ["/perfil-publico/experiencias", "Minhas experiências"], ["/conversas", "Conversas"], ["/rede/relacoes", "Relações"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/minhas-atividades", "Minhas atividades"], ["/identidade", "Identidade"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/materiais", "Materiais"]],
+  government: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/responsabilidade", "Responsabilidade"], ["/territorio/necessidades", "Necessidades do território"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Relatórios para analisar"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/editais", "Editais"], ["/candidaturas", "Candidaturas"], ["/carteira", "Execução e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"],
     ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
   platform: [["/admin", "Visão geral"], ["/area", "Área de trabalho"], ["/vocabulario", "Vocabulário"], ["/admin/compliance", "Compliance"], ["/admin/identidade", "Identidade"], ["/admin/credenciais", "Credenciais"], ["/admin/credenciais-profissionais", "Credenciais profissionais"], ["/admin/honorarios", "Honorários"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],

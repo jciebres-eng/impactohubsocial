@@ -9,7 +9,7 @@ from __future__ import annotations
 import unittest
 import uuid
 
-from tests.support import Client, app_tx, db_system, grant_premium, new_account, owner_conn
+from tests.support import Client, app_tx, db_system, grant_premium, new_account
 
 
 class ProgBase(unittest.TestCase):

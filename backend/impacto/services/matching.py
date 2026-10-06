@@ -201,14 +201,23 @@ def persist(c: Connection, viewer_org: str, user_id: str, result: dict, call_id:
     Um resultado antigo nunca muda de significado quando a régua muda: quem leu "82 com confiança alta" em outubro
     continua podendo saber com qual motor, quais pesos, quais regras e qual taxonomia aquilo foi calculado.
     """
-    return c.scalar("INSERT INTO match_runs(viewer_org_id, direction, call_id, project_id, engine_version, weights_version,"
-                    " rules_version, taxonomy_version, eligibility, score, confidence, result, features, evidence, created_by)"
-                    " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::numeric,$11::numeric,$12::jsonb,$13::jsonb,$14::jsonb,$15)"
-                    " RETURNING id::text", viewer_org, result["direction"], call_id, project_id, result["engine_version"],
-                    result["weights_version"], result.get("rules_version"), result.get("taxonomy_version"),
-                    result["eligibility"], result["score"], result["confidence"],
-                    Json({k: v for k, v in result.items() if k not in ("features", "evidence")}),
-                    Json(result["features"]), Json(result.get("evidence") or {}), user_id)
+    run_id = c.scalar("INSERT INTO match_runs(viewer_org_id, direction, call_id, project_id, engine_version, weights_version,"
+                      " rules_version, taxonomy_version, eligibility, score, confidence, result, features, evidence, created_by)"
+                      " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::numeric,$11::numeric,$12::jsonb,$13::jsonb,$14::jsonb,$15)"
+                      " RETURNING id::text", viewer_org, result["direction"], call_id, project_id, result["engine_version"],
+                      result["weights_version"], result.get("rules_version"), result.get("taxonomy_version"),
+                      result["eligibility"], result["score"], result["confidence"],
+                      Json({k: v for k, v in result.items() if k not in ("features", "evidence")}),
+                      Json(result["features"]), Json(result.get("evidence") or {}), user_id)
+    # Avaliação PERSISTIDA é trabalho entregue: o par foi pontuado com explicação e as quatro versões
+    # ficaram gravadas. A pontuação apenas calculada e não persistida não conta — é leitura.
+    from ..economics import value_ledger
+    value_ledger.record(c, event_type="match.run_completed", org_id=viewer_org, units=1,
+                        project_id=project_id, subject_type="match_run", subject_id=run_id,
+                        engine_version=result["engine_version"],
+                        metrics={"direction": result["direction"], "eligibility": result["eligibility"],
+                                 "confidence": float(result["confidence"] or 0)})
+    return run_id
 
 
 FEEDBACK_KINDS = ("accepted", "rejected", "ignored", "not_relevant", "contacted", "converted", "expired")

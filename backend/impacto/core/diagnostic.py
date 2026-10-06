@@ -286,6 +286,15 @@ def publish_version(conn: Connection, *, diagnosis_id: str, org_id: str, created
                entry_type="diagnosis_revised" if prev else "diagnosis_created", ref_type="diagnosis",
                ref_id=diagnosis_id, payload={"version": version, "completeness": payload["current_state"]["completeness"],
                                              "closed_gaps": changes.get("closed_gaps", [])})
+    # Valor registrado só quando a versão REALMENTE nasce: a saída antecipada acima ("nada mudou") não
+    # passa por aqui, e com isso congelar duas vezes não conta duas vezes.
+    from ..economics import value_ledger
+    value_ledger.record(conn, event_type="diagnosis.version_published", org_id=org_id, units=1,
+                        project_id=d["project_id"], subject_type="diagnosis", subject_id=diagnosis_id,
+                        engine_version=ENGINE_VERSION,
+                        metrics={"version": version, "actions_created": len(created),
+                                 "actions_auto_closed": len(closed),
+                                 "completeness": payload["current_state"]["completeness"]})
     return {"created": True, "id": row["id"], "version": version, "created_at": row["created_at"],
             "completeness": payload["current_state"]["completeness"], "confidence": payload["confidence"],
             "changes": changes, "actions_created": len(created), "actions_auto_closed": len(closed)}

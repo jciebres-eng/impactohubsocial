@@ -179,6 +179,18 @@ def generate(conn: Connection, app, *, assembly_id: str, fmt: str, actor_user_id
     if not state["found"]:
         raise ApiError(404, "not_found", "Montagem não encontrada")
     if not state["can_generate"]:
+        # A RECUSA é valor, não falha: a plataforma impediu que um documento com aparência de pronto
+        # fosse recusado na ponta, depois do prazo (ADR-127). Por isso entra no Value Ledger com o que
+        # faltava — e é registrada ANTES de levantar, porque depois do raise não há mais transação.
+        from ..economics import value_ledger
+        _org = conn.scalar("SELECT org_id::text FROM document_assemblies WHERE id = $1", assembly_id)
+        if _org:
+            value_ledger.record(conn, event_type="document.blocked_incomplete", org_id=_org,
+                                units=len(state["missing"]) or 1, subject_type="document_assembly",
+                                subject_id=assembly_id, engine_version=ENGINE_VERSION,
+                                metrics={"missing": len(state["missing"]),
+                                         "blockers": len(state["blockers"]),
+                                         "completeness": state["completeness"]})
         raise ApiError(409, "assembly_blocked", "Não é possível gerar este documento: " + "; ".join(state["blockers"]),
                        {"missing": state["missing"], "completeness": state["completeness"]})
     asm = conn.one("SELECT a.*, a.id::text AS id, a.template_id::text AS template_id, a.org_id::text AS org_id,"
@@ -215,6 +227,13 @@ def generate(conn: Connection, app, *, assembly_id: str, fmt: str, actor_user_id
         ledger(conn, project_id=asm["project_id"], org_id=asm["org_id"], actor=actor_user_id,
                entry_type="document_generated", ref_type="document", ref_id=doc_id,
                payload={"template": tpl["code"], "format": fmt, "sha256": digest, "completeness": state["completeness"]})
+    from ..economics import value_ledger
+    value_ledger.record(conn, event_type="document.assembled", org_id=asm["org_id"], units=1,
+                        project_id=asm["project_id"], subject_type="document", subject_id=doc_id,
+                        engine_version=ENGINE_VERSION,
+                        metrics={"template": tpl["code"], "template_version": tpl["version"],
+                                 "format": fmt, "completeness": state["completeness"],
+                                 "blocks": len(blocks)})
     return {"document_id": doc_id, "format": fmt, "sha256": digest, "filename": filename,
             "completeness": state["completeness"], "status": "generated"}
 

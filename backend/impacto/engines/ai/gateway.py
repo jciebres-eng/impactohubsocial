@@ -97,12 +97,43 @@ class AiGateway:
                            {"limit": lim, "used": used})
 
     def _log(self, conn, ctx, feature, provider, status, text_in, text_out, meta, latency, redactions):
-        conn.run("INSERT INTO ai_usage(org_id, user_id, feature, provider, model, status, input_chars, output_chars, tokens_in,"
-                 " tokens_out, latency_ms, input_sha256, redactions) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)",
-                 ctx.org_id, ctx.user_id, feature, provider, self.settings.ai_model or None, status, len(text_in), len(text_out),
-                 meta.get("tokens_in"), meta.get("tokens_out"), int(latency * 1000),
-                 hashlib.sha256(text_in.encode()).hexdigest(), redactions)
+        usage_id = conn.scalar(
+            "INSERT INTO ai_usage(org_id, user_id, feature, provider, model, status, input_chars, output_chars, tokens_in,"
+            " tokens_out, latency_ms, input_sha256, redactions) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)"
+            " RETURNING id",
+            ctx.org_id, ctx.user_id, feature, provider, self.settings.ai_model or None, status, len(text_in), len(text_out),
+            meta.get("tokens_in"), meta.get("tokens_out"), int(latency * 1000),
+            hashlib.sha256(text_in.encode()).hexdigest(), redactions)
         METRICS.inc("impacto_ai_requests_total", feature=feature, provider=provider, status=status)
+        # CUSTO: a auditoria econômica encontrou `ai_usage` registrando tokens e não registrando custo —
+        # e sem custo não existe margem por evento de valor, que é o cálculo central desta rodada.
+        #
+        # O custo é DERIVADO pela função do banco a partir da tabela de preço vigente do provedor. A
+        # tabela nasce VAZIA, de propósito: nenhum preço foi inventado no pacote. Sem linha vigente, a
+        # chamada fica com `cost_status = 'no_price_table'` e custo nulo — nunca zero, porque zero
+        # pareceria custo apurado.
+        if usage_id:
+            # SAVEPOINT: erro aqui deixaria a transação abortada e o próprio registro de uso seria
+            # perdido no COMMIT — foi o que aconteceu na primeira versão desta ligação.
+            conn.run("SAVEPOINT ai_cost")
+            try:
+                conn.scalar("SELECT app_price_ai_usage($1)", int(usage_id))
+            except Exception:  # noqa: BLE001 — precificar é instrumentação; não derruba a resposta ao usuário
+                conn.run("ROLLBACK TO SAVEPOINT ai_cost")
+                log(logger, logging.WARNING, "ai_cost_pricing_failed", usage_id=usage_id)
+            else:
+                conn.run("RELEASE SAVEPOINT ai_cost")
+            if ctx.org_id and status == "ok":
+                from ...economics import value_ledger
+                # `subject_id` é uuid no ledger e `ai_usage.id` é bigint: o identificador vai em
+                # `metrics`, não no campo tipado. (A primeira versão passava um aqui e a gravação era
+                # revertida em silêncio pelo savepoint — por isso `record()` agora avisa no log.)
+                value_ledger.record(conn, event_type="ai.analysis_completed", org_id=ctx.org_id,
+                                    units=1, subject_type="ai_usage",
+                                    engine_version=f"{provider}:{self.settings.ai_model or 'local'}",
+                                    metrics={"feature": feature, "ai_usage_id": usage_id,
+                                             "tokens_in": meta.get("tokens_in"),
+                                             "tokens_out": meta.get("tokens_out")})
 
     def _external(self, system: str, user: str) -> tuple[str | None, dict, str, int]:
         if not self.external:

@@ -164,6 +164,10 @@ def set_project(conn: Connection, *, program_id: str, project_id: str, org_id: s
                          body=note, ref_type="program", ref_id=program_id,
                          action_label="Ver programa", link=f"/programas/{program_id}",
                          dedupe_parts=("Program.project_role_changed", program_id, project_id, role))
+    from . import value_ledger
+    value_ledger.record(conn, event_type="program.projects_screened", org_id=org_id, units=1,
+                        project_id=project_id, program_id=program_id, subject_type="project",
+                        subject_id=project_id, metrics={"role": role})
     return {**row, "role_label": ROLE_LABEL[row["role"]]}
 
 

@@ -350,7 +350,12 @@ def evaluate(conn: Connection, *, org_id: str, project_id: str | None = None) ->
 
 
 def snapshot(conn: Connection, *, org_id: str, project_id: str | None = None) -> dict[str, Any]:
-    """Calcula e GRAVA o retrato. Append-only: serve a "como estávamos em janeiro?"."""
+    """Calcula e GRAVA o retrato. Append-only: serve a "como estávamos em janeiro?".
+
+    O Value Ledger é alimentado AQUI e não em `evaluate()`, de propósito: `evaluate` é chamada a cada
+    abertura do workspace, e contar valor a cada leitura inflaria o número até ele não significar nada.
+    Valor se registra na ação que produz resultado durável, não na consulta.
+    """
     r = evaluate(conn, org_id=org_id, project_id=project_id)
     row = conn.one(
         "INSERT INTO readiness_snapshots(org_id, project_id, document_readiness, project_readiness,"
@@ -361,6 +366,18 @@ def snapshot(conn: Connection, *, org_id: str, project_id: str | None = None) ->
         r["scores"]["funding_readiness"], r["scores"]["governance_readiness"],
         r["scores"]["execution_readiness"], r["scores"]["evidence_readiness"], r["overall"],
         Json(r["dimensions"]), Json(r["blockers"]), ENGINE_VERSION)
+    from ..economics import value_ledger
+    value_ledger.record(conn, event_type="readiness.evaluated", org_id=org_id, units=len(_CALC),
+                        project_id=project_id, subject_type="readiness_snapshot",
+                        subject_id=row["id"], engine_version=ENGINE_VERSION,
+                        metrics={"overall": r["overall"], "band": r["band"],
+                                 "dimensions": len(_CALC), "blockers": len(r["blockers"])})
+    if r["blockers"]:
+        value_ledger.record(conn, event_type="readiness.gap_found", org_id=org_id,
+                            units=len(r["blockers"]), project_id=project_id,
+                            subject_type="readiness_snapshot", subject_id=row["id"],
+                            engine_version=ENGINE_VERSION,
+                            metrics={"by_dimension": {b["dimension"]: 1 for b in r["blockers"]}})
     return {**r, "snapshot_id": row["id"], "computed_at": row["computed_at"]}
 
 

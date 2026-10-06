@@ -300,5 +300,11 @@ def scan_risks(conn: Connection, *, project_id: str, org_id: str, actor_user_id:
             ledger(conn, project_id=project_id, org_id=org_id, actor=actor_user_id, entry_type="risk_resolved",
                    ref_type="risk", ref_id=existing["id"], payload={"code": code, "automatic": True})
             closed.append({"id": existing["id"], "code": code})
+    from ..economics import value_ledger
+    value_ledger.record(conn, event_type="risk.scan_completed", org_id=org_id, units=len(RISK_RULES),
+                        project_id=project_id, subject_type="project", subject_id=project_id,
+                        engine_version=RISK_RULES_VERSION,
+                        metrics={"rules_applied": len(RISK_RULES), "identified": len(found),
+                                 "auto_resolved": len(closed)})
     return {"rules_version": RISK_RULES_VERSION, "identified": found, "auto_resolved": closed,
             "note": "Riscos marcados como 'system_identified' são indícios de regra, não diagnóstico definitivo."}

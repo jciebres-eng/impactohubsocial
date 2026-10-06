@@ -136,6 +136,14 @@ def transition(conn: Connection, *, update_id: str, to: str, org_id: str, actor:
                ref_type="impact_update", ref_id=update_id,
                payload={"period": [str(u["period_start"]), str(u["period_end"])], "status": to,
                         "executor_org_id": u["org_id"]})
+    if to == "accepted":
+        # O valor é da organização que EXECUTA e prestou contas, não de quem aceitou: foi ela que
+        # produziu o relatório cujos números o banco colheu.
+        from ..economics import value_ledger
+        value_ledger.record(conn, event_type="impact_report.accepted", org_id=u["org_id"], units=1,
+                            project_id=u["project_id"], subject_type="impact_update",
+                            subject_id=update_id,
+                            metrics={"period": [str(u["period_start"]), str(u["period_end"])]})
     return {**_load(conn, update_id), "unchanged": False}
 
 

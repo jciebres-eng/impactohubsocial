@@ -120,3 +120,49 @@ class ProgramNeedIn(In):
 class GapQ(In):
     #: Prefixo de território: "BR-MT" devolve o estado; "BR" devolve o país.
     territory_prefix: Annotated[str, Field(max_length=16, pattern=r"^[A-Z0-9-]*$")] | None = None
+
+
+# ---------------------------------------------------------------- Value Ledger
+class ValueFeedQ(In):
+    event_type: Annotated[str, Field(max_length=60, pattern=r"^[a-z][a-z0-9_.]*$")] | None = None
+    limit: Annotated[int, Field(ge=1, le=100)] = 50
+    offset: Annotated[int, Field(ge=0, le=100000)] = 0
+
+
+class ValueSummaryQ(In):
+    days: Annotated[int, Field(ge=1, le=730)] = 90
+    program_id: Uuid | None = None
+
+
+class BaselineIn(In):
+    """Declara quanto trabalho humano uma unidade de evento substitui.
+
+    Fonte, data e método são **obrigatórios** — e o CHECK no banco também recusa sem eles. Sem isso o
+    número seria chute com cara de medição, e é esse o defeito que o Value Ledger existe para evitar.
+    """
+    event_type: Annotated[str, Field(max_length=60, pattern=r"^[a-z][a-z0-9_.]*$")]
+    minutes_per_unit: Annotated[float, Field(gt=0, le=10000)]
+    source_name: Source
+    source_date: date
+    method_note: Annotated[str, Field(min_length=20, max_length=2000)]
+    source_url: Annotated[str, Field(max_length=500, pattern=r"^https?://")] | None = None
+
+
+class AiPriceIn(In):
+    """Preço de um modelo, por milhão de tokens, com fonte obrigatória.
+
+    A tabela nasce vazia: nenhum preço de provedor foi inventado no pacote.
+    """
+    provider: Annotated[str, Field(min_length=2, max_length=40)]
+    model: Annotated[str, Field(min_length=1, max_length=80)]
+    input_per_mtok_cents: Annotated[float, Field(ge=0, le=1_000_000)]
+    output_per_mtok_cents: Annotated[float, Field(ge=0, le=1_000_000)]
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")] = "USD"
+    source_name: Source
+    source_date: date
+    source_url: Annotated[str, Field(max_length=500, pattern=r"^https?://")] | None = None
+
+
+class AiCostQ(In):
+    days: Annotated[int, Field(ge=1, le=365)] = 30
+    org_id: Uuid | None = None

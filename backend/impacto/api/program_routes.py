@@ -18,6 +18,7 @@ Três observações para quem revisar:
 from __future__ import annotations
 
 from ..economics import programs as PG
+from ..economics import value_ledger as VL
 from ..http import Ctx, not_found, route
 from . import economics_schemas as E
 
@@ -156,3 +157,55 @@ def project_result_chain(ctx: Ctx):
 def territorial_gap(ctx: Ctx, q: E.GapQ):
     with ctx.tx(readonly=True) as c:
         return PG.territorial_gap(c, territory_prefix=q.territory_prefix)
+
+
+# ================================================================================================ Value Ledger
+@route("GET", "/v1/value/types", auth="user", tags=("valor",),
+       summary="Vocabulário de eventos de valor, com a linha de referência vigente e a fonte dela")
+def value_types(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        items = VL.types(c)
+    return {"items": items,
+            "note": ("`has_baseline=false` significa que ninguém declarou, com fonte, quanto trabalho "
+                     "humano aquela unidade substitui — e então nenhuma estimativa de tempo é "
+                     "produzida para eventos daquele tipo.")}
+
+
+@route("GET", "/v1/value/summary", query=E.ValueSummaryQ, min_role="viewer", tags=("valor",),
+       summary="Quanto valor o sistema criou para esta organização (contagem medida, tempo estimado)")
+def value_summary(ctx: Ctx, q: E.ValueSummaryQ):
+    from datetime import timedelta
+
+    from ..clock import now as _now
+    with ctx.tx(readonly=True) as c:
+        return VL.summary(c, org_id=ctx.org_id, since=_now() - timedelta(days=q.days),
+                          program_id=q.program_id)
+
+
+@route("GET", "/v1/value/events", query=E.ValueFeedQ, min_role="viewer", tags=("valor",),
+       summary="Os eventos de valor da organização, um a um")
+def value_events(ctx: Ctx, q: E.ValueFeedQ):
+    with ctx.tx(readonly=True) as c:
+        return VL.feed(c, org_id=ctx.org_id, event_type=q.event_type, limit=q.limit, offset=q.offset)
+
+
+@route("POST", "/v1/admin/value/baselines", body=E.BaselineIn, auth="admin", status=201,
+       tags=("valor",),
+       summary="Declara a linha de referência de um tipo de evento (cria versão; não reescreve)")
+def value_set_baseline(ctx: Ctx, body: E.BaselineIn):
+    with ctx.tx() as c:
+        return VL.set_baseline(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
+
+
+@route("POST", "/v1/admin/ai/prices", body=E.AiPriceIn, auth="admin", status=201, tags=("valor",),
+       summary="Declara o preço de um modelo de IA (versionado, com fonte)")
+def ai_set_price(ctx: Ctx, body: E.AiPriceIn):
+    with ctx.tx() as c:
+        return VL.set_ai_price(c, actor=ctx.user_id, **body.model_dump(exclude_none=True))
+
+
+@route("GET", "/v1/admin/ai/cost", query=E.AiCostQ, auth="admin", tags=("valor",),
+       summary="Custo estimado de IA por provedor, modelo e recurso — insumo da margem")
+def ai_cost(ctx: Ctx, q: E.AiCostQ):
+    with ctx.tx(readonly=True) as c:
+        return VL.ai_cost_summary(c, org_id=q.org_id, days=q.days)

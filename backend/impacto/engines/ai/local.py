@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from datetime import date
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 CAUSE_KEYWORDS = {
     "educacao": ["escola", "aluno", "educa", "alfabetiz", "reforço escolar", "ensino", "biblioteca", "leitura", "professor"],
@@ -139,7 +140,7 @@ def draft_document(kind: str, project: dict, org: dict, call: dict | None, budge
                   "", "10. EVIDÊNCIAS", "[COMPLETAR: listar evidências aceitas (fotos, listas de presença, notas fiscais)]"]
     if instructions:
         lines += ["", "Orientações adicionais informadas pelo usuário:", instructions[:2000]]
-    lines += ["", f"Data: {date.today().isoformat()}", "Responsável legal: [COMPLETAR]",
+    lines += ["", f"Data: {_hoje_utc().isoformat()}", "Responsável legal: [COMPLETAR]",
               "Validação profissional: pendente (solicite revisão a um profissional parceiro habilitado)"]
     return "\n".join(lines)
 

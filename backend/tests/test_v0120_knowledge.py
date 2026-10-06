@@ -513,13 +513,20 @@ class Support(unittest.TestCase):
 
     def test_prefs_in_app_off_suppresses_notification(self):
         u = new_account("osc")
-        self.assertEqual(len(u.get("/v1/notifications/prefs").json["items"]), 6)
+        # O número de grupos cresce quando a plataforma cresce (a 0016 somou os da rede). Comparar com a lista do
+        # produto em vez de um número fixo deixa o teste afirmar o que importa — "todos os grupos aparecem" — e não
+        # quebrar a cada grupo novo.
+        from impacto.services.hub import GROUPS
+        got = u.get("/v1/notifications/prefs").json["items"]
+        self.assertEqual({g["grp"] for g in got}, set(GROUPS))
         self.assertEqual(u.put("/v1/notifications/prefs", {"items": [{"grp": "support", "in_app": False, "email": True}]}).status, 200)
         tid = self.open_ticket(u)
         self.sup.post(f"/v1/admin/support/tickets/{tid}/messages", {"body": "Resposta da equipe"})
         notes = u.get("/v1/notifications").json
         self.assertFalse([n for n in notes["items"] if n["kind"].startswith("support")])
-        self.assertEqual(u.put("/v1/notifications/prefs", {"items": [{"grp": "support", "in_app": True, "email": True}]}).json["items"][3]["in_app"], True)
+        # busca pelo grupo, não por posição na lista: a ordem não é contrato
+        back = u.put("/v1/notifications/prefs", {"items": [{"grp": "support", "in_app": True, "email": True}]}).json
+        self.assertTrue(next(g for g in back["items"] if g["grp"] == "support")["in_app"])
         self.sup.post(f"/v1/admin/support/tickets/{tid}/messages", {"body": "Segunda resposta"})
         self.assertTrue([n for n in u.get("/v1/notifications").json["items"] if n["kind"].startswith("support")])
         self.assertEqual(u.put("/v1/notifications/prefs", {"items": [{"grp": "outro", "in_app": True, "email": True}]}).status, 422)

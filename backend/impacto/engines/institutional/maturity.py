@@ -6,6 +6,7 @@ from datetime import date
 
 from .common import as_date, config
 from .documents import best_state
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 PATH_TEXT = {
     1: [("Informe a natureza jurídica e a descrição da iniciativa", "Perfil institucional"), ("Defina causa(s) e território de atuação", "Perfil")],
@@ -23,7 +24,7 @@ PATH_TEXT = {
 def compute(facts: dict, *, today: date | None = None, track: dict | None = None, modality_states: dict[str, str] | None = None) -> dict:
     """facts = org_institutional_facts; track = {completed_projects, evidences_accepted, validated_indicator_values};
     modality_states = {código_da_modalidade: state} já avaliado pelo motor de elegibilidade (para o nível 5)."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     cfg = config()
     labels = {int(k): v for k, v in cfg["levels"].items()}
     if not facts.get("kind_is_proponent", facts.get("kind") in ("osc", "provider", "individual")):

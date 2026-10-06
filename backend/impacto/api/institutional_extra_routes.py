@@ -2,7 +2,6 @@
 e pedidos de mentoria. Declarado ≠ verificado: instrumentos nascem declarados e só a administração os verifica."""
 from __future__ import annotations
 
-from datetime import date
 
 from ..engines.institutional import formalization as form
 from ..engines.institutional import persona as pers
@@ -10,6 +9,7 @@ from ..http import ApiError, Ctx, not_found, page, route
 from ..services import documents as docsvc
 from ..services import institutional as svc
 from . import schemas as S
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 T = ("institutional",)
 AG_COLS = ("a.id::text AS id, a.org_id::text AS org_id, a.agreement_type, a.counterpart_name, a.counterpart_authority, a.instrument_number, a.object_summary,"
@@ -40,7 +40,7 @@ def _check_agreement(c, ctx: Ctx, d: dict) -> None:
 def list_agreements(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         rows = c.query(f"SELECT {AG_COLS} FROM organization_agreements a WHERE a.org_id = $1 ORDER BY a.end_date NULLS LAST, a.created_at DESC", ctx.org_id)
-    today = date.today()
+    today = _hoje_utc()
     return {"items": [pers.agreement_view(r, today) for r in rows],
             "note": "Instrumentos são DECLARADOS pela organização até a administração verificar o documento comprobatório."}
 
@@ -57,7 +57,7 @@ def add_agreement(ctx: Ctx, body: S.AgreementIn):
                        d["start_date"], d["end_date"], d["value_cents"], d["agreement_status"], d["qualification_id"], d["verification_url"], d["document_id"], ctx.user_id)
         ctx.audit(c, "inst.agreement_declared", "agreement", aid, {"type": d["agreement_type"]})
         row = c.one(f"SELECT {AG_COLS} FROM organization_agreements a WHERE a.id = $1", aid)
-    return pers.agreement_view(row, date.today())
+    return pers.agreement_view(row, _hoje_utc())
 
 
 @route("PATCH", "/v1/institutional/agreements/{agreement_id}", body=S.AgreementPatch, min_role="manager", tags=T,
@@ -81,7 +81,7 @@ def patch_agreement(ctx: Ctx, body: S.AgreementPatch):
         c.run(f"UPDATE organization_agreements SET {', '.join(sets)} WHERE id = $1", *vals)
         ctx.audit(c, "inst.agreement_edited", "agreement", aid, {"fields": sorted(d)})
         row = c.one(f"SELECT {AG_COLS} FROM organization_agreements a WHERE a.id = $1", aid)
-    return pers.agreement_view(row, date.today())
+    return pers.agreement_view(row, _hoje_utc())
 
 
 @route("DELETE", "/v1/institutional/agreements/{agreement_id}", min_role="manager", tags=T, summary="Remove instrumento ainda não verificado")
@@ -110,7 +110,7 @@ def persona(ctx: Ctx):
             m = svc.maturity(c, ctx.org_id, facts)
             for code in svc.catalog(c, "funding_modality").get("funding_modality", {}):
                 mods[code] = svc.evaluate_for_modality(c, ctx.org_id, code, f=facts, m=m)
-    today = date.today()
+    today = _hoje_utc()
     views = [pers.view(p, facts, quals, ags, today) for p in profiles if p != "structuring"]
     if "structuring" in profiles:
         views.append({"profile": "structuring", "see": "/v1/institutional/formalization", "next_steps": ["Siga a trilha de formalização e peça mentoria se precisar."],
@@ -186,14 +186,14 @@ def agreement_queue(ctx: Ctx, q: S.AgreementAdminQ):
         rows = c.query(f"SELECT {AG_COLS}, o.legal_name AS org_name, o.cnpj, d.validation_status AS document_validation FROM organization_agreements a"
                        " JOIN organizations o ON o.id = a.org_id LEFT JOIN documents d ON d.id = a.document_id"
                        " WHERE ($1::text IS NULL OR a.verification_status = $1) ORDER BY a.updated_at LIMIT $2 OFFSET $3", q.status, q.limit + 1, q.offset)
-    today = date.today()
+    today = _hoje_utc()
     return page([pers.agreement_view(r, today) for r in rows], q.limit, q.offset)
 
 
 @A("POST", "/v1/admin/institutional/agreements/{agreement_id}/decide", body=S.AgreementDecisionIn,
    summary="Verifica ou rejeita o instrumento. Verificar exige número, documento VALIDADO ou URL oficial, e nota.")
 def agreement_decide(ctx: Ctx, body: S.AgreementDecisionIn):
-    today = date.today()
+    today = _hoje_utc()
     with ctx.tx() as c:
         a = c.one("SELECT a.*, a.id::text AS id, a.org_id::text AS org_id, d.validation_status AS doc_validation, d.status AS doc_scan, d.valid_until AS doc_valid_until"
                   " FROM organization_agreements a LEFT JOIN documents d ON d.id = a.document_id WHERE a.id = $1 FOR UPDATE OF a", ctx.path["agreement_id"])

@@ -12,6 +12,7 @@ Fiscal não entra no score do Match (ADR-011).
 from __future__ import annotations
 
 from datetime import date
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 ENGINE_VERSION = "fiscal-engine@1.0.0"
 DISCLAIMER = ("Informação de apoio baseada em regras cadastradas e revisadas na plataforma. Não constitui aconselhamento "
@@ -27,7 +28,7 @@ def _active(rule: dict, ref: date) -> bool:
 
 
 def evaluate(rules: list[dict], tax_profile: dict | None, project: dict | None, ref: date | None = None) -> dict:
-    ref = ref or date.today()
+    ref = ref or _hoje_utc()
     tp = tax_profile or {}
     out = []
     for r in rules:

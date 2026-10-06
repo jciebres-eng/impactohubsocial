@@ -3,12 +3,12 @@ conquistas organizacionais. Anti-abuso: só conversa quem tem relação legítim
 limites por hora/dia, bloqueio bilateral, denúncia e moderação humana. Sem ranking nem pontuação entre organizações."""
 from __future__ import annotations
 
-from datetime import date
 
 from ..engines.match import professional as pm
 from ..http import ApiError, Ctx, not_found, page, route
 from ..services import badges
 from . import schemas as S
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 T = ("network",)
 MAX_MSG_PER_HOUR = 60
@@ -178,7 +178,7 @@ def opportunities(ctx: Ctx, q: S.Pagination):
         mine = {r["need_id"] for r in c.query("SELECT need_id::text AS need_id FROM need_offers WHERE professional_org_id = $1", ctx.org_id)}
     res = []
     for n in needs:
-        m = pm.evaluate(pm.ProfessionalInput.build(prof, _need_input(n), date.today()))
+        m = pm.evaluate(pm.ProfessionalInput.build(prof, _need_input(n), _hoje_utc()))
         if m["eligibility"] == "blocked" and any(b["code"] == "category_mismatch" for b in m["blockers"]):
             continue      # fora da área do profissional: não polui a lista
         res.append({**n, "already_offered": n["id"] in mine, "match": m})
@@ -213,7 +213,7 @@ def list_offers(ctx: Ctx):
         offers = c.query("SELECT o.id::text AS id, o.professional_org_id::text AS professional_org_id, org_display(o.professional_org_id) AS name, o.message, o.status, o.created_at"
                          " FROM need_offers o WHERE o.need_id = $1 ORDER BY o.created_at", n["id"])
         for o in offers:
-            o["match"] = pm.evaluate(pm.ProfessionalInput.build(_prof_input(c, o["professional_org_id"]), _need_input(n), date.today()))
+            o["match"] = pm.evaluate(pm.ProfessionalInput.build(_prof_input(c, o["professional_org_id"]), _need_input(n), _hoje_utc()))
     return {"items": offers}
 
 
@@ -252,7 +252,7 @@ def suggest_professionals(ctx: Ctx):
                         " WHERE o.kind = 'provider' AND o.status = 'active' AND $1 = ANY(pp.categories) LIMIT 100", n["category"])
         res = []
         for cd in cands:
-            res.append({**cd, "match": pm.evaluate(pm.ProfessionalInput.build(_prof_input(c, cd["id"]), _need_input(n), date.today()))})
+            res.append({**cd, "match": pm.evaluate(pm.ProfessionalInput.build(_prof_input(c, cd["id"]), _need_input(n), _hoje_utc()))})
     res = [r for r in res if r["match"]["eligibility"] != "blocked"]
     res.sort(key=lambda r: (-(r["match"]["score"] if r["match"]["score"] is not None else -1), r["name"].lower(), r["id"]))
     return {"items": res[:20]}

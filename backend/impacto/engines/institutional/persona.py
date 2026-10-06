@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date
 
 from .common import as_date, config
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 AGREEMENT_LABELS = {"management_contract": "Contrato de gestão", "partnership_term": "Termo de parceria", "collaboration_term": "Termo de colaboração",
                     "fomento_term": "Termo de fomento", "cooperation_agreement": "Acordo de cooperação", "other": "Outro instrumento"}
@@ -46,7 +47,7 @@ def profile_of(facts: dict, quals: list[dict]) -> list[str]:
 
 
 def view(profile: str, facts: dict, quals: list[dict], agreements: list[dict], today: date | None = None) -> dict:
-    today = today or date.today()
+    today = today or _hoje_utc()
     w = config()["qualification_warning_days"]
     mine = [q for q in quals if q["qualification_type"] == profile and q["verification_status"] not in ("rejected", "revoked")]
     ag = [agreement_view(a, today) for a in agreements]

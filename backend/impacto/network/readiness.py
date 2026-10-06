@@ -81,9 +81,14 @@ def _facts(conn: Connection, project_id: str | None, org_id: str) -> dict[str, A
         " (SELECT count(*) FROM memberships m WHERE m.org_id = o.id) AS members,"
         " (SELECT count(*) FROM memberships m WHERE m.org_id = o.id AND m.role IN ('owner','admin','manager'))"
         "   AS leaders FROM organizations o WHERE o.id = $1", org_id) or {}
+    # ATENÇÃO À COLUNA CERTA: `documents.status` é o resultado do ANTIVÍRUS (pending_scan/clean/infected/rejected);
+    # a aprovação do documento é `validation_status` (pending/validated/rejected). Eu havia lido `status` esperando
+    # 'approved' — valor que nem existe — e nenhum documento jamais contaria como aprovado. Foi o teste de prontidão
+    # documental que apanhou isso.
     docs = conn.query(
-        "SELECT doc_type, status, valid_until, (valid_until IS NOT NULL AND valid_until < current_date) AS expired"
-        " FROM documents WHERE org_id = $1 AND deleted_at IS NULL", org_id)
+        "SELECT doc_type, status AS scan_status, validation_status, valid_until,"
+        " (valid_until IS NOT NULL AND valid_until < current_date) AS expired"
+        " FROM documents WHERE org_id = $1 AND deleted_at IS NULL AND status <> 'infected'", org_id)
     out: dict[str, Any] = {"org": org, "org_docs": docs, "project": None}
     if not project_id:
         return out
@@ -102,7 +107,9 @@ def _facts(conn: Connection, project_id: str | None, org_id: str) -> dict[str, A
         "   AS validated FROM project_indicators pi WHERE pi.project_id = $1", project_id)
     out["budget_items"] = conn.scalar("SELECT count(*) FROM budget_items WHERE project_id = $1", project_id) or 0
     out["project_docs"] = conn.query(
-        "SELECT doc_type, status FROM documents WHERE project_id = $1 AND deleted_at IS NULL", project_id)
+        "SELECT doc_type, status AS scan_status, validation_status, valid_until,"
+        " (valid_until IS NOT NULL AND valid_until < current_date) AS expired"
+        " FROM documents WHERE project_id = $1 AND deleted_at IS NULL AND status <> 'infected'", project_id)
     out["evidences"] = conn.scalar(
         "SELECT count(*) FROM evidences WHERE project_id = $1", project_id) or 0
     out["team"] = conn.scalar("SELECT count(*) FROM project_team($1)", project_id) or 0
@@ -125,14 +132,14 @@ def _documents(f: dict) -> tuple[float, dict]:
     checks = []
     for t in REQUIRED_ORG_DOCS:
         have = by_type.get(t, [])
-        approved = [d for d in have if d["status"] == "approved"]
+        approved = [d for d in have if d["validation_status"] == "validated"]
         valid = [d for d in approved if not d.get("expired")]
         if valid:
             got, found = 1.0, "aprovado e dentro da validade"
         elif approved:
             got, found = 0.5, "aprovado, porém com validade vencida"
         elif have:
-            got, found = 0.3, f"enviado, situação: {have[0]['status']}"
+            got, found = 0.3, f"enviado, análise: {have[0]['validation_status']}"
         else:
             got, found = 0.0, "não enviado"
         checks.append(_Check(f"doc.{t}", t.replace("_", " ").capitalize(), 20, got, found,

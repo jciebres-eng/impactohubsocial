@@ -253,6 +253,19 @@ def new_account(kind: str = "osc", *, verify: bool = True, mode: str = "token", 
     return c
 
 
+def app_tx(c, *, readonly: bool = False):
+    """Conexão no papel da APLICAÇÃO, no contexto desta usuária/organização — sem privilégio.
+
+    Serve para provar que as travas do banco (guard_columns, estado inicial, append-only) valem no caminho real do
+    produto. `db_system()` não serve a esse propósito: contexto de sistema é privilegiado por definição, e as travas
+    o dispensam de propósito, para que trabalhos internos possam corrigir dados.
+    """
+    from impacto.db.pool import DbContext
+    kind = c.get("/v1/me").json["active_org"]["kind"] if c.org_id else None
+    return server()["state"].pool.tx(
+        DbContext(user_id=c.user["id"], org_id=c.org_id, org_kind=kind, platform_admin=False), readonly=readonly)
+
+
 def db_system():
     """Conexão de teste no contexto de sistema (para preparar cenários que exigem a administração)."""
     from impacto.db.pool import DbContext
@@ -283,6 +296,8 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
 def grant_premium(c: Client, plan: str | None = None) -> None:
     """Concede plano pago por grant administrativo (como faria um voucher) — evita limites do plano gratuito nos testes."""
     kind = c.get("/v1/me").json["active_org"]["kind"]
-    plan = plan or {"osc": "osc_premium", "company": "company_premium", "provider": "provider_premium", "individual": "individual_basic"}.get(kind)
+    plan = plan or {"osc": "osc_premium", "company": "company_premium", "provider": "provider_premium",
+                    "individual": "individual_basic", "government": "gov_institutional"}.get(kind)
+    assert plan, f"sem plano conhecido para organização do tipo {kind!r}"
     with db_system() as d:
         d.run("INSERT INTO entitlement_grants(org_id, plan_key, source, ends_at) VALUES ($1,$2,'admin', now() + interval '30 days')", c.org_id, plan)

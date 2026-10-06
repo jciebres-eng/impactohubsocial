@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import date
 
 from ..engines.knowledge import search as KS
 from ..http import ApiError, not_found
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 ORIGIN_LABEL = {"official": "Informação oficial da plataforma", "educational": "Material educacional", "third_party": "Conteúdo de terceiros"}
 DEMO_LABEL = "Exemplo / rascunho — não é documento oficial"
@@ -184,8 +184,8 @@ def get_article(c, slug: str, *, user_id: str | None) -> dict:
     if not a:
         raise not_found("Conteúdo")
     due = (a["last_reviewed_at"] or a["published_at"])
-    overdue = bool(due and (date.today() - due.date()).days > a["review_every_days"])
-    expired = bool(a["regulatory"] and a["valid_until"] and a["valid_until"] < date.today())
+    overdue = bool(due and (_hoje_utc() - due.date()).days > a["review_every_days"])
+    expired = bool(a["regulatory"] and a["valid_until"] and a["valid_until"] < _hoje_utc())
     a["needs_review"] = overdue or expired
     a["review_notice"] = ("Este conteúdo regulatório está com a validade vencida ou a revisão em atraso. Confirme a regra vigente na fonte oficial antes de agir." if a["regulatory"] and a["needs_review"]
                           else ("Revisão necessária — este conteúdo pode estar desatualizado." if a["needs_review"] else None))

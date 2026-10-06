@@ -2,7 +2,6 @@
 situação institucional e visão geral. Fluxo editorial: DRAFT → REVIEW → APPROVED → PUBLISHED → ARCHIVED (quatro olhos: quem cria não aprova)."""
 from __future__ import annotations
 
-from datetime import date
 
 from ..db.pq import Json
 from ..engines.institutional import badges as badge_engine
@@ -14,6 +13,7 @@ from ..services import documents as docsvc
 from ..services.catalog import DOCUMENT_TYPES
 from . import schemas as S
 from .institutional_routes import QUAL_COLS, _qual_view, _sync_certifications
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 T = ("admin", "institutional")
 
@@ -280,7 +280,7 @@ def qualification_queue(ctx: Ctx, q: S.AdminQualQ):
 @A("POST", "/v1/admin/institutional/qualifications/{qualification_id}/decide", body=S.QualDecisionIn,
    summary="Verifica, rejeita, revoga ou pede informações. Verificar exige autoridade, número/protocolo e (documento VALIDADO ou URL de verificação).")
 def qualification_decide(ctx: Ctx, body: S.QualDecisionIn):
-    today = date.today()
+    today = _hoje_utc()
     with ctx.tx() as c:
         q = c.one("SELECT q.*, q.id::text AS id, q.org_id::text AS org_id, d.validation_status AS doc_validation, d.status AS doc_scan, d.valid_until AS doc_valid_until"
                   " FROM organization_qualifications q LEFT JOIN documents d ON d.id = q.document_id WHERE q.id = $1 FOR UPDATE OF q", ctx.path["qualification_id"])
@@ -349,7 +349,7 @@ def document_validate(ctx: Ctx, body: S.DocValidationIn):
         if body.decision == "validate":
             if d["status"] not in docsvc.usable_statuses():
                 raise ApiError(409, "not_scanned", "O arquivo ainda não foi aprovado no antivírus")
-            if d["valid_until"] and d["valid_until"] < date.today():
+            if d["valid_until"] and d["valid_until"] < _hoje_utc():
                 raise ApiError(409, "expired", "Documento já expirado: não pode ser validado")
             c.run("UPDATE documents SET validation_status = 'validated', validated_by = $2, validated_at = now(), validation_note = $3, issued_on = coalesce($4::date, issued_on) WHERE id = $1",
                   d["id"], ctx.user_id, body.note, body.issued_on)

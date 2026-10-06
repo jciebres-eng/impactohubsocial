@@ -14,6 +14,7 @@ from datetime import date
 from .common import (DISCLAIMER_LEGAL, SEVERITY, STATE_LABELS, STATUS_LABELS, as_date, br, config, months_between)
 from .documents import best_state
 from . import maturity as _maturity
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 ENGINE_VERSION = "institutional-eligibility@1.0.0"
 
@@ -171,7 +172,7 @@ def evaluate(facts: dict, items: list[dict], *, today: date | None = None, matur
              subject: dict | None = None) -> dict:
     """facts: saída de org_institutional_facts (+ 'documents' normalizados com scan_status). items: lista de
     {code,label,requirement,mandatory,how_to_fix,source:{kind,rule_code,version,citation,url,consulted_on,confidence},needs_professional_validation}."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     docs = [{"doc_type": d.get("doc_type"), "scan_status": d.get("scan_status"), "validation_status": d.get("validation_status"),
              "valid_until": d.get("valid_until")} for d in facts.get("documents") or []]
     if maturity is None:

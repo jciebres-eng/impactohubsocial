@@ -112,7 +112,7 @@ def update(conn: Connection, *, listing_id: str, org_id: str, fields: dict[str, 
 
 
 def transition(conn: Connection, *, listing_id: str, to: str, org_id: str, actor: str | None,
-               note: str | None = None, admin: bool = False, system: bool = False) -> dict:
+               note: str | None = None, admin: bool = False, by_platform: bool = False) -> dict:
     """Move o anúncio no grafo. Suspender e liberar são da administração; o resto é da organização dona."""
     lst = _load(conn, listing_id)
     if to == lst["publication_state"]:
@@ -129,7 +129,7 @@ def transition(conn: Connection, *, listing_id: str, to: str, org_id: str, actor
                        {"permitidas": opts})
     if rule["actor"] == "admin" and not admin:
         raise forbidden("Esta transição é da administração da plataforma", "admin_only")
-    if rule["actor"] == "system" and not system:
+    if rule["actor"] == "system" and not by_platform:
         raise forbidden("Esta transição é feita pela plataforma", "system_only")
     if rule["actor"] == "owner" and not admin and lst["org_id"] != org_id:
         raise forbidden("Apenas a organização dona altera o anúncio")

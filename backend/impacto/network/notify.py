@@ -85,20 +85,23 @@ def project_event(conn: Connection, *, event: str, project_id: str, org_id: str,
 def org_event(conn: Connection, *, event: str, org_id: str, title: str, body: str | None = None,
               link: str | None = None, actor_user_id: str | None = None, priority: str = "normal",
               ref_type: str | None = None, ref_id: str | None = None, min_role: str = "viewer",
-              payload: dict | None = None, project_id: str | None = None,
+              action_label: str | None = None, payload: dict | None = None, project_id: str | None = None,
               dedupe_parts: tuple[Any, ...] | None = None) -> dict:
     """Avisa a organização quando o fato não pertence a um projeto: proposta recebida, anúncio suspenso, medida aplicada.
 
     `min_role` existe porque nem todo fato é de todos: uma medida de moderação vai para admin/owner, não para quem só
     tem leitura. Decidir isso aqui evita que cada rota invente seu próprio critério.
+
+    `action_label` é o que transforma o aviso em algo acionável — "Responder", "Analisar", "Ajustar". Sem ele, a
+    pessoa lê que algo aconteceu e tem de descobrir sozinha o que fazer.
     """
     if priority not in PRIORITIES:
         raise ValueError(f"prioridade inválida: {priority}")
     key = dedupe(*(dedupe_parts or (event, org_id, ref_type, ref_id)))
     sent = conn.scalar(
-        "SELECT notify_org_members($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", org_id,
+        "SELECT notify_org_members($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)", org_id,
         f"{_grp(event)}.{event.split('.')[-1]}", title[:200], (body or "")[:2000] or None, link, actor_user_id,
-        priority, key, ref_type, ref_id, min_role)
+        priority, key, ref_type, ref_id, min_role, action_label)
     ev = events.record(conn, event=event, org_id=org_id, actor_user_id=actor_user_id, project_id=project_id,
                        subject_type=ref_type, subject_id=ref_id, payload=payload, notified=int(sent or 0))
     return {"event_id": ev, "notified": int(sent or 0), "dedupe_key": key}

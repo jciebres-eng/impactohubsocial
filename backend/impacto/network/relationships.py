@@ -109,7 +109,8 @@ def cap_visibility(kind: str, asked: str) -> str:
 def create(conn: Connection, *, kind: str, org_id: str, actor: str | None, target_type: str, target_id: str,
            source_user_id: str | None = None, context_project_id: str | None = None, role: str | None = None,
            visibility: str = "private", note: str | None = None, evidence_document_id: str | None = None,
-           metadata: dict | None = None, status: str | None = None) -> dict:
+           metadata: dict | None = None, status: str | None = None,
+           origin_proposal_id: str | None = None) -> dict:
     """Cria a relação. Idempotente por (tipo, origem, destino, contexto): repetir devolve a que existe.
 
     A idempotência não é conveniência — é correção. "Favoritar" é um botão que o dedo aperta duas vezes, e duas linhas
@@ -145,11 +146,11 @@ def create(conn: Connection, *, kind: str, org_id: str, actor: str | None, targe
 
     row = conn.one(
         f"INSERT INTO relationships(kind, source_org_id, source_user_id, {col}, org_id, context_project_id, role,"
-        f" visibility, status, note, evidence_document_id, metadata, created_by)"
-        f" VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13)"
+        f" visibility, status, note, evidence_document_id, metadata, created_by, origin_proposal_id)"
+        f" VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)"
         f" RETURNING id::text AS id, kind, status, visibility, created_at",
         kind, None if source_user_id else org_id, source_user_id, target_id, org_id, context_project_id, role,
-        vis, st, note, evidence_document_id, Json(metadata or {}), actor)
+        vis, st, note, evidence_document_id, Json(metadata or {}), actor, origin_proposal_id)
 
     project_id = target_id if target_type == "project" else context_project_id
     if project_id:

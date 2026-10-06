@@ -89,7 +89,8 @@ def create(conn: Connection, *, kind: str, sender_org_id: str, receiver_org_id: 
     if not any((project_id, need_id, call_id, solution_id)):
         # Regra do pedido: "nunca criar chat sem contexto quando a relação é profissional". Vale para proposta também —
         # uma proposta sem contexto é um e-mail frio com outro nome.
-        raise unprocessable("A proposta precisa de contexto: projeto, necessidade, edital ou solução")
+        raise unprocessable("A proposta precisa de contexto: projeto, necessidade, edital ou solução",
+                            {"contextos": ["project_id", "need_id", "call_id", "solution_id"]})
     if relationships.blocked_between(conn, sender_org_id, receiver_org_id):
         raise forbidden("Não é possível propor: há bloqueio entre as organizações", "blocked")
 
@@ -187,7 +188,7 @@ def attach(conn: Connection, *, proposal_id: str, document_id: str, org_id: str,
 # ------------------------------------------------------------------------------------------------ transições
 
 def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, actor: str | None,
-               note: str | None = None, system: bool = False) -> dict:
+               note: str | None = None, by_platform: bool = False) -> dict:
     """Move a proposta. Valida máquina de estados, LADO e exigência de motivo — nessa ordem.
 
     O gatilho no banco já recusa transição inválida; a validação aqui existe para devolver 409 com a lista do que é
@@ -196,7 +197,7 @@ def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, acto
     p = _load(conn, proposal_id)
     if to == p["status"]:
         return {**p, "unchanged": True}
-    side = _side(p, org_id, system=system)
+    side = _side(p, org_id, by_platform=by_platform)
     rule = conn.one("SELECT actor, requires_note FROM proposal_status_graph WHERE from_status = $1 AND to_status = $2",
                     p["status"], to)
     if not rule:
@@ -205,9 +206,9 @@ def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, acto
         raise ApiError(409, "invalid_transition",
                        f"Proposta {ST_LABEL[p['status']]} não pode ir para {ST_LABEL.get(to, to)}",
                        {"permitidas": opts})
-    if rule["actor"] == "system" and not system:
+    if rule["actor"] == "system" and not by_platform:
         raise forbidden("Esta transição é feita pela plataforma, não pelas partes", "system_only")
-    if rule["actor"] in ("sender", "receiver") and not system and side != rule["actor"]:
+    if rule["actor"] in ("sender", "receiver") and not by_platform and side != rule["actor"]:
         raise forbidden(
             "Só quem enviou pode fazer isso" if rule["actor"] == "sender" else "Só quem recebeu pode fazer isso",
             "wrong_side")
@@ -216,6 +217,13 @@ def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, acto
 
     if to == "sent" and p["status"] == "changes_requested":
         return _resend(conn, p, actor=actor, org_id=org_id, note=note)
+    if to == "changes_requested":
+        # O valor proposto é registrado AGORA, enquanto ainda é o que a outra parte viu. Fazer isso no reenvio
+        # registraria o valor NOVO como se fosse o antigo — foi o defeito que o teste de versão apanhou.
+        _event(conn, proposal_id, p["status"], "changes_requested", actor, org_id,
+               f"valor em análise no momento do pedido de ajuste: "
+               f"{'não informado' if p['amount_cents'] is None else p['amount_cents']} {p['currency']}"
+               f" (versão {p['version']})")
 
     # Só `status` e `decision_note` saem daqui. Os carimbos (`sent_at`, `viewed_at`, `decided_at`, `decided_by`) e o
     # número da versão são DERIVADOS pelo gatilho `proposal_status_guard()` e protegidos por `guard_columns` — o
@@ -223,12 +231,12 @@ def transition(conn: Connection, *, proposal_id: str, to: str, org_id: str, acto
     conn.run("UPDATE proposals SET status = $2,"
              " decision_note = CASE WHEN $3::text IS NOT NULL THEN $3 ELSE decision_note END"
              " WHERE id = $1", proposal_id, to, note)
-    _event(conn, proposal_id, p["status"], to, actor, org_id if not system else None, note)
+    _event(conn, proposal_id, p["status"], to, actor, None if by_platform else org_id, note)
 
     result: dict[str, Any] = {**p, "status": to, "unchanged": False}
     if to == "accepted":
         result["relationship"] = _on_accept(conn, p, actor=actor)
-    _announce(conn, p, to=to, actor=actor, note=note, system=system)
+    _announce(conn, p, to=to, actor=actor, note=note, by_platform=by_platform)
     return result
 
 
@@ -243,9 +251,8 @@ def _resend(conn: Connection, p: dict, *, actor: str | None, org_id: str, note: 
     conn.run("UPDATE proposals SET status = 'sent' WHERE id = $1", p["id"])
     v = conn.scalar("SELECT version FROM proposals WHERE id = $1", p["id"])
     _event(conn, p["id"], p["status"], "sent", actor, org_id,
-           f"versão {v} (anterior: {p['version']}; valor anterior: "
-           f"{'não informado' if p['amount_cents'] is None else p['amount_cents']} {p['currency']})"
-           + (f" — {note}" if note else ""))
+           f"reenviada como versão {v} (anterior: {p['version']}). O valor da versão anterior está registrado no"
+           f" evento do pedido de ajuste." + (f" — {note}" if note else ""))
     notify.org_event(
         conn, event="Proposal.sent", org_id=p["receiver_org_id"], actor_user_id=actor,
         title=f"Proposta revisada (versão {v})",
@@ -267,7 +274,8 @@ def _on_accept(conn: Connection, p: dict, *, actor: str | None) -> dict | None:
     rel = relationships.create(
         conn, kind=kind, org_id=p["sender_org_id"], actor=actor, target_type=target_type, target_id=target_id,
         context_project_id=p["project_id"], visibility="participants", status="active",
-        note=f"Originada da proposta “{p['title']}”.", metadata={"proposal_id": p["id"], "proposal_kind": p["kind"]})
+        note=f"Originada da proposta “{p['title']}”.", origin_proposal_id=p["id"],
+        metadata={"proposal_kind": p["kind"]})
     conn.run("UPDATE proposals SET relationship_id = $2 WHERE id = $1", p["id"], rel["id"])
 
     if p["kind"] == "investment" and p["project_id"]:
@@ -287,8 +295,18 @@ def _on_accept(conn: Connection, p: dict, *, actor: str | None) -> dict | None:
     return rel
 
 
-def _announce(conn: Connection, p: dict, *, to: str, actor: str | None, note: str | None, system: bool) -> None:
-    """Quem é avisado em cada transição. Vista não avisa ninguém: seria ruído, e quem enviou vê no painel."""
+def _announce(conn: Connection, p: dict, *, to: str, actor: str | None, note: str | None,
+              by_platform: bool) -> None:
+    """UM aviso por fato, para cada pessoa.
+
+    DEFEITO QUE ISTO CORRIGE (achado pelo teste `test_whole_team_is_notified_once_and_the_actor_is_not`): a primeira
+    versão avisava a organização destinatária E a equipe do projeto. Como os membros da organização dona do projeto
+    estão nos dois conjuntos, cada pessoa recebia DOIS avisos do mesmo fato — e `dedupe_key` não pegava, porque as
+    duas chamadas usavam chaves diferentes. "Avisar toda a equipe" tinha virado "avisar duas vezes".
+
+    A regra agora: havendo projeto, o aviso vai para a EQUIPE (que é o conjunto maior e já contém as duas partes,
+    cada pessoa uma vez). Sem projeto, vai para a organização da contraparte.
+    """
     event = {"sent": "Proposal.sent", "viewed": "Proposal.viewed", "in_review": "Proposal.in_review",
              "accepted": "Proposal.accepted", "declined": "Proposal.declined",
              "changes_requested": "Proposal.changes_requested", "withdrawn": "Proposal.withdrawn",
@@ -296,21 +314,19 @@ def _announce(conn: Connection, p: dict, *, to: str, actor: str | None, note: st
     if not event:
         return
     if to in ("viewed", "cancelled"):
+        # "vista" não avisa: seria ruído, e quem enviou vê na própria caixa. O fato fica registrado.
         notify.fact_only(conn, event=event, org_id=p["sender_org_id"], actor_user_id=actor,
                          project_id=p["project_id"], ref_type="proposal", ref_id=p["id"])
         return
 
-    # Para quem vai o aviso: o que o destinatário faz avisa quem enviou, e vice-versa.
-    to_sender = to in ("accepted", "declined", "changes_requested", "in_review", "expired")
-    target_org = p["sender_org_id"] if to_sender else p["receiver_org_id"]
     titles = {
         "sent": f"{LABEL[p['kind']]} recebida", "in_review": "Sua proposta está em análise",
         "accepted": "Proposta aceita", "declined": "Proposta recusada",
-        "changes_requested": "Ajuste solicitado na sua proposta", "withdrawn": "Proposta retirada",
+        "changes_requested": "Ajuste solicitado na proposta", "withdrawn": "Proposta retirada",
         "expired": "Proposta expirada",
     }
     bodies = {
-        "sent": f"“{p['title']}” aguarda sua análise.",
+        "sent": f"“{p['title']}” aguarda análise.",
         "in_review": f"“{p['title']}” passou a ser analisada pela outra parte.",
         "accepted": f"“{p['title']}” foi aceita. A relação foi criada — ainda sem compromisso financeiro.",
         "declined": f"“{p['title']}” foi recusada. Motivo: {note or 'não informado'}.",
@@ -318,22 +334,26 @@ def _announce(conn: Connection, p: dict, *, to: str, actor: str | None, note: st
         "withdrawn": f"“{p['title']}” foi retirada por quem enviou. Motivo: {note or 'não informado'}.",
         "expired": f"O prazo de “{p['title']}” venceu sem decisão.",
     }
-    notify.org_event(
-        conn, event=event, org_id=target_org, actor_user_id=None if system else actor, title=titles[to],
-        body=bodies[to], link=f"/propostas/{p['id']}",
-        priority="high" if to in ("sent", "accepted", "changes_requested") else "normal",
-        ref_type="proposal", ref_id=p["id"], min_role="member", project_id=p["project_id"],
-        action_label={"sent": "Analisar", "changes_requested": "Revisar"}.get(to),
-        dedupe_parts=(event, p["id"], p["version"]), payload={"kind": p["kind"], "status": to})
+    prio = "high" if to in ("sent", "accepted", "changes_requested") else "normal"
+    label = {"sent": "Analisar", "changes_requested": "Revisar"}.get(to)
+    who = None if by_platform else actor
 
-    # A EQUIPE do projeto é avisada nas decisões — é o pedido explícito: toda a equipe em cada alteração de etapa.
-    if p["project_id"] and to in ("accepted", "declined", "changes_requested", "sent", "expired"):
+    if p["project_id"]:
         notify.project_event(
-            conn, event=event, project_id=p["project_id"], org_id=p["receiver_org_id"],
-            actor_user_id=None if system else actor, title=f"{titles[to]} — {p['title']}", body=bodies[to],
-            link=f"/propostas/{p['id']}", ref_type="proposal", ref_id=p["id"],
-            priority="high" if to == "accepted" else "normal",
-            dedupe_parts=(event, "team", p["id"], p["version"]), payload={"kind": p["kind"], "status": to})
+            conn, event=event, project_id=p["project_id"], org_id=p["receiver_org_id"], actor_user_id=who,
+            title=titles[to], body=bodies[to], link=f"/propostas/{p['id']}", ref_type="proposal",
+            ref_id=p["id"], priority=prio, action_label=label,
+            dedupe_parts=(event, p["id"], p["version"], to), payload={"kind": p["kind"], "status": to})
+        return
+
+    # Sem projeto: o aviso vai para a contraparte. O que o destinatário faz avisa quem enviou, e vice-versa.
+    to_sender = to in ("accepted", "declined", "changes_requested", "in_review", "expired")
+    target_org = p["sender_org_id"] if to_sender else p["receiver_org_id"]
+    notify.org_event(
+        conn, event=event, org_id=target_org, actor_user_id=who, title=titles[to], body=bodies[to],
+        link=f"/propostas/{p['id']}", priority=prio, ref_type="proposal", ref_id=p["id"], min_role="member",
+        action_label=label, dedupe_parts=(event, p["id"], p["version"], to),
+        payload={"kind": p["kind"], "status": to})
 
 
 def expire_due(conn: Connection, *, limit: int = 500) -> dict:
@@ -343,7 +363,7 @@ def expire_due(conn: Connection, *, limit: int = 500) -> dict:
         " AND expires_at IS NOT NULL AND expires_at < now() ORDER BY expires_at LIMIT $1", limit)
     done = 0
     for r in rows:
-        transition(conn, proposal_id=r["id"], to="expired", org_id="", actor=None, system=True)
+        transition(conn, proposal_id=r["id"], to="expired", org_id="", actor=None, by_platform=True)
         done += 1
     return {"expired": done, "checked": len(rows)}
 
@@ -372,8 +392,8 @@ def _load(conn: Connection, proposal_id: str) -> dict:
     return r
 
 
-def _side(p: dict, org_id: str, *, system: bool) -> str:
-    if system:
+def _side(p: dict, org_id: str, *, by_platform: bool) -> str:
+    if by_platform:
         return "system"
     if org_id == p["sender_org_id"]:
         return "sender"
@@ -392,7 +412,7 @@ def get(conn: Connection, *, proposal_id: str, org_id: str, mark_viewed: bool = 
         actor: str | None = None) -> dict:
     """Carrega a proposta com histórico, anexos e as ações disponíveis para QUEM está olhando."""
     p = _load(conn, proposal_id)
-    side = _side(p, org_id, system=False)
+    side = _side(p, org_id, by_platform=False)
     if mark_viewed and side == "receiver" and p["status"] == "sent":
         # Abrir é a prova de que chegou. Marcar aqui evita "não vi" como estado permanente.
         p = transition(conn, proposal_id=proposal_id, to="viewed", org_id=org_id, actor=actor)

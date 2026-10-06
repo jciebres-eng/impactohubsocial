@@ -37,7 +37,13 @@ class ArchitectureTests(unittest.TestCase):
                    "app.py", "auth_routes.py", "org_routes.py", "application_routes.py", "execution_routes.py", "document_routes.py",
                    "billing_routes.py", "monetization.py", "monetization_routes.py", "privacy_routes.py", "pool.py", "oidc.py", "ops_routes.py", "knowledge_routes.py", "content_admin_routes.py", "integration_routes.py", "hub.py", "trust_routes.py", "platform_routes.py", "identity.py", "credentials.py",
                    "challenges.py", "agreements.py",
-                   "lifecycle_routes.py", "assembly_routes.py"}
+                   "lifecycle_routes.py", "assembly_routes.py",
+                   # v0.16.0 — camada de rede. Cada uso foi revisado e tem razão nomeada no próprio arquivo:
+                   #   network_core_routes.py  → leitura de relações PÚBLICAS para quem não tem conta
+                   #                             (passa por relationships.visible_to, que filtra por visibility)
+                   #   network_hub_routes.py   → feed público do marketplace, perfil público (lê só public_fields),
+                   #                             unicidade GLOBAL de @identificador (ADR 105) e moderação de anúncio
+                   "network_core_routes.py", "network_hub_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:
@@ -79,11 +85,67 @@ class ArchitectureTests(unittest.TestCase):
                            "/v1/help/search", "/v1/help/context", "/v1/help/categories", "/v1/help/articles", "/v1/help/articles/{slug}", "/v1/help/faqs",
                            "/v1/help/resources", "/v1/help/resources/{slug}", "/v1/help/assistant", "/v1/help/events", "/v1/help/events/{slug}",
                            "/v1/help/courses", "/v1/help/courses/{slug}", "/v1/help/certificates/{code}", "/v1/help/partnerships", "/v1/help/demo-requests",
-                           "/v1/help/newsletter", "/v1/help/newsletter/confirm", "/v1/help/newsletter/unsubscribe", "/v1/help/sitemap", "/v1/integrations/inbound/{connection_id}"}
+                           "/v1/help/newsletter", "/v1/help/newsletter/confirm", "/v1/help/newsletter/unsubscribe", "/v1/help/sitemap", "/v1/integrations/inbound/{connection_id}",
+                           # v0.16.0 — rede. Cada uma lê SÓ projeção pública ou estado de publicação:
+                           # o feed lê marketplace_listings publicados; o perfil lê public_profiles.public_fields;
+                           # as relações passam por relationships.visible_to, que filtra por visibility.
+                           "/v1/marketplace/feed", "/v1/marketplace/listings/{listing_id}",
+                           "/v1/public/profiles/{handle}", "/v1/public/profiles/{handle}/open-graph",
+                           "/v1/public/relationships/{subject_type}/{subject_id}",
+                           "/v1/public/projects/{project_id}/impact"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):
                 self.assertEqual(r.auth, "admin", r.path)
+
+    def test_product_dates_are_utc(self):
+        """`date.today()` usa o fuso LOCAL do processo; o banco opera em UTC. Misturar os dois erra por um dia.
+
+        Encontrado na v0.16.0: com o servidor em UTC-4, às 00:40 UTC um documento vencido ontem era tratado como
+        válido. O erro aparece numa janela de poucas horas por dia, então teste de meio-dia não o pega. A regra é
+        usar `impacto.clock.today()`, que devolve a data UTC — a mesma que `current_date` no PostgreSQL.
+        """
+        offenders = []
+        for f in PKG.rglob("*.py"):
+            if f.name == "clock.py":
+                continue
+            src = f.read_text(encoding="utf-8")
+            for i, line in enumerate(src.splitlines(), 1):
+                if "date.today()" in line and not line.lstrip().startswith("#"):
+                    offenders.append(f"{f.relative_to(PKG)}:{i}")
+        self.assertEqual(offenders, [], f"Use impacto.clock.today() (UTC) em vez de date.today(): {offenders}")
+
+    def test_no_duplicate_routes(self):
+        """Duas rotas com o mesmo método e caminho: a segunda fica inalcançável, em silêncio.
+
+        Aconteceu na v0.16.0: `/v1/readiness` da camada de rede colidiu com a do diagnóstico (0013), e nada acusou —
+        nem o lint, nem o type-check, nem o arranque. Só a ordenação de especificidade decidia qual respondia.
+        """
+        from collections import Counter
+
+        from impacto import api
+        from impacto.http import ROUTES
+        api.load_all()
+        dups = [k for k, n in Counter((r.method, r.path) for r in ROUTES).items() if n > 1]
+        self.assertEqual(dups, [], f"Rotas duplicadas: {dups}")
+
+    def test_network_engines_never_notify_directly(self):
+        """Aviso sai SÓ por `network.notify`, que tem chave de idempotência.
+
+        `app_notify` direto num motor da rede significa aviso repetido em reprocessamento de job ou webhook — o
+        defeito que a v0.16.0 existe para corrigir. As rotas e motores da rede não chamam app_notify nem notify_user.
+        """
+        base = Path(__file__).resolve().parents[1] / "impacto"
+        offenders = []
+        for f in list((base / "network").glob("*.py")) + [base / "api" / "network_core_routes.py",
+                                                          base / "api" / "network_hub_routes.py"]:
+            src = f.read_text(encoding="utf-8")
+            if f.name in ("notify.py",):
+                continue
+            for bad in ("app_notify", "notify_user(", "notify_once("):
+                if bad in src:
+                    offenders.append(f"{f.name}: {bad}")
+        self.assertEqual(offenders, [], f"Aviso fora de network.notify: {offenders}")
 
     def test_no_string_formatted_sql_with_user_input(self):
         """Só nomes de tabela/coluna de listas fixas podem ser interpolados em SQL (f-strings revisadas)."""

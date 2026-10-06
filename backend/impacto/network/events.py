@@ -62,18 +62,19 @@ EVENTS: dict[str, str] = {
 def record(conn: Connection, *, event: str, org_id: str | None, actor_user_id: str | None = None,
            project_id: str | None = None, subject_type: str | None = None, subject_id: str | None = None,
            payload: dict[str, Any] | None = None, notified: int = 0) -> int:
-    """Grava o fato. Devolve o `id` para que quem notificou possa somar o alcance ao mesmo registro."""
+    """Grava o fato e devolve o `id`.
+
+    A escrita passa por `app_record_event()` (SECURITY DEFINER) e não por INSERT direto. A razão é estrutural: um
+    fato da rede envolve DUAS organizações — "proposta enviada" interessa ao histórico de quem recebeu — e uma
+    política de inquilino recusaria exatamente esse registro. A função aceita o fato da contraparte e, em troca,
+    amarra a autoria a `app_uid()`: ninguém registra fato em nome de outra pessoa. `INSERT` em `domain_events` está
+    revogado para o papel da aplicação, portanto este é o único caminho.
+    """
     if event not in EVENTS:
         raise ValueError(f"evento de domínio desconhecido: {event}")
-    return conn.scalar(
-        "INSERT INTO domain_events(event, org_id, actor_user_id, project_id, subject_type, subject_id, payload,"
-        " notified) VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8) RETURNING id",
-        event, org_id, actor_user_id, project_id, subject_type, subject_id, Json(payload or {}), notified)
-
-
-def set_notified(conn: Connection, event_id: int, notified: int) -> None:
-    """Quantas pessoas o fato efetivamente avisou. Zero é um resultado legítimo e fica visível."""
-    conn.run("UPDATE domain_events SET notified = $2 WHERE id = $1", event_id, notified)
+    return int(conn.scalar(
+        "SELECT app_record_event($1,$2,$3,$4,$5,$6,$7::jsonb,$8)",
+        event, org_id, actor_user_id, project_id, subject_type, subject_id, Json(payload or {}), notified))
 
 
 def feed(conn: Connection, *, org_id: str | None = None, project_id: str | None = None, limit: int = 50,

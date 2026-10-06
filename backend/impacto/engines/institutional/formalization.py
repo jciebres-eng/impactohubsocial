@@ -8,6 +8,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from .documents import best_state
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 CFG = Path(__file__).resolve().parents[4] / "config" / "formalization_path.json"
 BASIS = {"verified": "VERIFICADO", "derived": "DERIVADO DOS DADOS", "declared": "DECLARADO PELA ORGANIZAÇÃO", "pending": "AGUARDANDO VALIDAÇÃO", "none": "NÃO INICIADO"}
@@ -46,7 +47,7 @@ def _auto(check: str, facts: dict, has_project: bool, today: date) -> tuple[str,
 
 
 def compute(facts: dict, manual: dict[str, dict], has_project: bool, today: date | None = None) -> dict:
-    today = today or date.today()
+    today = today or _hoje_utc()
     cfg = path_config()
     steps, done = [], 0
     for s in cfg["steps"]:

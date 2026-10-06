@@ -6,6 +6,7 @@ from ..http import ApiError, Ctx, not_found, page, route
 from ..services import matching, risk, workflow
 from ..services.audit import ledger
 from . import schemas as S
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 T = ("applications",)
 APP_COLS = ("a.id::text AS id, a.call_id::text AS call_id, a.project_id::text AS project_id, a.osc_org_id::text AS osc_org_id,"
@@ -94,8 +95,7 @@ def interest(ctx: Ctx, body: S.InterestIn):
 
 
 def _today() -> str:
-    from datetime import date
-    return date.today().isoformat()
+    return _hoje_utc().isoformat()
 
 
 @route("GET", "/v1/applications/{application_id}", min_role="viewer", tags=T,

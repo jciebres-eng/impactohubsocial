@@ -11,6 +11,7 @@ from datetime import date
 
 from .engine import DEFAULT_WEIGHTS, Signal, SIGNAL_LABELS, _finish, _pick
 from .territory import specificity
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 ENGINE_VERSION = "professional-match@1.0.0"
 # Categorias cujo exercício depende de registro em conselho (credencial verificada passa a ser requisito).
@@ -31,7 +32,7 @@ class ProfessionalInput:
 
     @staticmethod
     def build(professional: dict, need: dict, today: date | None = None) -> ProfessionalInput:
-        return ProfessionalInput(_pick(professional, _PROF_KEYS), _pick(need, _NEED_KEYS), today or date.today())
+        return ProfessionalInput(_pick(professional, _PROF_KEYS), _pick(need, _NEED_KEYS), today or _hoje_utc())
 
 
 def _valid_credential(creds: list[dict], today: date, council: str | None) -> str:

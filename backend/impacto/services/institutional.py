@@ -13,6 +13,7 @@ from ..engines.institutional import eligibility as elig
 from ..engines.institutional import maturity as mat
 from ..engines.institutional.common import config
 from .documents import usable_statuses
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 CATALOGS = ("legal_nature", "qualification_type", "institutional_profile", "institutional_status", "funding_modality", "badge")
 
@@ -67,7 +68,7 @@ def _rule_item(r: dict) -> dict:
 
 def published_rules(c: Connection, *, modality: str | None = None, call_id: str | None = None, funder_org: str | None = None,
                     today: date | None = None) -> list[dict]:
-    today = today or date.today()
+    today = today or _hoje_utc()
     rows = c.query(
         "SELECT * FROM eligibility_rules WHERE status = 'published' AND (effective_from IS NULL OR effective_from <= $1::date) AND (effective_to IS NULL OR effective_to >= $1::date)"
         " AND (scope_type = 'global' OR (scope_type = 'modality' AND scope_ref = $2) OR (scope_type = 'call' AND scope_ref = $3) OR (scope_type = 'funder' AND scope_ref = $4))"
@@ -125,7 +126,7 @@ def funder_items(fp: dict, funder_org: str) -> list[dict]:
 # ------------------------------------------------------------------------------------------------ maturidade
 def modality_states(c: Connection, f: dict, today: date | None = None) -> dict[str, str]:
     """Estado de elegibilidade do org em cada modalidade publicada que tenha regra publicada (sem regra → não avaliável, fora do nível 5)."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     out = {}
     for code in catalog(c, "funding_modality").get("funding_modality", {}):
         items = published_rules(c, modality=code, today=today)
@@ -138,7 +139,7 @@ def modality_states(c: Connection, f: dict, today: date | None = None) -> dict[s
 
 def maturity(c: Connection, org_id: str, f: dict | None = None, today: date | None = None) -> dict:
     f = f or facts(c, org_id)
-    today = today or date.today()
+    today = today or _hoje_utc()
     states = modality_states(c, f, today) if f.get("cnpj_present") else {}
     return mat.compute(f, today=today, track=track(c, org_id), modality_states=states)
 
@@ -189,7 +190,7 @@ def solution_badges(c: Connection, sol: dict, today: date | None = None) -> list
 # ------------------------------------------------------------------------------------------------ visão geral
 def overview(c: Connection, org_id: str, today: date | None = None) -> dict:
     """Pode participar × pode receber × ainda precisa cumprir requisitos."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     f = facts(c, org_id)
     cat = catalog(c)
     m = maturity(c, org_id, f, today)
@@ -243,7 +244,7 @@ def fiscal_layers(c: Connection, res: dict, call: dict) -> dict:
 def suggest_status(f: dict, today: date | None = None) -> dict:
     """Sugestão (não decisão) de situação institucional para a administração; a decisão é humana."""
     from ..engines.institutional.documents import best_state
-    today = today or date.today()
+    today = today or _hoje_utc()
     base = config()["base_documents"]
     docs = [{"doc_type": d.get("doc_type"), "scan_status": d.get("scan_status"), "validation_status": d.get("validation_status"), "valid_until": d.get("valid_until")} for d in f.get("documents", [])]
     states = {t: best_state(docs, t, today)[0] for t in base}
@@ -281,7 +282,7 @@ def statement(c: Connection, org_id: str, today: date | None = None) -> dict:
     """Texto-base de apoio para a organização usar em propostas. Só afirma o que está cadastrado e rotula o estado de cada afirmação;
     o que não consta vira 'Não foi possível confirmar.' Nunca inventa qualificação, certificação, benefício fiscal, documento ou regra legal.
     Gerado por regras (sem IA externa) — um rascunho que exige revisão humana."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     f = facts(c, org_id)
     if not f:
         return {}

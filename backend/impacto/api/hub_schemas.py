@@ -179,7 +179,7 @@ class PrefItem(In):
 
 
 class PrefsIn(In):
-    items: Annotated[list[PrefItem], Field(min_length=1, max_length=6)]
+    items: Annotated[list[PrefItem], Field(min_length=1, max_length=14)]   # 14 grupos desde a 0016
 
 
 class PartnershipMoveIn(In):

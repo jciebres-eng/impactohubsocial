@@ -64,6 +64,11 @@ CREATE TABLE relationships (
   metadata      jsonb NOT NULL DEFAULT '{}'::jsonb,
   note          text CHECK (length(note) <= 2000),
   mirrored_from text CHECK (mirrored_from IN ('follows','favorites','org_blocks')),  -- espelho da camada antiga
+  -- A relação nascida do ACEITE de uma proposta é criada por quem aceitou, mas pertence a quem propôs. Guardar a
+  -- origem numa COLUNA (e não em metadata) é o que permite à RLS autorizar essa escrita sem abrir a tabela: quem é
+  -- parte da proposta pode criar a relação dela. De quebra, a interface mostra "originada da proposta X" sem
+  -- precisar escavar jsonb.
+  origin_proposal_id uuid,
   created_by    uuid REFERENCES users(id) ON DELETE SET NULL,
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),
@@ -184,6 +189,11 @@ CREATE INDEX ix_prop_sender ON proposals(sender_org_id, status, created_at DESC)
 CREATE INDEX ix_prop_project ON proposals(project_id) WHERE project_id IS NOT NULL;
 COMMENT ON TABLE proposals IS
   'Proposta. NÃO é contrato, NÃO é compromisso financeiro, NÃO é pagamento. amount_cents é valor PROPOSTO.';
+
+-- Fechada a referência circular: `relationships` nasce antes de `proposals`, então a chave entra agora.
+ALTER TABLE relationships ADD CONSTRAINT relationships_origin_proposal_fkey
+  FOREIGN KEY (origin_proposal_id) REFERENCES proposals(id) ON DELETE SET NULL;
+CREATE INDEX ix_rel_origin_proposal ON relationships(origin_proposal_id) WHERE origin_proposal_id IS NOT NULL;
 
 CREATE TABLE proposal_events (
   id            bigserial PRIMARY KEY,
@@ -308,6 +318,71 @@ CREATE TABLE message_attachments (
 COMMENT ON TABLE message_attachments IS
   'O arquivo continua governado pelo cofre (documents). Não há segundo armazenamento.';
 
+-- ------------------------------------------------------------------------------------------------ vínculo registrado
+-- `app_related` (0002) é a trava anti-spam da conversa: só se fala com quem já tem vínculo registrado. Ela conhecia
+-- candidatura, avaliação profissional, oferta em necessidade e seguir-mútuo — tudo de antes da rede.
+--
+-- ACHADO: com a rede, o investidor encontra o projeto no marketplace e não tem NENHUM desses vínculos. A conversa
+-- com contexto, que é a forma como a relação deve começar, ficava impossível. A trava estava certa; a lista de
+-- vínculos é que ficou incompleta.
+--
+-- Acrescento os dois vínculos que a rede cria, mantendo a intenção original (é preciso haver algo registrado):
+--   · relação pendente ou ativa que não seja bloqueio — inclusive 'contact', que é literalmente "quero conversar";
+--   · proposta já enviada (rascunho não conta: não chegou a ninguém).
+-- O bloqueio continua decidindo por cima, em `app_blocked_between`, na própria política da conversa.
+CREATE OR REPLACE FUNCTION app_related(a uuid, b uuid) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT EXISTS (SELECT 1 FROM applications x WHERE x.status <> 'withdrawn'
+                   AND ((x.osc_org_id = a AND x.funder_org_id = b) OR (x.osc_org_id = b AND x.funder_org_id = a)))
+      OR EXISTS (SELECT 1 FROM professional_reviews r
+                  WHERE (r.org_id = a AND r.professional_org_id = b)
+                     OR (r.org_id = b AND r.professional_org_id = a))
+      OR EXISTS (SELECT 1 FROM need_offers o JOIN project_needs n ON n.id = o.need_id
+                  WHERE (n.org_id = a AND o.professional_org_id = b)
+                     OR (n.org_id = b AND o.professional_org_id = a))
+      OR (EXISTS (SELECT 1 FROM follows WHERE follower_org_id = a AND followed_org_id = b)
+          AND EXISTS (SELECT 1 FROM follows WHERE follower_org_id = b AND followed_org_id = a))
+      -- v0.16.0: vínculos da rede.
+      -- A lista de tipos é EXPLÍCITA, e não "tudo menos bloqueio". Motivo concreto: `follows` é espelhado em
+      -- `relationships`, então "tudo menos bloqueio" faria um seguir UNILATERAL abrir conversa — desfazendo a regra
+      -- do seguir-mútuo que existe desde a 0002. Os tipos unilaterais de descoberta (follow, favorite, watchlist,
+      -- referral) ficam de fora de propósito: acompanhar alguém não é pedir para falar com ele.
+      OR EXISTS (SELECT 1 FROM relationships r
+                  WHERE r.kind IN ('contact','proposal','partnership','investment','sponsorship','service',
+                                   'mentorship','volunteer','collaboration','support','government_support',
+                                   'project_member','project_partner','project_sponsor','project_investor',
+                                   'verified_by')
+                   AND r.status IN ('pending','active')
+                   AND ((r.source_org_id = a AND r.target_org_id = b)
+                     OR (r.source_org_id = b AND r.target_org_id = a)
+                     OR (r.source_org_id = a AND EXISTS (SELECT 1 FROM projects p
+                           WHERE p.id = r.target_project_id AND p.org_id = b))
+                     OR (r.source_org_id = b AND EXISTS (SELECT 1 FROM projects p
+                           WHERE p.id = r.target_project_id AND p.org_id = a))))
+      OR EXISTS (SELECT 1 FROM proposals p WHERE p.status <> 'draft'
+                   AND ((p.sender_org_id = a AND p.receiver_org_id = b)
+                     OR (p.sender_org_id = b AND p.receiver_org_id = a)));
+$$;
+COMMENT ON FUNCTION app_related(uuid, uuid) IS
+  'Há vínculo registrado entre as duas organizações? Trava anti-spam da conversa. A 0016 somou os vínculos da rede
+   (relação deliberada pendente/ativa — contato, parceria, investimento, serviço… — e proposta enviada). Tipos
+   unilaterais de descoberta (follow/favorite/watchlist/referral) NÃO contam: seguir alguém não é pedir para falar
+   com ele, e a regra do seguir-mútuo continua valendo.';
+
+-- ACHADO: `conversations` tinha UNIQUE (org_a, org_b) — UMA conversa por par de organizações, para sempre. Com
+-- contexto, isso deixa de valer: a mesma empresa e a mesma OSC conversam sobre o projeto A e sobre o edital B, e
+-- misturar as duas numa caixa só é o que torna a negociação ilegível seis meses depois. A unicidade passa a ser por
+-- (par, contexto) — mais permissiva, então nenhuma linha existente deixa de ser válida.
+ALTER TABLE conversations DROP CONSTRAINT conversations_org_a_org_b_key;
+CREATE UNIQUE INDEX ux_conv_pair_context ON conversations(
+  org_a, org_b,
+  coalesce(context_project_id,  '00000000-0000-0000-0000-000000000000'::uuid),
+  coalesce(context_proposal_id, '00000000-0000-0000-0000-000000000000'::uuid),
+  coalesce(context_need_id,     '00000000-0000-0000-0000-000000000000'::uuid),
+  coalesce(context_call_id,     '00000000-0000-0000-0000-000000000000'::uuid));
+COMMENT ON INDEX ux_conv_pair_context IS
+  'Uma conversa por par de organizações E contexto. Antes da 0016 era uma por par, o que misturava assuntos.';
+
 -- ================================================================================================ 4. NOTIFICAÇÃO PARA A EQUIPE
 -- PEDIDO EXPLÍCITO DESTA RODADA: notificar TODA A EQUIPE envolvida a cada evolução de etapa ou documento juntado.
 -- `app_notify(org, NULL, …)` grava UMA linha com user_id nulo — aparece na lista da organização, mas não chega a
@@ -358,12 +433,12 @@ CREATE FUNCTION notify_team(p_project uuid, p_kind text, p_title text, p_body te
                             p_dedupe text DEFAULT NULL, p_ref_type text DEFAULT NULL, p_ref_id uuid DEFAULT NULL,
                             p_action_label text DEFAULT NULL)
 RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
-DECLARE n integer := 0; grp text;
+DECLARE n integer := 0; v_grp text;
 BEGIN
   IF app_uid() IS NULL AND NOT app_system() THEN
     RAISE EXCEPTION 'notificação exige contexto autenticado' USING ERRCODE = '42501';
   END IF;
-  grp := split_part(p_kind, '.', 1);
+  v_grp := split_part(p_kind, '.', 1);
   WITH team AS (SELECT DISTINCT t.user_id, t.org_id FROM project_team(p_project) t)
   INSERT INTO notifications(org_id, user_id, kind, title, body, link, actor_user_id, priority, project_id,
                             ref_type, ref_id, dedupe_key, action_label)
@@ -373,7 +448,7 @@ BEGIN
     FROM team t
    WHERE t.user_id IS DISTINCT FROM p_actor          -- quem fez a ação não é avisado da própria ação
      AND NOT EXISTS (SELECT 1 FROM notification_prefs np
-                      WHERE np.user_id = t.user_id AND np.grp = grp AND NOT np.in_app)
+                      WHERE np.user_id = t.user_id AND np.grp = v_grp AND NOT np.in_app)
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS n = ROW_COUNT;
   RETURN n;
@@ -388,30 +463,33 @@ COMMENT ON FUNCTION notify_team(uuid, text, text, text, text, uuid, text, text, 
 CREATE FUNCTION notify_org_members(p_org uuid, p_kind text, p_title text, p_body text, p_link text,
                                    p_actor uuid DEFAULT NULL, p_priority text DEFAULT 'normal',
                                    p_dedupe text DEFAULT NULL, p_ref_type text DEFAULT NULL,
-                                   p_ref_id uuid DEFAULT NULL, p_min_role text DEFAULT 'viewer')
+                                   p_ref_id uuid DEFAULT NULL, p_min_role text DEFAULT 'viewer',
+                                   p_action_label text DEFAULT NULL)
 RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
-DECLARE n integer := 0; grp text; ord text[] := ARRAY['viewer','member','analyst','manager','admin','owner'];
+DECLARE n integer := 0; v_grp text; ord text[] := ARRAY['viewer','member','analyst','manager','admin','owner'];
 BEGIN
   IF app_uid() IS NULL AND NOT app_system() THEN
     RAISE EXCEPTION 'notificação exige contexto autenticado' USING ERRCODE = '42501';
   END IF;
-  grp := split_part(p_kind, '.', 1);
+  v_grp := split_part(p_kind, '.', 1);
   INSERT INTO notifications(org_id, user_id, kind, title, body, link, actor_user_id, priority, ref_type, ref_id,
-                            dedupe_key)
+                            dedupe_key, action_label)
   SELECT m.org_id, m.user_id, p_kind, left(p_title, 200), left(p_body, 2000), p_link, p_actor, p_priority,
-         p_ref_type, p_ref_id, p_dedupe
+         p_ref_type, p_ref_id, p_dedupe, p_action_label
     FROM memberships m
    WHERE m.org_id = p_org
      AND array_position(ord, m.role) >= array_position(ord, p_min_role)
      AND m.user_id IS DISTINCT FROM p_actor
      AND NOT EXISTS (SELECT 1 FROM notification_prefs np
-                      WHERE np.user_id = m.user_id AND np.grp = grp AND NOT np.in_app)
+                      WHERE np.user_id = m.user_id AND np.grp = v_grp AND NOT np.in_app)
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS n = ROW_COUNT;
   RETURN n;
 END $$;
-REVOKE EXECUTE ON FUNCTION notify_org_members(uuid, text, text, text, text, uuid, text, text, text, uuid, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION notify_org_members(uuid, text, text, text, text, uuid, text, text, text, uuid, text) TO impacto_app;
+REVOKE EXECUTE ON FUNCTION notify_org_members(uuid, text, text, text, text, uuid, text, text, text, uuid, text,
+                                              text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION notify_org_members(uuid, text, text, text, text, uuid, text, text, text, uuid, text,
+                                             text) TO impacto_app;
 
 -- Grupos de preferência: a pessoa precisa poder silenciar "propostas" sem silenciar "cobrança". Os seis grupos da
 -- 0009 não cobrem a rede, então o CHECK é reescrito somando os sete grupos novos. Nenhuma linha existente é afetada
@@ -626,8 +704,56 @@ END $$;
 CREATE TRIGGER trg_listing_state BEFORE UPDATE OF publication_state ON marketplace_listings FOR EACH ROW
   EXECUTE FUNCTION listing_state_guard();
 
+-- ------------------------------------------------------------------------------------------------ apuração do período
+-- DEFEITO QUE ISTO CORRIGE (achado pelo teste `test_numbers_come_from_the_server_not_from_the_form`): o motor em
+-- Python montava `metrics`/`milestones`/`evidence_count` e os escrevia no UPDATE. Mas essas três colunas estão em
+-- `guard_columns` — justamente para que número de relatório não seja campo preenchível — então o envio era recusado.
+--
+-- A correção não é afrouxar o guard: é fazer a apuração acontecer onde a documentação já dizia que acontecia. Esta
+-- função é a ÚNICA definição dos números do período; o motor a usa para a prévia (antes do envio) e o gatilho a usa
+-- para gravar no envio. Uma definição, dois usos, nenhuma chance de a prévia divergir do que foi registrado.
+CREATE FUNCTION app_impact_metrics(p_project uuid, p_from date, p_to date) RETURNS jsonb
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  WITH ind AS (
+    SELECT ic.code, ic.name, ic.unit, pi.baseline, pi.target,
+           (SELECT v.value FROM indicator_values v WHERE v.project_indicator_id = pi.id
+              AND v.measured_on BETWEEN p_from AND p_to AND v.status = 'validated'
+            ORDER BY v.measured_on DESC LIMIT 1) AS value_in_period,
+           (SELECT count(*) FROM indicator_values v WHERE v.project_indicator_id = pi.id
+              AND v.measured_on BETWEEN p_from AND p_to) AS measurements,
+           (SELECT count(*) FROM indicator_values v WHERE v.project_indicator_id = pi.id
+              AND v.measured_on BETWEEN p_from AND p_to AND v.status = 'validated') AS validated
+      FROM project_indicators pi JOIN indicator_catalog ic ON ic.id = pi.indicator_id
+     WHERE pi.project_id = p_project),
+  ms AS (
+    SELECT title, due_on, status, amount_cents FROM milestones
+     WHERE project_id = p_project
+       AND (due_on BETWEEN p_from AND p_to OR status IN ('completed','verified'))),
+  ev AS (SELECT count(*) AS n FROM evidences
+          WHERE project_id = p_project AND occurred_on BETWEEN p_from AND p_to),
+  agg AS (SELECT coalesce(sum(measurements), 0) AS measured, coalesce(sum(validated), 0) AS validated FROM ind)
+  SELECT jsonb_build_object(
+    'indicators', coalesce((SELECT jsonb_agg(to_jsonb(ind) ORDER BY ind.code) FROM ind), '[]'::jsonb),
+    'milestones', coalesce((SELECT jsonb_agg(to_jsonb(ms) ORDER BY ms.due_on NULLS LAST) FROM ms), '[]'::jsonb),
+    'evidence_count', (SELECT n FROM ev),
+    'measurements', (SELECT measured FROM agg),
+    'validated_measurements', (SELECT validated FROM agg),
+    'completed_milestones', (SELECT count(*) FROM ms WHERE status IN ('completed','verified')),
+    'period', jsonb_build_array(p_from, p_to),
+    -- a ressalva vai COM os números: medição não validada não comprova resultado
+    'caveat', 'Apurado pelo servidor a partir das medições e marcos do período. ' ||
+      CASE WHEN (SELECT measured FROM agg) > (SELECT validated FROM agg)
+        THEN ((SELECT measured FROM agg) - (SELECT validated FROM agg))::text ||
+             ' medição(ões) ainda não validada(s) não comprovam resultado.'
+        ELSE 'Todas as medições do período estão validadas.' END);
+$$;
+REVOKE EXECUTE ON FUNCTION app_impact_metrics(uuid, date, date) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_impact_metrics(uuid, date, date) TO impacto_app;
+COMMENT ON FUNCTION app_impact_metrics(uuid, date, date) IS
+  'Números do período, apurados das medições e marcos. Única definição: a prévia e a gravação no envio usam esta.';
+
 CREATE FUNCTION impact_update_guard() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE g record;
+DECLARE g record; v_m jsonb;
 BEGIN
   IF NEW.status = OLD.status THEN RETURN NEW; END IF;
   SELECT * INTO g FROM network_status_graph
@@ -637,7 +763,14 @@ BEGIN
       USING ERRCODE = '42501';
   END IF;
   -- carimbos e autoria da revisão são DERIVADOS. É isto que faz "quem revisou" ser um fato e não um campo.
-  IF NEW.status = 'submitted' THEN NEW.submitted_at := now(); END IF;
+  IF NEW.status = 'submitted' THEN
+    NEW.submitted_at := now();
+    -- Os números do relatório são COLHIDOS aqui, não enviados. É o que faz "atendemos 400 pessoas" ter lastro.
+    v_m := app_impact_metrics(NEW.project_id, NEW.period_start, NEW.period_end);
+    NEW.milestones := coalesce(v_m -> 'milestones', '[]'::jsonb);
+    NEW.evidence_count := coalesce((v_m ->> 'evidence_count')::integer, 0);
+    NEW.metrics := v_m - 'milestones';
+  END IF;
   IF NEW.status IN ('under_review','changes_requested','accepted') THEN
     NEW.reviewed_at := now();
     NEW.reviewed_by := coalesce(app_uid(), NEW.reviewed_by);
@@ -1182,19 +1315,27 @@ CREATE TRIGGER trg_guard BEFORE UPDATE ON relationships FOR EACH ROW
   EXECUTE FUNCTION guard_columns('kind','source_org_id','source_user_id','org_id','mirrored_from');
 
 -- Proposta nasce em rascunho; anúncio nasce em rascunho. Nada "nasce publicado" ou "nasce aceito".
+-- ATENÇÃO AO FORMATO: os IF são ANINHADOS, não combinados com AND.
+--
+-- O PostgreSQL NÃO garante curto-circuito em AND/OR: `TG_TABLE_NAME = 'marketplace_listings' AND
+-- NEW.publication_state <> 'draft'` é uma expressão SQL única, e o acesso ao campo pode ser avaliado mesmo quando a
+-- tabela é outra — erro `record "new" has no field "publication_state"` ao inserir uma PROPOSTA. Como esta função
+-- serve três tabelas com colunas diferentes, o teste de tabela tem de ser um IF externo.
 CREATE FUNCTION network_initial_state() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  IF TG_TABLE_NAME = 'proposals' AND NEW.status <> 'draft' AND current_user::text = 'impacto_app'
-     AND NOT app_priv() THEN
-    RAISE EXCEPTION 'Proposta nasce em rascunho' USING ERRCODE = '42501';
-  END IF;
-  IF TG_TABLE_NAME = 'marketplace_listings' AND NEW.publication_state <> 'draft'
-     AND current_user::text = 'impacto_app' AND NOT app_priv() THEN
-    RAISE EXCEPTION 'Anúncio nasce em rascunho' USING ERRCODE = '42501';
-  END IF;
-  IF TG_TABLE_NAME = 'impact_updates' AND NEW.status <> 'draft' AND current_user::text = 'impacto_app'
-     AND NOT app_priv() THEN
-    RAISE EXCEPTION 'Relatório de impacto nasce em rascunho' USING ERRCODE = '42501';
+  IF current_user::text <> 'impacto_app' OR app_priv() THEN RETURN NEW; END IF;
+  IF TG_TABLE_NAME = 'proposals' THEN
+    IF NEW.status <> 'draft' THEN
+      RAISE EXCEPTION 'Proposta nasce em rascunho' USING ERRCODE = '42501';
+    END IF;
+  ELSIF TG_TABLE_NAME = 'marketplace_listings' THEN
+    IF NEW.publication_state <> 'draft' THEN
+      RAISE EXCEPTION 'Anúncio nasce em rascunho' USING ERRCODE = '42501';
+    END IF;
+  ELSIF TG_TABLE_NAME = 'impact_updates' THEN
+    IF NEW.status <> 'draft' THEN
+      RAISE EXCEPTION 'Relatório de impacto nasce em rascunho' USING ERRCODE = '42501';
+    END IF;
   END IF;
   RETURN NEW;
 END $$;
@@ -1202,6 +1343,52 @@ CREATE TRIGGER trg_initial BEFORE INSERT ON proposals FOR EACH ROW EXECUTE FUNCT
 CREATE TRIGGER trg_initial BEFORE INSERT ON marketplace_listings FOR EACH ROW
   EXECUTE FUNCTION network_initial_state();
 CREATE TRIGGER trg_initial BEFORE INSERT ON impact_updates FOR EACH ROW EXECUTE FUNCTION network_initial_state();
+
+-- ------------------------------------------------------------------------------------------------ quem APOIA o projeto
+-- `app_project_party` (0002) conhece candidatura e compromisso. A rede acrescentou outra forma de ser parte: a
+-- RELAÇÃO ativa de apoio, criada pelo aceite de uma proposta. Esta função une as duas, e é SECURITY DEFINER porque
+-- uma política de `impact_updates` que consultasse `relationships` diretamente causaria recursão (ADR 104).
+CREATE FUNCTION app_project_supporter(p_project uuid) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT app_org() IS NOT NULL AND (
+    EXISTS (SELECT 1 FROM projects p WHERE p.id = p_project AND p.org_id = app_org())
+    OR EXISTS (SELECT 1 FROM applications a WHERE a.project_id = p_project AND a.funder_org_id = app_org()
+                 AND a.status IN ('approved','accepted','contracted'))
+    OR EXISTS (SELECT 1 FROM relationships r WHERE r.target_project_id = p_project
+                 AND r.source_org_id = app_org() AND r.status = 'active'
+                 AND r.kind IN ('investment','sponsorship','support','government_support','project_sponsor',
+                                'project_investor','partnership','collaboration','project_partner')));
+$$;
+REVOKE EXECUTE ON FUNCTION app_project_supporter(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_project_supporter(uuid) TO impacto_app;
+COMMENT ON FUNCTION app_project_supporter(uuid) IS
+  'Verdadeiro quando a organização do contexto executa o projeto, tem candidatura aceita, ou mantém relação ativa
+   de apoio. É o critério de quem pode ANALISAR o relatório de impacto.';
+
+-- ------------------------------------------------------------------------------------------------ o que a CONTRAPARTE pode mudar
+-- Aceitar uma relação e analisar um relatório são UPDATE feitos por quem NÃO é dono da linha. A política de RLS
+-- precisa deixar passar, e aí a pergunta vira "mudar o quê?". Sem esta trava, quem recebe uma proposta de parceria
+-- poderia reescrever a observação da outra parte ao aceitar, e quem analisa um relatório poderia editar o resumo
+-- antes de aceitá-lo. GRANT por coluna não serve (concede, não restringe), então a regra é um gatilho.
+CREATE FUNCTION counterpart_columns() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE col text; allowed text[] := TG_ARGV;
+BEGIN
+  IF current_user::text <> 'impacto_app' OR app_priv() THEN RETURN NEW; END IF;
+  IF app_org() IS NOT NULL AND app_org() = OLD.org_id THEN RETURN NEW; END IF;   -- dono muda o que lhe cabe
+  FOR col IN SELECT k FROM jsonb_object_keys(to_jsonb(NEW)) AS k LOOP
+    IF (to_jsonb(NEW) -> col) IS DISTINCT FROM (to_jsonb(OLD) -> col) AND NOT (col = ANY(allowed)) THEN
+      RAISE EXCEPTION 'A outra parte não altera %.% nesta operação', TG_TABLE_NAME, col USING ERRCODE = '42501';
+    END IF;
+  END LOOP;
+  RETURN NEW;
+END $$;
+COMMENT ON FUNCTION counterpart_columns() IS
+  'Limita o UPDATE de quem não é dono da linha às colunas passadas como argumento do gatilho.';
+CREATE TRIGGER trg_counterpart BEFORE UPDATE ON relationships FOR EACH ROW
+  EXECUTE FUNCTION counterpart_columns('status', 'ended_at', 'ended_reason', 'updated_at');
+CREATE TRIGGER trg_counterpart BEFORE UPDATE ON impact_updates FOR EACH ROW
+  EXECUTE FUNCTION counterpart_columns('status', 'review_note', 'reviewed_by', 'reviewed_at', 'reviewed_by_org',
+                                       'updated_at');
 
 -- ================================================================================================ 18. RLS
 ALTER TABLE relationships ENABLE ROW LEVEL SECURITY;
@@ -1229,17 +1416,31 @@ ALTER TABLE domain_events ENABLE ROW LEVEL SECURITY;
 
 -- Relação: a organização vê a relação que criou, a que aponta para ela, e a que aponta para projeto dela.
 -- A relação PÚBLICA/de rede é visível a quem está autenticado — e é `visibility` que decide, nunca a existência.
+-- ACHADO (encontrado pelo teste de aceite de proposta): `app_project_party` só conhece FINANCIADOR com candidatura.
+-- A organização DONA do projeto não estava na lista, então ela não conseguia ver a relação de investimento no
+-- próprio projeto — e o INSERT ... RETURNING do aceite falhava por não poder ler a linha que acabara de criar.
+-- `app_project_supporter` inclui dono, candidatura aceita e relação ativa de apoio; é o conjunto correto aqui.
 CREATE POLICY rel_read ON relationships FOR SELECT USING (
   org_id = app_org() OR target_org_id = app_org() OR source_org_id = app_org()
   OR target_user_id = app_uid() OR source_user_id = app_uid()
   OR (visibility IN ('network','public') AND app_authenticated())
-  OR (target_project_id IS NOT NULL AND app_project_party(target_project_id))
+  OR (target_project_id IS NOT NULL AND app_project_supporter(target_project_id))
+  OR (context_project_id IS NOT NULL AND app_project_supporter(context_project_id))
   OR app_priv());
 CREATE POLICY rel_write ON relationships FOR INSERT WITH CHECK (
   (org_id = app_org() AND (source_org_id IS NULL OR source_org_id = app_org())
-   AND (source_user_id IS NULL OR source_user_id = app_uid())) OR app_priv());
-CREATE POLICY rel_update ON relationships FOR UPDATE USING (org_id = app_org() OR app_priv())
-  WITH CHECK (org_id = app_org() OR app_priv());
+   AND (source_user_id IS NULL OR source_user_id = app_uid()))
+  -- aceitar a proposta de outra organização cria a relação DELA: autorizado por ser parte da proposta
+  OR (origin_proposal_id IS NOT NULL AND proposal_is_party(origin_proposal_id, app_org()))
+  OR app_priv());
+-- Aceitar, recusar, pausar e encerrar são UPDATE feitos pelo LADO DE DESTINO. Sem o destino nesta política, uma
+-- relação pendente nunca sairia de pendente — e o gatilho `trg_counterpart` garante que ele só muda a SITUAÇÃO.
+CREATE POLICY rel_update ON relationships FOR UPDATE USING (
+  org_id = app_org() OR target_org_id = app_org() OR target_user_id = app_uid()
+  OR (target_project_id IS NOT NULL AND app_project_supporter(target_project_id)) OR app_priv())
+  WITH CHECK (
+  org_id = app_org() OR target_org_id = app_org() OR target_user_id = app_uid()
+  OR (target_project_id IS NOT NULL AND app_project_supporter(target_project_id)) OR app_priv());
 CREATE POLICY rel_delete ON relationships FOR DELETE USING (org_id = app_org() OR app_priv());
 
 -- Proposta: só as duas partes. Travessia por função SECURITY DEFINER (ADR 104).
@@ -1274,10 +1475,16 @@ CREATE POLICY listing_write ON marketplace_listings FOR ALL USING (org_id = app_
 
 -- Relatório de impacto: a organização dona e quem é parte do projeto (financiador com candidatura).
 CREATE POLICY impupd_read ON impact_updates FOR SELECT USING (
-  org_id = app_org() OR app_project_party(project_id)
+  org_id = app_org() OR app_project_party(project_id) OR app_project_supporter(project_id)
   OR (status = 'published' AND app_authenticated()) OR app_priv());
-CREATE POLICY impupd_write ON impact_updates FOR ALL USING (org_id = app_org() OR app_priv())
-  WITH CHECK (org_id = app_org() OR app_priv());
+CREATE POLICY impupd_insert ON impact_updates FOR INSERT WITH CHECK (org_id = app_org() OR app_priv());
+CREATE POLICY impupd_delete ON impact_updates FOR DELETE USING (org_id = app_org() OR app_priv());
+-- Quem APOIA o projeto analisa o relatório, e para isso precisa de UPDATE. O que ele pode mudar é só situação e
+-- devolutiva: `trg_counterpart` recusa qualquer outra coluna, então ninguém reescreve o relatório de outra pessoa
+-- antes de aceitá-lo.
+CREATE POLICY impupd_update ON impact_updates FOR UPDATE USING (
+  org_id = app_org() OR app_project_supporter(project_id) OR app_priv())
+  WITH CHECK (org_id = app_org() OR app_project_supporter(project_id) OR app_priv());
 
 -- Catálogos de referência: leitura para quem está autenticado, escrita só privilegiada.
 CREATE POLICY personas_read ON personas FOR SELECT USING (app_authenticated() OR app_priv());
@@ -1302,7 +1509,11 @@ CREATE POLICY profile_read ON public_profiles FOR SELECT USING (
 CREATE POLICY profile_write ON public_profiles FOR ALL
   USING (org_id = app_org() OR user_id = app_uid() OR app_priv())
   WITH CHECK (org_id = app_org() OR user_id = app_uid() OR app_priv());
-CREATE POLICY handlehist_read ON handle_history FOR SELECT USING (app_priv());
+-- O histórico existe para que o DONO possa provar que o @ mudou e quando. Ler só com privilégio de plataforma
+-- tornaria o registro inútil para quem ele protege.
+CREATE POLICY handlehist_read ON handle_history FOR SELECT USING (
+  app_priv() OR EXISTS (SELECT 1 FROM public_profiles p WHERE p.id = handle_history.profile_id
+                          AND (p.org_id = app_org() OR p.user_id = app_uid())));
 CREATE POLICY handlehist_insert ON handle_history FOR INSERT WITH CHECK (true);
 
 -- Experiência: a pessoa escreve a dela; a organização citada vê e confirma; pública quando a pessoa deixa.
@@ -1336,8 +1547,14 @@ CREATE POLICY intent_read ON investment_intents FOR SELECT USING (
   investor_org_id = app_org() OR app_project_party(project_id)
   OR EXISTS (SELECT 1 FROM projects p WHERE p.id = investment_intents.project_id AND p.org_id = app_org())
   OR app_priv());
-CREATE POLICY intent_write ON investment_intents FOR ALL USING (investor_org_id = app_org() OR app_priv())
-  WITH CHECK (investor_org_id = app_org() OR app_priv());
+-- A intenção é do INVESTIDOR, mas nasce quando a organização executora ACEITA a proposta. Sem a segunda condição,
+-- aceitar uma proposta de investimento seria recusado pela própria política que protege a intenção.
+CREATE POLICY intent_write ON investment_intents FOR ALL USING (
+  investor_org_id = app_org()
+  OR (proposal_id IS NOT NULL AND proposal_is_party(proposal_id, app_org())) OR app_priv())
+  WITH CHECK (
+  investor_org_id = app_org()
+  OR (proposal_id IS NOT NULL AND proposal_is_party(proposal_id, app_org())) OR app_priv());
 
 -- Recomendação e prontidão: só da própria organização.
 CREATE POLICY rec_read ON recommendations FOR SELECT USING (org_id = app_org() OR app_priv());
@@ -1349,8 +1566,52 @@ CREATE POLICY readiness_insert ON readiness_snapshots FOR INSERT WITH CHECK (org
 -- Evento de domínio: a organização vê os seus; quem é parte do projeto vê os do projeto.
 CREATE POLICY devent_read ON domain_events FOR SELECT USING (
   org_id = app_org() OR (project_id IS NOT NULL AND app_project_party(project_id)) OR app_priv());
-CREATE POLICY devent_insert ON domain_events FOR INSERT WITH CHECK (
-  org_id = app_org() OR org_id IS NULL OR app_priv());
+-- NÃO existe política de INSERT: o fato entra SÓ por `app_record_event()`, abaixo. Um fato da rede envolve duas
+-- organizações (quem propôs e quem recebeu), então "org_id = app_org()" recusaria justamente o registro que
+-- interessa — e abrir a política deixaria qualquer organização escrever no histórico de outra. A função resolve os
+-- dois: ela é SECURITY DEFINER e amarra a autoria a app_uid().
+REVOKE INSERT ON domain_events FROM impacto_app;
+
+CREATE FUNCTION app_record_event(p_event text, p_org uuid, p_actor uuid DEFAULT NULL,
+                                 p_project uuid DEFAULT NULL, p_subject_type text DEFAULT NULL,
+                                 p_subject_id uuid DEFAULT NULL, p_payload jsonb DEFAULT '{}'::jsonb,
+                                 p_notified integer DEFAULT 0)
+RETURNS bigint LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+DECLARE v_id bigint;
+BEGIN
+  IF app_uid() IS NULL AND NOT app_system() THEN
+    RAISE EXCEPTION 'registro de fato exige contexto autenticado' USING ERRCODE = '42501';
+  END IF;
+  -- a autoria não é declarada: ou é quem está agindo, ou é a plataforma (nulo)
+  IF p_actor IS NOT NULL AND NOT app_system() AND p_actor <> app_uid() THEN
+    RAISE EXCEPTION 'o autor do fato tem de ser quem está agindo' USING ERRCODE = '42501';
+  END IF;
+  INSERT INTO domain_events(event, org_id, actor_user_id, project_id, subject_type, subject_id, payload, notified)
+  VALUES (p_event, p_org, p_actor, p_project, p_subject_type, p_subject_id, coalesce(p_payload, '{}'::jsonb),
+          greatest(coalesce(p_notified, 0), 0))
+  RETURNING id INTO v_id;
+  RETURN v_id;
+END $$;
+REVOKE EXECUTE ON FUNCTION app_record_event(text, uuid, uuid, uuid, text, uuid, jsonb, integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION app_record_event(text, uuid, uuid, uuid, text, uuid, jsonb, integer) TO impacto_app;
+COMMENT ON FUNCTION app_record_event(text, uuid, uuid, uuid, text, uuid, jsonb, integer) IS
+  'Único caminho de escrita em domain_events. O fato pode pertencer à organização da contraparte (é o ponto), mas a
+   autoria é sempre app_uid() — ninguém registra fato em nome de outra pessoa.';
+
+-- ------------------------------------------------------------------------------------------------ trilha do projeto
+-- A trilha encadeada já aceitava entradas de quem APOIA o projeto (`app_project_investor`, `app_project_party`) —
+-- cada entrada sob o `org_id` de quem a escreveu, o que é o desenho correto: a trilha diz quem registrou o quê.
+--
+-- ACHADO: essas duas funções conhecem candidatura e compromisso. A rede criou outra forma de ser parte — a relação
+-- ativa de apoio, nascida do aceite de uma proposta. Sem somá-la, quem apoia por relação não consegue registrar na
+-- trilha o aceite de um relatório de impacto, e o fato mais importante do ciclo ficaria fora do histórico.
+ALTER POLICY ledger_insert ON ledger_entries WITH CHECK (
+  (org_id = app_org() AND (app_project_owner(project_id) OR app_project_party(project_id)
+                           OR app_project_investor(project_id) OR app_project_supporter(project_id)))
+  OR app_priv());
+ALTER POLICY ledger_read ON ledger_entries USING (
+  app_project_owner(project_id) OR app_project_investor(project_id) OR app_project_party(project_id)
+  OR app_project_supporter(project_id) OR app_priv());
 
 -- ================================================================================================ 19. GRANTS
 GRANT SELECT, INSERT, UPDATE, DELETE ON relationships, proposals, proposal_attachments, marketplace_listings,

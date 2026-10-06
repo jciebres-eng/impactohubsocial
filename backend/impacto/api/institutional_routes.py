@@ -12,6 +12,7 @@ from ..http import ApiError, Ctx, not_found, page, route
 from ..services import institutional as svc
 from . import schemas as S
 from .document_routes import DOC_COLS, with_state
+from ..clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 T = ("institutional",)
 FUNDER_KINDS = ("company", "government", "individual", "platform")
@@ -20,7 +21,7 @@ QUAL_COLS = ("q.id::text AS id, q.org_id::text AS org_id, q.qualification_type, 
 
 
 def _qual_view(q: dict, cat: dict, today: date | None = None) -> dict:
-    today = today or date.today()
+    today = today or _hoje_utc()
     exp = q.get("expiration_date")
     status = q["verification_status"]
     eff = "expired" if status == "verified" and exp and exp < today else status

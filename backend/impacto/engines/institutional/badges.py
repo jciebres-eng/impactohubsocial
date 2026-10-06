@@ -9,6 +9,7 @@ from datetime import date, timedelta
 
 from .common import BADGE_DISCLAIMER, as_date
 from .documents import best_state
+from ...clock import today as _hoje_utc  # data do produto é UTC; ver impacto/clock.py
 
 # critérios implementados (conjunto fechado; o catálogo só parametriza)
 ORG_CRITERIA = ("compliance_approved", "document_validated", "qualification_verified", "eligibility_evaluated")
@@ -70,7 +71,7 @@ def _solution_criterion(code: str, params: dict, sol: dict, today: date) -> dict
 
 def compute(defs: list[dict], *, scope: str, facts: dict | None = None, solution: dict | None = None, today: date | None = None, ctx: dict | None = None) -> list[dict]:
     """defs: itens publicados do catálogo 'badge' ({code,label,description,attributes,source_citation,...})."""
-    today = today or date.today()
+    today = today or _hoje_utc()
     out = []
     for d in defs:
         a = d.get("attributes") or {}

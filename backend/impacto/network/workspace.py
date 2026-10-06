@@ -314,21 +314,10 @@ def _s_supported(conn: Connection, *, org_id: str, **_: Any) -> Any:
 
 
 def _s_reports_to_review(conn: Connection, *, org_id: str, **_: Any) -> Any:
-    """Relatórios que ESTA organização pode analisar: dos projetos que ela apoia, enviados e ainda sem decisão."""
-    return conn.query(
-        "SELECT u.id::text AS id, u.project_id::text AS project_id, p.title AS project_title, u.period_start,"
-        " u.period_end, u.status, u.submitted_at, u.evidence_count,"
-        " coalesce(o.trade_name, o.legal_name) AS org_name"
-        " FROM impact_updates u JOIN projects p ON p.id = u.project_id"
-        " JOIN organizations o ON o.id = u.org_id"
-        " WHERE u.status IN ('submitted','under_review') AND u.org_id <> $1"
-        "   AND (EXISTS (SELECT 1 FROM applications a WHERE a.project_id = u.project_id"
-        "                  AND a.funder_org_id = $1 AND a.status IN ('approved','accepted','contracted'))"
-        "     OR EXISTS (SELECT 1 FROM relationships r WHERE r.target_project_id = u.project_id"
-        "                  AND r.source_org_id = $1 AND r.status = 'active'"
-        "                  AND r.kind IN ('investment','sponsorship','support','government_support',"
-        "                                 'project_sponsor','project_investor')))"
-        " ORDER BY u.submitted_at NULLS LAST LIMIT 10", org_id)
+    """Relatórios que ESTA organização pode analisar. A consulta vive em `impact_report.review_inbox`, que é o
+    módulo dono do assunto — o workspace só escolhe mostrá-la."""
+    from . import impact_report
+    return impact_report.review_inbox(conn, org_id=org_id)
 
 
 def _s_discover(conn: Connection, *, org_id: str, **_: Any) -> Any:

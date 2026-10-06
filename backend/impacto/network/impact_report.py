@@ -7,9 +7,11 @@ distingue a plataforma de um marketplace: quem apoiou recebe prestação de cont
 Ciclo: rascunho → enviado → em análise → (ajuste pedido ↺) → aceito → publicado.
 
 Quatro decisões que valem registro:
-  1. **A apuração é do servidor.** `metrics`, `milestones` e `evidence_count` NÃO vêm do formulário: são lidos de
-     `indicator_values`, `milestones` e `evidences` no momento do envio. A organização escreve o texto; os números são
-     colhidos. Sem isso, "atendemos 400 pessoas" seria digitável sem lastro.
+  1. **A apuração é do BANCO, não deste arquivo.** `metrics`, `milestones` e `evidence_count` são gravados pelo
+     gatilho `impact_update_guard()` quando o estado vira `submitted`, a partir de `app_impact_metrics()`, que lê
+     `indicator_values`, `milestones` e `evidences`. As três colunas estão em `guard_columns`, então nem este motor
+     pode escrevê-las — a organização escreve o texto, o banco colhe os números. Sem isso, "atendemos 400 pessoas"
+     seria digitável sem lastro. `gather()` aqui chama a mesma função, para que a prévia nunca divirja do registrado.
   2. **Quem revisa não é quem escreveu** — o CHECK da tabela recusa `reviewed_by = created_by` até em SQL direto, e
      `impact_update_guard()` deriva quem revisou de `app_uid()`.
   3. **Limitações são campo do relatório.** Dizer o que o dado NÃO prova é parte de relatar com honestidade; a
@@ -21,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..db.pq import Connection, Json
+from ..db.pq import Connection
 from ..http import ApiError, forbidden, not_found, unprocessable
 from ..services.audit import ledger
 from . import notify
@@ -79,40 +81,16 @@ def update(conn: Connection, *, update_id: str, org_id: str, fields: dict[str, A
 
 
 def gather(conn: Connection, *, project_id: str, period_start: Any, period_end: Any) -> dict[str, Any]:
-    """Apura os números do período a partir das tabelas de execução. Nada aqui vem de formulário.
+    """Prévia da apuração do período. Chama `app_impact_metrics()`, a MESMA função que o gatilho usa no envio.
 
-    É deliberadamente uma função separada e pública: a interface pode mostrar "é isto que será apurado" ANTES do
-    envio, de modo que a organização veja os números e entenda que não os digita.
+    Ter uma definição só é o ponto: se a prévia fosse uma consulta em Python e a gravação outra em SQL, as duas
+    divergiriam com o tempo e a organização veria um número antes de enviar e outro depois. Esta função é
+    deliberadamente uma linha.
+
+    Ela é pública para que a interface possa mostrar "é isto que será apurado" ANTES do envio — de modo que fique
+    claro que os números não são digitados.
     """
-    indicators = conn.query(
-        "SELECT ic.code, ic.name, ic.unit, pi.baseline, pi.target,"
-        " (SELECT v.value FROM indicator_values v WHERE v.project_indicator_id = pi.id"
-        "    AND v.measured_on BETWEEN $2 AND $3 AND v.status = 'validated'"
-        "  ORDER BY v.measured_on DESC LIMIT 1) AS value_in_period,"
-        " (SELECT count(*) FROM indicator_values v WHERE v.project_indicator_id = pi.id"
-        "    AND v.measured_on BETWEEN $2 AND $3) AS measurements,"
-        " (SELECT count(*) FROM indicator_values v WHERE v.project_indicator_id = pi.id"
-        "    AND v.measured_on BETWEEN $2 AND $3 AND v.status = 'validated') AS validated"
-        " FROM project_indicators pi JOIN indicator_catalog ic ON ic.id = pi.indicator_id"
-        " WHERE pi.project_id = $1 ORDER BY ic.code", project_id, period_start, period_end)
-    milestones = conn.query(
-        "SELECT title, due_on, status, amount_cents FROM milestones"
-        " WHERE project_id = $1 AND (due_on BETWEEN $2 AND $3 OR status IN ('completed','verified'))"
-        " ORDER BY due_on NULLS LAST", project_id, period_start, period_end)
-    evidence_count = int(conn.scalar(
-        "SELECT count(*) FROM evidences WHERE project_id = $1 AND occurred_on BETWEEN $2 AND $3",
-        project_id, period_start, period_end) or 0)
-    validated = sum(int(i["validated"] or 0) for i in indicators)
-    measured = sum(int(i["measurements"] or 0) for i in indicators)
-    return {
-        "indicators": indicators, "milestones": milestones, "evidence_count": evidence_count,
-        "measurements": measured, "validated_measurements": validated,
-        "completed_milestones": sum(1 for m in milestones if m["status"] in ("completed", "verified")),
-        # A ressalva vai COM os números, não num rodapé: medição não validada não comprova resultado.
-        "caveat": ("Apurado pelo servidor a partir das medições e marcos do período. "
-                   + (f"{measured - validated} medição(ões) ainda não validada(s) não comprovam resultado."
-                      if measured > validated else "Todas as medições do período estão validadas.")),
-    }
+    return conn.scalar("SELECT app_impact_metrics($1,$2,$3)", project_id, period_start, period_end)
 
 
 def transition(conn: Connection, *, update_id: str, to: str, org_id: str, actor: str | None,
@@ -141,14 +119,7 @@ def transition(conn: Connection, *, update_id: str, to: str, org_id: str, actor:
     if rule["requires_note"] and not (note and len(note.strip()) >= 3):
         raise unprocessable("Pedir ajuste exige dizer o que precisa ser ajustado (mínimo 3 caracteres)")
 
-    if to == "submitted":
-        # Momento exato da apuração: o que o relatório afirma em números passa a ter origem rastreável.
-        g = gather(conn, project_id=u["project_id"], period_start=u["period_start"], period_end=u["period_end"])
-        conn.run("UPDATE impact_updates SET metrics = $2::jsonb, milestones = $3::jsonb, evidence_count = $4,"
-                 " status = 'submitted' WHERE id = $1", update_id,
-                 Json({k: v for k, v in g.items() if k != "milestones"}), Json(g["milestones"]),
-                 g["evidence_count"])
-    elif to == "changes_requested":
+    if to == "changes_requested":
         conn.run("UPDATE impact_updates SET status = $2, review_note = $3 WHERE id = $1", update_id, to, note)
     else:
         conn.run("UPDATE impact_updates SET status = $2,"
@@ -157,10 +128,14 @@ def transition(conn: Connection, *, update_id: str, to: str, org_id: str, actor:
 
     _announce(conn, u, to=to, actor=actor, note=note)
     if to in ("accepted", "published"):
-        ledger(conn, project_id=u["project_id"], org_id=u["org_id"], actor=actor,
+        # `org_id` é a organização que REGISTROU a entrada, não a dona do projeto. É o desenho da trilha desde a
+        # 0002: cada entrada carrega quem a escreveu, e `ledger_read` deixa as duas partes lerem a trilha inteira.
+        # Gravar sob o org da OSC a partir do contexto do financiador seria escrever no histórico em nome de outra.
+        ledger(conn, project_id=u["project_id"], org_id=org_id, actor=actor,
                entry_type="impact_update_accepted" if to == "accepted" else "impact_update_published",
                ref_type="impact_update", ref_id=update_id,
-               payload={"period": [str(u["period_start"]), str(u["period_end"])], "status": to})
+               payload={"period": [str(u["period_start"]), str(u["period_end"])], "status": to,
+                        "executor_org_id": u["org_id"]})
     return {**_load(conn, update_id), "unchanged": False}
 
 
@@ -245,6 +220,29 @@ def listing(conn: Connection, *, project_id: str | None = None, org_id: str | No
     for r in rows:
         r["status_label"] = ST_LABEL[r["status"]]
     return rows
+
+
+def review_inbox(conn: Connection, *, org_id: str, limit: int = 10) -> list[dict]:
+    """Relatórios enviados e ainda sem decisão, dos projetos que ESTA organização apoia.
+
+    O critério de "apoia" é o mesmo de `_can_review`: candidatura aceita ao edital ou relação ativa de apoio. Repetir
+    o critério em SQL aqui é deliberado — a caixa precisa ser uma consulta só, e o teste de invariante compara as
+    duas definições para que não divirjam.
+    """
+    return conn.query(
+        "SELECT u.id::text AS id, u.project_id::text AS project_id, p.title AS project_title, u.period_start,"
+        " u.period_end, u.status, u.submitted_at, u.evidence_count,"
+        " coalesce(o.trade_name, o.legal_name) AS org_name"
+        " FROM impact_updates u JOIN projects p ON p.id = u.project_id"
+        " JOIN organizations o ON o.id = u.org_id"
+        " WHERE u.status IN ('submitted','under_review') AND u.org_id <> $1"
+        "   AND (EXISTS (SELECT 1 FROM applications a WHERE a.project_id = u.project_id"
+        "                  AND a.funder_org_id = $1 AND a.status IN ('approved','accepted','contracted'))"
+        "     OR EXISTS (SELECT 1 FROM relationships r WHERE r.target_project_id = u.project_id"
+        "                  AND r.source_org_id = $1 AND r.status = 'active'"
+        "                  AND r.kind IN ('investment','sponsorship','support','government_support',"
+        "                                 'project_sponsor','project_investor')))"
+        " ORDER BY u.submitted_at NULLS LAST LIMIT $2", org_id, limit)
 
 
 def published_for_project(conn: Connection, project_id: str) -> list[dict]:

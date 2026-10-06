@@ -253,6 +253,15 @@ def retention(app) -> dict:
             "sessions": c.run("DELETE FROM sessions WHERE refresh_expires_at < now() - interval '30 days'"),
             "ai_usage": c.run("DELETE FROM ai_usage WHERE created_at < now() - interval '13 months'"),
             "notifications": c.run("DELETE FROM notifications WHERE read_at IS NOT NULL AND read_at < now() - interval '180 days'"),
+            # O corpo do webhook pode conter nome e e-mail do pagador. O EVENTO fica para sempre
+            # (idempotência e reconciliação); o conteúdo dele sai depois de 18 meses (v0.17.0).
+            "billing_event_payloads": c.run("UPDATE billing_events SET payload = '{}'::jsonb"
+                                            " WHERE received_at < now() - interval '18 months'"
+                                            " AND payload <> '{}'::jsonb"),
+            # IP de aceite vencido: a prova é o documento, a versão e o hash do texto — não o IP.
+            "acceptance_ips": c.run("UPDATE legal_acceptances SET ip = NULL, user_agent = NULL"
+                                    " WHERE accepted_at < now() - interval '18 months'"
+                                    " AND (ip IS NOT NULL OR user_agent IS NOT NULL)"),
         }
 
 

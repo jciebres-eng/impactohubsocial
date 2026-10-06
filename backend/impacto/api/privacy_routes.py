@@ -25,6 +25,10 @@ def export(ctx: Ctx):
             "sessions": c.query("SELECT created_at, last_seen_at, ip, user_agent, revoked_at FROM sessions WHERE user_id = $1 ORDER BY created_at DESC"
                                 " LIMIT 200", ctx.user_id),
             "privacy_requests": c.query("SELECT kind, status, created_at, completed_at FROM privacy_requests WHERE user_id = $1", ctx.user_id),
+            # v0.17.0: a prova de aceite é dado do titular e tem de sair na portabilidade. Vai com o
+            # hash do texto aceito, que é o que torna a prova verificável por quem recebe o arquivo.
+            "legal_acceptances": c.query("SELECT doc_key, version, body_sha256, accepted_at, source, ip, user_agent"
+                                         " FROM legal_acceptances WHERE user_id = $1 ORDER BY accepted_at", ctx.user_id),
         }
     with ctx.system_tx() as c:
         data["activity"] = c.query("SELECT action, object_type, at, ip FROM audit_events WHERE actor_user_id = $1 ORDER BY id DESC LIMIT 1000", ctx.user_id)
@@ -66,6 +70,9 @@ def delete_account(ctx: Ctx, body: DeleteIn):
               " mfa_recovery_hashes = '{}', oidc_subject = NULL, status = 'deleted' WHERE id = $1", ctx.user_id, anon)
         c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = 'account_deleted', ip = NULL, user_agent = NULL WHERE user_id = $1", ctx.user_id)
         c.run("DELETE FROM auth_tokens WHERE user_id = $1", ctx.user_id)
+        # A prova de aceite SOBREVIVE (obrigação legal), sem o IP e sem o agente de usuário. O gatilho
+        # `acceptance_anonymize_only()` permite exatamente esta alteração e recusa qualquer outra.
+        c.run("UPDATE legal_acceptances SET ip = NULL, user_agent = NULL WHERE user_id = $1", ctx.user_id)
         c.run("INSERT INTO privacy_requests(user_id, kind, status, completed_at, notes) VALUES ($1,'deletion','completed', now(),"
               " 'Dados pessoais anonimizados; registros de auditoria e financeiros mantidos pseudonimizados')", ctx.user_id)
         ctx.audit(c, "privacy.account_deleted", "user", ctx.user_id, {})

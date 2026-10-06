@@ -22,26 +22,33 @@ from typing import Any
 
 from ..db.pq import Connection, Json
 from ..http import forbidden, not_found
-from . import readiness
+from . import marketplace, readiness
 
 ENGINE_VERSION = "recommendation@1.0.0"
 
 ACTIONS = ("complete_diagnosis", "complete_project", "add_indicator", "add_milestone", "upload_document",
            "publish_project", "create_listing", "send_proposal", "review_proposal", "find_professional",
            "find_investor", "apply_to_call", "submit_impact_update", "resolve_risk", "renew_document",
-           "confirm_experience", "measure_indicator", "review_match")
+           "confirm_experience", "measure_indicator", "review_match", "invite_member")
 
 #: Para onde cada ação leva. Recomendação que não abre a tela da ação é recado, não recomendação.
+#:
+#: TODO DESTINO AQUI É UMA ROTA REAL DO APLICATIVO, e há um teste de arquitetura que confere isso
+#: (`test_recommendation_links_exist_in_the_app`). Ele foi escrito porque sete destes links estavam errados na
+#: primeira versão — eu os escrevi pelo nome que me pareceu natural (`/projetos/{id}/indicadores`,
+#: `/rede/profissionais`, `/match`) em vez de pelo nome que o aplicativo usa. Cada um apareceria no workspace e o
+#: clique cairia em "página não encontrada", que é pior do que não recomendar nada.
 LINKS: dict[str, str] = {
-    "complete_diagnosis": "/projetos/{id}/diagnostico", "complete_project": "/projetos/{id}",
-    "add_indicator": "/projetos/{id}/indicadores", "add_milestone": "/projetos/{id}/marcos",
+    "complete_diagnosis": "/diagnosticos", "complete_project": "/projetos/{id}",
+    "add_indicator": "/projetos/{id}/impacto", "add_milestone": "/projetos/{id}",
     "upload_document": "/documentos", "publish_project": "/projetos/{id}",
     "create_listing": "/marketplace/meus", "send_proposal": "/propostas/nova",
-    "review_proposal": "/propostas/{id}", "find_professional": "/rede/profissionais",
-    "find_investor": "/match", "apply_to_call": "/editais/{id}",
+    "review_proposal": "/propostas/{id}", "find_professional": "/profissionais",
+    "find_investor": "/marketplace", "apply_to_call": "/oportunidades",
     "submit_impact_update": "/projetos/{id}/relatorios", "resolve_risk": "/projetos/{id}/riscos",
-    "renew_document": "/documentos/{id}", "confirm_experience": "/perfil/experiencias",
-    "measure_indicator": "/projetos/{id}/indicadores", "review_match": "/match",
+    "renew_document": "/documentos", "confirm_experience": "/rede/experiencias",
+    "measure_indicator": "/projetos/{id}/impacto", "review_match": "/projetos/{id}/impacto",
+    "invite_member": "/organizacao",
 }
 
 
@@ -76,8 +83,6 @@ def compute(conn: Connection, *, org_id: str, user_id: str | None = None, limit:
         "SELECT p.id::text AS id, p.title, p.status, p.visibility,"
         " (SELECT count(*) FROM project_indicators i WHERE i.project_id = p.id) AS indicators,"
         " (SELECT count(*) FROM milestones m WHERE m.project_id = p.id) AS milestones,"
-        " (SELECT count(*) FROM marketplace_listings l WHERE l.project_id = p.id"
-        "    AND l.publication_state = 'published') AS listings,"
         " (SELECT count(*) FROM project_risks r WHERE r.project_id = p.id"
         "    AND r.status IN ('open','materialized') AND r.severity IN ('high','critical')) AS hot_risks,"
         # a versão do diagnóstico pendura no DIAGNÓSTICO, que pendura no projeto — dois saltos, não um
@@ -134,7 +139,10 @@ def compute(conn: Connection, *, org_id: str, user_id: str | None = None, limit:
                              f"A descrição já está em {r['scores']['project_readiness']}% e o projeto continua "
                              "privado — publicar é o que o torna visível a quem pode apoiar.", 80, conf, bnd,
                              ev_base))
-        if p["visibility"] == "published" and not int(p["listings"] or 0) and r["scores"]["funding_readiness"] >= 60:
+        # A pergunta "tem anúncio no ar?" é do marketplace, e é ele quem a responde — ver
+        # marketplace.has_published_listing e o invariante que impede a condição de se espalhar.
+        has_listing = marketplace.has_published_listing(conn, p["id"])
+        if p["visibility"] == "published" and not has_listing and r["scores"]["funding_readiness"] >= 60:
             recs.append(_Rec("create_listing", "project", p["id"],
                              f"Criar anúncio para “{p['title']}”",
                              f"O projeto está publicado e com prontidão de captação em "
@@ -145,6 +153,29 @@ def compute(conn: Connection, *, org_id: str, user_id: str | None = None, limit:
                              f"Tratar {p['hot_risks']} risco(s) de severidade alta em “{p['title']}”",
                              "Risco aberto de severidade alta bloqueia avanço de etapa e aparece a quem avalia o "
                              "projeto.", 92, conf, bnd, {**ev_base, "hot_risks": int(p["hot_risks"])}))
+
+    if not projects:
+        # ACHADO (jornada 1): uma organização recém-criada não tinha NENHUMA recomendação, porque todas dependiam
+        # de existir projeto. O workspace abria vazio justamente para quem mais precisa de direção. Estas duas são
+        # o primeiro passo real de quem acabou de entrar.
+        r = readiness.evaluate(conn, org_id=org_id)
+        recs.append(_Rec("complete_project", "organization", None, "Criar o primeiro projeto",
+                         "A plataforma organiza o trabalho em torno de projetos: é o projeto que recebe "
+                         "diagnóstico, documentos, apoio e prestação de contas.", 90, None, "insufficient_data",
+                         {"reason": "sem projeto"}))
+        if r["scores"]["document_readiness"] < 100:
+            miss = [b["blocker"] for b in r["blockers"] if b["dimension"] == "document_readiness"][:3]
+            recs.append(_Rec("upload_document", "organization", None,
+                             "Completar a documentação institucional",
+                             f"Prontidão documental em {r['scores']['document_readiness']}%. "
+                             + "; ".join(miss) + ".", 94, r["scores"]["document_readiness"],
+                             "high", {"blockers": miss}))
+        if r["scores"]["governance_readiness"] < 70:
+            recs.append(_Rec("invite_member", "organization", None,
+                             "Definir responsáveis na organização",
+                             f"Prontidão de governança em {r['scores']['governance_readiness']}%: depender de uma "
+                             "pessoa só é o risco mais comum em organização pequena.", 70,
+                             r["scores"]["governance_readiness"], "medium", {}))
 
     recs += _proposal_recs(conn, org_id)
     recs += _document_recs(conn, org_id)

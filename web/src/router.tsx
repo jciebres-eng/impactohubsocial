@@ -34,8 +34,24 @@ export function match(pattern: string, path: string): Record<string, string> | n
   if (p.length !== a.length) return null;
   const params: Record<string, string> = {};
   for (let i = 0; i < p.length; i++) {
-    if (p[i].startsWith(":")) params[p[i].slice(1)] = decodeURIComponent(a[i]);
-    else if (p[i] !== a[i]) return null;
+    const seg = p[i];
+    if (seg.startsWith(":")) {
+      params[seg.slice(1)] = decodeURIComponent(a[i]);
+      continue;
+    }
+    // Segmento com PREFIXO LITERAL antes do parâmetro, como "@:handle" em /@identificador.
+    //
+    // A URL pública do perfil é `impacto.app/@nome` — o arroba faz parte do endereço, não do valor. Sem este
+    // caso, `/@:handle` nunca casaria (o segmento não começa com ":") e a página compartilhada cairia no
+    // "não encontrada". Com ele, o prefixo é conferido e só o resto vira parâmetro.
+    const colon = seg.indexOf(":");
+    if (colon > 0) {
+      const prefix = seg.slice(0, colon);
+      if (!a[i].startsWith(prefix) || a[i].length === prefix.length) return null;
+      params[seg.slice(colon + 1)] = decodeURIComponent(a[i].slice(prefix.length));
+      continue;
+    }
+    if (seg !== a[i]) return null;
   }
   return params;
 }

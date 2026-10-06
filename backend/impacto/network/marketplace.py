@@ -231,6 +231,24 @@ def public_feed(conn: Connection, *, subject_type: str | None = None, seeking: s
     return {"items": rows, "total": int(total or 0), "limit": limit, "offset": offset}
 
 
+def has_published_listing(conn: Connection, project_id: str) -> bool:
+    """Este projeto tem anúncio no ar?
+
+    Existe para que nenhum outro módulo precise escrever `publication_state = 'published'`. Parece detalhe, mas é o
+    achado E6 inteiro: quanto mais lugares repetem a condição de publicação, mais chances de um deles divergir. Há
+    um teste de invariante que falha se a condição aparecer fora deste arquivo.
+    """
+    return bool(conn.one("SELECT 1 AS ok FROM marketplace_listings WHERE project_id = $1"
+                         " AND publication_state = ANY($2::text[])", project_id, list(PUBLIC_STATES)))
+
+
+def published_count(conn: Connection, *, org_id: str | None = None) -> int:
+    """Quantos anúncios estão no ar (da organização, ou da plataforma inteira)."""
+    return int(conn.scalar(
+        "SELECT count(*) FROM marketplace_listings WHERE publication_state = ANY($1::text[])"
+        " AND ($2::uuid IS NULL OR org_id = $2)", list(PUBLIC_STATES), org_id) or 0)
+
+
 def mine(conn: Connection, *, org_id: str, state: str | None = None, limit: int = 50, offset: int = 0) -> list[dict]:
     rows = conn.query(f"{_SELECT} WHERE l.org_id = $1 AND ($2::text IS NULL OR l.publication_state = $2)"
                       f" ORDER BY l.created_at DESC LIMIT $3 OFFSET $4", org_id, state, limit, offset)

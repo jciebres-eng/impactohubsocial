@@ -1170,7 +1170,8 @@ CREATE TABLE recommendations (
   action        text NOT NULL CHECK (action IN ('complete_diagnosis','complete_project','add_indicator',
                   'add_milestone','upload_document','publish_project','create_listing','send_proposal',
                   'review_proposal','find_professional','find_investor','apply_to_call','submit_impact_update',
-                  'resolve_risk','renew_document','confirm_experience','measure_indicator','review_match')),
+                  'resolve_risk','renew_document','confirm_experience','measure_indicator','review_match',
+                  'invite_member')),
   -- sobre o quê
   subject_type  text NOT NULL CHECK (subject_type IN ('project','diagnosis','proposal','organization','call',
                                                       'document','listing','relationship','indicator')),
@@ -1641,7 +1642,11 @@ CREATE INDEX ix_impupd_period ON impact_updates(project_id, period_start DESC);
 CREATE INDEX ix_profexp_public ON professional_experiences(user_id, state)
   WHERE state = 'confirmed' AND visibility = 'public';
 -- "necessidades abertas de um território" — workspace do governo
-CREATE INDEX ix_terrneed_open ON territory_needs(territory, priority DESC) WHERE status = 'open';
+-- `priority` é TEXTO ('low'..'critical'), então `priority DESC` ordenaria em ordem ALFABÉTICA — e 'critical'
+-- viria depois de 'high'. O índice (e toda consulta) usa o peso explícito.
+CREATE INDEX ix_terrneed_open ON territory_needs(territory,
+  (CASE priority WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END) DESC)
+  WHERE status = 'open';
 
 -- Chave estrangeira de caminho de acesso sem índice próprio (mesma regra da 0015, conferida por
 -- scripts/db_integrity_report.py). O índice único de assunto do anúncio usa coalesce, então não serve ao

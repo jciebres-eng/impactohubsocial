@@ -1,9 +1,29 @@
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const num = new Intl.NumberFormat("pt-BR");
+
+// Formatadores por moeda, criados uma vez e reaproveitados.
+//
+// ACHADO DA AUDITORIA v0.16.0: `money()` formatava TUDO em real, inclusive os valores que o backend devolve em
+// dólar (a regra comercial desta rodada é em USD). "US$ 19,99" aparecia como "R$ 19,99" — mesmo número, moeda
+// errada, e ninguém notaria até a fatura. Agora a moeda vem do backend e o formatador a respeita; quando ela não
+// vem, o padrão continua sendo real, que é a moeda do resto do produto.
+const moneyFmt: Record<string, Intl.NumberFormat> = { BRL: brl };
+function fmtFor(currency: string): Intl.NumberFormat {
+  const cur = (currency || "BRL").toUpperCase();
+  if (!moneyFmt[cur]) {
+    try {
+      moneyFmt[cur] = new Intl.NumberFormat("pt-BR", { style: "currency", currency: cur });
+    } catch {
+      moneyFmt[cur] = brl;   // moeda desconhecida: não inventa símbolo
+    }
+  }
+  return moneyFmt[cur];
+}
 const dateFmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 const dtFmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
-export const money = (cents?: number | null) => (cents === null || cents === undefined ? "—" : brl.format(cents / 100));
+export const money = (cents?: number | null, currency = "BRL") =>
+  cents === null || cents === undefined ? "—" : fmtFor(currency).format(cents / 100);
 export const n = (v?: number | null) => (v === null || v === undefined ? "—" : num.format(v));
 export const pct = (v?: number | null) => (v === null || v === undefined ? "—" : `${Math.round(v)}%`);
 

@@ -349,6 +349,38 @@ const FEATURE: Record<string, string> = { "catalog.search": "Banco de oportunida
   "materials.publish": "Publicar materiais", "gov.data": "Dados do território" };
 const PAYMENT_ISSUE: Record<string, string> = { payment_failed: "Não conseguimos processar seu pagamento. Atualize o método de pagamento para manter o plano.", action_required: "Seu banco pede uma confirmação adicional para concluir o pagamento." };
 
+/** Preço do plano, com tudo o que precisa estar escrito ANTES de alguém pagar.
+ *
+ * Três coisas aqui são decisão de produto, não de estilo:
+ *   · no anual, o equivalente mensal aparece SEMPRE junto do total à vista — mostrar só "US$ 14,99/mês" e cobrar
+ *     US$ 179,88 de uma vez é o padrão escuro clássico;
+ *   · o preço de entrada vem com a duração e com o preço de depois, na mesma frase;
+ *   · a moeda vem do servidor. Formatar dólar como real seria o mesmo número com a moeda errada.
+ */
+function PlanPrice({ plan, interval, free }: { plan: any; interval: "month" | "year"; free: boolean }) {
+  const q = plan.price_quotes?.[interval];
+  const cents = plan.prices?.[interval];
+  if (free) return <p className="plan-price">Gratuito</p>;
+  if (cents == null) return <p className="plan-price">Preço não divulgado</p>;
+  const cur = q?.currency || plan.currency || "BRL";
+  return (
+    <>
+      <p className="plan-price">
+        {interval === "year" && q?.monthly_equivalent_cents != null
+          ? <>{money(q.monthly_equivalent_cents, cur)} / mês</>
+          : <>{money(cents, cur)} / {interval === "year" ? "ano" : "mês"}</>}
+      </p>
+      {interval === "year" && <p className="muted">{q?.total_note || `Total de ${money(cents, cur)} por ano.`}</p>}
+      {q?.intro && <p className="muted">{q.intro.summary}</p>}
+      {q?.tax_note && <p className="muted small">{q.tax_note}</p>}
+      {q?.trial_days ? <p className="muted small">{q.trial_days} dias de teste com o produto completo.</p> : null}
+      {interval === "year" && plan.annual_savings && (
+        <p className="muted">Economia de {money(plan.annual_savings.cents, cur)} por ano ({plan.annual_savings.percent}%) em relação ao mensal.</p>
+      )}
+    </>
+  );
+}
+
 /** Plano e cobrança (/conta/plano e /settings/billing). Preço, desconto e trial são sempre calculados no servidor; aqui só exibimos e pedimos a ação. */
 export function Plan() {
   const { me, reload: reloadMe } = useSession();
@@ -385,8 +417,8 @@ export function Plan() {
             ["Situação", sub ? <Pill status={sub.status} /> : trial?.active ? <Pill tone="good">Teste gratuito{trial.canceled ? " (cancelado)" : ""}</Pill> : <Pill tone="muted">Sem assinatura paga</Pill>],
             trial?.active ? ["Teste até", `${date(trial.trial_end)} (${trial.days_left} ${trial.days_left === 1 ? "dia" : "dias"})`] : null,
             sub?.interval ? ["Cobrança", sub.interval === "year" ? "Anual" : "Mensal"] : null,
-            sub?.amount_cents != null ? ["Valor", money(sub.amount_cents)] : null,
-            b?.next_charge ? ["Próxima cobrança", `${date(b.next_charge.at)}${b.next_charge.amount_cents != null ? " · " + money(b.next_charge.amount_cents) : ""}`] : null,
+            sub?.amount_cents != null ? ["Valor", money(sub.amount_cents, sub.currency)] : null,
+            b?.next_charge ? ["Próxima cobrança", `${date(b.next_charge.at)}${b.next_charge.amount_cents != null ? " · " + money(b.next_charge.amount_cents, b.next_charge.currency) : ""}`] : null,
             sub?.cancel_at_period_end ? ["Acesso até", date(sub.current_period_end)] : null,
           ].filter(Boolean) as any} />
           {b?.payment_method && <p className="muted">{b.payment_method}</p>}
@@ -417,8 +449,7 @@ export function Plan() {
               <article key={p.plan_key} className={`plan${cur ? " plan-current" : ""}`}>
                 <h2>{p.name}</h2>
                 <p className="muted">{p.tier_label}</p>
-                <p className="plan-price">{free ? "Gratuito" : hasPrice(p) ? `${money(p.prices[interval])} / ${interval === "year" ? "ano" : "mês"}` : "Preço não divulgado"}</p>
-                {interval === "year" && p.annual_savings && <p className="muted">Economia de {money(p.annual_savings.cents)} por ano ({p.annual_savings.percent}%) em relação ao mensal.</p>}
+                <PlanPrice plan={p} interval={interval} free={free} />
                 <ul>{p.features.map((f: string) => <li key={f}>{FEATURE[f] || f}</li>)}</ul>
                 <p className="muted">{Object.entries(p.limits).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v === null ? "ilimitado" : v}`).join(" · ")}</p>
                 {cur ? <Pill tone="good">Plano atual</Pill> : free ? null : p.tier === "gov" ? <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a> :
@@ -430,10 +461,27 @@ export function Plan() {
       </StateView>
       <Modal open={!!quote} title="Confirme sua assinatura" onClose={() => setQuote(null)} footer={<Button variant="primary" busy={busy} onClick={() => checkout(quote.plan_key)}>{quote?.trial?.active ? "Continuar para o pagamento" : "Ir para o pagamento"}</Button>}>
         {quote && <>
-          <KeyValue items={[["Plano", `${quote.plan_name} · ${quote.interval === "year" ? "anual" : "mensal"}`], ["Valor", money(quote.base_cents)],
-            quote.discount ? ["Desconto", quote.discount.kind === "percent" ? `${quote.discount.value}%` : money(quote.discount.value)] : null, ["Valor final", money(quote.final_cents)],
-            ["Primeira cobrança", quote.charge_now ? "ao confirmar o pagamento" : date(quote.first_charge_at)]].filter(Boolean) as any} />
+          <KeyValue items={[
+            ["Plano", `${quote.plan_name} · ${quote.interval === "year" ? "anual" : "mensal"}`],
+            ["Preço do plano", `${money(quote.base_cents, quote.currency)} por ${quote.interval === "year" ? "ano" : "mês"}`],
+            quote.interval === "year" && quote.price?.monthly_equivalent_cents
+              ? ["Equivalente mensal", money(quote.price.monthly_equivalent_cents, quote.currency)] : null,
+            quote.discount ? ["Desconto do voucher", quote.discount.kind === "percent" ? `${quote.discount.value}%` : money(quote.discount.value, quote.currency)] : null,
+            // A PRIMEIRA fatura e o preço do plano são linhas SEPARADAS: é o que impede a tela de mostrar
+            // "US$ 1,99" e a cobrança seguinte surpreender.
+            ["Primeira fatura", money(quote.first_cents ?? quote.final_cents, quote.currency)],
+            quote.price?.intro ? ["Depois do período de entrada", `${money(quote.price.intro.then_amount_cents, quote.currency)} por ${quote.interval === "year" ? "ano" : "mês"}`] : null,
+            ["Quando", quote.charge_now ? "ao confirmar o pagamento" : date(quote.first_charge_at)],
+            quote.price?.tax_note ? ["Imposto", quote.price.tax_note] : null,
+          ].filter(Boolean) as any} />
+          {quote.note && <p className="muted">{quote.note}</p>}
           {quote.trial?.active && <p>Você continua no teste gratuito. Nenhuma cobrança será feita antes de {date(quote.first_charge_at)}, e você pode cancelar antes dessa data.</p>}
+          {quote.price && !quote.provider_configured && (
+            <p className="banner banner-warning" role="alert">
+              Este preço ainda não está publicado no provedor de pagamento, então a contratação online pode não
+              concluir. Fale com a equipe se isso acontecer.
+            </p>
+          )}
           <Field label="Tenho um voucher"><Input value={voucher} onChange={(v) => setVoucher(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
           <p className="muted">Você pode cancelar quando quiser. Os dados do cartão são tratados pelo provedor de pagamento; a plataforma não os armazena.</p>
         </>}

@@ -369,7 +369,8 @@ def _s_territory(conn: Connection, *, org_id: str, **_: Any) -> Any:
         " people_estimate, source_name, source_url, source_date, priority, status, created_at"
         " FROM territory_needs"
         " WHERE ($1::text IS NULL OR territory = $1 OR territory LIKE 'BR-' || $1 || '%')"
-        " ORDER BY priority DESC, created_at DESC LIMIT 20", uf)
+        " ORDER BY (CASE priority WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END) DESC,"
+        " created_at DESC LIMIT 20", uf)
 
 
 def _s_programs(conn: Connection, *, org_id: str, **_: Any) -> Any:
@@ -434,8 +435,7 @@ def _s_platform(conn: Connection, *, org_id: str, **_: Any) -> Any:
         "organizations": int(conn.scalar("SELECT count(*) FROM organizations") or 0),
         "projects_published": int(conn.scalar("SELECT count(*) FROM projects"
                                               " WHERE visibility = 'published'") or 0),
-        "listings_published": int(conn.scalar("SELECT count(*) FROM marketplace_listings"
-                                              " WHERE publication_state = 'published'") or 0),
+        "listings_published": marketplace.published_count(conn),
         "relationships_active": int(conn.scalar("SELECT count(*) FROM relationships"
                                                 " WHERE status = 'active'") or 0),
         "proposals_open": int(conn.scalar("SELECT count(*) FROM proposals"

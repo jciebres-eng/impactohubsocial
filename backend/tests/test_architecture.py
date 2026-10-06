@@ -117,6 +117,25 @@ class ArchitectureTests(unittest.TestCase):
                     offenders.append(f"{f.relative_to(PKG)}:{i}")
         self.assertEqual(offenders, [], f"Use impacto.clock.today() (UTC) em vez de date.today(): {offenders}")
 
+    def test_recommendation_links_exist_in_the_app(self):
+        """Toda recomendação leva a uma tela que existe.
+
+        Encontrado na jornada 1 da v0.16.0: eu apontei uma recomendação para `/equipe`, rota que não existe (a
+        gestão de equipe fica em `/organizacao`). O item apareceria no workspace e o clique cairia em "página não
+        encontrada" — pior do que não recomendar nada.
+        """
+        from impacto.network.recommendation import ACTIONS, LINKS
+        app = (PKG.parents[1] / "web" / "src" / "app.tsx").read_text(encoding="utf-8")
+        declared = set(re.findall(r'\["(/[^"]*)",', app))
+        self.assertEqual(sorted(set(ACTIONS) - set(LINKS)), [], "ação sem destino declarado")
+        missing = []
+        for action, link in LINKS.items():
+            # `{id}` é substituído pelo identificador do sujeito; comparo o padrão com `:param`.
+            pat = link.replace("{id}", ":id")
+            if pat not in declared and pat.replace("/:id", "") not in declared:
+                missing.append(f"{action} -> {link}")
+        self.assertEqual(missing, [], f"recomendação apontando para tela inexistente: {missing}")
+
     def test_no_duplicate_routes(self):
         """Duas rotas com o mesmo método e caminho: a segunda fica inalcançável, em silêncio.
 

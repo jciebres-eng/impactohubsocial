@@ -405,8 +405,11 @@ def profile_handle_history(ctx: Ctx):
 def taxonomies(ctx: Ctx, q: N.TaxonomyQ):
     with ctx.tx(readonly=True) as c:
         taxes = c.query(
-            "SELECT key, label_pt, label_en, purpose, sensitivity, usage_policy, source_name, source_url,"
-            " version, updated_at FROM taxonomies WHERE ($1::text IS NULL OR key = $1) ORDER BY key", q.taxonomy)
+            # `taxonomies` não tem label_en (só os TERMOS têm): a tabela guarda o rótulo em português e a
+            # política de uso. Eu havia selecionado a coluna por simetria com taxonomy_terms, e a rota caía em 500.
+            "SELECT key, label_pt, purpose, sensitivity, usage_policy, source_name, source_url, source_date,"
+            " active, version, updated_at FROM taxonomies WHERE ($1::text IS NULL OR key = $1)"
+            " ORDER BY key", q.taxonomy)
         for t in taxes:
             t["terms"] = c.query(
                 "SELECT code, label_pt, label_en, description, position, active FROM taxonomy_terms"
@@ -446,7 +449,8 @@ def list_territory_needs(ctx: Ctx, q: N.TerritoryNeedQ):
             " LEFT JOIN organizations o ON o.id = n.org_id"
             " WHERE ($1::text IS NULL OR n.territory = $1 OR n.territory LIKE $1 || '-%')"
             "   AND ($2::text IS NULL OR n.cause = $2) AND ($3::text IS NULL OR n.status = $3)"
-            " ORDER BY n.priority DESC, n.created_at DESC LIMIT $4 OFFSET $5",
+            # ordena pelo PESO da prioridade, não pelo texto: 'critical' > 'high' > 'medium' > 'low'
+            " ORDER BY (CASE n.priority WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END) DESC, n.created_at DESC LIMIT $4 OFFSET $5",
             q.territory, q.cause, q.status, q.limit + 1, q.offset)
     return page(rows, q.limit, q.offset)
 

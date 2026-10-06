@@ -338,13 +338,15 @@ class TerritoryNeedIn(In):
     source_name: Annotated[str | None, Field(max_length=200)] = None
     source_url: Annotated[str | None, Field(pattern=r"^https?://", max_length=500)] = None
     source_date: date | None = None
-    priority: Annotated[int, Field(ge=1, le=5)] = 3
+    # `priority` é um rótulo, não um número: o banco aceita low/medium/high/critical. Eu havia escrito 1 a 5, e
+    # o INSERT era recusado pelo CHECK — com 422 genérico, sem dizer qual era o problema.
+    priority: Literal["low", "medium", "high", "critical"] = "medium"
 
 
 class TerritoryNeedQ(In):
     territory: Territory | None = None
     cause: Slug | None = None
-    status: Literal["open", "addressed", "closed"] | None = None
+    status: Literal["open", "partially_served", "served", "archived"] | None = None
     limit: Annotated[int, Field(ge=1, le=100)] = 50
     offset: Annotated[int, Field(ge=0, le=10000)] = 0
 

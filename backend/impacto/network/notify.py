@@ -39,8 +39,14 @@ GRP = {
     "diagnosis": "project", "milestone": "project", "indicator": "project", "risk": "project",
 }
 
-# Prioridade: muda ordenação e destaque na caixa, nunca o canal. `urgent` é para prazo/decisão que trava o trabalho.
-PRIORITIES = ("low", "normal", "high", "urgent")
+# Prioridade: muda ordenação e destaque na caixa, nunca o canal. `critical` é para o que trava o trabalho da
+# pessoa — prazo vencendo, decisão pendente, medida de moderação.
+#
+# OS NOMES SÃO OS DO BANCO. Eu havia escrito `urgent` aqui enquanto o CHECK de `notifications.priority` diz
+# `critical`: a divergência passava por lint, por type-check e por toda a suíte, e só apareceria na primeira
+# notificação de prioridade máxima — que é o caminho da moderação. Há um teste de invariante que compara esta
+# lista com o CHECK do banco, justamente para que não torne a divergir.
+PRIORITIES = ("low", "normal", "high", "critical")
 
 
 def dedupe(*parts: Any) -> str:

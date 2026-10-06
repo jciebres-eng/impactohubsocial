@@ -782,3 +782,135 @@ class ReadinessTests(NetBase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ================================================================================================ moderação
+class EnforcementTests(NetBase):
+    """A escada proporcional, com regra, motivo, prazo e direito de contestar."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        from tests.support import make_admin
+        cls.adm1, _ = make_admin()
+        cls.adm2, _ = make_admin()
+
+    def target(self) -> Client:
+        return new_account("osc", compliance="approved")
+
+    def test_ban_is_never_the_first_answer(self):
+        org = self.target()
+        r = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "ban", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Comportamento considerado inaceitável pela equipe de moderação."})
+        self.assertEqual(r.status, 409, r)
+        self.assertEqual(r.json["code"], "disproportionate")
+        self.assertIn("histórico", r.json["title"])
+
+    def test_the_ladder_climbs_with_history(self):
+        org = self.target()
+        for measure in ("guidance", "warning", "formal_notice", "partial_restriction"):
+            body = {"measure": measure, "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+                    "reason": f"Aplicação de {measure} após orientação não atendida no prazo combinado."}
+            if measure == "partial_restriction":
+                body["ends_at"] = (dt.datetime.now(dt.UTC) + dt.timedelta(days=15)).isoformat()
+            r = self.adm1.post("/v1/admin/enforcement", body)
+            self.assertEqual(r.status, 201, f"{measure}: {r}")
+            self.assertFalse(r.json["escalation_override"])
+        hist = self.adm1.get(f"/v1/admin/enforcement/history?org_id={org.org_id}")
+        self.assertEqual(len(hist.json["items"]), 4)
+        # com histórico de severidade 4, o próximo degrau permitido chega a 6 (suspensão temporária)
+        self.assertIn("temporary_suspension", hist.json["next_allowed"])
+        self.assertNotIn("ban", hist.json["next_allowed"])
+
+    def test_temporary_measures_require_an_end_date(self):
+        org = self.target()
+        self.adm1.post("/v1/admin/enforcement", {
+            "measure": "warning", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Advertência registrada para compor o histórico deste teste."})
+        r = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "temporary_suspension", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Suspensão temporária sem prazo, que não deve ser aceita."})
+        self.assertEqual(r.status, 422, r)
+        self.assertIn("prazo", r.json["title"])
+
+    def test_skipping_the_ladder_leaves_a_mark(self):
+        org = self.target()
+        r = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "precautionary_freeze", "target_org_id": org.org_id, "rule_ref": "TERMOS-9.1",
+            "reason": "Indício consistente de fraude em documento apresentado para captação.",
+            "ends_at": (dt.datetime.now(dt.UTC) + dt.timedelta(days=10)).isoformat(),
+            "override_reason": "Risco imediato a terceiros: há apuração em curso sobre documento falsificado."})
+        self.assertEqual(r.status, 201, r)
+        self.assertTrue(r.json["escalation_override"])
+        with db_system() as c:
+            note = c.scalar("SELECT evidence_note FROM enforcement_actions WHERE id = $1", r.json["id"])
+        self.assertIn("[ESCADA CONTORNADA]", note,
+                      "contornar a escada precisa ficar marcado para a auditoria conseguir listar os casos")
+
+    def test_the_target_is_told_and_can_appeal_once(self):
+        org = self.target()
+        act = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "warning", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Abordagem repetida a organizações sem contexto, após orientação."}).json["id"]
+        # o alvo é avisado e vê a medida, com a regra e o caminho para contestar
+        mine = org.get("/v1/conta/moderacao")
+        self.assertEqual(mine.status, 200, mine)
+        row = next(x for x in mine.json["items"] if x["id"] == act)
+        self.assertEqual(row["rule_ref"], "TERMOS-4.2")
+        self.assertTrue(row["can_appeal"])
+        self.assertIn("nunca é revelada", mine.json["note"])
+        self.assertNotIn("reporter", str(mine.json), "a identidade de quem denuncia não chega ao alvo")
+
+        short = org.post(f"/v1/conta/moderacao/{act}/contestar", {"note": "não"})
+        self.assertEqual(short.status, 422, short)
+        ok = org.post(f"/v1/conta/moderacao/{act}/contestar",
+                      {"note": "Houve engano: as mensagens tinham contexto de projeto, anexo em cada uma."})
+        self.assertEqual(ok.status, 200, ok)
+        again = org.post(f"/v1/conta/moderacao/{act}/contestar", {"note": "Contestando de novo o mesmo caso."})
+        self.assertEqual(again.status, 409, again)
+
+    def test_whoever_applied_never_judges_the_appeal(self):
+        org = self.target()
+        act = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "warning", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Advertência para exercitar o julgamento da contestação neste teste."}).json["id"]
+        org.post(f"/v1/conta/moderacao/{act}/contestar",
+                 {"note": "Contestação formal, com os elementos que entendemos contrários à medida."})
+        mine = self.adm1.post(f"/v1/admin/enforcement/{act}/appeal-decision",
+                              {"uphold": True, "note": "Mantida pelos mesmos fundamentos da aplicação."})
+        self.assertEqual(mine.status, 403, mine)
+        self.assertEqual(mine.json["code"], "same_person")
+        other = self.adm2.post(f"/v1/admin/enforcement/{act}/appeal-decision",
+                               {"uphold": False, "note": "Acolhida: o contexto apresentado afasta o enquadramento."})
+        self.assertEqual(other.status, 200, other)
+        self.assertEqual(other.json["status"], "overturned")
+
+    def test_nothing_applies_a_measure_automatically(self):
+        """O único caminho automático AFROUXA: encerra medida vencida. Nenhum trabalho aplica sanção."""
+        from impacto.network import enforcement as ENF
+        org = self.target()
+        # A escada é subida de verdade: severidade 2 → 3 → 4 e só então 6. Uma advertência sozinha não autoriza
+        # suspensão, e é isso que `escalation_ok` impõe.
+        for measure, extra in (("warning", {}), ("formal_notice", {}),
+                               ("partial_restriction",
+                                {"ends_at": (dt.datetime.now(dt.UTC) + dt.timedelta(days=5)).isoformat()})):
+            r = self.adm1.post("/v1/admin/enforcement", {
+                "measure": measure, "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+                "reason": f"Aplicação de {measure} para compor o histórico antes da suspensão deste teste.",
+                **extra})
+            self.assertEqual(r.status, 201, f"{measure}: {r}")
+        created = self.adm1.post("/v1/admin/enforcement", {
+            "measure": "temporary_suspension", "target_org_id": org.org_id, "rule_ref": "TERMOS-4.2",
+            "reason": "Suspensão temporária aplicada para verificar o encerramento automático por prazo.",
+            "ends_at": (dt.datetime.now(dt.UTC) + dt.timedelta(days=1)).isoformat()})
+        self.assertEqual(created.status, 201, created)
+        act = created.json["id"]
+        owner_conn().run("UPDATE enforcement_actions SET ends_at = now() - interval '1 minute' WHERE id = $1", act)
+        with db_system() as c:
+            out = ENF.expire_due(c)
+        self.assertGreaterEqual(out["expired"], 1)
+        self.assertIn("só encerra medida vencida", out["note"])
+        with db_system() as c:
+            st = c.scalar("SELECT status FROM enforcement_actions WHERE id = $1", act)
+        self.assertEqual(st, "expired")

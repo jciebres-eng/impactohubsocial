@@ -14,6 +14,7 @@ Duas rotas deste arquivo merecem atenção na revisão:
 from __future__ import annotations
 
 from ..http import ApiError, Ctx, forbidden, not_found, page, route, unprocessable
+from ..network import enforcement as ENF
 from ..network import events as EV
 from ..network import impact_report as IR
 from ..network import marketplace as MK
@@ -524,6 +525,99 @@ def decide_experience(ctx: Ctx, body: N.ExperienceDecisionIn):
                      body=body.note or "Decisão registrada.", link="/rede/experiencias",
                      ref_type="experience", ref_id=eid, min_role="manager")
     return {"id": eid, "state": body.decision}
+
+
+# ================================================================================================ moderação
+@route("GET", "/v1/moderation/ladder", auth="user", tags=("moderacao",),
+       summary="A escada de medidas, com o que cada degrau significa e se exige prazo")
+def moderation_ladder(ctx: Ctx):
+    return {"items": ENF.ladder(), "categories": [{"code": c, "label": lb} for c, lb in ENF.CATEGORIES],
+            "max_jump": ENF.MAX_JUMP,
+            "note": "Medida exige regra e motivo. Nenhuma medida é aplicada automaticamente: heurística prioriza a "
+                    "fila, nunca decide. Quem julga a contestação não é quem aplicou."}
+
+
+@route("GET", "/v1/conta/moderacao", min_role="admin", tags=("moderacao",),
+       summary="Medidas de moderação contra a sua organização, com o direito de contestar")
+def my_enforcement(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return {"items": ENF.target_view(c, org_id=ctx.org_id, user_id=ctx.user_id),
+                "note": "A identidade de quem denuncia nunca é revelada ao alvo da denúncia."}
+
+
+@route("POST", "/v1/conta/moderacao/{action_id}/contestar", body=N.AppealIn, min_role="admin",
+       tags=("moderacao",), summary="Contesta uma medida (uma vez por medida)")
+def appeal_enforcement(ctx: Ctx, body: N.AppealIn):
+    with ctx.tx() as c:
+        out = ENF.appeal(c, action_id=ctx.path["action_id"], org_id=ctx.org_id, user_id=ctx.user_id,
+                         note=body.note)
+        ctx.audit(c, "enforcement.appealed", "enforcement", ctx.path["action_id"], {})
+    return out
+
+
+@route("GET", "/v1/admin/enforcement", query=N.EnforcementQ, auth="admin", tags=("moderacao",))
+def list_enforcement(ctx: Ctx, q: N.EnforcementQ):
+    with ctx.system_tx() as c:
+        rows = c.query(
+            "SELECT e.id::text AS id, e.measure, e.severity, e.rule_ref, e.reason, e.status, e.starts_at,"
+            " e.ends_at, e.appeal_at, e.appeal_note, e.appeal_decision, e.created_at,"
+            " e.target_org_id::text AS target_org_id, e.target_user_id::text AS target_user_id,"
+            " coalesce(o.trade_name, o.legal_name) AS target_org_name,"
+            " user_display_name(e.target_user_id) AS target_user_name,"
+            " user_display_name(e.decided_by) AS decided_by_name,"
+            " user_display_name(e.appeal_decided_by) AS appeal_decided_by_name"
+            " FROM enforcement_actions e LEFT JOIN organizations o ON o.id = e.target_org_id"
+            " WHERE ($1::text IS NULL OR e.status = $1) ORDER BY e.created_at DESC LIMIT $2 OFFSET $3",
+            q.status, q.limit + 1, q.offset)
+    return page(rows, q.limit, q.offset)
+
+
+@route("POST", "/v1/admin/enforcement", body=N.EnforcementIn, auth="admin", status=201, tags=("moderacao",),
+       summary="Aplica medida (proporcional ao histórico; contornar a escada exige justificativa registrada)")
+def apply_enforcement(ctx: Ctx, body: N.EnforcementIn):
+    with ctx.system_tx() as c:
+        out = ENF.apply(c, measure=body.measure, decided_by=ctx.user_id, rule_ref=body.rule_ref,
+                        reason=body.reason, target_org_id=body.target_org_id, target_user_id=body.target_user_id,
+                        report_id=body.report_id, evidence_note=body.evidence_note, ends_at=body.ends_at,
+                        override_reason=body.override_reason)
+        ctx.audit(c, "admin.enforcement_applied", "enforcement", out["id"],
+                  {"measure": body.measure, "rule_ref": body.rule_ref,
+                   "escalation_override": out["escalation_override"]},
+                  org_id=body.target_org_id)
+    return out
+
+
+@route("GET", "/v1/admin/enforcement/history", query=N.EnforcementHistoryQ, auth="admin", tags=("moderacao",),
+       summary="Histórico de medidas contra um alvo — é o que torna a proporcionalidade verificável")
+def enforcement_history(ctx: Ctx, q: N.EnforcementHistoryQ):
+    if not q.org_id and not q.user_id:
+        raise unprocessable("Informe o alvo: org_id ou user_id")
+    with ctx.system_tx() as c:
+        prior = ENF.history(c, org_id=q.org_id, user_id=q.user_id)
+    return {"items": prior,
+            "next_allowed": [m for m in ENF.MEASURES if ENF.escalation_ok(m, prior)[0]],
+            "note": "A próxima medida permitida depende do histórico. Subir mais do que isso exige justificativa "
+                    "registrada, que fica marcada na medida."}
+
+
+@route("POST", "/v1/admin/enforcement/{action_id}/lift", body=N.AppealIn, auth="admin", tags=("moderacao",),
+       summary="Levanta a medida (exige motivo, como aplicar)")
+def lift_enforcement(ctx: Ctx, body: N.AppealIn):
+    with ctx.system_tx() as c:
+        out = ENF.lift(c, action_id=ctx.path["action_id"], decided_by=ctx.user_id, note=body.note)
+        ctx.audit(c, "admin.enforcement_lifted", "enforcement", ctx.path["action_id"], {"note": body.note})
+    return out
+
+
+@route("POST", "/v1/admin/enforcement/{action_id}/appeal-decision", body=N.AppealDecisionIn, auth="admin",
+       tags=("moderacao",), summary="Julga a contestação (nunca quem aplicou a medida)")
+def decide_appeal(ctx: Ctx, body: N.AppealDecisionIn):
+    with ctx.system_tx() as c:
+        out = ENF.decide_appeal(c, action_id=ctx.path["action_id"], decided_by=ctx.user_id,
+                                uphold=body.uphold, note=body.note)
+        ctx.audit(c, "admin.enforcement_appeal", "enforcement", ctx.path["action_id"],
+                  {"uphold": body.uphold})
+    return out
 
 
 # ================================================================================================ eventos de domínio

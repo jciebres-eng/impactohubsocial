@@ -107,6 +107,58 @@ class NetworkInvariants(unittest.TestCase):
             self.assertIn(self.osc.post(f"/v1/projects/{pid}/publish", {}).status, (200, 201))
         return pid
 
+    # ------------------------------------------------------------------ vocabulário compartilhado com o banco
+    def test_python_vocabularies_match_the_database_checks(self):
+        """Lista em Python e CHECK no banco precisam dizer a MESMA coisa.
+
+        Encontrado na v0.16.0: `notify.PRIORITIES` tinha 'urgent' e o CHECK de `notifications.priority` tem
+        'critical'. A divergência passava por lint, por type-check e pela suíte inteira, e só apareceria na
+        primeira notificação de prioridade máxima — que é o caminho da moderação. Este teste compara as listas que
+        existem nos dois lados.
+        """
+        from impacto.network import enforcement as ENF
+        from impacto.network import impact_report as IR
+        from impacto.network import notify as NT
+
+        def check_values(table: str, column: str) -> set[str]:
+            with db_system() as c:
+                defs = c.query(
+                    "SELECT pg_get_constraintdef(con.oid) AS d FROM pg_constraint con"
+                    " WHERE con.conrelid = $1::regclass AND con.contype = 'c'", table)
+            import re as _re
+            # Uma coluna pode ter VÁRIOS CHECKs. `publication_state`, por exemplo, tem o da lista de valores e
+            # também `(publication_state = 'published') = (published_at IS NOT NULL)` — pegar o primeiro que
+            # mencione a coluna devolveria {'published'} e o teste acusaria divergência onde não há. O que
+            # interessa é o CHECK de DOMÍNIO, que é o de lista: o que tem mais valores.
+            best: set[str] = set()
+            for d in defs:
+                if f"{column} =" not in d["d"] and f"({column})::text" not in d["d"]:
+                    continue
+                if "ANY (ARRAY" not in d["d"]:
+                    continue
+                vals = set(_re.findall(r"'([a-z_]+)'::text", d["d"]))
+                if len(vals) > len(best):
+                    best = vals
+            if best:
+                return best
+            self.fail(f"não achei o CHECK de domínio de {table}.{column}")
+
+        pairs = [
+            (set(NT.PRIORITIES), check_values("notifications", "priority"), "notify.PRIORITIES"),
+            (set(REL.KINDS), check_values("relationships", "kind"), "relationships.KINDS"),
+            (set(REL.VISIBILITY), check_values("relationships", "visibility"), "relationships.VISIBILITY"),
+            (set(REL.STATUSES), check_values("relationships", "status"), "relationships.STATUSES"),
+            (set(PR.KINDS), check_values("proposals", "kind"), "proposals.KINDS"),
+            (set(PR.STATUSES), check_values("proposals", "status"), "proposals.STATUSES"),
+            (set(MK.STATES), check_values("marketplace_listings", "publication_state"), "marketplace.STATES"),
+            (set(MK.SUBJECTS), check_values("marketplace_listings", "subject_type"), "marketplace.SUBJECTS"),
+            (set(IR.STATUSES), check_values("impact_updates", "status"), "impact_report.STATUSES"),
+            (set(ENF.MEASURES), check_values("enforcement_actions", "measure"), "enforcement.MEASURES"),
+            (set(ENF.STATUSES), check_values("enforcement_actions", "status"), "enforcement.STATUSES"),
+        ]
+        for py, db, name in pairs:
+            self.assertEqual(py, db, f"{name} divergiu do CHECK no banco")
+
     # ------------------------------------------------------------------ 1 e 2
     def test_relationship_existence_never_implies_visibility(self):
         pid = self.project(publish=True)

@@ -1614,15 +1614,51 @@ ALTER POLICY ledger_read ON ledger_entries USING (
   app_project_owner(project_id) OR app_project_investor(project_id) OR app_project_party(project_id)
   OR app_project_supporter(project_id) OR app_priv());
 
+-- ------------------------------------------------------------------------------------------------ alvo x administração
+-- O alvo de uma medida tem UM direito de escrita: registrar a contestação. Tudo o mais na linha é da moderação.
+CREATE FUNCTION enforcement_target_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE col text; is_target boolean;
+BEGIN
+  IF current_user::text <> 'impacto_app' OR app_priv() THEN RETURN NEW; END IF;
+  is_target := (OLD.target_org_id IS NOT NULL AND OLD.target_org_id = app_org())
+            OR (OLD.target_user_id IS NOT NULL AND OLD.target_user_id = app_uid());
+  IF NOT is_target THEN
+    RAISE EXCEPTION 'Somente a moderação ou o alvo da medida escrevem nesta linha' USING ERRCODE = '42501';
+  END IF;
+  FOR col IN SELECT k FROM jsonb_object_keys(to_jsonb(NEW)) AS k LOOP
+    IF (to_jsonb(NEW) -> col) IS DISTINCT FROM (to_jsonb(OLD) -> col)
+       AND col NOT IN ('appeal_note','appeal_at','status','updated_at') THEN
+      RAISE EXCEPTION 'O alvo da medida não altera %.%', TG_TABLE_NAME, col USING ERRCODE = '42501';
+    END IF;
+  END LOOP;
+  -- e o único estado que o alvo pode produzir é "contestada": anular a própria medida não é contestar.
+  IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status <> 'under_appeal' THEN
+    RAISE EXCEPTION 'O alvo da medida só pode registrar contestação (under_appeal), não decidi-la'
+      USING ERRCODE = '42501';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER trg_enf_target BEFORE UPDATE ON enforcement_actions FOR EACH ROW
+  EXECUTE FUNCTION enforcement_target_guard();
+COMMENT ON FUNCTION enforcement_target_guard() IS
+  'GRANT de coluna não distingue alvo de administração. Este gatilho faz: o alvo registra a contestação e nada mais,
+   e o único estado que ele produz é under_appeal — anular a própria medida não é contestar.';
+
 -- ================================================================================================ 19. GRANTS
 GRANT SELECT, INSERT, UPDATE, DELETE ON relationships, proposals, proposal_attachments, marketplace_listings,
   impact_updates, org_personas, public_profiles, professional_experiences, territory_needs, investment_intents,
   recommendations TO impacto_app;
 GRANT SELECT, INSERT ON proposal_events, handle_history, readiness_snapshots, domain_events TO impacto_app;
 GRANT SELECT ON personas, taxonomies, taxonomy_terms, reserved_handles, proposal_status_graph TO impacto_app;
-GRANT SELECT ON enforcement_actions TO impacto_app;
--- o alvo pode registrar a contestação, e só isso
-GRANT UPDATE (appeal_note, appeal_at, status, updated_at) ON enforcement_actions TO impacto_app;
+-- Moderação. A administração age pelo papel da aplicação com `app.platform_admin`, então ela precisa de INSERT e
+-- UPDATE — e a política `enf_write` já restringe a app_priv(). Faltava o GRANT, e a rota de aplicar medida caía em
+-- "permission denied" em vez de aplicar a medida.
+GRANT SELECT, INSERT ON enforcement_actions TO impacto_app;
+-- O ALVO registra a contestação, e só isso. `status` está no GRANT porque contestar muda o estado para
+-- 'under_appeal' — mas GRANT de coluna não distingue alvo de administração, então um gatilho faz essa distinção:
+-- sem ele, o alvo poderia marcar a própria medida como 'overturned' e anulá-la.
+GRANT UPDATE (appeal_note, appeal_at, status, appeal_decision, appeal_decided_by, ends_at, updated_at)
+  ON enforcement_actions TO impacto_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON message_attachments TO impacto_app;
 GRANT USAGE, SELECT ON SEQUENCE proposal_events_id_seq, handle_history_id_seq, domain_events_id_seq TO impacto_app;
 

@@ -369,6 +369,46 @@ class ExperienceDecisionIn(In):
     note: Annotated[str | None, Field(max_length=1000)] = None
 
 
+# ---------------------------------------------------------------- moderação
+Measure = Literal["guidance", "warning", "formal_notice", "partial_restriction", "temporary_suspension",
+                  "precautionary_freeze", "unlinking", "cancellation", "ban", "referral"]
+
+
+class EnforcementIn(In):
+    measure: Measure
+    # a regra aplicada e o motivo: medida sem regra é arbítrio, e o banco recusa
+    rule_ref: Annotated[str, Field(min_length=3, max_length=200)]
+    reason: Annotated[str, Field(min_length=10, max_length=4000)]
+    target_org_id: Uuid | None = None
+    target_user_id: Uuid | None = None
+    report_id: Uuid | None = None
+    evidence_note: Annotated[str | None, Field(max_length=2000)] = None
+    ends_at: datetime | None = None
+    # contornar a escada de proporcionalidade exige justificativa longa, que fica registrada na medida
+    override_reason: Annotated[str | None, Field(min_length=20, max_length=2000)] = None
+    # `severity` NÃO entra: vem da escada, não da escolha de quem aplica
+
+
+class AppealIn(In):
+    note: Annotated[str, Field(min_length=10, max_length=4000)]
+
+
+class AppealDecisionIn(In):
+    uphold: bool
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class EnforcementQ(In):
+    status: Literal["active", "expired", "lifted", "under_appeal", "upheld", "overturned"] | None = None
+    limit: Annotated[int, Field(ge=1, le=100)] = 50
+    offset: Annotated[int, Field(ge=0, le=10000)] = 0
+
+
+class EnforcementHistoryQ(In):
+    org_id: Uuid | None = None
+    user_id: Uuid | None = None
+
+
 # ---------------------------------------------------------------- eventos de domínio
 class EventQ(In):
     project_id: Uuid | None = None

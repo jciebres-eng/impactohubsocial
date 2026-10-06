@@ -37,6 +37,7 @@ import * as Talk from "./pages/talk";
 import * as IR from "./pages/impactreport";
 import * as PP from "./pages/publicprofile";
 import * as Terr from "./pages/territory";
+import * as Mod from "./pages/moderation";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -188,6 +189,8 @@ const ROUTES: R[] = [
   ["/rede/experiencias", () => <PP.ExperienceRequests />],
   ["/territorio/necessidades", () => <Terr.TerritoryNeeds />],
   ["/vocabulario", () => <Terr.Taxonomies />],
+  ["/conta/moderacao", () => <Mod.MyModeration />],
+  ["/admin/medidas", () => <Mod.EnforcementAdmin />, ["platform"]],
 ];
 
 
@@ -250,7 +253,7 @@ const NAV: Record<string, [string, string][]> = {
     ["/instituicao", "Instituição"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/materiais", "Materiais"], ["/dados-territoriais", "Dados do território"], ["/determinantes", "Determinantes sociais"], ["/documentos", "Documentos"]],
   platform: [["/admin", "Visão geral"], ["/area", "Área de trabalho"], ["/vocabulario", "Vocabulário"], ["/admin/compliance", "Compliance"], ["/admin/identidade", "Identidade"], ["/admin/credenciais", "Credenciais"], ["/admin/credenciais-profissionais", "Credenciais profissionais"], ["/admin/honorarios", "Honorários"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
-    ["/admin/denuncias", "Denúncias"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/chaves", "Chaves de cifragem"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
+    ["/admin/denuncias", "Denúncias"], ["/admin/medidas", "Medidas de moderação"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/chaves", "Chaves de cifragem"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"]],
 };
 const KIND_LABEL: Record<string, string> = { osc: "OSC", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração" };
 

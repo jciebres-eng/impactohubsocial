@@ -91,3 +91,47 @@ class DenominatorQ(In):
 
 class HistoryQ(In):
     limit: Annotated[int, Field(ge=1, le=100)] = 24
+
+
+# ================================================================================================ frameworks
+class RegistryQ(In):
+    status: Annotated[str, Field(pattern="^(in_use|mappable|registry_only)$")] | None = None
+
+
+class MappingIn(In):
+    framework_key: Slug
+    indicator_id: Uuid
+    relation: Annotated[str, Field(min_length=3, max_length=20)]
+    rationale: LongNote
+    external_code: Annotated[str, Field(min_length=1, max_length=60)] | None = None
+    external_name: SourceName | None = None
+    source_name: SourceName | None = None
+    reviewer_org_id: Uuid | None = None
+    reviewer_user_id: Uuid | None = None
+
+
+class MappingQ(In):
+    framework_key: Slug | None = None
+    indicator_id: Uuid | None = None
+    mine: bool = False
+
+
+class MaterialityIn(In):
+    scope: Annotated[str, Field(pattern="^(organization|program|project)$")] = "organization"
+    program_id: Uuid | None = None
+    project_id: Uuid | None = None
+    period_label: Annotated[str, Field(min_length=4, max_length=60)]
+    method_note: Annotated[str, Field(min_length=20, max_length=4000)]
+    lens: Annotated[str, Field(pattern="^(impact_only|financial_only|double)$")] = "double"
+    threshold: Annotated[int, Field(ge=1, le=5)] = 4
+    framework_key: Slug | None = None
+
+
+class MaterialityEntryIn(In):
+    topic_code: Slug
+    rationale: LongNote
+    impact_score: Annotated[int, Field(ge=1, le=5)] | None = None
+    financial_score: Annotated[int, Field(ge=1, le=5)] | None = None
+    stakeholder_note: Annotated[str, Field(max_length=2000)] | None = None
+    evidence_id: Uuid | None = None
+    indicator_id: Uuid | None = None

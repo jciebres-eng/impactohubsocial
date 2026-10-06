@@ -1,4 +1,40 @@
-# Relatório de desempenho — v0.18.0
+# Relatório de desempenho — v0.18.1
+
+## 0. Carga concorrente (v0.18.1)
+
+Primeira execução de carga **incluindo as rotas da camada de impacto**. Coletor:
+`scripts/loadtest.py`; saída bruta em `docs/evidence/loadtest_v0.18.1.json`.
+
+**Cenário:** 12 threads, 20 s, duas contas por thread (OSC e financiador — cada rota é chamada pelo
+tipo de organização que pode chamá-la), 21 rotas, 300 alegações verificadas e retratos de reputação
+no banco.
+
+**Resultado: 3.207 requisições · 160 req/s · 0 erro · todos os códigos 200.**
+
+| Rota | p50 | p95 | p99 |
+|---|---|---|---|
+| `/v1/reputation/me` | 101 ms | **335 ms** | 401 ms |
+| `/v1/dashboard` | 66 ms | 173 ms | 257 ms |
+| `/v1/feed/projects` | 79 ms | 166 ms | 255 ms |
+| `/v1/claims?limit=20` | 52 ms | 126 ms | 232 ms |
+| `/v1/portfolio` | 61 ms | 121 ms | 171 ms |
+| `/v1/lookups/indicators?q=pes` | 45 ms | 103 ms | 120 ms |
+
+A rota mais lenta é a de reputação, e o motivo é conhecido: são **onze consultas de sinal** por
+leitura. Está registrada como dívida M3 (cabe cache por organização com invalidação por evento).
+
+**O que este número NÃO é:** cliente, API e PostgreSQL rodam na **mesma máquina**, sem rede real e
+com dado sintético. Serve para pegar regressão de ordem de grandeza e para provar que nenhuma rota
+nova erra sob concorrência — **não** para dimensionar produção. Repetir contra homologação é a
+condição 6 do GO de publicação.
+
+**Um "erro" que não era erro:** a primeira execução acusou 330 falhas. Eram `/v1/portfolio` e
+`/v1/feed/projects`, exclusivas de financiador, chamadas com conta de OSC — ou seja, o teste estava
+medindo o controle de acesso. O script passou a declarar o tipo de organização por rota.
+
+---
+
+# Histórico — relatório de desempenho da v0.18.0
 
 ## 0. v0.18.0 — as consultas da camada de impacto contextualizado
 

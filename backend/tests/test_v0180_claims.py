@@ -82,7 +82,7 @@ class RuleCatalogTests(ClaimBase):
     def test_every_rule_is_deterministic_and_says_why_it_matters(self):
         r = self.osc.get("/v1/claims/rules")
         self.assertEqual(r.status, 200, r)
-        self.assertGreaterEqual(len(r.json["items"]), 11)
+        self.assertGreaterEqual(len(r.json["items"]), 12)
         for item in r.json["items"]:
             self.assertTrue(item["deterministic"], item["code"])
             self.assertGreaterEqual(len(item["why_it_matters"]), 20, item["code"])
@@ -92,7 +92,10 @@ class RuleCatalogTests(ClaimBase):
         lex = self.osc.get("/v1/claims/rules").json["lexicons"]
         for key in ("absolute", "certification", "causality", "comparative"):
             self.assertGreaterEqual(len(lex[key]), 8, key)
-        self.assertIn("neutro", lex["absolute"])
+        self.assertIn("comprovado", lex["absolute"])
+        # "neutro" MIGROU para o léxico de totalidade na v0.18.1: afirmar neutralidade é afirmar
+        # totalidade, e totalidade se confere por divisão (medido sobre elegível).
+        self.assertIn("neutro", lex["totality"])
         self.assertIn("certificado", lex["certification"])
 
     def test_no_rule_in_the_database_may_be_probabilistic(self):
@@ -160,7 +163,7 @@ class DeclarationTests(ClaimBase):
         self.assertEqual(r.status, 200, r)
         got = self.osc.get(f"/v1/claims/{cid}").json
         self.assertEqual(got["status"], "withdrawn")
-        self.assertGreaterEqual(len(got["checks"]), 11)
+        self.assertGreaterEqual(len(got["checks"]), 12)
 
     def test_a_withdrawn_claim_is_not_checked_again(self):
         p = self._project()
@@ -188,11 +191,11 @@ class RuleBehaviourTests(ClaimBase):
         self.assertEqual(out["status"], "flagged")
 
     def test_absolute_language_without_a_validated_measurement_is_flagged(self):
-        out = self._check(self._project(), "O projeto é neutro em carbono e o resultado é "
-                                           "comprovado em toda a área de atuação.")
+        out = self._check(self._project(), "O resultado é comprovado e garantido em toda a área "
+                                           "de atuação do projeto.")
         hit = self._rule(out, "absolute_language")
         self.assertFalse(hit["passed"])
-        self.assertIn("neutro", hit["detail"])
+        self.assertIn("comprovado", hit["detail"])
         self.assertEqual(hit["severity"], "serious")
 
     def test_claiming_certification_is_flagged_because_the_platform_certifies_nothing(self):
@@ -406,7 +409,7 @@ class HumanReviewTests(ClaimBase):
         cid = self._flagged()
         got = self.other.get(f"/v1/claims/{cid}")
         self.assertEqual(got.status, 200, got)
-        self.assertGreaterEqual(len(got.json["checks"]), 11)
+        self.assertGreaterEqual(len(got.json["checks"]), 12)
         fila = self.other.get("/v1/claims/review-requests").json["items"]
         self.assertTrue(any(i["claim_id"] == cid and i["pending"] for i in fila))
 

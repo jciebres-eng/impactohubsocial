@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.evidence import Evidence, EvidenceSet, Source, band
+from .context import contextual_impact
 from .territory import covers, specificity
 
 ENGINE_VERSION = "match-engine@1.2.0"
@@ -67,7 +68,7 @@ def _pick(d: dict | None, keys: tuple[str, ...]) -> dict:
 ORG_FIELDS = ("id", "kind", "founded_on", "territories", "causes", "ods", "certifications", "team_size",
               "compliance_status", "uf", "ibge_code", "legal_nature")
 PROJECT_FIELDS = ("id", "org_id", "title", "causes", "ods", "esg_tags", "territory", "beneficiaries_count", "budget_total_cents",
-                  "status", "visibility", "urgency", "ends_on", "indicators", "milestones", "funded_cents")
+                  "status", "visibility", "urgency", "ends_on", "indicators", "milestones", "funded_cents", "impact_context")
 CALL_FIELDS = ("id", "status", "opens_at", "closes_at", "causes", "ods", "territories", "eligible_org_types", "ticket_min_cents",
                "ticket_max_cents", "budget_total_cents", "required_document_types", "required_certifications",
                "min_org_age_months", "counterpart_pct", "requirements", "weights", "criteria_version", "sphere")
@@ -543,15 +544,30 @@ def evaluate_funder_project(mi: MatchInput) -> dict:
         sig.append(Signal("evidence_history", weights["evidence_history"], None, "Sem histórico de execução na plataforma"))
         risks.append({"code": "NO_TRACK_RECORD", "severity": "low", "message": "OSC sem histórico de execução registrado na plataforma"})
 
-    ben, need = p.get("beneficiaries_count"), _remaining_need(p) or p.get("budget_total_cents")
+    ben = p.get("beneficiaries_count")
     has_ind = bool(p.get("indicators"))
-    if ben and need:
-        per_k = ben / max(1.0, need / 100_000)   # beneficiários por R$ 1.000
-        val = min(1.0, math.log10(1 + per_k) / 2) * 0.7 + (0.3 if has_ind else 0)
-        sig.append(Signal("impact", weights["impact"], val, f"{ben} beneficiários · {per_k:.1f} por R$ 1.000 · indicadores {'definidos' if has_ind else 'ausentes'}"))
+    contextual = contextual_impact(p, has_indicators=has_ind)
+    if contextual["score"] is not None:
+        sig.append(Signal("impact", weights["impact"], contextual["score"], contextual["detail"],
+                          evidence=Evidence("impact_context", Source.DECLARED, contextual["score"],
+                                            observed_at=_today(mi), kind="impact_context",
+                                            detail=f"cobertura contextual {contextual['coverage']:.0%}")))
+        if contextual["coverage"] < 0.6:
+            risks.append({"code": "IMPACT_CONTEXT_INCOMPLETE", "severity": "medium",
+                          "message": "Contexto de impacto parcial; não deve ser tratado como avaliação completa"})
     else:
-        sig.append(Signal("impact", weights["impact"], None, "Beneficiários ou orçamento não informados"))
-        missing.append({"field": "project.beneficiaries_count", "label": "Número de beneficiários", "owner": "osc"})
+        # SEM CONTEXTO, O SINAL É UNKNOWN — inclusive quando há número de beneficiários.
+        #
+        # A versão recebida nesta rodada usava 0,5 como "referência neutra" para manter a
+        # ordenação calculável. A consequência era perversa e silenciosa: um projeto que declara
+        # contexto honestamente e obtém 0,35 ficaria ATRÁS de um projeto que não declarou nada e
+        # recebe 0,5 — ou seja, não declarar passaria a ser vantagem no ranking. Sinal ausente
+        # reduz a COBERTURA e a CONFIANÇA (ADR-026), que é o comportamento honesto, e o que falta
+        # aparece em `missing_data`.
+        sig.append(Signal("impact", weights["impact"], None, contextual["detail"]
+                          + (f" Há {ben} beneficiário(s) declarado(s), e alcance não é impacto."
+                             if ben is not None else "")))
+        missing.append({"field": "project.impact_context", "label": "Contexto de necessidade, barreiras e evidência", "owner": "osc"})
     if not has_ind:
         missing.append({"field": "project.indicators", "label": "Indicadores e metas de resultado", "owner": "osc"})
 

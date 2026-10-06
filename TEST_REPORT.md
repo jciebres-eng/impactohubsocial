@@ -1,4 +1,68 @@
-# TEST_REPORT — v0.18.0 (impacto contextualizado: equidade, referenciais e confiança, 2026-10-06)
+# TEST_REPORT — v0.18.1 (endurecimento técnico final, 2026-10-06)
+
+**1.298 testes, 0 falhas, 26 em passo próprio** (eram 1.223 na v0.18.0 e 961 na v0.17.0). Log
+íntegro: `docs/evidence/test_run_v0.18.1.log`. Carga: `docs/evidence/loadtest_v0.18.1.json`.
+Desempenho: `docs/evidence/perf_v0.18.1.log`. Integridade: `docs/evidence/db_integrity_v0.18.1.txt`.
+Lint: `docs/evidence/ruff_v0.18.1.log`.
+
+Os **75 testes novos** desta rodada existem para provar o que a versão anterior afirmava:
+
+| Arquivo | Testes | O que ele prova |
+|---|---|---|
+| `test_v0181_concurrency.py` | **9** | seis sessões disparando ao mesmo tempo deixam **um** responsável corrente e **um** denominador vigente; rodada de verificação fica completa ou não fica; concessão de selo nunca grava critério não satisfeito; retrato de reputação nunca grava valor sem observação; `ROLLBACK` não deixa linha; `SAVEPOINT` preserva o trabalho anterior |
+| `test_v0181_migrations.py` | **8** | banco preparado na **v0.17.0 com dado dentro** sobe para a v0.18.x: o dado anterior fica intacto, a linha de base sem fonte **sobrevive e passa a ser contável** (a trava vale para escrita nova), as 33 tabelas chegam com RLS e política, as 10 funções novas existem, migration alterada é recusada (forward-only) e migration que falha no meio **não deixa metade aplicada** |
+| `test_e2e_v0181_journeys.py` | **18** | a jornada completa num único projeto: registro → login → projeto → publicação → diagnóstico (8 prontidões) → equidade → ODS → indicador com fonte → evidência → medição validada por outra organização → match (os dois sentidos) → responsabilidade → decisão → alegação marcada → alegação sustentada → revisão por convite → reputação → contestação → selo → revogação por critério caído → relatório → trilha de auditoria |
+| `test_v0181_smoke.py` | **5** | o smoke de publicação roda, nenhuma verificação obrigatória falha, **provedor simulado é declarado como simulado**, verificação pulada nunca conta como aprovada, e o veredito nunca é GO quando houve pulo |
+| `test_v0181_hardening.py` | **16** | a função agregada de contexto (inclusive **o que ela não devolve**: nenhuma narrativa, nada para projeto privado), a 12ª regra de alegação (cobertura 53% de 60 elegíveis não é erradicação) e os controles de dependência verificáveis offline |
+| `test_e2e_v0181_accessibility.py` | **13** | no navegador real: nome acessível em todo controle, erro anunciado, atalho de conteúdo como **primeira** parada do Tab, sem armadilha de foco, foco visível, marcos e `h1` único, alternativa textual, **contraste calculado** nos temas claro e escuro, 390 px sem rolagem horizontal, alvo de toque ≥ 24 px, movimento reduzido |
+| `test_impact_core_hardening.py` | **6** | (recebido no pacote externo) UNKNOWN ≠ zero, contexto remoto não perde para urbano, contrato do match, série longitudinal |
+
+## Três testes que encontraram defeito de produto nesta rodada
+
+1. **A jornada pediu o match como financiador** — e o sinal contextual veio UNKNOWN. A RLS das
+   tabelas de equidade (corretamente) não entrega linha a terceiro: o código recebido lia direto, e
+   **nenhum teste pedia o match de fora**. Virou a função `project_impact_context()`.
+2. **A jornada criou um edital com `closes_at: "2026-12-05"`** — e recebeu **500**. Virou 422 com
+   exemplo, em todos os schemas de uma vez.
+3. **A jornada declarou "erradicamos a defasagem"** — e o verificador respondeu `substantiated`.
+   Virou a 12ª regra de integridade.
+
+E o smoke de publicação encontrou o cabeçalho `Server: uvicorn`, que só existia no harness de teste:
+o servidor de teste passou a subir como o de produção sobe.
+
+## Quatro testes MEUS que estavam medindo a coisa errada
+
+Registrado porque é o tipo de erro que fabrica confiança falsa:
+
+1. `_login` esperava "um heading qualquer" e casava com o título da **própria tela de login** —
+   quatro verificações de acessibilidade mediam a tela de login achando que mediam a aplicação. Foi
+   assim que três alvos de toque de 21–23 px apareceram: o achado é real, mas o teste estava na
+   página errada.
+2. Ordem alfabética outra vez: `test_a_published_project…` publicava o projeto antes de
+   `test_an_unpublished_project…` rodar. Cada um ganhou o seu próprio projeto.
+3. A verificação de "zero definições de selo embarcadas" contava linhas no banco compartilhado
+   excluindo códigos de teste **por padrão de nome** — bastava um teste novo com outro nome para
+   virar alarme falso. Passou a ler as **migrações**, que é onde a promessa vive.
+4. A varredura de dependência não declarada ignorava `requirements-optional.txt` e acusava
+   `pytesseract`, que está declarado e inventariado.
+
+Nenhum teste foi enfraquecido ou removido. A única expectativa alterada foi a de
+`test_funder_blockers`, que afirmava `eligible` para um projeto **sem contexto de impacto**: a
+asserção foi movida para dois testes com nome próprio — "sem contexto vai para revisão humana" e
+"com contexto declarado fica elegível" — mais um terceiro provando que omitir nunca é melhor que
+declarar pouco.
+
+Ambiente: **PostgreSQL 16 real criado do zero** (bootstrap + 34 migrações), servidor HTTP real
+(uvicorn, agora com `server_header=False`) e Chromium (Playwright).
+
+```
+cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" \
+  PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t .
+```
+
+---
+
+# Histórico — TEST_REPORT da v0.18.0
 
 **1.223 testes, 0 falhas, 26 pulados** (eram 961 na v0.17.0, 788 na v0.16.0 e 673 na v0.15.0). Log íntegro:
 `docs/evidence/test_run_v0.18.0.log`. Desempenho: `docs/evidence/perf_v0.18.0.log`. Integridade do banco:

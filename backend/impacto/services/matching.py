@@ -33,7 +33,41 @@ def load_project(c: Connection, project_id: str) -> dict | None:
     if p:
         p["milestones"] = c.query("SELECT amount_cents, funded_cents, status FROM milestones WHERE project_id = $1 ORDER BY seq", project_id)
         p["funded_cents"] = c.scalar("SELECT committed_cents FROM project_funding($1)", project_id) or 0
+        p["impact_context"] = _load_impact_context(c, project_id)
     return p
+
+
+def _load_impact_context(c: Connection, project_id: str) -> dict:
+    """Contexto agregado e não sensível para o ranking explicável.
+
+    Vem de `project_impact_context()` (migração 0034), e não de SELECT direto nas tabelas de
+    equidade: quem pede o match é o financiador, e a RLS dessas tabelas — corretamente — só devolve
+    linha para a organização dona do projeto. A versão anterior lia direto e, por isso, entregava
+    contexto vazio para todo mundo de fora, silenciosamente. A função devolve só números e
+    booleanos, nunca o texto da necessidade nem o contrafactual.
+    """
+    row = c.one("SELECT has_context, need_level::float AS need_level,"
+                " barrier_burden::float AS barrier_burden,"
+                " additionality_score::float AS additionality_score,"
+                " outcome_evidence_score::float AS outcome_evidence_score,"
+                " impact_evidence_score::float AS impact_evidence_score,"
+                " denominator_quality::float AS denominator_quality, has_counterfactual"
+                " FROM project_impact_context($1)", project_id)
+    if not row or not row.get("has_context"):
+        return {}
+    return {
+        "need_level": row["need_level"],
+        "barrier_burden": row["barrier_burden"],
+        # A lacuna de infraestrutura depende de indicador territorial carregado, que esta versão
+        # não tem (as metas do IBGE não entraram). UNKNOWN é a resposta honesta, não zero.
+        "infrastructure_gap": None,
+        "additionality_score": row["additionality_score"],
+        "sustainability_score": None,
+        "outcome_evidence_score": row["outcome_evidence_score"],
+        "impact_evidence_score": row["impact_evidence_score"],
+        "denominator_quality": row["denominator_quality"],
+        "has_counterfactual": row["has_counterfactual"],
+    }
 
 
 def load_projects(c: Connection, project_ids: list[str]) -> dict[str, dict]:
@@ -49,6 +83,7 @@ def load_projects(c: Connection, project_ids: list[str]) -> dict[str, dict]:
     for r in out.values():
         r["milestones"] = []
         r["funded_cents"] = 0
+        r["impact_context"] = {}
     for m in c.query("SELECT project_id::text AS project_id, amount_cents, funded_cents, status FROM milestones"
                      " WHERE project_id = ANY($1::uuid[]) ORDER BY project_id, seq", project_ids):
         target = out.get(m.pop("project_id"))
@@ -59,6 +94,8 @@ def load_projects(c: Connection, project_ids: list[str]) -> dict[str, dict]:
         target = out.get(f["project_id"])
         if target is not None:
             target["funded_cents"] = f["committed_cents"] or 0
+    for pid in out:
+        out[pid]["impact_context"] = _load_impact_context(c, pid)
     return out
 
 

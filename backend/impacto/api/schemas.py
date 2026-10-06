@@ -19,6 +19,29 @@ Ods = Annotated[int, Field(ge=1, le=17)]
 class In(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
+    @field_validator("*", mode="after")
+    @classmethod
+    def _refuse_naive_datetime(cls, value):
+        """Prazo sem fuso é recusado com 422 — e NÃO é convertido por adivinhação.
+
+        ACHADO DA JORNADA DE PONTA A PONTA (v0.18.1): `POST /v1/calls` com
+        `closes_at: "2026-12-05"` — exatamente o que um seletor de data produz — devolvia **500**.
+        O driver recusa `datetime` sem fuso (e está certo: o banco guarda `timestamptz`), mas a
+        recusa chegava como erro interno em vez de erro de entrada.
+
+        Adivinhar o fuso seria pior que o 500: deslocaria o vencimento de um edital em horas, e o
+        encerramento às 23h59 de Rio Branco não é o mesmo instante que o de Brasília. Então a
+        plataforma diz o que falta, com exemplo, e deixa a decisão com quem tem a informação.
+        """
+        itens = value if isinstance(value, (list, tuple)) else (value,)
+        for item in itens:
+            if isinstance(item, datetime) and item.tzinfo is None:
+                raise ValueError(
+                    "informe o fuso horário no prazo (ex.: 2026-12-05T23:59:00-03:00). A "
+                    "plataforma não adivinha fuso: 23h59 em Rio Branco não é o mesmo instante "
+                    "que 23h59 em Brasília, e a diferença muda quem consegue inscrever a tempo.")
+        return value
+
 
 # ---------------------------------------------------------------- auth
 class OrgIn(In):

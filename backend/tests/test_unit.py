@@ -107,7 +107,50 @@ class MatchEngineTests(unittest.TestCase):
         self.assertIn("TICKET_INCOMPATIBLE", [b["code"] for b in funder_project(funder={"ticket_max_cents": 1000})["blockers"]])
         self.assertIn("MISSING_CRITICAL_DOCUMENT",
                       [b["code"] for b in funder_project(funder={"required_document_types": ["cebas"]})["blockers"]])
-        self.assertEqual(funder_project()["eligibility"], "eligible")
+        self.assertEqual(funder_project()["blockers"], [], "o caso base não tem impedimento")
+
+    #: Contexto de impacto agregado, como `services/matching.py` o carrega do banco.
+    IMPACT_CONTEXT = {"need_level": .9, "barrier_burden": .8, "infrastructure_gap": .7,
+                      "additionality_score": .8, "sustainability_score": .6,
+                      "outcome_evidence_score": .6, "impact_evidence_score": .5,
+                      "denominator_quality": .7}
+
+    def test_without_impact_context_the_match_goes_to_human_review(self):
+        """A regra que a v0.18.1 fechou: número de beneficiários NÃO é sinal de impacto.
+
+        Antes desta rodada, 50 beneficiários e um orçamento produziam sinal de impacto cheio, e a
+        combinação ia direto para `eligible`. A versão recebida nesta rodada trocou isso por uma
+        "referência neutra" de 0,5 — o que premiava quem NÃO declarava contexto. Agora o sinal é
+        UNKNOWN: a cobertura cai, a confiança cai, o score fica nulo e a decisão vira humana.
+        """
+        r = funder_project()
+        self.assertEqual(r["eligibility"], "needs_review")
+        self.assertIsNone(r["score"])
+        self.assertIn("project.impact_context", [m["field"] for m in r["missing_data"]])
+        imp = next(s for s in r["signals"] if s["key"] == "impact")
+        self.assertIsNone(imp["value"])
+        self.assertIn("alcance não é impacto", imp["detail"])
+
+    def test_with_impact_context_declared_the_match_becomes_eligible(self):
+        r = funder_project(project={"impact_context": self.IMPACT_CONTEXT})
+        self.assertEqual(r["eligibility"], "eligible")
+        self.assertIsNotNone(r["score"])
+        imp = next(s for s in r["signals"] if s["key"] == "impact")
+        self.assertIsNotNone(imp["value"])
+        self.assertGreater(r["confidence"], funder_project()["confidence"])
+
+    def test_not_declaring_context_is_never_better_than_declaring_a_low_one(self):
+        """A trava contra o incentivo perverso: omitir não pode ser melhor que declarar pouco."""
+        baixo = funder_project(project={"impact_context": {
+            "need_level": .1, "barrier_burden": .1, "infrastructure_gap": .1,
+            "additionality_score": .1, "sustainability_score": .1,
+            "outcome_evidence_score": .1, "impact_evidence_score": .1,
+            "denominator_quality": .1}})
+        omisso = funder_project()
+        self.assertIsNotNone(baixo["score"], "declarar contexto baixo ainda produz score")
+        self.assertIsNone(omisso["score"], "omitir contexto não produz score")
+        self.assertGreater(baixo["confidence"], omisso["confidence"],
+                           "omitir contexto não pode dar mais confiança que declarar pouco")
 
     def test_plan_and_voucher_fields_are_ignored(self):
         a = funder_project()

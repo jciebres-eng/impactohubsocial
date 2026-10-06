@@ -11,6 +11,7 @@ from pathlib import Path
 from ..db.pq import Json
 from ..http import ApiError, Ctx, not_found, page, route, unprocessable
 from ..services.audit import ledger
+from ..impact.longitudinal import summarize_measurements
 from . import schemas as S
 
 T = ("impact",)
@@ -184,6 +185,10 @@ def _impact_payload(c, pid: str) -> dict:
         vals = c.query("SELECT id::text AS id, value::float AS value, measured_on, status, evidence_id::text AS evidence_id, note FROM indicator_values"
                        " WHERE project_indicator_id = $1 ORDER BY measured_on DESC, created_at DESC LIMIT 24", i["id"])
         i["values"] = vals
+        # A janela é declarada junto com o total: série truncada sem aviso é série que mente de
+        # boa-fé, porque `first_measured_on` pareceria ser o início do projeto.
+        total_vals = c.scalar("SELECT count(*) FROM indicator_values WHERE project_indicator_id = $1", i["id"])
+        i["longitudinal"] = summarize_measurements(vals, total_known=total_vals, window=24)
         rep = next((v for v in vals if v["status"] != "rejected"), None)
         val = next((v for v in vals if v["status"] == "validated"), None)
         i["latest_reported"] = rep["value"] if rep else None

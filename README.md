@@ -1,11 +1,28 @@
-# Plataforma Impacto — v0.18.0
+# Plataforma Impacto — v0.18.1
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** camada de impacto contextualizado fechada (equidade, território, referenciais, integridade de alegação, reputação, selos, formulários inteligentes e responsabilidade); **tecnicamente pronta para a etapa de design**, que é a próxima; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+> **Estado:** **BASE TÉCNICA CONGELADA** na v0.18.1 — `TECHNICAL_BASELINE_LOCK.md` registra as duas decisões: **GO** para a entrega ao Designer e **GO WITH CONDITIONS** para a publicação web (seis condições, nenhuma de código: auditoria de dependências, provedores reais, aprovação jurídica das minutas, imagem Docker construída, coletor de métricas e carga fora da máquina do banco); para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.18.1 (endurecimento técnico final):** rodada de **prova**, não de funcionalidade. Integrou quatro
+reforços de núcleo recebidos num pacote externo (sinal contextual no match, oito prontidões no diagnóstico,
+proveniência por campo em documento, série longitudinal) e rodou-os contra PostgreSQL real — o que o ambiente de
+origem não pôde fazer. Encontrou e corrigiu sete defeitos, quatro deles graves: o **sinal contextual estava morto
+para todo financiador** (a RLS, corretamente, não entrega a narrativa de equidade a terceiro — agora há função
+agregada que devolve **só números**), a **"referência neutra" de 0,5 premiava quem não declarava contexto**,
+**prazo sem fuso horário devolvia 500** (agora 422 com exemplo, sem adivinhar fuso) e **"erradicamos" passava como
+alegação sustentada** (nasceu a 12ª regra: totalidade se confere por divisão, medido sobre elegível). Acrescentou
+75 testes de prova: concorrência real, caminho de atualização com dado dentro, jornada completa de 18 passos,
+smoke de publicação com 20 verificações, acessibilidade no navegador com contraste calculado nos dois temas, e
+carga nas rotas novas. Declarou como **bloqueado pelo ambiente** — não como aprovado — o que não pôde ser
+executado: `npm audit`, `pip-audit`, `axe-core`, leitor de tela e Docker.
+
+**1.298 testes, 815 operações, 285 tabelas, 34 migrações.** Entregas de documento desta rodada:
+`TECHNICAL_BASELINE_LOCK.md`, `REQUIREMENTS_MATRIX.md`, `TECHNICAL_DEBT_REGISTER.md`,
+`PRODUCTION_RELEASE_RUNBOOK.md`, `ACCESSIBILITY_REPORT.md` e `DESIGN_HANDOFF_FINAL.md` reescrito.
 
 **Novo no v0.18.0 (interoperabilidade de referenciais de impacto, equidade e confiança):** a rodada implementa uma
 tese só — **impacto não é quantidade; impacto é resultado contextualizado.** "50 pessoas numa comunidade indígena
@@ -29,7 +46,7 @@ procedência em cada sugestão** e componente que **nunca sobrescreve** o que a 
 **responsabilidade** como responsável × papel × escopo × período × decisão × **versão**, separada da assinatura,
 com quatro-olhos declarado em dado.
 
-**1.223 testes, 815 operações, 285 tabelas, 31 migrações.** O que esta versão **não** entrega continua escrito com
+**(v0.18.0: 1.223 testes, 815 operações, 285 tabelas, 31 migrações.)** O que esta versão **não** entrega continua escrito com
 nome: as 169 metas oficiais dos ODS e os dados do IBGE **não foram carregados** (a rede do ambiente alcança só
 registros de pacote — a estrutura e os importadores estão prontos); mapeamento para GRI/ISSB/IRIS+ depende de
 decisão de produto **e** jurídica; nenhum selo publicado; nenhuma arte de selo. Comece por

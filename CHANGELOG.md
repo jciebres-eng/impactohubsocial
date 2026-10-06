@@ -1,6 +1,75 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.18.1] — 2026-10-06 — ENDURECIMENTO TÉCNICO FINAL E CONGELAMENTO DA BASE (snapshot do v0.18.0 em `history/v0.18.0/`)
+
+Rodada de **prova**, não de funcionalidade. O proprietário entregou um pacote
+`IMPACTO_v0.18.0_CORE_HARDENED.zip` produzido fora desta sessão, com quatro reforços de núcleo que
+**não puderam ser executados contra PostgreSQL real** onde foram escritos. Esta versão integrou
+aqueles reforços, rodou-os contra o banco real e encontrou o que só aparece com banco e com um
+terceiro na frente.
+
+### Integrado do pacote recebido
+- **Sinal contextual de impacto no match** (`engines/match/context.py`): necessidade, barreiras,
+  infraestrutura, adicionalidade, sustentabilidade e evidência, com cobertura declarada e `None`
+  (UNKNOWN) quando falta contexto.
+- **Oito prontidões no diagnóstico** (`READINESS_MAP`), cada uma com situação, nota e lacunas.
+- **Proveniência por campo** na montagem de documento (`USER_PROVIDED` / `SYSTEM_DERIVED`).
+- **Série longitudinal por indicador**, separando reportado de validado, sem afirmar causalidade.
+
+### Corrigido (defeitos reais, achados nesta rodada)
+- **O sinal contextual estava morto para todo terceiro.** Quem pede o match é o financiador, e a RLS
+  das tabelas de equidade — corretamente — só devolve linha para a organização dona. Nova função
+  `project_impact_context()` (migração 0034), `SECURITY DEFINER`, devolve **apenas números**, nunca
+  a narrativa, e **nada** para projeto não publicado. ADR-221.
+- **A "referência neutra" de 0,5 premiava quem não declarava contexto**: projeto com contexto
+  declarado e nota baixa ficaria atrás de projeto sem contexto nenhum. Sinal ausente voltou a ser
+  UNKNOWN, reduzindo cobertura e confiança (ADR-026). ADR-222.
+- **Prazo sem fuso horário devolvia 500.** `closes_at: "2026-12-05"` — o que um seletor de data
+  produz — quebrava no driver. Agora é **422 com exemplo**, e a plataforma continua sem adivinhar
+  fuso: 23h59 em Rio Branco não é o mesmo instante que 23h59 em Brasília. ADR-223.
+- **"Erradicamos" passava como alegação sustentada.** Havia uma medição validada no projeto, e isso
+  bastava para a regra de linguagem absoluta. Nasceu a **12ª regra**,
+  `totality_claim_without_coverage` (migração 0033): totalidade exige denominador vigente com fonte
+  **e** cobertura medida ≥ 99%, e a mensagem diz a cobertura real. ADR-224.
+- **Cabeçalho `Server: uvicorn`** no harness de teste (produção já usava `--no-server-header`):
+  o servidor de teste passou a subir igual, e o Nginx ganhou `server_tokens off` +
+  `proxy_hide_header Server`.
+- **Três alvos de toque com 21–23 px** em 390 px (WCAG 2.2 AA 2.5.8): link solto, atalho de
+  conteúdo e ação de painel passaram a ter 24 px mínimos.
+- **Série longitudinal sem declarar a janela**: `window`, `total_known` e `window_truncated`
+  entraram no payload — série truncada sem aviso é série que mente de boa-fé.
+
+### Acrescentado (prova)
+- `test_v0181_concurrency.py` (9): corrida real em designação, denominador, rodada de verificação,
+  concessão de selo, retrato de reputação, transação abortada e savepoint.
+- `test_v0181_migrations.py` (8): atualização v0.17.0 → v0.18.x **com dado dentro**, checksum
+  forward-only e migration que falha no meio.
+- `test_e2e_v0181_journeys.py` (18): a jornada completa, 18 passos, um projeto, uma trilha.
+- `scripts/smoke_test.py` (20 verificações) + `test_v0181_smoke.py` (5).
+- `test_v0181_hardening.py` (16): a função agregada (inclusive o que ela **não** devolve), a regra
+  de totalidade e os controles de dependência verificáveis offline.
+- `test_e2e_v0181_accessibility.py` (13): acessibilidade no navegador, contraste calculado nos dois
+  temas, teclado, foco, marcos, 390 px e movimento reduzido.
+- `scripts/loadtest.py` estendido às rotas da camada de impacto, com o tipo de organização correto
+  por rota.
+- `restore_test.sh` com seis conferidores novos da camada de impacto.
+
+### Declarado como bloqueado (e não como aprovado)
+- **`npm audit` e `pip-audit` não executaram**: registry npm devolve `403 Forbidden` e o índice PyPI
+  não responde. A saída de erro está em `SECURITY_AUDIT.md` §0, classificada
+  **BLOCKED BY ENVIRONMENT**. Nenhuma afirmação sobre CVE é feita nesta versão.
+- **`axe-core` e leitor de tela**: NOT VERIFIED, com o motivo, em `ACCESSIBILITY_REPORT.md` §2.
+- **Docker, coletor de métricas e carga fora da máquina do banco**: condições do GO de publicação,
+  listadas em `TECHNICAL_BASELINE_LOCK.md`.
+
+### Entregas de documento
+`TECHNICAL_BASELINE_LOCK.md` (as duas decisões), `REQUIREMENTS_MATRIX.md` (reconciliação histórica
+com classes A–I), `TECHNICAL_DEBT_REGISTER.md`, `PRODUCTION_RELEASE_RUNBOOK.md`,
+`ACCESSIBILITY_REPORT.md`, `DESIGN_HANDOFF_FINAL.md` reescrito para esta baseline.
+
+**Suíte: 1.223 → 1.298 testes verdes, 26 em passo próprio. ADR-221 a ADR-227.**
+
 ## [0.18.0] — 2026-10-06 — IMPACTO CONTEXTUALIZADO: EQUIDADE, REFERENCIAIS E CONFIANÇA (cumulativo; snapshot do v0.17.0 em `history/v0.17.0/`)
 
 A v0.17.0 havia declarado DESIGN como a próxima fase. Esta rodada reordena outra vez, pela mesma razão da anterior:

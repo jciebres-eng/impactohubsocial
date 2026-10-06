@@ -128,7 +128,11 @@ def server() -> dict:
         with socket.socket() as s:
             s.bind(("127.0.0.1", 0))
             port = s.getsockname()[1]
-        cfg = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", lifespan="on")
+        # `server_header=False` espelha o `--no-server-header` do Dockerfile: o servidor de teste
+        # tem de responder como o de produção responde, senão o smoke de publicação mede outra
+        # coisa (foi o que aconteceu nesta rodada: o smoke acusou vazamento que só existia aqui).
+        cfg = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", lifespan="on",
+                             server_header=False)
         srv = uvicorn.Server(cfg)
         t = threading.Thread(target=srv.run, daemon=True)
         t.start()

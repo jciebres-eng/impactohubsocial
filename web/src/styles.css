@@ -54,11 +54,14 @@ code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .lead { font-size: 17px; color: var(--texto-2); max-width: 68ch; }
 .pre { white-space: pre-wrap; max-width: 72ch; }
 .fineprint { font-size: 12.5px; color: var(--texto-3); max-width: 80ch; }
-.skip { position: absolute; left: -9999px; }
-.skip:focus { left: 16px; top: 8px; z-index: 100; background: var(--folha); padding: 8px 12px; }
+.skip { position: absolute; left: -9999px; display: inline-flex; align-items: center; min-height: 24px; }
+/* min-height de 24px também no atalho e no link de notificações: os dois são alvos soltos, e o
+   teste de acessibilidade em 390px pegou 23px e 21px. */
+.skip:focus { left: 16px; top: 8px; z-index: 100; background: var(--folha); padding: 8px 12px;
+  display: inline-flex; align-items: center; min-height: 24px; }
 
 /* Marca ----------------------------------------------------------------------------------- */
-.brand { display: inline-flex; align-items: center; gap: 10px; font: 600 20px/1 var(--serif); color: var(--tinta); text-decoration: none; }
+.brand { display: inline-flex; align-items: center; gap: 10px; min-height: 24px; font: 600 20px/1 var(--serif); color: var(--tinta); text-decoration: none; }
 .brand-light { color: #fff; }
 .brand-mark { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--ipe) 0 38%, transparent 39%), var(--tinta-3);
   box-shadow: inset 0 0 0 3px var(--ipe); }
@@ -85,7 +88,7 @@ code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 @media (max-width: 900px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .topbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--folha); border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; }
-  .topbar .notif { margin-left: auto; font-size: 14px; display: flex; gap: 6px; align-items: center; }
+  .topbar .notif { margin-left: auto; font-size: 14px; display: flex; gap: 6px; align-items: center; min-height: 24px; }
   .rail { position: fixed; z-index: 40; left: 0; top: 0; width: min(300px, 86vw); transform: translateX(-100%); transition: transform .2s ease; }
   .rail-open { transform: none; }
   .scrim { display: block; position: fixed; inset: 0; background: rgba(10, 18, 32, .45); z-index: 30; }
@@ -156,6 +159,8 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .panel-head h2 { margin: 0; }
 .panel-actions { display: flex; gap: 8px; align-items: center; font-size: 13.5px; }
+/* Ação de painel é alvo solto, não link no meio de frase: 24px mínimos (WCAG 2.2 AA 2.5.8). */
+.panel-actions a, .panel-actions button { display: inline-flex; align-items: center; min-height: 24px; }
 .grid-home { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; align-items: start; }
 .grid-home .panel { margin: 0; }
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
@@ -337,7 +342,11 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .auth-trail li { position: relative; font-size: 15.5px; }
 .auth-trail li::before { content: ""; position: absolute; left: -31px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--tinta); border: 3px solid var(--ipe); }
 .auth-main { padding: 48px clamp(20px, 6vw, 80px); max-width: 640px; }
+/* Alvo de toque: WCAG 2.2 AA (2.5.8) pede 24x24 mínimo. Estes são links SOLTOS (não estão no meio
+   de uma frase), então a exceção de "link em linha" não vale para eles — e o teste de
+   acessibilidade em 390px pegou os três com 22px de altura. */
 .auth-links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; font-size: 14px; }
+.auth-links a { display: inline-flex; align-items: center; min-height: 24px; }
 .kind-pick { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .kind-pick legend { font-weight: 600; margin-bottom: 8px; }
 .kind { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; padding: 12px 14px; border: 1px solid var(--linha); border-radius: var(--raio-m); cursor: pointer; background: var(--folha); }

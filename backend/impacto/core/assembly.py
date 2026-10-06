@@ -80,13 +80,23 @@ def evaluate(conn: Connection, assembly_id: str) -> dict:
     evidence = dict(asm["evidence"] or {})
     missing: list[dict] = []
     derived: dict[str, Any] = {}
+    provenance: dict[str, dict] = {}
     filled = 0
     for f in tpl["fields"]:
         val = values.get(f["key"])
+        origin = "USER_PROVIDED"
         if f["derived_from"]:
             val = _derive(conn, f["derived_from"], asm)
             derived[f["key"]] = None if val is None else str(val)
+            origin = "SYSTEM_DERIVED"
         has = val not in (None, "", [], {})
+        provenance[f["key"]] = {
+            "origin": origin,
+            "present": has,
+            "derived_from": f["derived_from"],
+            "evidence_required": bool(f["requires_evidence"]),
+            "evidence_id": evidence.get(f["key"]),
+        }
         if has:
             filled += 1
         elif f["required"]:
@@ -126,6 +136,7 @@ def evaluate(conn: Connection, assembly_id: str) -> dict:
             # valores que vêm do DOMÍNIO: a interface os mostra em leitura, para a pessoa ver o que o documento
             # vai dizer sem redigitar nada (e saber onde corrigir: no projeto, não na montagem)
             "derived": derived,
+            "provenance": provenance,
             "blockers": blockers, "can_generate": not blockers, "engine_version": ENGINE_VERSION}
 
 

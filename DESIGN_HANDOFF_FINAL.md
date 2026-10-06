@@ -1,4 +1,66 @@
-# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.16.0)
+# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.18.1)
+
+**Baseline:** 0.18.1 — **CONGELADA** (ver `TECHNICAL_BASELINE_LOCK.md`, decisão 1: **GO**) ·
+**Ramo:** `chore/v0.18.1-final-technical-hardening` · **Suíte:** 1.298 testes, 0 falhas (26 em
+passo próprio) · **API:** 815 operações · **Banco:** 285 tabelas, 34 migrações.
+
+## O que mudou para o Designer desde o handoff da v0.16.0
+
+Duas rodadas entraram no meio, e as duas mudaram **o que a tela precisa mostrar**:
+
+* **v0.17.0 (economia, legal, pagamento):** programa como entidade, registro de valor separado da
+  cobrança, monetização com portão legal (**nenhuma receita ativa**), pagamento marcado
+  `PRODUCTION PAYMENT NOT CONFIGURED`, 11 minutas legais **nenhuma aprovada**.
+* **v0.18.0–v0.18.1 (impacto contextualizado):** oito telas novas de conteúdo, e uma regra que
+  atravessa todas elas — **ausência de dado é informação, não espaço em branco**.
+
+### As oito telas que esta camada exige, e o estado que cada uma tem de representar
+
+| Tela | O que ela mostra | O estado que NÃO pode ser escondido |
+|---|---|---|
+| **Contexto de equidade do projeto** | necessidade, adicionalidade, barreiras com escada de prova (declarada → documentada → com evidência) | "sem denominador declarado com fonte, nenhum método de normalização está disponível" — com o motivo, nunca uma estimativa |
+| **Normalização** | sete métodos, cada um com o denominador que exige | método **indisponível** aparece com o motivo ao lado |
+| **Comparação entre projetos** | lado a lado, com fontes | `comparable: false` + lista de motivos, e **nunca** um veredito |
+| **Perfil territorial** | determinantes do território | indicador **não medido** aparece com o mesmo peso do medido (`measured: false`) |
+| **Integridade de alegação** | o texto que vai ser publicado, as 12 regras e o que falhou | `flagged` exige revisão de outra organização; aceitar **qualifica sem apagar** a marca |
+| **Reputação** | seis dimensões, cada uma com valor **ou motivo da ausência**, confiança, observações e quanto foi verificado | **não existe nota única**; organização nova mostra "sem medida", não nota baixa; contestação aberta aparece ao lado da dimensão |
+| **Selo** | o que atesta, **o que NÃO atesta**, critério por critério com evidência, validade | revogado e expirado são estados visíveis, não ausência |
+| **Responsabilidade** | quem responde por quê, em que período, e as decisões tomadas | **papel vago é informação**: aparece com o que ele responderia |
+
+### Dois componentes que já existem e o Designer deve reaproveitar
+
+* **`Suggest`** (`web/src/ui/suggest.tsx`): autocomplete com **etiqueta de origem** em cada
+  sugestão (carga oficial ≠ conhecimento da plataforma ≠ lista editorial ≠ histórico da própria
+  organização) e confirmação antes de substituir o que a pessoa escreveu. A etiqueta **não é
+  enfeite**: é o que permite avaliar a sugestão.
+* **`Steps`** (mesmo arquivo): formulário em etapas que **nunca esconde trabalho já feito** — etapa
+  bloqueada mostra o motivo e oferece "Abrir agora mesmo assim".
+
+### Estados de exceção que o Designer precisa desenhar (não só o caminho felizes)
+
+| Situação | Onde aparece | Mensagem que o produto já devolve |
+|---|---|---|
+| Falta contexto de impacto | match do financiador | sinal UNKNOWN + `missing_data: project.impact_context` → a tela deve virar **ação**, não erro |
+| Prazo sem fuso horário | qualquer campo de data-hora | 422 com exemplo (`2026-12-05T23:59:00-03:00`) |
+| Linha de base sem fonte | indicador | 422 `baseline_source_required` |
+| Alegação marcada | ficha da alegação | lista das regras que falharam, com o detalhe (inclui a cobertura medida) |
+| Dimensão sem base | reputação | `value: null` + `reason_without_value` em texto |
+| Selo recusado | pedido de selo | "por que eu não recebi": a avaliação recusada **fica registrada** |
+| Convite de revisão ausente | revisão de alegação | 422 `not_invited` |
+| Sem organização ativa | qualquer rota de organização | 409 `no_active_org` |
+
+### Acessibilidade — o piso já está medido
+
+`ACCESSIBILITY_REPORT.md` tem as 12 verificações que passam hoje (nome acessível, atalho de
+conteúdo como primeira parada, foco visível, marcos, contraste calculado nos dois temas, 390 px sem
+rolagem horizontal, alvo de toque ≥ 24 px, movimento reduzido) e as 6 que **não** foram verificadas
+(axe, leitor de tela real, segundo navegador, zoom 200%, daltonismo, voz). O Designer **não precisa
+descobrir** esse piso: precisa não derrubá-lo.
+
+---
+
+# Histórico — handoff da v0.16.0 (preservado)
+
 
 **Baseline:** 0.16.0 · **Branch:** `chore/v0.16.0-impact-network-core` · **Suíte:** 788 testes, 0 falhas
 (12 de volume rodam em passo próprio com `PERF=1`) · Substitui `DESIGN_HANDOFF.md` (v0.15.0), que fica em

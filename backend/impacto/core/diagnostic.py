@@ -35,6 +35,17 @@ DIMENSIONS: tuple[tuple[str, str, int], ...] = (
 )
 GAP_SEVERITY = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 
+READINESS_MAP = {
+    "project_readiness": {"problem", "territory", "solution", "budget", "measurement"},
+    "organization_readiness": {"identity", "governance"},
+    "funding_readiness": {"budget", "compliance"},
+    "evidence_readiness": {"problem", "measurement"},
+    "compliance_readiness": {"identity", "compliance"},
+    "data_readiness": {"problem", "territory", "measurement"},
+    "governance_readiness": {"governance", "compliance"},
+    "impact_readiness": {"problem", "territory", "measurement"},
+}
+
 
 def _collect(conn: Connection, *, org_id: str, project_id: str | None, diagnosis: dict | None) -> EvidenceSet:
     """Lê o que a plataforma SABE. Nada aqui é inferido — cada evidência diz de onde veio."""
@@ -186,6 +197,17 @@ def analyse(conn: Connection, *, org_id: str, project_id: str | None = None, dia
                 "priority": {"critical": "critical", "high": "high", "medium": "medium", "low": "low"}[g["severity"]],
                 "origin": "system_identified"}
                for g in sorted(gaps, key=lambda g: -GAP_SEVERITY[g["severity"]])]
+    readiness = {}
+    for key, dimensions in READINESS_MAP.items():
+        relevant = [item for item in per_dim if item["dimension"] in dimensions]
+        readiness[key] = {
+            "status": "ready" if relevant and all(item["percent"] >= 80 for item in relevant)
+                     else "needs_review" if relevant and any(item["percent"] > 0 for item in relevant)
+                     else "unknown",
+            "score": round(sum(item["percent"] for item in relevant) / len(relevant), 1) if relevant else None,
+            "dimensions": sorted(dimensions),
+            "blocking_gaps": sorted({gap for item in relevant for gap in item["gaps"]}),
+        }
     return {
         "engine_version": ENGINE_VERSION,
         "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat(),
@@ -196,6 +218,7 @@ def analyse(conn: Connection, *, org_id: str, project_id: str | None = None, dia
         # INFERÊNCIA (da plataforma, por regra — não é verdade absoluta)
         "current_state": {"completeness": completeness, "by_dimension": per_dim,
                           "blocking_gaps": [g["code"] for g in gaps if g["severity"] == "critical"]},
+        "readiness": readiness,
         "strengths": strengths,
         "gaps": gaps,
         "unknown": unknown,

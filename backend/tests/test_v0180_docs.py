@@ -57,9 +57,10 @@ class CountTests(unittest.TestCase):
                 "ods_targets": c.scalar("SELECT count(*) FROM ods_targets"),
             }
 
-    def test_the_eleven_claim_rules_are_eleven_in_the_database(self):
-        self.assertEqual(self.n["claim_rules"], 11)
-        self.assertIn("11 regras", DOCS["claims"].read_text(encoding="utf-8"))
+    def test_the_twelve_claim_rules_are_twelve_in_the_database(self):
+        """Eram 11 na v0.18.0; a dozena (`totality_claim_without_coverage`) nasceu de um achado."""
+        self.assertEqual(self.n["claim_rules"], 12)
+        self.assertIn("12 regras", DOCS["claims"].read_text(encoding="utf-8"))
 
     def test_the_six_reputation_dimensions_are_six_in_the_database(self):
         self.assertEqual(self.n["dimensions"], 6)
@@ -91,19 +92,19 @@ class CountTests(unittest.TestCase):
             self.assertIn(chave, texto, f"busca {chave} não aparece no documento")
 
     def test_the_platform_still_ships_zero_published_seal_definitions(self):
-        """Se alguém embarcar uma definição numa migração, este teste é o que avisa."""
-        with db_system() as c:
-            semeadas = c.scalar(
-                "SELECT count(*) FROM seal_definitions WHERE code LIKE 'selo\\_%'"
-                "   AND code NOT LIKE '%teste%' AND code NOT LIKE '%perf%'"
-                "   AND code NOT LIKE '%gaming%' AND code NOT LIKE '%rev%'"
-                "   AND code NOT LIKE '%versionado%' AND code NOT LIKE '%projeto%'"
-                "   AND code NOT LIKE '%validade%' AND code NOT LIKE '%recusa%'"
-                "   AND code NOT LIKE '%escopo%' AND code NOT LIKE '%critetio%'"
-                "   AND code NOT LIKE '%recheck%'")
-        self.assertEqual(semeadas, 0,
-                         "a plataforma passou a embarcar definição de selo; a decisão (ADR-209) "
-                         "dizia zero")
+        """A verificação é na MIGRAÇÃO, não no banco compartilhado da suíte.
+
+        A primeira versão contava linhas em `seal_definitions` excluindo códigos de teste por
+        padrão de nome — e bastava um teste novo com outro nome para o teste virar alarme falso
+        (foi o que aconteceu com `selo_jornada_v0181`). O que a ADR-209 promete é que **nenhuma
+        migração embarca definição de selo**, e isso se confere lendo as migrações.
+        """
+        import pathlib as _p
+        mig = _p.Path(__file__).resolve().parents[1] / "migrations"
+        culpadas = [f.name for f in sorted(mig.glob("*.sql"))
+                    if "insert into seal_definitions" in f.read_text(encoding="utf-8").lower()]
+        self.assertEqual(culpadas, [],
+                         f"migração embarcando definição de selo (ADR-209 dizia zero): {culpadas}")
         self.assertIn("ZERO definições", DOCS["seals"].read_text(encoding="utf-8"))
 
     def test_the_sdg_targets_are_still_not_loaded_and_the_docs_say_so(self):

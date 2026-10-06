@@ -1,0 +1,14 @@
+........
+--- v0.18.0: tempos (ms) ---
+  reputation.me                     33.3
+  seals.list                        31.6
+  claims.list                       25.8
+  responsibility.mine                9.4
+  claims.get                         8.2
+  lookup.territories                 6.5
+  seals.evaluate                     6.5
+.
+----------------------------------------------------------------------
+Ran 9 tests in 5.370s
+
+OK

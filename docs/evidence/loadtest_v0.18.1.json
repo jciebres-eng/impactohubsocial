@@ -1,0 +1,241 @@
+{
+  "threads": 12,
+  "seconds": 20.0,
+  "total_requests": 3207,
+  "rps": 160.2,
+  "total_errors": 0,
+  "routes": {
+    "/v1/dashboard": {
+      "requests": 149,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 66.3,
+      "p95_ms": 172.8,
+      "p99_ms": 256.6,
+      "mean_ms": 75.5
+    },
+    "/v1/me": {
+      "requests": 150,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 58.2,
+      "p95_ms": 112.9,
+      "p99_ms": 148.7,
+      "mean_ms": 64.3
+    },
+    "/v1/ods": {
+      "requests": 150,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 47.8,
+      "p95_ms": 99.8,
+      "p99_ms": 140.2,
+      "mean_ms": 52.3
+    },
+    "/v1/indicators/catalog": {
+      "requests": 151,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 50.9,
+      "p95_ms": 89.4,
+      "p99_ms": 132.2,
+      "mean_ms": 52.8
+    },
+    "/v1/report-center": {
+      "requests": 152,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 38.1,
+      "p95_ms": 77.7,
+      "p99_ms": 107.9,
+      "mean_ms": 41.1
+    },
+    "/v1/map/projects": {
+      "requests": 152,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 40.8,
+      "p95_ms": 101.8,
+      "p99_ms": 135.5,
+      "mean_ms": 48.8
+    },
+    "/v1/claims?limit=20": {
+      "requests": 153,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 51.8,
+      "p95_ms": 125.7,
+      "p99_ms": 231.8,
+      "mean_ms": 60.7
+    },
+    "/v1/claims/rules": {
+      "requests": 154,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 43.5,
+      "p95_ms": 87.1,
+      "p99_ms": 146.2,
+      "mean_ms": 49.0
+    },
+    "/v1/reputation/me": {
+      "requests": 155,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 101.0,
+      "p95_ms": 335.0,
+      "p99_ms": 400.7,
+      "mean_ms": 128.0
+    },
+    "/v1/reputation/dimensions": {
+      "requests": 156,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 49.2,
+      "p95_ms": 95.8,
+      "p99_ms": 131.9,
+      "mean_ms": 51.2
+    },
+    "/v1/seals/awards": {
+      "requests": 157,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 48.6,
+      "p95_ms": 91.3,
+      "p99_ms": 156.6,
+      "mean_ms": 53.8
+    },
+    "/v1/seals/definitions": {
+      "requests": 156,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 44.6,
+      "p95_ms": 79.2,
+      "p99_ms": 111.2,
+      "mean_ms": 46.3
+    },
+    "/v1/lookups/territories?q=ma": {
+      "requests": 156,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 45.2,
+      "p95_ms": 94.1,
+      "p99_ms": 124.5,
+      "mean_ms": 49.8
+    },
+    "/v1/lookups/indicators?q=pes": {
+      "requests": 156,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 44.9,
+      "p95_ms": 102.8,
+      "p99_ms": 119.8,
+      "mean_ms": 51.0
+    },
+    "/v1/responsibility/mine": {
+      "requests": 154,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 44.0,
+      "p95_ms": 80.5,
+      "p99_ms": 110.7,
+      "mean_ms": 46.7
+    },
+    "/v1/responsibility/roles": {
+      "requests": 154,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 47.0,
+      "p95_ms": 89.3,
+      "p99_ms": 140.8,
+      "mean_ms": 49.8
+    },
+    "/v1/frameworks": {
+      "requests": 153,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 52.0,
+      "p95_ms": 87.5,
+      "p99_ms": 108.2,
+      "mean_ms": 53.1
+    },
+    "/v1/equity/catalog": {
+      "requests": 151,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 47.4,
+      "p95_ms": 89.7,
+      "p99_ms": 139.2,
+      "mean_ms": 51.0
+    },
+    "/v1/territories/search?q=mato": {
+      "requests": 150,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 53.0,
+      "p95_ms": 99.7,
+      "p99_ms": 227.4,
+      "mean_ms": 57.0
+    },
+    "/v1/feed/projects": {
+      "requests": 149,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 78.8,
+      "p95_ms": 166.3,
+      "p99_ms": 254.5,
+      "mean_ms": 87.2
+    },
+    "/v1/portfolio": {
+      "requests": 149,
+      "errors": 0,
+      "status_codes": [
+        200
+      ],
+      "p50_ms": 60.6,
+      "p95_ms": 121.4,
+      "p99_ms": 171.3,
+      "mean_ms": 65.3
+    }
+  },
+  "caveats": "mesma máquina para cliente, API e PostgreSQL; dados mínimos; sem rede real; não representa capacidade de produção"
+}

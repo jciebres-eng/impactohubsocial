@@ -1,4 +1,4 @@
-# Prontidão da liberação — v0.18.0
+# Prontidão da liberação — v0.18.1
 
 Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o motivo. Não há "parcialmente verde".
 
@@ -6,8 +6,8 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 
 | # | Portão | Situação | Prova |
 |---|---|---|---|
-| 1 | Suíte completa verde, banco criado do zero | 🟢 | **1.223** testes, 0 falhas, 26 pulados · `docs/evidence/test_run_v0.18.0.log` |
-| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.18.0.log` |
+| 1 | Suíte completa verde, banco criado do zero | 🟢 | **1.298** testes, 0 falhas, 26 em passo próprio · `docs/evidence/test_run_v0.18.1.log` |
+| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.18.1.log` |
 | 3 | Tipos do frontend sem erro | 🟢 | `tsc --noEmit` limpo |
 | 4 | Build do frontend | 🟢 | `node build.mjs` · 14 arquivos no pré-cache |
 | 5 | Compilação de todo o Python | 🟢 | `python3 -m compileall impacto` |
@@ -59,7 +59,19 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 | 49 | **Toda sugestão de formulário declara a origem, e nenhuma sobrescreve em silêncio** | 🟢 | `origin`/`origin_label` em todas as buscas; componente que pergunta e oferece voltar · ADR-212/213 |
 | 50 | **Responsabilidade registrada sem CPF e separada da assinatura** | 🟢 | nenhuma coluna de documento (lido do `information_schema`); `signature_id` opcional nos dois sentidos · ADR-216/220 |
 | 51 | **Os números dos documentos desta rodada conferidos contra o banco** | 🟢 | `test_v0180_docs.py` (18 testes), incluindo "zero definições de selo embarcadas" e "zero metas de ODS carregadas" |
-| 52 | **Nenhuma chave estrangeira quente sem índice** | 🟢 | achado do relatório (`materiality_assessments.project_id`) corrigido na migração 0032 · `docs/evidence/db_integrity_v0.18.0.txt` |
+| 52 | **Nenhuma chave estrangeira quente sem índice** | 🟢 | achado do relatório (`materiality_assessments.project_id`) corrigido na migração 0032 · `docs/evidence/db_integrity_v0.18.1.txt` |
+| 53 | **Caminho de atualização da v0.17.0 com dado dentro** | 🟢 | `test_v0181_migrations.py` (8): dado intacto, 33 tabelas com RLS, 10 funções, forward-only recusando alteração |
+| 54 | **Migration que falha não deixa metade aplicada** | 🟢 | teste com migração deliberadamente quebrada em diretório temporário |
+| 55 | **Concorrência: um responsável, um denominador, rodada íntegra** | 🟢 | `test_v0181_concurrency.py` (9) com 6 threads soltas ao mesmo tempo |
+| 56 | **Jornada completa de ponta a ponta** | 🟢 | `test_e2e_v0181_journeys.py` (18 passos, 1 projeto, 1 trilha de auditoria) |
+| 57 | **Smoke de publicação executável** | 🟢 | 20 verificações; 0 falha obrigatória; provedor simulado **declarado** |
+| 58 | **Acessibilidade medida no navegador** | 🟡 | 12 verificações verdes (contraste calculado nos 2 temas, teclado, foco, 390 px, toque ≥ 24 px); **axe e leitor de tela: NOT VERIFIED** |
+| 59 | **Carga concorrente sem erro** | 🟡 | 12 threads, 3.207 req, 160 rps, **0 erro**; mesma máquina — **não** é capacidade de produção |
+| 60 | **Auditoria de dependências** | 🔴 | **BLOCKED BY ENVIRONMENT** (npm 403, PyPI indisponível), com a saída em `SECURITY_AUDIT.md` §0. Controles offline verificados; nenhuma afirmação sobre CVE |
+| 61 | **Imagem Docker construída e executada** | 🔴 | `Dockerfile` correto na leitura (não-root, `--no-server-header`); **docker indisponível neste ambiente** |
+| 62 | **Observabilidade com coletor e alertas** | 🔴 | `/metrics` e logs estruturados existem; **ninguém lendo** — 9 alertas mínimos no runbook §5 |
+| 63 | **Provedores externos reais** | 🔴 | SMTP, S3, antivírus, pagamento, fiscal e IdP em modo simulado — e o `/readyz` **diz isso** |
+| 64 | **Aprovação jurídica das 11 minutas** | 🔴 | o banco recusa aceite de rascunho (ADR-187): sem aprovação, cadastro travado em produção, de propósito |
 
 Portões 31 a 38 são da v0.17.0. O 37 nasceu de um achado embaraçoso: o documento do Value Ledger afirmava que a
 tabela de linhas de base "nasce vazia", e ela nasce com uma linha por tipo **sem número**. A diferença importa, e

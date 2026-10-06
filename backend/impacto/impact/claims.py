@@ -31,11 +31,21 @@ ENGINE_VERSION = "claim-integrity@1.0.0"
 
 #: Léxicos declarados em código, não em configuração: mudar o que a plataforma considera linguagem
 #: absoluta é mudança de comportamento e tem de aparecer em revisão de código e em teste.
+#: Afirmação de PROVA. Uma medição validada com evidência sustenta a frase.
 ABSOLUTE_TERMS = (
     "comprovado", "comprovada", "comprovadamente", "garantido", "garantida", "garantimos",
-    "100%", "cem por cento", "zero ", "neutro", "neutra", "neutralidade", "erradicou",
-    "erradicamos", "eliminou totalmente", "totalmente eliminado", "sem nenhum", "nunca mais",
-    "definitivamente", "assegurado", "assegura", "infalível",
+    "definitivamente", "assegurado", "assegura", "infalível", "indiscutível", "inquestionável",
+)
+#: Afirmação de TOTALIDADE. É a única classe que se confere por divisão — medido sobre elegível —,
+#: e por isso tem regra própria: medição validada não basta, precisa COBRIR o denominador.
+#: A separação nasceu de um achado da jornada de ponta a ponta da v0.18.1: "erradicamos" passava
+#: por `absolute_language` porque havia uma medição validada de 32 pessoas no projeto.
+TOTALITY_TERMS = (
+    "100%", "cem por cento", "zero caso", "zero casos", "nenhum caso", "sem nenhum",
+    "neutro", "neutra", "neutralidade", "erradicou", "erradicamos", "erradicada", "erradicação",
+    "eliminou totalmente", "totalmente eliminado", "nunca mais", "universalizou",
+    "universalizamos", "universalização", "todas as pessoas", "toda a população",
+    "todos os beneficiários", "integralmente atendida", "cobertura total",
 )
 CERTIFICATION_TERMS = (
     "certificado", "certificada", "certificação", "homologado", "homologada",
@@ -82,6 +92,7 @@ def rules(conn: Connection) -> dict:
         "items": rows,
         "lexicons": {
             "absolute": list(ABSOLUTE_TERMS),
+            "totality": list(TOTALITY_TERMS),
             "certification": list(CERTIFICATION_TERMS),
             "causality": list(CAUSALITY_TERMS),
             "comparative": list(COMPARATIVE_TERMS),
@@ -170,6 +181,17 @@ def _facts(conn: Connection, claim: dict) -> dict:
             "   AND ((scope = 'project' AND project_id = $1)"
             "     OR (scope = 'territory' AND territory ="
             "         (SELECT territory FROM projects WHERE id = $1)))", sid)
+        # Para conferir TOTALIDADE: o menor denominador vigente (o mais exigente) e a maior
+        # medição validada. A divisão de um pelo outro é a cobertura que a frase afirma ter.
+        f["denominator_value"] = conn.scalar(
+            "SELECT min(value)::float FROM equity_denominators WHERE effective_until IS NULL"
+            "   AND kind IN ('eligible_population','target_population','affected_population')"
+            "   AND ((scope = 'project' AND project_id = $1)"
+            "     OR (scope = 'territory' AND territory ="
+            "         (SELECT territory FROM projects WHERE id = $1)))", sid)
+        f["max_validated"] = conn.scalar(
+            "SELECT max(value)::float FROM indicator_values WHERE project_id = $1"
+            "   AND status = 'validated'", sid)
         f["execution"] = conn.one("SELECT starts_on, ends_on FROM projects WHERE id = $1", sid)
     else:
         # Para os outros sujeitos a plataforma sabe menos, e o verificador diz isso em vez de
@@ -180,6 +202,8 @@ def _facts(conn: Connection, claim: dict) -> dict:
         f["evidences"] = conn.scalar("SELECT count(*) FROM evidences WHERE org_id = $1"
                                      "   AND status = 'accepted'", claim["org_id"])
         f["expenses"] = {"total": 0, "no_receipt": 0}
+        f["denominator_value"] = None
+        f["max_validated"] = None
         f["denominators"] = conn.scalar(
             "SELECT count(*) FROM equity_denominators WHERE effective_until IS NULL"
             "   AND org_id = $1", claim["org_id"])
@@ -239,6 +263,19 @@ def _run_rules(claim: dict, f: dict) -> list[dict]:
          f"evidência no sujeito" if abs_hits and not base_forte else
          (f"termo absoluto presente ({', '.join(abs_hits[:4])}), e há medição validada com evidência"
           if abs_hits else "o texto não usa termo absoluto")))
+
+    tot_hits = _hits(text, TOTALITY_TERMS)
+    den, medido = f["denominator_value"], f["max_validated"]
+    cobertura = (medido / den) if (den and medido is not None and den > 0) else None
+    coberto = cobertura is not None and cobertura >= 0.99
+    add("totality_claim_without_coverage", not (tot_hits and not coberto), "serious",
+        (f"o texto afirma totalidade ({', '.join(tot_hits[:3])}) e "
+         + ("não há denominador vigente com fonte para conferir" if not den else
+            ("não há medição validada para dividir pelo denominador" if medido is None else
+             f"a cobertura medida é {cobertura:.0%} de {den:g} elegíveis"))
+         if tot_hits and not coberto else
+         (f"afirmação de totalidade com cobertura medida de {cobertura:.0%}" if tot_hits else
+          "o texto não afirma totalidade")))
 
     cert_hits = _hits(text, CERTIFICATION_TERMS)
     add("certification_language", not cert_hits, "serious",
@@ -325,6 +362,8 @@ def _public_facts(f: dict) -> dict:
         "result_chain_links": {e["link_type"]: e["n"] for e in f["edges"]},
         "expenses_without_receipt": f["expenses"]["no_receipt"],
         "denominators_available": f["denominators"],
+        "denominator_value": f["denominator_value"],
+        "max_validated_value": f["max_validated"],
     }
 
 

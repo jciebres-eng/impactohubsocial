@@ -446,6 +446,12 @@ class AiSummarizeIn(In):
 
 
 # ---------------------------------------------------------------- billing
+class PriceQ(In):
+    """Consulta de preço. O cliente diz O QUE quer, nunca QUANTO — valor, moeda e imposto vêm do servidor."""
+    plan_key: Annotated[str, StringConstraints(pattern=r"^[a-z0-9_]{3,40}$")]
+    interval: Literal["month", "year"] = "month"
+
+
 class CheckoutIn(In):
     """O cliente escolhe plano e periodicidade. Preço, desconto, trial e valor final são sempre calculados no servidor."""
     plan_key: Slug

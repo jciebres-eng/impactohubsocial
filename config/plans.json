@@ -1,350 +1,384 @@
 {
- "version": "plans@1.1",
- "_note": "Preços null = a definir pelo proprietário (exibido como 'sob consulta'). Cobrança real exige BILLING_PROVIDER configurado. Nenhum plano altera match, elegibilidade, ordenação ou posição de prestador.",
- "invariants": [
-  "no_plan_affects_match",
-  "no_plan_affects_provider_rank",
-  "downgrade_never_deletes_data"
- ],
- "downgrade_grace_days": 60,
- "flags": {
-  "premium_osc": {
-   "default": true,
-   "description": "Permite contratar planos pagos de OSC (buscas salvas, rastreio e alertas de editais)"
-  },
-  "premium_provider": {
-   "default": false,
-   "description": "Permite contratar plano pago de prestador"
-  },
-  "billing_live": {
-   "default": false,
-   "description": "Indica que a cobrança real foi homologada (exibe aviso de sandbox quando falso)"
-  },
-  "public_directory_providers": {
-   "default": true,
-   "description": "Diretório de profissionais parceiros visível para organizações"
-  }
- },
- "plans": {
-  "osc_basic": {
-   "role": "osc",
-   "name": "OSC Essencial",
-   "price_cents": 0,
-   "interval": "month",
-   "limits": {
-    "active_projects": 2,
-    "ai_requests_month": 20,
-    "storage_mb": 500,
-    "seats": 3,
-    "saved_searches": 0
-   },
-   "features": [
-    "catalog.search",
-    "match.explain",
-    "applications.assisted",
-    "documents.vault",
-    "evidence.post",
-    "professional.request"
-   ],
-   "tier": "free",
-   "prices": {}
-  },
-  "osc_premium": {
-   "role": "osc",
-   "name": "OSC Captação",
-   "price_cents": null,
-   "interval": "month",
-   "requires_flag": "premium_osc",
-   "limits": {
-    "active_projects": 20,
-    "ai_requests_month": 300,
-    "storage_mb": 10000,
-    "seats": 15,
-    "saved_searches": 20
-   },
-   "features": [
-    "catalog.search",
-    "match.explain",
-    "applications.assisted",
-    "documents.vault",
-    "evidence.post",
-    "professional.request",
-    "alerts.saved_search",
-    "opportunity.tracking",
-    "ai.assist.advanced",
-    "reports.export",
-    "templates"
-   ],
-   "tier": "premium",
-   "prices": {
-    "month": null,
-    "year": null
-   }
-  },
-  "company_basic": {
-   "role": "company",
-   "name": "Empresa Essencial",
-   "price_cents": 0,
-   "interval": "month",
-   "limits": {
-    "programs": 1,
-    "seats": 3,
-    "ai_requests_month": 50,
-    "storage_mb": 1000,
-    "saved_searches": 0
-   },
-   "features": [
-    "feed.projects",
-    "match.explain",
-    "portfolio.tracking",
-    "reports.basic"
-   ],
-   "tier": "free",
-   "prices": {}
-  },
-  "company_premium": {
-   "role": "company",
-   "name": "Empresa Impacto",
-   "price_cents": null,
-   "interval": "year",
-   "limits": {
-    "programs": 10,
-    "seats": 25,
-    "ai_requests_month": 500,
-    "storage_mb": 50000,
-    "saved_searches": 30
-   },
-   "features": [
-    "feed.projects",
-    "match.explain",
-    "portfolio.tracking",
-    "reports.basic",
-    "reports.advanced",
-    "reports.export",
-    "alerts.saved_search",
-    "conflict.management",
-    "fiscal.estimates",
-    "territory.analytics"
-   ],
-   "tier": "premium",
-   "prices": {
-    "month": null,
-    "year": null
-   }
-  },
-  "company_enterprise": {
-   "role": "company",
-   "name": "Empresa Enterprise",
-   "price_cents": null,
-   "interval": "custom",
-   "public": true,
-   "limits": {
-    "programs": null,
-    "seats": null,
-    "ai_requests_month": 5000,
-    "storage_mb": null,
-    "saved_searches": null
-   },
-   "features": [
-    "feed.projects",
-    "match.explain",
-    "portfolio.tracking",
-    "reports.basic",
-    "reports.advanced",
-    "reports.export",
-    "alerts.saved_search",
-    "conflict.management",
-    "fiscal.estimates",
-    "territory.analytics",
-    "sso",
-    "audit.export",
-    "api.access"
-   ],
-   "tier": "premium",
-   "prices": {}
-  },
-  "provider_basic": {
-   "role": "provider",
-   "name": "Profissional Parceiro",
-   "price_cents": 0,
-   "interval": "month",
-   "limits": {
-    "open_reviews": 10,
-    "ai_requests_month": 10,
-    "storage_mb": 500,
-    "seats": 3
-   },
-   "features": [
-    "directory.listing",
-    "reviews.receive",
-    "signatures.sign"
-   ],
-   "tier": "free",
-   "prices": {}
-  },
-  "provider_premium": {
-   "role": "provider",
-   "name": "Profissional Parceiro Plus",
-   "price_cents": null,
-   "interval": "month",
-   "requires_flag": "premium_provider",
-   "limits": {
-    "open_reviews": 100,
-    "ai_requests_month": 100,
-    "storage_mb": 5000,
-    "seats": 10
-   },
-   "features": [
-    "directory.listing",
-    "reviews.receive",
-    "signatures.sign",
-    "templates",
-    "reports.export"
-   ],
-   "tier": "premium",
-   "prices": {
-    "month": null,
-    "year": null
-   }
-  },
-  "government_basic": {
-   "role": "government",
-   "name": "Governo",
-   "price_cents": 0,
-   "interval": "custom",
-   "limits": {
-    "programs": null,
-    "seats": 20,
-    "ai_requests_month": 100,
-    "storage_mb": 20000
-   },
-   "features": [
-    "calls.publish",
-    "materials.publish",
-    "gov.data",
-    "reports.basic"
-   ],
-   "tier": "free",
-   "prices": {}
-  },
-  "individual_basic": {
-   "role": "individual",
-   "name": "Apoiador Pessoa Física",
-   "price_cents": 0,
-   "interval": "month",
-   "limits": {
-    "seats": 2,
-    "ai_requests_month": 10,
-    "storage_mb": 200,
-    "saved_searches": 0
-   },
-   "features": [
-    "feed.projects",
-    "match.explain",
-    "portfolio.tracking",
-    "reports.basic"
-   ],
-   "tier": "free",
-   "prices": {}
-  },
-  "osc_plus": {
-   "role": "osc",
-   "name": "OSC Plus",
-   "tier": "plus",
-   "price_cents": null,
-   "interval": "month",
-   "requires_flag": "premium_osc",
-   "prices": {
-    "month": null,
-    "year": null
-   },
-   "limits": {
-    "active_projects": 8,
-    "ai_requests_month": 100,
-    "storage_mb": 3000,
-    "seats": 8,
-    "saved_searches": 5
-   },
-   "features": [
-    "catalog.search",
-    "match.explain",
-    "applications.assisted",
-    "documents.vault",
-    "evidence.post",
-    "professional.request",
-    "alerts.saved_search",
-    "opportunity.tracking"
-   ]
-  },
-  "company_plus": {
-   "role": "company",
-   "name": "Empresa Plus",
-   "tier": "plus",
-   "price_cents": null,
-   "interval": "month",
-   "prices": {
-    "month": null,
-    "year": null
-   },
-   "limits": {
-    "programs": 3,
-    "seats": 10,
-    "ai_requests_month": 150,
-    "storage_mb": 10000,
-    "saved_searches": 10
-   },
-   "features": [
-    "feed.projects",
-    "match.explain",
-    "portfolio.tracking",
-    "reports.basic",
-    "reports.advanced",
-    "alerts.saved_search"
-   ]
-  },
-  "gov_institutional": {
-   "role": "government",
-   "name": "Governo / Institucional",
-   "tier": "gov",
-   "price_cents": null,
-   "interval": "custom",
-   "public": true,
-   "prices": {},
-   "limits": {
-    "programs": null,
-    "seats": null,
-    "ai_requests_month": 1000,
-    "storage_mb": null
-   },
-   "features": [
-    "calls.publish",
-    "materials.publish",
-    "gov.data",
-    "reports.basic",
-    "reports.advanced",
-    "audit.export"
-   ]
-  }
- },
- "never_sellable": [
-  "provider_rank",
-  "provider_featured",
-  "provider_badge",
-  "match_boost",
-  "eligibility_override"
- ],
- "_note_tiers": "v0.11.0: cada plano tem tier (free|plus|premium|gov) e preços mensal/anual em `prices` (null = NÃO definido pelo proprietário; nunca inventado). A divisão de recursos entre PLUS e PREMIUM é HIPÓTESE de produto a validar. Trial de 14 dias libera o plano de tier premium do tipo da organização.",
- "trial": {
-  "days": 14,
-  "plan_tier": "premium",
-  "auto_start": true,
-  "reminder_days": [
-   1,
-   7,
-   11,
-   13,
-   14
+  "version": "plans@1.2",
+  "_note": "Preços null = a definir pelo proprietário (exibido como 'sob consulta'). Cobrança real exige BILLING_PROVIDER configurado. Nenhum plano altera match, elegibilidade, ordenação ou posição de prestador.",
+  "invariants": [
+    "no_plan_affects_match",
+    "no_plan_affects_provider_rank",
+    "downgrade_never_deletes_data"
   ],
-  "stripe_min_seconds": 172800
- }
+  "downgrade_grace_days": 60,
+  "flags": {
+    "premium_osc": {
+      "default": true,
+      "description": "Permite contratar planos pagos de OSC (buscas salvas, rastreio e alertas de editais)"
+    },
+    "premium_provider": {
+      "default": false,
+      "description": "Permite contratar plano pago de prestador"
+    },
+    "billing_live": {
+      "default": false,
+      "description": "Indica que a cobrança real foi homologada (exibe aviso de sandbox quando falso)"
+    },
+    "public_directory_providers": {
+      "default": true,
+      "description": "Diretório de profissionais parceiros visível para organizações"
+    }
+  },
+  "plans": {
+    "osc_basic": {
+      "role": "osc",
+      "name": "OSC Essencial",
+      "price_cents": 0,
+      "interval": "month",
+      "limits": {
+        "active_projects": 2,
+        "ai_requests_month": 20,
+        "storage_mb": 500,
+        "seats": 3,
+        "saved_searches": 0
+      },
+      "features": [
+        "catalog.search",
+        "match.explain",
+        "applications.assisted",
+        "documents.vault",
+        "evidence.post",
+        "professional.request"
+      ],
+      "tier": "free",
+      "prices": {}
+    },
+    "osc_premium": {
+      "role": "osc",
+      "name": "OSC Captação",
+      "price_cents": null,
+      "interval": "month",
+      "requires_flag": "premium_osc",
+      "limits": {
+        "active_projects": 20,
+        "ai_requests_month": 300,
+        "storage_mb": 10000,
+        "seats": 15,
+        "saved_searches": 20
+      },
+      "features": [
+        "catalog.search",
+        "match.explain",
+        "applications.assisted",
+        "documents.vault",
+        "evidence.post",
+        "professional.request",
+        "alerts.saved_search",
+        "opportunity.tracking",
+        "ai.assist.advanced",
+        "reports.export",
+        "templates"
+      ],
+      "tier": "premium",
+      "prices": {
+        "month": null,
+        "year": null
+      }
+    },
+    "company_basic": {
+      "role": "company",
+      "name": "Empresa Essencial",
+      "price_cents": 0,
+      "interval": "month",
+      "limits": {
+        "programs": 1,
+        "seats": 3,
+        "ai_requests_month": 50,
+        "storage_mb": 1000,
+        "saved_searches": 0
+      },
+      "features": [
+        "feed.projects",
+        "match.explain",
+        "portfolio.tracking",
+        "reports.basic"
+      ],
+      "tier": "free",
+      "prices": {}
+    },
+    "company_premium": {
+      "role": "company",
+      "name": "Empresa Impacto",
+      "price_cents": null,
+      "interval": "year",
+      "limits": {
+        "programs": 10,
+        "seats": 25,
+        "ai_requests_month": 500,
+        "storage_mb": 50000,
+        "saved_searches": 30
+      },
+      "features": [
+        "feed.projects",
+        "match.explain",
+        "portfolio.tracking",
+        "reports.basic",
+        "reports.advanced",
+        "reports.export",
+        "alerts.saved_search",
+        "conflict.management",
+        "fiscal.estimates",
+        "territory.analytics"
+      ],
+      "tier": "premium",
+      "prices": {
+        "month": null,
+        "year": null
+      }
+    },
+    "company_enterprise": {
+      "role": "company",
+      "name": "Empresa Enterprise",
+      "price_cents": null,
+      "interval": "custom",
+      "public": true,
+      "limits": {
+        "programs": null,
+        "seats": null,
+        "ai_requests_month": 5000,
+        "storage_mb": null,
+        "saved_searches": null
+      },
+      "features": [
+        "feed.projects",
+        "match.explain",
+        "portfolio.tracking",
+        "reports.basic",
+        "reports.advanced",
+        "reports.export",
+        "alerts.saved_search",
+        "conflict.management",
+        "fiscal.estimates",
+        "territory.analytics",
+        "sso",
+        "audit.export",
+        "api.access"
+      ],
+      "tier": "premium",
+      "prices": {}
+    },
+    "provider_basic": {
+      "role": "provider",
+      "name": "Profissional Parceiro",
+      "price_cents": 0,
+      "interval": "month",
+      "limits": {
+        "open_reviews": 10,
+        "ai_requests_month": 10,
+        "storage_mb": 500,
+        "seats": 3
+      },
+      "features": [
+        "directory.listing",
+        "reviews.receive",
+        "signatures.sign"
+      ],
+      "tier": "free",
+      "prices": {}
+    },
+    "provider_premium": {
+      "role": "provider",
+      "name": "Profissional Parceiro Plus",
+      "price_cents": null,
+      "interval": "month",
+      "requires_flag": "premium_provider",
+      "limits": {
+        "open_reviews": 100,
+        "ai_requests_month": 100,
+        "storage_mb": 5000,
+        "seats": 10
+      },
+      "features": [
+        "directory.listing",
+        "reviews.receive",
+        "signatures.sign",
+        "templates",
+        "reports.export"
+      ],
+      "tier": "premium",
+      "prices": {
+        "month": null,
+        "year": null
+      }
+    },
+    "government_basic": {
+      "role": "government",
+      "name": "Governo",
+      "price_cents": 0,
+      "interval": "custom",
+      "limits": {
+        "programs": null,
+        "seats": 20,
+        "ai_requests_month": 100,
+        "storage_mb": 20000
+      },
+      "features": [
+        "calls.publish",
+        "materials.publish",
+        "gov.data",
+        "reports.basic"
+      ],
+      "tier": "free",
+      "prices": {}
+    },
+    "individual_basic": {
+      "role": "individual",
+      "name": "Apoiador Pessoa Física",
+      "price_cents": 0,
+      "interval": "month",
+      "limits": {
+        "seats": 2,
+        "ai_requests_month": 10,
+        "storage_mb": 200,
+        "saved_searches": 0
+      },
+      "features": [
+        "feed.projects",
+        "match.explain",
+        "portfolio.tracking",
+        "reports.basic"
+      ],
+      "tier": "free",
+      "prices": {}
+    },
+    "osc_plus": {
+      "role": "osc",
+      "name": "OSC Plus",
+      "tier": "plus",
+      "price_cents": null,
+      "interval": "month",
+      "requires_flag": "premium_osc",
+      "prices": {
+        "month": null,
+        "year": null
+      },
+      "limits": {
+        "active_projects": 8,
+        "ai_requests_month": 100,
+        "storage_mb": 3000,
+        "seats": 8,
+        "saved_searches": 5
+      },
+      "features": [
+        "catalog.search",
+        "match.explain",
+        "applications.assisted",
+        "documents.vault",
+        "evidence.post",
+        "professional.request",
+        "alerts.saved_search",
+        "opportunity.tracking"
+      ]
+    },
+    "company_plus": {
+      "role": "company",
+      "name": "Empresa Plus",
+      "tier": "plus",
+      "price_cents": null,
+      "interval": "month",
+      "prices": {
+        "month": null,
+        "year": null
+      },
+      "limits": {
+        "programs": 3,
+        "seats": 10,
+        "ai_requests_month": 150,
+        "storage_mb": 10000,
+        "saved_searches": 10
+      },
+      "features": [
+        "feed.projects",
+        "match.explain",
+        "portfolio.tracking",
+        "reports.basic",
+        "reports.advanced",
+        "alerts.saved_search"
+      ]
+    },
+    "gov_institutional": {
+      "role": "government",
+      "name": "Governo / Institucional",
+      "tier": "gov",
+      "price_cents": null,
+      "interval": "custom",
+      "public": true,
+      "prices": {},
+      "limits": {
+        "programs": null,
+        "seats": null,
+        "ai_requests_month": 1000,
+        "storage_mb": null
+      },
+      "features": [
+        "calls.publish",
+        "materials.publish",
+        "gov.data",
+        "reports.basic",
+        "reports.advanced",
+        "audit.export"
+      ]
+    }
+  },
+  "never_sellable": [
+    "provider_rank",
+    "provider_featured",
+    "provider_badge",
+    "match_boost",
+    "eligibility_override"
+  ],
+  "_note_tiers": "v0.11.0: cada plano tem tier (free|plus|premium|gov) e preços mensal/anual em `prices` (null = NÃO definido pelo proprietário; nunca inventado). A divisão de recursos entre PLUS e PREMIUM é HIPÓTESE de produto a validar. Trial de 14 dias libera o plano de tier premium do tipo da organização.",
+  "trial": {
+    "days": 14,
+    "plan_tier": "premium",
+    "auto_start": true,
+    "reminder_days": [
+      1,
+      7,
+      11,
+      13,
+      14
+    ],
+    "stripe_min_seconds": 172800
+  },
+  "price_versions": {
+    "_note": "Preço por plano, intervalo e moeda. O sincronizador cria uma VERSÃO nova quando o valor difere do vigente, fechando a vigência da anterior — o histórico nunca é sobrescrito. provider_price_id fica nulo até ser criado na conta do provedor; sem ele a plataforma recusa cobrar em vez de tentar com um valor inventado.",
+    "_rule": "v0.16.0: 14 dias de teste com o produto completo; US$ 1,99/mês nos 3 primeiros meses pagos; depois US$ 19,99/mês ou o anual equivalente a US$ 14,99/mês (US$ 179,88 à vista).",
+    "items": [
+      {
+        "applies_to_tier": "premium",
+        "interval": "month",
+        "currency": "USD",
+        "amount_cents": 1999,
+        "intro_amount_cents": 199,
+        "intro_periods": 3,
+        "trial_days": 14,
+        "tax_behavior": "exclusive",
+        "provider": "stripe",
+        "provider_price_id": null,
+        "provider_intro_price_id": null,
+        "reason": "Regra comercial v0.16.0: US$ 1,99/mês nos 3 primeiros meses pagos, depois US$ 19,99/mês."
+      },
+      {
+        "applies_to_tier": "premium",
+        "interval": "year",
+        "currency": "USD",
+        "amount_cents": 17988,
+        "intro_amount_cents": null,
+        "intro_periods": null,
+        "trial_days": 14,
+        "tax_behavior": "exclusive",
+        "provider": "stripe",
+        "provider_price_id": null,
+        "provider_intro_price_id": null,
+        "reason": "Regra comercial v0.16.0: anual equivalente a US$ 14,99/mês (12 x 14,99 = US$ 179,88 à vista)."
+      }
+    ]
+  }
 }

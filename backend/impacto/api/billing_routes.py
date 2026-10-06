@@ -7,7 +7,7 @@ import hmac
 from starlette.responses import JSONResponse
 
 from ..db.pool import DbContext
-from ..http import ApiError, Ctx, route
+from ..http import ApiError, Ctx, not_found, route
 from ..services import billing
 from . import schemas as S
 
@@ -24,16 +24,78 @@ def plans(ctx: Ctx):
         prices = {}
         for r in c.query("SELECT plan_key, interval, amount_cents FROM plan_prices WHERE active"):
             prices.setdefault(r["plan_key"], {})[r["interval"]] = r["amount_cents"]
+        # v0.16.0: a tabela de preços vigente, com moeda, preço de entrada, imposto e o TOTAL à vista. Cada plano
+        # carrega as duas leituras (mensal e anual) para que a tela compare sem fazer conta própria — conta feita no
+        # navegador é conta que divergirá do que será cobrado.
+        quotes = {}
+        for r in rows:
+            for iv in ("month", "year"):
+                q = mon.price_quote(c, r["plan_key"], iv)
+                if q:
+                    quotes.setdefault(r["plan_key"], {})[iv] = q
     for r in rows:
         r["available"] = not r["requires_flag"] or flags.get(r["requires_flag"], False)
         pr = dict(prices.get(r["plan_key"], {}))
+        pq = quotes.get(r["plan_key"], {})
+        for iv, q in pq.items():
+            pr[iv] = q["amount_cents"]          # a versão vigente manda sobre a tabela antiga
         if r["price_cents"] and r["interval"] in ("month", "year") and pr.get(r["interval"]) is None:
             pr[r["interval"]] = r["price_cents"]
         r["prices"] = pr
+        r["price_quotes"] = pq
+        r["currency"] = next((q["currency"] for q in pq.values()), "BRL")
         r["annual_savings"] = mon.annual_savings(pr.get("month"), pr.get("year"))
         r["tier_label"] = mon.TIER_LABEL.get(r["tier"], r["tier"])
     return {"items": rows, "billing_provider": ctx.app.billing.name, "billing_live": flags.get("billing_live", False),
-            "trial_days": ctx.settings.trial_days, "trial_auto_start": ctx.settings.trial_auto_start}
+            "trial_days": ctx.settings.trial_days, "trial_auto_start": ctx.settings.trial_auto_start,
+            "pricing_note": "Valores definidos no servidor, com vigência. Imposto e total aparecem antes do "
+                            "pagamento; o preço de entrada diz por quantos períodos vale e quanto passa a ser "
+                            "depois."}
+
+
+# A rota fica sob /v1/plans, não sob /v1/billing: tudo em /v1/billing exige autenticação (há um teste que verifica
+# isso desde a v0.11.0), e a TABELA DE PREÇOS é pública por natureza — é o que alguém lê antes de ter conta.
+@route("GET", "/v1/plans/price", query=S.PriceQ, auth="none", tags=T,
+       summary="Preço vigente de um plano: entrada, preço regular, equivalente mensal, total e imposto")
+def billing_price(ctx: Ctx, q: S.PriceQ):
+    """Preço calculado no SERVIDOR. O cliente informa plano e intervalo; valor, moeda e imposto vêm daqui."""
+    from ..services import monetization as mon
+    with ctx.pool.tx(DbContext(), readonly=True) as c:
+        out = mon.price_quote(c, q.plan_key, q.interval)
+    if not out:
+        raise ApiError(404, "price_not_defined",
+                       "Este plano não tem preço publicado para contratação online")
+    return out
+
+
+@route("GET", "/v1/billing/price-history", min_role="owner", tags=T,
+       summary="Histórico de preço da organização e avisos de reajuste recebidos")
+def billing_price_history(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return {
+            "accepted": c.query(
+                "SELECT plan_key, interval, currency, amount_cents, intro_amount_cents, intro_periods,"
+                " intro_periods_used, tax_behavior, accepted_at, ends_at FROM subscription_prices"
+                " WHERE org_id = $1 ORDER BY accepted_at DESC", ctx.org_id),
+            "notices": c.query(
+                "SELECT id::text AS id, from_amount_cents, to_amount_cents, currency, effective_at, notified_at,"
+                " channel, acknowledged_at, reason FROM price_change_notices WHERE org_id = $1"
+                " ORDER BY notified_at DESC", ctx.org_id),
+            "note": "O preço aceito fica congelado. Aumento exige aviso com 30 dias de antecedência, registrado "
+                    "aqui — o banco recusa aplicar sem ele.",
+        }
+
+
+@route("POST", "/v1/billing/price-notices/{notice_id}/ack", min_role="owner", tags=T,
+       summary="Registra que a organização viu o aviso de reajuste")
+def ack_price_notice(ctx: Ctx):
+    nid = ctx.path["notice_id"]
+    with ctx.tx() as c:
+        n = c.run("UPDATE price_change_notices SET acknowledged_at = now(), acknowledged_by = $2"
+                  " WHERE id = $1 AND org_id = $3 AND acknowledged_at IS NULL", nid, ctx.user_id, ctx.org_id)
+    if not n:
+        raise not_found("Aviso de reajuste")
+    return {"id": nid, "acknowledged": True}
 
 
 @route("GET", "/v1/billing", min_role="viewer", tags=T, summary="Estado de cobrança da organização: plano, status, trial, próxima cobrança, avisos, faturas")

@@ -12,7 +12,7 @@ import unittest
 import urllib.parse
 import uuid
 
-from tests.support import PASSWORD, Client, db_system, last_token_for, make_admin, new_account, server
+from tests.support import PASSWORD, Client, db_system, last_token_for, make_admin, new_account, owner_conn, server
 
 PRICES = {"osc_premium": "price_prem_m", "osc_premium_year": "price_prem_y", "osc_plus": "price_plus_m", "osc_plus_year": "price_plus_y"}
 VALUES = {("osc_premium", "month"): 9900, ("osc_premium", "year"): 99000, ("osc_plus", "month"): 4900, ("osc_plus", "year"): 49000}
@@ -105,14 +105,30 @@ class Base(unittest.TestCase):
         server()
         cls.adm1, _ = make_admin()
         cls.adm2, _ = make_admin()
+        # A AUTORIDADE DE PREÇO MUDOU NA v0.16.0: `plan_price_versions` (com moeda e vigência) manda sobre
+        # `plan_prices`. Estes testes verificam o cálculo do servidor, o voucher e o fluxo do Stripe — não a regra
+        # comercial em dólar —, então eles fecham a vigência das versões semeadas e publicam as suas próprias, em
+        # BRL e sem promoção de entrada. É o mesmo caminho que o proprietário usa para definir preço.
         with db_system() as d:
             for (pk, iv), v in VALUES.items():
                 d.run("INSERT INTO plan_prices(plan_key, interval, amount_cents) VALUES ($1,$2,$3) ON CONFLICT (plan_key, interval) DO UPDATE SET amount_cents = EXCLUDED.amount_cents", pk, iv, v)
+        oc = owner_conn()
+        oc.run("UPDATE plan_price_versions SET effective_until = now() WHERE plan_key = ANY($1::text[])"
+               " AND effective_until IS NULL", [pk for pk, _ in VALUES])
+        for (pk, iv), v in VALUES.items():
+            oc.run("INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, trial_days,"
+                   " tax_behavior, provider, provider_price_id, reason)"
+                   " VALUES ($1,$2,'BRL',$3,14,'inclusive','stripe','price_teste_' || $1 || '_' || $2,"
+                   " 'preço do cenário de teste da v0.11.0 (sem promoção de entrada)')", pk, iv, v)
 
     @classmethod
     def tearDownClass(cls):
         with db_system() as d:
             d.run("UPDATE plan_prices SET amount_cents = NULL WHERE plan_key IN ('osc_premium','osc_plus')")
+        oc = owner_conn()
+        oc.run("DELETE FROM plan_price_versions WHERE reason LIKE 'preço do cenário de teste%'")
+        oc.run("UPDATE plan_price_versions SET effective_until = NULL WHERE plan_key = ANY($1::text[])"
+               " AND effective_until IS NOT NULL AND currency = 'USD'", [pk for pk, _ in VALUES])
 
     def license(self, org_id: str, plan_key: str, days=30, source="license"):
         r = self.adm1.post(f"/v1/admin/organizations/{org_id}/grants", {"plan_key": plan_key, "days": days, "source": source, "reason": "teste de licença"})

@@ -98,13 +98,94 @@ def notify_once(c, org_id: str, kind: str, ref: str, title: str, body: str, link
 
 
 # ------------------------------------------------------------------------------------------------ preço e desconto (servidor é a autoridade)
-def price_for(c, plan: dict, interval: str) -> int | None:
+#: Moeda padrão da tabela de preços. Vive aqui porque é decisão de produto, não de cada chamada — e porque o cliente
+#: NUNCA escolhe a moeda da cobrança: escolher moeda é escolher preço.
+DEFAULT_CURRENCY = "USD"
+
+
+def price_version(c, plan_key: str, interval: str, currency: str = DEFAULT_CURRENCY) -> dict | None:
+    """Versão de preço VIGENTE (v0.16.0). A autoridade é `plan_price_versions`, com vigência e moeda.
+
+    Precedência, do mais específico ao mais antigo:
+      1. `plan_price_versions` vigente agora — tem moeda, preço de entrada, imposto e identificador no provedor;
+      2. `plan_prices` (v0.11.0) — sem moeda e sem vigência, mantida para não quebrar instalação que a preencheu;
+      3. `plans.price_cents` — legado da v0.10.0.
+    A ordem é deliberada: quem configurou a tabela nova manda. Devolver `None` significa "sem preço definido", e o
+    checkout recusa com mensagem explícita em vez de inventar valor.
+    """
+    r = c.one("SELECT id::text AS id, plan_key, interval, currency, amount_cents, intro_amount_cents,"
+              " intro_periods, trial_days, tax_behavior, provider, provider_price_id, provider_intro_price_id,"
+              " effective_from, reason FROM price_current($1,$2,$3)", plan_key, interval, currency)
+    return r if r and r["amount_cents"] is not None else None
+
+
+def price_for(c, plan: dict, interval: str, currency: str = DEFAULT_CURRENCY) -> int | None:
+    """Valor REGULAR, em centavos. O preço de entrada não entra aqui — ver `price_quote`."""
+    v = price_version(c, plan["plan_key"], interval, currency)
+    if v:
+        return int(v["amount_cents"])
     r = c.one("SELECT amount_cents FROM plan_prices WHERE plan_key = $1 AND interval = $2 AND active", plan["plan_key"], interval)
     if r and r["amount_cents"] is not None:
         return int(r["amount_cents"])
     if plan.get("price_cents") and plan.get("interval") == interval:      # legado (plans.price_cents)
         return int(plan["price_cents"])
     return None
+
+
+def monthly_equivalent(amount_cents: int, interval: str) -> int:
+    """Quanto dá por mês. Para anual, é o valor dividido por 12 — e o TOTAL continua sendo mostrado ao lado.
+
+    Mostrar só o equivalente mensal de um plano anual é o padrão escuro clássico ("US$ 14,99/mês" cobrando
+    US$ 179,88 de uma vez). A plataforma mostra os dois, sempre, e esta função existe para que o número de cima seja
+    calculado e não escrito à mão.
+    """
+    return round(amount_cents / 12) if interval == "year" else amount_cents
+
+
+def price_quote(c, plan_key: str, interval: str, currency: str = DEFAULT_CURRENCY) -> dict | None:
+    """O que a pessoa vai pagar, em palavras completas: entrada, quando muda, e o preço depois.
+
+    Esta é a função que a tela de preço e o checkout usam. Ela devolve TUDO o que precisa estar escrito antes de
+    alguém pagar — porque "não é padrão escuro se está escrito antes de pagar" só vale se estiver, de fato, escrito.
+    """
+    v = price_version(c, plan_key, interval, currency)
+    if not v:
+        return None
+    regular = int(v["amount_cents"])
+    intro = v["intro_amount_cents"]
+    periods = v["intro_periods"]
+    unit = "mês" if interval == "month" else "ano"
+    out = {
+        "price_version_id": v["id"], "currency": v["currency"], "interval": interval,
+        "amount_cents": regular, "monthly_equivalent_cents": monthly_equivalent(regular, interval),
+        "tax_behavior": v["tax_behavior"],
+        "tax_note": {"inclusive": "Imposto incluído no valor.",
+                     "exclusive": "Imposto calculado no fechamento, conforme o seu país.",
+                     "unspecified": "Imposto não declarado nesta tabela."}[v["tax_behavior"]],
+        "trial_days": v["trial_days"],
+        "provider_configured": bool(v["provider_price_id"]),
+        "intro": None,
+        "total_note": (f"Total de {_money(regular, v['currency'])} por ano."
+                       if interval == "year" else f"{_money(regular, v['currency'])} por mês."),
+    }
+    if intro is not None and periods:
+        out["intro"] = {
+            "amount_cents": int(intro), "periods": int(periods),
+            "then_amount_cents": regular,
+            "summary": (f"{_money(int(intro), v['currency'])} por {unit} nos primeiros {periods} "
+                        f"{'meses' if interval == 'month' else 'anos'} pagos, "
+                        f"depois {_money(regular, v['currency'])} por {unit}."),
+            "total_intro_cents": int(intro) * int(periods),
+        }
+    return out
+
+
+def _money(cents: int, currency: str) -> str:
+    """Valor legível. Separador por moeda; nada de formatar dólar com vírgula de real."""
+    if currency == "BRL":
+        return "R$ " + f"{cents / 100:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    sym = {"USD": "US$ ", "EUR": "€ "}.get(currency, currency + " ")
+    return sym + f"{cents / 100:,.2f}"
 
 
 def annual_savings(monthly: int | None, yearly: int | None) -> dict | None:
@@ -157,11 +238,26 @@ def quote(c, *, org_id: str, org_kind: str, plan_key: str, interval: str | None,
     if plan["requires_flag"] and not c.scalar("SELECT enabled FROM feature_flags WHERE key = $1", plan["requires_flag"]):
         raise ApiError(409, "plan_not_available", "Plano ainda não disponível para contratação")
     interval = interval or (plan["interval"] if plan["interval"] in ("month", "year") else "month")
-    base = price_for(c, plan, interval)
+    pq = price_quote(c, plan_key, interval)
+    base = int(pq["amount_cents"]) if pq else price_for(c, plan, interval)
     if base is None:
         raise ApiError(409, "price_not_defined", "Preço ainda não definido para contratação online — solicite proposta comercial ou use um voucher")
+    # PREÇO DE ENTRADA E VOUCHER NÃO EMPILHAM — quem paga leva o melhor dos dois.
+    #
+    # A decisão apareceu num teste antigo que falhou: com a promoção de entrada, um voucher de 20% passou a valer
+    # 20% de US$ 1,99 (US$ 0,40) em vez de 20% de US$ 19,99 (US$ 4,00). Quem usa o código espera o desconto sobre o
+    # preço do plano, não sobre uma promoção que já está ali. Empilhar os dois também não serve: daria desconto
+    # sobre desconto, e a conta deixaria de ser explicável.
+    #
+    # A regra é: calcula-se o desconto sobre o preço REGULAR e cobra-se o MENOR entre esse valor e o preço de
+    # entrada. Nunca é pior para quem paga do que qualquer das duas opções isoladas, e cabe numa frase na tela.
     disc = best_discount(c, org_id, plan_key, base)
-    final = max(0, base - (disc["discount_cents"] if disc else 0))
+    discounted = max(0, base - (disc["discount_cents"] if disc else 0))
+    intro_cents = int(pq["intro"]["amount_cents"]) if (pq and pq["intro"]) else None
+    if intro_cents is not None and intro_cents < discounted:
+        final, applied = intro_cents, "intro"
+    else:
+        final, applied = discounted, ("voucher" if disc else "regular")
     now = _now(c)
     trial = c.one("SELECT * FROM org_trials WHERE org_id = $1", org_id)
     tv = trial_view(trial, now)
@@ -174,10 +270,25 @@ def quote(c, *, org_id: str, org_kind: str, plan_key: str, interval: str | None,
     other = "year" if interval == "month" else "month"
     other_price = price_for(c, plan, other)
     sav = annual_savings(base if interval == "month" else other_price, other_price if interval == "month" else base)
-    return {"plan_key": plan_key, "plan_name": plan["name"], "tier": plan["tier"], "interval": interval, "currency": "BRL",
-            "base_cents": base, "discount": disc, "final_cents": final, "first_charge_at": first, "charge_now": not (tv and tv["active"]),
-            "trial": tv, "annual_savings": sav,
-            "note": "Valor calculado no servidor. Com período de teste ativo, a primeira cobrança só ocorre após o fim do teste."}
+    currency = pq["currency"] if pq else "BRL"
+    note = ("Valor calculado no servidor. Com período de teste ativo, a primeira cobrança só ocorre após o fim do "
+            "teste.")
+    if pq and pq["intro"]:
+        note += " " + pq["intro"]["summary"]
+    if intro_cents is not None and disc:
+        note += (" Promoção de entrada e código de desconto não se somam: aplicamos o mais vantajoso para você"
+                 f" ({'promoção de entrada' if applied == 'intro' else 'código de desconto'}).")
+    return {"plan_key": plan_key, "plan_name": plan["name"], "tier": plan["tier"], "interval": interval,
+            "currency": currency,
+            # `base_cents` é o preço REGULAR; `first_cents` é o que sai na primeira fatura. Separar os dois é o que
+            # impede a tela de dizer "US$ 1,99" e a cobrança seguinte surpreender.
+            "base_cents": base, "first_cents": final, "discount": disc, "final_cents": final,
+            "first_price_source": applied, "intro_cents": intro_cents, "discounted_cents": discounted,
+            "first_charge_at": first, "charge_now": not (tv and tv["active"]),
+            "trial": tv, "annual_savings": sav, "price": pq,
+            "tax_behavior": pq["tax_behavior"] if pq else "unspecified",
+            "provider_configured": bool(pq and pq["provider_configured"]),
+            "note": note}
 
 
 # ------------------------------------------------------------------------------------------------ vouchers (validação compartilhada)

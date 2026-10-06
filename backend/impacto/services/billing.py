@@ -30,6 +30,7 @@ logger = logging.getLogger("impacto.billing")
 
 class NoBilling:
     name = "none"
+    needs_price_id = False   # não cobra nada, então não há preço a publicar
 
     def create_checkout(self, **kw):
         raise ApiError(503, "billing_not_configured", "Cobrança online ainda não configurada nesta instalação. "
@@ -50,6 +51,7 @@ class NoBilling:
 
 class SandboxBilling:
     name = "sandbox"
+    needs_price_id = False   # ativa na hora, sem provedor externo: nada a publicar
 
     def create_checkout(self, *, org_id, plan_key, price_id=None, success_url=None, cancel_url=None, customer_email=None, **kw):
         return {"mode": "sandbox", "activate_now": True, "checkout_id": "sbx_" + hashlib.sha256(f"{org_id}{plan_key}{time.time()}".encode()).hexdigest()[:20]}
@@ -82,6 +84,7 @@ def stripe_signature_valid(payload: bytes, header: str, secret: str, tolerance: 
 
 class StripeBilling:
     name = "stripe"
+    needs_price_id = True   # o Checkout exige um `price` existente na conta
     API = "https://api.stripe.com/v1"
 
     def __init__(self, secret_key: str, webhook_secret: str, http: HttpClient | None = None):
@@ -159,8 +162,22 @@ def make_billing_provider(settings):
     return NoBilling()
 
 
-def price_ref(settings, plan_key: str, interval: str) -> str | None:
-    """ID de preço do provedor configurado por variável de ambiente (STRIPE_PRICE_<PLAN>[_YEAR|_MONTH]); nunca embutido no código."""
+def price_ref(settings, plan_key: str, interval: str, *, conn=None) -> str | None:
+    """Identificador do preço NO PROVEDOR. Nunca embutido no código, e nunca inventado.
+
+    Duas fontes, nesta ordem:
+      1. `plan_price_versions.provider_price_id` da versão vigente (v0.16.0) — fica junto do preço que ele
+         representa, o que impede a combinação errada "preço novo, identificador do antigo";
+      2. variável de ambiente `STRIPE_PRICE_<PLAN>[_MONTH|_YEAR]` (v0.11.0), mantida para instalação já configurada.
+
+    Devolver `None` é resposta legítima e significa "não configurado". Quem chama precisa recusar a cobrança com
+    mensagem clara, e é o que `checkout` faz — tentar com um valor inventado produziria erro do provedor em
+    produção, no pior momento possível.
+    """
+    if conn is not None:
+        v = mon.price_version(conn, plan_key, interval)
+        if v and v["provider_price_id"]:
+            return str(v["provider_price_id"])
     p = settings.stripe_prices
     return p.get(f"{plan_key}_{interval}") or (p.get(plan_key) if interval == "month" else None)
 
@@ -176,6 +193,31 @@ def _live_sub(c, org_id: str):
 def _audit(ctx: Ctx, c, action: str, obj_type: str, obj_id, payload: dict) -> None:
     from .audit import record
     record(c, org_id=ctx.org_id, actor=ctx.user_id, action=action, object_type=obj_type, object_id=obj_id, payload=payload, ip=ctx.ip, request_id=ctx.request_id)
+
+
+def record_accepted_price(c, *, org_id: str, subscription_id: str | None, quote: dict,
+                          accepted_by: str | None) -> str | None:
+    """Congela o preço que a organização aceitou.
+
+    POR QUE CONGELAR: sem isto, um reajuste reescreveria retroativamente aquilo com que cada organização concordou,
+    e "quanto esta organização contratou em março?" deixaria de ter resposta. `price_apply_guard()` no banco ainda
+    recusa um aumento sem aviso prévio registrado — esta função é o lado honesto do mesmo par: ela grava O QUE foi
+    aceito, no momento em que foi aceito.
+
+    Devolve `None` quando não há versão de preço (instalação ainda na tabela antiga): a cobrança segue funcionando,
+    só não há o que congelar.
+    """
+    pq = quote.get("price")
+    if not pq:
+        return None
+    c.run("UPDATE subscription_prices SET ends_at = now() WHERE org_id = $1 AND ends_at IS NULL", org_id)
+    return c.scalar(
+        "INSERT INTO subscription_prices(org_id, subscription_id, price_version_id, plan_key, interval, currency,"
+        " amount_cents, intro_amount_cents, intro_periods, tax_behavior, accepted_by)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id::text",
+        org_id, subscription_id, pq["price_version_id"], quote["plan_key"], quote["interval"], pq["currency"],
+        pq["amount_cents"], (pq["intro"] or {}).get("amount_cents"), (pq["intro"] or {}).get("periods"),
+        pq["tax_behavior"], accepted_by)
 
 
 def checkout(ctx: Ctx, plan_key: str, interval: str | None = None, voucher: str | None = None) -> dict:
@@ -214,9 +256,20 @@ def checkout(ctx: Ctx, plan_key: str, interval: str | None = None, voucher: str 
             _audit(ctx, c, "voucher.redeemed", "voucher", v["id"], {"type": v["type"], "at": "checkout"})
     with ctx.system_tx() as c:
         q = mon.quote(c, org_id=ctx.org_id, org_kind=p.org_kind, plan_key=plan_key, interval=interval)
+        pid = price_ref(ctx.settings, plan_key, q["interval"], conn=c)
+    if q.get("price") and not pid and ctx.app.billing.needs_price_id:
+        # Preço definido na tabela, mas sem identificador no provedor. Dizer isso é melhor do que tentar e receber
+        # um erro opaco do Stripe: o problema é de configuração da conta, e a mensagem precisa apontar para lá.
+        #
+        # A checagem é CONDICIONADA ao provedor: o provedor de teste (sandbox) não publica preço nenhum, e a minha
+        # primeira versão desta trava recusava a contratação até nele — o que quebrou o fluxo de desenvolvimento e
+        # de demonstração inteiro. Quem precisa do identificador é quem cobra de verdade.
+        raise ApiError(503, "provider_price_missing",
+                       "Este preço ainda não está publicado no provedor de pagamento. A contratação online será "
+                       "liberada assim que a configuração for concluída.")
     base = ctx.settings.public_base_url
     trial_end = q["first_charge_at"] if not q["charge_now"] else None
-    res = ctx.app.billing.create_checkout(org_id=ctx.org_id, plan_key=plan_key, interval=q["interval"], price_id=price_ref(ctx.settings, plan_key, q["interval"]),
+    res = ctx.app.billing.create_checkout(org_id=ctx.org_id, plan_key=plan_key, interval=q["interval"], price_id=pid,
                                           success_url=f"{base}/conta/plano?status=sucesso", cancel_url=f"{base}/conta/plano?status=cancelado",
                                           customer_email=p.email, trial_end=trial_end, discount=q["discount"])
     with ctx.system_tx() as c:
@@ -240,12 +293,15 @@ def checkout(ctx: Ctx, plan_key: str, interval: str | None = None, voucher: str 
                            Json(disc) if disc else None, trial_end)
             if disc and disc.get("redemption_id"):
                 c.run("UPDATE voucher_redemptions SET status = 'consumed', consumed_by_subscription = $2 WHERE id = $1", disc["redemption_id"], sid)
+            record_accepted_price(c, org_id=ctx.org_id, subscription_id=sid, quote=q, accepted_by=ctx.user_id)
             res["subscription_id"] = sid
             res["warning"] = "Assinatura SANDBOX: nenhuma cobrança real foi feita."
         else:
-            c.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, provider_checkout_id, interval, amount_cents, discount, trial_end)"
-                  " VALUES ($1,$2,'incomplete',$3,$4,$5,$6,$7::jsonb,$8::timestamptz)",
-                  ctx.org_id, plan_key, ctx.app.billing.name, res["checkout_id"], q["interval"], q["final_cents"], Json(disc) if disc else None, trial_end)
+            isid = c.scalar("INSERT INTO subscriptions(org_id, plan_key, status, provider, provider_checkout_id, interval, amount_cents, discount, trial_end)"
+                            " VALUES ($1,$2,'incomplete',$3,$4,$5,$6,$7::jsonb,$8::timestamptz) RETURNING id::text",
+                            ctx.org_id, plan_key, ctx.app.billing.name, res["checkout_id"], q["interval"], q["final_cents"], Json(disc) if disc else None, trial_end)
+            # O preço é congelado já na ida ao provedor: é o valor que a pessoa viu na tela antes de clicar.
+            record_accepted_price(c, org_id=ctx.org_id, subscription_id=isid, quote=q, accepted_by=ctx.user_id)
         _audit(ctx, c, "billing.checkout_started", "plan", plan_key,
                {"provider": ctx.app.billing.name, "interval": q["interval"], "final_cents": q["final_cents"], "trial": bool(trial_end)})
     res["quote"] = q
@@ -316,7 +372,9 @@ def change_plan(ctx: Ctx, plan_key: str, interval: str | None) -> dict:
         q = mon.quote(c, org_id=ctx.org_id, org_kind=ctx.principal.org_kind, plan_key=plan_key, interval=interval)
     if sub["plan_key"] == plan_key and (sub.get("interval") or q["interval"]) == q["interval"]:
         raise ApiError(409, "same_plan", "Esta já é a sua assinatura atual")
-    ctx.app.billing.change_plan(sub, price_id=price_ref(ctx.settings, plan_key, q["interval"]), plan_key=plan_key, interval=q["interval"])
+    with ctx.system_tx() as c:
+        pid = price_ref(ctx.settings, plan_key, q["interval"], conn=c)
+    ctx.app.billing.change_plan(sub, price_id=pid, plan_key=plan_key, interval=q["interval"])
     with ctx.system_tx() as c:
         c.run("UPDATE subscriptions SET plan_key = $2, interval = $3, amount_cents = $4, updated_at = now() WHERE id = $1", sub["id"], plan_key, q["interval"], q["final_cents"])
         _audit(ctx, c, "billing.plan_changed", "subscription", sub["id"], {"from": sub["plan_key"], "to": plan_key, "interval": q["interval"]})
@@ -429,6 +487,12 @@ def process_event(app_state, provider: str, event: dict) -> tuple[int, dict]:
                 org = str(sub["org_id"])
                 if etype == "invoice.paid":
                     c.run("UPDATE subscriptions SET payment_issue = NULL, status = CASE WHEN status IN ('past_due','incomplete') THEN 'active' ELSE status END, updated_at = now() WHERE id = $1", sub["id"])
+                    # Cada fatura paga consome um período de ENTRADA, até acabarem. O limite é um CHECK da tabela
+                    # (`intro_used_within`), então nem um webhook reprocessado passa do número contratado — e o
+                    # `least(...)` evita que a corrida entre dois eventos estoure a restrição.
+                    c.run("UPDATE subscription_prices SET intro_periods_used = least(intro_periods_used + 1,"
+                          " intro_periods) WHERE org_id = $1 AND ends_at IS NULL AND intro_periods IS NOT NULL"
+                          " AND intro_periods_used < intro_periods", sub["org_id"])
                     if int(obj.get("amount_paid") or 0) > 0:     # 1º pagamento confirmado (notify_once evita repetir nas renovações)
                         c.run("UPDATE org_trials SET status = 'converted', updated_at = now() WHERE org_id = $1 AND status IN ('active','canceled')", sub["org_id"])
                         mon.notify_once(c, org, "plan_activated", str(sub["id"]), "Seu plano foi ativado", "O pagamento foi confirmado. Obrigado!")

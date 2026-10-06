@@ -92,7 +92,9 @@ class ArchitectureTests(unittest.TestCase):
                            "/v1/marketplace/feed", "/v1/marketplace/listings/{listing_id}",
                            "/v1/public/profiles/{handle}", "/v1/public/profiles/{handle}/open-graph",
                            "/v1/public/relationships/{subject_type}/{subject_id}",
-                           "/v1/public/projects/{project_id}/impact"}
+                           "/v1/public/projects/{project_id}/impact",
+                           # tabela de preços: é pública por natureza, e o valor vem do servidor (nunca do cliente)
+                           "/v1/plans/price"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):

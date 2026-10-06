@@ -1,9 +1,9 @@
 {
   "version": "0.21.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-06T22:00:27+00:00",
-  "files_total": 1148,
-  "size_bytes_total": 23132407,
+  "generated_at": "2026-10-06T22:47:28+00:00",
+  "files_total": 1151,
+  "size_bytes_total": 23181095,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 57,
@@ -18,8 +18,8 @@
       "size_bytes": 35808
     },
     "banco: migração": {
-      "files": 44,
-      "size_bytes": 1052409
+      "files": 45,
+      "size_bytes": 1064897
     },
     "confiança e assinatura": {
       "files": 11,
@@ -30,8 +30,8 @@
       "size_bytes": 197882
     },
     "documentação da raiz": {
-      "files": 138,
-      "size_bytes": 1410152
+      "files": 139,
+      "size_bytes": 1418347
     },
     "documentação técnica": {
       "files": 26,
@@ -55,11 +55,11 @@
     },
     "frontend: build": {
       "files": 17,
-      "size_bytes": 1228469
+      "size_bytes": 1229909
     },
     "frontend: código": {
       "files": 50,
-      "size_bytes": 905053
+      "size_bytes": 909648
     },
     "frontend: estático": {
       "files": 12,
@@ -83,7 +83,7 @@
     },
     "manifesto de versão anterior": {
       "files": 11,
-      "size_bytes": 1449113
+      "size_bytes": 1454840
     },
     "mobile": {
       "files": 8,
@@ -114,8 +114,8 @@
       "size_bytes": 430376
     },
     "teste": {
-      "files": 82,
-      "size_bytes": 1605437
+      "files": 83,
+      "size_bytes": 1621680
     }
   },
   "files": [
@@ -259,8 +259,8 @@
     },
     {
       "file": "DECISIONS.md",
-      "sha256": "45aed2c38dc9f86ef8a3f3564bb6d119dfb2713ffd58663977aa4adcb4eaf57c",
-      "size_bytes": 87168,
+      "sha256": "a7e258e50f2de36aec1eb5e5df43925428d85422a460bc0786ff8ccd4c308c35",
+      "size_bytes": 88951,
       "category": "documentação da raiz"
     },
     {
@@ -373,8 +373,8 @@
     },
     {
       "file": "FINAL_MONETIZATION_RELEASE_MANIFEST.json",
-      "sha256": "ebcead3380e5c04b1f4adb556033abde3e642086ed4a005c28890ca3e067cc72",
-      "size_bytes": 13575,
+      "sha256": "9f6831afab251fe103474aa9453372bf12d60200d26c99e1965d62ab16357b95",
+      "size_bytes": 19302,
       "category": "manifesto de versão anterior"
     },
     {
@@ -729,6 +729,12 @@
       "file": "PRIVACY_VISIBILITY_MATRIX.md",
       "sha256": "e209dea3b3acac3e013345b0a62bc1419cc427492e7e7686a5a09ccabfeb3e2a",
       "size_bytes": 6453,
+      "category": "documentação da raiz"
+    },
+    {
+      "file": "PROCESS_FLOWS.md",
+      "sha256": "b47def28a3c1ce882379456dc676fbff2480abe9dfd038bc66d062049ebf1bba",
+      "size_bytes": 6412,
       "category": "documentação da raiz"
     },
     {
@@ -2646,6 +2652,12 @@
       "category": "banco: migração"
     },
     {
+      "file": "backend/migrations/0045_v0210_gov_templates.sql",
+      "sha256": "bf4ef36184e75927ac3e2a6386793f0b473321a063fefe10c4b0ac0e59520119",
+      "size_bytes": 12488,
+      "category": "banco: migração"
+    },
+    {
       "file": "backend/pyproject.toml",
       "sha256": "03136db52d2170c477fe5d31df47194b583ddbf0e51a5ef9e65e79588af8fde5",
       "size_bytes": 655,
@@ -2833,8 +2845,8 @@
     },
     {
       "file": "backend/tests/test_v0120_hardening.py",
-      "sha256": "848c9c14a42d355cdd1dbed83097646fe4eccd8f5dc1b84bb508f67b1b870c13",
-      "size_bytes": 30293,
+      "sha256": "9af676bb030304385901bff41a2063c6371e1f31b7475df1fc5794b24c43f2bb",
+      "size_bytes": 31249,
       "category": "teste"
     },
     {
@@ -2881,8 +2893,8 @@
     },
     {
       "file": "backend/tests/test_v0150_upgrade.py",
-      "sha256": "179cd80a1aa22924ee220aace31c625d8384215e142b9f8034d7eb00ee9a4972",
-      "size_bytes": 17857,
+      "sha256": "20fe2dc201f5fda2c894388bf21145050eea0bb635cfd35bd72fc3387971158c",
+      "size_bytes": 18651,
       "category": "teste"
     },
     {
@@ -3067,8 +3079,8 @@
     },
     {
       "file": "backend/tests/test_v0200_adversarial.py",
-      "sha256": "2aaf28d0583bb8ce982c1be70694d8d49d259748d7855910705fec8944dbcf40",
-      "size_bytes": 34643,
+      "sha256": "c2770251ba4e459616635ab596c0225a969a9c779f062a9097db35614f1bc61d",
+      "size_bytes": 36243,
       "category": "teste"
     },
     {
@@ -3129,6 +3141,12 @@
       "file": "backend/tests/test_v0210_commercial_ui.py",
       "sha256": "dee07a65b287dc4045117e4e2bb46820e624e5a079b4b9736b26e25b436454f7",
       "size_bytes": 9770,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0210_flows.py",
+      "sha256": "fd797d62b778d4e70deafd448f62f1ebd5d3f0937ce8c88580b8abf34ccf7a6b",
+      "size_bytes": 12893,
       "category": "teste"
     },
     {
@@ -6486,9 +6504,9 @@
       "category": "frontend"
     },
     {
-      "file": "web/dist/assets/app-4ENVGMBI.js",
-      "sha256": "18c236b5703a20831688c1e8cc8589cb5eb3ba577ec629fa00fcafd3ac320880",
-      "size_bytes": 910020,
+      "file": "web/dist/assets/app-4PRGQNPP.js",
+      "sha256": "ee28460093917036e424582de9a024eb22763606df14b0a2eeb7dfbd82ee2341",
+      "size_bytes": 911460,
       "category": "frontend: build"
     },
     {
@@ -6499,7 +6517,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "26f6ad9c420ab7f2a124d73726a3a6cf9d95087dd371242166e4b0deff97a8b9",
+      "sha256": "55a1cac783309f6935b9f057dc60bc9c58f97540ee2d7ad940dbfe9265c81270",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -6559,7 +6577,7 @@
     },
     {
       "file": "web/dist/index.html",
-      "sha256": "50128d4d9c5f8174c207726ec6d060cc6b790e1aa04198c7c623bcf32ce8d23d",
+      "sha256": "31a7210ae2760a4d9b5e8171ba45120bc6d1490477702f8611c661fc7fa824a2",
       "size_bytes": 982,
       "category": "frontend: build"
     },
@@ -6583,7 +6601,7 @@
     },
     {
       "file": "web/dist/sw.js",
-      "sha256": "701b99d695f6e1d45708d727fa1d9eb318f347bf9bb39db9ab2a8d39fdfd44be",
+      "sha256": "c7473c3b08d44a0a2862a48adb6a4a92d450ce2e064986d71ac979b023a7692b",
       "size_bytes": 1694,
       "category": "frontend: build"
     },
@@ -6679,8 +6697,8 @@
     },
     {
       "file": "web/src/app.tsx",
-      "sha256": "f3a48285938deb1200919f6ff3cafa1df5bceacf5b5e424b8260989f22f28399",
-      "size_bytes": 26809,
+      "sha256": "f7e5c4396231af76a225e84c9bb4202c4bf7fce1ae967a5a3ad78ced7ecfed95",
+      "size_bytes": 27111,
       "category": "frontend: código"
     },
     {
@@ -6733,8 +6751,8 @@
     },
     {
       "file": "web/src/pages/core.tsx",
-      "sha256": "f059b7b4df7ae857de7a69f48bed1621ef47c488e12d66371f26e6f2d1093005",
-      "size_bytes": 51612,
+      "sha256": "202afa7a77ba7ba0b4e69a83c424e19a89b3a72f8ff4000ce89cee67f54d43ee",
+      "size_bytes": 52677,
       "category": "frontend: código"
     },
     {
@@ -6763,8 +6781,8 @@
     },
     {
       "file": "web/src/pages/help.tsx",
-      "sha256": "68e36e7f5f0de90ec834786319d8662ae3a83bde445907885069e457b8665c0a",
-      "size_bytes": 62160,
+      "sha256": "b432556552e88767b1a308206a32f5f77a893c5d558dfc16d7818bb2edbac6bd",
+      "size_bytes": 62502,
       "category": "frontend: código"
     },
     {
@@ -6925,8 +6943,8 @@
     },
     {
       "file": "web/src/pages/workspace.tsx",
-      "sha256": "9939f8775d458c235ffbab4bc1a6e0843c72213cf5c4ee62c337460e1a91fd76",
-      "size_bytes": 22237,
+      "sha256": "8026bc47537fb0dfd609556f78480325d44c11bb1442c5d746dade9d5a758735",
+      "size_bytes": 23432,
       "category": "frontend: código"
     },
     {
@@ -6967,8 +6985,8 @@
     },
     {
       "file": "web/src/ui/trail.tsx",
-      "sha256": "3e60c87517019a8786592e292d216d0eec6fadfcdf76a749a6c899820d9fbbe7",
-      "size_bytes": 5380,
+      "sha256": "b800aaafc2fdee6493006b510251734450562f17cf96f1361e53dfecb49c6b1b",
+      "size_bytes": 7071,
       "category": "frontend: código"
     },
     {

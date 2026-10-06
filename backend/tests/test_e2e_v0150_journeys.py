@@ -284,7 +284,8 @@ class J5LongitudinalTracking(Journey):
         cat = self.osc.get("/v1/indicators/catalog?limit=5").json["items"]
         if cat:
             ind = self.osc.post(f"/v1/projects/{pid}/indicators",
-                                {"indicator_id": cat[0]["id"], "baseline": 10, "target": 40})
+                                {"indicator_id": cat[0]["id"], "baseline": 10,
+                                 "baseline_source": "Levantamento inicial da própria organização", "target": 40})
             self.assertIn(ind.status, (200, 201), ind)
         b = self.osc.post(f"/v1/projects/{pid}/snapshots", {"label": "após estruturação"}).json
         self.assertNotEqual(a["state_sha256"], b["state_sha256"])

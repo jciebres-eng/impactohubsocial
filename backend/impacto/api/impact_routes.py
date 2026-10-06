@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 from ..db.pq import Json
-from ..http import ApiError, Ctx, not_found, page, route
+from ..http import ApiError, Ctx, not_found, page, route, unprocessable
 from ..services.audit import ledger
 from . import schemas as S
 
@@ -108,9 +108,15 @@ def add_project_indicator(ctx: Ctx, body: S.ProjectIndicatorIn):
             raise not_found("Indicador")
         if c.one("SELECT 1 FROM project_indicators WHERE project_id = $1 AND indicator_id = $2", p["id"], body.indicator_id):
             raise ApiError(409, "already_added", "Indicador já vinculado ao projeto")
-        piid = c.scalar("INSERT INTO project_indicators(project_id, org_id, indicator_id, baseline, target, target_date, method)"
-                        " VALUES ($1,$2,$3,$4::numeric,$5::numeric,$6::date,$7) RETURNING id::text", p["id"], ctx.org_id, body.indicator_id,
-                        body.baseline, body.target, body.target_date, body.method)
+        if body.baseline is not None and not body.baseline_source:
+            raise unprocessable("Linha de base exige fonte declarada: número de partida sem fonte é"
+                                " número inventado, e o projeto inteiro passa a medir contra ele.",
+                                code="baseline_source_required")
+        piid = c.scalar("INSERT INTO project_indicators(project_id, org_id, indicator_id, baseline, baseline_source,"
+                        " baseline_date, target, target_date, method)"
+                        " VALUES ($1,$2,$3,$4::numeric,$5,$6::date,$7::numeric,$8::date,$9) RETURNING id::text",
+                        p["id"], ctx.org_id, body.indicator_id, body.baseline, body.baseline_source,
+                        body.baseline_date, body.target, body.target_date, body.method)
         ctx.audit(c, "project.indicator_added", "project_indicator", piid)
     return {"id": piid}
 

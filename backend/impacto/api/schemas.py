@@ -530,6 +530,10 @@ class IndicatorCatalogIn(In):
 class ProjectIndicatorIn(In):
     indicator_id: Uuid
     baseline: Annotated[float | None, Field(ge=-1e12, le=1e12)] = None
+    #: Obrigatória quando há linha de base (gatilho na 0025). Número de partida sem fonte é número
+    #: inventado, e o projeto inteiro passa a medir o progresso contra ele.
+    baseline_source: Annotated[str | None, Field(min_length=3, max_length=300)] = None
+    baseline_date: date | None = None
     target: Annotated[float | None, Field(ge=-1e12, le=1e12)] = None
     target_date: date | None = None
     method: Annotated[str | None, Field(max_length=1000)] = None

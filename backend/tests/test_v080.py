@@ -93,7 +93,7 @@ class ImpactTests(unittest.TestCase):
         cat = self.osc.get("/v1/indicators/catalog?ods=4").json["items"]
         ind = next(i for i in cat if i["code"] == "trained_people")
         self.assertEqual(ind["origin"], "platform")
-        pi = self.osc.post(f"/v1/projects/{self.pid}/indicators", {"indicator_id": ind["id"], "baseline": 0, "target": 40, "method": "Lista de presença"}).json["id"]
+        pi = self.osc.post(f"/v1/projects/{self.pid}/indicators", {"indicator_id": ind["id"], "baseline": 0, "baseline_source": "Lista de presença do primeiro encontro", "target": 40, "method": "Lista de presença"}).json["id"]
         self.assertEqual(self.osc.post(f"/v1/projects/{self.pid}/indicators", {"indicator_id": ind["id"]}).status, 409)
         ev = self.osc.post(f"/v1/projects/{self.pid}/evidences", {"kind": "attendance", "title": "Lista de presença turma A"}).json["id"]
         v = self.osc.post(f"/v1/project-indicators/{pi}/values", {"value": 20, "measured_on": date.today().isoformat(), "evidence_id": ev})

@@ -113,6 +113,73 @@ class ArchitectureTests(unittest.TestCase):
             if r.path.startswith("/v1/admin/"):
                 self.assertEqual(r.auth, "admin", r.path)
 
+    def test_every_declared_engine_resolves_to_real_code(self):
+        """O registro de motores é declaração; este teste é o que a torna verificável."""
+        from impacto.engines.registry import ENGINES, KINDS, resolve
+        self.assertGreater(len(ENGINES), 20)
+        keys = [e.key for e in ENGINES]
+        self.assertEqual(len(keys), len(set(keys)), "chave de motor duplicada")
+        for e in ENGINES:
+            self.assertIn(e.kind, KINDS, e.key)
+            self.assertTrue(callable(resolve(e)), f"{e.key}: {e.module}.{e.entrypoint}")
+            self.assertTrue(e.produces.strip() and e.never.strip(),
+                            f"{e.key}: motor sem 'o que produz' e 'o que nunca faz' não serve")
+
+    def test_declared_engine_versions_match_the_modules(self):
+        import importlib
+        from impacto.engines.registry import ENGINES
+        for e in ENGINES:
+            real = getattr(importlib.import_module(e.module), e.version_attr, None)
+            self.assertEqual(e.version, real,
+                             f"{e.key}: versão declarada no registro difere da do módulo")
+
+    def test_declared_engine_routes_exist(self):
+        from impacto import api
+        from impacto.engines.registry import ENGINES
+        from impacto.http import ROUTES
+        api.load_all()
+        paths = {r.path for r in ROUTES}
+        for e in ENGINES:
+            for path in e.routes:
+                self.assertIn(path, paths, f"{e.key} declara rota inexistente: {path}")
+
+    def test_only_the_declared_places_call_the_language_model(self):
+        """A trava que impede um chatbot novo entrar de carona.
+
+        Se alguém acrescentar uma chamada ao modelo em outro módulo, esta varredura falha e obriga a
+        declarar o ponto no registro — onde é preciso escrever o que ele nunca decide.
+        """
+        import re
+        from pathlib import Path
+
+        from impacto.engines.registry import AI_CALL_SITES
+        root = Path(__file__).resolve().parents[1] / "impacto"
+        call = re.compile(r"\.ai\.(structure_need|draft|summarize|complete)\s*\(")
+        found = set()
+        for py in root.rglob("*.py"):
+            rel = py.relative_to(root.parent).as_posix()
+            if rel.startswith("impacto/engines/ai/"):
+                continue                       # o próprio gateway e o provedor local
+            if call.search(py.read_text(encoding="utf-8")):
+                found.add(rel)
+        self.assertEqual(found, set(AI_CALL_SITES),
+                         "chamada ao modelo fora dos pontos declarados em registry.AI_CALL_SITES")
+
+    def test_deterministic_engines_do_not_import_the_ai_gateway(self):
+        from pathlib import Path
+
+        from impacto.engines.registry import ENGINES
+        root = Path(__file__).resolve().parents[1]
+        for e in ENGINES:
+            if e.kind != "deterministic" or e.module.startswith("impacto.engines.ai"):
+                continue
+            src = (root / (e.module.replace(".", "/") + ".py"))
+            if not src.exists():
+                src = root / e.module.replace(".", "/") / "__init__.py"
+            text = src.read_text(encoding="utf-8")
+            self.assertNotIn("ai.gateway", text,
+                             f"{e.key} é declarado determinístico mas importa o gateway de IA")
+
     def test_product_dates_are_utc(self):
         """`date.today()` usa o fuso LOCAL do processo; o banco opera em UTC. Misturar os dois erra por um dia.
 
@@ -260,3 +327,25 @@ class ReleasePackageTests(unittest.TestCase):
     def test_package_has_no_nested_archive(self):
         self.assertEqual([f for f in self._collect() if f.endswith(".zip")], [],
                          "ZIP dentro de ZIP é proibido pela regra de entrega")
+
+
+class EngineDocumentationTests(unittest.TestCase):
+    """O documento `docs/AI_ENGINES.md` afirma números. Este teste os confere.
+
+    Documento com número errado é pior que documento sem número: dá a impressão de auditoria.
+    """
+
+    def test_the_counts_in_the_document_match_the_registry(self):
+        import re
+        from pathlib import Path
+
+        from impacto.engines.registry import describe
+        d = describe()
+        doc = (Path(__file__).resolve().parents[2] / "docs" / "AI_ENGINES.md").read_text(
+            encoding="utf-8")
+        self.assertIn(f"{d['total']} motores", doc)
+        for kind, n in d["by_kind"].items():
+            self.assertRegex(doc, rf"`{kind}` \| {n} \|",
+                             f"o documento diz outro número para {kind} (real: {n})")
+        declared_sites = re.findall(r"`backend/impacto/api/(\w+\.py)`", doc)
+        self.assertIn("ai_routes.py", declared_sites)

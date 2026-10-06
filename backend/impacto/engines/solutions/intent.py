@@ -1,7 +1,10 @@
 """Intent parser determinístico (intent-parser@1.0.0): consulta livre → atributos estruturados.
 
 Pipeline: normalização → conceitos (tesauro, com correção de erros de digitação) → territórios → orçamento → prazo → status desejados → tipo de intenção.
-Nada aqui chama LLM; um refinador opcional (gateway de IA) só pode ACRESCENTAR conceitos válidos do tesauro (ver services/solutions.refine_with_ai).
+Nada aqui chama LLM, e não existe refinador por IA: uma versão anterior deste comentário citava
+`services/solutions.refine_with_ai`, função que nunca foi escrita. Referência órfã em comentário
+vira prova documental falsa quando alguém a lê como implementada — por isso o registro de motores
+(`engines/registry.py`) declara os três únicos pontos que chamam modelo, e há teste conferindo.
 """
 from __future__ import annotations
 

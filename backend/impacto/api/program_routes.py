@@ -355,3 +355,11 @@ def admin_revenue(ctx: Ctx, q: E.RevenueQ):
 def admin_reconciliation(ctx: Ctx, q: E.ReconciliationQ):
     with ctx.tx(readonly=True) as c:
         return PAY.reconciliation(c, days=q.days)
+
+
+# ================================================================================================ motores
+@route("GET", "/v1/engines", auth="user", tags=("motores",),
+       summary="Os motores operacionais: natureza, versão, o que produzem e o que nunca decidem")
+def engines_registry(ctx: Ctx):
+    from ..engines.registry import describe
+    return describe()

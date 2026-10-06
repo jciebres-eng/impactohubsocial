@@ -1,44 +1,9 @@
-# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.20.0)
+# DESIGN_HANDOFF_FINAL — o que o designer recebe (v0.19.0)
 
-**Baseline:** 0.20.0 · snapshot da anterior em `history/v0.19.0/` · números medidos nesta rodada em
-`FINAL_RELEASE_MANIFEST.json`, não repetidos de memória.
+**Baseline:** 0.19.0 · snapshot da anterior em `history/v0.18.1/` · Suíte, API e banco: ver
+`FINAL_PRE_DESIGN_RELEASE_REPORT.md` (números medidos nesta rodada, não repetidos de memória).
 
-> **A base está conceitualmente congelada.** Esta rodada não acrescentou produto: ela fechou a
-> engenharia. O que você recebe não vai mudar de forma estrutural debaixo do seu trabalho.
-
-## v0.20.0 — o que mudou para você
-
-### As seis telas que faltavam agora existem — e são feias de propósito
-
-Reputação, selos, afirmações de impacto, equidade, ODS e responsabilidade tinham API, serviço,
-banco, eventos, permissões, testes e documentação, e **nenhuma tela**. A camada de primeiro acesso
-dizia honestamente `to_be_designed` para as seis.
-
-Elas estão em `web/src/pages/impactlayer.tsx` como **UI mínima funcional**: existem para que o fluxo
-possa ser percorrido por uma pessoa de ponta a ponta, não para serem bonitas. **O refinamento visual
-é seu.** O que **não** é seu, e está travado por teste:
-
-* todo rótulo de estado vem de `glossary.ts` (gerado de `config/glossary.json`) — a interface não
-  inventa sinônimo;
-* cada tela carrega a **recusa que a define** (lista completa na seção 4 abaixo);
-* todo formulário envia os campos obrigatórios da rota — há teste que confere campo a campo, porque
-  a primeira versão da tela de afirmações enviava o corpo errado e respondia 422 em toda tentativa.
-
-### O vocabulário cresceu e continua sendo uma origem única
-
-123 termos em 23 domínios. Se um valor de enum aparecer no código sem entrada no glossário, **a
-suíte reprova**. Isso vale nos dois sentidos: termo documentado que o código deixou de usar também
-reprova.
-
-### Notificação deixou de ser uma lista e virou um contrato
-
-`GET /v1/notifications/catalog` devolve os **30 tipos** de aviso, a qual dos **15 interruptores**
-cada um pertence, a prioridade padrão e quais podem sair por e-mail. A tela de preferências não
-precisa mais adivinhar o que "projeto" desliga: a rota diz.
-
----
-
-## v0.19.0 — as três coisas que mudaram o seu trabalho *(mantido: continua valendo)*
+## v0.19.0 — as três coisas que mudaram o seu trabalho
 
 Esta rodada foi feita **para** a camada de design. Três itens, cada um resolvendo uma decisão que,
 sem eles, você teria de tomar por conta — e que depois teria de ser desfeita.
@@ -234,7 +199,7 @@ Quando o pacote chegar, o trabalho é mapear tokens e componentes sobre uma AI j
 | Testes | 788, 0 falhas | `TEST_REPORT.md` |
 | Desempenho | escala cheia, maior caminho 1.724 ms (orçamento 2.500 ms) | `PERFORMANCE_REPORT.md` |
 
-## 3 · As telas novas *(27 na v0.18.1, mais 6 na v0.20.0 — ver seção 9)*
+## 3 · As 27 telas novas desta rodada
 
 Funcionais, sem tratamento visual — é o que o designer vai vestir. Conferidas contra o roteador em
 `web/src/app.tsx` (eram 151 telas, são **178**):
@@ -322,134 +287,3 @@ de uso da arte oficial é tarefa externa, registrada em `IP_REGISTER.md` e detal
 
 Backend, banco, autenticação, autorização, multi-tenancy, cobrança, notificação, moderação, taxonomias, perfil
 público e os onze motores. Se algo parecer faltar, conferir primeiro a seção 7.
-
----
-
-# 9 · As seis telas da v0.20.0, e o contrato de cada uma
-
-| Tela | Rota | Dado que aparece | Estados | Vazio significa |
-|---|---|---|---|---|
-| Reputação | `/reputacao` | valor, confiança, faixa e **observações** por dimensão | `strong`, `moderate`, `weak`, `insufficient` | **não** é reputação ruim: é falta de observação |
-| Selos | `/selos` | selo, o que atesta, **o que NÃO atesta**, prazo | `active`, `expired`, `revoked` | nenhum selo concedido — a lista de critérios continua visível |
-| Afirmações | `/afirmacoes` | afirmação, tipo, período, rodadas de verificação | `unchecked`, `supported`, `unsupported`, `flagged`, `withdrawn` | nada foi afirmado ainda |
-| Equidade | `/projetos/:id/equidade` | denominadores disponíveis, método, barreiras | `declared`, `documented`, `evidenced` | sem denominador declarado **não existe número normalizado** |
-| ODS | `/projetos/:id/ods` | objetivo e **meta** | vinculado / não vinculado | metas não carregadas ≠ projeto sem ODS |
-| Responsabilidade | `/responsabilidade` | papel, pessoa, início, fim, decisões | vigente / encerrada | sem sujeito, "a organização decidiu" não é prestação de contas |
-
-## Como explicar cada conceito na interface
-
-O §85 pede isto explicitamente, e é a parte que decide se o produto é entendido ou mal usado. Cada
-item abaixo tem a frase que a interface **deve** carregar e o erro que ela **evita**.
-
-### Match
-**Diga:** "compatibilidade entre o que este projeto precisa e o que esta oportunidade oferece,
-calculada por regra, com os pesos publicados."
-**Nunca diga:** "chance de aprovação", "ranking", "melhores projetos para você".
-**Mostre sempre junto:** o que faltou (`missing`) e o que impede (`blockers`). Impedimento duro
-nunca sai elegível, e score e confiança são **campos separados** — 80% de compatibilidade com
-confiança baixa não é a mesma coisa que 80% com confiança alta, e a tela não pode fundir os dois num
-número só.
-
-### Diagnóstico
-**Diga:** "onde estão as lacunas, em oito dimensões, com a ação que fecha cada uma."
-**Nunca diga:** "nota do projeto". O diagnóstico aponta lacuna e propõe ação; versão nova é fato
-novo e a anterior **não** é reescrita. Mostre `completeness` e `confidence` lado a lado.
-
-### Score
-**Não existe "o score".** Existem leituras distintas: compatibilidade (por oportunidade), prontidão
-(por finalidade), reputação (por dimensão). Juntá-las num número único é o erro de design mais
-provável deste produto, e o mais caro: destruiria exatamente a informação que torna cada leitura
-útil. Se a tela precisar de um resumo visual, resuma **por dimensão**, não por média.
-
-### Reputação
-**Diga:** "o que foi observado sobre esta organização, por dimensão."
-**Nunca diga:** nota, estrela, ranking, posição.
-**Mostre sempre:** quantas observações são **verificadas** e quantas são **autodeclaradas** — é essa
-diferença que impede o número de ser comprado declarando coisas. E deixe visível que **denúncia
-aberta não entra**: só infração apurada e concluída, depois de manifestação da parte denunciada.
-
-### Selo
-**Diga** as duas coisas com o **mesmo peso visual**: o que o selo atesta e **o que ele não atesta**.
-O campo `what_it_does_not_attest` não é rodapé: um selo lido pela metade é pior que selo nenhum,
-porque transfere credibilidade para além do que foi conferido. A avaliação que **não** concedeu
-também é visível, com o critério que faltou — "por que eu não recebi" é a pergunta mais legítima que
-existe sobre um selo.
-
-### Evidência
-**Diga:** fonte, data de referência e se foi verificada por terceiro.
-**Nunca:** trate ausência de evidência como evidência negativa. "Não medido" e "medido como zero"
-são coisas diferentes, e a interface tem de distingui-las visualmente — o campo `measured` existe
-para isso, e toda definição ativa aparece no perfil do território, medida ou não.
-
-### Confiança
-É uma **faixa**, não um percentual de certeza: `high`, `medium`, `low`, `insufficient`. Confiança
-baixa não desqualifica o resultado; ela diz que a base é fina. Nunca esconda um resultado por
-confiança baixa — mostre com a faixa, porque esconder transformaria a plataforma em curadora
-silenciosa do que merece ser visto.
-
-### Procedência
-Todo número que a plataforma **não produziu** carrega publicador, conjunto, versão, licença, as duas
-datas (publicação e consulta) e o sha256 do arquivo. E carrega **frescura**, com quatro estados —
-dos quais o que mais importa na tela é `undeclared`: significa que ninguém declarou prazo de
-envelhecimento para aquele conjunto. **Não desenhe `undeclared` como se fosse "atual".** Tratar
-silêncio como atualidade é a forma mais discreta de um produto de evidência mentir.
-
-### Recomendações
-**Diga sempre de onde veio.** Toda recomendação tem razão, vínculo e evidência. Recomendação que
-deixou de valer fica `superseded` e permanece visível — não desaparece, porque desaparecer apagaria
-a razão de alguém ter agido. Nunca apresente recomendação como obrigação nem como aprovação prévia.
-
-### Relatórios
-Prestação de contas é **período declarado + evidência anexada + revisão de quem financia**. A tela
-precisa deixar claro quem revisou e quando, e que a organização **não** valida o próprio resultado —
-isso é barrado no banco, e a interface deve explicar a recusa quando ela aparecer, em vez de mostrar
-um erro genérico.
-
-### Qualidade de dado (novo nesta rodada)
-Sete tipos de achado sobre o **dado**, cada um apontando para a linha que a organização pode abrir e
-corrigir. **Não existe nota de qualidade, e não pode existir.** A tela precisa dizer, em palavras,
-que esses achados **não** são avaliação do projeto: projeto em território sem dado público produz
-dado incompleto, e transformar isso em desempenho baixo faria a plataforma medir orçamento de
-monitoramento e chamar o resultado de impacto. É a trava mais importante desta rodada, e ela depende
-de a interface não a quebrar.
-
-### Denúncia (reescrito nesta rodada)
-Quatro palavras diferentes, **quatro tratamentos visuais diferentes**, e jamais o mesmo:
-
-1. **denúncia** — alguém relatou. Nenhum efeito. A tela não pode sugerir culpa.
-2. **suspeita** — em apuração. Explicitamente **não** é achado.
-3. **infração apurada** — decidida por pessoa, com fundamentação escrita. Só esta autoriza medida.
-4. **consequência jurídica** — encaminhamento registrado. A plataforma **nunca declara crime**.
-
-Quem foi denunciado tem direito de manifestação **antes** da conclusão, e de recurso depois. Se a
-interface achatar esses quatro níveis em "denúncia" e "punição", ela transforma um sistema de
-apuração numa máquina de acusação — que é precisamente o que a engenharia desta rodada foi feita
-para impedir.
-
-## Permissões, em uma frase cada
-
-Seis tipos de organização (`osc`, `company`, `individual`, `provider`, `government`, `platform`) e
-seis papéis dentro de cada uma (`viewer`, `member`, `analyst`, `manager`, `admin`, `owner`). A
-autorização está **no backend** e é varrida por teste em todas as 837 operações — por `auth`, por
-`min_role` e por `kinds`. A interface pode esconder o que a pessoa não pode fazer, mas **não é** a
-barreira: esconder botão não protege nada, e a tela não deve fingir que protege.
-
-## Notificações, para a tela de preferências
-
-30 tipos, 15 interruptores, e `GET /v1/notifications/catalog` devolve o mapa. Quatro controles por
-grupo: ligar/desligar na caixa, ligar/desligar por e-mail, janela de silêncio e teto diário. Aviso
-**crítico** atravessa a janela e o teto — e a tela precisa dizer isso, para que a pessoa não se
-surpreenda ao receber às 3h da manhã que suas sessões foram encerradas por segurança.
-
-## Linhas de tempo que existem
-
-Transições de projeto, rodadas de verificação de afirmação, retratos de reputação, trilha de
-cobrança, apuração de denúncia, custódia de documento, eventos de domínio da rede e carga de dado
-externo. **Todas são append-only**: nenhuma reescreve o passado. A interface não deve oferecer
-"editar" em nenhuma delas — oferecer e falhar é pior que não oferecer.
-
-## O que ainda falta, e não é bug
-
-As oito dívidas declaradas estão em `TECHNICAL_DEBT_REGISTER.md` e em
-`FINAL_RELEASE_MANIFEST.json` → `deferred_items`. A que mais afeta o seu trabalho: **as seis telas
-novas são mínimas**. O fluxo está correto e provado; a forma é sua.

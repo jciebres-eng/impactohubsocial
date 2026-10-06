@@ -1,45 +1,11 @@
-# Plataforma Impacto — v0.20.0
+# Plataforma Impacto — v0.18.1
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** **BASE TÉCNICA CONGELADA** na v0.20.0 para a entrega ao Designer. Leia
-> `FINAL_TECHNICAL_RELEASE_REPORT.md` para a decisão desta rodada e `RELEASE_READINESS.md` §5 para o que esta
-> versão **NÃO** entrega. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não
-> construídos**.
-
-**Novo no v0.20.0 (fechamento da engenharia antes do Designer):** rodada de **auditoria**, não de funcionalidade,
-dividida em onze etapas. Cada etapa procurou a diferença entre o que a plataforma **afirmava** e o que ela
-**fazia** — e o que encontrou foi, em quase todos os casos, um mecanismo escrito, testado e **inalcançável**:
-
-* **Quinze tipos de aviso não pertenciam a interruptor nenhum.** A pessoa desligava todas as preferências que a
-  tela oferecia e continuava recebendo aviso de conformidade, candidatura, pagamento, evidência e situação
-  institucional, porque 29 chamadas usavam prefixos que não casavam com nenhum grupo. Interruptor que não desliga
-  é pior que interruptor nenhum, porque quem o usa acredita ter escolhido.
-* **Três funções existiam e nunca eram chamadas.** Proposta com prazo vencido ficava em "enviada" para sempre, e o
-  evento que avisaria as duas partes nunca acontecia. Selo cujo critério caiu continuava sendo exibido — o próprio
-  docstring da função que o revogaria diz que isso é pior que não ter selo.
-* **Dezoito eventos de domínio declarados e nunca emitidos**, incluindo "documento anexado" — literalmente o caso
-  que originou o módulo de notificação.
-* **Doze motores existiam fora do inventário**, entre eles a camada de impacto inteira: afirmações, equidade,
-  reputação e selos. Registro incompleto dá a impressão de inventário.
-* **O importador de metas dos ODS que um documento dizia ter entregue não existia.** Foi escrito, e o documento
-  corrigido sem apagar o erro.
-* **`.docx` era aceito no envio e subia sem texto nenhum extraído**: os leitores existiam e nenhum estava ligado.
-* **Uma bandeira de administração não ligava nada.** Ligar ou desligar não mudava o produto.
-
-E implementou o que o escopo da rodada pedia: denúncia separada em **quatro níveis** (denúncia → suspeita →
-infração apurada → consequência), com gatilho no banco impedindo que medida seja aplicada sem apuração concluída;
-**procedência** completa de dado público, em que "prazo não declarado" nunca mais vira "atual"; **qualidade de
-dado** que jamais se converte em desempenho do projeto; **nível de risco** das 837 operações com o controle humano
-que cada uma exige; **benchmark de preço** por pesquisa nas páginas dos próprios fornecedores; e as **seis telas**
-que faltavam.
-
-**1.557 testes, 837 operações, 293 tabelas, 41 migrações, 42 motores.** Entregas de documento desta rodada:
-`FINAL_TECHNICAL_RELEASE_REPORT.md`, `FINAL_RELEASE_MANIFEST.json`, `ENGINE_COVERAGE.md`, `PRICE_BENCHMARK.md` e
-`DESIGN_HANDOFF_FINAL.md` reescrito.
+> **Estado:** **BASE TÉCNICA CONGELADA** na v0.18.1 — `TECHNICAL_BASELINE_LOCK.md` registra as duas decisões: **GO** para a entrega ao Designer e **GO WITH CONDITIONS** para a publicação web (seis condições, nenhuma de código: auditoria de dependências, provedores reais, aprovação jurídica das minutas, imagem Docker construída, coletor de métricas e carga fora da máquina do banco); para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
 
 **Novo no v0.18.1 (endurecimento técnico final):** rodada de **prova**, não de funcionalidade. Integrou quatro
 reforços de núcleo recebidos num pacote externo (sinal contextual no match, oito prontidões no diagnóstico,
@@ -54,7 +20,7 @@ smoke de publicação com 20 verificações, acessibilidade no navegador com con
 carga nas rotas novas. Declarou como **bloqueado pelo ambiente** — não como aprovado — o que não pôde ser
 executado: `npm audit`, `pip-audit`, `axe-core`, leitor de tela e Docker.
 
-**1.298 testes, 815 operações, 285 tabelas, 34 migrações** *(números da v0.18.1; ver acima os atuais)*. Entregas de documento desta rodada:
+**1.298 testes, 815 operações, 285 tabelas, 34 migrações.** Entregas de documento desta rodada:
 `TECHNICAL_BASELINE_LOCK.md`, `REQUIREMENTS_MATRIX.md`, `TECHNICAL_DEBT_REGISTER.md`,
 `PRODUCTION_RELEASE_RUNBOOK.md`, `ACCESSIBILITY_REPORT.md` e `DESIGN_HANDOFF_FINAL.md` reescrito.
 
@@ -100,7 +66,7 @@ recusando verde sem fonte porque ausência de proibição não é permissão; **
 recorrente, **parcelamento modelado à parte da assinatura**, PIX e boleto, toda marcada `PRODUCTION PAYMENT NOT
 CONFIGURED` porque é o estado verdadeiro, com `is_simulated` derivada do provedor e irreescrevível; **onze documentos
 legais versionados** com aceite que guarda o **sha256 do texto aceito** — e o banco **recusando registrar aceite de
-minuta não revisada por advogado(a)**, o que trava o produto de propósito; e o **registro de motores (28 na v0.17.0; 42 na v0.20.0)
+minuta não revisada por advogado(a)**, o que trava o produto de propósito; e o **registro de 28 motores
 operacionais** com cinco testes que provam que IA aqui é motor, não chatbot.
 
 **(v0.17.0: 961 testes, 749 operações, 253 tabelas, 24 migrações.)** O que aquela versão **não** entregou está escrito com nome:

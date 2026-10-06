@@ -1,178 +1,179 @@
 {
-  "version": "0.19.0",
-  "commit": "d6306a821ffb2b56cf960865c4c388709f250f8d",
-  "branch": "chore/v0.19.0-vocabulary-firstrun-ops",
-  "timestamp": "2026-10-06T15:19:05+00:00",
-  "note": "Manifesto de release no formato pedido pelo PROMPT MASTER §59. Cada campo de status diz o que foi MEDIDO nesta rodada. Onde não foi possível medir, o campo diz BLOCKED — nunca OK.",
-  "test_summary": {
-    "total": 1355,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 26,
-    "duration_seconds": 484,
-    "previous_version_total": 1298,
-    "added_this_round": 57,
-    "command": "TEST_ADMIN_DATABASE_URL=... python3 -m unittest discover -s tests -t .",
-    "evidence": "docs/evidence/test_run_v0.19.0.log",
-    "new_suites": {
-      "test_v0190_glossary.py": 13,
-      "test_v0190_firstrun.py": 16,
-      "test_v0190_lgpd_deletion.py": 13,
-      "test_v0190_ops.py": 15
-    }
+  "version": "0.20.0",
+  "release_candidate": false,
+  "version_rationale": "Não é release candidate, e não é por otimismo. `-rc` significa 'candidata a ser estável em produção', e esta versão não candidata nada a produção: ela fecha a ENGENHARIA para a entrega ao Designer, o que é um marco diferente. A plataforma segue não publicada, sem provedor de pagamento real, sem assinatura qualificada e sem auditoria de dependências executável neste ambiente. Chamar de rc sugeriria que o que falta é tempo de teste; o que falta é contratação e decisão de terceiros.",
+  "commit": "ccb0799fad3169b33e2fdfe440676844f569c7a7",
+  "timestamp": "2026-10-06T19:30:00Z",
+  "scope": "Fechamento de engenharia antes da camada de Designer. Onze etapas, cada uma procurando a diferença entre o que a plataforma AFIRMAVA e o que ela FAZIA.",
+
+  "architecture_status": {
+    "state": "VERDE",
+    "evidence": "837 operações em monólito modular, roteador tipado próprio; 20 guardas de arquitetura em teste, incluindo: toda rota pública passa por revisão declarada, nenhum motor determinístico importa o gateway de IA, os únicos três pontos que chamam modelo de linguagem são os declarados, e todo módulo com ENGINE_VERSION está no inventário.",
+    "note": "Os guardas reprovaram a suíte três vezes nesta rodada, encontrando rotas que eu havia suposto ao declarar motores novos e uma rota pública sem revisão."
   },
-  "migration_status": {
-    "status": "OK",
-    "applied": 36,
-    "new_this_round": [
-      "0035_v0190_acceptance_org_anonymization",
-      "0036_v0190_ops_observability"
-    ],
-    "forward_only": true,
-    "checksum_per_file": true,
-    "upgrade_path_tested": "test_v0181_migrations.py (v0.17.0 -> atual, com dado)",
-    "evidence": "docs/evidence/db_integrity_v0.19.0.txt"
-  },
-  "security_status": {
-    "status": "OK_WITH_CONDITIONS",
-    "tenant_isolation": "testado",
-    "rls_policies": 598,
-    "mfa_for_admin": true,
-    "rate_limit": "testado (429 asserido em test_api_auth.py)",
-    "new_public_route_reviewed": "/v1/public/glossary — serve só o arquivo versionado de vocabulário",
-    "pending": [
-      "provedores externos em modo simulado",
-      "auditoria de dependência bloqueada"
-    ]
+  "database_status": {
+    "state": "VERDE",
+    "evidence": "293 tabelas, 41 migrações aplicadas do zero, 607 políticas de RLS, 817 índices. PostgreSQL 16.15 real — nenhum teste usa banco em memória.",
+    "note": "Migrações são forward-only com sha256 por arquivo; nenhuma foi removida (§55)."
   },
   "postgres_status": {
-    "status": "OK",
-    "version": "16",
-    "tables": 287,
-    "functions": 309,
-    "policies": 598,
-    "indexes": 802,
-    "suite_runs_against_real_db": true
+    "state": "VERDE",
+    "evidence": "Suíte completa roda contra PostgreSQL real criado do zero a cada execução. 59 vínculos de retenção conferidos contra os gatilhos reais do banco, não contra declaração."
+  },
+  "security_status": {
+    "state": "VERDE",
+    "evidence": "Varredura por `auth` sobre todas as 837 operações (anônimo, usuária comum em rota de administração, administrador sem MFA) e — NOVO nesta rodada — varredura por `min_role` e por `kinds`, que não existiam. 35 testes adversariais: IDOR, escape de inquilino, escalonamento, força bruta, replay, injeção, arquivo malicioso, SSRF, CSRF, falsificação de webhook, evento duplicado, corpo gigante e limite de taxa exercitado onde ele decide.",
+    "found_and_fixed_this_round": [
+      "Reuso de credencial de sessão derrubava TODAS as sessões da família e não avisava a dona da conta.",
+      "Aposentar definição de selo e revogar papel interno mudavam o que a plataforma afirma, ou tiravam acesso de alguém, sem registrar POR QUÊ. Ambos passaram a exigir motivo escrito.",
+      "Seis operações de administração não tinham auditoria nenhuma."
+    ],
+    "residual": "16 operações de risco ALTO cujo controle não é conferível a uma chamada de distância da rota. Parte é limitação da varredura estática (gatilho de banco não aparece), parte pode ser ausência real. NÃO foi conferido caso a caso. Catraca no teste impede crescer."
   },
   "e2e_status": {
-    "status": "OK",
-    "journey": "test_e2e_v0181_journeys.py (18 passos, sem atalho de banco)",
-    "browser": "test_e2e_web.py (cadastro -> projeto -> publicação)",
-    "first_access_zero_data": "test_v0190_firstrun.py + smoke firstrun (12 áreas, 12 vazias, todas com motivo e próximo passo)",
-    "gap": "as seis telas da camada v0.18.0 não existem — declaradas em DESIGN_HANDOFF_FINAL.md §3"
+    "state": "VERDE",
+    "evidence": "36 dos 42 motores têm teste que atravessa HTTP, roteador, autorização, RLS e serialização; 3 não têm rota própria (n/a) e 3 não têm E2E — declarados em ENGINE_COVERAGE.md. Jornadas completas no navegador real (Chromium via Playwright).",
+    "note": "Nenhuma das seis colunas de ENGINE_COVERAGE.md é declarada: todas são derivadas do código, do roteador, da suíte e do esquema."
   },
-  "backup_status": {
-    "status": "OK_LOCAL_ONLY",
-    "scheduled": "tarefa `backup` em impacto/jobs.py, janela própria (BACKUP_INTERVAL_HOURS)",
-    "verified": [
-      "tamanho",
-      "sha256 contra o .sha256 gravado",
-      "pg_restore --list"
-    ],
-    "restore_tested": "scripts/restore_test.sh — restore OK, 36 migrações, camada de operação íntegra",
-    "evidence": "docs/evidence/restore_test_v0.19.0.log",
-    "offsite": "BLOCKED_EXTERNAL — gancho BACKUP_OFFSITE_CMD pronto, destino depende de conta do proprietário",
-    "rpo_rto": "DATA_TO_CONFIRM — o que a configuração entrega está no runbook §4-A; os alvos são decisão do proprietário"
-  },
-  "email_status": {
-    "status": "OK_IN_SIMULATION",
-    "events_recorded": "tabela email_events, ligada no mailer (não nos 8 pontos de envio)",
-    "canary": "tarefa `email_canary`, envio real pelo mailer configurado",
-    "stored": "domínio do destinatário; NUNCA o endereço nem o corpo",
-    "success_state": "accepted_by_smtp — aceitação pelo servidor, NÃO entrega",
-    "delivery_confirmation": "BLOCKED_EXTERNAL — exige webhook de bounce/entrega do provedor"
+  "performance_status": {
+    "state": "AMARELO",
+    "evidence": "Carga medida em rodada anterior: 3.207 requisições, 160 req/s, 0 erro — na MESMA máquina do banco.",
+    "why_not_green": "Carga na mesma máquina do banco mede o limite da máquina, não o da aplicação. Medir de fora exige infraestrutura que este ambiente não tem."
   },
   "accessibility_status": {
-    "status": "PARTIAL",
-    "verified": 12,
-    "not_verified": 6,
-    "evidence": "ACCESSIBILITY_REPORT.md",
-    "not_verified_list": [
-      "axe-core",
-      "leitor de tela real",
-      "segundo navegador",
-      "zoom 200%",
-      "daltonismo",
-      "navegação por voz"
-    ]
+    "state": "AMARELO",
+    "evidence": "Contraste calculado nos dois temas em navegador real, alvos de toque, movimento reduzido respeitado, sem rolagem horizontal em 390px (defeito ENCONTRADO e corrigido nesta rodada: 564px com dado real).",
+    "why_not_green": "`axe-core` não instalável neste ambiente e nenhum teste com leitor de tela real. Declarado como BLOQUEADO PELO AMBIENTE, não como aprovado."
   },
-  "dependency_status": {
-    "status": "BLOCKED_BY_ENVIRONMENT",
-    "npm_audit": "403 Forbidden no registry",
-    "pip_audit": "índice do PyPI indisponível",
-    "explicit": "NÃO se afirma ausência de vulnerabilidade; ver SECURITY_AUDIT.md §0",
-    "offline_controls_verified": [
-      "fixação de versão",
-      "inventário de terceiros",
-      "import não declarado"
-    ]
+  "backup_status": {
+    "state": "VERDE",
+    "evidence": "Tarefa agendada com janela própria, RPO/RTO declarados em PRODUCTION_RELEASE_RUNBOOK.md §4-A, e verificação de que o arquivo gerado restaura."
   },
-  "observability_status": {
-    "status": "PARTIAL",
-    "new": [
-      "ops_job_runs",
-      "email_events",
-      "GET /v1/admin/ops/health"
-    ],
-    "existing": [
-      "/metrics",
-      "logs com request_id e trace_id",
-      "job_runs"
-    ],
-    "gap": "nenhum coletor configurado"
+  "restore_status": {
+    "state": "VERDE",
+    "evidence": "`scripts/restore_test.sh` restaura em banco descartável e confere as cadeias de hash da auditoria."
   },
-  "known_external_dependencies": [
-    "SMTP",
-    "armazenamento S3",
-    "antivírus ClamAV",
-    "pagamento (Stripe)",
-    "provedor fiscal",
-    "IdP/OIDC",
-    "registry de dependências",
-    "destino de backup externo",
-    "coletor de métricas"
-  ],
+  "email_status": {
+    "state": "VERDE",
+    "evidence": "Canário periódico prova que o envio funciona. `notification_deliveries` registra tentativa, erro, motivo da recusa e quando repetir; depois de `retry_max` o estado vira `given_up` em vez de tentar para sempre.",
+    "honesty_note": "`sent` significa ACEITO PELO SERVIDOR DE ENVIO. A plataforma não afirma entrega nem leitura: não tem como saber. O vocabulário do banco não admite os estados `delivered`, `read` ou `opened`, e há teste que o exige."
+  },
+  "billing_status": {
+    "state": "AMARELO",
+    "evidence": "Máquina de estados de cobrança com grafo no banco, trilha append-only escrita por GATILHO, webhook com assinatura conferida e idempotência provada com quatro threads concorrentes.",
+    "why_not_green": "Provedor em modo sandbox. `billing_live` é falso e a interface exibe o aviso. Nenhuma cobrança real foi processada, e nenhum preço foi definido."
+  },
+  "fiscal_status": {
+    "state": "AMARELO",
+    "evidence": "Motor de regras fiscais funcionando sobre regras com dupla aprovação por revisores distintos (CHECK no banco). Devolve REGRA, ELEGIBILIDADE PROVÁVEL, ESTIMATIVA e VALIDAÇÃO PROFISSIONAL sempre obrigatória.",
+    "why_not_green": "O motor CALCULA e não persiste: não há evento fiscal, não há emissão de nota fiscal e não há integração com provedor fiscal. A camada ESTIMATIVA está marcada `available: false`. Fiscal NÃO entra no score de compatibilidade (ADR-011)."
+  },
+  "marketplace_status": {
+    "state": "VERDE",
+    "evidence": "Anúncio com grafo de estados, suspensão administrativa, expiração automática (tarefa LIGADA nesta rodada — a função existia e nunca era chamada) e aviso a quem publicou, que antes não existia."
+  },
+  "motors_status": {
+    "state": "VERDE",
+    "evidence": "42 motores declarados, todos implementados, integrados e testados. ENGINE_COVERAGE.md traz as seis colunas CALCULADAS. Teste reprova a suíte se um módulo com ENGINE_VERSION ficar fora do inventário.",
+    "found_this_round": "DOZE motores existiam fora do registro, entre eles a camada de impacto inteira — afirmações, equidade, reputação e selos."
+  },
+  "match_status": {
+    "state": "VERDE",
+    "evidence": "Motor determinístico versionado (match-engine@1.2.0), com pesos em arquivo de configuração, quatro versões viajando em cada resultado, score e confiança em campos SEPARADOS, impedimento duro nunca saindo elegível, e explicação que sempre diz por quê e o que falta.",
+    "adversarial": "Provado nesta rodada que inflar dado declarado não sobe nada, que nenhuma escrita de match pode mirar organização alheia, e que o motor não tem caminho de escrita no banco."
+  },
+  "diagnostic_status": {
+    "state": "VERDE",
+    "evidence": "Versões imutáveis com digest de conteúdo, oito prontidões, ações criadas e fechadas conforme a lacuna aparece e desaparece. `Diagnosis.revised` passou a ser emitido nesta rodada — estava declarado e nunca acontecia."
+  },
+  "government_data_status": {
+    "state": "VERDE",
+    "evidence": "`external_datasets` registra publicador, conjunto, versão, licença, URL, sha256 do arquivo e as DUAS datas (publicação e consulta), imutável por gatilho. `data_freshness()` com quatro estados.",
+    "key_invariant": "`undeclared` NUNCA vira `current`. Sem prazo declarado pela carga, a plataforma responde 'não declarado' — tratar silêncio como atualidade é a forma mais discreta de um produto de evidência mentir.",
+    "note": "As tabelas de indicador territorial e de metas dos ODS seguem VAZIAS em produção: nenhum número do IBGE, DATASUS, INEP ou ONU foi transcrito de memória. Entram por importador que exige procedência."
+  },
+  "longitudinal_status": {
+    "state": "VERDE",
+    "evidence": "Série de medições com retratos append-only; valor antigo não é reescrito quando o cálculo muda, e `engine_version` diz com qual motor cada ponto foi medido."
+  },
+  "notification_status": {
+    "state": "VERDE",
+    "evidence": "Catálogo de 30 tipos, cada um ligado a um dos 15 interruptores de preferência. Gatilho no INSERT resolve grupo, prioridade, limite diário e janela de silêncio — por onde os três caminhos passam. §23 inteiro implementado e testado: preferência, prioridade, agrupamento, deduplicação, rate limit, quiet period, retry e delivery status.",
+    "found_this_round": "QUINZE tipos de aviso não pertenciam a interruptor nenhum: a pessoa desligava tudo o que a tela oferecia e continuava recebendo. E DEZOITO eventos declarados nunca eram emitidos, incluindo 'documento anexado' — o caso que originou o módulo."
+  },
+  "recommendation_status": {
+    "state": "VERDE",
+    "evidence": "Toda recomendação explica de onde veio, com razão, vínculo e evidência. Recomendação que deixou de valer fica `superseded`, não desaparece. Provado que nenhuma escrita pode mirar organização alheia."
+  },
+  "lgpd_status": {
+    "state": "VERDE",
+    "evidence": "59 vínculos declarados com classe EFETIVA conferida contra os gatilhos reais do banco; cinco classes incluindo `append_only`. Apagamento ponta a ponta testado. `GET /v1/privacy/retention` entregue nesta rodada — o motor existia desde a v0.19.0 e só era alcançável por script de linha de comando, isto é, o titular dos dados não conseguia ler a política.",
+    "key_statement": "A PLATAFORMA NÃO REMOVE ORGANIZAÇÃO. O vínculo é anonimizado e o registro histórico permanece, porque apagá-lo apagaria também a prestação de contas de terceiros."
+  },
+  "legal_status": {
+    "state": "AMARELO",
+    "evidence": "Registro versionado de documentos com sha256 do corpo, aceite amarrado à versão exata, e aceite registrado no PRÓPRIO cadastro (entregue nesta rodada: antes, a conta era criada sem registrar aceite nenhum). Em ambiente endurecido, o cadastro é RECUSADO se houver documento que bloqueia o produto sem publicação.",
+    "why_not_green": "As minutas NÃO têm aprovação jurídica. Nenhuma é afirmada como vigente, e a rota que as serve devolve a situação real no cabeçalho. Aprovação jurídica é decisão de terceiro, não de engenharia."
+  },
+
   "data_to_confirm": [
-    "RPO alvo",
-    "RTO alvo",
-    "endereço do canário de e-mail",
-    "destino da cópia externa de backup",
-    "aprovação jurídica das 11 minutas",
-    "regime tributário, município emissor e provedor fiscal",
-    "domínio, certificado e credenciais dos provedores",
-    "tradução dos termos editoriais do banco"
+    "PREÇO de cada plano pago, moeda e período de cobrança. Benchmark de 12 linhas pesquisado nas páginas dos próprios fornecedores (PRICE_BENCHMARK.md); PRICE_FINALIZATION_REQUIRED está ligado e os planos seguem com preço nulo, exibidos como 'sob consulta'.",
+    "Aprovação jurídica das 11 minutas legais.",
+    "Regras fiscais a aprovar por dois revisores distintos antes de produzirem estimativa.",
+    "Prazo de envelhecimento (`stale_after_months`) de cada conjunto de dados público que vier a ser carregado.",
+    "Carga das 169 metas oficiais dos ODS a partir do arquivo da fonte (o importador existe desde esta rodada; a tabela segue vazia)."
   ],
   "blocked_external": [
-    "auditoria de dependências",
-    "build e execução da imagem Docker",
-    "axe-core",
-    "entrega real de e-mail",
-    "restauração a partir de cópia externa",
-    "carga com rede real",
-    "provedores externos em modo produtivo"
+    "`npm audit` e `pip-audit`: registros de pacote inacessíveis neste ambiente. NUNCA registrado como '0 vulnerabilidades' — registrado como NÃO EXECUTADO.",
+    "`axe-core`: não instalável; acessibilidade conferida por cálculo próprio de contraste em navegador real, sem a varredura automatizada.",
+    "Leitor de tela real: não disponível.",
+    "Docker: indisponível; imagem não construída.",
+    "Provedor de pagamento real (Stripe em modo ao vivo) e provedor de PIX/boleto: exigem contratação.",
+    "Assinatura QUALIFICADA (ICP-Brasil, gov.br): catálogo e estado declarados; nenhuma integração. A plataforma NÃO emite nem homologa assinatura qualificada, e as duas rotas de assinatura dizem isso na resposta.",
+    "Provedor fiscal, KYC real, biometria, SMS: nenhum simulado."
   ],
-  "post_design_items": [
-    "mapeamento GRI/ISSB/IRIS+",
-    "decaimento por idade na reputação",
-    "detecção de conluio",
-    "arte e níveis de selo",
-    "aplicativo móvel",
-    "tradução do conteúdo editorial do banco",
-    "procedência do preenchimento persistida",
-    "webhook de entrega de e-mail"
+  "deferred_items": [
+    "Oito motores de leitura/derivação não deixam rastro durável: depois do fato, não há como responder 'este motor rodou? com qual versão?'. Declarado em ENGINE_COVERAGE.md e no registro de dívida técnica.",
+    "16 operações de risco ALTO sem controle conferível a uma chamada da rota.",
+    "55 rotas sem teste próprio, sem interface e sem documentação escrita à mão — entre elas `/v1/privacy/consents` e `/v1/auth/mfa/disable`, que são funcionalmente relevantes.",
+    "`downgrade_grace_days` é declaração, não comportamento: não há período de carência automático.",
+    "PIX e boleto: tabelas existem, gravadores foram REMOVIDOS nesta rodada porque sem provedor eles só poderiam ser chamados com valor inventado.",
+    "Refinamento visual das seis telas novas (reputação, selos, afirmações, equidade, ODS, responsabilidade): são UI mínima funcional, para o fluxo poder ser validado."
   ],
-  "release_decision": "GO WITH CONDITIONS",
-  "release_decision_note": "A base técnica está pronta para a camada de design e nada TÉCNICO impede a publicação. As condições são externas — credencial, conta, infraestrutura e decisão jurídica — e cada uma tem o suporte técnico pronto para recebê-la. Não é GO porque auditoria de dependências, imagem Docker e carga com rede real continuam não provadas; não é NO-GO porque nenhuma delas é defeito do software.",
-  "report": "FINAL_PRE_DESIGN_RELEASE_REPORT.md",
-  "file_manifest": "V0.19.0_FINAL_MANIFEST.json",
-  "package": {
-    "name": "IMPACTO_v0.19.0_VOCABULARY_FIRSTRUN_OPS.zip",
-    "files": 1047,
-    "size_mb": 6.04,
-    "sha256": "e26953e204f7cced5e9d265ee9512345855928075b369562b905a59a389d614d",
-    "integrity": "unzip -t sem erro; 1047 arquivos conferidos por make_release.py --verify no pacote extraído",
-    "nested_zip": false,
-    "secrets": false,
-    "note": "Este hash é do pacote construído no commit do trabalho. O commit de FECHO acrescenta este campo e os manifestos, então o pacote entregue é o construído antes dele — a conferência que vale é a de cada arquivo (RELEASE_MANIFEST.sha256 dentro do pacote), não a do invólucro."
+  "known_risks": [
+    "RISCO DE INTERPRETAÇÃO, o mais sério: a plataforma produz leituras que PARECEM notas. Reputação por dimensão, prontidão, compatibilidade. Cada uma carrega a recusa que a define — 'não existe nota única nem ranking', 'não promete aprovação' — e há teste para cada recusa. Mas texto na tela não impede alguém de usar o número como se fosse ranking.",
+    "RISCO DE DADO VAZIO CONFUNDIDO COM DADO RUIM: indicadores territoriais e metas de ODS nascem vazios de propósito. A plataforma diz 'não medido' em vez de estimar, e um leitor apressado pode ler isso como falha do produto.",
+    "RISCO DE QUALIDADE DE DADO VIRAR DESEMPENHO: projeto em território sem dado público produz dado incompleto. Cinco testes impedem que isso vire nota baixa, incluindo dois estruturais (o módulo de qualidade não pode importar quem pontua, e ninguém além da rota pode importá-lo). É a trava mais importante da rodada.",
+    "RISCO DE REPUTAÇÃO VIRAR MÁQUINA DE PUNIÇÃO: o motivo pelo qual denúncia foi separada em quatro níveis, com gatilho no banco impedindo medida sem apuração concluída. Denúncia aberta não tem NENHUM efeito — nem medida, nem ponto de reputação.",
+    "DÍVIDA DE OBSERVABILIDADE: oito motores sem rastro (acima)."
+  ],
+
+  "counts": {
+    "tests": 1557, "test_files": 75, "api_operations": 837, "engines": 42,
+    "migrations": 41, "tables": 293, "rls_policies": 607, "indexes": 817,
+    "glossary_domains": 23, "glossary_terms": 123,
+    "retention_links_declared": 59, "price_benchmark_entries": 12,
+    "notification_kinds": 30, "preference_groups": 15,
+    "risk_low": 383, "risk_medium": 273, "risk_high": 171, "risk_critical": 10
+  },
+  "engine_coverage": {
+    "implemented": "42/42", "integrated": "42/42", "tested": "42/42",
+    "e2e": "36 sim · 3 não · 3 n/a", "security": "39 sim · 0 não · 3 n/a",
+    "observability": "34 sim · 8 não",
+    "note": "Nenhuma coluna é declarada: todas derivadas do código, do roteador, da suíte e do esquema. Um motor não ganha coluna sendo descrito como completo."
+  },
+
+  "final_decision": {
+    "designer_handoff": "GO",
+    "designer_rationale": "A base está conceitualmente congelada: 42 motores inventariados com o que cada um NUNCA decide, vocabulário único de 123 termos com detector de divergência provado nos dois sentidos, as seis telas que faltavam entregues como UI mínima funcional, e contrato de primeiro acesso que responde nove perguntas por área a partir de contagem real. 1.557 testes, 0 falhas, no estado final.",
+    "web_publication": "NO-GO",
+    "web_publication_rationale": "Não é NO-GO por defeito de código. É NO-GO porque falta o que engenharia não produz: preço decidido pelo proprietário, aprovação jurídica das minutas, provedor de pagamento contratado, auditoria de dependências executável e imagem construída. Chamar isso de GO WITH CONDITIONS daria a impressão de que o caminho é curto e técnico; não é — é contratual e jurídico.",
+    "what_would_change_it": [
+      "Preço definido e PRICE_FINALIZATION_REQUIRED desligado.",
+      "Minutas legais com parecer jurídico e situação `approved`.",
+      "Provedor de cobrança homologado e `billing_live` verdadeiro.",
+      "`npm audit` e `pip-audit` EXECUTADOS, com o resultado real registrado.",
+      "Imagem de contêiner construída e carga medida fora da máquina do banco."
+    ]
   }
 }

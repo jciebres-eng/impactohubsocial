@@ -10,8 +10,8 @@
 >
 > Toda linha **A** aponta o arquivo de teste que a sustenta. Nenhuma linha diz A por documento.
 
-**Estado medido na v0.19.0:** 293 tabelas · 41 migrações · 309 funções SQL · 607 políticas de RLS ·
-817 índices · 819 operações de API · 65 arquivos de teste. Contagem de testes e resultado da suíte:
+**Estado medido na v0.19.0:** 287 tabelas · 36 migrações · 309 funções SQL · 598 políticas de RLS ·
+802 índices · 819 operações de API · 65 arquivos de teste. Contagem de testes e resultado da suíte:
 `FINAL_PRE_DESIGN_RELEASE_REPORT.md` (medidos, não repetidos de memória).
 
 ## 1. Núcleo do produto (ciclo de impacto)
@@ -87,7 +87,7 @@
 | 37 | Assinatura amarrada a DOCUMENTO+VERSÃO | **A** | `subject_sha256` (v0.14.0) + decisão aponta versão (v0.18.0) |
 | 38 | Proveniência por campo no documento | **A** | `assembly.py` devolve `provenance` por campo |
 | 39 | Oito prontidões do diagnóstico | **A** | `READINESS_MAP`; jornada passo 03 |
-| 40 | IA assistida com revisão humana; IA não decide | **A** | registro de 42 motores + varredura de chamadas |
+| 40 | IA assistida com revisão humana; IA não decide | **A** | registro de 28 motores + varredura de chamadas |
 
 ## 3. Economia, legal e pagamento (v0.17.0)
 

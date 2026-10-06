@@ -134,7 +134,7 @@ alegação, cujo gatilho não olha papel, nem o do dono do banco). A política p
 
 | Teste | Comando | Resultado | Evidência |
 |---|---|---|---|
-| Suíte completa (PostgreSQL 16 real, banco do zero) | `python3 -m unittest discover -s tests -t .` | **1.557 testes · 0 falhas · 26 pulados · 484 s** | `docs/evidence/test_run_v0.19.0.log` |
+| Suíte completa (PostgreSQL 16 real, banco do zero) | `python3 -m unittest discover -s tests -t .` | **1.355 testes · 0 falhas · 26 pulados · 484 s** | `docs/evidence/test_run_v0.19.0.log` |
 | Glossário (contrato + banco) | `… tests.test_v0190_glossary` | 13 · OK | inclui prova de que o detector reprova |
 | Primeiro acesso e retorno de contexto | `… tests.test_v0190_firstrun` | 16 · OK | — |
 | Exclusão e retenção (LGPD) | `… tests.test_v0190_lgpd_deletion` | 13 · OK | varredura em todas as colunas de texto |
@@ -143,7 +143,7 @@ alegação, cujo gatilho não olha papel, nem o do dono do banco). A política p
 | Tipos (web) | `tsc -p tsconfig.offline.json --noEmit` | sem erro | — |
 | Build (web) | `node build.mjs` | ok | — |
 | Documentação de API | `python3 ../scripts/gen_api_docs.py` | **819 operações** | `docs/openapi.json` |
-| Integridade do banco | `python3 scripts/db_integrity_report.py` | 293 tabelas · 41 migrações · 607 políticas · 817 índices | `docs/evidence/db_integrity_v0.19.0.txt` |
+| Integridade do banco | `python3 scripts/db_integrity_report.py` | 287 tabelas · 36 migrações · 598 políticas · 802 índices | `docs/evidence/db_integrity_v0.19.0.txt` |
 | Backup → restauração → migração → validação | `scripts/backup.sh` + `scripts/restore_test.sh` | **restore OK**, com os conferidores novos da camada de operação | `docs/evidence/restore_test_v0.19.0.log` |
 | Smoke de publicação (24 verificações) | `scripts/smoke_test.py --base … --email …` | **19 passaram · 0 falharam · 5 puladas · required_failed = 0** | `docs/evidence/smoke_v0.19.0.json` |
 
@@ -228,8 +228,8 @@ webhook de entrega de e-mail.
 | Portão | Situação | Evidência | Bloqueador |
 |---|---|---|---|
 | Arquitetura | **PASSA** | 20 testes arquiteturais, inclusive os que reprovaram e foram corrigidos | — |
-| Banco | **PASSA** | 293 tabelas, 41 migrações, 607 políticas, 817 índices | — |
-| PostgreSQL real | **PASSA** | 1.557 testes contra banco do zero | — |
+| Banco | **PASSA** | 287 tabelas, 36 migrações, 598 políticas, 802 índices | — |
+| PostgreSQL real | **PASSA** | 1.355 testes contra banco do zero | — |
 | Segurança | **PASSA** | isolamento entre organizações, RLS, MFA, limites | — |
 | LGPD | **PASSA** | exclusão ponta a ponta + varredura de todas as colunas de texto | — |
 | Equidade | **PASSA** | 30 testes; UNKNOWN ≠ ZERO | — |

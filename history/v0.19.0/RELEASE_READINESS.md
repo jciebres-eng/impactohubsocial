@@ -43,7 +43,7 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 | 33 | **Pagamento simulado nunca passa por real** | 🟢 | `is_simulated` derivada e irreescrevível; `platform_revenue()` com o simulado em coluna própria · 30 testes |
 | 34 | **Receita real nunca inferida do nome do provedor** | 🟢 | `provider_configured` entra na apuração · `test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money` |
 | 35 | **Nenhuma estimativa de tempo sem linha de base com fonte** | 🟢 | `app_record_value()` deriva; nenhuma linha de base nasce com número · 16 testes |
-| 36 | **Só os pontos declarados chamam o modelo de linguagem** | 🟢 | varredura em `test_architecture`; registro de 42 motores com o que cada um nunca decide |
+| 36 | **Só os pontos declarados chamam o modelo de linguagem** | 🟢 | varredura em `test_architecture`; registro de 28 motores com o que cada um nunca decide |
 | 37 | **Os números dos documentos conferidos contra o banco** | 🟢 | `test_v0170_docs.py` (17 testes) — pegou três afirmações falsas minhas nesta rodada |
 | 38 | **A prova de aceite sobrevive à exclusão da conta, sem o dado pessoal** | 🟢 | `acceptance_anonymize_only()`; portabilidade inclui o hash · `test_v0170_security.py` |
 | 39 | **Nenhum número normalizado sem denominador declarado com fonte** | 🟢 | sete métodos, cada um exigindo o denominador; resposta "indisponível" com motivo · `test_v0180_equity.py` (30 testes) |

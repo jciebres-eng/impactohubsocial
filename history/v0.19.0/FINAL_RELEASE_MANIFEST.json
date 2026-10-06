@@ -1,0 +1,178 @@
+{
+  "version": "0.19.0",
+  "commit": "d6306a821ffb2b56cf960865c4c388709f250f8d",
+  "branch": "chore/v0.19.0-vocabulary-firstrun-ops",
+  "timestamp": "2026-10-06T15:19:05+00:00",
+  "note": "Manifesto de release no formato pedido pelo PROMPT MASTER §59. Cada campo de status diz o que foi MEDIDO nesta rodada. Onde não foi possível medir, o campo diz BLOCKED — nunca OK.",
+  "test_summary": {
+    "total": 1355,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 26,
+    "duration_seconds": 484,
+    "previous_version_total": 1298,
+    "added_this_round": 57,
+    "command": "TEST_ADMIN_DATABASE_URL=... python3 -m unittest discover -s tests -t .",
+    "evidence": "docs/evidence/test_run_v0.19.0.log",
+    "new_suites": {
+      "test_v0190_glossary.py": 13,
+      "test_v0190_firstrun.py": 16,
+      "test_v0190_lgpd_deletion.py": 13,
+      "test_v0190_ops.py": 15
+    }
+  },
+  "migration_status": {
+    "status": "OK",
+    "applied": 36,
+    "new_this_round": [
+      "0035_v0190_acceptance_org_anonymization",
+      "0036_v0190_ops_observability"
+    ],
+    "forward_only": true,
+    "checksum_per_file": true,
+    "upgrade_path_tested": "test_v0181_migrations.py (v0.17.0 -> atual, com dado)",
+    "evidence": "docs/evidence/db_integrity_v0.19.0.txt"
+  },
+  "security_status": {
+    "status": "OK_WITH_CONDITIONS",
+    "tenant_isolation": "testado",
+    "rls_policies": 598,
+    "mfa_for_admin": true,
+    "rate_limit": "testado (429 asserido em test_api_auth.py)",
+    "new_public_route_reviewed": "/v1/public/glossary — serve só o arquivo versionado de vocabulário",
+    "pending": [
+      "provedores externos em modo simulado",
+      "auditoria de dependência bloqueada"
+    ]
+  },
+  "postgres_status": {
+    "status": "OK",
+    "version": "16",
+    "tables": 287,
+    "functions": 309,
+    "policies": 598,
+    "indexes": 802,
+    "suite_runs_against_real_db": true
+  },
+  "e2e_status": {
+    "status": "OK",
+    "journey": "test_e2e_v0181_journeys.py (18 passos, sem atalho de banco)",
+    "browser": "test_e2e_web.py (cadastro -> projeto -> publicação)",
+    "first_access_zero_data": "test_v0190_firstrun.py + smoke firstrun (12 áreas, 12 vazias, todas com motivo e próximo passo)",
+    "gap": "as seis telas da camada v0.18.0 não existem — declaradas em DESIGN_HANDOFF_FINAL.md §3"
+  },
+  "backup_status": {
+    "status": "OK_LOCAL_ONLY",
+    "scheduled": "tarefa `backup` em impacto/jobs.py, janela própria (BACKUP_INTERVAL_HOURS)",
+    "verified": [
+      "tamanho",
+      "sha256 contra o .sha256 gravado",
+      "pg_restore --list"
+    ],
+    "restore_tested": "scripts/restore_test.sh — restore OK, 36 migrações, camada de operação íntegra",
+    "evidence": "docs/evidence/restore_test_v0.19.0.log",
+    "offsite": "BLOCKED_EXTERNAL — gancho BACKUP_OFFSITE_CMD pronto, destino depende de conta do proprietário",
+    "rpo_rto": "DATA_TO_CONFIRM — o que a configuração entrega está no runbook §4-A; os alvos são decisão do proprietário"
+  },
+  "email_status": {
+    "status": "OK_IN_SIMULATION",
+    "events_recorded": "tabela email_events, ligada no mailer (não nos 8 pontos de envio)",
+    "canary": "tarefa `email_canary`, envio real pelo mailer configurado",
+    "stored": "domínio do destinatário; NUNCA o endereço nem o corpo",
+    "success_state": "accepted_by_smtp — aceitação pelo servidor, NÃO entrega",
+    "delivery_confirmation": "BLOCKED_EXTERNAL — exige webhook de bounce/entrega do provedor"
+  },
+  "accessibility_status": {
+    "status": "PARTIAL",
+    "verified": 12,
+    "not_verified": 6,
+    "evidence": "ACCESSIBILITY_REPORT.md",
+    "not_verified_list": [
+      "axe-core",
+      "leitor de tela real",
+      "segundo navegador",
+      "zoom 200%",
+      "daltonismo",
+      "navegação por voz"
+    ]
+  },
+  "dependency_status": {
+    "status": "BLOCKED_BY_ENVIRONMENT",
+    "npm_audit": "403 Forbidden no registry",
+    "pip_audit": "índice do PyPI indisponível",
+    "explicit": "NÃO se afirma ausência de vulnerabilidade; ver SECURITY_AUDIT.md §0",
+    "offline_controls_verified": [
+      "fixação de versão",
+      "inventário de terceiros",
+      "import não declarado"
+    ]
+  },
+  "observability_status": {
+    "status": "PARTIAL",
+    "new": [
+      "ops_job_runs",
+      "email_events",
+      "GET /v1/admin/ops/health"
+    ],
+    "existing": [
+      "/metrics",
+      "logs com request_id e trace_id",
+      "job_runs"
+    ],
+    "gap": "nenhum coletor configurado"
+  },
+  "known_external_dependencies": [
+    "SMTP",
+    "armazenamento S3",
+    "antivírus ClamAV",
+    "pagamento (Stripe)",
+    "provedor fiscal",
+    "IdP/OIDC",
+    "registry de dependências",
+    "destino de backup externo",
+    "coletor de métricas"
+  ],
+  "data_to_confirm": [
+    "RPO alvo",
+    "RTO alvo",
+    "endereço do canário de e-mail",
+    "destino da cópia externa de backup",
+    "aprovação jurídica das 11 minutas",
+    "regime tributário, município emissor e provedor fiscal",
+    "domínio, certificado e credenciais dos provedores",
+    "tradução dos termos editoriais do banco"
+  ],
+  "blocked_external": [
+    "auditoria de dependências",
+    "build e execução da imagem Docker",
+    "axe-core",
+    "entrega real de e-mail",
+    "restauração a partir de cópia externa",
+    "carga com rede real",
+    "provedores externos em modo produtivo"
+  ],
+  "post_design_items": [
+    "mapeamento GRI/ISSB/IRIS+",
+    "decaimento por idade na reputação",
+    "detecção de conluio",
+    "arte e níveis de selo",
+    "aplicativo móvel",
+    "tradução do conteúdo editorial do banco",
+    "procedência do preenchimento persistida",
+    "webhook de entrega de e-mail"
+  ],
+  "release_decision": "GO WITH CONDITIONS",
+  "release_decision_note": "A base técnica está pronta para a camada de design e nada TÉCNICO impede a publicação. As condições são externas — credencial, conta, infraestrutura e decisão jurídica — e cada uma tem o suporte técnico pronto para recebê-la. Não é GO porque auditoria de dependências, imagem Docker e carga com rede real continuam não provadas; não é NO-GO porque nenhuma delas é defeito do software.",
+  "report": "FINAL_PRE_DESIGN_RELEASE_REPORT.md",
+  "file_manifest": "V0.19.0_FINAL_MANIFEST.json",
+  "package": {
+    "name": "IMPACTO_v0.19.0_VOCABULARY_FIRSTRUN_OPS.zip",
+    "files": 1047,
+    "size_mb": 6.04,
+    "sha256": "e26953e204f7cced5e9d265ee9512345855928075b369562b905a59a389d614d",
+    "integrity": "unzip -t sem erro; 1047 arquivos conferidos por make_release.py --verify no pacote extraído",
+    "nested_zip": false,
+    "secrets": false,
+    "note": "Este hash é do pacote construído no commit do trabalho. O commit de FECHO acrescenta este campo e os manifestos, então o pacote entregue é o construído antes dele — a conferência que vale é a de cada arquivo (RELEASE_MANIFEST.sha256 dentro do pacote), não a do invólucro."
+  }
+}

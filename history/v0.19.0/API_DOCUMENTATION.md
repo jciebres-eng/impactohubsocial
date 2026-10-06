@@ -1,6 +1,6 @@
 # API — documentação (v0.17.0)
 
-Referência completa **gerada do código**: `docs/API.md` (**837 operações**) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (**749 operações**) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
 
 ## Camada econômica, legal e de pagamento (45 operações novas, v0.17.0)
 

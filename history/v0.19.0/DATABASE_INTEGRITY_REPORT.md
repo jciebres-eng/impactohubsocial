@@ -4,7 +4,7 @@ Todo número aqui vem de consulta ao catálogo do PostgreSQL, não de contagem �
 `scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.18.0.txt`
 (as anteriores ficaram em `docs/evidence/db_integrity_v0.16.0.txt` e `_v0.15.0.txt`).
 
-Banco medido: criado **do zero** pelas 41 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
+Banco medido: criado **do zero** pelas 32 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
 
 ## 0. Os números da v0.18.0, e o que o coletor apontou
 

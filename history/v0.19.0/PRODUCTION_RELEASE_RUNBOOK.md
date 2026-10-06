@@ -32,7 +32,7 @@
 | 2.1 | Migrações | `python -m impacto.db.migrate` (forward-only, com checksum e lock consultivo) | `python -m impacto.db.migrate --check` sem pendência; `/readyz` sem `pending_migrations` | **não há rollback de migration**: restaurar o dump pré-migração (2.3) |
 | 2.2 | Dados de referência | o próprio runner sincroniza planos, flags e regras fiscais **em rascunho** (nunca aprovadas) | `select count(*) from fiscal_rules where status='approved'` = 0 | — |
 | 2.3 | Backup ANTES de migrar | `BACKUP_DATABASE_URL=... bash scripts/backup.sh` | arquivo `.dump` + `.sha256` gerados | é o próprio rollback |
-| 2.4 | Teste de restauração | `ADMIN_DATABASE_URL=... bash scripts/restore_test.sh backups/X.dump` | imprime "restore OK", 41 migrações, cadeias íntegras, camada econômica **desligada** e camada de impacto **íntegra** | — |
+| 2.4 | Teste de restauração | `ADMIN_DATABASE_URL=... bash scripts/restore_test.sh backups/X.dump` | imprime "restore OK", 34 migrações, cadeias íntegras, camada econômica **desligada** e camada de impacto **íntegra** | — |
 | 2.5 | Carga oficial (opcional) | `scripts/import_territories.py` e `scripts/import_territory_indicators.py` — exigem `--source-name/--source-url/--source-date` | `GET /v1/territories/catalog-status` com `from_official_load` verdadeiro | reverter para o catálogo anterior (versionado) |
 
 ## 3. Aplicação

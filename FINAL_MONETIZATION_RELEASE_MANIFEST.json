@@ -4,7 +4,6 @@
   "released_on": "2026-10-06",
   "scope": "Reengenharia da monetização e fechamento técnico comercial, antes da camada de Designer.",
   "version_rationale": "0.21.0 e não 1.0.0: esta versão publica a PRIMEIRA tabela de preços da plataforma e o motor de gratuidade temporal, mas nenhum fluxo de cobrança foi exercitado com provedor real, e as 11 minutas jurídicas continuam em rascunho. Chamar de 1.0 declararia pronto para cobrar de gente de verdade, o que exige contratação e aprovação jurídica — decisões que não são técnicas.",
-
   "what_the_audit_found_before_any_change": {
     "central_finding": "Toda a infraestrutura comercial existia e estava vazia.",
     "evidence": {
@@ -23,7 +22,6 @@
     },
     "consequence_at_the_time": "Todo plano pago exibia 'Preço não divulgado' e o botão de contratar estava desabilitado. A plataforma recusava contratação em vez de inventar valor — comportamento correto, e o ponto de partida desta rodada."
   },
-
   "delivered": {
     "pricing_catalog": {
       "live_price_versions": 8,
@@ -39,7 +37,14 @@
     "free_period_engine": {
       "table": "free_periods",
       "granularity": "por conta, nunca data global no código",
-      "sources": ["2026_CAMPAIGN", "2027_NEW_SUBSCRIPTION", "PROMOTION", "GRANT", "PARTNERSHIP", "MANUAL_EXCEPTION"],
+      "sources": [
+        "2026_CAMPAIGN",
+        "2027_NEW_SUBSCRIPTION",
+        "PROMOTION",
+        "GRANT",
+        "PARTNERSHIP",
+        "MANUAL_EXCEPTION"
+      ],
       "three_months_semantics": "MESES DE CALENDÁRIO, não 90 dias (ADR-268)",
       "ends_at_semantics": "EXCLUSIVO: o período é [started_at, ends_at)",
       "commercial_timezone": "America/Sao_Paulo, aplicado na fronteira; armazenamento continua em UTC",
@@ -47,59 +52,200 @@
       "on_expiry": "a conta volta ao plano gratuito permanente. Sem cobrança, sem suspensão, sem perda de dados."
     },
     "free_access_is_not_authorization": {
-      "tables": ["commercial_offers", "offer_acceptances"],
-      "consent_values": ["free_access", "authorized"],
-      "recorded_fields": ["offer_id", "pricing_version", "plan_key", "price_version_id", "free_period_id", "billing_frequency", "payment_method", "terms_version", "privacy_version", "commercial_terms_version", "accepted_at", "accepted_by", "ip", "user_agent", "consent_status"],
+      "tables": [
+        "commercial_offers",
+        "offer_acceptances"
+      ],
+      "consent_values": [
+        "free_access",
+        "authorized"
+      ],
+      "recorded_fields": [
+        "offer_id",
+        "pricing_version",
+        "plan_key",
+        "price_version_id",
+        "free_period_id",
+        "billing_frequency",
+        "payment_method",
+        "terms_version",
+        "privacy_version",
+        "commercial_terms_version",
+        "accepted_at",
+        "accepted_by",
+        "ip",
+        "user_agent",
+        "consent_status"
+      ],
       "enforced_by": "gatilho charge_requires_authorization, no BANCO",
       "why_in_the_database": "Um módulo pode ser contornado por outro caminho de escrita — rota nova, job, script, console. Um gatilho, não."
     },
     "payments": {
-      "billing_frequency": ["one_time", "installment", "recurring"],
+      "billing_frequency": [
+        "one_time",
+        "installment",
+        "recurring"
+      ],
       "installments_are_not_recurrence": true,
       "boleto_installments_require_cnpj": true,
       "validated_where": "backend (services/offers.py), com teste que chama o serviço sem passar por rota",
       "idempotency_key": "platform_charges(org_id, idempotency_key) UNIQUE, escopada por organização"
     },
     "usage_engine": {
-      "tables": ["usage_counters", "usage_alerts", "spend_limits"],
-      "thresholds": [70, 90, 100],
-      "spend_limit_actions": ["warn", "hard_stop"],
+      "tables": [
+        "usage_counters",
+        "usage_alerts",
+        "spend_limits"
+      ],
+      "thresholds": [
+        70,
+        90,
+        100
+      ],
+      "spend_limit_actions": [
+        "warn",
+        "hard_stop"
+      ],
       "overage_policy": "Exceder o limite do plano NÃO gera cobrança adicional: o excedente é interrompido. Não há preço de excedente publicado.",
       "live_count_still_blocks": "sim — o contador persistido avisa e lembra; quem bloqueia continua sendo a contagem ao vivo"
     },
     "commercial_notifications": {
-      "windows_days": [90, 60, 30, 7, 1],
+      "windows_days": [
+        90,
+        60,
+        30,
+        7,
+        1
+      ],
       "weekly_reminder_within_days": 30,
       "end_notice": true,
       "source": "FREE_PERIOD_END",
       "frontend_computes_dates": false,
-      "jobs": ["commercial_sweep", "usage_alerts"]
+      "jobs": [
+        "commercial_sweep",
+        "usage_alerts"
+      ]
     },
     "commercial_ui": {
       "public_pricing_page": "/planos",
-      "screens": ["/planos", "/conta/comercial", "/conta/consumo", "/conta/plano (faixa de período gratuito)"],
+      "screens": [
+        "/planos",
+        "/conta/comercial",
+        "/conta/consumo",
+        "/conta/plano (faixa de período gratuito)"
+      ],
       "commercial_routes": 11,
-      "i18n_namespaces": ["billing", "pricing", "subscription", "free_period", "commercial", "checkout", "invoice", "payment", "cancellation", "usage"],
+      "i18n_namespaces": [
+        "billing",
+        "pricing",
+        "subscription",
+        "free_period",
+        "commercial",
+        "checkout",
+        "invoice",
+        "payment",
+        "cancellation",
+        "usage"
+      ],
       "i18n_keys_per_locale": 82,
       "i18n_keys_total": 246,
-      "i18n_locales": ["pt-BR", "en", "es"],
+      "i18n_locales": [
+        "pt-BR",
+        "en",
+        "es"
+      ],
       "i18n_keys_before_this_round": 0
+    },
+    "templates_processes_and_visual_flows": {
+      "why_in_this_round": "Pedido explícito do proprietário: 'documentos modelos inseridos formatados e disponíveis, processos mapeados, fluxos visuais identificados e visíveis em cada perfil'. A auditoria achou três situações diferentes, e duas delas eram de visibilidade, não de ausência.",
+      "document_templates": {
+        "before": "3 modelos publicados, todos do lado de quem PROPÕE; a tela de modelos não estava no menu de NENHUM perfil",
+        "now": 5,
+        "added": [
+          "edital_chamamento_mrosc (art. 24 da Lei 13.019/2014, 24 campos)",
+          "termo_parceria_mrosc (art. 42 da Lei 13.019/2014, 27 campos)"
+        ],
+        "total_fields": 100,
+        "not_added_and_why": "Nenhum modelo para empresa, financiador privado ou profissional. Os dois novos existem porque há FONTE LEGAL citável para a estrutura deles. Não existe norma dizendo o que uma política de investimento social privado ou uma proposta técnica de consultoria precisa conter — inventar produziria um modelo que parece padrão e não é padrão de nada."
+      },
+      "visibility_fixed": {
+        "before": "/documentos/modelos não estava no menu de nenhum perfil; /documentos/montagens só em osc e company — embora as rotas sempre permitissem todos",
+        "now": "osc, company, government e provider alcançam documentos, montagens e modelos",
+        "individual_and_platform": "continuam sem cofre de documentos POR DESENHO; o teste exige a regra (todo perfil com /documentos alcança montagens e modelos), não o resultado"
+      },
+      "visual_flows": {
+        "before": "o componente Trail existia, com três trilhas definidas, e era usado em UM lugar: o detalhe de candidatura",
+        "now": 5,
+        "flows": [
+          "jornada do perfil (/area e /ajuda/comece-aqui)",
+          "candidatura (/candidaturas/:id)",
+          "ciclo do projeto (/projetos/:id/situacao)",
+          "montagem de documento (/documentos/montagens/:id)",
+          "formalização da OSC (/instituicao)"
+        ],
+        "no_step_is_invented": "cada etapa é um valor que o backend já produzia: fases de core/lifecycle.py, situações de document_assemblies.status, etapas de config/onboarding_paths.json",
+        "locked_by": [
+          "test_the_trail_is_used_in_more_than_one_place",
+          "test_every_trail_defined_is_actually_rendered"
+        ]
+      },
+      "mapped_processes": {
+        "journeys_per_profile": {
+          "osc": 15,
+          "company": 7,
+          "provider": 5,
+          "individual": 4,
+          "government": 4,
+          "platform": 0
+        },
+        "detected_by_real_data": true,
+        "declared_as_hypothesis": "sim — config/onboarding_paths.json se declara HIPÓTESE, e a tela repete isso ('Jornada em validação editorial'); há teste que exige a declaração",
+        "still_unmapped": [
+          "negociação (proposta → acordo → aporte)",
+          "marketplace",
+          "prestação de contas",
+          "denúncia e apuração",
+          "jornada do perfil platform"
+        ]
+      },
+      "document": "PROCESS_FLOWS.md"
     }
   },
-
-  "migrations": ["0042_v0210_free_period.sql", "0043_v0210_commercial_offer.sql", "0044_v0210_usage_engine.sql"],
-
+  "migrations": [
+    "0042_v0210_free_period.sql",
+    "0043_v0210_commercial_offer.sql",
+    "0044_v0210_usage_engine.sql",
+    "0045_v0210_gov_templates.sql"
+  ],
   "tests": {
-    "new_test_files": ["test_v0210_pricing_catalog.py", "test_v0210_free_period.py", "test_v0210_offer.py", "test_v0210_usage.py", "test_v0210_commercial_ui.py"],
-    "new_tests": 109,
-    "full_suite": 1666,
+    "new_test_files": [
+      "test_v0210_commercial_ui.py",
+      "test_v0210_flows.py",
+      "test_v0210_free_period.py",
+      "test_v0210_offer.py",
+      "test_v0210_pricing_catalog.py",
+      "test_v0210_usage.py"
+    ],
+    "new_tests": 126,
+    "full_suite": 1683,
     "failures": 0,
     "skipped": 26,
-    "duration_seconds": 522,
-    "temporal_boundary_instants_tested": ["2026-12-31 23:59:58", "2026-12-31 23:59:59", "2027-01-01 00:00:00", "2027-01-01 00:00:01", "2027-01-01 02:00 UTC"],
-    "subscription_dates_tested": ["2027-01-01", "2027-02-01", "2027-02-15", "2027-02-28", "2027-03-31"]
+    "duration_seconds": 525,
+    "temporal_boundary_instants_tested": [
+      "2026-12-31 23:59:58",
+      "2026-12-31 23:59:59",
+      "2027-01-01 00:00:00",
+      "2027-01-01 00:00:01",
+      "2027-01-01 02:00 UTC"
+    ],
+    "subscription_dates_tested": [
+      "2027-01-01",
+      "2027-02-01",
+      "2027-02-15",
+      "2027-02-28",
+      "2027-03-31"
+    ]
   },
-
   "defects_found_and_fixed_in_this_round": [
     {
       "defect": "A exigência de autorização de cobrança podia ser burlada",
@@ -142,9 +288,22 @@
       "fix": "Aviso no topo apontando para a regra vigente. O documento permanece: ele descreve mecanismos que continuam valendo.",
       "found_by": "auditoria desta rodada",
       "severity": "baixa"
+    },
+    {
+      "defect": "Um teste da suíte era dependente da hora do dia e não sabia",
+      "how": "A janela de silêncio de notificações (22:00–07:00, v0.20.0) adia a entrega preenchendo `deliver_after`, e o envio não recolhe o que está adiado. Entre 22h e 7h o teste de retentativa de e-mail reprovava — em qualquer execução noturna, e só nela. Passou despercebido por sempre rodar de dia.",
+      "fix": "O teste libera a entrega antes de exercitar a retentativa, que é o assunto dele; a janela de silêncio tem teste próprio.",
+      "found_by": "execução da suíte às 22h23",
+      "severity": "média — reprovaria toda execução noturna"
+    },
+    {
+      "defect": "Teste de corpo acima do limite dependia de quem ganhasse uma corrida de rede",
+      "how": "Acima do teto o servidor responde 413 e encerra enquanto o cliente ainda envia bytes. Isolado o cliente lia a resposta; na suíte completa a conexão às vezes caía antes.",
+      "fix": "As duas garantias continuam exigidas — quando há resposta ela é 413 payload_too_large, e nada é criado em nenhum caso — com a leitura tentada mais de uma vez para não virar letra morta.",
+      "found_by": "regressão completa",
+      "severity": "baixa — defeito do teste, não do produto"
     }
   ],
-
   "not_done_and_why": [
     {
       "item": "Ativar o take rate de 10% do marketplace",
@@ -187,33 +346,76 @@
       "blocker_type": "falta de operação"
     }
   ],
-
   "invariants_enforced_in_the_database": [
-    {"invariant": "Não há cobrança sem autorização vigente", "trigger": "charge_requires_authorization", "migration": "0043"},
-    {"invariant": "Preço não se sobrescreve", "trigger": "price_version_immutable", "migration": "0017"},
-    {"invariant": "Aumento exige aviso de 30 dias", "trigger": "price_apply_guard", "migration": "0017"},
-    {"invariant": "Período gratuito concedido não se reescreve", "trigger": "free_period_immutable", "migration": "0042"},
-    {"invariant": "Aceite é prova e não se altera", "trigger": "acceptance_immutable", "migration": "0043"},
-    {"invariant": "Take rate e success fee não se ativam sem custódia", "trigger": "monetization_rule_gate", "migration": "0020"},
-    {"invariant": "is_simulated é derivada do provedor", "trigger": "charge_simulated_flag", "migration": "0022 (revisto em 0043)"}
+    {
+      "invariant": "Não há cobrança sem autorização vigente",
+      "trigger": "charge_requires_authorization",
+      "migration": "0043"
+    },
+    {
+      "invariant": "Preço não se sobrescreve",
+      "trigger": "price_version_immutable",
+      "migration": "0017"
+    },
+    {
+      "invariant": "Aumento exige aviso de 30 dias",
+      "trigger": "price_apply_guard",
+      "migration": "0017"
+    },
+    {
+      "invariant": "Período gratuito concedido não se reescreve",
+      "trigger": "free_period_immutable",
+      "migration": "0042"
+    },
+    {
+      "invariant": "Aceite é prova e não se altera",
+      "trigger": "acceptance_immutable",
+      "migration": "0043"
+    },
+    {
+      "invariant": "Take rate e success fee não se ativam sem custódia",
+      "trigger": "monetization_rule_gate",
+      "migration": "0020"
+    },
+    {
+      "invariant": "is_simulated é derivada do provedor",
+      "trigger": "charge_simulated_flag",
+      "migration": "0022 (revisto em 0043)"
+    }
   ],
-
-  "payment_never_buys": ["reputação", "verificação/selo", "impacto", "evidência", "veracidade de afirmação", "elegibilidade", "qualidade de match", "posição em ranking"],
+  "payment_never_buys": [
+    "reputação",
+    "verificação/selo",
+    "impacto",
+    "evidência",
+    "veracidade de afirmação",
+    "elegibilidade",
+    "qualidade de match",
+    "posição em ranking"
+  ],
   "payment_never_buys_enforced_by": "test_no_code_path_turns_a_plan_into_a_score — nenhum módulo de reputação, impacto, match, selo, afirmação, equidade ou elegibilidade consulta qualquer tabela comercial",
-
   "documents": [
-    "PRICING_BIBLE.md", "PRICING_RECONCILIATION.md", "PRICING_CATALOG.md", "PRICING_VERSION_2027_01.md",
-    "MONETIZATION_ARCHITECTURE.md", "BILLING_ARCHITECTURE.md", "FULL_FREE_2026.md", "COMMERCIAL_TERMS.md",
-    "COMMERCIAL_UX_SPEC.md", "PRICING_BENCHMARKS.md", "UNIT_ECONOMICS.md", "24_MONTH_FINANCIAL_MODEL.md",
-    "BILLING_SECURITY.md", "DESIGNER_HANDOFF_MONETIZATION.md"
+    "PRICING_BIBLE.md",
+    "PRICING_RECONCILIATION.md",
+    "PRICING_CATALOG.md",
+    "PRICING_VERSION_2027_01.md",
+    "MONETIZATION_ARCHITECTURE.md",
+    "BILLING_ARCHITECTURE.md",
+    "FULL_FREE_2026.md",
+    "COMMERCIAL_TERMS.md",
+    "COMMERCIAL_UX_SPEC.md",
+    "PRICING_BENCHMARKS.md",
+    "UNIT_ECONOMICS.md",
+    "24_MONTH_FINANCIAL_MODEL.md",
+    "BILLING_SECURITY.md",
+    "DESIGNER_HANDOFF_MONETIZATION.md",
+    "PROCESS_FLOWS.md"
   ],
-
-  "adrs": "267 a 280",
+  "adrs": "267 a 283",
   "history_snapshot": "history/v0.20.0/ (20 arquivos)",
-
   "verdict": {
     "designer_layer": "GO",
-    "designer_rationale": "A camada comercial está completa, testada e documentada, com as quatro telas construídas e o i18n nos três idiomas. O que falta para cobrar não muda a interface.",
+    "designer_rationale": "A camada comercial está completa, testada e documentada, com as quatro telas construídas e o i18n nos três idiomas. Além dela, esta rodada tornou visíveis os modelos de documento e os fluxos que já existiam e não apareciam: a Trilha passou de uma tela para cinco, e modelos e montagens entraram no menu dos quatro perfis que têm cofre de documentos. O que falta para cobrar não muda a interface.",
     "web_publication": "NO-GO",
     "web_publication_rationale": "As 11 minutas jurídicas estão em rascunho, não há provedor de pagamento contratado e tax_behavior está indefinido. Publicar permitiria que alguém tentasse contratar e recebesse uma recusa, ou pior, aceitasse termos que ainda não existem. O caminho restante é contratual e jurídico, não técnico.",
     "charging_real_customers": "NO-GO",

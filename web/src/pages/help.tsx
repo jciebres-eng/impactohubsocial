@@ -7,6 +7,7 @@ import { Link, navigate, useLocation } from "../router";
 import { useSession } from "../session";
 import { date, dateTime, label } from "../format";
 import { Button, Field, Group, Input, KeyValue, PageHead, Panel, Pill, Pager, Select, StateView, TextArea, useAction, useForm, useLoad, useToast, Chips } from "../ui/kit";
+import { JourneyTrail } from "../ui/trail";
 
 // ----------------------------------------------------------------------------------------- moldura pública
 export function PublicFrame({ children }: { children: ReactNode }) {
@@ -825,6 +826,10 @@ export function Start() {
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.steps.length && "Ainda não há jornada cadastrada para este tipo de organização."}>
         {data && (
           <>
+            {/* A mesma jornada que já vinha do servidor, agora desenhada como Trilha. A lista
+                ordenada continua abaixo porque é ela que leva à ação: a trilha diz ONDE a pessoa
+                está, a lista diz o que fazer. */}
+            <JourneyTrail steps={data.steps} />
             <div className="meter" role="progressbar" aria-valuenow={data.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Progresso da jornada"><span style={{ width: `${data.percent}%` }} /></div>
             <p className="muted">{data.done} de {data.total} etapas · {data.percent}%</p>
             <ol className="steps">{data.steps.map((s: any) => (

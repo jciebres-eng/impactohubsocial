@@ -3,6 +3,7 @@ import { api } from "../api";
 import { money } from "../format";
 import { Link, navigate } from "../router";
 import { Button, PageHead, Panel, Pill, StateView, useAction, useLoad } from "../ui/kit";
+import { JourneyTrail } from "../ui/trail";
 
 // WORKSPACE — não é "dashboard por perfil".
 //
@@ -35,11 +36,36 @@ export function Workspace() {
         ) : undefined}
       />
       <p className="muted small">{data.note}</p>
+      {/* A JORNADA DO PERFIL, na entrada do perfil. Ela já era calculada pelo servidor
+          (`GET /v1/help/start`, de `config/onboarding_paths.json`, marcada por dado real e não por
+          autodeclaração) e só aparecia dentro de /ajuda, atrás do link do rodapé do menu — ou seja,
+          o mapa do caminho de cada perfil existia e ficava onde ninguém passa. */}
+      <JourneyAtWork />
       {data.layout.map((sec: any) => (
         <Section key={sec.key} id={sec.key} title={sec.title} data={data.sections[sec.key]}
                  counts={data.counts} reload={reload} />
       ))}
     </>
+  );
+}
+
+
+/** A jornada do perfil, resumida: a Trilha e quantas etapas faltam.
+
+ *  Carrega à parte do workspace de propósito — se a jornada falhar, a área de trabalho continua
+ *  abrindo. Um mapa é orientação, não pré-requisito para trabalhar. */
+function JourneyAtWork() {
+  const { data } = useLoad<any>("/v1/help/start");
+  if (!data?.steps?.length) return null;
+  const falta = data.total - data.done;
+  return (
+    <div className="stack">
+      <JourneyTrail steps={data.steps} />
+      <p className="muted small">
+        {falta === 0 ? "Jornada concluída." : `${falta} etapa${falta === 1 ? "" : "s"} para concluir sua jornada.`}
+        {" "}<Link to="/ajuda/comece-aqui">Ver o caminho completo</Link>
+      </p>
+    </div>
   );
 }
 

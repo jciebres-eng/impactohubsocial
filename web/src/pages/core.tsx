@@ -6,6 +6,8 @@ import { date, dateTime } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
+// A Trilha é o elemento de identidade da plataforma e, até a v0.21.0, aparecia num lugar só.
+import { ASSEMBLY_TRAIL, PROJECT_PHASE_TRAIL, Trail } from "../ui/trail";
 
 // Esta tela é FUNCIONAL: usa o mesmo kit e os mesmos tokens do restante do app. A camada de design vem depois,
 // com a designer — aqui o objetivo é que tudo que o backend faz tenha caminho de uso e nada fique escondido.
@@ -145,6 +147,11 @@ export function Lifecycle({ id }: { id: string }) {
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <>
+            {/* A fase vem do servidor (`core/lifecycle.py::phase()`); a trilha só a desenha. Antes a
+                fase era uma palavra solta ao lado da situação, e as 17 situações do projeto não
+                tinham mapa nenhum em tela. */}
+            <Trail steps={PROJECT_PHASE_TRAIL} current={data.phase}
+                   ended={["cancelled", "rejected", "archived"].includes(data.status) ? data.status : undefined} />
             <Panel title="Agora">
               <KeyValue items={[["Situação", <Pill key="s" status={data.status}>{data.label}</Pill>], ["Fase", data.phase]]} />
             </Panel>
@@ -664,6 +671,11 @@ export function AssemblyDetail({ id }: { id: string }) {
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && ev && (
           <>
+            {/* O fluxo MODELO → MONTAGEM → COMPLETUDE → GERAÇÃO → REVISÃO → ASSINATURA existia só
+                como desenho ASCII em DOCUMENT_ASSEMBLY.md §1. A tela mostrava um selo de situação e
+                não dizia em que ponto do caminho a montagem estava. */}
+            <Trail steps={ASSEMBLY_TRAIL} current={data.status}
+                   ended={["blocked", "rejected"].includes(data.status) ? data.status : undefined} />
             <Panel title="Situação da montagem">
               <KeyValue items={[
                 ["Completude", `${ev.completeness}% (${ev.filled} de ${ev.total} campos)`],

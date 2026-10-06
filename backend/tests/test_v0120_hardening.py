@@ -375,6 +375,19 @@ class MailDelivery(unittest.TestCase):
         with db_system() as d:
             d.scalar("SELECT app_notify($1,$2,'billing.notice',$3,$4,$5)", org.org_id, org.user["id"],
                      "Aviso de cobrança de teste", "Corpo do aviso.", "/conta/plano")
+            # v0.21.0 — ESTE TESTE ERA DEPENDENTE DA HORA, e não sabia.
+            #
+            # A v0.20.0 criou a janela de silêncio (22:00–07:00): o gatilho `notification_fill`
+            # adia a entrega preenchendo `deliver_after`, e `notification_emails` não recolhe o que
+            # está adiado. Entre 22h e 7h, portanto, nenhuma entrega era criada e este teste
+            # reprovava — em qualquer execução noturna, e só nela. Passou despercebido por rodar de
+            # dia; encontrado numa execução às 22h23.
+            #
+            # O assunto deste teste é a RETENTATIVA, não a janela de silêncio (que tem teste
+            # próprio em test_v0200_notifications). Então ele libera a entrega e segue.
+            d.run("UPDATE notifications SET deliver_after = now() - interval '1 minute',"
+                  " throttled = false WHERE user_id = $1 AND kind = 'billing.notice'",
+                  org.user["id"])
         st = server()["state"]
 
         class BrokenMailer:

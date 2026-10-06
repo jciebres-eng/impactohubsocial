@@ -11,6 +11,33 @@ export const INTEREST_TRAIL = [["interest", "Interesse"], ...PLATFORM_TRAIL.slic
 export const EXTERNAL_TRAIL = [["draft", "Preparação"], ["submitted", "Protocolo"], ["approved", "Resultado"], ["in_execution", "Execução"],
   ["reporting", "Prestação de contas"], ["closed", "Encerramento"]] as const;
 
+
+/** FASES DO PROJETO. Não é uma invenção de UI: `building/open/execution/closed` são a classificação
+ *  que `impacto/core/lifecycle.py::phase()` aplica às 17 situações, e que `GET /v1/projects/{id}/lifecycle`
+ *  devolve em `phase`. Até a v0.21.0 a tela mostrava a fase como uma palavra solta ao lado da
+ *  situação; a máquina existia e o mapa dela não era desenhado em lugar nenhum. */
+export const PROJECT_PHASE_TRAIL = [
+  ["building", "Montagem"], ["open", "Aberto a captação"], ["execution", "Execução"], ["closed", "Encerrado"],
+] as const;
+
+/** MONTAGEM DE DOCUMENTO. As etapas são os valores reais de `document_assemblies.status` na ordem
+ *  do fluxo que `DOCUMENT_ASSEMBLY.md` §1 desenha em ASCII — e que, até a v0.21.0, existia só lá.
+ *  `blocked` e `rejected` não entram como etapa: são desvios do caminho, e `ended` os mostra. */
+export const ASSEMBLY_TRAIL = [
+  ["drafting", "Preenchimento"], ["ready", "Completo"], ["generated", "Gerado"],
+  ["in_review", "Em revisão"], ["approved", "Aprovado"], ["signed", "Assinado"],
+] as const;
+
+/** Trilha montada a partir da jornada que o servidor calcula por tipo de organização
+ *  (`GET /v1/help/start`, de `config/onboarding_paths.json`). A etapa "atual" é a primeira não
+ *  concluída — e não a última concluída, porque é para onde a pessoa deve olhar. */
+export function JourneyTrail({ steps }: { steps: { key: string; title: string; done: boolean }[] }) {
+  if (!steps?.length) return null;
+  const atual = steps.find((s) => !s.done);
+  return <Trail steps={steps.map((s) => [s.key, s.title] as const)}
+                current={atual ? atual.key : steps[steps.length - 1].key} />;
+}
+
 export function Trail({ steps, current, ended }: { steps: readonly (readonly [string, string])[]; current: string; ended?: string }) {
   const idx = steps.findIndex(([k]) => k === current);
   return (

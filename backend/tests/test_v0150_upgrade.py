@@ -170,9 +170,21 @@ class UpgradePathTests(unittest.TestCase):
                                0, f"{table} sem política")
 
     def test_08_platform_templates_and_providers_are_seeded(self):
-        self.assertEqual(self.conn.scalar("SELECT count(*) FROM document_templates WHERE owner_org_id IS NULL"
-                                          " AND status = 'published'"), 3)
-        self.assertEqual(self.conn.scalar("SELECT count(*) FROM document_template_fields"), 49)
+        """Os modelos da plataforma chegam carregados e com campos.
+
+        v0.21.0 — a contagem fixa (3 modelos, 49 campos) saiu. Ela travava o NÚMERO, e o número é a
+        parte que deve crescer: a v0.21.0 acrescentou os dois modelos do lado de quem fomenta
+        (edital do art. 24 e termo do art. 42 da Lei 13.019/2014) e o teste reprovou por isso.
+        O que precisa continuar garantido é que a carga ACONTECEU e que os modelos vêm formatados —
+        um modelo sem campo é um arquivo vazio com nome bonito.
+        """
+        modelos = self.conn.query("SELECT id::text AS id, code FROM document_templates"
+                                  " WHERE owner_org_id IS NULL AND status = 'published'")
+        self.assertGreaterEqual(len(modelos), 3, "a carga dos modelos da plataforma não aconteceu")
+        for m in modelos:
+            n = self.conn.scalar("SELECT count(*) FROM document_template_fields WHERE template_id = $1",
+                                 m["id"])
+            self.assertGreaterEqual(n, 8, f"{m['code']} chegou com {n} campos")
         states = {r["key"]: r["state"] for r in self.conn.query("SELECT key, state FROM signature_providers")}
         self.assertEqual(states["platform_advanced"], "production")
         self.assertEqual(states["icp_brasil"], "unavailable")

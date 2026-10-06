@@ -1,6 +1,6 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.15.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+Produto: SemVer (`VERSION` = `0.16.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
 (migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: `match-engine@1.0.0`, `fiscal-engine@1.0.0`; pesos `weights@1.0`; planos `plans@1.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
 
@@ -39,3 +39,33 @@ tag pode criá-la com:
 git tag -a v0.15.0-final-pre-design 67aa058 -m "v0.15.0 — núcleo do produto fechado, baseline técnica pré-design"
 git push origin v0.15.0-final-pre-design
 ```
+
+**v0.16.0** (MINOR): IMPACT NETWORK CORE — a rede de impacto, as personas e a cobrança versionada. **26** tabelas novas
+(**231** no total), 79 rotas novas (**704** operações), duas migrações (`0016_v0160_impact_network.sql`,
+`0017_v0160_billing_v2.sql`). A `0015` já estava liberada e **não** foi editada; as `0016`/`0017` foram editadas
+durante o desenvolvimento (nunca aplicadas fora do ambiente de construção) e a partir desta liberação são imutáveis.
+
+Motores novos versionados: `readiness@1.0.0`, `recommendation@1.0.0`. Planos: **`plans@1.2`**, com a regra comercial
+desta rodada (14 dias de teste · US$ 1,99/mês nos 3 primeiros meses pagos · depois US$ 19,99/mês ou US$ 179,88/ano).
+
+**Mudanças de contrato, declaradas:**
+
+1. `money()` no frontend passou a receber a moeda — mudança interna do cliente, não da API.
+2. `GET /v1/readiness` continua igual; a avaliação **por finalidade** ganhou rota própria
+   (`/v1/readiness/purposes`) porque a anterior colidia com o padrão de caminho.
+3. `monetization.quote()` devolve campos **novos** (`base_cents`, `first_cents`, `first_price_source`,
+   `intro_cents`, `currency`, `tax_behavior`, `provider_configured`). Nenhum campo anterior saiu.
+4. `conversations` trocou `UNIQUE(org_a, org_b)` por `ux_conv_pair_context`: o mesmo par pode ter conversas sobre
+   assuntos diferentes. Conversa antiga continua válida — é relaxamento, não quebra.
+5. A moeda padrão da cobrança passou de **BRL** para **USD**, por decisão comercial desta rodada. Isto **muda
+   comportamento** e está destacado aqui e no CHANGELOG. Planos antigos sem versão de preço em USD continuam
+   recusando contratação online em vez de inventar conversão.
+
+**Nenhuma tabela foi removida.** As 79 rotas são adições.
+
+Snapshot dos documentos do v0.15.0: `history/v0.15.0/` (28 arquivos, com `NOTE.md` explicando que a v0.16.0 mudou
+contagens de tabela, de rota e de teste, e a regra comercial para dólar).
+
+**Datas de produto são UTC** a partir desta versão (`backend/impacto/clock.py`), com teste de arquitetura. Antes
+disso, `date.today()` usava o fuso local do processo — o que, num contêiner em UTC-4, gravava o dia anterior durante
+algumas horas de cada dia.

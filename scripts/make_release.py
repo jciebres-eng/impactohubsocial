@@ -27,7 +27,10 @@ EXCLUDE_SUFFIX = {".pyc", ".pyo", ".log", ".sqlite", ".sqlite3", ".db", ".pem", 
                   ".dump", ".bak", ".tar", ".gz", ".bz2", ".xz", ".7z", ".rar"}
 EXCLUDE_NAMES = {".env", ".DS_Store", "RELEASE_MANIFEST.sha256", "RELEASE_MANIFEST.csv"}
 # Exceções: evidência de teste (.log) é parte do release
-KEEP_EXACT = {"docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log", "docs/evidence/perf_v0.15.0.log", "history/v0.14.0/test_run_v0.14.0.log", "history/v0.14.0/VERSION", "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+KEEP_EXACT = {"docs/evidence/test_run_v0.16.0.log", "docs/evidence/ruff_v0.16.0.log",
+              "docs/evidence/perf_v0.16.0.log", "history/v0.15.0/test_run_v0.15.0.log",
+              "history/v0.15.0/VERSION",
+              "docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log", "docs/evidence/perf_v0.15.0.log", "history/v0.14.0/test_run_v0.14.0.log", "history/v0.14.0/VERSION", "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -77,7 +80,35 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "scripts/db_integrity_report.py",
             "docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log",
             "docs/evidence/perf_v0.15.0.log", "docs/evidence/db_integrity_v0.15.0.txt",
-            "history/v0.14.0/VERSION"]
+            "history/v0.14.0/VERSION",
+            # v0.16.0 — IMPACT NETWORK CORE
+            "IMPACT_NETWORK_ARCHITECTURE.md", "IMPACT_GRAPH.md", "RELATIONSHIP_MODEL.md", "PROPOSAL_ENGINE.md",
+            "IMPACT_MARKETPLACE.md", "MESSAGING_ARCHITECTURE.md", "NOTIFICATION_ARCHITECTURE.md",
+            "IMPACT_REPORTING.md", "ROLE_BASED_EXPERIENCE.md", "WORKSPACE_ARCHITECTURE.md",
+            "PRIVACY_VISIBILITY_MATRIX.md", "MODERATION_LADDER.md", "BILLING_V2.md",
+            "INFORMATION_ARCHITECTURE.md", "NAVIGATION_MODEL.md", "DESIGN_HANDOFF_FINAL.md",
+            "MOBILE_READINESS_FINAL.md", "FINAL_IMPACT_NETWORK_HARDENING_REPORT.md",
+            "V0.16.0_FINAL_MANIFEST.json",
+            "backend/migrations/0016_v0160_impact_network.sql", "backend/migrations/0017_v0160_billing_v2.sql",
+            "backend/impacto/clock.py",
+            "backend/impacto/network/__init__.py", "backend/impacto/network/relationships.py",
+            "backend/impacto/network/proposals.py", "backend/impacto/network/marketplace.py",
+            "backend/impacto/network/messaging.py", "backend/impacto/network/notify.py",
+            "backend/impacto/network/events.py", "backend/impacto/network/readiness.py",
+            "backend/impacto/network/recommendation.py", "backend/impacto/network/profiles.py",
+            "backend/impacto/network/impact_report.py", "backend/impacto/network/workspace.py",
+            "backend/impacto/network/enforcement.py",
+            "backend/impacto/api/network_schemas.py", "backend/impacto/api/network_core_routes.py",
+            "backend/impacto/api/network_hub_routes.py",
+            "backend/tests/test_v0160_network.py", "backend/tests/test_v0160_invariants.py",
+            "backend/tests/test_v0160_billing.py", "backend/tests/test_e2e_v0160_journeys.py",
+            "scripts/sql_prepare_check.py",
+            "web/src/pages/workspace.tsx", "web/src/pages/net.tsx", "web/src/pages/market.tsx",
+            "web/src/pages/talk.tsx", "web/src/pages/impactreport.tsx", "web/src/pages/publicprofile.tsx",
+            "web/src/pages/territory.tsx", "web/src/pages/moderation.tsx",
+            "docs/evidence/test_run_v0.16.0.log", "docs/evidence/ruff_v0.16.0.log",
+            "docs/evidence/perf_v0.16.0.log", "docs/evidence/db_integrity_v0.16.0.txt",
+            "history/v0.15.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

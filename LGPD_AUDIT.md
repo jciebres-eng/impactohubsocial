@@ -1,4 +1,4 @@
-# LGPD_AUDIT — v0.15.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.16.0 (técnico; não é parecer jurídico)
 
 A matriz por categoria de dado — base legal, finalidade, prazo, o que acontece no fim do prazo e quem tem acesso —
 está em **`DATA_RETENTION_MATRIX.md`**, inclusive a lista do que a plataforma **deliberadamente não coleta** (sem
@@ -7,6 +7,78 @@ cadastro nominal de beneficiário, sem dado sensível, sem dado biométrico, sem
 armazenamento, DPO nomeado, RIPD e ROPA formal).
 
 
+
+
+## v0.16.0 — a rede, o perfil público e o grupo beneficiário
+
+Esta rodada criou a primeira superfície **pública por escolha da pessoa** (`impacto.app/@identificador`) e a
+primeira coluna que chega perto de categoria especial (`beneficiary_groups`). As duas foram tratadas como o centro
+da revisão de privacidade.
+
+### A página pública
+
+| Controle | Como |
+|---|---|
+| Publicar é **ato explícito** | o perfil nasce `private`; nada vai ao ar sem a pessoa ligar |
+| A página não consulta tabela privada | lê **só** `public_fields`, uma projeção curada montada pelo servidor |
+| Lista fechada do que pode ser projetado | `PROJECTABLE`, 18 chaves |
+| Lista do que **nunca** é público | `NEVER_PUBLIC`: CNPJ, e-mail, telefone, endereço, número de documento, situação e risco de conformidade, grupo beneficiário, CPF, data de nascimento, dados bancários, receita |
+| Rede de segurança na gravação | `_assert_no_private()` **falha a gravação** se qualquer chave proibida entrar na projeção |
+| Contato desligado por padrão | `show_contact` falso; ligar é escolha |
+| Número de registro profissional não vai ao ar | a página diz "tem CREA/SP verificado", não qual é o número |
+| Credencial não verificada e experiência não confirmada não aparecem | a plataforma não repassa afirmação sem conferência |
+| Perfil suspenso responde **404** | "existe, mas está suspenso" é informação sobre a moderação |
+| Histórico de identificadores é append-only e legível pela dona | quem confiou no endereço `@nome` tem como saber que ele mudou de mãos |
+
+### `BeneficiaryProfile ≠ SensitivePersonalData`
+
+A distinção pedida, aplicada:
+
+> "Este projeto atende mulheres em situação de vulnerabilidade" → **atributo do projeto**.
+> "Esta pessoa é mulher e pertence a determinado grupo vulnerável" → **dado pessoal sensível**, e a plataforma não
+> coleta.
+
+| Controle | Como se verifica |
+|---|---|
+| A coluna existe em **uma** tabela (`territory_needs`) | invariante que consulta `information_schema` e falha se aparecer em outra |
+| **Não é filtro de busca** em nenhuma rota | invariante que percorre os modelos de `query` das 704 rotas |
+| A política de uso está gravada **no banco** | `taxonomies.usage_policy`: "é proibido usar este conjunto para filtrar, segmentar ou inferir característica de usuária ou usuário" |
+| Nenhuma inferência de atributo pessoal | não há caminho no código que derive característica de pessoa; a recomendação usa estado de projeto, documento e proposta |
+| Continua sem cadastro nominal de beneficiário final | ADR-139, inalterado |
+
+### Dado pessoal nas superfícies novas
+
+| Superfície | O que guarda de pessoa | Tratamento |
+|---|---|---|
+| `relationships` | nenhum — liga **organizações** | o ator que criou fica em coluna de auditoria |
+| `proposals` | o texto que as partes escreverem | visível **só** às duas partes; campo livre, com o aviso de sempre na interface |
+| `messages` | o que as partes escreverem | só as duas organizações; conversa profissional exige contexto |
+| `notifications` | destinatário (pessoa) | lida só pela própria pessoa; preferência por grupo e canal |
+| `domain_events` | ator e organizações | sem dado pessoal no corpo do fato |
+| `professional_experiences` | nome da pessoa e da organização citada | entra no público **só** depois de confirmada |
+| `enforcement_actions` | alvo e quem decidiu | o alvo vê a sua; o denunciante **nunca** é revelado |
+| `price_change_notices` | organização avisada | append-only, exceto o "ciente" |
+
+### Direitos do titular nas tabelas novas
+
+A exportação (`/v1/privacy/export`) e a anonimização (`/v1/privacy/delete-account`) continuam valendo. Duas notas
+honestas:
+
+1. **A exportação ainda não inclui as entidades novas da rede** (relações, propostas, recados, perfil público). É
+   pendência declarada, não esquecimento: a exportação é por **usuário**, e esses registros pertencem a
+   organizações — definir o que de uma proposta entre duas organizações pertence ao titular pessoa física é decisão
+   jurídica antes de ser técnica.
+2. **Fato de rede é append-only e não é apagado** pela anonimização; o que acontece é a pseudonimização do ator,
+   como já ocorre no ledger. Apagar o fato apagaria também a história da contraparte, que não pediu nada.
+
+### Pendências de privacidade desta rodada
+
+| Pendência | Classificação |
+|---|---|
+| Exportação não cobre relações, propostas, recados e perfil público | **AMARELO** — declarada acima |
+| Política de privacidade não descreve ainda a página pública nem a rede | **AMARELO** — texto jurídico pendente |
+| RIPD para a superfície pública | **VERMELHO** — exige DPO nomeado |
+| DPO nomeado, ROPA formal | **VERMELHO** — inalterado desde a v0.11.0 |
 
 | Requisito | Estado | Evidência | Pendência |
 |---|---|---|---|

@@ -1,8 +1,29 @@
-# Plataforma Impacto — v0.15.0
+# Plataforma Impacto — v0.16.0
 
-Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos públicos**: do edital à prestação de contas, com compatibilidade explicável, candidatura assistida, documentos e rascunhos com IA validados por profissional habilitado, acompanhamento de aportes/despesas/evidências e trilha de integridade verificável.
+**Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
+impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
+papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
+permissão frouxa.
 
-> **Estado:** núcleo do produto fechado e **tecnicamente pronto para a etapa de design**; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+> **Estado:** rede de impacto fechada e **tecnicamente pronta para a etapa de design**; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.16.0 (IMPACT NETWORK CORE):** a plataforma deixou de ser "um lugar com projetos" e passou a ser
+**infraestrutura de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de impacto** — com
+**um núcleo** e experiências por papel, não quatro aplicações. A cadeia inteira existe como dado: Pessoa/Organização
+→ Contexto → Necessidade → Rede → Match → Proposta → Relação → Projeto → Execução → Evidência → Resultado → Novo
+Match. **Grafo de impacto** relacional (uma tabela de aresta, 22 tipos, 5 níveis de visibilidade, travessia de
+profundidade 2 em 15 ms — a razão medida de **não** adotar banco de grafos); **motor de propostas** (9 tipos, 10
+situações, grafo de transições no banco) onde *proposta ≠ contrato ≠ investimento ≠ pagamento*; **marketplace** com
+um único lugar que decide o que é público; **conversa com contexto obrigatório**; **notificação para toda a equipe
+envolvida** em cada evolução (14 grupos, idempotente, um aviso por fato); **prontidão** em 6 dimensões sempre com
+explicação; **recomendação ≠ match**; **workspace por persona** (10 personas, 24 seções, 15 capacidades) que devolve
+próximas ações, não números; **perfil público `impacto.app/@identificador`** que lê só uma projeção curada;
+**relatório de impacto** cujos números são **colhidos pelo banco**, não digitados; **escada de moderação** de 10
+degraus com proporcionalidade e contestação; **cobrança versionada** com aviso de 30 dias e imposto no checkout.
+**788 testes, 704 operações, 231 tabelas, 17 migrações.** O pacote de Design System "Convergência" **não foi
+recebido** — as seções que dependiam dele não foram executadas, e isso está escrito em
+`DESIGN_HANDOFF_FINAL.md` §1. Comece por `IMPACT_NETWORK_ARCHITECTURE.md`, `DESIGN_HANDOFF_FINAL.md` e
+`FINAL_IMPACT_NETWORK_HARDENING_REPORT.md`.
 
 **Novo no v0.15.0 (Núcleo do produto):** as seis peças passaram a ser **um sistema**, não seis telas — ideia → diagnóstico → projeto → documento → match → acompanhamento compartilhando o mesmo vocabulário de evidência (com fonte, data e frescura), as mesmas versões de motor e a mesma trilha encadeada por hash. A **ideia não é apagada** ao virar projeto; a **máquina de 17 situações é dado no banco**, com gatilho que recusa transição inválida até em SQL direto; a **linha de tempo** é a trilha que já existia, verificável; **retratos comparáveis** respondem "o que mudou entre março e setembro"; o **diagnóstico** separa FATO, INFERÊNCIA, RECOMENDAÇÃO e **DESCONHECIDO**, com versões imutáveis e `o que mudou` calculado pelo servidor; a **montagem de documento** recusa gerar incompleto, dizendo o que falta, e exige **quatro olhos** para aprovar; o **match** carrega quatro versões e aceita retorno humano **sem treinar nada automaticamente**. 673 testes, 625 operações, 205 tabelas. **Não há assinatura qualificada (ICP-Brasil/Gov.br), KMS/HSM, integração contra sistema real nem teste de intrusão independente** — tudo isso está listado com nome e motivo. Comece por `CORE_PRODUCT_ARCHITECTURE.md`, `FINAL_PRE_DESIGN_HARDENING_REPORT.md` e `DESIGN_HANDOFF.md` §13.
 
@@ -31,7 +52,12 @@ Plataforma para **OSCs, empresas/fundações, profissionais parceiros e órgãos
 | publicar (Web, Google Play, App Store) | `DEPLOYMENT_CHECKLIST.md`, `docs/DEPLOYMENT.md`, `docs/MOBILE.md` |
 | continuar o desenvolvimento | `CLAUDE_HANDOFF_FINAL.md`, `DECISIONS.md` |
 | entender o núcleo do produto | `CORE_PRODUCT_ARCHITECTURE.md`, `MATCH_ENGINE_FINAL.md`, `DIAGNOSTIC_ENGINE.md`, `PROJECT_LIFECYCLE.md`, `DOCUMENT_ASSEMBLY.md`, `LONGITUDINAL_TRACKING.md` |
-| fazer o design | `DESIGN_HANDOFF.md` §13 (fluxos A–I + 20 invariantes) |
+| fazer o design | **`DESIGN_HANDOFF_FINAL.md`** (v0.16.0), `INFORMATION_ARCHITECTURE.md`, `NAVIGATION_MODEL.md`; histórico em `DESIGN_HANDOFF.md` §13 |
+| entender a rede de impacto | `IMPACT_NETWORK_ARCHITECTURE.md`, `IMPACT_GRAPH.md`, `RELATIONSHIP_MODEL.md`, `PROPOSAL_ENGINE.md`, `IMPACT_MARKETPLACE.md`, `IMPACT_REPORTING.md` |
+| entender as personas e o workspace | `ROLE_BASED_EXPERIENCE.md`, `WORKSPACE_ARCHITECTURE.md` |
+| saber quem vê o quê | **`PRIVACY_VISIBILITY_MATRIX.md`** |
+| entender moderação e cobrança | `MODERATION_LADDER.md`, `BILLING_V2.md` |
+| publicar no celular | `MOBILE_READINESS_FINAL.md`, `STORE_READINESS.md` |
 | saber o que depende de terceiro | `EXTERNAL_DEPENDENCIES.md`, `HOMOLOGATION_MATRIX.md`, `SIGNATURE_VALIDATION_MATRIX.md` |
 | auditar segurança, banco e desempenho | `SECURITY_FINAL_CHECKLIST.md`, `DATABASE_INTEGRITY_REPORT.md`, `PERFORMANCE_REPORT.md` |
 | rotacionar chave de cifragem | `KEY_ROTATION.md` |

@@ -1,9 +1,48 @@
-# SECURITY_AUDIT — v0.15.0 (2026-10-05)
+# SECURITY_AUDIT — v0.16.0 (2026-10-05)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
 A lista linha a linha, com a prova de cada item e as **9 pendências honestas**, está em
 **`SECURITY_FINAL_CHECKLIST.md`**.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
+
+## v0.16.0 — a rede de impacto sob auditoria
+
+A rodada acrescentou 26 tabelas, 79 rotas e um grafo de relações entre organizações. Isso muda o problema de
+segurança de forma qualitativa: até aqui quase todo dado pertencia a **uma** organização, e a política de RLS
+comparava `org_id = app_org()`. Uma relação, uma proposta e uma conversa pertencem a **duas**.
+
+| Risco novo | Como está tratado | Prova |
+|---|---|---|
+| **Fato de rede forjado** (gravar evento em nome da contraparte) | `REVOKE INSERT ON domain_events`; a gravação passa por `app_record_event()` (SECURITY DEFINER), que deriva a autoria de `app_uid()`/`app_org()` | `test_v0160_invariants.test_history_is_never_rewritten` |
+| **Contraparte reescrevendo o convite** | `rel_update` foi estendida para o alvo poder aceitar, e `counterpart_columns()` limita a contraparte a `status`, `ended_at` e `ended_reason` | `test_v0160_network` |
+| **Travessia do grafo vazando terceiro** | a CTE recursiva só segue arestas cuja `visibility` alcança quem consulta; profundidade máxima 2, declarada | `test_v0160_invariants.test_b_never_sees_a_private_relationship_of_a`; `PRIVACY_VISIBILITY_MATRIX.md` |
+| **Projeto privado na vitrine** | `PUBLIC_STATES = ("published",)` em **um** lugar + `listing_publish_guard()` no banco | jornada 5 de ponta a ponta, sem sessão |
+| **Página pública lendo tabela privada** | a rota lê **só** `public_fields`; lista fechada de 18 campos projetáveis; `_assert_no_private()` falha na gravação | `test_v0160_network`; `profiles.NEVER_PUBLIC` |
+| **Alvo de moderação anulando a própria punição** | a GRANT de coluna deixava o alvo escrever `status` (GRANT de coluna *adiciona* privilégio e não restringe) → `enforcement_target_guard()` | achado desta auditoria, corrigido |
+| **Denunciante exposto ao alvo** | `target_view()` não seleciona coluna de denunciante; `reporter_anonymous` verdadeiro por padrão | teste que confere a ausência na resposta |
+| **Abordagem em massa por conversa sem assunto** | conversa profissional exige contexto (proposta, projeto, anúncio ou relação) | `messaging.PROFESSIONAL` |
+| **Seguir unilateral abrindo conversa** | `app_related()` passou a listar **explicitamente** os tipos que criam relação, em vez de "todos menos bloqueio" | achado por **teste de regressão da v0.8.0**, não por revisão |
+| **Mudança silenciosa de preço** | `price_notice_guard()` (30 dias) + `price_apply_guard()` (aumento exige aviso) + `price_version_immutable()` | `test_v0160_billing` |
+| **SQL inválido chegando a produção** | `scripts/sql_prepare_check.py` roda `PREPARE` em todo literal de SQL extraído por AST: **185 consultas, 0 erros** | achou 5 defeitos reais de nome de coluna no primeiro uso |
+| **Erro de fuso gravando data errada** | `impacto/clock.py` em UTC; 28 usos de `date.today()` substituídos | `test_product_dates_are_utc` |
+
+### Números de segurança atualizados
+
+| Medida | v0.15.0 | v0.16.0 |
+|---|---|---|
+| Políticas de RLS | 408 | **466** |
+| Funções `SECURITY DEFINER` | 53 | **63** — **todas** com `search_path` fixo |
+| Gatilhos que o contexto privilegiado não atravessa | 5 | **15** |
+| Tabelas append-only | 17 | **22** |
+| Tabelas com coluna guardada | 20 | **26** |
+| Tabelas sem RLS | 1 (`schema_migrations`) | **1** |
+
+### O que esta auditoria NÃO cobre (inalterado e honesto)
+
+Não é teste de intrusão; nunca houve um. A auditoria de dependências (`npm audit`, `pip-audit`) continua
+**bloqueada neste ambiente** pelo registro de pacotes, e é obrigatória em CI antes de publicar. Stripe, SMTP,
+antivírus, S3 e IdP continuam dublês. Não há classificador automático de conteúdo ilícito — a fila de moderação é
+alimentada por denúncia humana (e isso é decisão, não lacuna: ver ADR-161).
 
 ## v0.15.0 — o que mudou nesta auditoria
 

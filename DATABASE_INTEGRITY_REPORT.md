@@ -47,7 +47,8 @@ não é só estrutural:
 | Contexto anônimo não vê nada | `test_anonymous_context_sees_nothing` |
 | O papel da aplicação não tem `BYPASSRLS` | `test_app_role_has_no_bypass` |
 | As tabelas novas da v0.15.0 isolam em SQL direto | `test_v0150_security.test_rls_blocks_the_new_tables_directly_in_sql` |
-| As 22 tabelas novas da v0.16.0 isolam em SQL direto, numa matriz entre inquilinos | `test_v0160_invariants.CrossTenantMatrix` |
+| Nenhuma rota de escrita da rede aceita identificador **existente de outra organização** (o caso em que um `WHERE org_id` esquecido vazaria de verdade) | `test_v0160_invariants.CrossTenantNetworkMatrix` |
+| Os gatilhos de situação inicial e de guarda da rede recusam **em SQL direto no contexto da usuária** (papel `impacto_app`) | `test_v0160_network`, via `app_tx()` |
 | Funções `SECURITY DEFINER` não entregam dado de outra organização | `test_security_definer_helpers_do_not_leak_other_tenant` |
 
 ### `org_id` anulável: 21 tabelas, todas por desenho
@@ -143,7 +144,7 @@ aplicação não lista "tudo que a pessoa X criou", e índice que ninguém usa �
 Resultado: de 460 para **552** índices, e `fk_without_index_hot` em **0**. A suíte completa (673 testes, que
 escrevem muito) manteve o mesmo tempo: 268 s antes, 268 s depois — o custo de escrita é irrelevante nesta escala.
 
-**Em v0.16.0** a mesma regra foi aplicada às 22 tabelas novas na própria migração 0016, e não como correção
+**Em v0.16.0** a mesma regra foi aplicada às 26 tabelas novas na própria migração 0016, e não como correção
 posterior: 643 índices no total, `fk_without_index_hot` continua em **0**. As 327 FK sem índice próprio são,
 todas, chaves para `users` (`created_by`, `decided_by`, `reviewed_by`…), que não são caminho de acesso — a
 aplicação não lista "tudo que a pessoa X criou" (ADR-137).
@@ -178,7 +179,7 @@ usuário, projeto publicado, documento e entradas na trilha, e então aplica 001
 | Trilha encadeada intacta, `ledger_verify` válido | ✔ |
 | Transições que o produto já fazia continuam no grafo | ✔ |
 | Consolidação dos ODS não deixou referência quebrada (`sdg_goals` removida, `ods_goals` com 17 linhas) | ✔ |
-| As 15 estruturas da v0.15.0 **e as 23 da v0.16.0** chegaram com RLS e política | ✔ |
+| As 15 estruturas da v0.15.0 **e as 26 da v0.16.0** chegaram com RLS e política | ✔ |
 | Modelos da plataforma e provedores de assinatura semeados | ✔ |
 | O papel da aplicação usa as tabelas novas; tabelas de chave invisíveis | ✔ |
 | **Esquema atualizado idêntico ao criado do zero** — colunas, índices, políticas e gatilhos | ✔ |
@@ -215,6 +216,6 @@ O papel da aplicação **não** tem `BYPASSRLS`, não é dono de nenhuma tabela 
 | Alguma tabela de dado de organização está sem RLS? | **Não.** |
 | Alguma `SECURITY DEFINER` está sem `search_path` fixo? | **Não.** |
 | Alguma tabela está sem chave primária? | **Não.** |
-| Alguma FK de caminho de acesso está sem índice? | **Não** — nem nas 22 tabelas da v0.16.0, cujos índices vieram na própria migração. |
+| Alguma FK de caminho de acesso está sem índice? | **Não** — nem nas 26 tabelas da v0.16.0, cujos índices vieram na própria migração. |
 | Existe caminho pela aplicação para reescrever histórico? | **Não** — 22 tabelas append-only, 15 guardas que o contexto privilegiado não atravessa, encadeamento por hash verificável. |
 | Atualizar de uma versão anterior produz o mesmo esquema que criar do zero? | **Sim**, verificado por teste. |

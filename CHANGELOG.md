@@ -57,9 +57,9 @@ quatro aplicações.
   `config/plans.json` e **nunca** em código.
 - **`impacto/clock.py`**: `now()` e `today()` em UTC. 28 usos de `date.today()` substituídos em 15 arquivos.
 - **79 rotas novas (704 no total)**, **26 telas funcionais** novas, `migrations/0016_v0160_impact_network.sql`
-  (22 tabelas) e `0017_v0160_billing_v2.sql` (3 tabelas).
-- **+115 testes (788 no total)**: rede (55), cobrança (15), jornadas de ponta a ponta (7), invariantes (27),
-  arquitetura (+6), desempenho (+5).
+  (23 tabelas) e `0017_v0160_billing_v2.sql` (3 tabelas).
+- **788 testes no total** (eram 673): rede (55), invariantes (28), cobrança (15), jornadas de ponta a ponta (7),
+  arquitetura (6 → 13), desempenho (7 → 12).
 - **`scripts/sql_prepare_check.py`**: extrai o SQL do código por AST e roda `PREPARE` em cada consulta. **185
   consultas conferidas, 0 erros** — encontrou 5 defeitos reais de nome de coluna que a leitura de código não pegou.
 - Documentos: `IMPACT_NETWORK_ARCHITECTURE.md`, `IMPACT_GRAPH.md`, `RELATIONSHIP_MODEL.md`, `PROPOSAL_ENGINE.md`,

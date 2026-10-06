@@ -1,0 +1,65 @@
+# Execução A — 2026-10-06T02:55:37-04:00 — escala cheia (PERF_FULL=1)
+test_charge_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_charge_list_stays_within_budget) ... ok
+test_document_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_document_list_stays_within_budget) ... ok
+test_funder_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_funder_feed_stays_within_budget) ... ok
+test_hot_queries_use_an_index (tests.test_v0150_performance.VolumeTests.test_hot_queries_use_an_index) ... 
+[desempenho] inconclusivo nesta escala: aceites do titular (legal_acceptances com menos de 500 linhas)
+ok
+test_legal_registry_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_legal_registry_stays_within_budget) ... ok
+test_list_does_not_grow_linearly_with_the_page_size (tests.test_v0150_performance.VolumeTests.test_list_does_not_grow_linearly_with_the_page_size)
+Detector de N+1: se a página de 100 custar muito mais que a de 5, há consulta por linha. ... ok
+test_network_graph_depth_two_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_network_graph_depth_two_stays_within_budget)
+Profundidade 2 é o caso que justificaria um banco de grafos — a medição é o que decide isso. ... ok
+test_project_timeline_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_project_timeline_stays_within_budget) ... ok
+test_proposal_inbox_and_relationships_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_proposal_inbox_and_relationships_stay_within_budget) ... ok
+test_public_marketplace_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_marketplace_feed_stays_within_budget)
+O feed público é a porta de entrada de quem ainda não tem conta: é a página mais exposta do produto. ... ok
+test_public_program_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_program_feed_stays_within_budget) ... ok
+test_readiness_purposes_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_purposes_stays_within_budget) ... ok
+test_readiness_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_stays_within_budget) ... ok
+test_the_sql_functions_of_the_economic_layer_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_the_sql_functions_of_the_economic_layer_stay_within_budget)
+Mede as FUNÇÕES, não as rotas: é nelas que mora a conta, e é nelas que a regressão aparece. ... ok
+test_value_summary_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_value_summary_stays_within_budget) ... ok
+test_volume_was_really_created (tests.test_v0150_performance.VolumeTests.test_volume_was_really_created) ... ok
+test_workspace_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_workspace_stays_within_budget)
+O workspace é a tela de ABERTURA de todas as personas, e chama vários motores de uma vez. ... ok
+
+[desempenho · escala cheia] volume criado em 30.4s · cobrancas=14ms · documentos=9ms · feed_financiador=1874ms · feed_programas=40ms · fn_cadeia_resultado=2ms · fn_lacuna_territorial=8ms · fn_panorama_legal=2ms · fn_programa_financeiro=3ms · fn_receita_plataforma=8ms · grafo_2=39ms · linha_do_tempo=12ms · marketplace_publico=22ms · projetos_100=2174ms · projetos_5=2016ms · prontidao=12ms · prontidao_finalidades=11ms · propostas=87ms · registro_legal=40ms · relacoes=16ms · resumo_valor=13ms · workspace_investidor=107ms · workspace_osc=497ms
+
+----------------------------------------------------------------------
+Ran 17 tests in 45.950s
+
+OK
+
+# Execução B — 2026-10-06T02:56:24-04:00 — escala cheia (PERF_FULL=1)
+test_charge_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_charge_list_stays_within_budget) ... ok
+test_document_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_document_list_stays_within_budget) ... ok
+test_funder_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_funder_feed_stays_within_budget) ... ok
+test_hot_queries_use_an_index (tests.test_v0150_performance.VolumeTests.test_hot_queries_use_an_index) ... 
+[desempenho] inconclusivo nesta escala: aceites do titular (legal_acceptances com menos de 500 linhas)
+ok
+test_legal_registry_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_legal_registry_stays_within_budget) ... ok
+test_list_does_not_grow_linearly_with_the_page_size (tests.test_v0150_performance.VolumeTests.test_list_does_not_grow_linearly_with_the_page_size)
+Detector de N+1: se a página de 100 custar muito mais que a de 5, há consulta por linha. ... ok
+test_network_graph_depth_two_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_network_graph_depth_two_stays_within_budget)
+Profundidade 2 é o caso que justificaria um banco de grafos — a medição é o que decide isso. ... ok
+test_project_timeline_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_project_timeline_stays_within_budget) ... ok
+test_proposal_inbox_and_relationships_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_proposal_inbox_and_relationships_stay_within_budget) ... ok
+test_public_marketplace_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_marketplace_feed_stays_within_budget)
+O feed público é a porta de entrada de quem ainda não tem conta: é a página mais exposta do produto. ... ok
+test_public_program_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_program_feed_stays_within_budget) ... ok
+test_readiness_purposes_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_purposes_stays_within_budget) ... ok
+test_readiness_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_stays_within_budget) ... ok
+test_the_sql_functions_of_the_economic_layer_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_the_sql_functions_of_the_economic_layer_stay_within_budget)
+Mede as FUNÇÕES, não as rotas: é nelas que mora a conta, e é nelas que a regressão aparece. ... ok
+test_value_summary_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_value_summary_stays_within_budget) ... ok
+test_volume_was_really_created (tests.test_v0150_performance.VolumeTests.test_volume_was_really_created) ... ok
+test_workspace_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_workspace_stays_within_budget)
+O workspace é a tela de ABERTURA de todas as personas, e chama vários motores de uma vez. ... ok
+
+[desempenho · escala cheia] volume criado em 31.2s · cobrancas=20ms · documentos=12ms · feed_financiador=2041ms · feed_programas=40ms · fn_cadeia_resultado=2ms · fn_lacuna_territorial=31ms · fn_panorama_legal=1ms · fn_programa_financeiro=4ms · fn_receita_plataforma=5ms · grafo_2=20ms · linha_do_tempo=14ms · marketplace_publico=26ms · projetos_100=2107ms · projetos_5=2021ms · prontidao=14ms · prontidao_finalidades=14ms · propostas=111ms · registro_legal=43ms · relacoes=14ms · resumo_valor=12ms · workspace_investidor=101ms · workspace_osc=451ms
+
+----------------------------------------------------------------------
+Ran 17 tests in 47.041s
+
+OK

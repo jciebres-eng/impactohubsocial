@@ -1,0 +1,1117 @@
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+test_bruteforce_lockout (tests.test_api_auth.AuthTests.test_bruteforce_lockout) ... ok
+test_cnpj_uniqueness (tests.test_api_auth.AuthTests.test_cnpj_uniqueness) ... ok
+test_cookie_mode_requires_csrf (tests.test_api_auth.AuthTests.test_cookie_mode_requires_csrf) ... ok
+test_disabled_user_loses_access (tests.test_api_auth.AuthTests.test_disabled_user_loses_access) ... ok
+test_expired_access_token (tests.test_api_auth.AuthTests.test_expired_access_token) ... ok
+test_foreign_origin_blocked (tests.test_api_auth.AuthTests.test_foreign_origin_blocked) ... ok
+test_invitation_flow_and_role_limits (tests.test_api_auth.AuthTests.test_invitation_flow_and_role_limits) ... ok
+test_ip_rate_limit (tests.test_api_auth.AuthTests.test_ip_rate_limit) ... ok
+test_login_errors_are_identical (tests.test_api_auth.AuthTests.test_login_errors_are_identical) ... ok
+test_logout_revokes_session (tests.test_api_auth.AuthTests.test_logout_revokes_session) ... ok
+test_mfa_flow_and_recovery_code (tests.test_api_auth.AuthTests.test_mfa_flow_and_recovery_code) ... ok
+test_password_reset_revokes_sessions (tests.test_api_auth.AuthTests.test_password_reset_revokes_sessions) ... ok
+test_refresh_rotation_and_reuse_detection (tests.test_api_auth.AuthTests.test_refresh_rotation_and_reuse_detection) ... {"ts": "2026-10-06T07:38:30.788+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "08a922a36a6d4dbf", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "21f194ac6289fbb4c9c8c3af3889815c", "user_id": "7a74c4a6-2772-4ebe-a0f0-05c14b78a0d9"}
+{"ts": "2026-10-06T07:38:30.844+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "d93c38d943844fdd", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "6e7c326e76779918fa62e57593841fd2", "user_id": "7a74c4a6-2772-4ebe-a0f0-05c14b78a0d9"}
+ok
+test_register_does_not_enumerate_existing_email (tests.test_api_auth.AuthTests.test_register_does_not_enumerate_existing_email) ... ok
+test_register_verify_login_me (tests.test_api_auth.AuthTests.test_register_verify_login_me) ... ok
+test_sessions_list_and_revoke_other (tests.test_api_auth.AuthTests.test_sessions_list_and_revoke_other) ... ok
+test_unknown_fields_rejected (tests.test_api_auth.AuthTests.test_unknown_fields_rejected) ... ok
+test_unverified_email_blocks_writes (tests.test_api_auth.AuthTests.test_unverified_email_blocks_writes) ... ok
+test_weak_password_and_invalid_cnpj_rejected (tests.test_api_auth.AuthTests.test_weak_password_and_invalid_cnpj_rejected) ... ok
+test_government_must_be_verified_to_publish (tests.test_api_features.AlertsTests.test_government_must_be_verified_to_publish) ... ok
+test_saved_search_tracks_new_calls_and_notifies (tests.test_api_features.AlertsTests.test_saved_search_tracks_new_calls_and_notifies) ... ok
+test_paid_plan_with_price_via_sandbox (tests.test_api_features.BillingAndVoucherTests.test_paid_plan_with_price_via_sandbox) ... ok
+test_public_plan_catalog (tests.test_api_features.BillingAndVoucherTests.test_public_plan_catalog) ... ok
+test_sandbox_checkout_unlocks_paid_features (tests.test_api_features.BillingAndVoucherTests.test_sandbox_checkout_unlocks_paid_features) ... ok
+test_stripe_webhook_signature_and_idempotency (tests.test_api_features.BillingAndVoucherTests.test_stripe_webhook_signature_and_idempotency) ... {"ts": "2026-10-06T07:38:34.411+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "45b5723ef52f4483", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "f6587fd8ac833f0c30cf054946c3eaa9"}
+{"ts": "2026-10-06T07:38:34.446+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "fe5da21aaf864ab0", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "5f9f6b3bd2f94b97131806ea991d7795"}
+ok
+test_voucher_concurrency_last_use (tests.test_api_features.BillingAndVoucherTests.test_voucher_concurrency_last_use) ... ok
+test_voucher_dual_approval_and_single_use (tests.test_api_features.BillingAndVoucherTests.test_voucher_dual_approval_and_single_use) ... ok
+test_openapi_and_health (tests.test_api_features.ContractTests.test_openapi_and_health) ... ok
+test_candidate_rules_are_never_used_until_dual_approval (tests.test_api_features.FiscalTests.test_candidate_rules_are_never_used_until_dual_approval) ... ok
+test_ai_structure_need_and_quota (tests.test_api_features.GovernmentAndAiTests.test_ai_structure_need_and_quota) ... ok
+test_gov_stats_k_anonymity (tests.test_api_features.GovernmentAndAiTests.test_gov_stats_k_anonymity) ... ok
+test_import_json_feed_and_run_once (tests.test_api_features.JobsTests.test_import_json_feed_and_run_once) ... ok
+test_feed_identical_with_and_without_premium (tests.test_api_features.MatchInvarianceTests.test_feed_identical_with_and_without_premium) ... ok
+test_admin_disable_user_revokes_sessions (tests.test_api_features.PrivacyAndAdminTests.test_admin_disable_user_revokes_sessions) ... ok
+test_admin_overview_and_audit_chain (tests.test_api_features.PrivacyAndAdminTests.test_admin_overview_and_audit_chain) ... ok
+test_export_and_delete_account (tests.test_api_features.PrivacyAndAdminTests.test_export_and_delete_account) ... ok
+test_legal_texts_served (tests.test_api_features.PrivacyAndAdminTests.test_legal_texts_served) ... ok
+test_reports_flow (tests.test_api_features.PrivacyAndAdminTests.test_reports_flow) ... ok
+test_external_call_tracking (tests.test_api_workflow.JourneyTests.test_external_call_tracking) ... ok
+test_full_platform_journey (tests.test_api_workflow.JourneyTests.test_full_platform_journey) ... {"ts": "2026-10-06T07:38:44.050+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "82cca326766641b7", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "297914acf1b072e4e8f056adf399a820", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas o financiador informa desembolso/cancelamento", "user_id": "f40001a8-dadb-4182-b260-a95ca8f8450c"}
+{"ts": "2026-10-06T07:38:44.070+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "87c6e4393d524756", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "3eded101b755ebdb3b8e2a12d0c457e0", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas a OSC confirma o recebimento", "user_id": "537e0415-ec23-4414-87cb-0c0b1c2ab233"}
+ok
+test_funder_interest_flow_and_feed (tests.test_api_workflow.JourneyTests.test_funder_interest_flow_and_feed) ... ok
+test_professional_validation_and_signature (tests.test_api_workflow.JourneyTests.test_professional_validation_and_signature) ... ok
+test_declared_engine_routes_exist (tests.test_architecture.ArchitectureTests.test_declared_engine_routes_exist) ... ok
+test_declared_engine_versions_match_the_modules (tests.test_architecture.ArchitectureTests.test_declared_engine_versions_match_the_modules) ... ok
+test_deterministic_engines_do_not_import_the_ai_gateway (tests.test_architecture.ArchitectureTests.test_deterministic_engines_do_not_import_the_ai_gateway) ... ok
+test_every_declared_engine_resolves_to_real_code (tests.test_architecture.ArchitectureTests.test_every_declared_engine_resolves_to_real_code)
+O registro de motores é declaração; este teste é o que a torna verificável. ... ok
+test_every_table_has_rls (tests.test_architecture.ArchitectureTests.test_every_table_has_rls) ... ok
+test_handlers_declare_auth (tests.test_architecture.ArchitectureTests.test_handlers_declare_auth) ... ok
+test_match_and_directory_never_import_billing (tests.test_architecture.ArchitectureTests.test_match_and_directory_never_import_billing)
+ADR-007/008: ranking/match não podem depender de plano, assinatura ou voucher. ... ok
+test_network_engines_never_notify_directly (tests.test_architecture.ArchitectureTests.test_network_engines_never_notify_directly)
+Aviso sai SÓ por `network.notify`, que tem chave de idempotência. ... ok
+test_no_duplicate_routes (tests.test_architecture.ArchitectureTests.test_no_duplicate_routes)
+Duas rotas com o mesmo método e caminho: a segunda fica inalcançável, em silêncio. ... ok
+test_no_secrets_committed (tests.test_architecture.ArchitectureTests.test_no_secrets_committed) ... ok
+test_no_string_formatted_sql_with_user_input (tests.test_architecture.ArchitectureTests.test_no_string_formatted_sql_with_user_input)
+Só nomes de tabela/coluna de listas fixas podem ser interpolados em SQL (f-strings revisadas). ... ok
+test_only_the_declared_places_call_the_language_model (tests.test_architecture.ArchitectureTests.test_only_the_declared_places_call_the_language_model)
+A trava que impede um chatbot novo entrar de carona. ... ok
+test_prices_are_not_hard_coded (tests.test_architecture.ArchitectureTests.test_prices_are_not_hard_coded)
+Preço mora no banco (`plan_price_versions`, `monetization_rules`), nunca em código. ... ok
+test_product_dates_are_utc (tests.test_architecture.ArchitectureTests.test_product_dates_are_utc)
+`date.today()` usa o fuso LOCAL do processo; o banco opera em UTC. Misturar os dois erra por um dia. ... ok
+test_recommendation_links_exist_in_the_app (tests.test_architecture.ArchitectureTests.test_recommendation_links_exist_in_the_app)
+Toda recomendação leva a uma tela que existe. ... ok
+test_system_context_only_in_allowed_modules (tests.test_architecture.ArchitectureTests.test_system_context_only_in_allowed_modules) ... ok
+test_the_commercial_rule_is_declared_in_configuration (tests.test_architecture.ArchitectureTests.test_the_commercial_rule_is_declared_in_configuration)
+A regra comercial é dado versionado em git, não decisão espalhada pelo código. ... ok
+test_the_counts_in_the_document_match_the_registry (tests.test_architecture.EngineDocumentationTests.test_the_counts_in_the_document_match_the_registry) ... ok
+test_package_has_no_database_dump_or_local_data (tests.test_architecture.ReleasePackageTests.test_package_has_no_database_dump_or_local_data) ... ok
+test_package_has_no_nested_archive (tests.test_architecture.ReleasePackageTests.test_package_has_no_nested_archive) ... ok
+test_admin_logs_in_with_mfa_and_reaches_overview_and_audit (tests.test_e2e_baseline.BaselineE2E.test_admin_logs_in_with_mfa_and_reaches_overview_and_audit) ... ok
+test_plan_page_shows_trial_applies_voucher_and_cancels_keeping_access (tests.test_e2e_baseline.BaselineE2E.test_plan_page_shows_trial_applies_voucher_and_cancels_keeping_access) ... ok
+test_user_sees_allowed_area_and_is_blocked_on_another_kinds_area (tests.test_e2e_baseline.BaselineE2E.test_user_sees_allowed_area_and_is_blocked_on_another_kinds_area) ... ok
+test_visitor_signup_login_and_logout_ends_the_session (tests.test_e2e_baseline.BaselineE2E.test_visitor_signup_login_and_logout_ends_the_session) ... ok
+test_academy_course_quiz_and_certificate (tests.test_e2e_knowledge.KnowledgeE2E.test_academy_course_quiz_and_certificate) ... ok
+test_cms_editor_cannot_self_approve_and_reviewer_publishes (tests.test_e2e_knowledge.KnowledgeE2E.test_cms_editor_cannot_self_approve_and_reviewer_publishes) ... ok
+test_event_registration_and_trial_request (tests.test_e2e_knowledge.KnowledgeE2E.test_event_registration_and_trial_request) ... ok
+test_new_pages_pass_basic_accessibility_checks (tests.test_e2e_knowledge.KnowledgeE2E.test_new_pages_pass_basic_accessibility_checks) ... ok
+test_no_duplicate_element_ids_and_no_heading_level_skips (tests.test_e2e_knowledge.KnowledgeE2E.test_no_duplicate_element_ids_and_no_heading_level_skips) ... ok
+test_osc_checklist_feedback_and_support_ticket (tests.test_e2e_knowledge.KnowledgeE2E.test_osc_checklist_feedback_and_support_ticket) ... ok
+test_private_pages_redirect_visitor_to_login (tests.test_e2e_knowledge.KnowledgeE2E.test_private_pages_redirect_visitor_to_login) ... ok
+test_text_contrast_meets_wcag_aa_on_public_pages (tests.test_e2e_knowledge.KnowledgeE2E.test_text_contrast_meets_wcag_aa_on_public_pages)
+Contraste de texto (WCAG AA 4.5:1 / 3:1 para texto grande) medido no navegador, em tema claro e escuro. ... ok
+test_visitor_search_guide_assistant_and_demo (tests.test_e2e_knowledge.KnowledgeE2E.test_visitor_search_guide_assistant_and_demo) ... ok
+test_institution_mobile (tests.test_e2e_v0100.WebV0100.test_institution_mobile) ... ok
+test_institution_page_states_and_a11y (tests.test_e2e_v0100.WebV0100.test_institution_page_states_and_a11y) ... ok
+test_register_shows_legal_nature_for_osc (tests.test_e2e_v0100.WebV0100.test_register_shows_legal_nature_for_osc) ... ok
+test_admin_panel_queues (tests.test_e2e_v0101.WebV0101.test_admin_panel_queues) ... ok
+test_institution_new_tabs_journey (tests.test_e2e_v0101.WebV0101.test_institution_new_tabs_journey) ... ok
+test_solution_network_view (tests.test_e2e_v0101.WebV0101.test_solution_network_view) ... ok
+test_dark_theme_keeps_readable_contrast (tests.test_e2e_v0140_trust.TrustE2E.test_dark_theme_keeps_readable_contrast) ... ok
+test_new_pages_have_no_console_errors_and_one_h1 (tests.test_e2e_v0140_trust.TrustE2E.test_new_pages_have_no_console_errors_and_one_h1) ... ok
+test_public_campaign_shows_remaining_quotas (tests.test_e2e_v0140_trust.TrustE2E.test_public_campaign_shows_remaining_quotas) ... ok
+test_public_page_shows_revocation (tests.test_e2e_v0140_trust.TrustE2E.test_public_page_shows_revocation) ... ok
+test_theme_choice_is_applied_and_persists (tests.test_e2e_v0140_trust.TrustE2E.test_theme_choice_is_applied_and_persists) ... ok
+test_third_party_verifies_without_logging_in (tests.test_e2e_v0140_trust.TrustE2E.test_third_party_verifies_without_logging_in) ... ok
+test_two_layer_signature_through_the_ui (tests.test_e2e_v0140_trust.TrustE2E.test_two_layer_signature_through_the_ui) ... ok
+test_unknown_code_shows_friendly_error (tests.test_e2e_v0140_trust.TrustE2E.test_unknown_code_shows_friendly_error) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J1IdeaToVerifiedDocument.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J2ProjectToFunding.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J3EmptyOrganizationFillsEvidence.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J4AssemblyReviewAndSignature.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J5LongitudinalTracking.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J6RiskLifecycle.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J7FeedbackLoopWithoutAutomaticTraining.test_journey) ... ok
+test_journey (tests.test_e2e_v0150_journeys.J8TwoTenantsNeverMeet.test_journey) ... ok
+test_blocked_assembly_shows_what_is_missing_instead_of_generating (tests.test_e2e_v0150_web.CoreWebE2E.test_blocked_assembly_shows_what_is_missing_instead_of_generating)
+Invariante de design: a interface NÃO pode esconder o que impede gerar o documento. ... ok
+test_idea_becomes_project_through_the_interface (tests.test_e2e_v0150_web.CoreWebE2E.test_idea_becomes_project_through_the_interface) ... ok
+test_lifecycle_refusal_is_shown_to_the_person (tests.test_e2e_v0150_web.CoreWebE2E.test_lifecycle_refusal_is_shown_to_the_person) ... ok
+test_new_pages_open_clean (tests.test_e2e_v0150_web.CoreWebE2E.test_new_pages_open_clean) ... ok
+test_provider_page_states_what_is_not_available (tests.test_e2e_v0150_web.CoreWebE2E.test_provider_page_states_what_is_not_available)
+Invariante de design: a interface não pode chamar o Gov.br de ICP-Brasil nem esconder indisponibilidade. ... ok
+test_readiness_shows_unknown_separately_from_gaps (tests.test_e2e_v0150_web.CoreWebE2E.test_readiness_shows_unknown_separately_from_gaps)
+Invariante de design: 'não sei' não pode ser apresentado como 'está ruim'. ... ok
+test_journey (tests.test_e2e_v0160_journeys.J1_OnboardingToWorkspace.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J2_InvestorDiscoversAndProposes.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J3_OrganizationStructuresAndPublishes.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J4_ProfessionalFindsWork.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J5_GovernmentPublishesAndMonitors.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J6_ExecutionToProvenResult.test_journey) ... ok
+test_journey (tests.test_e2e_v0160_journeys.J7_TeamIsAlwaysNotified.test_journey) ... ok
+test_admin_and_provider_pages (tests.test_e2e_v080.WebV080.test_admin_and_provider_pages) ... ok
+test_individual_funder_journey_pages (tests.test_e2e_v080.WebV080.test_individual_funder_journey_pages) ... ok
+test_osc_pages_and_report_render (tests.test_e2e_v080.WebV080.test_osc_pages_and_report_render) ... ok
+test_mobile_viewport_has_no_horizontal_scroll (tests.test_e2e_v090.WebV090.test_mobile_viewport_has_no_horizontal_scroll) ... ok
+test_owner_flow_and_admin_queue (tests.test_e2e_v090.WebV090.test_owner_flow_and_admin_queue) ... ok
+test_search_profile_compare_adapt_journey (tests.test_e2e_v090.WebV090.test_search_profile_compare_adapt_journey) ... ok
+test_company_feed_and_mobile_navigation (tests.test_e2e_web.WebE2E.test_company_feed_and_mobile_navigation) ... ok
+test_osc_signup_project_with_assist_and_publish (tests.test_e2e_web.WebE2E.test_osc_signup_project_with_assist_and_publish) ... ok
+test_security_headers_on_spa (tests.test_e2e_web.WebE2E.test_security_headers_on_spa) ... ok
+test_rejects_wrong_audience_nonce_and_unverified_email (tests.test_oidc.OidcTests.test_rejects_wrong_audience_nonce_and_unverified_email) ... ok
+test_sso_login_provisions_user_and_session (tests.test_oidc.OidcTests.test_sso_login_provisions_user_and_session) ... ok
+test_anonymous_context_sees_nothing (tests.test_security_tenancy.DatabaseRlsTests.test_anonymous_context_sees_nothing) ... ok
+test_app_db_role_cannot_bypass_rls (tests.test_security_tenancy.DatabaseRlsTests.test_app_db_role_cannot_bypass_rls) ... ok
+test_app_role_has_no_bypass (tests.test_security_tenancy.DatabaseRlsTests.test_app_role_has_no_bypass) ... ok
+test_append_only_and_hidden_tables (tests.test_security_tenancy.DatabaseRlsTests.test_append_only_and_hidden_tables) ... ok
+test_insert_for_other_tenant_denied (tests.test_security_tenancy.DatabaseRlsTests.test_insert_for_other_tenant_denied) ... ok
+test_ledger_tampering_is_detected (tests.test_security_tenancy.DatabaseRlsTests.test_ledger_tampering_is_detected) ... ok
+test_privileged_columns_guarded (tests.test_security_tenancy.DatabaseRlsTests.test_privileged_columns_guarded) ... ok
+test_unfiltered_select_returns_only_own_rows (tests.test_security_tenancy.DatabaseRlsTests.test_unfiltered_select_returns_only_own_rows) ... ok
+test_unfiltered_update_cannot_touch_other_tenant (tests.test_security_tenancy.DatabaseRlsTests.test_unfiltered_update_cannot_touch_other_tenant) ... ok
+test_admin_without_mfa_is_blocked (tests.test_security_tenancy.TenancyTests.test_admin_without_mfa_is_blocked) ... ok
+test_company_sees_only_published_and_docs_only_after_due_diligence (tests.test_security_tenancy.TenancyTests.test_company_sees_only_published_and_docs_only_after_due_diligence) ... ok
+test_download_token_is_short_lived_and_tamper_proof (tests.test_security_tenancy.TenancyTests.test_download_token_is_short_lived_and_tamper_proof) ... ok
+test_injection_payloads_are_stored_literally (tests.test_security_tenancy.TenancyTests.test_injection_payloads_are_stored_literally) ... ok
+test_object_ids_are_validated (tests.test_security_tenancy.TenancyTests.test_object_ids_are_validated) ... ok
+test_other_osc_cannot_read_or_write_project (tests.test_security_tenancy.TenancyTests.test_other_osc_cannot_read_or_write_project) ... ok
+test_other_tenants_cannot_access_documents_and_drafts (tests.test_security_tenancy.TenancyTests.test_other_tenants_cannot_access_documents_and_drafts) ... ok
+test_regular_user_cannot_access_admin (tests.test_security_tenancy.TenancyTests.test_regular_user_cannot_access_admin) ... ok
+test_role_and_kind_enforcement (tests.test_security_tenancy.TenancyTests.test_role_and_kind_enforcement) ... ok
+test_disallowed_extension (tests.test_security_tenancy.UploadTests.test_disallowed_extension) ... ok
+test_docx_with_macro_rejected (tests.test_security_tenancy.UploadTests.test_docx_with_macro_rejected) ... ok
+test_executable_disguised_as_pdf (tests.test_security_tenancy.UploadTests.test_executable_disguised_as_pdf) ... ok
+test_filename_traversal_is_neutralized (tests.test_security_tenancy.UploadTests.test_filename_traversal_is_neutralized) ... ok
+test_oversize_rejected (tests.test_security_tenancy.UploadTests.test_oversize_rejected) ... ok
+test_pdf_with_javascript_rejected (tests.test_security_tenancy.UploadTests.test_pdf_with_javascript_rejected) ... ok
+test_valid_pdf_hash_and_suggestion (tests.test_security_tenancy.UploadTests.test_valid_pdf_hash_and_suggestion) ... ok
+test_clamd_protocol (tests.test_unit.AdapterTests.test_clamd_protocol) ... ok
+test_external_llm_adapters (tests.test_unit.AdapterTests.test_external_llm_adapters) ... ok
+test_http_client_retries (tests.test_unit.AdapterTests.test_http_client_retries) ... ok
+test_sigv4_official_aws_vector (tests.test_unit.AdapterTests.test_sigv4_official_aws_vector) ... ok
+test_labels_and_estimate (tests.test_unit.FiscalEngineTests.test_labels_and_estimate) ... ok
+test_no_estimate_without_validated_limit (tests.test_unit.FiscalEngineTests.test_no_estimate_without_validated_limit) ... ok
+test_only_approved_and_current (tests.test_unit.FiscalEngineTests.test_only_approved_and_current) ... ok
+test_regime_mismatch_and_unknown (tests.test_unit.FiscalEngineTests.test_regime_mismatch_and_unknown) ... ok
+test_classify_document (tests.test_unit.LocalAiTests.test_classify_document) ... ok
+test_draft_marks_gaps_and_never_invents (tests.test_unit.LocalAiTests.test_draft_marks_gaps_and_never_invents) ... ok
+test_structure_need (tests.test_unit.LocalAiTests.test_structure_need) ... ok
+test_custom_weights_versioned (tests.test_unit.MatchEngineTests.test_custom_weights_versioned) ... ok
+test_deterministic (tests.test_unit.MatchEngineTests.test_deterministic) ... ok
+test_eligible_with_explanations (tests.test_unit.MatchEngineTests.test_eligible_with_explanations) ... ok
+test_expired_document_is_not_valid (tests.test_unit.MatchEngineTests.test_expired_document_is_not_valid) ... ok
+test_fractioning_allows_fit_via_milestone (tests.test_unit.MatchEngineTests.test_fractioning_allows_fit_via_milestone) ... ok
+test_funder_blockers (tests.test_unit.MatchEngineTests.test_funder_blockers) ... ok
+test_hard_blockers (tests.test_unit.MatchEngineTests.test_hard_blockers) ... ok
+test_missing_data_lowers_confidence_and_never_invents_score (tests.test_unit.MatchEngineTests.test_missing_data_lowers_confidence_and_never_invents_score) ... ok
+test_plan_and_voucher_fields_are_ignored (tests.test_unit.MatchEngineTests.test_plan_and_voucher_fields_are_ignored) ... ok
+test_territory_codes (tests.test_unit.MatchEngineTests.test_territory_codes) ... ok
+test_field_encryption_and_rotation (tests.test_unit.SecurityPrimitiveTests.test_field_encryption_and_rotation) ... ok
+test_password_hashing (tests.test_unit.SecurityPrimitiveTests.test_password_hashing) ... ok
+test_pii_redaction (tests.test_unit.SecurityPrimitiveTests.test_pii_redaction) ... ok
+test_signed_tokens (tests.test_unit.SecurityPrimitiveTests.test_signed_tokens) ... ok
+test_stripe_signature (tests.test_unit.SecurityPrimitiveTests.test_stripe_signature) ... ok
+test_totp_rfc6238_vectors (tests.test_unit.SecurityPrimitiveTests.test_totp_rfc6238_vectors) ... ok
+test_internal_destinations_are_blocked (tests.test_unit.SsrfTests.test_internal_destinations_are_blocked) ... ok
+test_loopback_http_only_in_dev_and_redirects_not_followed (tests.test_unit.SsrfTests.test_loopback_http_only_in_dev_and_redirects_not_followed) ... /usr/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=9, family=2, type=1, proto=0, laddr=('127.0.0.1', 44479)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_cnpj (tests.test_unit.ValidatorAndUploadTests.test_cnpj) ... ok
+test_local_storage_blocks_traversal (tests.test_unit.ValidatorAndUploadTests.test_local_storage_blocks_traversal) ... ok
+test_safe_filename (tests.test_unit.ValidatorAndUploadTests.test_safe_filename) ... ok
+test_sniffing (tests.test_unit.ValidatorAndUploadTests.test_sniffing) ... ok
+test_institutional_engines_are_pure_and_do_not_touch_billing (tests.test_v0100_institutional.ArchitectureInstitutionalTests.test_institutional_engines_are_pure_and_do_not_touch_billing) ... ok
+test_expired_document_cannot_be_validated (tests.test_v0100_institutional.DocumentStateTests.test_expired_document_cannot_be_validated) ... ok
+test_sql_direct_cannot_self_validate_document (tests.test_v0100_institutional.DocumentStateTests.test_sql_direct_cannot_self_validate_document) ... ok
+test_states_absent_pending_validated_rejected_expired (tests.test_v0100_institutional.DocumentStateTests.test_states_absent_pending_validated_rejected_expired) ... ok
+test_blocked_match_for_unmet_published_rule_attached_to_call_modality (tests.test_v0100_institutional.EligibilityMatchTests.test_blocked_match_for_unmet_published_rule_attached_to_call_modality) ... ok
+test_call_with_declared_legal_nature_and_maturity_blocks_with_explanation (tests.test_v0100_institutional.EligibilityMatchTests.test_call_with_declared_legal_nature_and_maturity_blocks_with_explanation) ... ok
+test_fiscal_layers_are_separated_for_incentive_calls (tests.test_v0100_institutional.EligibilityMatchTests.test_fiscal_layers_are_separated_for_incentive_calls) ... ok
+test_funder_required_qualification_blocks_project_match (tests.test_v0100_institutional.EligibilityMatchTests.test_funder_required_qualification_blocks_project_match) ... ok
+test_no_rules_means_pending_never_invented_eligibility (tests.test_v0100_institutional.EligibilityMatchTests.test_no_rules_means_pending_never_invented_eligibility) ... ok
+test_only_funders_evaluate_other_orgs (tests.test_v0100_institutional.EligibilityMatchTests.test_only_funders_evaluate_other_orgs) ... ok
+test_plan_never_changes_eligibility_or_match (tests.test_v0100_institutional.EligibilityMatchTests.test_plan_never_changes_eligibility_or_match) ... ok
+test_professional_validation_state_when_rule_needs_it (tests.test_v0100_institutional.EligibilityMatchTests.test_professional_validation_state_when_rule_needs_it) ... ok
+test_published_rule_flow_ineligible_then_eligible_after_verification (tests.test_v0100_institutional.EligibilityMatchTests.test_published_rule_flow_ineligible_then_eligible_after_verification) ... ok
+test_badges_have_criterion_validity_and_never_claim_government_certification (tests.test_v0100_institutional.MaturityBadgeTests.test_badges_have_criterion_validity_and_never_claim_government_certification) ... ok
+test_maturity_levels_and_next_steps (tests.test_v0100_institutional.MaturityBadgeTests.test_maturity_levels_and_next_steps) ... ok
+test_catalogs_separate_nature_qualification_profile_and_status (tests.test_v0100_institutional.ModelTests.test_catalogs_separate_nature_qualification_profile_and_status) ... ok
+test_collective_registers_without_cnpj_and_never_becomes_regular (tests.test_v0100_institutional.ModelTests.test_collective_registers_without_cnpj_and_never_becomes_regular) ... ok
+test_profile_association_and_foundation_with_cultural_profile (tests.test_v0100_institutional.ModelTests.test_profile_association_and_foundation_with_cultural_profile) ... ok
+test_profile_rejects_unknown_codes_and_incompatible_kind (tests.test_v0100_institutional.ModelTests.test_profile_rejects_unknown_codes_and_incompatible_kind) ... ok
+test_profile_requires_admin_role_and_viewer_can_read (tests.test_v0100_institutional.ModelTests.test_profile_requires_admin_role_and_viewer_can_read) ... ok
+test_declared_is_not_verified_and_org_cannot_self_verify (tests.test_v0100_institutional.QualificationTests.test_declared_is_not_verified_and_org_cannot_self_verify) ... ok
+test_expired_qualification_cannot_be_verified_and_expired_not_counted (tests.test_v0100_institutional.QualificationTests.test_expired_qualification_cannot_be_verified_and_expired_not_counted) ... ok
+test_forged_status_fields_are_rejected (tests.test_v0100_institutional.QualificationTests.test_forged_status_fields_are_rejected) ... ok
+test_legacy_certifications_array_becomes_declared_qualification_only (tests.test_v0100_institutional.QualificationTests.test_legacy_certifications_array_becomes_declared_qualification_only) ... ok
+test_multiple_qualifications_and_admin_verification_rules (tests.test_v0100_institutional.QualificationTests.test_multiple_qualifications_and_admin_verification_rules) ... ok
+test_revoke_and_reject_require_note_and_revoke_only_verified (tests.test_v0100_institutional.QualificationTests.test_revoke_and_reject_require_note_and_revoke_only_verified) ... ok
+test_sql_direct_cannot_self_verify (tests.test_v0100_institutional.QualificationTests.test_sql_direct_cannot_self_verify) ... ok
+test_tenant_isolation_declared_qualifications_not_visible_to_others (tests.test_v0100_institutional.QualificationTests.test_tenant_isolation_declared_qualifications_not_visible_to_others) ... ok
+test_verified_qualification_is_public_declared_is_not (tests.test_v0100_institutional.QualificationTests.test_verified_qualification_is_public_declared_is_not) ... ok
+test_verified_with_validated_document_instead_of_url (tests.test_v0100_institutional.QualificationTests.test_verified_with_validated_document_instead_of_url) ... ok
+test_admin_requires_mfa_for_institutional_actions (tests.test_v0100_institutional.RuleWorkflowTests.test_admin_requires_mfa_for_institutional_actions) ... ok
+test_catalog_badge_cannot_claim_government_certification (tests.test_v0100_institutional.RuleWorkflowTests.test_catalog_badge_cannot_claim_government_certification) ... ok
+test_four_eyes_creator_cannot_approve_and_unpublished_rules_not_visible (tests.test_v0100_institutional.RuleWorkflowTests.test_four_eyes_creator_cannot_approve_and_unpublished_rules_not_visible) ... ok
+test_institutional_status_catalog_is_fixed_and_nonadmins_blocked (tests.test_v0100_institutional.RuleWorkflowTests.test_institutional_status_catalog_is_fixed_and_nonadmins_blocked) ... ok
+test_new_version_keeps_old_until_published_and_archives_previous (tests.test_v0100_institutional.RuleWorkflowTests.test_new_version_keeps_old_until_published_and_archives_previous) ... ok
+test_org_status_decision_is_human_justified_and_audited (tests.test_v0100_institutional.RuleWorkflowTests.test_org_status_decision_is_human_justified_and_audited) ... ok
+test_rule_requires_source_and_known_catalog_values (tests.test_v0100_institutional.RuleWorkflowTests.test_rule_requires_source_and_known_catalog_values) ... ok
+test_confidential_is_invisible_to_others_but_visible_to_owner (tests.test_v0100_institutional.SolutionIPTests.test_confidential_is_invisible_to_others_but_visible_to_owner) ... ok
+test_free_text_institutional_intent (tests.test_v0100_institutional.SolutionIPTests.test_free_text_institutional_intent) ... ok
+test_funding_readiness_is_explained_and_filter_requires_complete_ip_and_need (tests.test_v0100_institutional.SolutionIPTests.test_funding_readiness_is_explained_and_filter_requires_complete_ip_and_need) ... ok
+test_invalid_modalities_rejected_and_valid_ones_used_in_search (tests.test_v0100_institutional.SolutionIPTests.test_invalid_modalities_rejected_and_valid_ones_used_in_search) ... ok
+test_publish_requires_ownership_and_authorization (tests.test_v0100_institutional.SolutionIPTests.test_publish_requires_ownership_and_authorization) ... ok
+test_restricted_use_blocks_replication_adaptation_and_development (tests.test_v0100_institutional.SolutionIPTests.test_restricted_use_blocks_replication_adaptation_and_development) ... ok
+test_search_by_verified_qualification_and_legal_nature_only (tests.test_v0100_institutional.SolutionIPTests.test_search_by_verified_qualification_and_legal_nature_only) ... ok
+test_shareable_on_request_hides_content_until_author_accepts (tests.test_v0100_institutional.SolutionIPTests.test_shareable_on_request_hides_content_until_author_accepts) ... ok
+test_sharing_labels_exposed_on_cards (tests.test_v0100_institutional.SolutionIPTests.test_sharing_labels_exposed_on_cards) ... ok
+test_candidate_rules_import_as_drafts_only_and_idempotent (tests.test_v0100_institutional.StatementAndCandidatesTests.test_candidate_rules_import_as_drafts_only_and_idempotent) ... ok
+test_statement_never_invents_qualifications (tests.test_v0100_institutional.StatementAndCandidatesTests.test_statement_never_invents_qualifications) ... ok
+test_admin_verification_requires_number_and_proof_and_note (tests.test_v0101_institutional.AgreementTests.test_admin_verification_requires_number_and_proof_and_note) ... ok
+test_agreement_is_declared_and_org_cannot_self_verify (tests.test_v0101_institutional.AgreementTests.test_agreement_is_declared_and_org_cannot_self_verify) ... ok
+test_dates_validated_and_alerts (tests.test_v0101_institutional.AgreementTests.test_dates_validated_and_alerts) ... ok
+test_isolation_between_orgs (tests.test_v0101_institutional.AgreementTests.test_isolation_between_orgs) ... ok
+test_sql_direct_cannot_self_verify (tests.test_v0101_institutional.AgreementTests.test_sql_direct_cannot_self_verify) ... ok
+test_fiscal_estimate_carries_institutional_layer_and_separates_it (tests.test_v0101_institutional.FiscalCrossTests.test_fiscal_estimate_carries_institutional_layer_and_separates_it) ... ok
+test_non_osc_target_is_ignored (tests.test_v0101_institutional.FiscalCrossTests.test_non_osc_target_is_ignored) ... ok
+test_documents_drive_auto_steps_by_validation_state (tests.test_v0101_institutional.FormalizationTests.test_documents_drive_auto_steps_by_validation_state) ... ok
+test_path_progress_and_manual_vs_auto (tests.test_v0101_institutional.FormalizationTests.test_path_progress_and_manual_vs_auto) ... ok
+test_isolation (tests.test_v0101_institutional.MentoringTests.test_isolation) ... ok
+test_open_limit (tests.test_v0101_institutional.MentoringTests.test_open_limit) ... ok
+test_request_cancel_and_admin_flow (tests.test_v0101_institutional.MentoringTests.test_request_cancel_and_admin_flow) ... ok
+test_sql_direct_cannot_change_progress (tests.test_v0101_institutional.MentoringTests.test_sql_direct_cannot_change_progress) ... ok
+test_network_graph_shape_privacy_and_relations (tests.test_v0101_institutional.NetworkGraphTests.test_network_graph_shape_privacy_and_relations) ... ok
+test_network_rascunho_de_outra_org_nao_vaza (tests.test_v0101_institutional.NetworkGraphTests.test_network_rascunho_de_outra_org_nao_vaza) ... ok
+test_multiple_profiles (tests.test_v0101_institutional.PersonaTests.test_multiple_profiles) ... ok
+test_no_qualification_does_not_claim_profile (tests.test_v0101_institutional.PersonaTests.test_no_qualification_does_not_claim_profile) ... ok
+test_os_view_with_authority_areas_and_contract (tests.test_v0101_institutional.PersonaTests.test_os_view_with_authority_areas_and_contract) ... ok
+test_oscip_focus_on_partnership_term_and_expiry_alert (tests.test_v0101_institutional.PersonaTests.test_oscip_focus_on_partnership_term_and_expiry_alert) ... ok
+test_expanded_concepts_parse_and_do_not_clash (tests.test_v0101_institutional.ThesaurusTests.test_expanded_concepts_parse_and_do_not_clash) ... ok
+test_agreement_license_seats_domain_and_revoke (tests.test_v0110_monetization.AgreementTests.test_agreement_license_seats_domain_and_revoke) ... ok
+test_discount_agreement_applies_in_quote (tests.test_v0110_monetization.AgreementTests.test_discount_agreement_applies_in_quote) ... ok
+test_domain_alone_is_not_enough_and_wrong_domain_is_generic (tests.test_v0110_monetization.AgreementTests.test_domain_alone_is_not_enough_and_wrong_domain_is_generic) ... ok
+test_gov_agreement_grants_institutional_tier (tests.test_v0110_monetization.AgreementTests.test_gov_agreement_grants_institutional_tier) ... ok
+test_license_revocation_requires_reason_and_keeps_history (tests.test_v0110_monetization.AgreementTests.test_license_revocation_requires_reason_and_keeps_history) ... ok
+test_cannot_see_or_touch_other_org_billing (tests.test_v0110_monetization.BillingSecurityTests.test_cannot_see_or_touch_other_org_billing) ... ok
+test_every_billing_route_declares_authorization (tests.test_v0110_monetization.BillingSecurityTests.test_every_billing_route_declares_authorization) ... ok
+test_no_card_data_columns_in_schema (tests.test_v0110_monetization.BillingSecurityTests.test_no_card_data_columns_in_schema) ... ok
+test_only_owner_can_checkout_cancel_and_change (tests.test_v0110_monetization.BillingSecurityTests.test_only_owner_can_checkout_cancel_and_change) ... ok
+test_user_cannot_change_plan_price_or_rights (tests.test_v0110_monetization.BillingSecurityTests.test_user_cannot_change_plan_price_or_rights) ... ok
+test_cancel_prevents_renewal_and_keeps_history (tests.test_v0110_monetization.StripeFlowTests.test_cancel_prevents_renewal_and_keeps_history) ... ok
+test_checkout_during_trial_sends_trial_end_and_never_charges_early (tests.test_v0110_monetization.StripeFlowTests.test_checkout_during_trial_sends_trial_end_and_never_charges_early) ... ok
+test_duplicate_webhook_does_not_duplicate_charge_or_invoice (tests.test_v0110_monetization.StripeFlowTests.test_duplicate_webhook_does_not_duplicate_charge_or_invoice) ... {"ts": "2026-10-06T07:41:15.700+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "454895f794854903", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "c2a1272d89f3b6d76d99f2cc7a8d8782"}
+{"ts": "2026-10-06T07:41:15.759+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "1a14197013a64b3d", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "609391b35ffe298c2156c5d2a4954175"}
+ok
+test_monthly_and_annual_use_the_right_price (tests.test_v0110_monetization.StripeFlowTests.test_monthly_and_annual_use_the_right_price) ... ok
+test_out_of_order_subscription_events_are_ignored (tests.test_v0110_monetization.StripeFlowTests.test_out_of_order_subscription_events_are_ignored) ... ok
+test_payment_failure_action_required_and_portal (tests.test_v0110_monetization.StripeFlowTests.test_payment_failure_action_required_and_portal) ... ok
+test_sandbox_trial_checkout_then_conversion_job (tests.test_v0110_monetization.StripeFlowTests.test_sandbox_trial_checkout_then_conversion_job) ... ok
+test_trial_ending_in_under_48h_never_charges_before_end (tests.test_v0110_monetization.StripeFlowTests.test_trial_ending_in_under_48h_never_charges_before_end) ... ok
+test_upgrade_and_downgrade_are_synced_with_provider (tests.test_v0110_monetization.StripeFlowTests.test_upgrade_and_downgrade_are_synced_with_provider) ... ok
+test_free_plus_premium_gov_access_matrix (tests.test_v0110_monetization.TierAccessTests.test_free_plus_premium_gov_access_matrix) ... ok
+test_gov_cannot_be_bought_online (tests.test_v0110_monetization.TierAccessTests.test_gov_cannot_be_bought_online) ... ok
+test_plan_has_no_effect_on_match_architecture (tests.test_v0110_monetization.TierAccessTests.test_plan_has_no_effect_on_match_architecture) ... ok
+test_plans_catalog_has_tiers_and_real_prices_only (tests.test_v0110_monetization.TierAccessTests.test_plans_catalog_has_tiers_and_real_prices_only) ... ok
+test_cancel_on_day_13_then_downgrade_to_free_after_trial (tests.test_v0110_monetization.TrialTests.test_cancel_on_day_13_then_downgrade_to_free_after_trial) ... ok
+test_cancel_on_day_1_keeps_full_until_end_without_charge (tests.test_v0110_monetization.TrialTests.test_cancel_on_day_1_keeps_full_until_end_without_charge) ... ok
+test_government_gets_no_trial_and_no_auto_trial_when_disabled (tests.test_v0110_monetization.TrialTests.test_government_gets_no_trial_and_no_auto_trial_when_disabled) ... ok
+test_lifecycle_reminders_days_1_7_11_13_14_without_spam (tests.test_v0110_monetization.TrialTests.test_lifecycle_reminders_days_1_7_11_13_14_without_spam) ... ok
+test_new_user_starts_14_day_full_trial (tests.test_v0110_monetization.TrialTests.test_new_user_starts_14_day_full_trial) ... ok
+test_trial_cannot_be_reused_or_farmed (tests.test_v0110_monetization.TrialTests.test_trial_cannot_be_reused_or_farmed) ... ok
+test_amount_voucher_in_checkout_creates_coupon_and_final_price (tests.test_v0110_monetization.VoucherTests.test_amount_voucher_in_checkout_creates_coupon_and_final_price) ... ok
+test_expired_and_exhausted_vouchers_fail (tests.test_v0110_monetization.VoucherTests.test_expired_and_exhausted_vouchers_fail) ... ok
+test_percent_voucher_20_applies_on_server_and_cannot_be_reused (tests.test_v0110_monetization.VoucherTests.test_percent_voucher_20_applies_on_server_and_cannot_be_reused) ... ok
+test_permanent_license_voucher (tests.test_v0110_monetization.VoucherTests.test_permanent_license_voucher) ... ok
+test_voucher_100_percent_grants_license_without_payment (tests.test_v0110_monetization.VoucherTests.test_voucher_100_percent_grants_license_without_payment) ... ok
+test_concurrent_certificate_issue_creates_a_single_certificate (tests.test_v0120_hardening.Concurrency.test_concurrent_certificate_issue_creates_a_single_certificate) ... ok
+test_concurrent_trial_decision_is_applied_once (tests.test_v0120_hardening.Concurrency.test_concurrent_trial_decision_is_applied_once) ... ok
+test_concurrent_voucher_redemption_respects_the_single_use_limit (tests.test_v0120_hardening.Concurrency.test_concurrent_voucher_redemption_respects_the_single_use_limit) ... ok
+test_duplicate_webhook_delivered_concurrently_is_processed_once (tests.test_v0120_hardening.Concurrency.test_duplicate_webhook_delivered_concurrently_is_processed_once)
+Idempotência sob concorrência: o mesmo event.id entregue 4x em paralelo grava UMA linha (garantia do banco). ... ok
+test_event_capacity_is_never_exceeded_under_concurrent_registration (tests.test_v0120_hardening.Concurrency.test_event_capacity_is_never_exceeded_under_concurrent_registration) ... ok
+test_webhook_without_valid_signature_is_never_recorded (tests.test_v0120_hardening.Concurrency.test_webhook_without_valid_signature_is_never_recorded) ... {"ts": "2026-10-06T07:41:31.641+00:00", "level": "warning", "logger": "impacto.billing", "msg": "stripe_webhook_bad_signature", "request_id": "b504b4cf8bc54f91", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "ad4a984be1fd738fe7de92eac308c886"}
+ok
+test_checklist_progress_and_feedback_are_per_user (tests.test_v0120_hardening.CrossTenantIdor.test_checklist_progress_and_feedback_are_per_user) ... ok
+test_other_tenant_cannot_read_write_or_rate_ticket (tests.test_v0120_hardening.CrossTenantIdor.test_other_tenant_cannot_read_write_or_rate_ticket) ... ok
+test_trial_and_demo_requests_are_scoped_to_the_organization (tests.test_v0120_hardening.CrossTenantIdor.test_trial_and_demo_requests_are_scoped_to_the_organization) ... ok
+test_uuid_of_another_tenant_never_returns_data_on_core_objects (tests.test_v0120_hardening.CrossTenantIdor.test_uuid_of_another_tenant_never_returns_data_on_core_objects) ... ok
+test_bad_json_and_media_type_are_rejected_cleanly (tests.test_v0120_hardening.ErrorHygiene.test_bad_json_and_media_type_are_rejected_cleanly) ... ok
+test_database_schema_details_never_reach_the_client (tests.test_v0120_hardening.ErrorHygiene.test_database_schema_details_never_reach_the_client)
+Violação de CHECK no banco não deve expor tabela/constraint; a mensagem autorada pelos gatilhos continua visível. ... {"ts": "2026-10-06T07:41:33.329+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "7b37760a0af34bbd", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "80359cc4fcdece75538bb52a701fb309", "error_id": "a7501f1fe075", "route": "/v1/admin/content/courses", "constraint": "courses_check2", "error": "new row for relation \"courses\" violates check constraint \"courses_check2\"", "user_id": "1c6f502d-b27e-4f4e-993c-8c35a5b5827e"}
+ok
+test_malformed_ids_and_bodies_never_leak_internals_and_never_500 (tests.test_v0120_hardening.ErrorHygiene.test_malformed_ids_and_bodies_never_leak_internals_and_never_500) ... ok
+test_sql_and_xss_payloads_are_treated_as_text_everywhere_in_the_hub (tests.test_v0120_hardening.ErrorHygiene.test_sql_and_xss_payloads_are_treated_as_text_everywhere_in_the_hub) ... ok
+test_unknown_fields_are_rejected_so_clients_cannot_smuggle_state (tests.test_v0120_hardening.ErrorHygiene.test_unknown_fields_are_rejected_so_clients_cannot_smuggle_state) ... ok
+test_failed_bulletin_send_does_not_consume_the_subscriber_period (tests.test_v0120_hardening.MailDelivery.test_failed_bulletin_send_does_not_consume_the_subscriber_period)
+Falha de SMTP não pode "queimar" o boletim da inscrita: last_sent_at só avança quando o envio sai. ... ok
+test_transactional_notice_is_retried_until_it_leaves (tests.test_v0120_hardening.MailDelivery.test_transactional_notice_is_retried_until_it_leaves)
+Aviso de cobrança: enquanto o e-mail falha, `emailed_at` continua nulo (reenvio no ciclo seguinte), sem duplicar depois. ... ok
+test_annual_savings_is_never_invented (tests.test_v0120_hardening.MoneyAndTime.test_annual_savings_is_never_invented) ... ok
+test_discount_is_always_integer_cents_within_bounds (tests.test_v0120_hardening.MoneyAndTime.test_discount_is_always_integer_cents_within_bounds) ... ok
+test_quote_refuses_to_sell_a_plan_without_price (tests.test_v0120_hardening.MoneyAndTime.test_quote_refuses_to_sell_a_plan_without_price) ... ok
+test_reserved_voucher_discount_is_visible_to_the_organization (tests.test_v0120_hardening.MoneyAndTime.test_reserved_voucher_discount_is_visible_to_the_organization)
+Regressão: `pending_discounts` vinha SEMPRE vazio (JOIN com `vouchers`, invisível à organização por RLS), ... ok
+test_timestamps_are_timezone_aware_iso_8601 (tests.test_v0120_hardening.MoneyAndTime.test_timestamps_are_timezone_aware_iso_8601) ... ok
+test_admin_routes_require_mfa_even_for_platform_admin (tests.test_v0120_hardening.RouteAuthorizationSweep.test_admin_routes_require_mfa_even_for_platform_admin) ... ok
+test_catalog_is_not_empty_and_matches_openapi (tests.test_v0120_hardening.RouteAuthorizationSweep.test_catalog_is_not_empty_and_matches_openapi) ... ok
+test_every_admin_route_rejects_ordinary_user (tests.test_v0120_hardening.RouteAuthorizationSweep.test_every_admin_route_rejects_ordinary_user) ... ok
+test_every_non_public_route_rejects_anonymous (tests.test_v0120_hardening.RouteAuthorizationSweep.test_every_non_public_route_rejects_anonymous) ... ok
+test_no_route_answers_with_server_error_to_anonymous (tests.test_v0120_hardening.RouteAuthorizationSweep.test_no_route_answers_with_server_error_to_anonymous)
+Nenhuma rota deve estourar 5xx por entrada anônima/placeholder (estado impossível vira erro tratado). ... ok
+test_enrollment_progress_quiz_and_certificate (tests.test_v0120_knowledge.Academy.test_enrollment_progress_quiz_and_certificate) ... ok
+test_progress_is_private (tests.test_v0120_knowledge.Academy.test_progress_is_private) ... ok
+test_quiz_key_never_leaves_the_server (tests.test_v0120_knowledge.Academy.test_quiz_key_never_leaves_the_server) ... ok
+test_quiz_requires_answers_and_unpublished_course_is_hidden (tests.test_v0120_knowledge.Academy.test_quiz_requires_answers_and_unpublished_course_is_hidden) ... ok
+test_analytics_endpoint_and_retention (tests.test_v0120_knowledge.AnalyticsAndGovernance.test_analytics_endpoint_and_retention) ... ok
+test_category_and_unknown_history_type (tests.test_v0120_knowledge.AnalyticsAndGovernance.test_category_and_unknown_history_type) ... ok
+test_public_endpoints_are_rate_limited_in_spec (tests.test_v0120_knowledge.AnalyticsAndGovernance.test_public_endpoints_are_rate_limited_in_spec) ... ok
+test_stale_content_is_flagged_and_review_clears_it (tests.test_v0120_knowledge.AnalyticsAndGovernance.test_stale_content_is_flagged_and_review_clears_it) ... ok
+test_bulletin_dispatch_sends_only_published_bulletins_to_confirmed (tests.test_v0120_knowledge.Captation.test_bulletin_dispatch_sends_only_published_bulletins_to_confirmed) ... ok
+test_demo_request_schedule_sends_email (tests.test_v0120_knowledge.Captation.test_demo_request_schedule_sends_email) ... ok
+test_newsletter_double_opt_in (tests.test_v0120_knowledge.Captation.test_newsletter_double_opt_in) ... ok
+test_partnership_not_readable_by_other_users (tests.test_v0120_knowledge.Captation.test_partnership_not_readable_by_other_users) ... ok
+test_partnership_requires_consent_and_flows_through_pipeline (tests.test_v0120_knowledge.Captation.test_partnership_requires_consent_and_flows_through_pipeline) ... ok
+test_partnership_validates_and_honeypot_stores_nothing (tests.test_v0120_knowledge.Captation.test_partnership_validates_and_honeypot_stores_nothing) ... ok
+test_admin_grants_and_revokes_staff_roles (tests.test_v0120_knowledge.Editorial.test_admin_grants_and_revokes_staff_roles) ... ok
+test_author_cannot_approve_even_as_platform_admin_and_db_enforces_it (tests.test_v0120_knowledge.Editorial.test_author_cannot_approve_even_as_platform_admin_and_db_enforces_it) ... ok
+test_draft_is_not_public_until_published_by_another_person (tests.test_v0120_knowledge.Editorial.test_draft_is_not_public_until_published_by_another_person) ... ok
+test_published_version_is_immutable_and_new_version_supersedes (tests.test_v0120_knowledge.Editorial.test_published_version_is_immutable_and_new_version_supersedes) ... ok
+test_regulatory_content_needs_source_and_date_and_expires (tests.test_v0120_knowledge.Editorial.test_regulatory_content_needs_source_and_date_and_expires) ... {"ts": "2026-10-06T07:41:53.341+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "caae47ad70ae413b", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "f77ca00bd1052d8673aafcb2a303cc9f", "error_id": "caa3003effaa", "route": "/v1/admin/content/article-versions/{id}/transition", "constraint": "kb_article_versions_check2", "error": "new row for relation \"kb_article_versions\" violates check constraint \"kb_article_versions_check2\"", "user_id": "e76ee05d-10ba-4648-a713-c164e8de4d18"}
+ok
+test_returning_to_draft_requires_a_note (tests.test_v0120_knowledge.Editorial.test_returning_to_draft_requires_a_note) ... ok
+test_roles_are_enforced (tests.test_v0120_knowledge.Editorial.test_roles_are_enforced) ... ok
+test_staff_routes_require_mfa (tests.test_v0120_knowledge.Editorial.test_staff_routes_require_mfa) ... ok
+test_billing_notice_is_emailed_once_to_owner (tests.test_v0120_knowledge.EmailNotices.test_billing_notice_is_emailed_once_to_owner) ... ok
+test_email_preference_off_suppresses_but_in_app_remains (tests.test_v0120_knowledge.EmailNotices.test_email_preference_off_suppresses_but_in_app_remains) ... ok
+test_unverified_owner_gets_no_email (tests.test_v0120_knowledge.EmailNotices.test_unverified_owner_gets_no_email) ... ok
+test_attendance_enables_rating_and_completion_exposes_recording (tests.test_v0120_knowledge.Events.test_attendance_enables_rating_and_completion_exposes_recording) ... ok
+test_cancelling_event_notifies_registered (tests.test_v0120_knowledge.Events.test_cancelling_event_notifies_registered) ... ok
+test_past_or_unpublished_events_reject_registration (tests.test_v0120_knowledge.Events.test_past_or_unpublished_events_reject_registration) ... ok
+test_registration_waitlist_promotion_and_private_join_link (tests.test_v0120_knowledge.Events.test_registration_waitlist_promotion_and_private_join_link) ... ok
+test_reminder_job_is_idempotent (tests.test_v0120_knowledge.Events.test_reminder_job_is_idempotent) ... ok
+test_checklist_progress_is_saved_per_user (tests.test_v0120_knowledge.FaqAndResources.test_checklist_progress_is_saved_per_user) ... ok
+test_faq_feedback_rollup_and_low_resolution_flag (tests.test_v0120_knowledge.FaqAndResources.test_faq_feedback_rollup_and_low_resolution_flag) ... ok
+test_faq_revision_replaces_only_when_new_one_is_published (tests.test_v0120_knowledge.FaqAndResources.test_faq_revision_replaces_only_when_new_one_is_published) ... ok
+test_resource_download_of_stored_file_uses_temporary_url (tests.test_v0120_knowledge.FaqAndResources.test_resource_download_of_stored_file_uses_temporary_url) ... ok
+test_resource_versions_are_immutable_and_history_is_kept (tests.test_v0120_knowledge.FaqAndResources.test_resource_versions_are_immutable_and_history_is_kept) ... ok
+test_template_resource_creates_draft_for_org (tests.test_v0120_knowledge.FaqAndResources.test_template_resource_creates_draft_for_org) ... ok
+test_every_detector_runs_for_every_org_kind (tests.test_v0120_knowledge.Onboarding.test_every_detector_runs_for_every_org_kind) ... ok
+test_pending_center_and_activities (tests.test_v0120_knowledge.Onboarding.test_pending_center_and_activities) ... ok
+test_progress_comes_from_real_data (tests.test_v0120_knowledge.Onboarding.test_progress_comes_from_real_data) ... ok
+test_requires_auth (tests.test_v0120_knowledge.Onboarding.test_requires_auth) ... ok
+test_assistant_does_not_use_unpublished_content (tests.test_v0120_knowledge.SearchAndAssistant.test_assistant_does_not_use_unpublished_content) ... ok
+test_assistant_is_grounded_and_cites_sources (tests.test_v0120_knowledge.SearchAndAssistant.test_assistant_is_grounded_and_cites_sources) ... ok
+test_assistant_refuses_without_base_and_offers_ticket (tests.test_v0120_knowledge.SearchAndAssistant.test_assistant_refuses_without_base_and_offers_ticket) ... ok
+test_ctx_search_and_contextual_help (tests.test_v0120_knowledge.SearchAndAssistant.test_ctx_search_and_contextual_help) ... ok
+test_empty_search_offers_next_steps_and_logs_only_hash (tests.test_v0120_knowledge.SearchAndAssistant.test_empty_search_offers_next_steps_and_logs_only_hash) ... ok
+test_search_validates_input (tests.test_v0120_knowledge.SearchAndAssistant.test_search_validates_input) ... ok
+test_semantic_vocabulary_finds_by_synonym_and_explains (tests.test_v0120_knowledge.SearchAndAssistant.test_semantic_vocabulary_finds_by_synonym_and_explains) ... ok
+test_import_creates_only_demo_drafts_and_is_idempotent (tests.test_v0120_knowledge.SeedContent.test_import_creates_only_demo_drafts_and_is_idempotent) ... ok
+test_publish_requires_different_reviewer_and_carries_demo_badge (tests.test_v0120_knowledge.SeedContent.test_publish_requires_different_reviewer_and_carries_demo_badge) ... ok
+test_attachment_must_be_own_org_document (tests.test_v0120_knowledge.Support.test_attachment_must_be_own_org_document) ... ok
+test_prefs_in_app_off_suppresses_notification (tests.test_v0120_knowledge.Support.test_prefs_in_app_off_suppresses_notification) ... ok
+test_sla_escalation_and_recurring_candidates (tests.test_v0120_knowledge.Support.test_sla_escalation_and_recurring_candidates) ... ok
+test_ticket_from_help_is_counted_and_sla_is_configurable_by_admin_only (tests.test_v0120_knowledge.Support.test_ticket_from_help_is_counted_and_sla_is_configurable_by_admin_only) ... ok
+test_ticket_lifecycle_with_sla_and_staff_roles (tests.test_v0120_knowledge.Support.test_ticket_lifecycle_with_sla_and_staff_roles) ... ok
+test_tickets_are_private_to_requester_and_staff (tests.test_v0120_knowledge.Support.test_tickets_are_private_to_requester_and_staff) ... ok
+test_user_cannot_set_priority_state_or_assignee_even_directly (tests.test_v0120_knowledge.Support.test_user_cannot_set_priority_state_or_assignee_even_directly) ... ok
+test_active_trial_is_extended_and_used_trial_is_refused (tests.test_v0120_knowledge.TrialRequests.test_active_trial_is_extended_and_used_trial_is_refused) ... ok
+test_dashboard_has_derived_usage (tests.test_v0120_knowledge.TrialRequests.test_dashboard_has_derived_usage) ... ok
+test_only_owner_requests_and_only_admin_decides (tests.test_v0120_knowledge.TrialRequests.test_only_owner_requests_and_only_admin_decides) ... ok
+test_request_never_grants_access_and_admin_decision_starts_trial (tests.test_v0120_knowledge.TrialRequests.test_request_never_grants_access_and_admin_decision_starts_trial) ... ok
+test_sitemap_lists_only_public_non_demo (tests.test_v0120_knowledge.Visibility.test_sitemap_lists_only_public_non_demo) ... ok
+test_visibility_levels (tests.test_v0120_knowledge.Visibility.test_visibility_levels) ... ok
+test_generic_rest_adapter_pushes_and_records_external_id (tests.test_v0130_integrations.AdapterContracts.test_generic_rest_adapter_pushes_and_records_external_id) ... ok
+test_government_adapter_refuses_to_pretend_authorization (tests.test_v0130_integrations.AdapterContracts.test_government_adapter_refuses_to_pretend_authorization) ... ok
+test_senior_sapiens_speaks_soap_and_maps_records (tests.test_v0130_integrations.AdapterContracts.test_senior_sapiens_speaks_soap_and_maps_records) ... ok
+test_soap_fault_is_a_permanent_error_and_unauthorized_is_detected (tests.test_v0130_integrations.AdapterContracts.test_soap_fault_is_a_permanent_error_and_unauthorized_is_detected) ... ok
+test_totvs_requires_product_and_uses_its_own_paths (tests.test_v0130_integrations.AdapterContracts.test_totvs_requires_product_and_uses_its_own_paths) ... ok
+test_catalog_declares_real_maturity_and_never_claims_homologation (tests.test_v0130_integrations.ConnectionLifecycle.test_catalog_declares_real_maturity_and_never_claims_homologation) ... ok
+test_draft_to_active_requires_valid_config_and_credential (tests.test_v0130_integrations.ConnectionLifecycle.test_draft_to_active_requires_valid_config_and_credential) ... ok
+test_provider_without_adapter_cannot_be_connected (tests.test_v0130_integrations.ConnectionLifecycle.test_provider_without_adapter_cannot_be_connected) ... ok
+test_revoking_deletes_credentials_but_keeps_history (tests.test_v0130_integrations.ConnectionLifecycle.test_revoking_deletes_credentials_but_keeps_history) ... ok
+test_roles_are_enforced (tests.test_v0130_integrations.ConnectionLifecycle.test_roles_are_enforced) ... ok
+test_provider_rejects_unsupported_auth_kind_and_short_secret (tests.test_v0130_integrations.CredentialSecurity.test_provider_rejects_unsupported_auth_kind_and_short_secret) ... ok
+test_rotation_replaces_the_secret_and_is_audited_without_the_value (tests.test_v0130_integrations.CredentialSecurity.test_rotation_replaces_the_secret_and_is_audited_without_the_value) ... ok
+test_secret_never_leaves_the_api_and_is_not_readable_by_the_app_role (tests.test_v0130_integrations.CredentialSecurity.test_secret_never_leaves_the_api_and_is_not_readable_by_the_app_role) ... ok
+test_secret_ref_keeps_only_the_reference (tests.test_v0130_integrations.CredentialSecurity.test_secret_ref_keeps_only_the_reference) ... ok
+test_stored_secret_is_encrypted_at_rest_and_decrypts_only_through_the_hub (tests.test_v0130_integrations.CredentialSecurity.test_stored_secret_is_encrypted_at_rest_and_decrypts_only_through_the_hub) ... ok
+test_export_generates_controlled_dataset_and_neutralizes_formula (tests.test_v0130_integrations.FileIntegration.test_export_generates_controlled_dataset_and_neutralizes_formula) ... ok
+test_export_only_sees_own_organization (tests.test_v0130_integrations.FileIntegration.test_export_only_sees_own_organization) ... ok
+test_import_previews_without_applying_and_requires_approval (tests.test_v0130_integrations.FileIntegration.test_import_previews_without_applying_and_requires_approval) ... ok
+test_import_rejects_document_of_another_organization (tests.test_v0130_integrations.FileIntegration.test_import_rejects_document_of_another_organization) ... ok
+test_rows_missing_required_fields_are_invalid_and_explained (tests.test_v0130_integrations.FileIntegration.test_rows_missing_required_fields_are_invalid_and_explained) ... ok
+test_same_file_cannot_be_imported_twice (tests.test_v0130_integrations.FileIntegration.test_same_file_cannot_be_imported_twice) ... ok
+test_upload_only_accepts_formats_the_vault_validates (tests.test_v0130_integrations.FileIntegration.test_upload_only_accepts_formats_the_vault_validates)
+O cofre de documentos valida assinatura binária e só aceita .csv/.xlsx entre os formatos tabulares. ... ok
+test_vault_rejects_binary_disguised_as_csv (tests.test_v0130_integrations.FileIntegration.test_vault_rejects_binary_disguised_as_csv)
+O cofre compara conteúdo e extensão: binário disfarçado de .csv não chega ao interpretador. ... ok
+test_xxe_is_refused_by_the_parser_used_for_connector_payloads (tests.test_v0130_integrations.FileIntegration.test_xxe_is_refused_by_the_parser_used_for_connector_payloads) ... ok
+test_admin_overview_answers_which_integration_is_broken (tests.test_v0130_integrations.HealthAndOperations.test_admin_overview_answers_which_integration_is_broken) ... ok
+test_health_check_never_writes_on_the_external_system (tests.test_v0130_integrations.HealthAndOperations.test_health_check_never_writes_on_the_external_system) ... ok
+test_health_states_reflect_the_external_system (tests.test_v0130_integrations.HealthAndOperations.test_health_states_reflect_the_external_system) ... ok
+test_provider_maturity_requires_admin_and_evidence (tests.test_v0130_integrations.HealthAndOperations.test_provider_maturity_requires_admin_and_evidence) ... ok
+test_unconfigured_connection_reports_unconfigured (tests.test_v0130_integrations.HealthAndOperations.test_unconfigured_connection_reports_unconfigured) ... ok
+test_worker_endpoint_is_admin_only (tests.test_v0130_integrations.HealthAndOperations.test_worker_endpoint_is_admin_only) ... ok
+test_bad_signature_is_rejected_and_recorded (tests.test_v0130_integrations.InboundWebhooks.test_bad_signature_is_rejected_and_recorded) ... ok
+test_duplicate_message_is_processed_once_even_in_parallel (tests.test_v0130_integrations.InboundWebhooks.test_duplicate_message_is_processed_once_even_in_parallel) ... ok
+test_inbound_endpoint_is_public_but_rate_limited_in_spec (tests.test_v0130_integrations.InboundWebhooks.test_inbound_endpoint_is_public_but_rate_limited_in_spec) ... ok
+test_missing_event_id_and_malformed_body_are_rejected (tests.test_v0130_integrations.InboundWebhooks.test_missing_event_id_and_malformed_body_are_rejected) ... ok
+test_replay_of_old_signature_is_rejected (tests.test_v0130_integrations.InboundWebhooks.test_replay_of_old_signature_is_rejected) ... ok
+test_unknown_or_inactive_connection_answers_generically (tests.test_v0130_integrations.InboundWebhooks.test_unknown_or_inactive_connection_answers_generically) ... ok
+test_valid_message_is_accepted_and_enqueues_a_job (tests.test_v0130_integrations.InboundWebhooks.test_valid_message_is_accepted_and_enqueues_a_job) ... ok
+test_connection_endpoint_cannot_point_to_internal_network (tests.test_v0130_integrations.IntegrationSecurity.test_connection_endpoint_cannot_point_to_internal_network) ... ok
+test_import_row_content_is_stored_as_text_not_interpreted (tests.test_v0130_integrations.IntegrationSecurity.test_import_row_content_is_stored_as_text_not_interpreted) ... ok
+test_mapping_cannot_execute_code (tests.test_v0130_integrations.IntegrationSecurity.test_mapping_cannot_execute_code) ... ok
+test_secrets_never_appear_in_logs_or_audit (tests.test_v0130_integrations.IntegrationSecurity.test_secrets_never_appear_in_logs_or_audit) ... ok
+test_soap_envelope_escapes_content_and_rejects_bad_operation (tests.test_v0130_integrations.IntegrationSecurity.test_soap_envelope_escapes_content_and_rejects_bad_operation) ... ok
+test_ssrf_guard_blocks_at_call_time_even_if_dns_points_inside (tests.test_v0130_integrations.IntegrationSecurity.test_ssrf_guard_blocks_at_call_time_even_if_dns_points_inside)
+A guarda autoritativa roda na chamada: destino interno vira erro PERMANENTE (não fica repetindo). ... ok
+test_webhook_headers_cannot_smuggle_authorization (tests.test_v0130_integrations.IntegrationSecurity.test_webhook_headers_cannot_smuggle_authorization) ... ok
+test_xml_bomb_and_deep_nesting_are_refused (tests.test_v0130_integrations.IntegrationSecurity.test_xml_bomb_and_deep_nesting_are_refused) ... ok
+test_canceled_job_is_not_executed (tests.test_v0130_integrations.JobLifecycle.test_canceled_job_is_not_executed) ... ok
+test_circuit_opens_after_consecutive_failures_and_protects_the_external_system (tests.test_v0130_integrations.JobLifecycle.test_circuit_opens_after_consecutive_failures_and_protects_the_external_system) ... {"ts": "2026-10-06T07:42:16.967+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.17.0", "env": "test", "connection_id": "f86aa234-ad23-4a1d-af5d-be973f290e21", "failure_streak": 5}
+{"ts": "2026-10-06T07:42:17.013+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.17.0", "env": "test", "connection_id": "f86aa234-ad23-4a1d-af5d-be973f290e21", "failure_streak": 6}
+ok
+test_concurrent_workers_never_run_the_same_job_twice (tests.test_v0130_integrations.JobLifecycle.test_concurrent_workers_never_run_the_same_job_twice) ... ok
+test_explicit_idempotency_key_is_respected (tests.test_v0130_integrations.JobLifecycle.test_explicit_idempotency_key_is_respected) ... ok
+test_malformed_response_is_permanent_and_does_not_break_the_core (tests.test_v0130_integrations.JobLifecycle.test_malformed_response_is_permanent_and_does_not_break_the_core) ... ok
+test_permanent_failure_is_not_retried (tests.test_v0130_integrations.JobLifecycle.test_permanent_failure_is_not_retried) ... ok
+test_same_request_returns_the_same_job (tests.test_v0130_integrations.JobLifecycle.test_same_request_returns_the_same_job) ... ok
+test_successful_pull_maps_records_and_links_external_ids (tests.test_v0130_integrations.JobLifecycle.test_successful_pull_maps_records_and_links_external_ids) ... ok
+test_temporary_failure_retries_with_backoff_then_gives_up (tests.test_v0130_integrations.JobLifecycle.test_temporary_failure_retries_with_backoff_then_gives_up) ... ok
+test_timeout_and_rate_limit_are_temporary (tests.test_v0130_integrations.JobLifecycle.test_timeout_and_rate_limit_are_temporary) ... ok
+test_conflicts_are_visible_to_the_organization (tests.test_v0130_integrations.MappingAndExternalIds.test_conflicts_are_visible_to_the_organization) ... ok
+test_internal_id_is_never_replaced_and_conflicts_are_recorded (tests.test_v0130_integrations.MappingAndExternalIds.test_internal_id_is_never_replaced_and_conflicts_are_recorded) ... ok
+test_mapping_rejects_unknown_transform_and_bad_target (tests.test_v0130_integrations.MappingAndExternalIds.test_mapping_rejects_unknown_transform_and_bad_target) ... ok
+test_mapping_transforms_are_declared_and_validated (tests.test_v0130_integrations.MappingAndExternalIds.test_mapping_transforms_are_declared_and_validated) ... ok
+test_version_conflict_is_detected_and_never_silently_overwritten (tests.test_v0130_integrations.MappingAndExternalIds.test_version_conflict_is_detected_and_never_silently_overwritten) ... ok
+test_catalog_only_accepts_real_events (tests.test_v0130_integrations.OutboundWebhooks.test_catalog_only_accepts_real_events) ... ok
+test_event_is_delivered_once_with_valid_signature (tests.test_v0130_integrations.OutboundWebhooks.test_event_is_delivered_once_with_valid_signature) ... ok
+test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed (tests.test_v0130_integrations.OutboundWebhooks.test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed) ... {"ts": "2026-10-06T07:42:18.391+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.17.0", "env": "test", "delivery_id": "3864b4fa-702b-4f79-b058-b7433d7c4df7", "event_type": "TRIAL.STARTED", "attempts": 6, "code": "[REDACTED]"}
+ok
+test_http_endpoint_and_internal_targets_are_refused (tests.test_v0130_integrations.OutboundWebhooks.test_http_endpoint_and_internal_targets_are_refused) ... ok
+test_only_subscribed_events_and_active_subscriptions_are_delivered (tests.test_v0130_integrations.OutboundWebhooks.test_only_subscribed_events_and_active_subscriptions_are_delivered) ... ok
+test_other_organization_never_receives_events (tests.test_v0130_integrations.OutboundWebhooks.test_other_organization_never_receives_events) ... ok
+test_permanent_rejection_goes_straight_to_dead_letter (tests.test_v0130_integrations.OutboundWebhooks.test_permanent_rejection_goes_straight_to_dead_letter) ... {"ts": "2026-10-06T07:42:18.820+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.17.0", "env": "test", "delivery_id": "c5f87871-fc3f-4d3a-a63f-eb6beb6f507b", "event_type": "PAYMENT.FAILED", "attempts": 1, "code": "[REDACTED]"}
+ok
+test_signature_is_verifiable_and_rejects_tampering (tests.test_v0130_integrations.OutboundWebhooks.test_signature_is_verifiable_and_rejects_tampering) ... ok
+test_test_delivery_endpoint_emits_a_ping (tests.test_v0130_integrations.OutboundWebhooks.test_test_delivery_endpoint_emits_a_ping) ... ok
+test_failure_path_then_recovery (tests.test_v0130_integrations.SimulatedProductionFlow.test_failure_path_then_recovery)
+Conexão → falha externa → retry → falha → auditoria + evento de falha → recuperação. ... ok
+test_full_happy_path_from_connection_to_audit (tests.test_v0130_integrations.SimulatedProductionFlow.test_full_happy_path_from_connection_to_audit)
+Organização → conexão → credencial → saúde → mapeamento → job → ID externo → evento → webhook → auditoria. ... ok
+test_worker_job_is_registered_in_platform_history (tests.test_v0130_integrations.SimulatedProductionFlow.test_worker_job_is_registered_in_platform_history) ... ok
+test_admin_only_operational_view (tests.test_v0130_integrations.TenantIsolation.test_admin_only_operational_view) ... ok
+test_jobs_links_events_and_imports_are_scoped (tests.test_v0130_integrations.TenantIsolation.test_jobs_links_events_and_imports_are_scoped) ... ok
+test_other_organization_cannot_read_write_or_use_the_connection (tests.test_v0130_integrations.TenantIsolation.test_other_organization_cannot_read_write_or_use_the_connection) ... ok
+test_subscription_and_deliveries_are_scoped (tests.test_v0130_integrations.TenantIsolation.test_subscription_and_deliveries_are_scoped) ... ok
+test_broken_chain_is_detected (tests.test_v0140_trust.CustodyChain.test_broken_chain_is_detected) ... ok
+test_chain_cannot_be_rewritten_by_the_application (tests.test_v0140_trust.CustodyChain.test_chain_cannot_be_rewritten_by_the_application) ... ok
+test_chain_records_every_fact_and_verifies (tests.test_v0140_trust.CustodyChain.test_chain_records_every_fact_and_verifies) ... ok
+test_integrity_endpoint_detects_tampered_storage (tests.test_v0140_trust.CustodyChain.test_integrity_endpoint_detects_tampered_storage) ... ok
+test_docx_structure_and_round_trip (tests.test_v0140_trust.DocumentFormats.test_docx_structure_and_round_trip) ... ok
+test_draft_export_in_three_formats_with_optional_qr (tests.test_v0140_trust.DocumentFormats.test_draft_export_in_three_formats_with_optional_qr) ... ok
+test_export_dataset_in_every_format (tests.test_v0140_trust.DocumentFormats.test_export_dataset_in_every_format) ... ok
+test_formula_injection_is_neutralised_in_spreadsheets (tests.test_v0140_trust.DocumentFormats.test_formula_injection_is_neutralised_in_spreadsheets) ... ok
+test_odf_puts_mimetype_first_uncompressed (tests.test_v0140_trust.DocumentFormats.test_odf_puts_mimetype_first_uncompressed) ... ok
+test_pdf_with_qr_contains_code (tests.test_v0140_trust.DocumentFormats.test_pdf_with_qr_contains_code) ... ok
+test_qr_round_trip_through_our_own_pipeline (tests.test_v0140_trust.DocumentFormats.test_qr_round_trip_through_our_own_pipeline) ... ok
+test_wopi_online_editing_is_declared_not_implemented (tests.test_v0140_trust.DocumentFormats.test_wopi_online_editing_is_declared_not_implemented) ... ok
+test_xlsx_cells_have_right_types (tests.test_v0140_trust.DocumentFormats.test_xlsx_cells_have_right_types) ... ok
+test_xml_export_sanitizes_tag_names (tests.test_v0140_trust.DocumentFormats.test_xml_export_sanitizes_tag_names) ... ok
+test_fee_tables_start_empty_and_say_so (tests.test_v0140_trust.FeeTablesAndServices.test_fee_tables_start_empty_and_say_so) ... ok
+test_geo_requires_consent_to_be_public (tests.test_v0140_trust.FeeTablesAndServices.test_geo_requires_consent_to_be_public) ... ok
+test_published_table_is_not_edited (tests.test_v0140_trust.FeeTablesAndServices.test_published_table_is_not_edited) ... ok
+test_publishing_with_source_works_and_items_show (tests.test_v0140_trust.FeeTablesAndServices.test_publishing_with_source_works_and_items_show) ... ok
+test_publishing_without_source_is_refused (tests.test_v0140_trust.FeeTablesAndServices.test_publishing_without_source_is_refused) ... ok
+test_service_catalog_and_directory_card (tests.test_v0140_trust.FeeTablesAndServices.test_service_catalog_and_directory_card) ... ok
+test_campaign_slug_is_unique (tests.test_v0140_trust.FundingQuotas.test_campaign_slug_is_unique) ... ok
+test_cannot_oversell (tests.test_v0140_trust.FundingQuotas.test_cannot_oversell) ... ok
+test_own_org_cannot_back_itself_and_closed_quota_refuses (tests.test_v0140_trust.FundingQuotas.test_own_org_cannot_back_itself_and_closed_quota_refuses) ... ok
+test_parallel_pledges_never_exceed_total (tests.test_v0140_trust.FundingQuotas.test_parallel_pledges_never_exceed_total) ... ok
+test_pledge_cannot_self_confirm (tests.test_v0140_trust.FundingQuotas.test_pledge_cannot_self_confirm) ... ok
+test_public_campaign_shows_remaining_quotas (tests.test_v0140_trust.FundingQuotas.test_public_campaign_shows_remaining_quotas) ... ok
+test_quota_math_and_remaining (tests.test_v0140_trust.FundingQuotas.test_quota_math_and_remaining) ... ok
+test_completing_a_stage_requires_its_mandatory_answers (tests.test_v0140_trust.GuidedDiagnosis.test_completing_a_stage_requires_its_mandatory_answers) ... ok
+test_guide_lists_stages_with_progress (tests.test_v0140_trust.GuidedDiagnosis.test_guide_lists_stages_with_progress) ... ok
+test_partial_save_does_not_require_everything (tests.test_v0140_trust.GuidedDiagnosis.test_partial_save_does_not_require_everything) ... ok
+test_skip_is_recorded_with_reason (tests.test_v0140_trust.GuidedDiagnosis.test_skip_is_recorded_with_reason) ... ok
+test_stage_with_required_document_demands_it (tests.test_v0140_trust.GuidedDiagnosis.test_stage_with_required_document_demands_it) ... ok
+test_unknown_stage_and_foreign_document_are_refused (tests.test_v0140_trust.GuidedDiagnosis.test_unknown_stage_and_foreign_document_are_refused) ... ok
+test_biometric_and_phone_are_refused_explicitly (tests.test_v0140_trust.IdentityVerification.test_biometric_and_phone_are_refused_explicitly) ... {"ts": "2026-10-06T07:42:30.245+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "9296e8971c4f4c87", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "f106acc44ad0f93085349c6deb8e9474", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 9.6, "spans": {"db.tx": {"count": 3, "ms": 8.5}}, "user_id": "97d9a95d-d163-4626-b93f-8f64f09b5e1a", "org_id": "a1f7f772-1ec8-4554-b450-83de03c671d9"}
+{"ts": "2026-10-06T07:42:30.258+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "05a4f29fab7b4ba6", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "d546ec83fe6a4172d20aa1a2ba1e331c", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 9.0, "spans": {"db.tx": {"count": 3, "ms": 7.7}}, "user_id": "97d9a95d-d163-4626-b93f-8f64f09b5e1a", "org_id": "a1f7f772-1ec8-4554-b450-83de03c671d9"}
+ok
+test_document_verification_needs_human_decision (tests.test_v0140_trust.IdentityVerification.test_document_verification_needs_human_decision) ... ok
+test_self_promotion_is_blocked_at_database_level (tests.test_v0140_trust.IdentityVerification.test_self_promotion_is_blocked_at_database_level) ... ok
+test_signature_records_identity_level (tests.test_v0140_trust.IdentityVerification.test_signature_records_identity_level) ... ok
+test_starting_level_and_catalog (tests.test_v0140_trust.IdentityVerification.test_starting_level_and_catalog) ... ok
+test_locales_declare_real_coverage (tests.test_v0140_trust.LocalesAndTheme.test_locales_declare_real_coverage) ... ok
+test_namespace_filter_and_unknown_locale (tests.test_v0140_trust.LocalesAndTheme.test_namespace_filter_and_unknown_locale) ... ok
+test_preferences_round_trip (tests.test_v0140_trust.LocalesAndTheme.test_preferences_round_trip) ... ok
+test_translation_catalog_is_complete_across_locales (tests.test_v0140_trust.LocalesAndTheme.test_translation_catalog_is_complete_across_locales) ... ok
+test_unknown_locale_and_empty_payload_are_refused (tests.test_v0140_trust.LocalesAndTheme.test_unknown_locale_and_empty_payload_are_refused) ... ok
+test_council_catalog_is_honest_about_lookup (tests.test_v0140_trust.ProfessionalCredential.test_council_catalog_is_honest_about_lookup) ... ok
+test_council_requires_uf (tests.test_v0140_trust.ProfessionalCredential.test_council_requires_uf) ... ok
+test_credential_starts_self_declared (tests.test_v0140_trust.ProfessionalCredential.test_credential_starts_self_declared) ... ok
+test_document_then_human_decision_verifies_and_raises_identity (tests.test_v0140_trust.ProfessionalCredential.test_document_then_human_decision_verifies_and_raises_identity) ... ok
+test_revocation_is_recorded (tests.test_v0140_trust.ProfessionalCredential.test_revocation_is_recorded) ... ok
+test_access_is_counted_for_the_owner (tests.test_v0140_trust.PublicVerification.test_access_is_counted_for_the_owner) ... ok
+test_anyone_can_verify_without_login (tests.test_v0140_trust.PublicVerification.test_anyone_can_verify_without_login) ... ok
+test_code_accepts_sloppy_typing (tests.test_v0140_trust.PublicVerification.test_code_accepts_sloppy_typing) ... ok
+test_new_version_supersedes_and_keeps_old_verifiable (tests.test_v0140_trust.PublicVerification.test_new_version_supersedes_and_keeps_old_verifiable) ... ok
+test_other_org_cannot_revoke (tests.test_v0140_trust.PublicVerification.test_other_org_cannot_revoke) ... ok
+test_public_page_hides_personal_data (tests.test_v0140_trust.PublicVerification.test_public_page_hides_personal_data) ... ok
+test_qr_code_is_served_for_public_code (tests.test_v0140_trust.PublicVerification.test_qr_code_is_served_for_public_code) ... ok
+test_revocation_shows_on_public_page (tests.test_v0140_trust.PublicVerification.test_revocation_shows_on_public_page) ... ok
+test_tampered_file_is_detected (tests.test_v0140_trust.PublicVerification.test_tampered_file_is_detected) ... ok
+test_unknown_and_malformed_codes (tests.test_v0140_trust.PublicVerification.test_unknown_and_malformed_codes) ... ok
+test_other_org_cannot_revoke_signature (tests.test_v0140_trust.SignatureRevocation.test_other_org_cannot_revoke_signature) ... ok
+test_revoked_signature_appears_as_revoked_not_deleted (tests.test_v0140_trust.SignatureRevocation.test_revoked_signature_appears_as_revoked_not_deleted) ... ok
+test_both_parties_see_the_agreement (tests.test_v0140_trust.SignedAgreements.test_both_parties_see_the_agreement) ... ok
+test_decline_cancels_the_agreement (tests.test_v0140_trust.SignedAgreements.test_decline_cancels_the_agreement) ... ok
+test_draft_cannot_get_public_code (tests.test_v0140_trust.SignedAgreements.test_draft_cannot_get_public_code) ... ok
+test_full_multiparty_flow (tests.test_v0140_trust.SignedAgreements.test_full_multiparty_flow) ... ok
+test_hash_is_frozen_and_party_cannot_mark_other_as_signed (tests.test_v0140_trust.SignedAgreements.test_hash_is_frozen_and_party_cannot_mark_other_as_signed) ... ok
+test_longitudinal_followup (tests.test_v0140_trust.SignedAgreements.test_longitudinal_followup) ... ok
+test_party_cannot_sign_twice_and_stranger_cannot_sign (tests.test_v0140_trust.SignedAgreements.test_party_cannot_sign_twice_and_stranger_cannot_sign) ... ok
+test_publish_requires_two_required_parties (tests.test_v0140_trust.SignedAgreements.test_publish_requires_two_required_parties) ... ok
+test_catalog_has_17_sdg_with_official_colors_and_no_un_logo (tests.test_v0140_trust.TaxonomyAndTags.test_catalog_has_17_sdg_with_official_colors_and_no_un_logo) ... ok
+test_tag_is_idempotent_and_removable (tests.test_v0140_trust.TaxonomyAndTags.test_tag_is_idempotent_and_removable) ... ok
+test_tagging_a_project (tests.test_v0140_trust.TaxonomyAndTags.test_tagging_a_project) ... ok
+test_unknown_taxonomy_code_is_refused_by_the_database (tests.test_v0140_trust.TaxonomyAndTags.test_unknown_taxonomy_code_is_refused_by_the_database) ... ok
+test_internal_timestamp_is_applied_and_verifiable (tests.test_v0140_trust.TimestampsAndRfc3161.test_internal_timestamp_is_applied_and_verifiable) ... ok
+test_rfc3161_refuses_instead_of_pretending (tests.test_v0140_trust.TimestampsAndRfc3161.test_rfc3161_refuses_instead_of_pretending) ... ok
+test_parallel_verifiable_record_creation_reuses_one_code (tests.test_v0140_trust.TrustConcurrency.test_parallel_verifiable_record_creation_reuses_one_code) ... ok
+test_same_code_used_in_parallel_signs_once (tests.test_v0140_trust.TrustConcurrency.test_same_code_used_in_parallel_signs_once) ... ok
+test_custody_chain_is_isolated (tests.test_v0140_trust.TrustTenantIsolation.test_custody_chain_is_isolated) ... ok
+test_identity_is_personal_not_organizational (tests.test_v0140_trust.TrustTenantIsolation.test_identity_is_personal_not_organizational) ... ok
+test_integrity_check_is_isolated (tests.test_v0140_trust.TrustTenantIsolation.test_integrity_check_is_isolated) ... ok
+test_other_org_cannot_create_record_for_foreign_document (tests.test_v0140_trust.TrustTenantIsolation.test_other_org_cannot_create_record_for_foreign_document) ... ok
+test_verifiable_records_are_isolated (tests.test_v0140_trust.TrustTenantIsolation.test_verifiable_records_are_isolated) ... ok
+test_code_dies_when_content_changes (tests.test_v0140_trust.TwoLayerSignature.test_code_dies_when_content_changes) ... ok
+test_code_is_single_use (tests.test_v0140_trust.TwoLayerSignature.test_code_is_single_use) ... ok
+test_signature_requires_challenge_code (tests.test_v0140_trust.TwoLayerSignature.test_signature_requires_challenge_code) ... ok
+test_signature_succeeds_with_both_layers (tests.test_v0140_trust.TwoLayerSignature.test_signature_succeeds_with_both_layers) ... ok
+test_sms_channel_is_refused_explicitly (tests.test_v0140_trust.TwoLayerSignature.test_sms_channel_is_refused_explicitly) ... {"ts": "2026-10-06T07:42:43.940+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "7b3ecec9caf74616", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "0da451675da1450bc6ef9814778de48e", "method": "POST", "route": "/v1/signatures/challenge", "status": 501, "ms": 10.8, "spans": {"db.tx": {"count": 4, "ms": 9.5}}, "user_id": "45c9da9e-64f0-47a2-a711-d633a747a03c", "org_id": "b5136c3d-7bd2-42c3-b817-3fcfb09927e0"}
+ok
+test_wrong_code_is_refused_and_counted (tests.test_v0140_trust.TwoLayerSignature.test_wrong_code_is_refused_and_counted) ... ok
+test_wrong_password_is_refused_before_code (tests.test_v0140_trust.TwoLayerSignature.test_wrong_password_is_refused_before_code) ... ok
+test_assembly_cannot_be_created_from_a_draft_template (tests.test_v0150_core.AssemblyTests.test_assembly_cannot_be_created_from_a_draft_template) ... ok
+test_complete_assembly_generates_and_registers_in_the_vault (tests.test_v0150_core.AssemblyTests.test_complete_assembly_generates_and_registers_in_the_vault) ... ok
+test_derived_field_path_is_a_closed_list (tests.test_v0150_core.AssemblyTests.test_derived_field_path_is_a_closed_list) ... ok
+test_four_eyes_the_author_cannot_approve_their_own_assembly (tests.test_v0150_core.AssemblyTests.test_four_eyes_the_author_cannot_approve_their_own_assembly) ... ok
+test_incomplete_assembly_refuses_to_generate_and_says_what_is_missing (tests.test_v0150_core.AssemblyTests.test_incomplete_assembly_refuses_to_generate_and_says_what_is_missing) ... ok
+test_platform_templates_are_published_with_their_source_declared (tests.test_v0150_core.AssemblyTests.test_platform_templates_are_published_with_their_source_declared) ... ok
+test_published_template_is_immutable (tests.test_v0150_core.AssemblyTests.test_published_template_is_immutable) ... ok
+test_declared_evidence_is_never_marked_verified (tests.test_v0150_core.DiagnosticTests.test_declared_evidence_is_never_marked_verified) ... ok
+test_dismissing_an_action_requires_a_reason (tests.test_v0150_core.DiagnosticTests.test_dismissing_an_action_requires_a_reason) ... ok
+test_engine_reference_is_public_to_the_user (tests.test_v0150_core.DiagnosticTests.test_engine_reference_is_public_to_the_user) ... ok
+test_gaps_become_actions_and_closed_gaps_close_their_actions (tests.test_v0150_core.DiagnosticTests.test_gaps_become_actions_and_closed_gaps_close_their_actions) ... ok
+test_readiness_separates_fact_inference_and_recommendation (tests.test_v0150_core.DiagnosticTests.test_readiness_separates_fact_inference_and_recommendation) ... ok
+test_version_is_immutable_and_diff_is_computed_by_the_server (tests.test_v0150_core.DiagnosticTests.test_version_is_immutable_and_diff_is_computed_by_the_server) ... ok
+test_idea_cannot_declare_promoted_stage (tests.test_v0150_core.IdeasTests.test_idea_cannot_declare_promoted_stage) ... ok
+test_idea_survives_promotion_and_project_keeps_origin (tests.test_v0150_core.IdeasTests.test_idea_survives_promotion_and_project_keeps_origin) ... ok
+test_promoted_idea_is_not_promoted_twice_nor_edited (tests.test_v0150_core.IdeasTests.test_promoted_idea_is_not_promoted_twice_nor_edited) ... ok
+test_app_role_cannot_change_the_legal_level_of_a_provider (tests.test_v0150_core.KeyManagementTests.test_app_role_cannot_change_the_legal_level_of_a_provider)
+O nível jurídico/criptográfico do provedor não é coluna que a aplicação escreva (GRANT por coluna). ... ok
+test_calibration_dataset_has_no_personal_data (tests.test_v0150_core.KeyManagementTests.test_calibration_dataset_has_no_personal_data) ... ok
+test_inventory_never_exposes_the_key_and_declares_no_kms (tests.test_v0150_core.KeyManagementTests.test_inventory_never_exposes_the_key_and_declares_no_kms) ... ok
+test_qualified_provider_cannot_be_promoted_without_real_asymmetric_signature (tests.test_v0150_core.KeyManagementTests.test_qualified_provider_cannot_be_promoted_without_real_asymmetric_signature) ... ok
+test_reencrypt_is_auditable_and_idempotent (tests.test_v0150_core.KeyManagementTests.test_reencrypt_is_auditable_and_idempotent) ... ok
+test_unknown_table_is_refused_with_the_available_list (tests.test_v0150_core.KeyManagementTests.test_unknown_table_is_refused_with_the_available_list) ... ok
+test_graph_is_data_and_drives_the_api (tests.test_v0150_core.LifecycleTests.test_graph_is_data_and_drives_the_api) ... ok
+test_invalid_transition_is_refused_with_the_options (tests.test_v0150_core.LifecycleTests.test_invalid_transition_is_refused_with_the_options) ... ok
+test_status_guard_refuses_invalid_transition_even_in_direct_sql (tests.test_v0150_core.LifecycleTests.test_status_guard_refuses_invalid_transition_even_in_direct_sql)
+A máquina de estados é do BANCO: contornar a API não contorna a regra. ... ok
+test_timeline_entry_cannot_be_edited_or_deleted (tests.test_v0150_core.LifecycleTests.test_timeline_entry_cannot_be_edited_or_deleted) ... ok
+test_transition_is_recorded_in_history_and_hash_chained_timeline (tests.test_v0150_core.LifecycleTests.test_transition_is_recorded_in_history_and_hash_chained_timeline) ... ok
+test_transition_requiring_reason_is_refused_without_one (tests.test_v0150_core.LifecycleTests.test_transition_requiring_reason_is_refused_without_one) ... ok
+test_feedback_is_recorded_once_and_trains_nothing_automatically (tests.test_v0150_core.MatchFeedbackTests.test_feedback_is_recorded_once_and_trains_nothing_automatically) ... ok
+test_foreign_match_run_is_not_found (tests.test_v0150_core.MatchFeedbackTests.test_foreign_match_run_is_not_found) ... ok
+test_closing_a_risk_requires_a_reason_and_severity_follows_the_matrix (tests.test_v0150_core.RiskTests.test_closing_a_risk_requires_a_reason_and_severity_follows_the_matrix) ... ok
+test_resolved_risk_is_not_reopened_by_the_scan (tests.test_v0150_core.RiskTests.test_resolved_risk_is_not_reopened_by_the_scan) ... ok
+test_risk_rules_are_open_to_the_user (tests.test_v0150_core.RiskTests.test_risk_rules_are_open_to_the_user) ... ok
+test_rule_identified_risk_is_marked_and_auto_resolved_when_condition_ends (tests.test_v0150_core.RiskTests.test_rule_identified_risk_is_marked_and_auto_resolved_when_condition_ends) ... ok
+test_policy_cannot_require_a_level_no_provider_delivers (tests.test_v0150_core.SignatureProviderTests.test_policy_cannot_require_a_level_no_provider_delivers) ... ok
+test_provider_states_are_honest (tests.test_v0150_core.SignatureProviderTests.test_provider_states_are_honest) ... ok
+test_signature_with_unavailable_provider_is_refused_by_the_database (tests.test_v0150_core.SignatureProviderTests.test_signature_with_unavailable_provider_is_refused_by_the_database) ... ok
+test_snapshot_comparison_shows_what_changed (tests.test_v0150_core.SnapshotTests.test_snapshot_comparison_shows_what_changed) ... ok
+test_snapshots_of_other_project_are_not_comparable (tests.test_v0150_core.SnapshotTests.test_snapshots_of_other_project_are_not_comparable) ... ok
+test_analysis_never_invents_a_value_where_there_is_no_evidence (tests.test_v0150_invariants.DiagnosticInvariants.test_analysis_never_invents_a_value_where_there_is_no_evidence) ... ok
+test_plan_does_not_influence_readiness (tests.test_v0150_invariants.DiagnosticInvariants.test_plan_does_not_influence_readiness) ... ok
+test_recommendation_is_marked_as_recommendation (tests.test_v0150_invariants.DiagnosticInvariants.test_recommendation_is_marked_as_recommendation) ... ok
+test_same_state_does_not_create_a_new_version (tests.test_v0150_invariants.DiagnosticInvariants.test_same_state_does_not_create_a_new_version)
+Inclusive atravessando a virada do segundo: "nada mudou" é sobre a organização, não sobre o relógio. ... ok
+test_absent_evidence_is_never_present_and_has_no_confidence (tests.test_v0150_invariants.EvidenceInvariants.test_absent_evidence_is_never_present_and_has_no_confidence) ... ok
+test_better_source_wins_the_conflict (tests.test_v0150_invariants.EvidenceInvariants.test_better_source_wins_the_conflict) ... ok
+test_declared_evidence_cannot_be_marked_verified (tests.test_v0150_invariants.EvidenceInvariants.test_declared_evidence_cannot_be_marked_verified) ... ok
+test_freshness_decays_and_expiry_is_distinct_from_old (tests.test_v0150_invariants.EvidenceInvariants.test_freshness_decays_and_expiry_is_distinct_from_old) ... ok
+test_insufficient_data_is_a_band_of_its_own (tests.test_v0150_invariants.EvidenceInvariants.test_insufficient_data_is_a_band_of_its_own) ... ok
+test_stale_evidence_lowers_confidence_not_the_value (tests.test_v0150_invariants.EvidenceInvariants.test_stale_evidence_lowers_confidence_not_the_value) ... ok
+test_generated_document_hash_does_not_change (tests.test_v0150_invariants.IdempotencyInvariants.test_generated_document_hash_does_not_change) ... ok
+test_repeated_transition_to_the_same_status_is_not_recorded_twice (tests.test_v0150_invariants.IdempotencyInvariants.test_repeated_transition_to_the_same_status_is_not_recorded_twice) ... ok
+test_risk_scan_twice_produces_one_effect (tests.test_v0150_invariants.IdempotencyInvariants.test_risk_scan_twice_produces_one_effect) ... ok
+test_snapshot_of_an_unchanged_project_has_the_same_hash (tests.test_v0150_invariants.IdempotencyInvariants.test_snapshot_of_an_unchanged_project_has_the_same_hash) ... ok
+test_every_result_carries_the_four_versions (tests.test_v0150_invariants.MatchEngineInvariants.test_every_result_carries_the_four_versions) ... ok
+test_explanation_always_answers_why_and_what_is_missing (tests.test_v0150_invariants.MatchEngineInvariants.test_explanation_always_answers_why_and_what_is_missing) ... ok
+test_hard_blocker_never_comes_out_eligible_and_has_no_score (tests.test_v0150_invariants.MatchEngineInvariants.test_hard_blocker_never_comes_out_eligible_and_has_no_score)
+Bloqueio é regra de ELEGIBILIDADE, não peso: pontuação alta não compensa requisito não atendido. ... ok
+test_plan_does_not_influence_the_result (tests.test_v0150_invariants.MatchEngineInvariants.test_plan_does_not_influence_the_result) ... ok
+test_same_input_and_versions_give_the_same_result (tests.test_v0150_invariants.MatchEngineInvariants.test_same_input_and_versions_give_the_same_result) ... ok
+test_score_and_confidence_are_separate_fields (tests.test_v0150_invariants.MatchEngineInvariants.test_score_and_confidence_are_separate_fields) ... ok
+test_signals_carry_weight_value_and_contribution (tests.test_v0150_invariants.MatchEngineInvariants.test_signals_carry_weight_value_and_contribution) ... ok
+test_charge_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_charge_list_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_document_list_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_document_list_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_funder_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_funder_feed_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_hot_queries_use_an_index (tests.test_v0150_performance.VolumeTests.test_hot_queries_use_an_index) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_legal_registry_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_legal_registry_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_list_does_not_grow_linearly_with_the_page_size (tests.test_v0150_performance.VolumeTests.test_list_does_not_grow_linearly_with_the_page_size)
+Detector de N+1: se a página de 100 custar muito mais que a de 5, há consulta por linha. ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_network_graph_depth_two_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_network_graph_depth_two_stays_within_budget)
+Profundidade 2 é o caso que justificaria um banco de grafos — a medição é o que decide isso. ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_project_timeline_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_project_timeline_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_proposal_inbox_and_relationships_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_proposal_inbox_and_relationships_stay_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_public_marketplace_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_marketplace_feed_stays_within_budget)
+O feed público é a porta de entrada de quem ainda não tem conta: é a página mais exposta do produto. ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_public_program_feed_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_public_program_feed_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_readiness_purposes_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_purposes_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_readiness_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_readiness_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_the_sql_functions_of_the_economic_layer_stay_within_budget (tests.test_v0150_performance.VolumeTests.test_the_sql_functions_of_the_economic_layer_stay_within_budget)
+Mede as FUNÇÕES, não as rotas: é nelas que mora a conta, e é nelas que a regressão aparece. ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_value_summary_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_value_summary_stays_within_budget) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_volume_was_really_created (tests.test_v0150_performance.VolumeTests.test_volume_was_really_created) ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_workspace_stays_within_budget (tests.test_v0150_performance.VolumeTests.test_workspace_stays_within_budget)
+O workspace é a tela de ABERTURA de todas as personas, e chama vários motores de uma vez. ... skipped 'teste de volume roda em passo próprio (PERF=1 ou PERF_FULL=1)'
+test_admin_without_mfa_cannot_touch_keys (tests.test_v0150_security.AdminSurfaceTests.test_admin_without_mfa_cannot_touch_keys) ... ok
+test_anonymous_cannot_read_core_routes (tests.test_v0150_security.AdminSurfaceTests.test_anonymous_cannot_read_core_routes) ... ok
+test_key_and_calibration_routes_require_platform_admin_with_mfa (tests.test_v0150_security.AdminSurfaceTests.test_key_and_calibration_routes_require_platform_admin_with_mfa) ... ok
+test_assembly_cannot_point_at_another_tenant_project (tests.test_v0150_security.CrossTenantMatrix.test_assembly_cannot_point_at_another_tenant_project) ... ok
+test_assembly_evidence_must_be_a_document_of_the_same_tenant (tests.test_v0150_security.CrossTenantMatrix.test_assembly_evidence_must_be_a_document_of_the_same_tenant) ... ok
+test_reads_of_other_tenant_resources_are_denied (tests.test_v0150_security.CrossTenantMatrix.test_reads_of_other_tenant_resources_are_denied) ... ok
+test_rls_blocks_the_new_tables_directly_in_sql (tests.test_v0150_security.CrossTenantMatrix.test_rls_blocks_the_new_tables_directly_in_sql)
+Mesmo sem a API: o contexto da organização A não vê nem escreve linha da B. ... ok
+test_security_definer_helpers_do_not_leak_other_tenant (tests.test_v0150_security.CrossTenantMatrix.test_security_definer_helpers_do_not_leak_other_tenant)
+Função SECURITY DEFINER é a porta de fuga clássica da RLS: confere que nenhuma delas entrega dado alheio. ... ok
+test_snapshot_of_other_tenant_is_not_comparable_through_own_project (tests.test_v0150_security.CrossTenantMatrix.test_snapshot_of_other_tenant_is_not_comparable_through_own_project) ... ok
+test_writes_on_other_tenant_resources_are_denied (tests.test_v0150_security.CrossTenantMatrix.test_writes_on_other_tenant_resources_are_denied) ... ok
+test_integration_secret_column_is_not_readable_by_the_app_role (tests.test_v0150_security.EncryptionIsolationTests.test_integration_secret_column_is_not_readable_by_the_app_role) ... ok
+test_key_tables_are_invisible_to_the_organization_context (tests.test_v0150_security.EncryptionIsolationTests.test_key_tables_are_invisible_to_the_organization_context) ... ok
+test_unfavorite_of_existing_and_nonexisting_project_are_indistinguishable (tests.test_v0150_security.IdempotentDeleteTests.test_unfavorite_of_existing_and_nonexisting_project_are_indistinguishable) ... ok
+test_unfollow_of_existing_and_nonexisting_org_are_indistinguishable (tests.test_v0150_security.IdempotentDeleteTests.test_unfollow_of_existing_and_nonexisting_org_are_indistinguishable) ... ok
+test_sweep (tests.test_v0150_security.WriteRouteSweep.test_sweep) ... ok
+test_sweep_covers_the_new_core_routes (tests.test_v0150_security.WriteRouteSweep.test_sweep_covers_the_new_core_routes) ... ok
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+test_01_v0121_has_no_v0150_structures (tests.test_v0150_upgrade.UpgradePathTests.test_01_v0121_has_no_v0150_structures) ... ok
+test_02_upgrade_step_by_step_succeeds (tests.test_v0150_upgrade.UpgradePathTests.test_02_upgrade_step_by_step_succeeds) ... NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+ok
+test_03_pre_existing_data_survived_untouched (tests.test_v0150_upgrade.UpgradePathTests.test_03_pre_existing_data_survived_untouched) ... ok
+test_04_hash_chained_ledger_is_still_intact (tests.test_v0150_upgrade.UpgradePathTests.test_04_hash_chained_ledger_is_still_intact) ... ok
+test_05_legacy_project_transitions_still_work (tests.test_v0150_upgrade.UpgradePathTests.test_05_legacy_project_transitions_still_work)
+O produto já movia projeto de 'published' para 'funded' antes da máquina de estados existir. ... ok
+test_06_ods_consolidation_left_no_dangling_reference (tests.test_v0150_upgrade.UpgradePathTests.test_06_ods_consolidation_left_no_dangling_reference) ... ok
+test_07_new_structures_arrived_with_rls (tests.test_v0150_upgrade.UpgradePathTests.test_07_new_structures_arrived_with_rls) ... ok
+test_08_platform_templates_and_providers_are_seeded (tests.test_v0150_upgrade.UpgradePathTests.test_08_platform_templates_and_providers_are_seeded) ... ok
+test_09_app_role_can_use_the_new_tables (tests.test_v0150_upgrade.UpgradePathTests.test_09_app_role_can_use_the_new_tables) ... ok
+test_09b_the_v0170_layer_arrived_with_its_seeds_and_its_refusals (tests.test_v0150_upgrade.UpgradePathTests.test_09b_the_v0170_layer_arrived_with_its_seeds_and_its_refusals)
+Atualizar precisa trazer as travas, não só as tabelas. ... ok
+test_10_schema_matches_a_database_built_from_scratch (tests.test_v0150_upgrade.UpgradePathTests.test_10_schema_matches_a_database_built_from_scratch)
+Atualizar e criar do zero precisam levar ao MESMO esquema. Divergência aqui é dívida silenciosa. ... NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+ok
+test_a_price_reduction_needs_no_notice (tests.test_v0160_billing.PricingTests.test_a_price_reduction_needs_no_notice)
+A carência protege quem paga, não a plataforma: baixar preço não precisa de 30 dias. ... ok
+test_a_price_version_is_never_rewritten (tests.test_v0160_billing.PricingTests.test_a_price_version_is_never_rewritten) ... ok
+test_annual_shows_both_the_monthly_equivalent_and_the_total (tests.test_v0160_billing.PricingTests.test_annual_shows_both_the_monthly_equivalent_and_the_total)
+Mostrar só "US$ 14,99/mês" e cobrar US$ 179,88 de uma vez é o padrão escuro clássico. ... ok
+test_catalog_carries_the_quotes_for_both_intervals (tests.test_v0160_billing.PricingTests.test_catalog_carries_the_quotes_for_both_intervals) ... ok
+test_checkout_refuses_when_the_real_provider_has_no_published_price (tests.test_v0160_billing.PricingTests.test_checkout_refuses_when_the_real_provider_has_no_published_price)
+Com provedor REAL e sem preço publicado nele, a plataforma recusa — e diz o motivo verdadeiro. ... {"ts": "2026-10-06T07:43:08.207+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "c71a019634e64e2d", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "35773db710e4a2966d05172ebf77d457", "method": "POST", "route": "/v1/billing/checkout", "status": 503, "ms": 21.3, "spans": {"db.tx": {"count": 4, "ms": 20.0}}, "user_id": "584b9ddc-890e-47d9-97b9-28b76fb1c51c", "org_id": "4a1af83a-d669-4dc8-b216-213d4098e47b"}
+ok
+test_commercial_rule_comes_from_the_database (tests.test_v0160_billing.PricingTests.test_commercial_rule_comes_from_the_database) ... ok
+test_intro_needs_both_price_and_duration (tests.test_v0160_billing.PricingTests.test_intro_needs_both_price_and_duration) ... ok
+test_intro_price_cannot_exceed_the_regular_price (tests.test_v0160_billing.PricingTests.test_intro_price_cannot_exceed_the_regular_price) ... ok
+test_only_one_current_version_per_plan_interval_currency (tests.test_v0160_billing.PricingTests.test_only_one_current_version_per_plan_interval_currency) ... ok
+test_organization_sees_its_own_price_history_and_acknowledges_notices (tests.test_v0160_billing.PricingTests.test_organization_sees_its_own_price_history_and_acknowledges_notices) ... ok
+test_price_increase_requires_a_notice_with_thirty_days (tests.test_v0160_billing.PricingTests.test_price_increase_requires_a_notice_with_thirty_days)
+"Nunca mudar preço silenciosamente" é uma trava do banco, não uma frase na documentação. ... ok
+test_price_is_not_in_the_code (tests.test_v0160_billing.PricingTests.test_price_is_not_in_the_code)
+O valor vem do banco: mudar a tabela muda a resposta, sem tocar em código. ... ok
+test_sandbox_does_not_require_a_published_price (tests.test_v0160_billing.PricingTests.test_sandbox_does_not_require_a_published_price)
+E no provedor de teste a contratação funciona, dizendo em letras que nada foi cobrado. ... ok
+test_tax_behaviour_is_declared_before_payment (tests.test_v0160_billing.PricingTests.test_tax_behaviour_is_declared_before_payment) ... ok
+test_webhook_replay_does_not_double_count_intro_periods (tests.test_v0160_billing.PricingTests.test_webhook_replay_does_not_double_count_intro_periods)
+Webhook reprocessado não pode consumir dois meses de promoção. ... ok
+test_b_cannot_read_a_proposal_it_is_not_part_of (tests.test_v0160_invariants.CrossTenantNetworkMatrix.test_b_cannot_read_a_proposal_it_is_not_part_of) ... ok
+test_b_cannot_touch_anything_of_a (tests.test_v0160_invariants.CrossTenantNetworkMatrix.test_b_cannot_touch_anything_of_a) ... ok
+test_b_never_sees_a_private_relationship_of_a (tests.test_v0160_invariants.CrossTenantNetworkMatrix.test_b_never_sees_a_private_relationship_of_a) ... ok
+test_a_people_estimate_always_carries_its_source (tests.test_v0160_invariants.NetworkInvariants.test_a_people_estimate_always_carries_its_source) ... ok
+test_a_private_project_can_never_reach_the_marketplace (tests.test_v0160_invariants.NetworkInvariants.test_a_private_project_can_never_reach_the_marketplace) ... {"ts": "2026-10-06T07:43:11.882+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "67b27668224e4c27", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "50f30958ab6f1e2d12b7bde2f6770085", "route": "/v1/marketplace/listings/{listing_id}/transition", "error": "O projeto precisa estar publicado antes de o anúncio ir ao ar", "user_id": "0eb145e4-ecf5-4608-a934-4cdaeafdf891"}
+ok
+test_accepting_a_proposal_never_creates_money (tests.test_v0160_invariants.NetworkInvariants.test_accepting_a_proposal_never_creates_money) ... ok
+test_beneficiary_group_is_never_a_filter_on_people (tests.test_v0160_invariants.NetworkInvariants.test_beneficiary_group_is_never_a_filter_on_people)
+O termo descreve PROJETO ou NECESSIDADE. A política está no banco, e nenhuma rota o aceita como filtro. ... ok
+test_every_recommendation_explains_itself (tests.test_v0160_invariants.NetworkInvariants.test_every_recommendation_explains_itself) ... ok
+test_handle_history_keeps_the_trail (tests.test_v0160_invariants.NetworkInvariants.test_handle_history_keeps_the_trail) ... ok
+test_history_is_never_rewritten (tests.test_v0160_invariants.NetworkInvariants.test_history_is_never_rewritten) ... ok
+test_impact_numbers_are_gathered_not_typed (tests.test_v0160_invariants.NetworkInvariants.test_impact_numbers_are_gathered_not_typed) ... ok
+test_nothing_is_born_published_accepted_or_sent (tests.test_v0160_invariants.NetworkInvariants.test_nothing_is_born_published_accepted_or_sent) ... ok
+test_one_fact_one_notice_per_person_and_never_the_actor (tests.test_v0160_invariants.NetworkInvariants.test_one_fact_one_notice_per_person_and_never_the_actor) ... ok
+test_only_the_marketplace_engine_filters_by_publication_state (tests.test_v0160_invariants.NetworkInvariants.test_only_the_marketplace_engine_filters_by_publication_state)
+O filtro de publicação vive SÓ no motor do marketplace. ... ok
+test_price_comes_from_the_server_with_an_effective_period (tests.test_v0160_invariants.NetworkInvariants.test_price_comes_from_the_server_with_an_effective_period) ... ok
+test_python_vocabularies_match_the_database_checks (tests.test_v0160_invariants.NetworkInvariants.test_python_vocabularies_match_the_database_checks)
+Lista em Python e CHECK no banco precisam dizer a MESMA coisa. ... ok
+test_relationship_existence_never_implies_visibility (tests.test_v0160_invariants.NetworkInvariants.test_relationship_existence_never_implies_visibility) ... ok
+test_the_fact_survives_the_silenced_notice (tests.test_v0160_invariants.NetworkInvariants.test_the_fact_survives_the_silenced_notice) ... ok
+test_the_proposer_never_decides_and_the_executor_never_reviews (tests.test_v0160_invariants.NetworkInvariants.test_the_proposer_never_decides_and_the_executor_never_reviews) ... ok
+test_the_public_page_reads_only_the_curated_projection (tests.test_v0160_invariants.NetworkInvariants.test_the_public_page_reads_only_the_curated_projection) ... ok
+test_block_favorite_and_watchlist_can_never_be_public (tests.test_v0160_invariants.VocabularyInvariants.test_block_favorite_and_watchlist_can_never_be_public) ... ok
+test_consented_kinds_are_disjoint_from_unilateral (tests.test_v0160_invariants.VocabularyInvariants.test_consented_kinds_are_disjoint_from_unilateral) ... ok
+test_every_relationship_kind_declares_its_accepted_targets (tests.test_v0160_invariants.VocabularyInvariants.test_every_relationship_kind_declares_its_accepted_targets) ... ok
+test_handle_normalization_is_idempotent_and_strips_accents (tests.test_v0160_invariants.VocabularyInvariants.test_handle_normalization_is_idempotent_and_strips_accents) ... ok
+test_marketplace_has_exactly_one_public_state (tests.test_v0160_invariants.VocabularyInvariants.test_marketplace_has_exactly_one_public_state) ... ok
+test_proposal_closed_states_are_terminal_except_changes_requested (tests.test_v0160_invariants.VocabularyInvariants.test_proposal_closed_states_are_terminal_except_changes_requested) ... ok
+test_public_projection_is_a_closed_list_without_private_fields (tests.test_v0160_invariants.VocabularyInvariants.test_public_projection_is_a_closed_list_without_private_fields) ... ok
+test_relationship_state_machine_has_no_way_out_of_closed (tests.test_v0160_invariants.VocabularyInvariants.test_relationship_state_machine_has_no_way_out_of_closed) ... ok
+test_ban_is_never_the_first_answer (tests.test_v0160_network.EnforcementTests.test_ban_is_never_the_first_answer) ... ok
+test_nothing_applies_a_measure_automatically (tests.test_v0160_network.EnforcementTests.test_nothing_applies_a_measure_automatically)
+O único caminho automático AFROUXA: encerra medida vencida. Nenhum trabalho aplica sanção. ... ok
+test_skipping_the_ladder_leaves_a_mark (tests.test_v0160_network.EnforcementTests.test_skipping_the_ladder_leaves_a_mark) ... ok
+test_temporary_measures_require_an_end_date (tests.test_v0160_network.EnforcementTests.test_temporary_measures_require_an_end_date) ... ok
+test_the_ladder_climbs_with_history (tests.test_v0160_network.EnforcementTests.test_the_ladder_climbs_with_history) ... ok
+test_the_target_is_told_and_can_appeal_once (tests.test_v0160_network.EnforcementTests.test_the_target_is_told_and_can_appeal_once) ... ok
+test_whoever_applied_never_judges_the_appeal (tests.test_v0160_network.EnforcementTests.test_whoever_applied_never_judges_the_appeal) ... ok
+test_changes_requested_needs_a_note_and_only_published_is_public (tests.test_v0160_network.ImpactReportTests.test_changes_requested_needs_a_note_and_only_published_is_public) ... ok
+test_executor_cannot_review_its_own_report (tests.test_v0160_network.ImpactReportTests.test_executor_cannot_review_its_own_report) ... ok
+test_numbers_come_from_the_server_not_from_the_form (tests.test_v0160_network.ImpactReportTests.test_numbers_come_from_the_server_not_from_the_form) ... ok
+test_supporter_reviews_and_stranger_does_not (tests.test_v0160_network.ImpactReportTests.test_supporter_reviews_and_stranger_does_not) ... ok
+test_cannot_announce_someone_elses_project (tests.test_v0160_network.MarketplaceTests.test_cannot_announce_someone_elses_project) ... ok
+test_listing_of_unpublished_project_cannot_go_live (tests.test_v0160_network.MarketplaceTests.test_listing_of_unpublished_project_cannot_go_live) ... {"ts": "2026-10-06T07:43:20.447+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "a709a55d2c2247c3", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "60440479a6f7746893e55ebc4d847b5f", "route": "/v1/marketplace/listings/{listing_id}/transition", "error": "O projeto precisa estar publicado antes de o anúncio ir ao ar", "user_id": "686718e5-495c-45b6-9aed-215771a04b35"}
+ok
+test_one_listing_per_subject (tests.test_v0160_network.MarketplaceTests.test_one_listing_per_subject) ... ok
+test_only_administration_suspends_and_reason_is_required (tests.test_v0160_network.MarketplaceTests.test_only_administration_suspends_and_reason_is_required) ... ok
+test_public_feed_returns_only_published_listings (tests.test_v0160_network.MarketplaceTests.test_public_feed_returns_only_published_listings)
+Invariante central do achado E6: projeto privado não aparece no marketplace. ... ok
+test_conversation_requires_a_registered_link (tests.test_v0160_network.MessagingTests.test_conversation_requires_a_registered_link)
+Sem nenhum vínculo, a conversa é recusada pela trava anti-spam — e isso é proposital. ... {"ts": "2026-10-06T07:43:21.755+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "95f2b2a0530a4ba7", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "9ba3b1b69aa861ec3176ec6c3233d96b", "route": "/v1/conversations", "error": "new row violates row-level security policy for table \"conversations\"", "user_id": "0af2c179-924a-45b2-a2b6-365fcb5f9c47"}
+ok
+test_other_party_only_reads_its_own_thread (tests.test_v0160_network.MessagingTests.test_other_party_only_reads_its_own_thread) ... ok
+test_professional_conversation_requires_context (tests.test_v0160_network.MessagingTests.test_professional_conversation_requires_context) ... ok
+test_same_context_reuses_the_same_thread (tests.test_v0160_network.MessagingTests.test_same_context_reuses_the_same_thread) ... ok
+test_ten_messages_generate_one_notice_until_it_is_read (tests.test_v0160_network.MessagingTests.test_ten_messages_generate_one_notice_until_it_is_read) ... ok
+test_accepted_proposal_is_not_editable (tests.test_v0160_network.ProposalTests.test_accepted_proposal_is_not_editable) ... ok
+test_accepting_creates_relationship_and_intent_but_never_money (tests.test_v0160_network.ProposalTests.test_accepting_creates_relationship_and_intent_but_never_money) ... ok
+test_blocked_organization_cannot_receive_a_proposal (tests.test_v0160_network.ProposalTests.test_blocked_organization_cannot_receive_a_proposal) ... ok
+test_changes_requested_creates_a_new_version_and_keeps_the_old_amount (tests.test_v0160_network.ProposalTests.test_changes_requested_creates_a_new_version_and_keeps_the_old_amount) ... ok
+test_only_receiver_decides_and_refusal_demands_a_reason (tests.test_v0160_network.ProposalTests.test_only_receiver_decides_and_refusal_demands_a_reason) ... ok
+test_proposal_is_born_draft_even_through_direct_sql (tests.test_v0160_network.ProposalTests.test_proposal_is_born_draft_even_through_direct_sql) ... ok
+test_proposal_requires_context (tests.test_v0160_network.ProposalTests.test_proposal_requires_context) ... ok
+test_viewed_at_and_decided_by_cannot_be_forged_by_the_client (tests.test_v0160_network.ProposalTests.test_viewed_at_and_decided_by_cannot_be_forged_by_the_client)
+Carimbo de tempo e autoria de decisão são derivados por gatilho, não enviados. ... ok
+test_changing_the_handle_keeps_the_trail_and_does_not_free_the_old_one (tests.test_v0160_network.PublicProfileTests.test_changing_the_handle_keeps_the_trail_and_does_not_free_the_old_one) ... ok
+test_public_page_reads_only_the_curated_projection (tests.test_v0160_network.PublicProfileTests.test_public_page_reads_only_the_curated_projection) ... ok
+test_reserved_handle_is_refused_and_normalization_works (tests.test_v0160_network.PublicProfileTests.test_reserved_handle_is_refused_and_normalization_works) ... ok
+test_suspended_profile_answers_404 (tests.test_v0160_network.PublicProfileTests.test_suspended_profile_answers_404) ... ok
+test_unverified_credential_never_reaches_the_public_page (tests.test_v0160_network.PublicProfileTests.test_unverified_credential_never_reaches_the_public_page) ... ok
+test_every_number_comes_with_the_criteria_that_produced_it (tests.test_v0160_network.ReadinessTests.test_every_number_comes_with_the_criteria_that_produced_it) ... ok
+test_funding_readiness_does_not_depend_on_already_having_funding (tests.test_v0160_network.ReadinessTests.test_funding_readiness_does_not_depend_on_already_having_funding)
+Prontidão para captar não pode usar captação já obtida: seria circular ("está pronto porque já captou"). ... ok
+test_recommendation_always_says_why_and_from_where (tests.test_v0160_network.ReadinessTests.test_recommendation_always_says_why_and_from_where) ... ok
+test_refreshing_does_not_duplicate_and_old_ones_become_superseded (tests.test_v0160_network.ReadinessTests.test_refreshing_does_not_duplicate_and_old_ones_become_superseded) ... ok
+test_snapshot_is_append_only (tests.test_v0160_network.ReadinessTests.test_snapshot_is_append_only) ... ok
+test_closing_a_relationship_requires_a_reason (tests.test_v0160_network.RelationshipTests.test_closing_a_relationship_requires_a_reason) ... ok
+test_invalid_transition_lists_what_is_possible (tests.test_v0160_network.RelationshipTests.test_invalid_transition_lists_what_is_possible) ... ok
+test_old_follow_table_is_mirrored_into_relationships (tests.test_v0160_network.RelationshipTests.test_old_follow_table_is_mirrored_into_relationships)
+A camada antiga continua funcionando e a rede vê tudo — nenhuma rota existente parou. ... ok
+test_pending_relationship_is_accepted_only_by_target (tests.test_v0160_network.RelationshipTests.test_pending_relationship_is_accepted_only_by_target) ... ok
+test_private_relationship_never_leaks_through_the_public_route (tests.test_v0160_network.RelationshipTests.test_private_relationship_never_leaks_through_the_public_route) ... ok
+test_relationship_is_idempotent_and_block_is_forced_private (tests.test_v0160_network.RelationshipTests.test_relationship_is_idempotent_and_block_is_forced_private) ... ok
+test_relationship_kind_rejects_target_that_makes_no_sense (tests.test_v0160_network.RelationshipTests.test_relationship_kind_rejects_target_that_makes_no_sense) ... ok
+test_self_relationship_is_refused (tests.test_v0160_network.RelationshipTests.test_self_relationship_is_refused) ... ok
+test_attaching_a_document_notifies_the_other_side (tests.test_v0160_network.TeamNotificationTests.test_attaching_a_document_notifies_the_other_side)
+'documentos juntados' é um dos eventos que o pedido manda avisar. ... ok
+test_repeating_the_same_fact_does_not_notify_twice (tests.test_v0160_network.TeamNotificationTests.test_repeating_the_same_fact_does_not_notify_twice) ... ok
+test_silencing_a_group_stops_the_notice_but_not_the_fact (tests.test_v0160_network.TeamNotificationTests.test_silencing_a_group_stops_the_notice_but_not_the_fact) ... ok
+test_whole_team_is_notified_once_and_the_actor_is_not (tests.test_v0160_network.TeamNotificationTests.test_whole_team_is_notified_once_and_the_actor_is_not)
+O pedido central da rodada: avisar TODA a equipe em cada mudança, uma vez só, sem avisar quem agiu. ... ok
+test_capabilities_match_what_the_routes_accept (tests.test_v0160_network.WorkspaceTests.test_capabilities_match_what_the_routes_accept)
+A capacidade anunciada e a rota precisam concordar: oferecer o que a rota recusa é defeito de produto. ... ok
+test_four_personas_share_one_core (tests.test_v0160_network.WorkspaceTests.test_four_personas_share_one_core)
+Nenhuma persona tem domínio próprio: todas chamam os mesmos motores, mudando só seleção e ordem. ... ok
+test_persona_does_not_grant_permission (tests.test_v0160_network.WorkspaceTests.test_persona_does_not_grant_permission)
+Declarar-se investidor não concede o que o papel na organização não permite. ... ok
+test_persona_must_match_the_organization_kind (tests.test_v0160_network.WorkspaceTests.test_persona_must_match_the_organization_kind) ... ok
+test_every_route_cited_in_the_v0170_section_exists (tests.test_v0170_docs.ApiDocTests.test_every_route_cited_in_the_v0170_section_exists) ... ok
+test_the_section_covers_the_new_route_groups (tests.test_v0170_docs.ApiDocTests.test_the_section_covers_the_new_route_groups) ... ok
+test_the_framework_does_not_claim_any_document_is_in_force (tests.test_v0170_docs.LegalDocTests.test_the_framework_does_not_claim_any_document_is_in_force) ... ok
+test_the_framework_lists_exactly_the_registered_documents (tests.test_v0170_docs.LegalDocTests.test_the_framework_lists_exactly_the_registered_documents) ... ok
+test_every_rule_key_in_the_document_exists_in_the_database (tests.test_v0170_docs.MonetizationDocTests.test_every_rule_key_in_the_document_exists_in_the_database) ... ok
+test_no_legal_card_is_green (tests.test_v0170_docs.MonetizationDocTests.test_no_legal_card_is_green) ... ok
+test_no_rule_is_active (tests.test_v0170_docs.MonetizationDocTests.test_no_rule_is_active)
+Se uma regra ficar ativa, a frase "nenhuma está ativa" dos documentos fica falsa. ... ok
+test_the_refused_ones_are_the_four_the_documents_name (tests.test_v0170_docs.MonetizationDocTests.test_the_refused_ones_are_the_four_the_documents_name) ... ok
+test_the_table_in_the_document_has_one_line_per_rule (tests.test_v0170_docs.MonetizationDocTests.test_the_table_in_the_document_has_one_line_per_rule)
+Conta as LINHAS da tabela, não a palavra: "nove" e "9" dizem a mesma coisa. ... ok
+test_the_banner_is_in_the_document_because_it_is_in_the_code (tests.test_v0170_docs.PaymentDocTests.test_the_banner_is_in_the_document_because_it_is_in_the_code) ... ok
+test_the_document_and_the_code_agree_on_which_providers_are_real (tests.test_v0170_docs.PaymentDocTests.test_the_document_and_the_code_agree_on_which_providers_are_real) ... ok
+test_the_document_states_the_real_number_of_graph_edges (tests.test_v0170_docs.PaymentDocTests.test_the_document_states_the_real_number_of_graph_edges) ... ok
+test_the_document_lists_the_real_project_roles (tests.test_v0170_docs.ProgramDocTests.test_the_document_lists_the_real_project_roles) ... ok
+test_the_document_states_the_real_number_of_status_edges (tests.test_v0170_docs.ProgramDocTests.test_the_document_states_the_real_number_of_status_edges)
+Dizia 12; são 11. Número errado em documento é o defeito que não quebra nada e mente. ... ok
+test_no_shipped_baseline_carries_a_number (tests.test_v0170_docs.ValueLedgerDocTests.test_no_shipped_baseline_carries_a_number)
+A afirmação é sobre a INSTALAÇÃO, e é mais fina do que "a tabela está vazia". ... ok
+test_the_document_lists_every_value_event_type (tests.test_v0170_docs.ValueLedgerDocTests.test_the_document_lists_every_value_event_type) ... ok
+test_the_documents_say_without_a_number_not_without_a_row (tests.test_v0170_docs.ValueLedgerDocTests.test_the_documents_say_without_a_number_not_without_a_row) ... ok
+test_every_engine_declares_what_it_never_decides (tests.test_v0170_engines.EngineRegistryRouteTests.test_every_engine_declares_what_it_never_decides) ... ok
+test_only_three_points_call_a_language_model (tests.test_v0170_engines.EngineRegistryRouteTests.test_only_three_points_call_a_language_model) ... ok
+test_the_ai_controls_are_declared_including_pii_redaction (tests.test_v0170_engines.EngineRegistryRouteTests.test_the_ai_controls_are_declared_including_pii_redaction) ... ok
+test_the_assistants_are_declared_as_retrieval_not_conversation (tests.test_v0170_engines.EngineRegistryRouteTests.test_the_assistants_are_declared_as_retrieval_not_conversation) ... ok
+test_the_assistants_really_answer_without_a_model (tests.test_v0170_engines.EngineRegistryRouteTests.test_the_assistants_really_answer_without_a_model)
+Não basta declarar: a resposta do produto tem de dizer `ai_used: false`. ... ok
+test_the_deterministic_engines_are_the_large_majority (tests.test_v0170_engines.EngineRegistryRouteTests.test_the_deterministic_engines_are_the_large_majority)
+'IA como motor operacional' só é verdade se a maior parte do produto não depender dela. ... ok
+test_the_registry_is_served_with_the_three_natures (tests.test_v0170_engines.EngineRegistryRouteTests.test_the_registry_is_served_with_the_three_natures) ... ok
+test_a_user_sees_only_their_own_acceptances (tests.test_v0170_legal.AcceptanceIsolationTests.test_a_user_sees_only_their_own_acceptances) ... ok
+test_the_proof_table_is_not_readable_by_another_organization (tests.test_v0170_legal.AcceptanceIsolationTests.test_the_proof_table_is_not_readable_by_another_organization) ... ok
+test_approval_without_a_reviewer_is_refused_by_the_database (tests.test_v0170_legal.AcceptanceRefusalTests.test_approval_without_a_reviewer_is_refused_by_the_database) ... ok
+test_effective_date_cannot_precede_approval (tests.test_v0170_legal.AcceptanceRefusalTests.test_effective_date_cannot_precede_approval) ... ok
+test_nobody_can_accept_a_draft_through_direct_sql_either (tests.test_v0170_legal.AcceptanceRefusalTests.test_nobody_can_accept_a_draft_through_direct_sql_either) ... ok
+test_nobody_can_accept_a_draft_through_the_api (tests.test_v0170_legal.AcceptanceRefusalTests.test_nobody_can_accept_a_draft_through_the_api) ... ok
+test_pending_is_empty_and_explains_that_this_is_not_the_same_as_accepted (tests.test_v0170_legal.AcceptanceRefusalTests.test_pending_is_empty_and_explains_that_this_is_not_the_same_as_accepted) ... ok
+test_01_review_then_approval_derives_the_effective_date (tests.test_v0170_legal.ApprovedDocumentTests.test_01_review_then_approval_derives_the_effective_date) ... ok
+test_02_the_document_then_becomes_pending_for_the_user (tests.test_v0170_legal.ApprovedDocumentTests.test_02_the_document_then_becomes_pending_for_the_user) ... ok
+test_03_acceptance_records_version_and_hash_of_the_text (tests.test_v0170_legal.ApprovedDocumentTests.test_03_acceptance_records_version_and_hash_of_the_text) ... ok
+test_04_accepting_twice_does_not_duplicate_the_proof (tests.test_v0170_legal.ApprovedDocumentTests.test_04_accepting_twice_does_not_duplicate_the_proof) ... ok
+test_05_it_leaves_pending_once_accepted (tests.test_v0170_legal.ApprovedDocumentTests.test_05_it_leaves_pending_once_accepted) ... ok
+test_06_the_proof_is_append_only (tests.test_v0170_legal.ApprovedDocumentTests.test_06_the_proof_is_append_only) ... ok
+test_07_the_text_of_an_approved_version_is_immutable (tests.test_v0170_legal.ApprovedDocumentTests.test_07_the_text_of_an_approved_version_is_immutable) ... ok
+test_08_a_new_version_supersedes_the_previous_approved_one (tests.test_v0170_legal.ApprovedDocumentTests.test_08_a_new_version_supersedes_the_previous_approved_one) ... ok
+test_09_the_old_acceptance_still_proves_what_was_accepted (tests.test_v0170_legal.ApprovedDocumentTests.test_09_the_old_acceptance_still_proves_what_was_accepted)
+É todo o ponto da versão: o aceite de ontem continua apontando para o texto de ontem. ... ok
+test_10_the_new_version_becomes_pending_again (tests.test_v0170_legal.ApprovedDocumentTests.test_10_the_new_version_becomes_pending_again) ... ok
+test_11_status_never_goes_backwards (tests.test_v0170_legal.ApprovedDocumentTests.test_11_status_never_goes_backwards) ... ok
+test_12_the_admin_sees_the_proof_with_who_and_which_hash (tests.test_v0170_legal.ApprovedDocumentTests.test_12_the_admin_sees_the_proof_with_who_and_which_hash) ... ok
+test_an_unknown_document_is_a_404_not_an_empty_page (tests.test_v0170_legal.RegistryTests.test_an_unknown_document_is_a_404_not_an_empty_page) ... ok
+test_every_draft_carries_the_english_marker_demanded_by_the_round (tests.test_v0170_legal.RegistryTests.test_every_draft_carries_the_english_marker_demanded_by_the_round) ... ok
+test_none_of_them_is_approved_and_the_api_says_so_in_numbers (tests.test_v0170_legal.RegistryTests.test_none_of_them_is_approved_and_the_api_says_so_in_numbers)
+Se um dia este teste falhar, é porque alguém aprovou uma minuta — e isso tem de doer. ... ok
+test_the_documents_requiring_acceptance_are_listed_as_blocking (tests.test_v0170_legal.RegistryTests.test_the_documents_requiring_acceptance_are_listed_as_blocking) ... ok
+test_the_eleven_documents_are_registered (tests.test_v0170_legal.RegistryTests.test_the_eleven_documents_are_registered) ... ok
+test_the_generator_is_in_sync_with_the_documents (tests.test_v0170_legal.RegistryTests.test_the_generator_is_in_sync_with_the_documents) ... ok
+test_the_stored_text_is_byte_for_byte_the_repository_text (tests.test_v0170_legal.RegistryTests.test_the_stored_text_is_byte_for_byte_the_repository_text)
+Contrato digitado duas vezes diverge um dia, e ninguém descobre qual foi aceito. ... ok
+test_the_text_route_says_in_the_header_that_it_is_a_draft (tests.test_v0170_legal.RegistryTests.test_the_text_route_says_in_the_header_that_it_is_a_draft) ... ok
+test_a_plan_without_a_declared_price_refuses_contracting (tests.test_v0170_monetization.CommercialRuleTests.test_a_plan_without_a_declared_price_refuses_contracting)
+E sem preço declarado a plataforma recusa — em vez de inventar um valor. ... ok
+test_free_entry_covers_what_the_documents_require (tests.test_v0170_monetization.CommercialRuleTests.test_free_entry_covers_what_the_documents_require)
+Cadastro, perfil, projeto, descoberta e rede sem pagar — e não por tempo limitado. ... ok
+test_the_retired_usd_rule_stays_in_history_with_its_period_closed (tests.test_v0170_monetization.CommercialRuleTests.test_the_retired_usd_rule_stays_in_history_with_its_period_closed)
+Aposentar não é apagar: o preço de ontem explica o contrato de ontem. ... ok
+test_the_shipped_product_declares_no_price_at_all (tests.test_v0170_monetization.CommercialRuleTests.test_the_shipped_product_declares_no_price_at_all)
+A regra em dólar da v0.16.0 foi aposentada e nenhum preço institucional foi fixado. ... ok
+test_institutional_prices_are_declared_as_hypothesis_not_as_price (tests.test_v0170_monetization.HierarchyTests.test_institutional_prices_are_declared_as_hypothesis_not_as_price) ... ok
+test_the_proponent_premium_is_never_the_core (tests.test_v0170_monetization.HierarchyTests.test_the_proponent_premium_is_never_the_core) ... ok
+test_every_rule_has_a_legal_card_with_an_official_source_and_a_date (tests.test_v0170_monetization.LegalAuditTests.test_every_rule_has_a_legal_card_with_an_official_source_and_a_date) ... ok
+test_no_card_is_green_and_every_one_still_needs_a_lawyer (tests.test_v0170_monetization.LegalAuditTests.test_no_card_is_green_and_every_one_still_needs_a_lawyer)
+Pesquisa não é parecer. Nenhuma carta pode dispensar advogado nesta versão. ... ok
+test_nothing_is_billable_after_the_legal_audit (tests.test_v0170_monetization.LegalAuditTests.test_nothing_is_billable_after_the_legal_audit)
+O resultado honesto da FASE 6: a auditoria não liberou nenhuma cobrança. ... ok
+test_the_data_product_card_names_the_reidentification_risk (tests.test_v0170_monetization.LegalAuditTests.test_the_data_product_card_names_the_reidentification_risk) ... ok
+test_the_four_highest_risk_revenues_are_refused_not_merely_pending (tests.test_v0170_monetization.LegalAuditTests.test_the_four_highest_risk_revenues_are_refused_not_merely_pending)
+"Analisado e não implementar assim" é mais forte que "ainda não analisado". ... ok
+test_the_payment_institution_risk_is_named_where_it_applies (tests.test_v0170_monetization.LegalAuditTests.test_the_payment_institution_risk_is_named_where_it_applies)
+O risco de enquadramento como instituição de pagamento tem de estar escrito, não implícito. ... ok
+test_the_public_contracting_card_refuses_self_service_checkout (tests.test_v0170_monetization.LegalAuditTests.test_the_public_contracting_card_refuses_self_service_checkout) ... ok
+test_a_green_card_cannot_be_issued_without_basis_source_and_date (tests.test_v0170_monetization.LegalGateTests.test_a_green_card_cannot_be_issued_without_basis_source_and_date) ... {"ts": "2026-10-06T07:43:39.046+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "99779d0aadf540f8", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "4683d4a9ed49c340ba788d04f68cdc24", "error_id": "1580248f7e7b", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_needs_evidence", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_needs_evidence\"", "user_id": "e2a1323a-4e26-4c24-832f-4ece433934e2"}
+ok
+test_a_green_card_cannot_have_open_questions (tests.test_v0170_monetization.LegalGateTests.test_a_green_card_cannot_have_open_questions) ... {"ts": "2026-10-06T07:43:39.056+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "e0e0919fa0d546ba", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "5d0f7c5afd8dac8376acb0b3ba4cdab3", "error_id": "50d1731e7f15", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_has_no_open_questions", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_has_no_open_questions\"", "user_id": "e2a1323a-4e26-4c24-832f-4ece433934e2"}
+ok
+test_activation_without_a_green_legal_card_is_refused (tests.test_v0170_monetization.LegalGateTests.test_activation_without_a_green_legal_card_is_refused) ... ok
+test_activation_without_a_price_is_refused (tests.test_v0170_monetization.LegalGateTests.test_activation_without_a_price_is_refused) ... ok
+test_every_rule_declares_the_problem_and_answers_the_substitution_test (tests.test_v0170_monetization.LegalGateTests.test_every_rule_declares_the_problem_and_answers_the_substitution_test)
+"Não venda 20 funcionalidades por R$99; venda um problema caro resolvido". ... ok
+test_no_rule_ships_active (tests.test_v0170_monetization.LegalGateTests.test_no_rule_ships_active) ... ok
+test_success_fee_and_take_rate_cannot_be_activated_at_all (tests.test_v0170_monetization.LegalGateTests.test_success_fee_and_take_rate_cannot_be_activated_at_all)
+A ADR-022 é barreira estrutural: a plataforma não custodia nem processa aporte. ... ok
+test_the_legal_card_is_append_only (tests.test_v0170_monetization.LegalGateTests.test_the_legal_card_is_append_only) ... ok
+test_a_value_event_produces_a_candidate_and_never_a_charge (tests.test_v0170_monetization.PipelineTests.test_a_value_event_produces_a_candidate_and_never_a_charge) ... ok
+test_the_application_cannot_insert_a_billable_event_directly (tests.test_v0170_monetization.PipelineTests.test_the_application_cannot_insert_a_billable_event_directly) ... ok
+test_the_pipeline_is_isolated_between_organizations (tests.test_v0170_monetization.PipelineTests.test_the_pipeline_is_isolated_between_organizations) ... ok
+test_the_reason_says_why_nothing_is_charged (tests.test_v0170_monetization.PipelineTests.test_the_reason_says_why_nothing_is_charged) ... ok
+test_waiving_requires_a_written_reason (tests.test_v0170_monetization.PipelineTests.test_waiving_requires_a_written_reason) ... ok
+test_the_platform_admin_cannot_read_a_client_card_token (tests.test_v0170_payments.InstrumentTests.test_the_platform_admin_cannot_read_a_client_card_token)
+Não há por que um administrador ver o token de cartão de um cliente. ... ok
+test_the_platform_stores_no_card_number (tests.test_v0170_payments.InstrumentTests.test_the_platform_stores_no_card_number)
+`last4` com mais de quatro dígitos é recusado. É o campo em que alguém grava o número todo. ... ok
+test_there_is_no_column_for_card_data (tests.test_v0170_payments.InstrumentTests.test_there_is_no_column_for_card_data) ... ok
+test_an_installment_schedule_that_does_not_add_up_is_refused (tests.test_v0170_payments.MethodTests.test_an_installment_schedule_that_does_not_add_up_is_refused) ... WARNING:  there is no transaction in progress
+ok
+test_boleto_requires_a_due_date_and_pix_an_expiry (tests.test_v0170_payments.MethodTests.test_boleto_requires_a_due_date_and_pix_an_expiry) ... ok
+test_expired_pix_and_boleto_are_closed_by_the_job (tests.test_v0170_payments.MethodTests.test_expired_pix_and_boleto_are_closed_by_the_job) ... ok
+test_installments_are_modelled_apart_from_subscription (tests.test_v0170_payments.MethodTests.test_installments_are_modelled_apart_from_subscription)
+Parcelamento tem número fixo de parcelas e não renova — por isso não é assinatura. ... ok
+test_installments_only_exist_on_card (tests.test_v0170_payments.MethodTests.test_installments_only_exist_on_card) ... ok
+test_pix_and_boleto_artifacts_are_stored_with_their_deadline (tests.test_v0170_payments.MethodTests.test_pix_and_boleto_artifacts_are_stored_with_their_deadline) ... ok
+test_another_org_never_sees_or_moves_my_charge (tests.test_v0170_payments.PaymentIsolationTests.test_another_org_never_sees_or_moves_my_charge) ... ok
+test_the_org_cannot_rewrite_the_amount_or_the_provider (tests.test_v0170_payments.PaymentIsolationTests.test_the_org_cannot_rewrite_the_amount_or_the_provider) ... ok
+test_the_deadline_job_is_registered_in_the_worker (tests.test_v0170_payments.PaymentJobTests.test_the_deadline_job_is_registered_in_the_worker)
+Prazo que só vence quando alguém roda o comando à mão não vence. ... ok
+test_the_job_runs_and_reports_what_it_closed (tests.test_v0170_payments.PaymentJobTests.test_the_job_runs_and_reports_what_it_closed) ... ok
+test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money (tests.test_v0170_payments.RevenueShapeTests.test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money)
+A lição mais cara desta fase. ... ok
+test_subscription_revenue_is_reported_apart_from_charges (tests.test_v0170_payments.RevenueShapeTests.test_subscription_revenue_is_reported_apart_from_charges)
+Duas tabelas escrevendo o mesmo dinheiro dariam dois números para a mesma pergunta. ... ok
+test_the_consolidated_total_contains_only_real_money (tests.test_v0170_payments.RevenueShapeTests.test_the_consolidated_total_contains_only_real_money) ... ok
+test_every_charge_is_born_simulated_and_carries_the_warning (tests.test_v0170_payments.SimulationHonestyTests.test_every_charge_is_born_simulated_and_carries_the_warning) ... ok
+test_no_provider_is_configured_and_the_api_says_so (tests.test_v0170_payments.SimulationHonestyTests.test_no_provider_is_configured_and_the_api_says_so) ... ok
+test_nobody_can_mark_a_simulated_charge_as_real (tests.test_v0170_payments.SimulationHonestyTests.test_nobody_can_mark_a_simulated_charge_as_real)
+A recusa é melhor que a sobrescrita: quem tentou tem de receber o erro, não o silêncio. ... ok
+test_simulated_money_never_enters_real_revenue (tests.test_v0170_payments.SimulationHonestyTests.test_simulated_money_never_enters_real_revenue) ... ok
+test_the_warning_appears_on_every_line_not_only_in_the_summary (tests.test_v0170_payments.SimulationHonestyTests.test_the_warning_appears_on_every_line_not_only_in_the_summary)
+Linha de extrato que não diz que é simulada é linha que alguém vai somar. ... ok
+test_a_charge_is_born_in_created_even_through_direct_sql (tests.test_v0170_payments.StateMachineTests.test_a_charge_is_born_in_created_even_through_direct_sql) ... ok
+test_a_full_refund_sets_the_refunded_value_to_the_whole_amount (tests.test_v0170_payments.StateMachineTests.test_a_full_refund_sets_the_refunded_value_to_the_whole_amount) ... ok
+test_a_partial_refund_needs_a_value_between_zero_and_the_total (tests.test_v0170_payments.StateMachineTests.test_a_partial_refund_needs_a_value_between_zero_and_the_total) ... ok
+test_a_transition_outside_the_graph_is_refused_and_says_where_it_can_go (tests.test_v0170_payments.StateMachineTests.test_a_transition_outside_the_graph_is_refused_and_says_where_it_can_go) ... ok
+test_payment_dates_are_derived_not_written (tests.test_v0170_payments.StateMachineTests.test_payment_dates_are_derived_not_written) ... ok
+test_the_trail_is_written_by_the_trigger_and_is_append_only (tests.test_v0170_payments.StateMachineTests.test_the_trail_is_written_by_the_trigger_and_is_append_only) ... ok
+test_a_replayed_event_is_counted_and_produces_no_effect (tests.test_v0170_payments.WebhookTests.test_a_replayed_event_is_counted_and_produces_no_effect) ... ok
+test_an_event_without_a_valid_signature_is_stored_but_not_applied (tests.test_v0170_payments.WebhookTests.test_an_event_without_a_valid_signature_is_stored_but_not_applied)
+O frontend nunca é fonte de verdade sobre pagamento: quem confirma é o webhook assinado. ... ok
+test_reconciliation_surfaces_stuck_charges_and_unverified_events (tests.test_v0170_payments.WebhookTests.test_reconciliation_surfaces_stuck_charges_and_unverified_events) ... ok
+test_a_program_cannot_hang_someone_elses_edital (tests.test_v0170_programs.ProgramAggregationTests.test_a_program_cannot_hang_someone_elses_edital) ... {"ts": "2026-10-06T07:43:48.624+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "ebd49f6701eb4d1f", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "68a487fec302e709f96ebac66c8b5072", "route": "/v1/programs/{program_id}/calls", "error": "o edital tem de ser da mesma organização do programa", "user_id": "f1517271-5df6-4f26-9479-c9ffdb4ab12e"}
+ok
+test_baseline_without_a_source_is_refused (tests.test_v0170_programs.ProgramAggregationTests.test_baseline_without_a_source_is_refused) ... ok
+test_declared_and_measured_never_mix (tests.test_v0170_programs.ProgramAggregationTests.test_declared_and_measured_never_mix)
+A trava central: orçamento declarado e dinheiro apurado em objetos SEPARADOS e nomeados. ... ok
+test_the_executing_org_is_notified_when_its_project_enters_a_program (tests.test_v0170_programs.ProgramAggregationTests.test_the_executing_org_is_notified_when_its_project_enters_a_program) ... ok
+test_a_draft_program_is_invisible_to_everyone_else (tests.test_v0170_programs.ProgramIsolationTests.test_a_draft_program_is_invisible_to_everyone_else) ... ok
+test_a_suspended_program_leaves_the_public_feed (tests.test_v0170_programs.ProgramIsolationTests.test_a_suspended_program_leaves_the_public_feed) ... ok
+test_another_org_cannot_move_or_edit_the_program (tests.test_v0170_programs.ProgramIsolationTests.test_another_org_cannot_move_or_edit_the_program) ... ok
+test_only_public_published_programs_appear_without_a_session (tests.test_v0170_programs.ProgramIsolationTests.test_only_public_published_programs_appear_without_a_session) ... ok
+test_the_org_executing_a_project_in_the_program_can_see_the_program (tests.test_v0170_programs.ProgramIsolationTests.test_the_org_executing_a_project_in_the_program_can_see_the_program)
+Quem executa precisa saber de que programa faz parte — mesma lógica de app_project_supporter. ... ok
+test_a_public_program_can_still_be_suspended (tests.test_v0170_programs.ProgramLifecycleTests.test_a_public_program_can_still_be_suspended)
+A primeira versão da guarda de visibilidade BLOQUEAVA a suspensão de programa público. ... ok
+test_a_suspended_program_cannot_be_made_public (tests.test_v0170_programs.ProgramLifecycleTests.test_a_suspended_program_cannot_be_made_public) ... ok
+test_program_is_born_in_draft_even_through_direct_sql (tests.test_v0170_programs.ProgramLifecycleTests.test_program_is_born_in_draft_even_through_direct_sql) ... ok
+test_publication_dates_are_derived_not_written (tests.test_v0170_programs.ProgramLifecycleTests.test_publication_dates_are_derived_not_written) ... ok
+test_suspension_requires_a_reason (tests.test_v0170_programs.ProgramLifecycleTests.test_suspension_requires_a_reason) ... ok
+test_transition_outside_the_graph_is_refused_and_says_where_it_can_go (tests.test_v0170_programs.ProgramLifecycleTests.test_transition_outside_the_graph_is_refused_and_says_where_it_can_go) ... ok
+test_the_plan_limit_now_counts_programs_and_not_editais (tests.test_v0170_programs.ProgramLimitTests.test_the_plan_limit_now_counts_programs_and_not_editais)
+O limite `programs` era aplicado contra `calls`: o plano vendia entidade que não existia. ... ok
+test_hypothesis_is_never_counted_as_evidence (tests.test_v0170_programs.ResultChainTests.test_hypothesis_is_never_counted_as_evidence)
+A honestidade da cadeia de resultado está em não promover elo fraco a forte. ... ok
+test_the_gap_carries_no_person_level_data (tests.test_v0170_programs.TerritorialGapTests.test_the_gap_carries_no_person_level_data) ... ok
+test_the_gap_says_when_the_demand_has_no_source (tests.test_v0170_programs.TerritorialGapTests.test_the_gap_says_when_the_demand_has_no_source)
+Lacuna apoiada em estimativa sem fonte não passa por fato: a resposta diz isso. ... ok
+test_every_new_table_exists (tests.test_v0170_security.CatalogTests.test_every_new_table_exists) ... ok
+test_every_new_table_has_at_least_one_policy (tests.test_v0170_security.CatalogTests.test_every_new_table_has_at_least_one_policy)
+RLS ligada e sem política nega tudo — parece seguro e quebra o produto em silêncio. ... ok
+test_every_new_table_has_row_level_security (tests.test_v0170_security.CatalogTests.test_every_new_table_has_row_level_security) ... ok
+test_no_new_column_holds_personal_data_in_the_clear (tests.test_v0170_security.CatalogTests.test_no_new_column_holds_personal_data_in_the_clear)
+Varredura por nome de coluna. A exceção é declarada, uma por uma, com o motivo. ... ok
+test_no_new_table_grants_delete_to_the_app_except_program_parts (tests.test_v0170_security.CatalogTests.test_no_new_table_grants_delete_to_the_app_except_program_parts) ... ok
+test_the_append_only_tables_are_not_writable_by_the_app (tests.test_v0170_security.CatalogTests.test_the_append_only_tables_are_not_writable_by_the_app) ... ok
+test_a_draft_program_is_invisible_to_everyone_else (tests.test_v0170_security.IsolationMatrixTests.test_a_draft_program_is_invisible_to_everyone_else) ... ok
+test_and_the_owner_does_read_its_own_rows (tests.test_v0170_security.IsolationMatrixTests.test_and_the_owner_does_read_its_own_rows)
+O par do teste acima. Sem ele, um WHERE errado faria o vazamento 'passar'. ... ok
+test_the_other_organization_cannot_reach_it_by_api_either (tests.test_v0170_security.IsolationMatrixTests.test_the_other_organization_cannot_reach_it_by_api_either) ... ok
+test_the_other_organization_cannot_write_into_my_program (tests.test_v0170_security.IsolationMatrixTests.test_the_other_organization_cannot_write_into_my_program) ... {"ts": "2026-10-06T07:43:57.371+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "161ff9148b0d44d9", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "db0ad6ad93bb48108e8230472b3ae2e2", "route": "/v1/programs/{program_id}/indicators", "error": "o vínculo tem de ser da organização dona do programa", "user_id": "9d921fec-7939-4652-b5a2-de3bcdc116c3"}
+ok
+test_the_other_organization_reads_none_of_my_rows (tests.test_v0170_security.IsolationMatrixTests.test_the_other_organization_reads_none_of_my_rows) ... ok
+test_the_platform_admin_does_not_read_the_card_token (tests.test_v0170_security.IsolationMatrixTests.test_the_platform_admin_does_not_read_the_card_token) ... ok
+test_the_scenario_actually_wrote_rows (tests.test_v0170_security.IsolationMatrixTests.test_the_scenario_actually_wrote_rows)
+Isolamento que passa porque não há dado é isolamento que não foi testado. ... ok
+test_deleting_the_account_erases_the_ip_and_keeps_the_proof (tests.test_v0170_security.PrivacyTests.test_deleting_the_account_erases_the_ip_and_keeps_the_proof) ... ok
+test_only_the_ip_and_the_user_agent_can_be_erased (tests.test_v0170_security.PrivacyTests.test_only_the_ip_and_the_user_agent_can_be_erased) ... ok
+test_retention_empties_old_webhook_payloads_and_old_acceptance_ips (tests.test_v0170_security.PrivacyTests.test_retention_empties_old_webhook_payloads_and_old_acceptance_ips) ... ok
+test_the_acceptance_proof_appears_in_the_data_export (tests.test_v0170_security.PrivacyTests.test_the_acceptance_proof_appears_in_the_data_export) ... ok
+test_the_ip_cannot_be_swapped_for_another_one (tests.test_v0170_security.PrivacyTests.test_the_ip_cannot_be_swapped_for_another_one) ... ok
+test_a_price_without_a_source_is_refused (tests.test_v0170_value.AiCostTests.test_a_price_without_a_source_is_refused) ... ok
+test_declaring_a_price_prices_future_calls (tests.test_v0170_value.AiCostTests.test_declaring_a_price_prices_future_calls) ... ok
+test_the_price_table_is_invisible_to_organizations (tests.test_v0170_value.AiCostTests.test_the_price_table_is_invisible_to_organizations)
+Preço de provedor é custo NOSSO: a organização não tem por que ver. ... ok
+test_the_price_table_ships_empty_and_cost_is_null_not_zero (tests.test_v0170_value.AiCostTests.test_the_price_table_ships_empty_and_cost_is_null_not_zero) ... ok
+test_a_number_without_a_source_is_refused_by_the_database (tests.test_v0170_value.ValueHonestyTests.test_a_number_without_a_source_is_refused_by_the_database) ... ok
+test_baselines_ship_empty_so_nothing_is_estimated_out_of_the_box (tests.test_v0170_value.ValueHonestyTests.test_baselines_ship_empty_so_nothing_is_estimated_out_of_the_box)
+A trava central: de fábrica, nenhum número de tempo é produzido. ... ok
+test_counts_are_recorded_even_without_a_baseline (tests.test_v0170_value.ValueHonestyTests.test_counts_are_recorded_even_without_a_baseline)
+Sem linha de referência, a CONTAGEM continua sendo registrada — ela é medida. ... ok
+test_declaring_a_baseline_with_a_source_starts_the_estimate (tests.test_v0170_value.ValueHonestyTests.test_declaring_a_baseline_with_a_source_starts_the_estimate) ... ok
+test_the_current_baseline_cannot_be_rewritten (tests.test_v0170_value.ValueHonestyTests.test_the_current_baseline_cannot_be_rewritten)
+Corrigir a régua exige versão nova: o número de ontem explica a afirmação de ontem. ... ok
+test_the_summary_says_how_many_events_have_no_baseline (tests.test_v0170_value.ValueHonestyTests.test_the_summary_says_how_many_events_have_no_baseline)
+"45 minutos" ao lado de "e 300 eventos sem régua" é honesto; o número sozinho não é. ... ok
+test_another_org_never_sees_my_value_events (tests.test_v0170_value.ValueIsNotBillingTests.test_another_org_never_sees_my_value_events) ... ok
+test_the_application_cannot_insert_a_value_event_directly (tests.test_v0170_value.ValueIsNotBillingTests.test_the_application_cannot_insert_a_value_event_directly)
+Se pudesse, poderia escrever a estimativa de tempo à mão — que é o que não se quer poder. ... ok
+test_the_ledger_is_append_only_for_the_application (tests.test_v0170_value.ValueIsNotBillingTests.test_the_ledger_is_append_only_for_the_application) ... ok
+test_every_type_declares_what_a_unit_means (tests.test_v0170_value.ValueVocabularyTests.test_every_type_declares_what_a_unit_means)
+Sem isso, `units` seria número sem significado, somável com qualquer outro. ... ok
+test_the_estimate_status_vocabulary_matches_the_database_check (tests.test_v0170_value.ValueVocabularyTests.test_the_estimate_status_vocabulary_matches_the_database_check) ... ok
+test_the_python_list_matches_the_table (tests.test_v0170_value.ValueVocabularyTests.test_the_python_list_matches_the_table)
+Vocabulário duplicado divergiu uma vez (notify.PRIORITIES × CHECK do banco). Não outra. ... ok
+test_esg_and_ods_reports_use_reported_wording (tests.test_v080.GeoAndReportTests.test_esg_and_ods_reports_use_reported_wording) ... ok
+test_location_precision_protects_exact_coordinates (tests.test_v080.GeoAndReportTests.test_location_precision_protects_exact_coordinates) ... ok
+test_reports_scope_language_and_csv_safety (tests.test_v080.GeoAndReportTests.test_reports_scope_language_and_csv_safety) ... ok
+test_cross_tenant_isolation (tests.test_v080.ImpactTests.test_cross_tenant_isolation) ... ok
+test_determinants_k_anonymity_and_honest_note (tests.test_v080.ImpactTests.test_determinants_k_anonymity_and_honest_note) ... ok
+test_diagnosis_to_project_flow (tests.test_v080.ImpactTests.test_diagnosis_to_project_flow) ... ok
+test_graph_link_types_and_external_validation (tests.test_v080.ImpactTests.test_graph_link_types_and_external_validation) ... {"ts": "2026-10-06T07:44:08.695+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "63a1c7b1bb1548a6", "service": "impacto-api", "version": "0.17.0", "env": "test", "trace_id": "ae987b5f0fae260bde6c36433e8b5586", "error_id": "1f6fdacfbb45", "route": "/v1/projects/{project_id}/graph/edges", "constraint": "impact_edges_check", "error": "new row for relation \"impact_edges\" violates check constraint \"impact_edges_check\"", "user_id": "f249a5dc-6be3-49af-9ce2-a0f4bc3ccc46"}
+ok
+test_indicator_reported_vs_validated_flow (tests.test_v080.ImpactTests.test_indicator_reported_vs_validated_flow) ... ok
+test_ods_catalog_and_honest_targets (tests.test_v080.ImpactTests.test_ods_catalog_and_honest_targets) ... ok
+test_individual_cannot_do_company_or_osc_things (tests.test_v080.IndividualFunderTests.test_individual_cannot_do_company_or_osc_things) ... ok
+test_individual_registers_without_cnpj_and_funds_with_masked_name (tests.test_v080.IndividualFunderTests.test_individual_registers_without_cnpj_and_funds_with_masked_name) ... ok
+test_badges_have_no_ranking (tests.test_v080.NetworkTests.test_badges_have_no_ranking) ... ok
+test_messaging_requires_relationship_blocks_and_privacy (tests.test_v080.NetworkTests.test_messaging_requires_relationship_blocks_and_privacy) ... ok
+test_mutual_follow_enables_messages (tests.test_v080.NetworkTests.test_mutual_follow_enables_messages) ... ok
+test_professional_needs_offers_and_match_invariance (tests.test_v080.NetworkTests.test_professional_needs_offers_and_match_invariance) ... ok
+test_error_aggregation_without_pii (tests.test_v080.ObservabilityTests.test_error_aggregation_without_pii) ... ok
+test_traceparent_propagation (tests.test_v080.ObservabilityTests.test_traceparent_propagation) ... ok
+test_contribution_model_legal_gate (tests.test_v080.PaymentTests.test_contribution_model_legal_gate) ... ok
+test_dispute_and_cross_tenant (tests.test_v080.PaymentTests.test_dispute_and_cross_tenant) ... ok
+test_refund_flow_two_party_control (tests.test_v080.PaymentTests.test_refund_flow_two_party_control) ... ok
+test_state_machine_roles_and_commitment_sync (tests.test_v080.PaymentTests.test_state_machine_roles_and_commitment_sync) ... ok
+test_statement_import_and_reconciliation (tests.test_v080.PaymentTests.test_statement_import_and_reconciliation) ... ok
+test_benchmark_flags_outlier_and_requires_justification (tests.test_v080.ProcurementTests.test_benchmark_flags_outlier_and_requires_justification) ... ok
+test_configurable_policy_and_expense_guard (tests.test_v080.ProcurementTests.test_configurable_policy_and_expense_guard) ... ok
+test_cross_tenant (tests.test_v080.ProcurementTests.test_cross_tenant) ... ok
+test_default_policy_requires_three_quotes_and_exception_needs_other_approver (tests.test_v080.ProcurementTests.test_default_policy_requires_three_quotes_and_exception_needs_other_approver) ... ok
+test_block_requires_human_decision_and_restricts_operations (tests.test_v080.RiskTests.test_block_requires_human_decision_and_restricts_operations) ... ok
+test_signals_are_review_items_never_accusations (tests.test_v080.RiskTests.test_signals_are_review_items_never_accusations) ... ok
+test_csv_injection_neutralized (tests.test_v080.UnitTests.test_csv_injection_neutralized) ... ok
+test_error_fingerprint_is_stable_and_scrubbed (tests.test_v080.UnitTests.test_error_fingerprint_is_stable_and_scrubbed) ... ok
+test_geo_precision_rules (tests.test_v080.UnitTests.test_geo_precision_rules) ... ok
+test_procurement_stats (tests.test_v080.UnitTests.test_procurement_stats) ... ok
+test_professional_engine_blocks_and_ignores_billing_inputs (tests.test_v080.UnitTests.test_professional_engine_blocks_and_ignores_billing_inputs) ... ok
+test_statement_parser (tests.test_v080.UnitTests.test_statement_parser) ... ok
+test_adaptation_rules (tests.test_v090_solutions.EngineUnitTests.test_adaptation_rules) ... ok
+test_combine_bounds (tests.test_v090_solutions.EngineUnitTests.test_combine_bounds) ... ok
+test_intent_parser_examples (tests.test_v090_solutions.EngineUnitTests.test_intent_parser_examples) ... ok
+test_replicability_and_evidence_never_invented (tests.test_v090_solutions.EngineUnitTests.test_replicability_and_evidence_never_invented) ... ok
+test_solution_match_blocks_excluded_and_has_no_plan_input (tests.test_v090_solutions.EngineUnitTests.test_solution_match_blocks_excluded_and_has_no_plan_input) ... ok
+test_truth_labels (tests.test_v090_solutions.EngineUnitTests.test_truth_labels) ... ok
+test_append_only_and_rls_on_events_and_requests (tests.test_v090_solutions.SolutionDatabaseGuardTests.test_append_only_and_rls_on_events_and_requests) ... ok
+test_evidence_and_results_status_cannot_be_set_by_owner (tests.test_v090_solutions.SolutionDatabaseGuardTests.test_evidence_and_results_status_cannot_be_set_by_owner) ... ok
+test_intent_stage_cannot_be_forged_in_database (tests.test_v090_solutions.SolutionDatabaseGuardTests.test_intent_stage_cannot_be_forged_in_database) ... ok
+test_other_org_cannot_modify_or_see_drafts (tests.test_v090_solutions.SolutionDatabaseGuardTests.test_other_org_cannot_modify_or_see_drafts) ... ok
+test_owner_cannot_forge_trust_demo_or_verification (tests.test_v090_solutions.SolutionDatabaseGuardTests.test_owner_cannot_forge_trust_demo_or_verification) ... ok
+test_admin_only_and_removal (tests.test_v090_solutions.SolutionHttpTests.test_admin_only_and_removal) ... ok
+test_aggregates_and_vocabulary (tests.test_v090_solutions.SolutionHttpTests.test_aggregates_and_vocabulary) ... ok
+test_create_defaults_and_validation (tests.test_v090_solutions.SolutionHttpTests.test_create_defaults_and_validation) ... ok
+test_cross_tenant_writes_blocked (tests.test_v090_solutions.SolutionHttpTests.test_cross_tenant_writes_blocked) ... ok
+test_demo_seed_is_marked_demo_and_never_proven (tests.test_v090_solutions.SolutionHttpTests.test_demo_seed_is_marked_demo_and_never_proven) ... ok
+test_develop_idea_requires_authorization_and_human_review (tests.test_v090_solutions.SolutionHttpTests.test_develop_idea_requires_authorization_and_human_review) ... ok
+test_funder_match_and_recommendations (tests.test_v090_solutions.SolutionHttpTests.test_funder_match_and_recommendations) ... ok
+test_idea_is_not_a_case_and_has_no_results (tests.test_v090_solutions.SolutionHttpTests.test_idea_is_not_a_case_and_has_no_results) ... ok
+test_intent_privacy_and_stage_forging (tests.test_v090_solutions.SolutionHttpTests.test_intent_privacy_and_stage_forging) ... ok
+test_personalization_is_opt_in_and_deletable (tests.test_v090_solutions.SolutionHttpTests.test_personalization_is_opt_in_and_deletable) ... ok
+test_profile_similar_compare_adapt_combine (tests.test_v090_solutions.SolutionHttpTests.test_profile_similar_compare_adapt_combine) ... ok
+test_publish_gates_and_owner_only (tests.test_v090_solutions.SolutionHttpTests.test_publish_gates_and_owner_only) ... ok
+test_regression_me_works_for_platform_org (tests.test_v090_solutions.SolutionHttpTests.test_regression_me_works_for_platform_org)
+Regressão (achada no E2E v0.9.0): GET /v1/me devolvia 500 quando a organização ativa era a da plataforma (faltava plan_names). ... ok
+test_replication_flow_reviews_and_disputes (tests.test_v090_solutions.SolutionHttpTests.test_replication_flow_reviews_and_disputes) ... ok
+test_requests_antispam_and_permissions (tests.test_v090_solutions.SolutionHttpTests.test_requests_antispam_and_permissions) ... ok
+test_search_is_plan_independent_and_log_has_no_raw_text (tests.test_v090_solutions.SolutionHttpTests.test_search_is_plan_independent_and_log_has_no_raw_text) ... ok
+test_search_quality (tests.test_v090_solutions.SolutionHttpTests.test_search_quality) ... ok
+test_search_rate_limited_and_validates (tests.test_v090_solutions.SolutionHttpTests.test_search_rate_limited_and_validates) ... ok
+test_trust_progression_needs_accepted_evidence_and_resets_on_edit (tests.test_v090_solutions.SolutionHttpTests.test_trust_progression_needs_accepted_evidence_and_resets_on_edit) ... ok
+test_view_never_creates_intent_and_events_are_deduplicated (tests.test_v090_solutions.SolutionHttpTests.test_view_never_creates_intent_and_events_are_deduplicated) ... ok
+
+----------------------------------------------------------------------
+Ran 961 tests in 375.166s
+
+OK (skipped=17)

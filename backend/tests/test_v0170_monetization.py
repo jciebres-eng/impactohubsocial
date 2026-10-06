@@ -121,7 +121,10 @@ class LegalGateTests(MonBase):
         self.assertTrue(r.json["items"])
         for rule in r.json["items"]:
             self.assertFalse(rule["active"], f"{rule['key']} não pode vir ativa")
-            self.assertEqual(rule["legal_status"], "review_required", rule["key"])
+            # Depois da auditoria da FASE 6, quatro regras passaram de `review_required` a `refused`:
+            # foram analisadas e a conclusão foi não implementar assim. Nenhuma pode estar `validated`.
+            self.assertIn(rule["legal_status"], ("review_required", "refused"), rule["key"])
+            self.assertNotEqual(rule["legal_status"], "validated", rule["key"])
 
     def test_activation_without_a_green_legal_card_is_refused(self):
         r = self.admin.patch("/v1/admin/monetization/rules/premium.readiness_analysis",
@@ -247,3 +250,70 @@ class HierarchyTests(MonBase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ================================================================================================ FASE 6
+class LegalAuditTests(MonBase):
+    """A auditoria legal da FASE 6: nove cartas, nenhuma verde, todas com fonte oficial e data."""
+
+    def test_every_rule_has_a_legal_card_with_an_official_source_and_a_date(self):
+        cards = {c["rule_key"]: c for c in
+                 self.osc.get("/v1/monetization/legal-cards").json["items"]}
+        rules = self.osc.get("/v1/monetization/rules").json["items"]
+        self.assertTrue(rules)
+        for r in rules:
+            card = cards.get(r["key"])
+            self.assertIsNotNone(card, f"{r['key']} está sem carta legal")
+            self.assertTrue(card["legal_basis"], f"{r['key']}: carta sem base normativa")
+            self.assertTrue(card["source_name"], f"{r['key']}: carta sem fonte nomeada")
+            self.assertTrue(card["verified_on"], f"{r['key']}: carta sem data de verificação")
+            self.assertIn("planalto", (card["source_url"] or "").lower() + card["source_name"].lower(),
+                          f"{r['key']}: a fonte precisa ser oficial")
+
+    def test_no_card_is_green_and_every_one_still_needs_a_lawyer(self):
+        """Pesquisa não é parecer. Nenhuma carta pode dispensar advogado nesta versão."""
+        for c in self.osc.get("/v1/monetization/legal-cards").json["items"]:
+            self.assertIn(c["status"], ("yellow", "red"), f"{c['rule_key']} está verde")
+            self.assertTrue(c["needs_lawyer"], f"{c['rule_key']} dispensa advogado")
+            self.assertTrue(c["open_questions"],
+                            f"{c['rule_key']} não declara nenhuma pergunta aberta")
+
+    def test_the_four_highest_risk_revenues_are_refused_not_merely_pending(self):
+        """"Analisado e não implementar assim" é mais forte que "ainda não analisado"."""
+        rules = {r["key"]: r for r in self.osc.get("/v1/monetization/rules").json["items"]}
+        for key in ("b2g.territorial_governance", "marketplace.take_rate", "success_fee.funding",
+                    "data.territorial_intelligence"):
+            self.assertEqual(rules[key]["legal_status"], "refused", key)
+            self.assertEqual(rules[key]["card_status"], "red", key)
+
+    def test_the_payment_institution_risk_is_named_where_it_applies(self):
+        """O risco de enquadramento como instituição de pagamento tem de estar escrito, não implícito."""
+        cards = {c["rule_key"]: c for c in
+                 self.osc.get("/v1/monetization/legal-cards").json["items"]}
+        for key in ("success_fee.funding", "marketplace.take_rate"):
+            blob = (cards[key]["regulatory_notes"] or "") + (cards[key]["legal_basis"] or "")
+            self.assertIn("12.865", blob, f"{key}: a Lei 12.865/2013 tem de estar citada")
+            self.assertIn("banco central", blob.lower(), key)
+
+    def test_the_public_contracting_card_refuses_self_service_checkout(self):
+        cards = {c["rule_key"]: c for c in
+                 self.osc.get("/v1/monetization/legal-cards").json["items"]}
+        card = cards["b2g.territorial_governance"]
+        self.assertIn("14.133", card["legal_basis"])
+        self.assertIn("checkout", (card["regulatory_notes"] or "").lower() + (card["note"] or "").lower())
+
+    def test_the_data_product_card_names_the_reidentification_risk(self):
+        cards = {c["rule_key"]: c for c in
+                 self.osc.get("/v1/monetization/legal-cards").json["items"]}
+        card = cards["data.territorial_intelligence"]
+        self.assertIn("13.709", card["legal_basis"], "a LGPD tem de estar citada")
+        self.assertIn("anonimiza", (card["legal_basis"] or "").lower())
+        self.assertIn("reidentifica", (card["regulatory_notes"] or "").lower())
+
+    def test_nothing_is_billable_after_the_legal_audit(self):
+        """O resultado honesto da FASE 6: a auditoria não liberou nenhuma cobrança."""
+        rules = self.osc.get("/v1/monetization/rules").json["items"]
+        self.assertEqual([r["key"] for r in rules if r["active"]], [])
+        pipe = self.osc.get("/v1/monetization/pipeline").json
+        for item in pipe["items"]:
+            self.assertNotEqual(item["status"], "eligible", item)

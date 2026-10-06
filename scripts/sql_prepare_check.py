@@ -39,7 +39,8 @@ HOLES = {
     # camada econômica (0018+)
     "programs.py": {"{', '.join(sets)}": "title = 'x'", "{len(args) - 1}": "1", "{len(args)}": "2"},
     "value_ledger.py": {"{', '.join(sets)}": "note = 'x'"},
-    "billable.py": {"{', '.join(sets)}": "active = false"},
+    "billable.py": {"{', '.join(sets)}": "active = false", "{', '.join(names)}": "rule_key",
+                    "{ph}": "'premium.readiness_analysis'", "{len(args)}": "1"},
     "legal.py": {"{', '.join(sets)}": "status = 'yellow'"},
 }
 

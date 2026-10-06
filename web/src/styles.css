@@ -461,3 +461,9 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .empty-facts dd { margin: 0; }
 .empty-blocked { margin: .5rem 0 0; font-weight: 600; }
 @media (max-width: 40rem) { .empty-facts { grid-template-columns: 1fr; } .empty-facts dd { margin-bottom: .4rem; } }
+
+/* Aviso de situação jurídica no cadastro (v0.20.0): a pessoa marca "Li e aceito" sabendo se o
+   documento está aprovado. Tom de atenção, não de erro — não há nada errado em desenvolver antes
+   de o jurídico aprovar; errado seria esconder. */
+.form-notice { border-left: 3px solid var(--warn, #b26b00); padding: .5rem .75rem; margin: .5rem 0;
+  background: color-mix(in srgb, var(--warn, #b26b00) 8%, transparent); font-size: .9rem; border-radius: 4px; }

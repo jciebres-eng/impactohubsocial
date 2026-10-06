@@ -115,6 +115,19 @@ def register(ctx: Ctx, body) -> dict:
         raise unprocessable("Senha fraca", [{"field": "password", "message": p} for p in problems])
     if not body.accept_terms:
         raise unprocessable("É necessário aceitar os Termos de Uso e a Política de Privacidade")
+    # PORTÃO JURÍDICO. Documento que exige aceite e não foi aprovado não pode ser aceito: o gatilho do
+    # banco recusa o registro, e seguir mesmo assim significaria coletar concordância com um texto que
+    # ninguém revisou, sem deixar prova. Em desenvolvimento e teste o cadastro continua, porque a
+    # plataforma precisa ser desenvolvível antes de o jurídico existir — e a resposta DIZ que seguiu
+    # assim, em vez de fingir que houve aceite.
+    from . import legal as LEGAL
+    with ctx.system_tx() as c_legal:
+        pendentes = LEGAL.blockers(c_legal)
+    if pendentes and ctx.settings.is_hardened:
+        raise ApiError(503, "legal_documents_not_published",
+                       "O cadastro está suspenso até que os documentos legais sejam aprovados por "
+                       "revisão jurídica. Nenhum aceite pode ser coletado sobre minuta.",
+                       {"documents": [d["doc_key"] for d in pendentes]})
     org = body.organization
     cnpj = only_digits(org.cnpj) if org and org.cnpj else None
     nature_code = getattr(org, "legal_nature_code", None) if org else None
@@ -162,10 +175,20 @@ def register(ctx: Ctx, body) -> dict:
                 c.run("INSERT INTO provider_profiles(org_id) VALUES ($1)", org_id)
             from . import monetization
             monetization.start_trial(c, ctx.settings, org_id=org_id, org_kind=org.kind, email=email, cnpj=cnpj, user_id=uid, source="signup")
+        # PROVA DO ACEITE. `consents` guarda a string de versão do arquivo de configuração; a prova
+        # que serve a um questionamento jurídico é outra: documento, versão e HASH do texto, em
+        # `legal_acceptances`. Até a v0.20.0 o cadastro não escrevia lá — a caixa "Li e aceito" era
+        # conferida como booleano e nada ficava registrado.
+        from . import legal as LEGAL
+        aceitos = LEGAL.accept_on_signup(c, user_id=uid, org_id=org_id,
+                                         audience=org.kind if org else None,
+                                         ip=ctx.ip, user_agent=ctx.user_agent)
         tok = create_auth_token(c, uid, "verify_email", 60 * 48)
         from .audit import record
         record(c, org_id=org_id, actor=uid, action="user.registered", object_type="user", object_id=uid,
-               payload={"org_kind": org.kind if org else None}, ip=ctx.ip, request_id=ctx.request_id)
+               payload={"org_kind": org.kind if org else None,
+                        "legal_acceptances": [a["doc_key"] for a in aceitos]},
+               ip=ctx.ip, request_id=ctx.request_id)
     link = f"{ctx.settings.public_base_url}/verificar-email?token={tok}"
     _send_after(ctx, email, "Confirme seu e-mail — Plataforma Impacto",
                 f"Olá, {body.full_name}!\n\nConfirme seu e-mail para ativar todas as funções:\n{link}\n\nO link expira em 48 horas.")

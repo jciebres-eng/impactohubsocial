@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { absorbSession, api, describeError } from "../api";
 import { Link, navigate, useLocation } from "../router";
 import { useSession } from "../session";
-import { Button, Field, Input, Select, StateView, useAction, useForm } from "../ui/kit";
+import { Button, Field, Input, Select, StateView, useAction, useForm, useLoad } from "../ui/kit";
 
 function AuthFrame({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
   return (
@@ -118,6 +118,27 @@ const KINDS: [string, string, string][] = [
   ["government", "Órgão público", "Publique editais e materiais e acompanhe dados do território."],
 ];
 
+/** Diz, na tela de cadastro, a situação REAL dos documentos legais.
+ *
+ * Enquanto houver documento que exige aceite e não foi aprovado, o texto servido por `/legal/termos`
+ * sai com o cabeçalho `X-Legal-Status: draft` e a primeira linha "MINUTA — DRAFT FOR LEGAL REVIEW".
+ * Esconder isso da pessoa que está marcando "Li e aceito" seria pedir concordância com um texto que
+ * a própria plataforma sabe não estar aprovado. Em staging e produção o cadastro é RECUSADO nesse
+ * estado (503 `legal_documents_not_published`); aqui a tela diz o porquê antes de a pessoa tentar.
+ */
+function LegalStatus() {
+  const { data } = useLoad<any>("/v1/legal/registry");
+  const pendentes: string[] = data?.blocking_product || [];
+  if (!data || pendentes.length === 0) return null;
+  return (
+    <p className="form-notice" role="status">
+      <strong>Documentos ainda em revisão jurídica.</strong> {pendentes.length} documento(s) que exigem
+      aceite não foram aprovados, então nenhum aceite é registrado como prova por enquanto. Em
+      produção o cadastro fica suspenso até a aprovação.
+    </p>
+  );
+}
+
 export function Register() {
   const f = useForm({ email: "", password: "", full_name: "", kind: "osc", legal_name: "", cnpj: "", uf: "", legal_nature_code: "", accept_terms: false });
   const [done, setDone] = useState(false);
@@ -173,6 +194,7 @@ export function Register() {
           <input type="checkbox" checked={f.v.accept_terms} onChange={(e: any) => f.set("accept_terms")(e.target.checked)} />
           <span>Li e aceito os <Link to="/legal/termos">Termos de uso</Link> e a <Link to="/legal/privacidade">Política de privacidade</Link>.</span>
         </label>
+        <LegalStatus />
         {err && <p className="form-error" role="alert">{err}</p>}
         <Button type="submit" variant="primary" busy={busy}>Criar conta</Button>
       </form>

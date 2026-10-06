@@ -69,6 +69,45 @@ def pending(conn: Connection, *, user_id: str, org_kind: str | None) -> dict:
     }
 
 
+def blockers(conn: Connection) -> list[dict]:
+    """Documentos que EXIGEM aceite e não estão aprovados — a pendência jurídica do lançamento.
+
+    Enquanto esta lista não estiver vazia, o produto não pode coletar aceite válido: o gatilho do
+    banco recusa aceite de minuta, e a caixa "Li e aceito" na tela de cadastro estaria coletando
+    concordância com um texto que ninguém aprovou e do qual não ficaria prova nenhuma.
+    """
+    return [{"doc_key": r["doc_key"], "title": r["title"], "version": r["latest_version"],
+             "status": r["status"], "status_label": STATUS_LABEL.get(r["status"], r["status"])}
+            for r in conn.query("SELECT * FROM legal_overview()") if r["blocks_product"]]
+
+
+def accept_on_signup(conn: Connection, *, user_id: str, org_id: str | None, audience: str | None,
+                     ip: str | None, user_agent: str | None) -> list[dict]:
+    """Registra, no cadastro, o aceite de TODO documento vigente que exige aceite.
+
+    POR QUE ISTO EXISTE. Até a v0.20.0 a tela de cadastro mostrava "Li e aceito os Termos de uso e a
+    Política de privacidade", o cadastro conferia um booleano e gravava `consents` com uma string de
+    versão vinda do arquivo de configuração. A prova de verdade — documento, versão e **hash do
+    texto** — mora em `legal_acceptances`, e o cadastro nunca escrevia lá. Resultado: em produção
+    cada pessoa aceitaria um texto sem que sobrasse prova de QUAL texto foi aceito.
+
+    Devolve a lista do que foi aceito. Lista vazia significa que não há documento vigente exigindo
+    aceite — o que hoje é verdade e é tratado por `blockers()`, não escondido aqui.
+    """
+    aceitos = []
+    for doc in conn.query("SELECT * FROM legal_pending($1, $2)", user_id, audience or "all"):
+        row = conn.one(
+            "INSERT INTO legal_acceptances(document_id, user_id, org_id, ip, user_agent, source)"
+            " VALUES ($1,$2,$3,$4,$5,'signup')"
+            " ON CONFLICT (document_id, user_id) DO NOTHING"
+            " RETURNING doc_key, version, body_sha256, accepted_at",
+            doc["id"], user_id, org_id, ip, (user_agent or "")[:300] or None)
+        if row:
+            aceitos.append({"doc_key": row["doc_key"], "version": row["version"],
+                            "body_sha256": row["body_sha256"], "accepted_at": row["accepted_at"]})
+    return aceitos
+
+
 def accept(conn: Connection, *, user_id: str, org_id: str | None, key: str,
            ip: str | None = None, user_agent: str | None = None, source: str = "web") -> dict:
     doc = conn.one("SELECT id::text AS id, title, version, status FROM legal_documents"

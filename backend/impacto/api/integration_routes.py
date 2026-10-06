@@ -6,7 +6,6 @@ externa é deduplicada pelo banco; jobs rodam no trabalhador (nunca uma sincroni
 from __future__ import annotations
 
 import hashlib
-import json
 
 from starlette.responses import JSONResponse
 
@@ -481,5 +480,3 @@ def admin_run_worker(ctx: Ctx):
     return {"jobs": jobs, "deliveries": deliveries}
 
 
-def _dump(v) -> str:
-    return json.dumps(v, ensure_ascii=False, default=str)

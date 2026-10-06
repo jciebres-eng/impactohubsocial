@@ -85,6 +85,22 @@ code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; 
 .content { padding: 32px clamp(16px, 4vw, 48px) 64px; max-width: 1180px; width: 100%; min-width: 0; }
 .content:focus { outline: none; }
 .scrim { display: none; }
+/* v0.20.0 — trava de largura. A regressão completa pegou 564px de rolagem horizontal em 390px de
+   viewport, e só COM DADO REAL: em banco limpo não acontece. A causa é sempre a mesma família —
+   um identificador, um e-mail, uma URL ou um número longo que não quebra, dentro de um bloco que
+   não tem para onde encolher. Em vez de caçar caso a caso, a largura é travada aqui:
+
+   - `max-width: 100%` e `min-width: 0` impedem qualquer filho de empurrar o pai (sem `min-width: 0`
+     um item de flex/grid se recusa a encolher abaixo do conteúdo, que é o modo mais comum de
+     estourar layout sem ninguém entender por quê);
+   - `overflow-wrap: anywhere` quebra o identificador longo em vez de esticar a página;
+   - a tabela ganha rolagem PRÓPRIA, para que ela role e a página não. */
+.content, .content * { min-width: 0; max-width: 100%; }
+.content { overflow-x: hidden; }
+.panel, .panel *, .bordered, .kv, .kv * { overflow-wrap: anywhere; }
+.table { display: block; overflow-x: auto; }
+.table > tbody, .table > thead { display: table; width: 100%; }
+
 @media (max-width: 900px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
   .topbar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--folha); border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; }

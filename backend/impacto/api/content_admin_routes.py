@@ -27,10 +27,6 @@ def _is_admin(ctx: Ctx) -> bool:
     return ctx.principal.is_platform_admin
 
 
-def _need(ctx: Ctx, role: str) -> None:
-    if not _is_admin(ctx) and role not in ctx.principal.staff_roles:
-        raise ApiError(403, "role_required", f"Requer o papel interno '{role}'")
-
 
 def _cat(c, slug: str | None) -> str | None:
     if not slug:

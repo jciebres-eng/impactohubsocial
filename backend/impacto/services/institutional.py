@@ -182,10 +182,6 @@ def org_badges(c: Connection, org_id: str, f: dict | None = None, today: date | 
     return badge_engine.compute(defs, scope="organization", facts=f, today=today, ctx={"last_eligibility_evaluation": last})
 
 
-def solution_badges(c: Connection, sol: dict, today: date | None = None) -> list[dict]:
-    defs = list(catalog(c, "badge").get("badge", {}).values())
-    return badge_engine.compute(defs, scope="solution", solution=sol, today=today)
-
 
 # ------------------------------------------------------------------------------------------------ visão geral
 def overview(c: Connection, org_id: str, today: date | None = None) -> dict:

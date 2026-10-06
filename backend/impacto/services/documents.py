@@ -90,6 +90,19 @@ def extract_text(mime: str, data: bytes, max_chars: int = 200_000) -> str | None
                 return data.decode("utf-8")[:max_chars]
             except UnicodeDecodeError:
                 return data.decode("latin-1")[:max_chars]
+        # v0.20.0 — `.docx` é ACEITO no envio (ver ALLOWED acima), `formats.py` declara no próprio
+        # cabeçalho que lê docx e odt, os dois leitores existem e funcionam, e NENHUM dos dois
+        # estava ligado aqui. Resultado prático: documento enviado em Word subia sem texto nenhum
+        # extraído — e o classificador de documento, a busca e a sugestão de tipo recebiam vazio
+        # sem que ninguém percebesse, porque "sem texto" é um resultado possível e silencioso.
+        if mime in (
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/msword"):
+            from .formats import read_docx_text
+            return read_docx_text(data, max_chars)
+        if mime in ("application/vnd.oasis.opendocument.text", "application/x-vnd.oasis.opendocument.text"):
+            from .formats import read_odt_text
+            return read_odt_text(data, max_chars)
         if mime.startswith("image/"):
             try:  # OCR opcional (tesseract instalado no sistema)
                 import pytesseract

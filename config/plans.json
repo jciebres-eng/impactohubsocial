@@ -1,11 +1,20 @@
 {
   "version": "plans@2.0",
   "_note": "Preços null = a definir pelo proprietário (exibido como 'sob consulta'). Cobrança real exige BILLING_PROVIDER configurado. Nenhum plano altera match, elegibilidade, ordenação ou posição de prestador.",
-  "invariants": [
-    "no_plan_affects_match",
-    "no_plan_affects_provider_rank",
-    "downgrade_never_deletes_data"
-  ],
+  "invariants": {
+    "no_plan_affects_match": {
+      "claim": "Plano pago NÃO altera score, elegibilidade nem ordenação de compatibilidade.",
+      "verified_by": "backend/tests/test_v0150_invariants.py::test_plan_does_not_influence_the_result"
+    },
+    "no_plan_affects_provider_rank": {
+      "claim": "Plano pago NÃO altera a posição de um prestador no diretório.",
+      "verified_by": "backend/tests/test_v0150_invariants.py::test_plan_does_not_influence_the_result"
+    },
+    "downgrade_never_deletes_data": {
+      "claim": "Rebaixar plano NUNCA apaga dado: o acesso a recurso pago cessa, o dado permanece.",
+      "verified_by": "backend/tests/test_v0110_monetization.py"
+    }
+  },
   "downgrade_grace_days": 60,
   "flags": {
     "premium_osc": {
@@ -373,5 +382,7 @@
         "reason": "Regra comercial da v0.16.0 aposentada na v0.17.0: o proponente deixou de ser o pagador principal."
       }
     ]
-  }
+  },
+  "_invariants_note": "Cada invariante aponta para o teste que o verifica. Até a v0.20.0 esta lista era só três strings que nenhum código lia e nenhum teste conferia — isto é, uma promessa escrita no arquivo de configuração. `test_v0200_cleanup.py` passou a exigir que cada invariante declarado aqui tenha um teste real e que o teste exista no repositório.",
+  "_downgrade_grace_days_note": "DECLARAÇÃO, não comportamento implementado. Nenhum código lê esta chave hoje: o rebaixamento de plano cessa o acesso ao recurso pago e não apaga dado (ver invariante acima), mas não há período de carência automático. A chave fica porque o número é a intenção declarada do proprietário; quando a carência for implementada, é daqui que ela lê o prazo. Registrado em TECHNICAL_DEBT_REGISTER.md."
 }

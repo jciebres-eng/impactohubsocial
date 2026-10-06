@@ -136,29 +136,19 @@ def set_installments(conn: Connection, *, charge_id: str, org_id: str,
     return {"charge_id": charge_id, "installments": len(schedule)}
 
 
-def attach_pix(conn: Connection, *, charge_id: str, payload: str, expires_at: Any,
-               provider_txid: str | None = None) -> dict:
-    """Guarda a instrução "copia e cola" do PIX gerada pelo provedor.
-
-    A carga não é credencial: é instrução de pagamento com prazo, e não autoriza nada em nome de
-    ninguém. Mas tem validade, e por isso `expires_at` é obrigatório na tabela.
-    """
-    conn.run("INSERT INTO charge_pix(charge_id, payload, expires_at, provider_txid)"
-             " VALUES ($1,$2,$3,$4) ON CONFLICT (charge_id) DO UPDATE"
-             " SET payload = excluded.payload, expires_at = excluded.expires_at,"
-             " provider_txid = excluded.provider_txid", charge_id, payload, expires_at, provider_txid)
-    return {"charge_id": charge_id, "expires_at": expires_at}
-
-
-def attach_boleto(conn: Connection, *, charge_id: str, digitable_line: str, due_on: Any,
-                  barcode: str | None = None, provider_boleto_id: str | None = None,
-                  pdf_storage_key: str | None = None) -> dict:
-    conn.run("INSERT INTO charge_boleto(charge_id, digitable_line, barcode, due_on,"
-             " provider_boleto_id, pdf_storage_key) VALUES ($1,$2,$3,$4,$5,$6)"
-             " ON CONFLICT (charge_id) DO UPDATE SET digitable_line = excluded.digitable_line,"
-             " barcode = excluded.barcode, due_on = excluded.due_on", charge_id, digitable_line,
-             barcode, due_on, provider_boleto_id, pdf_storage_key)
-    return {"charge_id": charge_id, "due_on": due_on}
+# ---------------------------------------------------------------------------- PIX e boleto
+#
+# `attach_pix()` e `attach_boleto()` existiam aqui e NUNCA eram chamadas por ninguém. A limpeza da
+# v0.20.0 (§54) as removeu, e o motivo precisa ficar escrito para que não voltem por engano:
+#
+# as duas GRAVAVAM instrução de pagamento — carga "copia e cola" do PIX, linha digitável do boleto —
+# que só um provedor brasileiro de pagamento pode produzir. Sem provedor, a única forma de chamá-las
+# seria passando valor inventado, e aí a plataforma estaria exibindo uma instrução de pagamento que
+# não paga nada. Isso não é código incompleto: é código que, se ligado, mente.
+#
+# As tabelas `charge_pix` e `charge_boleto` FICAM (migrações nunca são removidas, e `detail()` abaixo
+# já as lê, devolvendo nulo enquanto estiverem vazias). Quando houver provedor homologado, quem o
+# integrar escreve o gravador junto com a integração — não antes.
 
 
 # ---------------------------------------------------------------------------- mover

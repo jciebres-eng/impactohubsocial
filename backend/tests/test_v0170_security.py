@@ -239,6 +239,15 @@ class PrivacyTests(unittest.TestCase):
 
     def setUp(self):
         self.c = new_account("osc")
+        # v0.20.0 — A ORDEM AQUI PASSOU A IMPORTAR, e vale dizer por quê.
+        #
+        # Desde a v0.20.0 o cadastro registra o aceite dos documentos pendentes no próprio
+        # `register()`. Então uma conta criada DEPOIS do documento abaixo já nasce tendo aceitado
+        # ele — e o INSERT manual de aceite antigo, mais adiante, colidiria com a chave única.
+        # `self.pre` é criada ANTES do documento existir, justamente para que o teste possa
+        # fabricar um aceite com data antiga. A colisão não era defeito do produto: era o teste
+        # supondo um cadastro que não registra nada, o que deixou de ser verdade.
+        self.pre = new_account("osc")
         oc = owner_conn()
         try:
             self.doc = oc.scalar(
@@ -317,7 +326,7 @@ class PrivacyTests(unittest.TestCase):
     def test_retention_empties_old_webhook_payloads_and_old_acceptance_ips(self):
         from impacto import jobs as J
         from tests.support import server
-        outro = new_account("osc")
+        outro = self.pre
         oc = owner_conn()
         try:
             oc.run("INSERT INTO billing_events(provider, event_id, type, payload)"

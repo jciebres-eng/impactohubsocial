@@ -330,6 +330,18 @@ def _announce(conn: Connection, p: dict, *, to: str, actor: str | None, note: st
              "expired": "Proposal.expired", "cancelled": "Proposal.withdrawn"}.get(to)
     if not event:
         return
+
+    # v0.20.0 — `messaging.system_note()` existia desde a v0.16.0, dizia no próprio docstring que
+    # serve para "a conversa contar a história completa, e não só a parte digitada", e NUNCA era
+    # chamada. Havendo conversa amarrada a esta proposta (`conversations.context_proposal_id`), o
+    # andamento dela passa a aparecer na própria conversa — que é onde as duas partes estão
+    # olhando. Sem isso, a conversa mostrava os recados e omitia o que de fato aconteceu.
+    from . import messaging
+    for conv in conn.query("SELECT id::text AS id FROM conversations"
+                           " WHERE context_proposal_id = $1 AND status <> 'archived'", p["id"]):
+        messaging.system_note(conn, conversation_id=conv["id"],
+                              body=f"Proposta: {ST_LABEL.get(to, to)}.",
+                              ref_type="proposal", ref_id=p["id"])
     if to in ("viewed", "cancelled"):
         # "vista" não avisa: seria ruído, e quem enviou vê na própria caixa. O fato fica registrado.
         notify.fact_only(conn, event=event, org_id=p["sender_org_id"], actor_user_id=actor,

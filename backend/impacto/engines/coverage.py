@@ -95,14 +95,6 @@ def _module_source(engine: Engine) -> str:
     return caminho.read_text(encoding="utf-8") if caminho.exists() else ""
 
 
-def _persists_version(engine: Engine) -> bool:
-    """Alguma migração guarda a versão deste motor em coluna? Então o rastro é do banco, não do log."""
-    if not engine.version:
-        return False
-    fonte = _module_source(engine)
-    return "ENGINE_VERSION" in fonte and ("engine_version" in fonte or "ENGINE_VERSION)" in fonte)
-
-
 def _library_users() -> set[str]:
     """Módulos de motor importados por quem tem rota ou tarefa: estão ligados, só que por dentro."""
     usados: set[str] = set()

@@ -261,6 +261,10 @@
     "value_events.org_id": {
       "class": "append_only",
       "reason": "Evento de valor entregue, base do ledger de valor."
+    },
+    "report_responses.org_id": {
+      "class": "append_only",
+      "reason": "Manifestação de quem foi denunciado. A tabela é append-only por gatilho (v0.20.0, migração 0038): o que a parte respondeu na apuração NÃO se apaga, porque é a prova de que ela teve direito de resposta. Se pudesse ser removida, a plataforma perderia exatamente o registro que a protege de ter decidido sem ouvir."
     }
   },
   "account_deletion_flow": {

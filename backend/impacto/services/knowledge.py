@@ -6,7 +6,6 @@ e data e é sinalizado quando vencido; o assistente só responde com a base publ
 Plano/assinatura nunca influencia busca ou recomendação."""
 from __future__ import annotations
 
-import json
 import logging
 
 from ..engines.knowledge import search as KS
@@ -388,5 +387,3 @@ def low_resolution_faqs(c, *, min_votes: int = 5, max_helpful_rate: float = 0.5)
                    min_votes, max_helpful_rate)
 
 
-def to_json(v) -> str:
-    return json.dumps(v, ensure_ascii=False)

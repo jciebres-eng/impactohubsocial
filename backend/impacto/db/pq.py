@@ -327,8 +327,6 @@ class Connection:
     def transaction_status(self) -> int:
         return _lib.PQtransactionStatus(self._conn) if self._conn else PQTRANS_UNKNOWN
 
-    def server_version(self) -> int:
-        return _lib.PQserverVersion(self._conn)
 
     def __del__(self):  # pragma: no cover
         try:

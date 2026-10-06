@@ -37,14 +37,6 @@ ENGINE_VERSION = "deadline-sweep@1.0.0"
 WINDOWS = (30, 7, 1)
 
 
-def _janela(dias: int) -> int | None:
-    """Qual janela este prazo acabou de cruzar. `None` quando não cruzou nenhuma."""
-    for w in WINDOWS:
-        if dias == w:
-            return w
-    return None
-
-
 def _texto(dias: int) -> str:
     return "vence hoje" if dias <= 0 else ("vence amanhã" if dias == 1 else f"vence em {dias} dias")
 

@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from collections.abc import Iterator
 
 from ..observability import add_span
-from .pq import Connection, OperationalError, PQTRANS_IDLE, SerializationFailure
+from .pq import Connection, OperationalError, PQTRANS_IDLE
 
 
 @dataclass(frozen=True)
@@ -148,12 +148,9 @@ class Pool:
             self.release(conn)
 
 
-def retry_serializable(fn, attempts: int = 3):
-    """Reexecuta ``fn`` em conflitos de serialização/deadlock (com backoff curto)."""
-    for i in range(attempts):
-        try:
-            return fn()
-        except SerializationFailure:
-            if i == attempts - 1:
-                raise
-            time.sleep(0.02 * (2 ** i))
+
+# NÃO existe aqui um `retry_serializable()`. Existiu, e nunca foi chamado: a estratégia desta
+# plataforma para conflito de serialização é outra, e está em `http.py` — devolver 409
+# `concurrent_update` e pedir que o cliente repita. Repetir no servidor esconderia do cliente que
+# houve conflito, e em operação que envolve dinheiro ou decisão sobre terceiro isso é pior que o
+# erro. A v0.20.0 removeu o utilitário morto para que ninguém o ligue achando que é o padrão.

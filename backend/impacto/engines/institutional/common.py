@@ -48,6 +48,3 @@ def months_between(a: date, b: date) -> int:
     return (b.year - a.year) * 12 + (b.month - a.month) - (1 if b.day < a.day else 0)
 
 
-def label_of(catalog: dict[str, dict] | None, code: str) -> str:
-    """Rótulo de um código de catálogo (dict code -> item); cai para o próprio código quando o catálogo não conhece."""
-    return ((catalog or {}).get(code) or {}).get("label") or code

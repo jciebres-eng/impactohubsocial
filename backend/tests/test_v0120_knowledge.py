@@ -157,12 +157,27 @@ class Editorial(unittest.TestCase):
         self.assertEqual(c.get("/v1/me").json["user"]["staff_roles"], ["editor"])
 
     def test_admin_grants_and_revokes_staff_roles(self):
+        """v0.20.0: revogar papel interno passou a EXIGIR motivo escrito.
+
+        O inventário de risco (§40) classificou a operação como crítica — é tirar o acesso de uma
+        pessoa — e encontrou que ela não registrava por quê. O teste acompanhou a exigência e ficou
+        mais forte: confere que a revogação sem motivo é recusada, e que o motivo chega à auditoria.
+        """
         adm, _ = make_admin()
         u = new_account("osc")
         self.assertEqual(adm.post("/v1/admin/staff-roles", {"email": u.email, "role": "support"}).status, 201)
         self.assertEqual(u.get("/v1/me").json["user"]["staff_roles"], ["support"])
-        self.assertEqual(adm.delete(f"/v1/admin/staff-roles/{u.user['id']}/support").status, 200)
+        sem_motivo = adm.delete(f"/v1/admin/staff-roles/{u.user['id']}/support")
+        self.assertEqual(sem_motivo.status, 422, "revogar acesso sem motivo não pode passar")
+        motivo = "Saiu da equipe de suporte em 06/10, conforme comunicado interno."
+        r = adm.delete(f"/v1/admin/staff-roles/{u.user['id']}/support?reason={motivo.replace(' ', '%20')}")
+        self.assertEqual(r.status, 200, r)
         self.assertEqual(u.get("/v1/me").json["user"]["staff_roles"], [])
+        with db_system() as c:
+            registro = c.one("SELECT payload FROM audit_events WHERE action = 'staff.role_revoked'"
+                             " AND object_id = $1 ORDER BY id DESC LIMIT 1", u.user["id"])
+        self.assertIsNotNone(registro, "a revogação não foi auditada")
+        self.assertIn("Saiu da equipe", registro["payload"]["reason"])
 
 
 class Visibility(unittest.TestCase):

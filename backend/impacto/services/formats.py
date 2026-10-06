@@ -13,7 +13,6 @@ Edição on-line colaborativa (Office na Web / Collabora / OnlyOffice) exige ser
 from __future__ import annotations
 
 import io
-import json as _json
 import zipfile
 from datetime import UTC, datetime
 from xml.sax.saxutils import escape, quoteattr, unescape
@@ -303,9 +302,6 @@ def xml(root: str, data, *, item: str = "item") -> bytes:
 
     return ('<?xml version="1.0" encoding="UTF-8"?>\n' + render(data, root)).encode()
 
-
-def json_bytes(data) -> bytes:
-    return (_json.dumps(data, ensure_ascii=False, indent=1, default=str) + "\n").encode()
 
 
 # ================================================================================ PDF com QR de verificação

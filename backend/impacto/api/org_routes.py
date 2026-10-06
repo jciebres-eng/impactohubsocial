@@ -145,8 +145,24 @@ class DirectoryQ(S.Pagination):
 @route("GET", "/v1/directory/professionals", query=DirectoryQ, min_role="viewer", tags=("directory",),
        summary="Diretório de profissionais parceiros. Ordenação objetiva e determinística — NUNCA por plano (invariante).")
 def directory(ctx: Ctx, q: DirectoryQ):
-    from ..services.directory import search_professionals
+    """v0.20.0 — a bandeira `public_directory_providers` passou a LIGAR alguma coisa.
+
+    Ela existia em `config/plans.json`, aparecia em `docs/ADMIN.md`, era alterável por
+    `PUT /v1/admin/flags/{key}` — e nenhuma linha de código a lia. Ligar ou desligar não mudava
+    nada no produto. É o mesmo defeito que a v0.20.0 corrigiu nas notificações: um interruptor
+    que não desliga é pior que interruptor nenhum, porque quem administra acredita ter escolhido.
+
+    Com a bandeira desligada, o diretório responde vazio e DIZ que foi a administração que o
+    desligou — não finge que não há profissionais cadastrados.
+    """
     with ctx.tx(readonly=True) as c:
+        ligado = c.scalar("SELECT enabled FROM feature_flags WHERE key = 'public_directory_providers'")
+        if ligado is False:
+            return {"items": [], "total": 0, "limit": q.limit, "offset": q.offset,
+                    "disabled_by_platform": True,
+                    "note": ("O diretório de profissionais está desligado pela administração da "
+                             "plataforma. Não é ausência de profissionais cadastrados.")}
+        from ..services.directory import search_professionals
         rows = search_professionals(c, category=q.category, territory=q.territory, text=q.q, limit=q.limit + 1, offset=q.offset)
     return page(rows, q.limit, q.offset)
 

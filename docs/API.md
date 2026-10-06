@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (836)
+## Operações (837)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -151,6 +151,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/payments/reconciliation` | admin da plataforma + MFA | — | Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura |
 | GET | `/v1/admin/payments/revenue` | admin da plataforma + MFA | — | Receita apurada, com o simulado em colunas próprias e nunca somado ao real |
 | PUT | `/v1/admin/plans/{plan_key}/price` | admin da plataforma + MFA | — | Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide) |
+| GET | `/v1/admin/price-benchmark` | admin da plataforma + MFA | — | Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
 | GET | `/v1/admin/reports/queue` | admin da plataforma + MFA | — | Fila de apuração, com a distinção entre arquivada e não procedente |
 | POST | `/v1/admin/reports/{report_id}/conclude` | admin da plataforma + MFA | — | Conclusão fundamentada. Só 'substantiated' autoriza medida |

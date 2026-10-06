@@ -1,0 +1,119 @@
+{
+  "version": "price_benchmark@1.0",
+  "collected_on": "2026-10-06",
+  "collected_by": "pesquisa web direta nas páginas de preço dos próprios fornecedores",
+  "PRICE_FINALIZATION_REQUIRED": true,
+  "_what_this_is": "BENCHMARK, não preço. Cada linha foi lida na página de preço do próprio fornecedor na data declarada. Nenhum valor aqui define, sugere ou limita o preço da Impacto Trust: a decisão de preço é do proprietário, e esta tabela existe só para que ela não seja tomada no escuro.",
+  "_what_this_is_not": "Não é cotação, não é proposta, não é projeção de receita e não foi negociada com ninguém. Preço de tabela publicado é o preço de LISTA: desconto por volume, por setor sem fins lucrativos e por contrato plurianual é regra no mercado e não aparece aqui.",
+  "_methodology": [
+    "Só entram valores lidos na página oficial de preço do fornecedor, na data declarada em cada linha.",
+    "Agregador de preços de terceiro NÃO foi usado como fonte: o número que eles publicam costuma ser estimativa, e estimativa de terceiro apresentada como preço é exatamente o tipo de dado que esta plataforma recusa.",
+    "Fornecedor que não publica preço entra na tabela com price_cents nulo e o motivo. Omitir seria fazer o mercado parecer mais transparente do que é.",
+    "Valores em USD não foram convertidos para BRL: converter exigiria escolher uma taxa e uma data, e o resultado pareceria mais preciso do que é."
+  ],
+  "_how_to_update": "Refazer a pesquisa, substituir as linhas inteiras e atualizar collected_on. Nunca editar um valor isolado: a data de coleta vale para a tabela toda.",
+  "entries": [
+    {
+      "category": "nonprofit_management",
+      "product": "Salesforce Nonprofit Cloud",
+      "plan": "Sales & Service Core",
+      "price": 70.0, "currency": "USD", "unit": "por usuário/mês", "billing_period": "anual",
+      "features": "CRM para organizações sem fins lucrativos: gestão de doadores, programas e atendimento.",
+      "source": "https://www.salesforce.com/nonprofit/pricing/", "source_date": "2026-10-06"
+    },
+    {
+      "category": "nonprofit_management",
+      "product": "Salesforce Nonprofit Cloud",
+      "plan": "Sales & Service Advanced",
+      "price": 125.0, "currency": "USD", "unit": "por usuário/mês", "billing_period": "anual",
+      "features": "Camada avançada do CRM para organizações sem fins lucrativos.",
+      "source": "https://www.salesforce.com/nonprofit/pricing/", "source_date": "2026-10-06"
+    },
+    {
+      "category": "nonprofit_management",
+      "product": "Salesforce Nonprofit Cloud",
+      "plan": "Sales Max / Service Max",
+      "price": 285.0, "currency": "USD", "unit": "por usuário/mês", "billing_period": "anual",
+      "features": "Camada máxima publicada pelo fornecedor.",
+      "source": "https://www.salesforce.com/nonprofit/pricing/", "source_date": "2026-10-06"
+    },
+    {
+      "category": "project_management_saas",
+      "product": "Asana", "plan": "Starter",
+      "price": 10.99, "currency": "USD", "unit": "por usuário/mês", "billing_period": "anual",
+      "features": "Gestão de projetos e tarefas, sem limite de assentos.",
+      "source": "https://asana.com/pricing", "source_date": "2026-10-06"
+    },
+    {
+      "category": "project_management_saas",
+      "product": "Asana", "plan": "Advanced",
+      "price": 24.99, "currency": "USD", "unit": "por usuário/mês", "billing_period": "anual",
+      "features": "Camada avançada de gestão de projetos.",
+      "source": "https://asana.com/pricing", "source_date": "2026-10-06"
+    },
+    {
+      "category": "project_management_saas",
+      "product": "monday.com", "plan": "Work Management Standard",
+      "price": 12.0, "currency": "USD", "unit": "por assento/mês", "billing_period": "anual ou mensal",
+      "features": "Gestão de trabalho em quadros, automações e integrações.",
+      "source": "https://monday.com/pricing", "source_date": "2026-10-06"
+    },
+    {
+      "category": "project_management_saas",
+      "product": "monday.com", "plan": "Work Management Pro",
+      "price": 19.0, "currency": "USD", "unit": "por assento/mês", "billing_period": "anual ou mensal",
+      "features": "Camada profissional de gestão de trabalho.",
+      "source": "https://monday.com/pricing", "source_date": "2026-10-06"
+    },
+    {
+      "category": "crm_b2b",
+      "product": "monday.com CRM", "plan": "Pro",
+      "price": 28.0, "currency": "USD", "unit": "por assento/mês", "billing_period": "anual ou mensal",
+      "features": "CRM de vendas com automações e previsões.",
+      "source": "https://monday.com/pricing", "source_date": "2026-10-06"
+    },
+    {
+      "category": "crm_b2b",
+      "product": "HubSpot Sales Hub", "plan": "Starter",
+      "price": 20.0, "currency": "USD", "unit": "por assento/mês", "billing_period": "mensal",
+      "features": "CRM de vendas; a página também anuncia valor promocional de US$ 7 por assento.",
+      "source": "https://www.hubspot.com/pricing/crm", "source_date": "2026-10-06"
+    },
+    {
+      "category": "grant_management",
+      "product": "Submittable", "plan": "todos",
+      "price": null, "currency": null, "unit": null, "billing_period": null,
+      "features": "Gestão de editais e candidaturas.",
+      "not_published_reason": "O fornecedor NÃO publica preço: a página direciona para contato comercial.",
+      "source": "https://www.submittable.com/pricing/", "source_date": "2026-10-06"
+    },
+    {
+      "category": "esg_software",
+      "product": "Workiva", "plan": "todos",
+      "price": null, "currency": null, "unit": null, "billing_period": null,
+      "features": "Relato ESG e conformidade.",
+      "not_published_reason": "O fornecedor NÃO publica preço de tabela. Os números que circulam vêm de agregadores de terceiros e são estimativas — não foram usados aqui.",
+      "source": "https://www.workiva.com/", "source_date": "2026-10-06"
+    },
+    {
+      "category": "enterprise_saas_br",
+      "product": "Pipefy", "plan": "Business / Enterprise",
+      "price": null, "currency": null, "unit": "por usuário", "billing_period": null,
+      "features": "Automação de processos; fornecedor brasileiro.",
+      "not_published_reason": "Declara cobrança por usuário e NÃO publica o valor: a página direciona para contato comercial.",
+      "source": "https://www.pipefy.com/pricing/", "source_date": "2026-10-06"
+    }
+  ],
+  "findings": [
+    "Entre os comparáveis pesquisados, a faixa PUBLICADA de preço por usuário/mês vai de US$ 10,99 (Asana Starter) a US$ 285 (Salesforce Nonprofit Cloud Max). A mediana das linhas publicadas fica perto de US$ 24.",
+    "UM TERÇO dos fornecedores pesquisados não publica preço algum — inclusive os dois mais próximos do que a Impacto Trust faz (gestão de editais e relato ESG). Isso é informação sobre o mercado, não lacuna da pesquisa: num setor onde comprador e vendedor negociam caso a caso, publicar preço é uma escolha, e a maioria dos fornecedores de nicho não a faz.",
+    "Nenhum comparável encontrado cobra por organização atendida, por projeto acompanhado ou por evidência verificada. Todos cobram por ASSENTO. A Impacto Trust tem uma estrutura de monetização diferente (ver MONETIZATION.md), então a comparação por assento serve de ordem de grandeza, não de modelo.",
+    "Preço em reais não foi encontrado em nenhum comparável internacional: todos publicam em USD ou EUR. O fornecedor brasileiro pesquisado não publica preço."
+  ],
+  "decision_required": {
+    "owner": "proprietário da plataforma",
+    "what": "Definir preço de cada plano pago, a moeda e o período de cobrança.",
+    "blocked_until_then": "Os planos pagos seguem com preço nulo em config/plans.json, exibidos como 'sob consulta'. A cobrança real continua exigindo provedor de cobrança homologado (flag billing_live).",
+    "note": "Esta tabela NÃO decide nada. Ela existe para que a decisão de preço seja tomada com a referência do mercado à vista, e para que fique registrado o que foi consultado e quando."
+  }
+}

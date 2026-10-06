@@ -15742,6 +15742,32 @@
     ]
    }
   },
+  "/v1/admin/price-benchmark": {
+   "get": {
+    "summary": "Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido",
+    "operationId": "get_monetization_routes_price_benchmark",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
   "/v1/help/search": {
    "get": {
     "summary": "Busca híbrida (texto + similaridade + vocabulário de tópicos + perfil + tela). Pública para conteúdo público; autenticada amplia por perfil. Sem embeddings.",

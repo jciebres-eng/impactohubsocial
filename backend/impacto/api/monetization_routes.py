@@ -203,3 +203,17 @@ def batch_redemptions(ctx: Ctx):
                                  " o.legal_name AS organization, u.email::text AS redeemed_by FROM vouchers v LEFT JOIN voucher_redemptions r ON r.voucher_id = v.id"
                                  " LEFT JOIN organizations o ON o.id = r.org_id LEFT JOIN users u ON u.id = r.redeemed_by WHERE v.batch_id = $1"
                                  " ORDER BY r.redeemed_at DESC NULLS LAST, v.code_hint", ctx.path["batch_id"])}
+
+
+@route("GET", "/v1/admin/price-benchmark", auth="admin", tags=("monetizacao",),
+       summary="Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido")
+def price_benchmark(ctx: Ctx):
+    """O que o MERCADO cobra, lido nas páginas dos próprios fornecedores, com data e fonte.
+
+    Isto não é, e não vira, o preço da plataforma: `config/plans.json` segue com preço nulo nos
+    planos pagos até o proprietário decidir, e há teste que impede qualquer código de usar esta
+    tabela para preencher aquela. Um benchmark que vira preço por conveniência produz um preço que
+    ninguém decidiu — apenas copiado de empresas com outro produto, outro custo e outro cliente.
+    """
+    from ..core import pricing
+    return pricing.benchmark()

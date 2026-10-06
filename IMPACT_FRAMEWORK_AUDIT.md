@@ -148,3 +148,20 @@ político e contra decisão automatizada sobre pessoas. A conciliação:
   nesta rodada; o dado depende de arquivo oficial.
 - **Próxima:** FASE 2 — contexto de equidade, normalização rotulada e comparação que se recusa a
   ranquear sem base.
+
+## PHASE STATUS — FASES 2 a 5
+
+| Fase | Entregue | Prova |
+|---|---|---|
+| 2 | Contexto de equidade, 12 barreiras editoriais, denominador versionado com fonte obrigatória, 7 métodos de normalização, comparação que se recusa | `0025_v0180_equity.sql`, `impact/equity.py`, 12 rotas, `test_v0180_equity.py` (30 testes) |
+| 3 | Território como catálogo com `from_official_load`, 15 definições de indicador de determinante, perfil territorial que mostra o que **não** é medido, dois importadores que exigem fonte | `0026_v0180_territory.sql`, `impact/territory.py`, 5 rotas, `test_v0180_territory.py` (20 testes) |
+| 4 | Registro de 19 referenciais, mapeamento de indicador com escada de seis degraus **sem** `certified`, cobertura ("consigo relatar?"), materialidade com `is_material` derivada | `0027_v0180_frameworks.sql`, `impact/frameworks.py`, 11 rotas, `test_v0180_frameworks.py` (24 testes) |
+| 5 | Integridade de alegação: 11 regras determinísticas, situação **derivada** (sem coluna), revisão humana por convite nomeado de outra organização | `0028_v0180_claims.sql`, `impact/claims.py`, 9 rotas, `test_v0180_claims.py` (42 testes), `CLAIM_INTEGRITY.md` |
+
+- **Suíte:** 1.077 testes, 0 falhas, 17 ignorados (eram 961 ao fim da v0.17.0).
+- **Decisões registradas:** ADR-191 a ADR-200.
+- **Bloqueado por terceiro, sem contorno:** 169 metas oficiais dos ODS e dados do IBGE (a rede do
+  ambiente alcança só registros de pacote); mapeamento para GRI/ISSB/IRIS+ depende de decisão de
+  produto **e** jurídica, porque as minutas da v0.17.0 excluem esses relatórios.
+- **Próxima:** FASE 6 — reputação explicável, com contestação e correção, sem transformar a nota em
+  caixa-preta que determina acesso.

@@ -43,6 +43,9 @@ HOLES = {
                     "{ph}": "'premium.readiness_analysis'", "{len(args)}": "1"},
     "legal.py": {"{', '.join(sets)}": "status = 'yellow'"},
     "payments.py": {},
+    # camada de impacto contextualizado (0025+)
+    "equity.py": {}, "territory.py": {}, "frameworks.py": {},
+    "claims.py": {"{owner_col}": "org_id", "{table}": "projects"},
 }
 
 

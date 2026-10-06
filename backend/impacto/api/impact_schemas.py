@@ -135,3 +135,42 @@ class MaterialityEntryIn(In):
     stakeholder_note: Annotated[str, Field(max_length=2000)] | None = None
     evidence_id: Uuid | None = None
     indicator_id: Uuid | None = None
+
+
+# ================================================================================================ alegações
+class ClaimIn(In):
+    subject_type: Annotated[str, Field(
+        pattern="^(project|program|organization|solution|impact_update)$")]
+    subject_id: Uuid
+    claim_kind: Annotated[str, Field(pattern="^(result|ods_contribution|esg|environmental|social|"
+                                             "governance|efficiency|financial|comparative|"
+                                             "certification)$")]
+    statement: Annotated[str, Field(min_length=10, max_length=4000)]
+    scope_note: Annotated[str, Field(max_length=2000)] | None = None
+    period_start: date | None = None
+    period_end: date | None = None
+    indicator_id: Uuid | None = None
+    evidence_id: Uuid | None = None
+
+
+class ClaimQ(In):
+    subject_type: Annotated[str, Field(
+        pattern="^(project|program|organization|solution|impact_update)$")] | None = None
+    subject_id: Uuid | None = None
+    mine: bool = True
+    limit: Annotated[int, Field(ge=1, le=100)] = 50
+    offset: Annotated[int, Field(ge=0, le=10000)] = 0
+
+
+class ClaimWithdrawIn(In):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class ClaimReviewIn(In):
+    decision: Annotated[str, Field(pattern="^(accepted|needs_change|rejected)$")]
+    note: Annotated[str, Field(min_length=20, max_length=2000)]
+
+
+class ClaimReviewRequestIn(In):
+    reviewer_org_id: Uuid
+    note: Annotated[str, Field(min_length=10, max_length=2000)] | None = None

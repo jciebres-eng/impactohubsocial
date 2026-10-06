@@ -10,7 +10,7 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            # v0.17.0 — camada econômica
            "program_routes", "legal_routes",
            # v0.18.0 — equidade, frameworks e confiança
-           "equity_routes", "territory_routes", "framework_routes"]
+           "equity_routes", "territory_routes", "framework_routes", "claim_routes"]
 _loaded = False
 
 

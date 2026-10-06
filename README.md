@@ -1,11 +1,31 @@
-# Plataforma Impacto — v0.16.0
+# Plataforma Impacto — v0.17.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** rede de impacto fechada e **tecnicamente pronta para a etapa de design**; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+> **Estado:** camada econômica, legal e de pagamento fechada; **tecnicamente pronta para a etapa de design**, que é a próxima; para piloto controlado, leia primeiro `RELEASE_READINESS.md` §5 (o que esta versão NÃO entrega). **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. Leia `PRODUCTION_READINESS.md` e `FINAL_RELEASE_AUDIT.md` antes de qualquer decisão.
+
+**Novo no v0.17.0 (camada econômica, legal e de pagamento):** a rodada inverte a ordem do roteiro a pedido do
+proprietário — **monetização, pagamento e auditoria legal vêm antes do design** — e implementa uma tese só: **o
+proponente não pode ser o pagador principal.** Cadastro, perfil, projeto, descoberta, rede e acompanhamento básico
+são **gratuitos e permanecem gratuitos** (ADR-173, que muda a regra comercial da v0.16.0). Entram: **Programa** como
+entidade de primeira classe, com objetivo obrigatório e três funções que separam o declarado do medido
+(`program_financials` distingue **gasto** de **comprovado**; `result_chain` carrega a força declarada de cada elo
+sem promover hipótese a evidência; `territorial_gap` leva a qualidade da evidência por território); **Value Ledger**
+separado da cobrança, com a aplicação **sem INSERT** na tabela e nenhuma linha de base nascendo com número;
+**monetização com portão legal no banco** — nove regras, **zero verdes, nenhuma ativa**, e `green_needs_evidence`
+recusando verde sem fonte porque ausência de proibição não é permissão; **arquitetura de pagamento** com cartão,
+recorrente, **parcelamento modelado à parte da assinatura**, PIX e boleto, toda marcada `PRODUCTION PAYMENT NOT
+CONFIGURED` porque é o estado verdadeiro, com `is_simulated` derivada do provedor e irreescrevível; **onze documentos
+legais versionados** com aceite que guarda o **sha256 do texto aceito** — e o banco **recusando registrar aceite de
+minuta não revisada por advogado(a)**, o que trava o produto de propósito; e o **registro de 28 motores
+operacionais** com cinco testes que provam que IA aqui é motor, não chatbot.
+
+**961 testes, 749 operações, 253 tabelas, 24 migrações.** O que esta versão **não** entrega está escrito com nome:
+nenhuma receita ativa, nenhum aceite registrável, nenhum provedor de pagamento, nenhuma nota fiscal, nenhum SLA.
+Comece por `ECONOMICS.md`, `MONETIZATION_LEGAL_MATRIX.md` e `FINAL_ECONOMIC_HARDENING_REPORT.md`.
 
 **Novo no v0.16.0 (IMPACT NETWORK CORE):** a plataforma deixou de ser "um lugar com projetos" e passou a ser
 **infraestrutura de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de impacto** — com
@@ -20,7 +40,7 @@ explicação; **recomendação ≠ match**; **workspace por persona** (10 person
 próximas ações, não números; **perfil público `impacto.app/@identificador`** que lê só uma projeção curada;
 **relatório de impacto** cujos números são **colhidos pelo banco**, não digitados; **escada de moderação** de 10
 degraus com proporcionalidade e contestação; **cobrança versionada** com aviso de 30 dias e imposto no checkout.
-**788 testes, 704 operações, 231 tabelas, 17 migrações.** O pacote de Design System "Convergência" **não foi
+788 testes, 704 operações, 231 tabelas e 17 migrações à época. O pacote de Design System "Convergência" **não foi
 recebido** — as seções que dependiam dele não foram executadas, e isso está escrito em
 `DESIGN_HANDOFF_FINAL.md` §1. Comece por `IMPACT_NETWORK_ARCHITECTURE.md`, `DESIGN_HANDOFF_FINAL.md` e
 `FINAL_IMPACT_NETWORK_HARDENING_REPORT.md`.

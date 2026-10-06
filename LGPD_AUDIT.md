@@ -1,4 +1,4 @@
-# LGPD_AUDIT — v0.16.0 (técnico; não é parecer jurídico)
+# LGPD_AUDIT — v0.17.0 (técnico; não é parecer jurídico)
 
 A matriz por categoria de dado — base legal, finalidade, prazo, o que acontece no fim do prazo e quem tem acesso —
 está em **`DATA_RETENTION_MATRIX.md`**, inclusive a lista do que a plataforma **deliberadamente não coleta** (sem
@@ -8,6 +8,36 @@ armazenamento, DPO nomeado, RIPD e ROPA formal).
 
 
 
+
+## v0.17.0 — o conflito entre prova e eliminação, e como ele foi resolvido
+
+A rodada criou a primeira estrutura do produto em que **a prova precisa sobreviver ao titular**:
+`legal_acceptances` registra quem aceitou qual documento, em qual versão, com o sha256 do texto — e guarda IP e
+agente de usuário, que são dado pessoal.
+
+A tabela é append-only, porque prova que pode ser editada não prova nada. Mas a exclusão de conta anonimiza o
+titular. Com um gatilho que proíbe qualquer alteração, a anonimização seria **recusada pelo banco**: o produto teria
+de escolher entre a prova e o direito do titular.
+
+**A escolha foi estreitar o append-only em vez de afrouxá-lo.** `acceptance_anonymize_only()` permite exatamente
+uma alteração — apagar IP e agente de usuário — e recusa todas as outras; o GRANT de coluna recusa antes ainda,
+porque a aplicação só tem `UPDATE (ip, user_agent)`. A prova sobrevive sem eles: ela é o documento, a versão, o hash
+do texto e o titular pseudonimizado.
+
+| Item LGPD | Situação |
+|---|---|
+| Portabilidade (art. 18, V) | 🟢 `/v1/privacy/export` passou a incluir a prova de aceite **com o hash**, que é o que permite a quem recebe o arquivo verificar o que foi aceito |
+| Eliminação (art. 18, VI) | 🟢 a exclusão de conta apaga IP e agente de usuário do aceite e mantém a prova pseudonimizada |
+| Minimização (art. 6º, III) | 🟢 retenção nova: IP de aceite com mais de 18 meses apagado; corpo bruto de webhook esvaziado no mesmo prazo (o evento fica, por idempotência) |
+| Dado pessoal nas tabelas novas | 🟢 varredura do catálogo com quatro exceções declaradas; `value_events`, `billable_events` e `platform_charges` não guardam dado de pessoa além de `actor_user_id` |
+| Finalidade na venda de dado agregado | 🔴 **receita recusada**: dado anonimizado deixa de estar fora da LGPD se a anonimização puder ser revertida com esforços razoáveis (art. 12), e agregado territorial com contagem pequena é exatamente onde a reidentificação acontece |
+| Encarregado(a) nomeado (art. 41) | 🟡 continua pendência do proprietário; é um campo `{{ }}` nas onze minutas |
+
+### O corpo do webhook
+
+`billing_events.payload` guarda o que o provedor manda, e isso pode conter nome e e-mail do pagador. O evento
+precisa ser guardado para sempre (idempotência e reconciliação); o **corpo** dele, não. Depois de 18 meses o corpo é
+esvaziado e o evento fica.
 
 ## v0.16.0 — a rede, o perfil público e o grupo beneficiário
 

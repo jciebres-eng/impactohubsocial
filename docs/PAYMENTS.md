@@ -1,5 +1,11 @@
 # Pagamentos e cobrança (`services/billing.py`)
 
+> **v0.17.0:** este documento cobre a assinatura (v0.11.0) e o registro de aporte. A **cobrança da plataforma** —
+> cartão avulso, recorrente, **parcelamento modelado à parte da assinatura**, PIX e boleto — ganhou camada própria e
+> está em **`PAYMENT_ARCHITECTURE.md`**, com a declaração `PRODUCTION PAYMENT NOT CONFIGURED` que vale para as duas:
+> não há provedor configurado nesta instalação.
+
+
 ## Duas coisas diferentes
 1. **Assinatura da própria plataforma** (planos pagos): implementada com adapters.
 2. **Aportes de financiadores a projetos de OSC**: **não são processados pela plataforma** (ADR-003/022). São *registrados* (`commitments`): compromisso → desembolso informado pelo financiador → recebimento confirmado pela OSC. Triggers impedem que a mesma parte faça os dois lados e que a soma ultrapasse o orçamento. Isso evita atuar como instituição de pagamento/custódia e não cria “cotas” de valor mobiliário. Modelos formais de contribuição/cotas ficam para após parecer jurídico.

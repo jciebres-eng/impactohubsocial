@@ -1,10 +1,33 @@
-# Relatório de integridade do banco — v0.16.0
+# Relatório de integridade do banco — v0.17.0
 
 Todo número aqui vem de consulta ao catálogo do PostgreSQL, não de contagem à mão. O coletor é
-`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.16.0.txt`
-(a da versão anterior ficou em `docs/evidence/db_integrity_v0.15.0.txt`).
+`scripts/db_integrity_report.py`; a saída bruta está em `docs/evidence/db_integrity_v0.17.0.txt`
+(as anteriores ficaram em `docs/evidence/db_integrity_v0.16.0.txt` e `_v0.15.0.txt`).
 
-Banco medido: criado **do zero** pelas 17 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
+Banco medido: criado **do zero** pelas 24 migrações (`scripts/dev_reset_db.sh`), PostgreSQL 16.15.
+
+## 0. Os números da v0.17.0, e o que o coletor apontou
+
+| Medida | v0.16.0 | **v0.17.0** |
+|---|---|---|
+| Tabelas | 231 | **253** |
+| Tabelas sem RLS | `schema_migrations` | **`schema_migrations`** (única; `chain_heads` tem RLS e política própria) |
+| Políticas | — | **521** |
+| Gatilhos | — | **194** |
+| Funções | — | **277**, das quais **75** `SECURITY DEFINER` |
+| `SECURITY DEFINER` sem `search_path` fixo | nenhuma | **nenhuma** |
+| Chaves estrangeiras | — | **680** |
+| FK **quente** sem índice | nenhuma | **nenhuma** |
+| CHECKs | — | **1.216** |
+| Índices | — | **714** |
+| Tabelas sem chave primária | nenhuma | **nenhuma** |
+| Tabelas append-only | — | **26** (entram `value_events`, `billable_events`, `charge_events`, `monetization_legal_cards`) |
+| Migrações aplicadas | 17 | **24** |
+
+**O coletor achou um defeito real nesta rodada:** `legal_acceptances.org_id` era uma FK de caminho de acesso **sem
+índice** — a administração lista aceite por organização, e sem o índice a consulta varreria a tabela inteira. O
+índice foi criado na 0024, respeitando a regra da 0015 (índice só em coluna de inquilino ou de pai percorrido, não
+em toda FK — por isso **345** FKs continuam sem índice, de propósito).
 
 ## 1. Números
 

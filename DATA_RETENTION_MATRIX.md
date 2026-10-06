@@ -59,6 +59,9 @@ Começa por aqui porque é a parte mais importante da matriz:
 | `commitments`, `expenses`, `invoices`, `payment_records` | obrigação legal (fiscal/contábil) | mantidos, pseudonimizados |
 | `signatures` e `signature_revocations` | a assinatura precisa continuar verificável por terceiro | mantidas; são append-only por desenho |
 | `project_transitions` | histórico de decisão | mantido, pseudonimizado |
+| `legal_acceptances` (v0.17.0) | a prova de aceite precisa continuar verificável: ela é o documento, a versão e o **sha256 do texto aceito** | mantida; **IP e agente de usuário são APAGADOS** na exclusão da conta e pela retenção de 18 meses. O gatilho `acceptance_anonymize_only()` permite exatamente esses dois campos e recusa qualquer outra alteração |
+| `value_events`, `billable_events`, `platform_charges`, `charge_events` (v0.17.0) | obrigação fiscal e contábil, e integridade da trilha de cobrança | mantidos, pseudonimizados (`actor_user_id` continua, com o usuário já anonimizado) |
+| `billing_events` (evento de webhook) | idempotência: apagar o evento permitiria reprocessar o mesmo pagamento | o **evento** é mantido para sempre; o **corpo bruto** (`payload`), que pode conter nome e e-mail do pagador, é **esvaziado após 18 meses** |
 
 O registro de eliminação (`privacy_requests`) diz isso textualmente: *"Dados pessoais anonimizados; registros de
 auditoria e financeiros mantidos pseudonimizados"*. Não há promessa de apagar o que a lei manda guardar.
@@ -70,7 +73,8 @@ auditoria e financeiros mantidos pseudonimizados"*. Não há promessa de apagar 
 | Acesso e portabilidade | `GET /v1/privacy/export` | baixa um JSON com os dados do titular; registra o pedido |
 | Eliminação / anonimização | `POST /v1/privacy/delete-account` | exige senha e confirmação; **recusa** se o titular é único dono de organização com outros membros (409 `transfer_ownership_first`); anonimiza, revoga sessões, apaga tokens |
 | Revogação de consentimento opcional | `POST /v1/privacy/consents` | só consentimento opcional (comunicação); consentimento necessário à execução do contrato não é "revogável" sem encerrar a conta |
-| Informação sobre o tratamento | `GET /v1/legal/privacidade` | política vigente, versionada |
+| Informação sobre o tratamento | `GET /v1/legal/privacidade` | o texto, servido do registro versionado, com a situação dele no cabeçalho `X-Legal-Status` — hoje `draft`, porque a política **não foi revisada por advogado(a)** |
+| Prova de aceite na portabilidade (v0.17.0) | `GET /v1/privacy/export` | a chave `legal_acceptances` leva documento, versão, **hash do texto**, data, origem, IP e agente de usuário — o hash é o que permite a quem recebe o arquivo conferir **quais** termos foram aceitos |
 
 ## 7. Compartilhamento com terceiros
 
@@ -86,6 +90,18 @@ auditoria e financeiros mantidos pseudonimizados"*. Não há promessa de apagar 
 Nenhum dado é vendido, nenhum é usado para treinar modelo. O retorno humano sobre recomendações de match fica
 disponível para calibração **com revisão humana** e sem dado pessoal (`calibration_dataset()` não devolve e-mail
 nem identificador de organização).
+
+## 7.1. O que a v0.17.0 acrescentou à retenção
+
+| Rotina | Prazo | O que faz | Onde |
+|---|---|---|---|
+| IP de aceite | 18 meses | apaga `ip` e `user_agent` de `legal_acceptances`, preservando a prova | `jobs.retention` |
+| Corpo de webhook | 18 meses | esvazia `billing_events.payload`, preservando o evento | `jobs.retention` |
+| Prazo de cobrança | imediato ao vencer | fecha PIX e boleto vencidos **pela transição do grafo**, não por UPDATE solto | `jobs.payment_deadlines` |
+
+E uma ausência que é decisão de privacidade, não esquecimento: **a venda de dado agregado foi recusada** porque
+anonimização que pode ser revertida com esforços razoáveis não é anonimização (LGPD art. 12), e agregado territorial
+com contagem pequena é exatamente onde a reidentificação acontece. Ver `MONETIZATION.md` §3.
 
 ## 8. Pendências honestas desta matriz
 

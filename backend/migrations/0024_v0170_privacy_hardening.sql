@@ -52,3 +52,8 @@ COMMENT ON COLUMN legal_acceptances.ip IS
 COMMENT ON COLUMN billing_events.payload IS
   'Corpo bruto do provedor. Pode conter nome e e-mail do pagador, então é ESVAZIADO após 18 meses '
   'pela retenção (jobs.retention). O evento em si é guardado para sempre, por idempotência.';
+
+-- `db_integrity_report.py` apontou esta FK como "quente sem índice": a administração lista aceite por
+-- organização, e sem o índice a consulta varre a tabela inteira. A regra da 0015 vale aqui — índice só
+-- em coluna de inquilino ou de pai percorrido, não em toda FK.
+CREATE INDEX ix_legal_acc_org ON legal_acceptances(org_id) WHERE org_id IS NOT NULL;

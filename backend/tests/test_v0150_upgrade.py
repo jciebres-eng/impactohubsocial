@@ -154,7 +154,15 @@ class UpgradePathTests(unittest.TestCase):
                       "taxonomy_terms", "public_profiles", "handle_history", "professional_experiences",
                       "enforcement_actions", "territory_needs", "investment_intents", "recommendations",
                       "readiness_snapshots", "domain_events", "network_status_graph",
-                      "plan_price_versions", "subscription_prices", "price_change_notices"):
+                      "plan_price_versions", "subscription_prices", "price_change_notices",
+                      # v0.17.0 — a camada econômica, legal e de pagamento
+                      "programs", "program_status_graph", "program_calls", "program_projects",
+                      "program_indicators", "program_needs", "value_event_types", "value_baselines",
+                      "value_events", "ai_price_table", "monetization_legal_cards",
+                      "monetization_rules", "billable_events", "charge_state_graph",
+                      "payment_instruments", "platform_charges", "charge_events",
+                      "charge_installments", "charge_pix", "charge_boleto", "legal_documents",
+                      "legal_acceptances"):
             row = self.conn.one("SELECT relrowsecurity FROM pg_class WHERE relname = $1 AND relkind = 'r'", table)
             self.assertIsNotNone(row, f"{table} não foi criada")
             self.assertTrue(row["relrowsecurity"], f"{table} sem RLS habilitada")
@@ -188,6 +196,36 @@ class UpgradePathTests(unittest.TestCase):
             app.execute_script("ROLLBACK")
         finally:
             app.close()
+
+    def test_09b_the_v0170_layer_arrived_with_its_seeds_and_its_refusals(self):
+        """Atualizar precisa trazer as travas, não só as tabelas.
+
+        Uma migração pode criar a estrutura e deixar o conteúdo de fora — e aí o portão legal existe
+        sem nenhuma regra para barrar, as minutas não existem para serem recusadas, e tudo "passa".
+        """
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM legal_documents"), 11)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM legal_documents"
+                                          " WHERE status = 'approved'"), 0,
+                         "nenhuma minuta pode chegar aprovada por atualização")
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules"), 9)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules WHERE active"), 0,
+                         "nenhuma regra de receita pode chegar ativa por atualização")
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_legal_cards"
+                                          " WHERE status = 'green'"), 0)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM value_event_types"), 11)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM value_baselines"
+                                          " WHERE minutes_per_unit IS NOT NULL"), 0,
+                         "nenhuma linha de base pode chegar com número por atualização")
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM ai_price_table"), 0)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM charge_state_graph"), 27)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM program_status_graph"), 11)
+        # e as travas funcionam no banco ATUALIZADO, não só no criado do zero
+        with self.assertRaises(Exception):
+            self.conn.run("INSERT INTO legal_acceptances(document_id, user_id)"
+                          " SELECT id, $1 FROM legal_documents WHERE doc_key = 'terms_of_use'",
+                          self.user)
+        with self.assertRaises(Exception):
+            self.conn.run("UPDATE legal_documents SET status = 'approved' WHERE doc_key = 'cookies'")
 
     def test_10_schema_matches_a_database_built_from_scratch(self):
         """Atualizar e criar do zero precisam levar ao MESMO esquema. Divergência aqui é dívida silenciosa."""

@@ -1,9 +1,39 @@
 # DATABASE_SCHEMA
 
-**v0.16.0 — 231 tabelas, 17 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
+**v0.17.0 — 253 tabelas, 24 migrações.** O retrato completo e medido do banco (RLS, políticas, gatilhos, funções
 `SECURITY DEFINER`, chaves estrangeiras, índices, imutabilidade e caminho de atualização) está em
 **`DATABASE_INTEGRITY_REPORT.md`**, com os números colhidos do catálogo do PostgreSQL por
 `scripts/db_integrity_report.py`.
+
+## Migrações da v0.17.0
+
+| Migração | O que faz |
+|---|---|
+| `0018_v0170_programs.sql` | **6 tabelas** do Programa: `programs` (com `objective` NOT NULL), `program_status_graph` (11 arestas, ator `owner`/`platform`/`either`), `program_calls`, `program_projects` (6 papéis), `program_indicators` (CHECK exigindo fonte na linha de base), `program_needs`. Funções `program_has_project_of()` (SECURITY DEFINER), `program_financials()`, `result_chain()`, `territorial_gap()`; gatilhos `program_initial_state()`, `program_status_guard()` (deriva `published_at`/`closed_at` e **RAISE** se alguém tentar escrevê-las), `program_visibility_guard()`, `program_link_guard()`; `notification_prefs` estendido a 15 grupos |
+| `0019_v0170_value_ledger.sql` | **4 tabelas** do registro de valor: `value_event_types` (11 tipos com `what_counts`), `value_baselines` (versionada, `minutes_per_unit` **nulo** de fábrica, CHECK `baseline_needs_source`), `value_events` (append-only, **sem INSERT** para a aplicação), `ai_price_table` (nasce **sem nenhuma linha**). Funções `app_record_value()` (porta única, SECURITY DEFINER), `app_price_ai_usage()`; `close_previous_version()` **BEFORE INSERT** (o índice único parcial é conferido antes dos gatilhos AFTER), `version_row_immutable()`; `ai_usage` ganha custo derivado |
+| `0020_v0170_monetization.sql` | **3 tabelas** da monetização: `monetization_legal_cards` (append-only, CHECK `green_needs_evidence` e `green_has_no_open_questions`), `monetization_rules` (8 motores, `problem_solved` e `substitution_answer` NOT NULL), `billable_events` (6 estados, com `reason`). Gatilho `monetization_rule_gate()` — o portão legal — e `app_promote_billable()` |
+| `0021_v0170_legal_cards.sql` | os **9 cartões legais**, com texto literal de fonte oficial e data de consulta; cada um atualiza `monetization_rules.legal_status` para `refused` ou `review_required` conforme a cor. **Zero verdes** |
+| `0022_v0170_payments.sql` | **7 tabelas** do pagamento: `charge_state_graph` (27 arestas), `payment_instruments` (só token; CHECK de quatro dígitos em `last4`), `platform_charges` (`is_simulated` **derivada** de lista explícita de provedores reais), `charge_events` (escrita por gatilho `SECURITY DEFINER`; `REVOKE INSERT` para a aplicação), `charge_installments` (+ `CONSTRAINT TRIGGER ... DEFERRABLE` conferindo a soma no COMMIT), `charge_pix`, `charge_boleto`. Funções `charge_belongs_to()` (SECURITY DEFINER), `platform_revenue()` (simulado em colunas próprias); `billing_events` ganha `signature_verified`, `charge_id`, `duplicate_count`, o estado `rejected_signature` e o CHECK `billing_events_signature_effect` |
+| `0023_v0170_legal.sql` | **2 tabelas** do arcabouço legal: `legal_documents` (11 documentos, todos `draft`; CHECK `approved_needs_review` e `effective_needs_approved`) e `legal_acceptances` (prova com sha256 copiado pelo gatilho). Funções `legal_pending()`, `legal_overview()`, `legal_text()`; gatilhos `legal_doc_hash()`, `legal_doc_text_immutable()`, `legal_doc_status_guard()`, `acceptance_stamp()`. **Gerada** por `scripts/gen_legal_registry.py` a partir de `docs/legal/*.md` |
+| `0024_v0170_privacy_hardening.sql` | o estreitamento do append-only: `acceptance_anonymize_only()` substitui `forbid_mutation()` em `legal_acceptances`, permitindo **só** apagar IP e agente de usuário, com GRANT de coluna; índice `ix_legal_acc_org` (FK quente apontada pelo relatório de integridade) |
+
+### As quatro estruturas da v0.17.0 que merecem leitura
+
+**`platform_charges`** — `is_simulated` é derivada do provedor por gatilho, contra uma lista **explícita** de
+provedores reais. "Todos menos sandbox" faria qualquer provedor novo nascer marcado como real, e um dublê de teste
+chamado de outro jeito passaria por dinheiro. A tentativa de alterar a coluna é **recusada**, não sobrescrita.
+`paid_at` e `settled_at` são derivados da transição e **não** entram em `guard_columns`, pela lição da 0018.
+
+**`value_events`** — append-only e **sem INSERT para a aplicação**. A única porta é `app_record_value()`, que é
+SECURITY DEFINER para que a estimativa de tempo seja **sempre** derivada da linha de base vigente e nunca possa
+ser passada como parâmetro.
+
+**`legal_documents` + `legal_acceptances`** — texto de versão é imutável, e o aceite guarda o **sha256 copiado do
+documento pelo gatilho**, nunca informado pelo cliente. `acceptance_stamp()` **recusa** aceite de documento que não
+esteja aprovado e vigente — o que, hoje, é o caso de todos os onze.
+
+**`charge_installments`** — a soma das parcelas é conferida por `CONSTRAINT TRIGGER ... DEFERRABLE INITIALLY
+DEFERRED`, no COMMIT. Tinha de ser postergada: a conferência precisa acontecer depois de todas as parcelas entrarem.
 
 ## Migrações da v0.16.0
 

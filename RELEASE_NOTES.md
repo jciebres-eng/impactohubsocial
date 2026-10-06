@@ -1,4 +1,43 @@
-# Release notes — v0.16.0
+# Release notes — v0.17.0
+
+## v0.17.0 — Camada econômica, legal e de pagamento
+
+**Resumo:** a plataforma passou a saber **quem paga, por quê, e o que ela ainda não pode cobrar**. A rodada inverte a
+ordem do roteiro a pedido do proprietário — monetização, pagamento e auditoria legal **antes** do design — e
+implementa uma tese só: **o proponente não pode ser o pagador principal.**
+
+### Para quem usa
+
+- **Entrada gratuita, de forma permanente.** Cadastro, perfil, criação de projeto, descoberta de oportunidades,
+  participação na rede e acompanhamento básico são gratuitos e seguem gratuitos. O plano chama-se "OSC — gratuito"
+  porque é isso que ele é. Atingir um limite técnico não tira o acesso ao que já foi criado.
+- **Programa**, para quem financia: a carteira, as chamadas, os indicadores e as necessidades de território num
+  lugar só — com **gasto** e **comprovado** em colunas separadas, a força declarada de cada elo da cadeia de
+  resultado, e a lacuna territorial com a qualidade da evidência que a sustenta.
+- **Onze documentos legais** publicados como minuta, cada um dizendo em letras o que a plataforma **não** faz.
+- **O que a plataforma entregou** passou a ser um registro próprio, separado do que ela cobrou.
+
+### O que você vai ver escrito, e é verdade
+
+- **`PRODUCTION PAYMENT NOT CONFIGURED`** em toda a área de pagamento. Não há provedor contratado, então **nenhuma
+  cobrança real foi processada** — e cada cobrança de teste aparece marcada como simulada, em cada linha, não só no
+  resumo.
+- **Nenhuma receita ativa.** Nove regras cadastradas, nenhuma liberada: cinco esperam parecer jurídico e quatro
+  foram recusadas.
+- **Nenhum aceite de termos é registrável.** As minutas não passaram por advogado(a), e o banco recusa registrar
+  aceite de rascunho — porque "o usuário aceitou os termos" dito sobre um rascunho é afirmação falsa com aparência
+  de prova.
+- **Nenhuma estimativa de "horas economizadas".** Sem linha de base declarada com fonte, data e método, o produto
+  mostra as contagens que mediu e deixa a estimativa em branco.
+
+### Para quem decide
+
+O que falta para faturar **não é software**: parecer jurídico, provedor de pagamento contratado e contador para
+nota fiscal. A lista completa, com o que cada item destrava, está em `MONETIZATION_LEGAL_MATRIX.md` §5 e em
+`RELEASE_READINESS.md` §5.
+
+**961 testes, 749 operações, 253 tabelas, 24 migrações.** Um limite declarado: o feed do financiador ficou mais
+lento (1,87–2,04 s, folga de 1,2× até o orçamento) e a correção já está nomeada.
 
 ## v0.16.0 — IMPACT NETWORK CORE
 

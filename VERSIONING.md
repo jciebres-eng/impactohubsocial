@@ -1,7 +1,8 @@
 # Versionamento
 
-Produto: SemVer (`VERSION` = `0.16.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
-(migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: `match-engine@1.0.0`, `fiscal-engine@1.0.0`; pesos `weights@1.0`; planos `plans@1.0`
+Produto: SemVer (`VERSION` = `0.17.0`; pré-1.0 = sem garantia de compatibilidade). API: prefixo `/v1`. Migrações: sequenciais, só para frente, com checksum
+(migração **liberada** nunca é editada — crie a seguinte; `0005_v090_solutions.sql` foi editada em desenvolvimento porque nunca foi aplicada fora do ambiente de construção). Motores: o registro completo e versionado está em `backend/impacto/engines/registry.py` e em
+`GET /v1/engines`, com teste conferindo cada versão declarada contra a constante do módulo; pesos `weights@1.0`; planos `plans@2.0`
 (gravados em cada `match_run`/regra). Regras fiscais, planos e termos **não são editados**: publica-se nova versão.
 
 **Por que 0.7.0 e não 0.6.1:** o v0.6.0 era uma referência local; o v0.7.0 troca a base de execução (PostgreSQL, auth real, portais). Mudança estrutural → MINOR.
@@ -62,6 +63,34 @@ desta rodada (14 dias de teste · US$ 1,99/mês nos 3 primeiros meses pagos · d
    recusando contratação online em vez de inventar conversão.
 
 **Nenhuma tabela foi removida.** As 79 rotas são adições.
+
+**v0.17.0** (MINOR): CAMADA ECONÔMICA, LEGAL E DE PAGAMENTO. **22** tabelas novas (**253** no total), 749
+operações de rota, sete migrações (`0018`–`0024`). As `0016`/`0017` já estavam liberadas e **não** foram editadas;
+as `0018`–`0024` foram editadas durante o desenvolvimento (nunca aplicadas fora do ambiente de construção) e a
+partir desta liberação são imutáveis. A `0023_v0170_legal.sql` é **gerada** por
+`scripts/gen_legal_registry.py` a partir de `docs/legal/*.md` — editá-la à mão dessincroniza o banco dos arquivos, e
+há teste que pega isso.
+
+Planos: **`plans@2.0`**, com a regra comercial desta rodada — **o proponente não é o pagador principal** e a entrada
+é gratuita de forma permanente (ADR-173). Isto **muda** a regra da v0.16.0, por decisão expressa do proprietário.
+
+**Mudanças de contrato, declaradas:**
+
+1. A moeda padrão da cobrança voltou de **USD** para **BRL**. Isto **muda comportamento** e está destacado aqui e no
+   CHANGELOG. Foi a v0.16.0 que havia trocado para dólar; esta rodada reverte, junto com a regra comercial.
+2. `GET /v1/legal/{doc}` continua no mesmo caminho e passou a servir do registro versionado, acrescentando os
+   cabeçalhos `X-Legal-Status`, `X-Legal-Version` e `X-Legal-Sha256`. Nenhum campo saiu; o corpo continua Markdown.
+3. `GET /v1/privacy/export` ganhou a chave `legal_acceptances`. Adição.
+4. `GET /v1/admin/payments/revenue` nasce nesta versão e já traz `provider_configured`,
+   `total_real_paid_cents_by_currency` e o bloco `subscriptions` em separado.
+5. `billing_events` ganhou o estado `rejected_signature` e as colunas `signature_verified`, `charge_id` e
+   `duplicate_count`. O webhook da v0.11.0 continua respondendo 200 para evento válido e passou a responder **202
+   `rejected_signature`** quando `process_event` é chamado por um caminho que não conferiu a assinatura.
+6. `notification_prefs` ganhou o grupo `program` (15 grupos).
+
+**Nenhuma tabela foi removida.** As rotas novas são adições.
+
+Snapshot dos documentos do v0.16.0: `history/v0.16.0/`.
 
 Snapshot dos documentos do v0.15.0: `history/v0.15.0/` (28 arquivos, com `NOTE.md` explicando que a v0.16.0 mudou
 contagens de tabela, de rota e de teste, e a regra comercial para dólar).

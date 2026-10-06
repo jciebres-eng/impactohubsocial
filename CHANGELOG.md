@@ -1,6 +1,93 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.17.0] — 2026-10-06 — CAMADA ECONÔMICA, LEGAL E DE PAGAMENTO (cumulativo; snapshot do v0.16.0 em `history/v0.16.0/`)
+
+Esta rodada inverte a ordem do roteiro a pedido do proprietário: **monetização, pagamento e auditoria legal vêm
+ANTES do design.** A tese que ela implementa é uma só — **o proponente não pode ser o pagador principal** — e a
+consequência é que cadastro, perfil, projeto, descoberta, rede e acompanhamento básico são gratuitos e permanecem
+gratuitos (ADR-173, que muda a regra comercial da v0.16.0).
+
+### Adicionado
+- **Programa como entidade de primeira classe** (`programs` + chamadas, carteira, indicadores e necessidades):
+  a unidade com que instituto, fundação e secretaria pensam o próprio dinheiro, e o que torna o institucional
+  vendável. Situação é grafo no banco (11 arestas); `objective` é obrigatório; linha de base de indicador exige
+  fonte. Três funções separam o que foi declarado do que foi medido: `program_financials()` (gasto ≠ comprovado),
+  `result_chain()` (força declarada de cada elo, sem promover hipótese a evidência) e `territorial_gap()` (com a
+  qualidade da evidência por território). ADR-174.
+- **Value Ledger** (`value_events`, 11 tipos com o campo `what_counts`): o registro do que a Plataforma entregou,
+  **separado** do registro do que ela cobrou. A aplicação **não tem INSERT** na tabela — só `app_record_value()`,
+  `SECURITY DEFINER` — então a estimativa de tempo nunca pode ser passada como parâmetro. Nenhuma linha de base
+  nasce com número, e o evento fica `no_baseline` até alguém declarar o número com fonte, data e método.
+  ADR-175/176.
+- **Monetização com portão legal** (`monetization_rules`, `monetization_legal_cards`, `billable_events`): nove
+  regras cadastradas, **zero verdes, nenhuma ativa**. `monetization_rule_gate()` recusa ativar receita sem cartão
+  legal verde; `green_needs_evidence` recusa verde sem fonte citada, porque ausência de proibição não é permissão.
+  `problem_solved` e `substitution_answer` são NOT NULL: regra que não diz qual problema caro resolve não entra no
+  banco. ADR-177.
+- **Arquitetura de pagamento da Plataforma** (`platform_charges` e companhia), com **PRODUCTION PAYMENT NOT
+  CONFIGURED** em todas as respostas porque é o estado verdadeiro: cartão avulso, cartão recorrente, **parcelamento
+  modelado à parte da assinatura** (soma das parcelas conferida no COMMIT por `CONSTRAINT TRIGGER`), PIX e boleto.
+  Máquina de estados de 27 arestas, trilha escrita por gatilho `SECURITY DEFINER`, webhook idempotente com
+  contagem de reentrega. ADR-180 a 185.
+- **Onze documentos legais versionados** (`legal_documents`), oito deles novos — Assinatura, Marketplace,
+  Intermediação, Pagamento, Cancelamento, Reembolso, B2B e B2G —, escritos a partir do que o software FAZ e com uma
+  seção de perguntas abertas para o jurídico em cada um. A migração é **gerada** de `docs/legal/*.md`, e há teste
+  que recalcula o sha256 dos arquivos e compara com o banco. ADR-186.
+- **Aceite com prova**: documento, versão, **sha256 do texto aceito** (copiado pelo gatilho, nunca informado pelo
+  cliente), titular, data e origem. Versão nova é linha nova e texto de versão é imutável, então o aceite de ontem
+  continua provando o texto de ontem.
+- **Registro de motores operacionais** (`engines/registry.py`, `GET /v1/engines`, `docs/AI_ENGINES.md`): 28 motores
+  declarados com o que produzem e **o que nunca decidem**, e cinco testes que tornam a declaração verificável —
+  entre eles a varredura que impede uma chamada nova ao modelo entrar de carona. 23 determinísticos, 2 que
+  respondem por extração do conteúdo cadastrado (`ai_used: false`) e 3 que chamam modelo sobre base determinística.
+  ADR-189.
+- **Job `payment_deadlines`**: PIX e boleto vencidos fecham pela transição do grafo.
+- **Retenção nova**: corpo de webhook esvaziado após 18 meses (o evento fica, por idempotência) e IP de aceite
+  vencido apagado.
+
+### Alterado
+- **Moeda padrão de cobrança passou a BRL** (era USD), e `config/plans.json` foi para `plans@2.0` com o plano
+  `osc_basic` renomeado "OSC — gratuito".
+- **`GET /v1/legal/{doc}`** passou a servir do registro versionado e a declarar a situação do documento no
+  cabeçalho. Até a v0.16.0 ela se chamava "textos legais VIGENTES" e nenhum deles estava vigente.
+- **O caminho de webhook da v0.11.0** passou a registrar `signature_verified` e a contar reentrega.
+- **A portabilidade de dados** (`/v1/privacy/export`) passou a incluir a prova de aceite, com o hash.
+
+### Corrigido
+- **Receita inexistente no relatório**: a apuração classificava fatura como real pelo **nome** do provedor, e os
+  cenários da v0.11.0 gravam `provider='stripe'` com chave falsa — apareciam R$ 396,00 que não existem. Sem
+  provedor configurado, nenhuma fatura conta como real. ADR-182.
+- **Comentário citando função que nunca existiu** (`services/solutions.refine_with_ai`) em
+  `engines/solutions/intent.py`: referência órfã em comentário vira prova documental falsa no dia em que alguém a
+  lê como implementada.
+- **`VALUE_LEDGER.md` afirmava que a tabela de linhas de base nasce vazia.** Ela nasce com uma linha por tipo e
+  **sem número** — a diferença importa, e o teste que confere documentos contra o banco pegou o erro.
+- **Teste de índice que exigia ausência de varredura sequencial sem olhar o tamanho da tabela**: varredura
+  sequencial em 150 linhas é o planejador acertando. ADR-190.
+
+### Segurança e LGPD
+- Revisão das 22 tabelas novas lida do catálogo do PostgreSQL: todas com RLS e política, nenhuma com DELETE
+  injustificado para a aplicação, `value_events` e `charge_events` sem INSERT para a aplicação.
+- **O conflito entre prova append-only e direito de eliminação** foi resolvido estreitando o append-only:
+  `acceptance_anonymize_only()` permite exatamente apagar IP e agente de usuário, e o GRANT de coluna recusa antes
+  ainda. A prova sobrevive sem eles. ADR-188.
+- Matriz de isolamento por tabela e por linha, com o teste par que falha se o filtro do próprio teste não achar nada.
+
+### Desempenho
+- Caminhos novos medidos na escala cheia: feed de programas 40 ms, resumo de valor 12–13 ms, cobranças 14–20 ms,
+  registro legal 40–43 ms; `platform_revenue()` 5–8 ms varrendo 10.000 cobranças.
+- **Regressão declarada**: o feed do financiador foi de 1.508–1.724 ms para **1.874–2.041 ms** com a mesma consulta,
+  e a folga até o orçamento caiu de 1,5× para 1,2×. Os carregadores em lote deixaram de ser opcionais.
+
+### Não entregue, e por quê
+- **Nenhuma receita está ativa** — falta parecer jurídico para as cinco amarelas; quatro são recusadas.
+- **Nenhum aceite é registrável** — nenhuma das onze minutas foi revisada por advogado(a).
+- **Nenhum provedor de pagamento configurado** — não há conta, chave nem identificador de preço.
+- **Sem nota fiscal, sem SLA, sem assinatura qualificada, sem integração governamental.**
+- **FASE 15 (deploy) e 16 (teste de fumaça em produção) não são executáveis neste ambiente**: não há domínio,
+  credencial nem saída de rede além dos registros de pacote.
+
 ## [0.16.0] — 2026-10-05 — IMPACT NETWORK CORE (cumulativo; snapshot do v0.15.0 em `history/v0.15.0/`)
 
 Esta rodada transforma o produto de "plataforma de projetos" em **infraestrutura de conexão, estruturação,

@@ -1,6 +1,35 @@
-# API — documentação (v0.16.0)
+# API — documentação (v0.17.0)
 
-Referência completa **gerada do código**: `docs/API.md` (**704 operações**) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+Referência completa **gerada do código**: `docs/API.md` (**749 operações**) e `docs/openapi.json` (também em `GET /v1/openapi.json`). Convenções de autenticação, CSRF, erros e paginação: início de `docs/API.md`.
+
+## Camada econômica, legal e de pagamento (45 operações novas, v0.17.0)
+
+Caminhos conferidos contra `docs/API.md`, que é gerado do código.
+
+| Grupo | Rotas |
+|---|---|
+| **Programa** | `GET·POST /v1/programs` · `GET·PATCH /v1/programs/{program_id}` · `GET /v1/programs/feed` **(pública)** · `GET /v1/programs/{program_id}` **(pública)** · `GET /v1/programs/status-graph` · `POST /v1/programs/{program_id}/transition` · `POST·DELETE /v1/programs/{program_id}/calls` · `POST /v1/programs/{program_id}/projects` · `POST /v1/programs/{program_id}/indicators` · `POST /v1/programs/{program_id}/needs` |
+| **Declarado × medido** | `GET /v1/projects/{project_id}/result-chain` · `GET /v1/territorial-gap` |
+| **Registro de valor** | `GET /v1/value/types` · `GET /v1/value/summary` · `GET /v1/value/events` · `POST /v1/admin/value/baselines` · `GET /v1/admin/ai/cost` |
+| **Monetização** | `GET /v1/monetization/rules` · `PATCH /v1/admin/monetization/rules/{rule_key}` · `GET /v1/monetization/legal-cards` · `POST /v1/admin/monetization/legal-cards` · `GET /v1/admin/monetization/pipeline` · `POST /v1/admin/monetization/pipeline/{billable_seq}/waive` |
+| **Pagamento** | `GET /v1/payments/status` · `GET /v1/payments/state-graph` · `GET·POST /v1/payments/charges` · `GET /v1/payments/charges/{charge_id}` · `PUT /v1/payments/charges/{charge_id}/installments` · `POST /v1/payments/charges/{charge_id}/transition` · `GET /v1/admin/payments/revenue` · `GET /v1/admin/payments/reconciliation` |
+| **Legal** | `GET /v1/legal/registry` **(pública)** · `GET /v1/legal/documents/{doc_key}` **(pública)** · `GET /v1/legal/{doc}` **(pública)** · `GET /v1/legal/pending` · `GET /v1/legal/acceptances/mine` · `POST /v1/legal/acceptances` · `POST /v1/admin/legal/documents/{doc_id}/review` · `POST /v1/admin/legal/documents/{doc_id}/approve` · `GET /v1/admin/legal/acceptances` |
+| **Motores** | `GET /v1/engines` |
+
+### O que estas rotas respondem hoje, e por quê
+
+| Rota | Resposta de hoje | Motivo |
+|---|---|---|
+| `GET /v1/payments/status` | `configured: false`, `methods_available_now: []`, banner `PRODUCTION PAYMENT NOT CONFIGURED` | não há provedor, conta, chave nem identificador de preço |
+| `POST /v1/payments/charges` | cobrança com `is_simulated: true` e `warning` em **cada linha** | a coluna é derivada do provedor; o aviso não é opcional |
+| `GET /v1/admin/payments/revenue` | `real_paid_cents: 0`, simulado em colunas próprias | sem provedor, a receita real é zero **por construção** |
+| `GET /v1/monetization/rules` | nove regras, zero verdes, nenhuma ativa | falta parecer em cinco; quatro são recusadas |
+| `GET /v1/legal/pending` | lista **vazia**, com nota explicando | nenhuma minuta está aprovada e vigente |
+| `POST /v1/legal/acceptances` | **422 `document_not_effective`** | o banco recusa aceite de minuta não revisada |
+| `GET /v1/value/summary` | contagens medidas, `events_without_baseline` > 0 | nenhuma linha de base tem número declarado |
+| `GET /v1/admin/ai/cost` | `cost_status: no_price_table` | a tabela de preço de IA nasce sem linhas |
+
+Nenhuma dessas respostas é um defeito: todas são o estado verdadeiro, e cada uma tem teste fixando o comportamento.
 
 ## Rede de impacto (79 operações novas, v0.16.0)
 

@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -7056,7 +7056,7 @@
   },
   "/v1/legal/{doc}": {
    "get": {
-    "summary": "Textos legais vigentes (Markdown)",
+    "summary": "Texto legal em Markdown, servido do registro versionado (minuta vem marcada como minuta)",
     "operationId": "get_privacy_routes_legal",
     "tags": [
      "privacy"
@@ -29983,6 +29983,2015 @@
      }
     ]
    }
+  },
+  "/v1/programs/status-graph": {
+   "get": {
+    "summary": "Transições possíveis de um programa, com quem move e se exige motivo",
+    "operationId": "get_program_routes_program_graph",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/programs/feed": {
+   "get": {
+    "summary": "Programas publicados (público, sem sessão)",
+    "operationId": "get_program_routes_program_feed",
+    "tags": [
+     "programa"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "territory",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory"
+      }
+     },
+     {
+      "name": "cause",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Cause"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/programs": {
+   "get": {
+    "summary": "Programas da organização",
+    "operationId": "get_program_routes_program_list",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "draft",
+          "open",
+          "in_execution",
+          "suspended",
+          "closed",
+          "archived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Cria um programa (nasce em rascunho; o limite do plano é conferido aqui)",
+    "operationId": "post_program_routes_program_create",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}": {
+   "get": {
+    "summary": "Um programa, com o declarado e o apurado em objetos separados",
+    "operationId": "get_program_routes_program_get",
+    "tags": [
+     "programa"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   },
+   "patch": {
+    "summary": "Edita o que é declarado (situação e datas derivadas não passam por aqui)",
+    "operationId": "patch_program_routes_program_patch",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}/transition": {
+   "post": {
+    "summary": "Move a situação do programa (recusada se não estiver no grafo)",
+    "operationId": "post_program_routes_program_transition",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}/calls": {
+   "post": {
+    "summary": "Pendura um edital da própria organização no programa",
+    "operationId": "post_program_routes_program_add_call",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramCallIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}/calls/{call_id}": {
+   "delete": {
+    "summary": "Desfaz o vínculo com o edital",
+    "operationId": "delete_program_routes_program_del_call",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "call_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/programs/{program_id}/projects": {
+   "post": {
+    "summary": "Põe ou move um projeto no programa, com o papel que ele tem ali",
+    "operationId": "post_program_routes_program_set_project",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramProjectIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}/indicators": {
+   "post": {
+    "summary": "Acrescenta indicador ao programa (linha de base exige fonte)",
+    "operationId": "post_program_routes_program_add_indicator",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramIndicatorIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/programs/{program_id}/needs": {
+   "post": {
+    "summary": "Liga o programa a uma necessidade de território (habilita a análise de lacuna)",
+    "operationId": "post_program_routes_program_add_need",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "program_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgramNeedIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/result-chain": {
+   "get": {
+    "summary": "Cadeia de resultado do projeto, com a força declarada de cada elo",
+    "operationId": "get_program_routes_project_result_chain",
+    "tags": [
+     "programa"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/territorial-gap": {
+   "get": {
+    "summary": "Demanda registrada contra oferta, por território — agregado, sem dado de pessoa",
+    "operationId": "get_program_routes_territorial_gap",
+    "tags": [
+     "territorio"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "territory_prefix",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 16,
+         "pattern": "^[A-Z0-9-]*$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory Prefix"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/value/types": {
+   "get": {
+    "summary": "Vocabulário de eventos de valor, com a linha de referência vigente e a fonte dela",
+    "operationId": "get_program_routes_value_types",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/value/summary": {
+   "get": {
+    "summary": "Quanto valor o sistema criou para esta organização (contagem medida, tempo estimado)",
+    "operationId": "get_program_routes_value_summary",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 90,
+       "maximum": 730,
+       "minimum": 1,
+       "title": "Days",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "program_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Program Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/value/events": {
+   "get": {
+    "summary": "Os eventos de valor da organização, um a um",
+    "operationId": "get_program_routes_value_events",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "event_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 60,
+         "pattern": "^[a-z][a-z0-9_.]*$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Event Type"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/value/baselines": {
+   "post": {
+    "summary": "Declara a linha de referência de um tipo de evento (cria versão; não reescreve)",
+    "operationId": "post_program_routes_value_set_baseline",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BaselineIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/prices": {
+   "post": {
+    "summary": "Declara o preço de um modelo de IA (versionado, com fonte)",
+    "operationId": "post_program_routes_ai_set_price",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AiPriceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/cost": {
+   "get": {
+    "summary": "Custo estimado de IA por provedor, modelo e recurso — insumo da margem",
+    "operationId": "get_program_routes_ai_cost",
+    "tags": [
+     "valor"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 30,
+       "maximum": 365,
+       "minimum": 1,
+       "title": "Days",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "org_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Org Id"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/monetization/rules": {
+   "get": {
+    "summary": "As regras de receita, em ordem de hierarquia, com o estado real e a carta legal",
+    "operationId": "get_program_routes_monetization_rules",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "engine",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "saas_institutional",
+          "b2g",
+          "enterprise",
+          "implementation",
+          "marketplace_take_rate",
+          "success_fee",
+          "proponent_premium",
+          "data_intelligence"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Engine"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/monetization/legal-cards": {
+   "get": {
+    "summary": "Pesquisa de base normativa por receita (não é parecer jurídico)",
+    "operationId": "get_program_routes_monetization_legal_cards",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/monetization/pipeline": {
+   "get": {
+    "summary": "O que a plataforma criou de valor que alguma regra alcança — e por que não é cobrado",
+    "operationId": "get_program_routes_monetization_pipeline",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "candidate",
+          "blocked_legal",
+          "blocked_no_price",
+          "eligible",
+          "billed",
+          "waived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "org_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Org Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/monetization/legal-cards": {
+   "post": {
+    "summary": "Registra a pesquisa de base normativa de uma receita",
+    "operationId": "post_program_routes_admin_add_legal_card",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LegalCardIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/monetization/rules/{rule_key}": {
+   "patch": {
+    "summary": "Ajusta preço, situação jurídica e ativação de uma regra (o portão é no banco)",
+    "operationId": "patch_program_routes_admin_set_rule",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "rule_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RulePatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/monetization/pipeline": {
+   "get": {
+    "summary": "A fila de monetização de todas as organizações",
+    "operationId": "get_program_routes_admin_pipeline",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "candidate",
+          "blocked_legal",
+          "blocked_no_price",
+          "eligible",
+          "billed",
+          "waived"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "org_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Org Id"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/monetization/pipeline/{billable_seq}/waive": {
+   "post": {
+    "summary": "Dispensa um candidato a cobrança, com motivo escrito",
+    "operationId": "post_program_routes_admin_waive",
+    "tags": [
+     "monetizacao"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "billable_seq",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WaiveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/payments/status": {
+   "get": {
+    "summary": "O que está e o que não está configurado para cobrar de verdade",
+    "operationId": "get_program_routes_payments_status",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/payments/state-graph": {
+   "get": {
+    "summary": "Transições possíveis de uma cobrança, com a origem de cada uma",
+    "operationId": "get_program_routes_payments_graph",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/payments/charges": {
+   "get": {
+    "summary": "As cobranças da organização, com o aviso em cada simulada",
+    "operationId": "get_program_routes_charges_list",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "state",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "created",
+          "checkout_started",
+          "pending",
+          "authorized",
+          "paid",
+          "settled",
+          "failed",
+          "expired",
+          "cancelled",
+          "refunded",
+          "partially_refunded",
+          "disputed",
+          "chargeback"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "State"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   },
+   "post": {
+    "summary": "Abre uma cobrança (nada é cobrado: é a intenção de cobrar)",
+    "operationId": "post_program_routes_charge_create",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChargeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/payments/charges/{charge_id}": {
+   "get": {
+    "summary": "Uma cobrança com a trilha inteira: por que ela está neste estado",
+    "operationId": "get_program_routes_charge_get",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "charge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/payments/charges/{charge_id}/installments": {
+   "put": {
+    "summary": "Grava o cronograma do parcelamento (a soma tem de fechar com o total)",
+    "operationId": "put_program_routes_charge_installments",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "charge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/InstallmentScheduleIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/payments/charges/{charge_id}/transition": {
+   "post": {
+    "summary": "Move a cobrança (recusada se não estiver no grafo)",
+    "operationId": "post_program_routes_charge_transition",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "charge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChargeTransitionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/payments/revenue": {
+   "get": {
+    "summary": "Receita apurada, com o simulado em colunas próprias e nunca somado ao real",
+    "operationId": "get_program_routes_admin_revenue",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 90,
+       "maximum": 1095,
+       "minimum": 1,
+       "title": "Days",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/payments/reconciliation": {
+   "get": {
+    "summary": "Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura",
+    "operationId": "get_program_routes_admin_reconciliation",
+    "tags": [
+     "pagamento"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "days",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 7,
+       "maximum": 90,
+       "minimum": 1,
+       "title": "Days",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/engines": {
+   "get": {
+    "summary": "Os motores operacionais: natureza, versão, o que produzem e o que nunca decidem",
+    "operationId": "get_program_routes_engines_registry",
+    "tags": [
+     "motores"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/legal/registry": {
+   "get": {
+    "summary": "Situação de cada documento legal: versão, se está aprovado e se bloqueia o produto",
+    "operationId": "get_legal_routes_registry",
+    "tags": [
+     "legal"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/legal/documents/{doc_key}": {
+   "get": {
+    "summary": "O texto de um documento, com a situação dele e o sha256 do que seria aceito",
+    "operationId": "get_legal_routes_document",
+    "tags": [
+     "legal"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "doc_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/legal/pending": {
+   "get": {
+    "summary": "Documento vigente que esta pessoa ainda não aceitou",
+    "operationId": "get_legal_routes_pending",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/legal/acceptances/mine": {
+   "get": {
+    "summary": "O que esta pessoa aceitou, com versão e hash do texto",
+    "operationId": "get_legal_routes_mine",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/legal/acceptances": {
+   "post": {
+    "summary": "Registra aceite (recusado se o documento for minuta não aprovada)",
+    "operationId": "post_legal_routes_accept",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AcceptIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/legal/documents/{doc_id}/review": {
+   "post": {
+    "summary": "Marca a minuta como enviada para revisão jurídica",
+    "operationId": "post_legal_routes_to_review",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "doc_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/legal/documents/{doc_id}/approve": {
+   "post": {
+    "summary": "Aprova a versão, exigindo quem revisou e sob qual referência",
+    "operationId": "post_legal_routes_approve",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "doc_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ApproveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/legal/acceptances": {
+   "get": {
+    "summary": "Prova de aceite: quem, quando, qual versão e qual hash",
+    "operationId": "get_legal_routes_admin_acceptances",
+    "tags": [
+     "legal"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "doc_key",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maxLength": 40,
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Doc Key"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -40454,7 +42463,8 @@
        "report",
        "project",
        "document",
-       "account"
+       "account",
+       "program"
       ],
       "title": "Grp",
       "type": "string"
@@ -47801,6 +49811,1411 @@
      "note"
     ],
     "title": "AppealDecisionIn",
+    "type": "object"
+   },
+   "ProgramIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 5,
+      "title": "Title",
+      "type": "string"
+     },
+     "summary": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Summary",
+      "type": "string"
+     },
+     "objective": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Objective",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 20000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "budget_total_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Budget Total Cents"
+     },
+     "currency": {
+      "default": "BRL",
+      "pattern": "^[A-Z]{3}$",
+      "title": "Currency",
+      "type": "string"
+     },
+     "territories": {
+      "items": {
+       "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+       "type": "string"
+      },
+      "maxItems": 200,
+      "title": "Territories",
+      "type": "array"
+     },
+     "causes": {
+      "items": {
+       "pattern": "^[a-z0-9_]{2,60}$",
+       "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Causes",
+      "type": "array"
+     },
+     "ods": {
+      "items": {
+       "maximum": 17,
+       "minimum": 1,
+       "type": "integer"
+      },
+      "maxItems": 17,
+      "title": "Ods",
+      "type": "array"
+     },
+     "sphere": {
+      "anyOf": [
+       {
+        "enum": [
+         "federal",
+         "state",
+         "municipal",
+         "private",
+         "mixed",
+         "international"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Sphere"
+     },
+     "instrument": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Instrument"
+     },
+     "starts_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts On"
+     },
+     "ends_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ends On"
+     }
+    },
+    "required": [
+     "title",
+     "summary",
+     "objective"
+    ],
+    "title": "ProgramIn",
+    "type": "object"
+   },
+   "ProgramPatch": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 5,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "objective": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Objective"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 20000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Description"
+     },
+     "budget_total_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Budget Total Cents"
+     },
+     "currency": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Currency"
+     },
+     "territories": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        "maxItems": 200,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Territories"
+     },
+     "causes": {
+      "anyOf": [
+       {
+        "items": {
+         "pattern": "^[a-z0-9_]{2,60}$",
+         "type": "string"
+        },
+        "maxItems": 30,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Causes"
+     },
+     "ods": {
+      "anyOf": [
+       {
+        "items": {
+         "maximum": 17,
+         "minimum": 1,
+         "type": "integer"
+        },
+        "maxItems": 17,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ods"
+     },
+     "sphere": {
+      "anyOf": [
+       {
+        "enum": [
+         "federal",
+         "state",
+         "municipal",
+         "private",
+         "mixed",
+         "international"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Sphere"
+     },
+     "instrument": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Instrument"
+     },
+     "starts_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts On"
+     },
+     "ends_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ends On"
+     },
+     "visibility": {
+      "anyOf": [
+       {
+        "enum": [
+         "organization",
+         "network",
+         "public"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Visibility"
+     }
+    },
+    "title": "ProgramPatch",
+    "type": "object"
+   },
+   "ProgramTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to_status": {
+      "enum": [
+       "draft",
+       "open",
+       "in_execution",
+       "suspended",
+       "closed",
+       "archived"
+      ],
+      "title": "To Status",
+      "type": "string"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Reason"
+     }
+    },
+    "required": [
+     "to_status"
+    ],
+    "title": "ProgramTransitionIn",
+    "type": "object"
+   },
+   "ProgramCallIn": {
+    "additionalProperties": false,
+    "properties": {
+     "call_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Call Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "call_id"
+    ],
+    "title": "ProgramCallIn",
+    "type": "object"
+   },
+   "ProgramProjectIn": {
+    "additionalProperties": false,
+    "properties": {
+     "project_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "role": {
+      "enum": [
+       "candidate",
+       "selected",
+       "funded",
+       "monitored",
+       "declined",
+       "withdrawn"
+      ],
+      "title": "Role",
+      "type": "string"
+     },
+     "allocated_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Allocated Cents"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "project_id",
+     "role"
+    ],
+    "title": "ProgramProjectIn",
+    "type": "object"
+   },
+   "ProgramIndicatorIn": {
+    "additionalProperties": false,
+    "properties": {
+     "indicator_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Indicator Id",
+      "type": "string"
+     },
+     "target_value": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Value"
+     },
+     "target_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Date"
+     },
+     "baseline_value": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Baseline Value"
+     },
+     "baseline_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Baseline Date"
+     },
+     "baseline_source": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Baseline Source"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "indicator_id"
+    ],
+    "title": "ProgramIndicatorIn",
+    "type": "object"
+   },
+   "ProgramNeedIn": {
+    "additionalProperties": false,
+    "properties": {
+     "need_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Need Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "need_id"
+    ],
+    "title": "ProgramNeedIn",
+    "type": "object"
+   },
+   "BaselineIn": {
+    "additionalProperties": false,
+    "description": "Declara quanto trabalho humano uma unidade de evento substitui.\n\nFonte, data e método são **obrigatórios** — e o CHECK no banco também recusa sem eles. Sem isso o\nnúmero seria chute com cara de medição, e é esse o defeito que o Value Ledger existe para evitar.",
+    "properties": {
+     "event_type": {
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9_.]*$",
+      "title": "Event Type",
+      "type": "string"
+     },
+     "minutes_per_unit": {
+      "exclusiveMinimum": 0,
+      "maximum": 10000,
+      "title": "Minutes Per Unit",
+      "type": "number"
+     },
+     "source_name": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "source_date": {
+      "format": "date",
+      "title": "Source Date",
+      "type": "string"
+     },
+     "method_note": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Method Note",
+      "type": "string"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     }
+    },
+    "required": [
+     "event_type",
+     "minutes_per_unit",
+     "source_name",
+     "source_date",
+     "method_note"
+    ],
+    "title": "BaselineIn",
+    "type": "object"
+   },
+   "AiPriceIn": {
+    "additionalProperties": false,
+    "description": "Preço de um modelo, por milhão de tokens, com fonte obrigatória.\n\nA tabela nasce vazia: nenhum preço de provedor foi inventado no pacote.",
+    "properties": {
+     "provider": {
+      "maxLength": 40,
+      "minLength": 2,
+      "title": "Provider",
+      "type": "string"
+     },
+     "model": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Model",
+      "type": "string"
+     },
+     "input_per_mtok_cents": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Input Per Mtok Cents",
+      "type": "number"
+     },
+     "output_per_mtok_cents": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Output Per Mtok Cents",
+      "type": "number"
+     },
+     "currency": {
+      "default": "USD",
+      "pattern": "^[A-Z]{3}$",
+      "title": "Currency",
+      "type": "string"
+     },
+     "source_name": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "source_date": {
+      "format": "date",
+      "title": "Source Date",
+      "type": "string"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     }
+    },
+    "required": [
+     "provider",
+     "model",
+     "input_per_mtok_cents",
+     "output_per_mtok_cents",
+     "source_name",
+     "source_date"
+    ],
+    "title": "AiPriceIn",
+    "type": "object"
+   },
+   "LegalCardIn": {
+    "additionalProperties": false,
+    "description": "Pesquisa de base normativa de uma receita. NÃO é parecer jurídico.\n\n`certainty` é o grau de certeza da PESQUISA. `needs_lawyer` e `needs_accountant` nascem\nverdadeiros, e marcar verde exige base, fonte, data, certeza alta e `needs_lawyer = false`.",
+    "properties": {
+     "rule_key": {
+      "maxLength": 60,
+      "pattern": "^[a-z][a-z0-9_.]*$",
+      "title": "Rule Key",
+      "type": "string"
+     },
+     "payer": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Payer",
+      "type": "string"
+     },
+     "beneficiary": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Beneficiary",
+      "type": "string"
+     },
+     "billing_event": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Billing Event",
+      "type": "string"
+     },
+     "revenue_nature": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Revenue Nature",
+      "type": "string"
+     },
+     "contractual_relation": {
+      "maxLength": 500,
+      "minLength": 5,
+      "title": "Contractual Relation",
+      "type": "string"
+     },
+     "certainty": {
+      "enum": [
+       "low",
+       "medium",
+       "high"
+      ],
+      "title": "Certainty",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "green",
+       "yellow",
+       "red"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "required_document": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Required Document"
+     },
+     "required_terms": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Required Terms"
+     },
+     "cancellation_policy": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cancellation Policy"
+     },
+     "refund_policy": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Refund Policy"
+     },
+     "tax_notes": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Tax Notes"
+     },
+     "invoice_notes": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Invoice Notes"
+     },
+     "regulatory_notes": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Regulatory Notes"
+     },
+     "legal_basis": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Legal Basis"
+     },
+     "source_name": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Name"
+     },
+     "source_url": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source Url"
+     },
+     "verified_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Verified On"
+     },
+     "needs_lawyer": {
+      "default": true,
+      "title": "Needs Lawyer",
+      "type": "boolean"
+     },
+     "needs_accountant": {
+      "default": true,
+      "title": "Needs Accountant",
+      "type": "boolean"
+     },
+     "open_questions": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Open Questions"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "rule_key",
+     "payer",
+     "beneficiary",
+     "billing_event",
+     "revenue_nature",
+     "contractual_relation",
+     "certainty",
+     "status"
+    ],
+    "title": "LegalCardIn",
+    "type": "object"
+   },
+   "RulePatch": {
+    "additionalProperties": false,
+    "description": "Ajusta uma regra de receita. O portão de ativação é no banco, não aqui.",
+    "properties": {
+     "amount_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Cents"
+     },
+     "percentage": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 100,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Percentage"
+     },
+     "currency": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Currency"
+     },
+     "legal_status": {
+      "anyOf": [
+       {
+        "enum": [
+         "review_required",
+         "validated",
+         "refused"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Legal Status"
+     },
+     "legal_card_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Legal Card Id"
+     },
+     "active": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Active"
+     },
+     "hypothesis_min_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Hypothesis Min Cents"
+     },
+     "hypothesis_max_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Hypothesis Max Cents"
+     },
+     "hypothesis_note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Hypothesis Note"
+     }
+    },
+    "title": "RulePatch",
+    "type": "object"
+   },
+   "WaiveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "WaiveIn",
+    "type": "object"
+   },
+   "ChargeIn": {
+    "additionalProperties": false,
+    "description": "Abre uma cobrança. Nada é cobrado: é o registro da intenção de cobrar.\n\n`provider` e `is_simulated` NÃO vêm do cliente: o provedor é o configurado na instalação, e\n`is_simulated` é derivada dele por gatilho no banco.",
+    "properties": {
+     "kind": {
+      "enum": [
+       "subscription",
+       "one_off",
+       "installment_plan",
+       "operation"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "method": {
+      "enum": [
+       "card",
+       "pix",
+       "boleto",
+       "manual"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "currency": {
+      "default": "BRL",
+      "pattern": "^[A-Z]{3}$",
+      "title": "Currency",
+      "type": "string"
+     },
+     "subscription_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Subscription Id"
+     },
+     "invoice_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Invoice Id"
+     },
+     "billable_event_seq": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Billable Event Seq"
+     },
+     "installments": {
+      "anyOf": [
+       {
+        "maximum": 24,
+        "minimum": 2,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Installments"
+     },
+     "instrument_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Instrument Id"
+     },
+     "due_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Due On"
+     }
+    },
+    "required": [
+     "kind",
+     "method",
+     "amount_cents"
+    ],
+    "title": "ChargeIn",
+    "type": "object"
+   },
+   "InstallmentItem": {
+    "additionalProperties": false,
+    "properties": {
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "due_on": {
+      "format": "date",
+      "title": "Due On",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount_cents",
+     "due_on"
+    ],
+    "title": "InstallmentItem",
+    "type": "object"
+   },
+   "InstallmentScheduleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "schedule": {
+      "items": {
+       "$ref": "#/components/schemas/InstallmentItem"
+      },
+      "maxItems": 24,
+      "minItems": 2,
+      "title": "Schedule",
+      "type": "array"
+     }
+    },
+    "required": [
+     "schedule"
+    ],
+    "title": "InstallmentScheduleIn",
+    "type": "object"
+   },
+   "ChargeTransitionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "to_state": {
+      "enum": [
+       "created",
+       "checkout_started",
+       "pending",
+       "authorized",
+       "paid",
+       "settled",
+       "failed",
+       "expired",
+       "cancelled",
+       "refunded",
+       "partially_refunded",
+       "disputed",
+       "chargeback"
+      ],
+      "title": "To State",
+      "type": "string"
+     },
+     "refunded_cents": {
+      "anyOf": [
+       {
+        "maximum": 1000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Refunded Cents"
+     },
+     "failure_code": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Failure Code"
+     },
+     "failure_message": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Failure Message"
+     }
+    },
+    "required": [
+     "to_state"
+    ],
+    "title": "ChargeTransitionIn",
+    "type": "object"
+   },
+   "AcceptIn": {
+    "additionalProperties": false,
+    "properties": {
+     "doc_key": {
+      "maxLength": 40,
+      "minLength": 2,
+      "title": "Doc Key",
+      "type": "string"
+     },
+     "source": {
+      "default": "web",
+      "pattern": "^(web|mobile|api)$",
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "doc_key"
+    ],
+    "title": "AcceptIn",
+    "type": "object"
+   },
+   "ApproveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reviewed_by": {
+      "description": "Nome de quem assume a revisão jurídica desta versão",
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Reviewed By",
+      "type": "string"
+     },
+     "review_reference": {
+      "description": "Parecer, processo ou documento que embasa a aprovação",
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Review Reference",
+      "type": "string"
+     },
+     "effective_from": {
+      "anyOf": [
+       {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective From"
+     }
+    },
+    "required": [
+     "reviewed_by",
+     "review_reference"
+    ],
+    "title": "ApproveIn",
     "type": "object"
    }
   },

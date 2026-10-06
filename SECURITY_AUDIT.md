@@ -1,9 +1,42 @@
-# SECURITY_AUDIT — v0.16.0 (2026-10-05)
+# SECURITY_AUDIT — v0.17.0 (2026-10-06)
 
 Escopo: código do repositório + execução local. **Não é pentest.** Controles detalhados e testes: `docs/SECURITY.md`.
 A lista linha a linha, com a prova de cada item e as **9 pendências honestas**, está em
 **`SECURITY_FINAL_CHECKLIST.md`**.
 Resultado: **GREEN** = verificado por teste · **YELLOW** = implementado, depende de config/serviço real · **RED** = ausente.
+
+## v0.17.0 — a camada econômica sob auditoria
+
+A rodada acrescentou **22 tabelas** (253 no total) que tratam de dinheiro, de regra de receita e de prova de aceite.
+A revisão foi feita **lendo o catálogo do PostgreSQL**, não o código, porque o que vale é o estado real do banco:
+
+| Verificação | Resultado |
+|---|---|
+| RLS ligada nas 22 tabelas novas | 🟢 todas |
+| Pelo menos uma política em cada | 🟢 todas (RLS ligada sem política nega tudo: parece seguro e quebra o produto em silêncio) |
+| `value_events` e `charge_events` sem INSERT para a aplicação | 🟢 escrita só por gatilho ou função `SECURITY DEFINER` |
+| `SECURITY DEFINER` sem `search_path` fixo | 🟢 nenhuma das 75 funções |
+| FK quente sem índice | 🟢 nenhuma (a revisão achou uma, `legal_acceptances.org_id`, e ela foi criada) |
+| Coluna nova com cara de dado pessoal sem justificativa | 🟢 nenhuma; as quatro exceções são declaradas uma a uma com o motivo |
+| Isolamento entre organizações nas tabelas novas | 🟢 matriz linha a linha, **com o teste par** que falha se o filtro do próprio teste não achar nada |
+| Token de cartão legível pela administração da plataforma | 🟢 **não**: a política de `payment_instruments` não tem exceção para privilégio |
+| Coluna para número de cartão, CVV ou validade | 🟢 **não existe**, e há teste varrendo o catálogo |
+
+### Três travas que valem destaque nesta auditoria
+
+1. **`is_simulated` é derivada do provedor** e a tentativa de alterá-la é **recusada**, não sobrescrita em silêncio.
+   Sobrescrever resolveria o caso igual e deixaria quem tentou marcar cobrança de teste como real sem nenhum sinal.
+2. **A trilha de cobrança é escrita por gatilho `SECURITY DEFINER`** porque a aplicação não tem INSERT em
+   `charge_events`. A saída fácil — conceder o INSERT — resolveria o erro de permissão e abriria a porta para
+   inventar linha de trilha à mão.
+3. **Webhook sem assinatura conferida é registrado e não produz efeito**, com CHECK no banco impedindo que ele
+   chegue a "processado". "Não aplicar" é a parte que ninguém lembra de testar quando a integração for ligada.
+
+### Pendência que esta rodada NÃO fechou
+
+O **segredo de assinatura do webhook** não existe porque não há conta de provedor. O caminho de verificação está
+implementado e testado contra assinatura inválida; contra assinatura **válida de provedor real**, não — e não há como
+testar isso aqui. Fica 🟡 declarado.
 
 ## v0.16.0 — a rede de impacto sob auditoria
 

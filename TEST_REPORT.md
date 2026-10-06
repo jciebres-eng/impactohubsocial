@@ -1,23 +1,40 @@
-# TEST_REPORT — v0.16.0 (IMPACT NETWORK CORE, 2026-10-05)
+# TEST_REPORT — v0.17.0 (camada econômica, legal e de pagamento, 2026-10-06)
 
-**788 testes, 0 falhas, 12 pulados** (eram 673 na v0.15.0). Log íntegro:
-`docs/evidence/test_run_v0.16.0.log`. Desempenho: `docs/evidence/perf_v0.16.0.log`. Integridade do banco:
-`docs/evidence/db_integrity_v0.16.0.txt`.
+**961 testes, 0 falhas, 17 pulados** (eram 788 na v0.16.0 e 673 na v0.15.0). Log íntegro:
+`docs/evidence/test_run_v0.17.0.log`. Desempenho: `docs/evidence/perf_v0.17.0.log` (duas execuções). Integridade do
+banco: `docs/evidence/db_integrity_v0.17.0.txt`.
 
-Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 17 migrações), servidor HTTP real
+Os **161 testes novos** desta rodada, por arquivo:
+
+| Arquivo | Testes | O que ele protege |
+|---|---|---|
+| `test_v0170_payments.py` | **30** | a cobrança simulada nunca passa por real; `is_simulated` derivada e irreescrevível; transição fora do grafo recusada; trilha escrita por gatilho e append-only; parcelamento com soma conferida no COMMIT; nenhuma coluna para número de cartão; webhook idempotente; evento sem assinatura registrado e **sem efeito**; e a fatura com `provider='stripe'` que **não** conta como receita real sem provedor configurado |
+| `test_v0170_legal.py` | **27** | as onze minutas registradas, **nenhuma aprovada**; aceite de minuta recusado pela API e pelo SQL direto; aprovação sem revisor recusada; texto de versão imutável; aceite guardando o sha256; versão nova superando a anterior e voltando a pendente; o aceite antigo continuando a provar o texto antigo |
+| `test_v0170_monetization.py` | **26** | o portão legal; cartão verde sem fonte recusado; as quatro recusas; a mensagem da ADR-022 chegando à API; quem pode ser cobrado |
+| `test_v0170_programs.py` | **19** | situação como grafo; datas derivadas; visibilidade que não bloqueia moderação; linha de base de indicador exigindo fonte; declarado × medido; notificação à equipe executora |
+| `test_v0170_security.py` | **18** | RLS e política em todas as 22 tabelas novas; matriz de isolamento linha a linha **com o teste par**; nenhuma coluna nova com dado pessoal sem justificativa; a anonimização que não destrói a prova; retenção |
+| `test_v0170_value.py` | **16** | entrega separada de cobrança; estimativa só com linha de base declarada; `app_record_value()` como porta única |
+| `test_v0170_docs.py` | **17** | **os documentos conferidos contra o banco**: chaves de regra, cores dos cartões, tipos de evento, arestas do grafo de cobrança, documentos legais registrados |
+| `test_v0170_engines.py` | **7** | o registro de motores pela API; os assistentes declarados como extração e **respondendo com `ai_used: false`** |
+| `test_architecture.py` (novos) | **6** | motor declarado resolve para código; versão declarada bate com a do módulo; rota declarada existe; determinístico não importa o gateway; **só os pontos declarados chamam o modelo** |
+| `test_v0150_performance.py` (novos) | **5** | feed de programas, resumo de valor, cobranças, registro legal e as cinco funções SQL da camada econômica |
+
+Ambiente: **PostgreSQL 16 real criado do zero em cada execução** (bootstrap + 24 migrações), servidor HTTP real
 (uvicorn) e Chromium (Playwright). Comando:
 ```
 cd backend && TEST_ADMIN_DATABASE_URL="postgresql://postgres@127.0.0.1:5432/postgres" \
   PASSWORD_SCRYPT_N=16384 RATE_LIMIT_MULTIPLIER=1000 python3 -m unittest discover -s tests -t . -v
 ```
 
-Os **12 pulados** são a suíte de volume inteira, que roda em passo próprio porque o dado sintético muda o resultado
-de testes de ranking e de paginação no mesmo banco (ADR-138). Com `PERF_FULL=1` os 12 rodam e passam:
+Os **17 pulados** são a suíte de volume inteira, que roda em passo próprio porque o dado sintético muda o resultado
+de testes de ranking e de paginação no mesmo banco (ADR-138). Eram 12 na v0.16.0; cresceu com as cinco medições da
+camada econômica. Com `PERF_FULL=1` os 17 rodam e passam:
 ```
 cd backend && PERF_FULL=1 TEST_ADMIN_DATABASE_URL="..." python3 -m unittest tests.test_v0150_performance -v
 ```
 
-Contagem por suíte, da maior para a menor (métodos `def test_*`, somando **788**):
+Contagem por suíte, da maior para a menor (métodos `def test_*`). A tabela abaixo é da v0.16.0 e somava
+**788**; os arquivos da v0.17.0 estão na tabela do início deste documento:
 
 | Suíte | Testes | Suíte | Testes |
 |---|---|---|---|
@@ -276,3 +293,35 @@ Rota literal capturada por parâmetro · perfil de financiador vazio · opt-out 
 
 ## O que NÃO foi testado (não afirmar)
 Carga concorrente · pentest/fuzzing · axe e leitor de tela · navegadores além do Chromium · dispositivos móveis reais · clamd/S3/SMTP/Stripe/IdP/provedor de IA reais · build Docker · apps Android/iOS · qualidade de relevância com usuários reais · tipos oficiais TS (typecheck offline com *shims*; CI deve validar).
+
+
+## Bugs encontrados pelos testes na v0.17.0 — e cada um ensinou algo
+
+| Defeito | Onde a suíte pegou | A lição |
+|---|---|---|
+| `BEGIN/COMMIT` dentro da migração 0018 | aplicação da migração | o executor já envolve cada arquivo em transação; o `COMMIT` interno acabava com ela e uma falha no meio deixaria a migração aplicada pela metade **sem rollback** |
+| `guard_columns` sobre coluna derivada por gatilho | a transição legítima da própria dona voltava 403 | gatilhos disparam em ordem alfabética; guardar coluna que outro gatilho deriva rejeita a transição legítima. **Mesmo erro da v0.16.0**, cometido de novo |
+| trava de visibilidade bloqueando a moderação | suspender programa público era impossível | trava que impede o abuso e o remédio ao mesmo tempo é trava mal desenhada |
+| `ctx.org_id` levantando 409 na leitura anônima | GET de programa rascunho sem sessão | "selecione uma organização" em resposta a um recurso inexistente é **vazamento de existência** |
+| índice único parcial conferido antes do gatilho AFTER | criar versão nova de linha de base era impossível | o índice é conferido no fim do comando, antes dos gatilhos AFTER: "fechar a versão anterior" tem de ser BEFORE INSERT |
+| `try/except` sem SAVEPOINT em volta de função de banco | `ai_usage` desaparecia no COMMIT | capturar exceção de banco sem SAVEPOINT deixa a transação **abortada** e o trabalho do usuário morre em silêncio |
+| o SAVEPOINT escondendo um segundo defeito meu | nada no log | trava que engole erro sem avisar é trava que mente; virou `value_ledger_record_failed` |
+| mensagem do portão legal perdida pelo tratador global | a ADR-022 não chegava à API | 403 genérico protege o esquema e apaga a razão; a recusa precisa ser 422 com a mensagem |
+| receita classificada pelo **nome** do provedor | suíte completa, R$ 396,00 inexistentes | coluna dizendo 'stripe' não é prova de chave ao vivo — é o que um cenário de teste escreve |
+| trilha de cobrança sem permissão para a aplicação | 403 ao abrir cobrança | a saída certa foi `SECURITY DEFINER` no gatilho, não GRANT de INSERT ao app |
+| `CHECK` de `billing_events` sem o estado novo | três testes da v0.11.0 | restrição nova quebra caminho antigo: o caminho antigo passou a declarar `signature_verified` |
+| varredura de "coluna com dado pessoal" por substring | `subscription_id` acusado por conter "ip" | varredura que grita com nome inocente é varredura que alguém desliga |
+| isolamento exigindo contagem **zero** | suíte completa | confundir "não é meu" com "não existe" acusa vazamento onde há regra (programa com visibilidade de rede) |
+| documento afirmando tabela vazia | `test_v0170_docs.py` | a tabela de linhas de base tem uma linha por tipo, **sem número**. A diferença importa, e o teste que confere documento contra banco pegou minha própria afirmação falsa |
+
+## O que NÃO foi testado na v0.17.0 (não afirmar)
+
+| Item | Por quê |
+|---|---|
+| cobrança real em qualquer meio | **não há provedor configurado**: nenhuma conta, chave ou identificador de preço |
+| webhook de provedor real | sem conta, o segredo de assinatura não existe; o que é testado é a rejeição e a idempotência |
+| PIX e boleto de verdade | QR, copia-e-cola e linha digitável vêm do provedor |
+| emissão de nota fiscal | não há provedor fiscal nem inscrição municipal |
+| aceite de documento vigente **em produção** | nenhuma minuta foi aprovada; o caminho completo é exercido sobre um documento criado **dentro do teste** |
+| validade jurídica das onze minutas | é trabalho de advogado(a), não de teste |
+| índice de `legal_acceptances` em volume | a tabela não chega a 500 linhas no cenário, e está declarado como inconclusivo no relatório de desempenho |

@@ -1,4 +1,4 @@
-# Prontidão da liberação — v0.16.0
+# Prontidão da liberação — v0.17.0
 
 Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o motivo. Não há "parcialmente verde".
 
@@ -6,39 +6,52 @@ Este documento responde a uma pergunta por vez, com GREEN / YELLOW / RED e o mot
 
 | # | Portão | Situação | Prova |
 |---|---|---|---|
-| 1 | Suíte completa verde, banco criado do zero | 🟢 | **788** testes, 0 falhas, 12 pulados · `docs/evidence/test_run_v0.16.0.log` |
-| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.16.0.log` |
+| 1 | Suíte completa verde, banco criado do zero | 🟢 | **961** testes, 0 falhas, 17 pulados · `docs/evidence/test_run_v0.17.0.log` |
+| 2 | Lint do backend sem apontamento | 🟢 | `ruff`, "All checks passed" · `docs/evidence/ruff_v0.17.0.log` |
 | 3 | Tipos do frontend sem erro | 🟢 | `tsc --noEmit` limpo |
 | 4 | Build do frontend | 🟢 | `node build.mjs` · 14 arquivos no pré-cache |
 | 5 | Compilação de todo o Python | 🟢 | `python3 -m compileall impacto` |
-| 6 | OpenAPI gerado do código | 🟢 | **704** operações · `docs/openapi.json` |
-| 7 | Migrações só para frente, com checksum | 🟢 | **17** migrações, nenhuma liberada foi editada |
-| 8 | Caminho de atualização v0.12.1 → **v0.16.0** com dado dentro | 🟢 | `test_v0150_upgrade.py` (10 testes, ampliado com as 26 estruturas novas) |
+| 6 | OpenAPI gerado do código | 🟢 | **749** operações · `docs/openapi.json` |
+| 7 | Migrações só para frente, com checksum | 🟢 | **24** migrações, nenhuma liberada foi editada |
+| 8 | Caminho de atualização v0.12.1 → **v0.17.0** com dado dentro | 🟢 | `test_v0150_upgrade.py` (**11** testes; o novo confere que as travas chegaram, não só as tabelas: aceite de minuta e aprovação sem revisor são recusados no banco **atualizado**) |
 | 9 | Esquema atualizado **idêntico** ao criado do zero | 🟢 | `test_10_schema_matches_a_database_built_from_scratch` |
-| 10 | RLS em toda tabela de dado de organização | 🟢 | **229 de 231** com política; exceções nomeadas |
-| 11 | Matriz de isolamento A → recurso de B | 🟢 | varredura automática de todas as rotas de escrita + matriz explícita + SQL direto |
+| 10 | RLS em toda tabela de dado de organização | 🟢 | **251 de 253** com política; as duas exceções são `schema_migrations` e `chain_heads`, nomeadas |
+| 11 | Matriz de isolamento A → recurso de B | 🟢 | varredura automática + matriz explícita + SQL direto; na v0.17.0 a matriz passou a ser **linha a linha** nas 22 tabelas novas, com o **teste par** que falha se o filtro do próprio teste não achar nada |
 | 12 | Nenhum segredo no repositório nem no ZIP | 🟢 | teste estático + varredura no empacotador |
 | 13 | Jornadas de ponta a ponta | 🟢 | 8 + **7** jornadas · `test_e2e_v0150_journeys.py`, `test_e2e_v0160_journeys.py` |
-| 14 | Navegador real nas telas novas | 🟡 | 6 testes cobrem as telas da v0.15.0; **as 27 telas da v0.16.0 não têm Playwright** |
+| 14 | Navegador real nas telas novas | 🟡 | 6 testes cobrem as telas da v0.15.0; **as 27 telas da v0.16.0 e a camada econômica da v0.17.0 não têm Playwright** — a v0.17.0 é camada de domínio e API, sem tela nova |
 | 15 | Invariantes do produto | 🟢 | 21 + **28** testes · `test_v0150_invariants.py`, `test_v0160_invariants.py` |
-| 16 | Desempenho medido com volume de alvo | 🟢 | medido; o feed é 🟡 e está declarado |
+| 16 | Desempenho medido com volume de alvo | 🟡 | medido em duas execuções; **o feed piorou de 1,5–1,7 s para 1,87–2,04 s** e a folga caiu para 1,2× — declarado em `PERFORMANCE_REPORT.md` §7 |
 | 17 | Compatibilidade: nada que existia quebrou | 🟢 | suíte inteira anterior continua verde |
 | 18 | Dependência externa ausente produz recusa explícita | 🟢 | 501/estado `unavailable`, nunca sucesso falso |
 | 19 | Nenhum `TODO`/`FIXME`/`MOCK`/`STUB` no caminho de produção | 🟢 | ver §3 |
 | 20 | Dado de demonstração separado de dado de produção | 🟢 | ver §4 |
-| 21 | Documentação da versão completa e versionada | 🟢 | **18 documentos novos** + 15 atualizados + snapshot em `history/v0.15.0/` |
+| 21 | Documentação da versão completa e versionada | 🟢 | **9 documentos novos** + 14 atualizados + snapshot em `history/v0.16.0/`, **e 17 testes que conferem os números dos documentos contra o banco** |
 | 22 | ZIP completo, sem ZIP aninhado, validado por extração | 🟢 | `scripts/make_release.py` + `--verify` |
 | 23 | **Pacote sem despejo de banco nem dado local**, garantido por teste | 🟢 | `test_architecture.ReleasePackageTests` (2 testes) |
 
-| 24 | **SQL do código conferido por `PREPARE`** contra o esquema real | 🟢 | `scripts/sql_prepare_check.py` · 185 consultas, 0 erros |
+| 24 | **SQL do código conferido por `PREPARE`** contra o esquema real | 🟢 | `scripts/sql_prepare_check.py` · 185 (rede) + 66 (econômica) + 11 (legal) consultas, 0 erros |
 | 25 | **Preço nunca em literal de código** | 🟢 | `test_prices_are_not_hard_coded` lê `config/plans.json` e varre backend e frontend |
 | 26 | **Nenhuma rota duplicada** (a segunda ficaria inalcançável em silêncio) | 🟢 | `test_no_duplicate_routes` |
 | 27 | **Todo destino de recomendação existe no roteador** | 🟢 | `test_recommendation_links_exist_in_the_app` |
 | 28 | **Datas de produto em UTC**, não no fuso do processo | 🟢 | `test_product_dates_are_utc` · `backend/impacto/clock.py` |
 | 29 | Backup e **teste de restauração** com ledger íntegro | 🟢 | `scripts/backup.sh` + `scripts/restore_test.sh` executados nesta rodada |
-| 30 | **Nenhuma rota pública nova sem revisão** | 🟢 | `test_handlers_declare_auth` com lista de permissão explícita (7 rotas públicas novas) |
+| 30 | **Nenhuma rota pública nova sem revisão** | 🟢 | `test_handlers_declare_auth` com lista de permissão explícita (**4** rotas públicas novas na v0.17.0: feed e ficha de programa, registro legal e texto de documento) |
 
-Portões 24 a 30 são desta rodada. O 24 nasceu de um achado real: a revisão de código **não** pegava nome de coluna
+| 31 | **Nenhuma receita ativável sem cartão legal verde** | 🟢 | portão no banco (`monetization_rule_gate()`); 9 regras, **zero verdes, nenhuma ativa** · `test_v0170_monetization.py` |
+| 32 | **Nenhum aceite de documento não revisado por advogado(a)** | 🟢 | `acceptance_stamp()` recusa; 27 testes · trava o produto **de propósito** |
+| 33 | **Pagamento simulado nunca passa por real** | 🟢 | `is_simulated` derivada e irreescrevível; `platform_revenue()` com o simulado em coluna própria · 30 testes |
+| 34 | **Receita real nunca inferida do nome do provedor** | 🟢 | `provider_configured` entra na apuração · `test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money` |
+| 35 | **Nenhuma estimativa de tempo sem linha de base com fonte** | 🟢 | `app_record_value()` deriva; nenhuma linha de base nasce com número · 16 testes |
+| 36 | **Só os pontos declarados chamam o modelo de linguagem** | 🟢 | varredura em `test_architecture`; registro de 28 motores com o que cada um nunca decide |
+| 37 | **Os números dos documentos conferidos contra o banco** | 🟢 | `test_v0170_docs.py` (17 testes) — pegou três afirmações falsas minhas nesta rodada |
+| 38 | **A prova de aceite sobrevive à exclusão da conta, sem o dado pessoal** | 🟢 | `acceptance_anonymize_only()`; portabilidade inclui o hash · `test_v0170_security.py` |
+
+Portões 31 a 38 são da v0.17.0. O 37 nasceu de um achado embaraçoso: o documento do Value Ledger afirmava que a
+tabela de linhas de base "nasce vazia", e ela nasce com uma linha por tipo **sem número**. A diferença importa, e
+nenhuma revisão humana pegaria — o teste pegou.
+
+Portões 24 a 30 são da rodada anterior. O 24 nasceu de um achado real: a revisão de código **não** pegava nome de coluna
 errado, e cinco defeitos só apareceram quando o SQL passou a ser conferido por `PREPARE`.
 
 Portão 23 foi acrescentado depois de um achado real: `backups/` não estava excluído do empacotamento, e o despejo do banco de desenvolvimento entraria no ZIP na próxima construção. Corrigido no `.gitignore`, no empacotador e com teste.
@@ -49,13 +62,13 @@ Portão 23 foi acrescentado depois de um achado real: `backups/` não estava exc
 |---|---|---|
 | Banco e integridade | 🟢 | `DATABASE_INTEGRITY_REPORT.md` |
 | Núcleo do produto (6 motores) | 🟢 | `CORE_PRODUCT_ARCHITECTURE.md` |
-| API | 🟢 | **704** operações, contrato estável, erro RFC 7807 |
+| API | 🟢 | **749** operações, contrato estável, erro RFC 7807 |
 | Segurança da aplicação | 🟢 | `SECURITY_FINAL_CHECKLIST.md` §1–8 |
 | Validação de segurança por terceiro | 🔴 | **nenhuma** — nunca houve teste de intrusão independente |
 | Chaves e cifragem | 🟡 | funciona e é auditado; **KMS/HSM não existe** e isso está declarado |
 | Assinatura digital | 🟡 | avançada funciona; **qualificada (ICP-Brasil) e Gov.br indisponíveis** |
 | Integrações externas | 🟡 | o mais maduro é `contract_tested`; **nenhuma em produção real** |
-| Desempenho | 🟡 | caminhos da rede entre 9 e 82 ms; workspace da OSC 341–436 ms; feed do financiador 1,5–1,7 s — limite declarado na resposta |
+| Desempenho | 🟡 | caminhos da rede entre 9 e 82 ms; camada econômica entre 1 e 43 ms; workspace da OSC 451–497 ms; **feed do financiador 1,87–2,04 s** — limite declarado na resposta |
 | Frontend funcional | 🟢 | sem erro de console, um `<h1>` por página, caminhos críticos testados no navegador |
 | Frontend visual | 🔴 | **não existe camada de design** — é propositalmente a próxima etapa; e o pacote "Convergência" **não foi recebido** (`DESIGN_HANDOFF_FINAL.md` §1) |
 | Mobile nativo | 🔴 | não iniciado; PWA funciona (`STORE_READINESS.md`) |
@@ -126,6 +139,31 @@ Lista fechada, para que ninguém descubra depois:
     de uso de marca.
 20. **Decisão sobre compra dentro do app** (Apple/Google) — comercial e jurídica, do proprietário.
 
+**Acrescentado na v0.17.0:**
+
+21. **Nenhuma receita ativa.** Nove regras cadastradas, **zero verdes**: cinco esperam parecer jurídico e quatro
+    são recusadas (success fee, take rate de marketplace, cobrança automática de órgão público e venda de dado
+    agregado). O portão está no banco, não na interface.
+22. **Nenhum aceite de documento legal é registrável.** As onze minutas são minutas; o banco recusa registrar
+    aceite de documento não aprovado por revisor nomeado. **Isto trava o produto de propósito**, e destravar é
+    contratar revisão jurídica, não programar.
+23. **Nenhum provedor de pagamento configurado.** Sem conta, chave, identificador de preço ou segredo de webhook.
+    Toda a camada da plataforma — máquina de estados, trilha, parcelamento, instrução de PIX e de boleto,
+    idempotência e reconciliação — está pronta e testada; **nenhuma cobrança real foi processada**.
+24. **Verificação de assinatura de webhook contra provedor real.** O caminho está implementado e testado contra
+    assinatura **inválida**; contra assinatura válida de provedor real, não há como testar aqui.
+25. **Emissão de nota fiscal.** Sem provedor fiscal, sem inscrição municipal, sem código de serviço definido.
+26. **SLA de disponibilidade.** Nenhum número foi medido em operação real nem contratado com fornecedor de
+    infraestrutura; as minutas dizem isso em letras em vez de prometer um percentual.
+27. **Preço institucional (B2B, B2G, Enterprise, implantação).** Não está declarado em lugar nenhum do sistema,
+    porque é decisão comercial do proprietário.
+28. **FASE 15 (implantação) e FASE 16 (teste de fumaça em produção) do roteiro desta rodada**, que **não são
+    executáveis neste ambiente**: não há domínio, credencial de nuvem nem saída de rede além dos registros de
+    pacote. Estão declaradas, não puladas em silêncio.
+29. **Qualquer estimativa de tempo economizado.** Nenhuma linha de base tem número declarado com fonte, data e
+    método — então o produto registra as contagens (que são verdade) e devolve a estimativa nula.
+30. **Logotipos oficiais dos ODS** e **camada de design**: continuam pendentes, e o design é a próxima fase.
+
 ## 6. Para subir
 
 `DEPLOYMENT_CHECKLIST.md` tem o procedimento. O mínimo:
@@ -150,9 +188,16 @@ GET  /v1/signature-providers                          # confere que só platform
 
 ## 7. Veredito
 
-A versão está **tecnicamente pronta para receber a designer**: a rede de impacto está fechada, nada do que já
-existia quebrou, o caminho de atualização está testado, não há 🔴 de engenharia interna e todo limite está
-declarado em documento e, quando cabe, na própria resposta da API.
+A versão está **tecnicamente pronta para receber a designer**: a rede de impacto está fechada, a camada econômica,
+legal e de pagamento está implementada e travada, nada do que já existia quebrou, o caminho de atualização está
+testado com as travas dentro, não há 🔴 de engenharia interna e todo limite está declarado em documento e, quando
+cabe, na própria resposta da API.
+
+**O que esta rodada mudou no veredito, e é importante ler:** os bloqueios que restam para faturar **não são
+técnicos**. Falta parecer jurídico (cinco receitas amarelas e onze minutas), falta provedor de pagamento contratado
+e configurado, falta contador para nota fiscal. A engenharia fez o que lhe cabia: construiu a camada inteira e a
+deixou **desligada**, com o motivo de cada desligamento escrito no banco, na API e nos documentos. Ligar não é
+programar.
 
 Um limite que vale repetir no veredito: o pacote de Design System **não chegou**, então as seções que dependiam
 dele não foram executadas. O que foi feito no lugar é o insumo que ele consome — a arquitetura da informação e o

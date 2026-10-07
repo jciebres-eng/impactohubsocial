@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T14:54:57+00:00",
-  "files_total": 1812,
-  "size_bytes_total": 32436073,
+  "generated_at": "2026-10-07T15:09:21+00:00",
+  "files_total": 1814,
+  "size_bytes_total": 32464806,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -34,8 +34,8 @@
       "size_bytes": 1637542
     },
     "documentação técnica": {
-      "files": 43,
-      "size_bytes": 1906199
+      "files": 45,
+      "size_bytes": 1934932
     },
     "documento legal": {
       "files": 11,
@@ -3726,6 +3726,12 @@
       "category": "documentação técnica"
     },
     {
+      "file": "docs/Dependencias_de_terceiros_e_pessoas_IMPACTO_v0.23.0.docx",
+      "sha256": "60fb70047401332690365c8ec745a1c03163e864b2ff2b386cb9f0a845e4568b",
+      "size_bytes": 22248,
+      "category": "documentação técnica"
+    },
+    {
       "file": "docs/ESG_ODS.md",
       "sha256": "b756423b904ca531c64d537920cd33fd14cdb4a6b3de6998c1208355c17dc0c4",
       "size_bytes": 1831,
@@ -3783,6 +3789,12 @@
       "file": "docs/PROCUREMENT.md",
       "sha256": "4f45e8f9b3b8bc7a27bbe9efc929a9ec0e1b3ce9c1a8872d781beefdbad1657c",
       "size_bytes": 834,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/PUBLICACAO.md",
+      "sha256": "0f9e889a568c05746b700960cb581f50e986ec12549be42b3bd8bcfcc9538257",
+      "size_bytes": 6485,
       "category": "documentação técnica"
     },
     {

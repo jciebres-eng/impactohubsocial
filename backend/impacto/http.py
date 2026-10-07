@@ -175,12 +175,44 @@ class Ctx:
         if not self.principal or not self.principal.has_role(minimum):
             raise forbidden(f"Requer papel '{minimum}' ou superior na organização")
 
+    @property
+    def correlation_id(self) -> str:
+        """Identificador do RASTRO, não da requisição.
+
+        `request_id` identifica uma requisição. Uma operação do produto costuma ser várias: enviar
+        documento, classificar, aprovar, gerar recibo. O cliente que quiser amarrar as quatro manda
+        `x-correlation-id`; quem não manda recebe o próprio `request_id`, e aí rastro e requisição
+        coincidem — que é o caso simples, não um caso perdido.
+        """
+        bruto = self.request.headers.get("x-correlation-id") or ""
+        limpo = "".join(ch for ch in bruto if ch.isalnum() or ch in "-_")[:64]
+        return limpo or self.request_id
+
     def audit(self, conn: pq.Connection, action: str, object_type: str | None = None, object_id: Any = None,
-              payload: dict | None = None, org_id: str | None = None) -> None:
-        from .services.audit import record
-        record(conn, org_id=org_id if org_id is not None else (self.principal.org_id if self.principal else None),
-               actor=self.principal.user_id if self.principal else None, action=action, object_type=object_type,
-               object_id=object_id, payload=payload or {}, ip=self.ip, request_id=self.request_id)
+              payload: dict | None = None, org_id: str | None = None, *,
+              actor_type: str | None = None, resource_name: str | None = None,
+              severity: str | None = None, status: str = "success", source: str = "api",
+              parent_event_id: int | None = None,
+              before: dict | None = None, after: dict | None = None) -> int:
+        """Ponto de estrangulamento da auditoria: 319 chamadores passam por aqui.
+
+        É por isso que os campos acrescentados na v0.23.0 — `actor_type`, `session_id`,
+        `user_agent`, `correlation_id`, `severity` — são preenchidos AQUI e não em cada chamada.
+        Pedir a cada chamador que preenchesse `actor_type` garantiria que algum esquecesse, e um
+        evento sem tipo de ator numa investigação vale menos que nenhum, porque engana.
+        """
+        from .services.audit import actor_type_of, record
+        p = self.principal
+        return record(
+            conn,
+            org_id=org_id if org_id is not None else (p.org_id if p else None),
+            actor=p.user_id if p else None, action=action, object_type=object_type,
+            object_id=object_id, payload=payload or {}, ip=self.ip, request_id=self.request_id,
+            actor_type=actor_type or actor_type_of(p),
+            session_id=getattr(p, "session_id", None) if p else None,
+            user_agent=self.user_agent, correlation_id=self.correlation_id,
+            parent_event_id=parent_event_id, resource_name=resource_name,
+            severity=severity, status=status, source=source, before=before, after=after)
 
 
 @dataclass

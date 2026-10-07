@@ -137,9 +137,14 @@ def run_job(app, c, job: dict, *, http=None, sleep=None) -> dict:
         hubjobs.fail(c, job["id"], err, attempts=job["attempts"], max_attempts=job["max_attempts"])
         log(logger, logging.ERROR, "integration_adapter_error", job_id=job["id"], error_type=type(exc).__name__)
         outcome.update({"status": "failed", "error_code": "adapter_error"})
-    audit_record(c, org_id=job["org_id"], actor=None, action=f"integration.job.{outcome['status']}", object_type="integration_job",
+    # v0.23.0 — este evento nasce no TRABALHADOR, não numa requisição. `source='job'` e
+    # `actor_type='automation'`: marcar como `api`/`system` faria a trilha descrever uma pessoa
+    # chamando a API, e numa investigação é por aí que se perde tempo.
+    audit_record(c, org_id=job["org_id"], actor=None, source="job", actor_type="automation",
+                 action=f"integration.job.{outcome['status']}", object_type="integration_job",
                  object_id=job["id"], payload={k: v for k, v in outcome.items() if k != "result"} | {"operation": job["operation"], "entity": job.get("entity"),
-                 "connection_id": job.get("connection_id"), "attempt": job["attempts"]}, ip=None, request_id=job["correlation_id"])
+                 "connection_id": job.get("connection_id"), "attempt": job["attempts"]}, ip=None,
+                 request_id=job["correlation_id"], correlation_id=job["correlation_id"])
     return outcome
 
 

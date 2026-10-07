@@ -533,17 +533,154 @@ def reports(ctx: Ctx, q: ReportQ):
 
 
 class AuditQ(S.Pagination):
+    """Filtros da trilha. Cada um corresponde a uma pergunta de investigação, não a uma coluna.
+
+    Até a v0.22.0 havia dois: organização e prefixo de ação. Quem investiga pergunta outras coisas —
+    "o que ESTA pessoa fez", "o que aconteceu com ESTE documento", "o que foi RECUSADO", "o que é
+    grave" — e nenhuma dessas tinha filtro, então a resposta era paginar milhares de linhas.
+    """
     org_id: S.Uuid | None = None
     action: str | None = None
+    actor_user_id: S.Uuid | None = None
+    actor_type: Literal["user", "admin", "system", "ai", "automation", "integration"] | None = None
+    object_type: str | None = None
+    object_id: str | None = None
+    correlation_id: str | None = None
+    severity: Literal["info", "notice", "warning", "critical"] | None = None
+    status: Literal["success", "denied", "failed"] | None = None
+    source: Literal["api", "job", "cli", "webhook", "migration", "test"] | None = None
+    category: str | None = None
+    since: datetime | None = None
+    until: datetime | None = None
+
+
+_AUDIT_COLS = (
+    "id, org_id::text AS org_id, actor_user_id::text AS actor, actor_type, action,"
+    " audit_category(action) AS category, object_type, object_id, resource_name,"
+    " ip, request_id, correlation_id, parent_event_id, session_id::text AS session_id,"
+    " user_agent, severity, status, source, payload, before_state, after_state,"
+    " seq, event_hash, chain_version, at")
+
+_AUDIT_WHERE = (
+    " WHERE ($1::uuid IS NULL OR org_id = $1::uuid)"
+    "   AND ($2::text IS NULL OR action LIKE $2 || '%')"
+    "   AND ($3::uuid IS NULL OR actor_user_id = $3::uuid)"
+    "   AND ($4::text IS NULL OR actor_type = $4)"
+    "   AND ($5::text IS NULL OR object_type = $5)"
+    "   AND ($6::text IS NULL OR object_id = $6)"
+    "   AND ($7::text IS NULL OR correlation_id = $7)"
+    "   AND ($8::text IS NULL OR severity = $8)"
+    "   AND ($9::text IS NULL OR status = $9)"
+    "   AND ($10::text IS NULL OR source = $10)"
+    "   AND ($11::text IS NULL OR audit_category(action) = $11)"
+    "   AND ($12::timestamptz IS NULL OR at >= $12)"
+    "   AND ($13::timestamptz IS NULL OR at <= $13)")
+
+
+def _audit_args(q: AuditQ) -> list:
+    return [q.org_id, q.action, q.actor_user_id, q.actor_type, q.object_type, q.object_id,
+            q.correlation_id, q.severity, q.status, q.source,
+            q.category.upper() if q.category else None, q.since, q.until]
 
 
 @A("GET", "/v1/admin/audit", permission="security.audit.read", query=AuditQ)
 def audit_search(ctx: Ctx, q: AuditQ):
+    from ..core.access import log_privileged
+    log_privileged(ctx, "security.audit.read")
     with ctx.tx(readonly=True) as c:
-        rows = c.query("SELECT id, org_id::text AS org_id, actor_user_id::text AS actor, action, object_type, object_id, ip, request_id, payload,"
-                       " seq, event_hash, at FROM audit_events WHERE ($1::uuid IS NULL OR org_id = $1::uuid) AND ($2::text IS NULL OR action LIKE $2 || '%')"
-                       " ORDER BY id DESC LIMIT $3 OFFSET $4", q.org_id, q.action, q.limit + 1, q.offset)
+        rows = c.query(f"SELECT {_AUDIT_COLS} FROM audit_events{_AUDIT_WHERE}"
+                       " ORDER BY id DESC LIMIT $14 OFFSET $15",
+                       *_audit_args(q), q.limit + 1, q.offset)
     return page(rows, q.limit, q.offset)
+
+
+class TimelineQ(S.In):
+    object_type: str
+    object_id: str
+    limit: int = Field(default=200, ge=1, le=1000)
+
+
+@A("GET", "/v1/admin/audit/timeline", permission="security.audit.read", query=TimelineQ,
+   summary="Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização")
+def audit_timeline(ctx: Ctx, q: TimelineQ):
+    """A consulta que o produto não conseguia fazer sem varrer a tabela que mais cresce no banco.
+
+    `ix_audit_object` existe desde a migração 0056 exatamente para esta rota.
+    """
+    from ..core.access import log_privileged
+    log_privileged(ctx, "security.audit.read")
+    with ctx.tx(readonly=True) as c:
+        linhas = c.query(f"SELECT {_AUDIT_COLS} FROM audit_events"
+                         " WHERE object_type = $1 AND object_id = $2"
+                         " ORDER BY id LIMIT $3", q.object_type, q.object_id, q.limit)
+    return {"object_type": q.object_type, "object_id": q.object_id,
+            "events": linhas, "count": len(linhas),
+            "truncated": len(linhas) == q.limit,
+            "note": None if len(linhas) < q.limit else
+            f"A linha do tempo foi cortada em {q.limit} eventos. Use os filtros de "
+            f"`/v1/admin/audit` para percorrer o resto — a trilha é append-only, nada se perdeu."}
+
+
+class TrailQ(S.In):
+    correlation_id: str
+
+
+@A("GET", "/v1/admin/audit/trail", permission="security.audit.read", query=TrailQ,
+   summary="Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id")
+def audit_trail(ctx: Ctx, q: TrailQ):
+    """Sai de "quem mexeu neste documento?" para "mostre-me a cadeia que o levou até este estado".
+
+    A diferença entre esta rota e a linha do tempo é a ÁRVORE: a linha do tempo ordena por tempo e
+    não diz o que causou o quê. `parent_event_id` diz, e `depth` é o que a interface indenta.
+    """
+    from ..core.access import log_privileged
+    log_privileged(ctx, "security.audit.read")
+    with ctx.tx(readonly=True) as c:
+        arvore = c.query("SELECT * FROM audit_trail_of($1)", q.correlation_id)
+        # CONFERÊNCIA DE COMPLETUDE, não um segundo resultado.
+        #
+        # A primeira versão devolvia um campo `unlinked` com "eventos do rastro fora da árvore". Ele
+        # é provavelmente vazio SEMPRE, e por construção: `audit_trail_of()` traz como raiz todo
+        # evento sem pai, e `aa_trg_audit_parent` recusa pai de outra correlação — então todo evento
+        # do rastro é raiz ou descendente de uma. Um campo que não pode ter conteúdo não informa
+        # nada e sugere que informa, que é pior.
+        #
+        # O que vale conferir é o contrário: se a árvore tem MENOS eventos que o rastro, alguma
+        # dessas duas garantias deixou de valer, e aí a árvore está mentindo por omissão.
+        total = c.scalar("SELECT count(*) FROM audit_events WHERE correlation_id = $1",
+                         q.correlation_id)
+    faltando = total - len(arvore)
+    return {"correlation_id": q.correlation_id, "tree": arvore,
+            "events_in_trail": total, "events_in_tree": len(arvore),
+            "complete": faltando == 0,
+            "note": None if faltando == 0 else
+            f"ATENÇÃO: {faltando} evento(s) deste rastro não aparecem na árvore de causa. Isso só "
+            f"acontece se a relação de pai apontar para fora da correlação, o que o banco recusa — "
+            f"então é indício de alteração direta no banco."}
+
+
+@A("POST", "/v1/admin/audit/export", permission="security.audit.export", body=AuditQ,
+   summary="Exporta a trilha filtrada — e registra a própria exportação na trilha")
+def audit_export(ctx: Ctx, body: AuditQ):
+    """Exportar trilha de auditoria é um evento auditável. Quem exporta leva a própria linha.
+
+    Levar a trilha para fora é a operação que mais interessa a quem quer apagar rastro depois, e era
+    a única leitura privilegiada que não deixava registro NA PRÓPRIA TRILHA — só em
+    `privileged_access_log`. Agora deixa as duas, e a exportação devolve o id do evento que ela
+    gerou, para que quem recebe o arquivo possa conferir a origem.
+    """
+    with ctx.tx(readonly=True) as c:
+        linhas = c.query(f"SELECT {_AUDIT_COLS} FROM audit_events{_AUDIT_WHERE}"
+                         " ORDER BY id LIMIT $14", *_audit_args(body), min(body.limit, 10_000))
+    with ctx.system_tx() as c:
+        evento = ctx.audit(c, "audit.log_exported", "audit_events", None,
+                           {"rows": len(linhas), "filters": body.model_dump(mode="json",
+                                                                            exclude_none=True)},
+                           severity="warning")
+    return {"export_event_id": evento, "rows": len(linhas), "events": linhas,
+            "limit_applied": min(body.limit, 10_000),
+            "note": "Esta exportação foi registrada na trilha como `audit.log_exported`, com o "
+                    "número de linhas e os filtros usados."}
 
 
 class VerifyQ(S.In):

@@ -1,7 +1,7 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T14:38:35+00:00",
+  "generated_at": "2026-10-07T14:53:23+00:00",
   "files_total": 1812,
   "size_bytes_total": 32436192,
   "by_category": {

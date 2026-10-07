@@ -1,25 +1,25 @@
 {
   "version": "0.22.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T01:06:13+00:00",
-  "files_total": 1186,
-  "size_bytes_total": 24263638,
+  "generated_at": "2026-10-07T02:45:00+00:00",
+  "files_total": 1187,
+  "size_bytes_total": 24351527,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
-      "size_bytes": 1030288
+      "size_bytes": 1038007
     },
     "backend": {
       "files": 59,
-      "size_bytes": 684916
+      "size_bytes": 691110
     },
     "banco: acesso": {
       "files": 4,
       "size_bytes": 35808
     },
     "banco: migração": {
-      "files": 49,
-      "size_bytes": 1126293
+      "files": 50,
+      "size_bytes": 1130823
     },
     "confiança e assinatura": {
       "files": 11,
@@ -31,11 +31,11 @@
     },
     "documentação da raiz": {
       "files": 144,
-      "size_bytes": 1492174
+      "size_bytes": 1509459
     },
     "documentação técnica": {
       "files": 26,
-      "size_bytes": 1341212
+      "size_bytes": 1343533
     },
     "documento legal": {
       "files": 11,
@@ -55,11 +55,11 @@
     },
     "frontend: build": {
       "files": 17,
-      "size_bytes": 1283893
+      "size_bytes": 1284081
     },
     "frontend: código": {
       "files": 53,
-      "size_bytes": 976397
+      "size_bytes": 977902
     },
     "frontend: estático": {
       "files": 12,
@@ -95,7 +95,7 @@
     },
     "núcleo do produto": {
       "files": 12,
-      "size_bytes": 167451
+      "size_bytes": 168746
     },
     "operação": {
       "files": 20,
@@ -115,7 +115,7 @@
     },
     "teste": {
       "files": 86,
-      "size_bytes": 1699620
+      "size_bytes": 1746472
     }
   },
   "files": [
@@ -175,8 +175,8 @@
     },
     {
       "file": "AUTHORIZATION.md",
-      "sha256": "7a0f0faad4d62e043bb680b329785de0ea10707f944f551e4a0423789f97fa3b",
-      "size_bytes": 11321,
+      "sha256": "d09959172a8930a743f7d67182d5b0ff3f55251fbbefe598c525930e91f33f20",
+      "size_bytes": 13382,
       "category": "documentação da raiz"
     },
     {
@@ -199,8 +199,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "3cd3fb1070435eff2bc90f0c4bf5aa400fd43d015f006c358bd9627ab6a3a007",
-      "size_bytes": 98188,
+      "sha256": "15a429c42bd15d731d0c6ccb73b73df01fa4cb70437865544f957f6b53e59cdf",
+      "size_bytes": 101841,
       "category": "documentação da raiz"
     },
     {
@@ -265,8 +265,8 @@
     },
     {
       "file": "DECISIONS.md",
-      "sha256": "fd6daaadbaf5962de8a01296be4373fcf6af9e0bc06a27c643c36530ba25fce1",
-      "size_bytes": 95614,
+      "sha256": "dda2446f1eeadae790ca584f8dd3a603eb77a940d9056b3120667784813e4ceb",
+      "size_bytes": 101823,
       "category": "documentação da raiz"
     },
     {
@@ -433,8 +433,8 @@
     },
     {
       "file": "FINANCIAL_ENGINE.md",
-      "sha256": "383cf630e143e6fcbbf1a6e22a9041245c3b181410a0b0491720d639aa0843b8",
-      "size_bytes": 9862,
+      "sha256": "8c026693d76d0b4d0160847e559aaba9e5a9ddabab523f69e03686905b78beaa",
+      "size_bytes": 11947,
       "category": "documentação da raiz"
     },
     {
@@ -571,8 +571,8 @@
     },
     {
       "file": "INTERNAL_OPERATIONS.md",
-      "sha256": "d28b45af11549e6d18db9f456d69f53539ec6589e3a57f1de24da76b63dff6ee",
-      "size_bytes": 8406,
+      "sha256": "7bfe3f66dc4dfe8a37ab0696b855bd41567c4db56240e53194bc8c61393cd836",
+      "size_bytes": 9809,
       "category": "documentação da raiz"
     },
     {
@@ -673,8 +673,8 @@
     },
     {
       "file": "NON_CUSTODIAL_ARCHITECTURE.md",
-      "sha256": "c0e15f6a2b1e5b6966d3d56548bec0e3c9bf248d2b0a97fc13a153c83f59a9ac",
-      "size_bytes": 13156,
+      "sha256": "73bf57670c1a59e20426c6b5a9d4ef5d8cfec6f88999a2648c63e05755001cd9",
+      "size_bytes": 13509,
       "category": "documentação da raiz"
     },
     {
@@ -793,8 +793,8 @@
     },
     {
       "file": "README.md",
-      "sha256": "22d4718a1d2866675d343cf17985bec734694f2ae6990bcaed42763c351ebb85",
-      "size_bytes": 25489,
+      "sha256": "4ad49db83388764c904617998f28c8cb6c2afac9b495e1f9e1a359e49b29c11d",
+      "size_bytes": 25987,
       "category": "documentação da raiz"
     },
     {
@@ -949,8 +949,8 @@
     },
     {
       "file": "TECHNICAL_FINALIZATION_STATUS.md",
-      "sha256": "a19c82fd20128cc920048f45a4b6183a2b090ab5885cc9d72deef9f52b8ec975",
-      "size_bytes": 10806,
+      "sha256": "7b13f8042dab11bf482983fbe797e7eaef11ec6b50543f4d77a2291402f13ee2",
+      "size_bytes": 11829,
       "category": "documentação da raiz"
     },
     {
@@ -1141,14 +1141,14 @@
     },
     {
       "file": "backend/impacto/api/access_routes.py",
-      "sha256": "b720f74cf38b463608653e261f6e4e9ce38804e7705b4635db11b4a04b654bf5",
-      "size_bytes": 11438,
+      "sha256": "be32a6949fe7baced86376591f3299374718d375fa664cd97090a15c38fb5725",
+      "size_bytes": 13028,
       "category": "api: rotas e esquemas"
     },
     {
       "file": "backend/impacto/api/admin_routes.py",
-      "sha256": "16133734b4cf926f8f23b91f517dda0fb10065093aa23435e44aa5d7d12e3250",
-      "size_bytes": 35170,
+      "sha256": "ca4040940807df80f1b478a337e6571a872e698bb1f7ce8b73dc225d76ba8b3b",
+      "size_bytes": 35196,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1165,8 +1165,8 @@
     },
     {
       "file": "backend/impacto/api/assembly_routes.py",
-      "sha256": "9619098902aba7f8d0166dc3f86078461c07db27104ae9893906295a32ac4a0c",
-      "size_bytes": 22779,
+      "sha256": "82fe0411a521640bd6ffe24d82561689a47f1f0534a9b0eef0e60993f34d8145",
+      "size_bytes": 22846,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1207,8 +1207,8 @@
     },
     {
       "file": "backend/impacto/api/content_admin_routes.py",
-      "sha256": "d7e86044cd6b19341299f5e715d6bc82b5e87e919b9a0535c8239860e55e6d94",
-      "size_bytes": 48150,
+      "sha256": "4eb4e6d4667479acba7d7ddf0b1a78803bf3c09ce0cc352db88b60ae110a3de6",
+      "size_bytes": 48204,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1327,8 +1327,8 @@
     },
     {
       "file": "backend/impacto/api/internal_routes.py",
-      "sha256": "ad5db5a27eb7392e191e1f0137e5c618ca68b411b8e1643fe6ffb5161e2fe0c7",
-      "size_bytes": 27041,
+      "sha256": "cf9f90b9b4f15ba7075eaf9f9041c1c2c698bbef0a785b518dc3cccbfaa0651c",
+      "size_bytes": 31633,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1387,8 +1387,8 @@
     },
     {
       "file": "backend/impacto/api/ops_routes.py",
-      "sha256": "dda9a76d9c5923ecdf83be01ae28e495708347f26318a785ab7735b18ab155d6",
-      "size_bytes": 9659,
+      "sha256": "209cb5eb3f920601a661e7f24be28381cf8cdf608a6c5ff29a40b6f1b3fb69e7",
+      "size_bytes": 9874,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1447,8 +1447,8 @@
     },
     {
       "file": "backend/impacto/api/schemas.py",
-      "sha256": "fdafd22f3cb119f985d1731ef22e3a606ae5a58ffe0efee0bc1bfd96f5f424cb",
-      "size_bytes": 57298,
+      "sha256": "ba34f25bfce977833f92abcae2976db8e3e7da7c36c9f33a81bd88d4f4aa3c4d",
+      "size_bytes": 58473,
       "category": "api: rotas e esquemas"
     },
     {
@@ -1519,8 +1519,8 @@
     },
     {
       "file": "backend/impacto/core/access.py",
-      "sha256": "6cb6ab96291a32556d5901bb699d8fb9a6b4229c0adc7eb1a975dacb9fe3ab4f",
-      "size_bytes": 18228,
+      "sha256": "07c054cb81d2b78fb5fa9d357efd0cb6c2b3002161ddb7b380140d9832590a47",
+      "size_bytes": 19523,
       "category": "núcleo do produto"
     },
     {
@@ -1615,8 +1615,8 @@
     },
     {
       "file": "backend/impacto/economics/approvals.py",
-      "sha256": "56562d3f408789df3ec718f435a96d159a1503ac157526fe1cee277ff8e2e8ae",
-      "size_bytes": 7378,
+      "sha256": "1b686c092eb132e77bbe8a2e4ff7b0a164df3d8676794635a2d2082b18dd8ef9",
+      "size_bytes": 9038,
       "category": "backend"
     },
     {
@@ -1627,14 +1627,14 @@
     },
     {
       "file": "backend/impacto/economics/engine.py",
-      "sha256": "3cad66ce8004cbdae6d5451edd71defbfea85d9b1581cb7d202813f40d27c743",
-      "size_bytes": 12691,
+      "sha256": "6abcbe8f2a3ef8495c043c205466744b74cff8f3383d3f0844ba20e479dde8b4",
+      "size_bytes": 13890,
       "category": "backend"
     },
     {
       "file": "backend/impacto/economics/metrics.py",
-      "sha256": "44c467b5ab60c5771ac41414760fea972a8310cff9d4541a40f1af3684747703",
-      "size_bytes": 15762,
+      "sha256": "d9175c9e1334e8b6a8a060a8b4264e2d0d5b65bbdc7a223bdfdb827de41a1304",
+      "size_bytes": 18587,
       "category": "backend"
     },
     {
@@ -1849,8 +1849,8 @@
     },
     {
       "file": "backend/impacto/http.py",
-      "sha256": "45875a30891307993463f5cb2d86d4647b451bdfbcd10644c3d01b9d39d8fe73",
-      "size_bytes": 25839,
+      "sha256": "b6e88e2a8f809242140f707b965de6a96aeddbdccb43632e8b7d76f790ce65e4",
+      "size_bytes": 26349,
       "category": "backend"
     },
     {
@@ -2748,6 +2748,12 @@
       "category": "banco: migração"
     },
     {
+      "file": "backend/migrations/0050_v0220_approval_applies.sql",
+      "sha256": "5720ef70d62355b0368da123c18eada582a788dce6d7e22f93e2797785109f90",
+      "size_bytes": 4530,
+      "category": "banco: migração"
+    },
+    {
       "file": "backend/pyproject.toml",
       "sha256": "03136db52d2170c477fe5d31df47194b583ddbf0e51a5ef9e65e79588af8fde5",
       "size_bytes": 655,
@@ -3265,20 +3271,20 @@
     },
     {
       "file": "backend/tests/test_v0220_authorization.py",
-      "sha256": "86b176223644ba7524329155f570b37b8e8a3cca05b36589a99cc34efd578fa4",
-      "size_bytes": 21145,
+      "sha256": "d21cccd89b45cba4e3436a38c1272c3bc23a6d7fd46d869659ed6457ae391189",
+      "size_bytes": 26523,
       "category": "teste"
     },
     {
       "file": "backend/tests/test_v0220_financial_engine.py",
-      "sha256": "fed1541b9a29a5698404a5c671adf65c8dcfa6aaf7ab4a14512d49028678bccf",
-      "size_bytes": 30021,
+      "sha256": "c1c0be3ed866201c02ed700c307cdec8097a0d79929ca2a002c0a3bc3fea6de9",
+      "size_bytes": 53281,
       "category": "teste"
     },
     {
       "file": "backend/tests/test_v0220_internal_ui.py",
-      "sha256": "a59e0c22b41b23e9bc5602a1424cc503964be719bcfe759fb0b2ef33d0011104",
-      "size_bytes": 18840,
+      "sha256": "c785ef5deb4f8bac93ef7e7ddc3b204526bd96c907778b9303eb80a029892887",
+      "size_bytes": 37054,
       "category": "teste"
     },
     {
@@ -3421,8 +3427,8 @@
     },
     {
       "file": "docs/API.md",
-      "sha256": "f48ffc10896b426c26d9da5798cd781c8ab846fc7f8094568e5a64a6ccb15f90",
-      "size_bytes": 138144,
+      "sha256": "cbe6e78252e8353d2b8af29fd93cc6519131999c96b1250ea3087afdd1da2c05",
+      "size_bytes": 138265,
       "category": "documentação técnica"
     },
     {
@@ -3817,8 +3823,8 @@
     },
     {
       "file": "docs/openapi.json",
-      "sha256": "fbe93823f7e2ec8c785ae1696c0a2b81b2b877949ddf610ee8c209788f325645",
-      "size_bytes": 1124321,
+      "sha256": "c5af9f0677b682304103bcc8975fcb3105eeb8b2d55210c4468ca87f71b66d89",
+      "size_bytes": 1126521,
       "category": "documentação técnica"
     },
     {
@@ -6696,9 +6702,9 @@
       "category": "frontend"
     },
     {
-      "file": "web/dist/assets/app-VYIB6L3H.js",
-      "sha256": "c9be094c107364906bc1665a15d2c1b85e8a7ff9646de8044dbdfac9903b69d8",
-      "size_bytes": 963337,
+      "file": "web/dist/assets/app-6CNHF6GO.js",
+      "sha256": "f5e1882f3de294c6031333e56181b83d9b9fc654816089779e3c227fd7663f6c",
+      "size_bytes": 963525,
       "category": "frontend: build"
     },
     {
@@ -6709,7 +6715,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "6071eed30537b4eeea5ca8a54c0d7b29208d97320928dee6b53cd35fbd67451a",
+      "sha256": "526aa59d8c5ae76e2021de44ced848259f12eb465048576bc08c41cf6396d979",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -6769,7 +6775,7 @@
     },
     {
       "file": "web/dist/index.html",
-      "sha256": "82bf27ba529cc79602122a162c6a2505e9cfff314756392b69714a489e6b5a17",
+      "sha256": "9e3fbe99f63c9aff70c6667526cc36526c59473611e287fff9fce0494a41c997",
       "size_bytes": 982,
       "category": "frontend: build"
     },
@@ -6793,7 +6799,7 @@
     },
     {
       "file": "web/dist/sw.js",
-      "sha256": "3ae121c9f97695fd6f872916a9e628cbb05433e82d1ee3667a0e056c1787299e",
+      "sha256": "368da4cfa2237803ec484237d2882d152aa5b0d2556f424ad245b1dacc2ff169",
       "size_bytes": 1694,
       "category": "frontend: build"
     },
@@ -6895,8 +6901,8 @@
     },
     {
       "file": "web/src/app.tsx",
-      "sha256": "efaf98106e125c8fdcc4aef8d609a22793ed88190650825df9ef8dd8ab1e5f33",
-      "size_bytes": 30056,
+      "sha256": "1dbcc7ddd630740bd097842a002907914be9434aabe0e4f6c302123ecab66d0d",
+      "size_bytes": 30207,
       "category": "frontend: código"
     },
     {
@@ -7027,8 +7033,8 @@
     },
     {
       "file": "web/src/pages/internal.tsx",
-      "sha256": "c84f453dc86827eb802269e9c6929420199ffbe948d4407c873cb7cacadab367",
-      "size_bytes": 50705,
+      "sha256": "e665465ce64b529b11f380b1086aa8c7d263c9a947a6229cfd5eb60f17b10735",
+      "size_bytes": 51062,
       "category": "frontend: código"
     },
     {
@@ -7069,8 +7075,8 @@
     },
     {
       "file": "web/src/pages/portal.tsx",
-      "sha256": "3df2b605a0c63b1fc284c11445736172747f87cfd14941cd3c5cbef6d61af84b",
-      "size_bytes": 6565,
+      "sha256": "d2e9b7dfc6a0b2da599d9f9bd97df3b7b08ddc06e90547aed02780dd2df24f20",
+      "size_bytes": 7562,
       "category": "frontend: código"
     },
     {

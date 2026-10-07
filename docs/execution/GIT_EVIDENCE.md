@@ -20,8 +20,16 @@ branch: audit/v0.23.0-completion
 |---|---|
 | Commit publicado | `3b4306c9fb89fcfc35bc7bb9481817b3bee9e4b7` |
 | Árvore (`tree`) | `e80077107b308f03c10d718f4fae865dbc7acb2d` |
-| Tag | `v0.23.0-audit-completion` → aponta para o mesmo commit |
-| Local × remoto | **idênticos** |
+| Tag | `v0.23.0-audit-completion` → aponta para o mesmo commit, **localmente** |
+| Local × remoto (branch) | **idênticos** |
+| Local × remoto (tag) | **a tag NÃO está no remoto** |
+
+**A tag não está publicada, e isso não é detalhe.** O envio é recusado por este ambiente (HTTP 403).
+Ela existe no repositório local e no `bundle` que acompanha o pacote de auditoria; no GitHub, não.
+Quem clonar o remoto encontra o commit e **não** encontra a tag, e precisa conferir pelo hash do
+commit ou pela árvore. A versão anterior desta seção listava a tag sob "o histórico está público" sem
+essa ressalva — uma auditoria independente notou que `git ls-remote --tags` não a traz, e tinha
+razão. Para publicá-la: `git push --tags` de onde houver permissão.
 
 O hash da **árvore** é o que mais importa para auditoria: ele depende só do conteúdo dos arquivos, não
 de autor, data ou mensagem. Duas pessoas que reconstruam o mesmo conjunto de arquivos chegam ao mesmo
@@ -97,8 +105,8 @@ sem motivo escrito.
 
 ## 3. O histórico inteiro, verificável **sem rede**
 
-O pacote de auditoria traz `impacto-v0.23.0.bundle` (5,9 MB) — o repositório inteiro num arquivo, com
-todos os commits e a tag:
+O pacote de auditoria traz `hashes/impacto-v0.23.0.bundle` — o repositório inteiro num arquivo, com
+todos os commits **e a tag** (que o remoto não tem):
 
 ```
 git bundle verify impacto-v0.23.0.bundle

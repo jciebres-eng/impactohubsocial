@@ -242,9 +242,32 @@ def verify(d: Path) -> int:
     return 1 if bad else 0
 
 
+USO = """Uso:
+  make_release.py                      constrói o pacote com o nome padrão
+  make_release.py --name ARQUIVO.zip   constrói com o nome dado
+  make_release.py --verify DIRETORIO   confere um pacote extraído contra RELEASE_MANIFEST.sha256
+"""
+
 if __name__ == "__main__":
-    if len(sys.argv) >= 2 and sys.argv[1] == "--verify":
-        sys.exit(verify(Path(sys.argv[2] if len(sys.argv) > 2 else ".")))
-    if len(sys.argv) >= 3 and sys.argv[1] == "--name":
-        sys.exit(build(sys.argv[2]))
+    # ARGUMENTO DESCONHECIDO RECUSA, não constrói.
+    #
+    # A versão anterior caía no `build()` final para qualquer argumento não reconhecido — inclusive
+    # `--help`. Um auditor independente rodou `make_release.py --help` para ver a sintaxe e o script
+    # EMPACOTOU: reescreveu `RELEASE_MANIFEST.csv` e `.sha256` versionados e criou um ZIP novo em
+    # `dist-release/`. Construir release é efeito colateral grande demais para ser o comportamento
+    # padrão de um comando digitado errado.
+    args = sys.argv[1:]
+    if args and args[0] in ("-h", "--help", "help"):
+        print(USO)
+        sys.exit(0)
+    if args and args[0] == "--verify":
+        if len(args) < 2:
+            sys.exit("--verify exige o diretório do pacote extraído\n\n" + USO)
+        sys.exit(verify(Path(args[1])))
+    if args and args[0] == "--name":
+        if len(args) < 2:
+            sys.exit("--name exige o nome do arquivo\n\n" + USO)
+        sys.exit(build(args[1]))
+    if args:
+        sys.exit(f"argumento não reconhecido: {args[0]}\n\n" + USO)
     sys.exit(build())

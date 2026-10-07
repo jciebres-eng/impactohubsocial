@@ -17,15 +17,22 @@ divergência.
 
 ### 2. Commit
 
-`67bc6aa` · branch `audit/v0.23.0-completion` · base `chore/v0.19.0-vocabulary-firstrun-ops`
-
-| Commit | Escopo |
+| | |
 |---|---|
-| `9ca75f1` | Gates 0-4: as quatro matrizes, derivadas do código e travadas por teste |
-| `b4c6958` | Gate 5: dez conferências de segurança, nove executadas e uma declarada bloqueada |
-| `5d0ce11` | Gate 6: dados e infraestrutura, executados contra PostgreSQL real do zero |
-| `7b286d7` | Gates 7 e 8: integrações inertes, modal testado, achado de tabela que não resistiu |
-| `67bc6aa` | Regressão completa: quatro testes que vazavam estado entre arquivos |
+| Commit | preenchido no empacotamento final (ver `GIT_EVIDENCE.md`) |
+| Branch | `audit/v0.23.0-completion` |
+| Base | `chore/v0.19.0-vocabulary-firstrun-ops` |
+
+**Os hashes citados na versão anterior deste relatório não existem mais.** `9ca75f1`, `b4c6958`,
+`5d0ce11`, `7b286d7` e `67bc6aa` foram **reescritos**: a proteção de push do GitHub recusou a
+publicação apontando uma chave do Stripe no controle negativo da varredura de segredos, em
+`b4c6958:backend/tests/test_v0230_security_gate.py:427`. Autorizar o segredo pelo link que o GitHub
+oferece seria o oposto do que aquele teste defende; reescrever os três commits afetados foi a saída
+certa, e a branch nunca havia sido publicada. O histórico, a razão e os hashes vigentes estão em
+`GIT_EVIDENCE.md`, que é a fonte desta informação — **citar hash em dois lugares foi o que produziu a
+contradição**, e uma auditoria independente a encontrou.
+
+A sequência de commits desta rodada, por escopo, está em `MASTER_EXECUTION_STATUS.md`.
 
 ### 3. Tag
 
@@ -46,12 +53,21 @@ Docker; envio de tag ao remoto recusado; nenhuma base de vulnerabilidade alcanç
 
 ### 6. Testes executados
 
-**2.184** na regressão completa, mais **17** de desempenho em passo próprio. **115 são novos desta
-rodada.**
+**2.184** coletados na regressão completa, mais **26** de volume em passo próprio (17 + 9).
 
 ### 7. Testes aprovados
 
-**2.184 de 2.184.** Falhas: 0. Erros: 0. Duração: 585 s.
+**2.158 aprovados · 0 falhas · 0 erros · 26 ignorados**, de 2.184 coletados, em 585 s.
+
+Os 26 ignorados são os de volume, que rodam em passo próprio — e **os dois arquivos rodam**:
+`test_v0150_performance.py` (17) e `test_v0180_performance.py` (9), ambos OK em `PERF=1` e em
+`PERF_FULL=1`. **2.158 + 26 = 2.184.**
+
+A versão anterior deste item dizia "2.184 de 2.184 aprovados", o que apaga os ignorados, e a de
+`TEST_EVIDENCE.md` afirmava que os 26 rodavam à parte quando o passo de desempenho executava só 17 —
+os 9 de `test_v0180_performance.py` nunca rodaram, e aquele arquivo é citado pela matriz de motores
+como evidência de `reputation` e `seals`. Apontado por auditoria independente e corrigido rodando os
+nove.
 
 ### 8. Falhas corrigidas
 
@@ -77,7 +93,7 @@ declarada e conferida por conjunto**:
 |---|---|
 | Operações de API | **888 de 888** classificadas, com o ponto de estrangulamento exercitado por classe |
 | Motores | **42 de 42** com teste, caso de dado faltante, caso adversarial e rotas conferidas |
-| Passos de jornada | **49 de 49**, todos ponta a ponta |
+| Passos de jornada | **49 de 49** cobertos, em 7 jornadas: 19 por navegador, 30 por travessia de API |
 | Tabelas com RLS | **321 de 322** (a exceção é `schema_migrations`, com motivo escrito) |
 | Integrações com teste de contrato | **14 de 14** |
 
@@ -111,34 +127,41 @@ organização 220 · organização por papel 186 · plataforma 138 · organizaç
 usuário sem organização 97 · plataforma com permissão 83 · pública 52.
 
 **Cada uma das 888 foi INVOCADA individualmente** (`test_v0230_api_sweep.py`), com o cliente da
-persona que a alcança:
+persona que a alcança — e o que importa mais que o status é **até qual camada a chamada chegou**:
 
-| | |
-|---|---|
-| Invocadas por HTTP real | **883** |
-| Puladas por serem destrutivas, com motivo escrito | **5** |
-| **Responderam 5xx** | **0** |
-| Devolveram 2xx | 332 |
-| Devolveram 422 (corpo vazio recusado pela validação) | 358 |
-| Devolveram 404 (identificador inexistente informado de propósito) | 177 |
-| Devolveram 403 / 409 / 401 | 7 / 8 / 1 |
+| Camada alcançada | Operações | O que está exercitado |
+|---|---|---|
+| **handler executado** | **542** | roteamento + autorização + validação + **o código da operação** |
+| recusada pelo schema antes do handler | **341** | roteamento + autorização + validação. **O handler não roda** |
+| pulada por ser destrutiva (motivo escrito) | 5 | — |
+| **responderam 5xx** | **0** | — |
 
-A coluna `observed` da matriz passou a carregar **o código HTTP real de cada operação**. Antes dizia
-"chokepoint por classe" — descrição do método, não observação; o adendo de auditoria notou isso e
-tinha razão. Uma coluna chamada `observed` que não carrega observação é a pior espécie de
-documentação, porque *parece* evidência.
+Status observados: 2xx em 332, 422 em 341, 404 em 177, e 403/409/401 em 23.
 
-A varredura é determinística: constrói os próprios objetos em vez de procurar no banco o que outro
-teste deixou, e duas execuções consecutivas produzem arquivo idêntico. A primeira versão lia
-`SELECT ... LIMIT 1`, o que fazia o resultado depender de quais testes rodaram antes.
+**Por que a coluna de camada existe, e por que o status sozinho engana.** Em `impacto/http.py`,
+`spec.body.model_validate(payload)` roda **antes** de `spec.handler(*args)`. Nas 341 operações
+recusadas por corpo incompleto, **nenhuma linha do handler foi executada** — um `NameError` dentro de
+qualquer um deles passaria batido por esta varredura. A versão anterior deste relatório afirmava que
+um 422 prova que "a rota roda, a autorização roda, **a busca roda** e o erro é tratado". Era falso
+para essas 341, e uma auditoria independente apontou o lugar exato no código. A afirmação correta é a
+tabela acima.
 
-**O que isto NÃO prova, e precisa ficar dito aqui.** Não é teste funcional de caminho feliz. Um `404`
-para identificador inexistente e um `422` para corpo vazio **são respostas corretas** e contam como
-exercício — provam que a rota roda, que a autorização roda, que a busca roda e que o erro é tratado.
-Não provam que a operação faz a coisa certa quando recebe dados válidos. Em uma frase: está provado
-que **nenhuma das 888 operações está quebrada**; não está provado que todas as 888 foram exercitadas
-com dados reais de ponta a ponta. O que cobre o caminho feliz são as jornadas por persona e as suítes
-de domínio, com o escopo delas.
+A matriz carrega as duas colunas: `observed` com o código HTTP real e `layer_reached` com a camada.
+
+A varredura é determinística — constrói os próprios objetos em vez de procurar no banco o que outro
+teste deixou, e duas execuções consecutivas produzem arquivo idêntico. Três correções entraram depois
+da auditoria independente: a persona **Profissional** não existia (as 6 rotas de `kinds=("provider",)`
+caíam no cliente OSC e tomavam `wrong_org_kind`); o arranjo **silenciava** a própria falha (o
+`summary` da solução tinha 16 caracteres contra o mínimo de 20, e as 32 rotas de `{solution_id}`
+rodavam contra id inexistente enquanto o comentário dizia o contrário); e os `DELETE` rodavam **antes**
+dos `GET` do mesmo recurso, apagando o arranjo recém-construído. As três estão corrigidas, com teste
+de contraprova para a primeira.
+
+**O que isto NÃO prova.** Não é teste funcional de caminho feliz. Está provado que **nenhuma das 888
+operações levanta exceção não tratada na camada que alcança**, e está dito quantas alcançam cada
+camada. Não está provado que as 888 foram exercitadas com dados válidos de ponta a ponta — e, para
+341 delas, o handler não foi entrado nesta varredura. O caminho feliz é coberto pelas jornadas por
+persona e pelas suítes de domínio, com o escopo delas.
 
 Autorização, em cima disso: **221 chamadas HTTP reais** de organização-cliente contra a porta da
 plataforma, **todas 403**; 83 rotas com permissão nomeada recusando papel que não a tem, **com
@@ -313,7 +336,7 @@ de rastreabilidade constam como exceções declaradas em `test_v0230_release_gat
 
 | Artefato | Como verificar |
 |---|---|
-| `IMPACTO_v0.23.0_AUDIT_COMPLETION.zip` (distribuível, 1.806 arquivos, ~10,6 MB) | `sha256sum -c IMPACTO_v0.23.0_AUDIT_COMPLETION.zip.sha256`, publicado ao lado |
+| `IMPACTO_v0.23.0_AUDIT_COMPLETION.zip` (distribuível: 1.808 entradas no ZIP = 1.805 do manifesto + 3 auto-referenciais) | `sha256sum -c IMPACTO_v0.23.0_AUDIT_COMPLETION.zip.sha256`, publicado ao lado |
 | `IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip` (auditoria) | `sha256sum -c IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip.sha256`, publicado ao lado |
 | Pacote distribuível, **arquivo por arquivo** | `python3 scripts/make_release.py --verify plataforma-impacto-v0.23.0` — confere os 1.806 contra `RELEASE_MANIFEST.sha256` embutido |
 | Manifesto de rastreabilidade | `IMPACTO_v0.23.0_TRACEABILITY.json` — 1.805 arquivos com sha256, tamanho e categoria |

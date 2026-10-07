@@ -106,13 +106,34 @@ def classe(r) -> str:
     return "organizacao"
 
 
-#: Status observado por operação, gravado por `test_v0230_api_sweep.py` quando ele CHAMA as 888.
+#: Status e CAMADA observados por operação, gravados por `test_v0230_api_sweep.py` ao chamar as 888.
 #:
 #: Antes desta rodada a coluna `observed` dizia "chokepoint por classe" — descrição do método, não
 #: observação. O adendo de auditoria de 07/10/2026 notou exatamente isso, e tinha razão: uma coluna
 #: chamada `observed` que não carrega observação é a pior espécie de documentação, porque parece
-#: evidência. Agora ela traz o código HTTP real de cada operação.
+#: evidência.
+#:
+#: `layer_reached` existe porque status sozinho ENGANA: um 422 de schema é recusado por
+#: `model_validate` ANTES de `spec.handler`, então o handler nunca roda. Sem essa coluna, "888
+#: invocadas, nenhum 5xx" leva o leitor a concluir que 888 handlers foram exercitados.
 _SWEEP = ROOT / "docs" / "execution" / "api_sweep_observed.json"
+_LAYERS = ROOT / "docs" / "execution" / "api_sweep_layers.json"
+
+_CAMADA_EM_PALAVRAS = {
+    "handler": "handler executado",
+    "validacao": "recusada pelo schema antes do handler",
+    "roteamento": "recusada na autorização antes do handler",
+    "pulada": "pulada por ser destrutiva (motivo em PULADAS)",
+    "excecao": "o cliente levantou exceção",
+}
+
+
+def _camada(chave: str) -> str:
+    import json
+    if not _LAYERS.exists():
+        return "AUSENTE: rode test_v0230_api_sweep.py"
+    d = json.loads(_LAYERS.read_text(encoding="utf-8"))
+    return _CAMADA_EM_PALAVRAS.get(d.get(chave, ""), "AUSENTE: operação não registrada")
 
 _SIGNIFICADO = {
     200: "200 respondeu", 201: "201 criou", 204: "204 respondeu sem corpo",
@@ -148,7 +169,8 @@ def main() -> int:
     campos = (["operation_id", "method", "path", "class"] + list(PERSONAS)
               + ["mfa_required", "cross_tenant", "invalid_payload", "not_found", "rate_limit",
                  "audit", "ledger_effect", "multipart", "raw_body", "feature", "permission",
-                 "min_role", "kinds", "expected", "observed", "status", "evidence"])
+                 "min_role", "kinds", "expected", "observed", "layer_reached", "status",
+                 "evidence"])
 
     linhas = []
     for r in sorted(ROUTES, key=lambda x: (x.path, x.method)):
@@ -177,6 +199,7 @@ def main() -> int:
             "min_role": r.min_role or "", "kinds": "|".join(r.kinds or ()),
             "expected": "responde sem erro de servidor; recusa quem a classe não autoriza",
             "observed": _observado(f"{r.method} {r.path}"),
+            "layer_reached": _camada(f"{r.method} {r.path}"),
             "status": "PASS", "evidence": "docs/execution/TEST_EVIDENCE.md",
         }
         for p in PERSONAS:

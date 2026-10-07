@@ -17,11 +17,26 @@ cd backend && TEST_ADMIN_DATABASE_URL=... PASSWORD_SCRYPT_N=16384 \
 
 | | |
 |---|---|
-| **Testes executados** | **2.184** |
+| **Testes coletados** | **2.184** |
+| **Aprovados** | **2.158** |
 | **Falhas** | **0** |
 | **Erros** | **0** |
-| Ignorados | 26 — os testes de volume, que rodam em passo próprio (`PERF=1`); executados à parte, ver abaixo |
+| **Ignorados nesta execução** | **26** — os testes de volume, que rodam em passo próprio (`PERF=1`) |
 | Duração | 585 s |
+
+**Os 26 ignorados, um a um — e por que a contabilidade anterior estava errada.** O relatório anterior
+dizia "26 … executados à parte", mas o passo de desempenho rodava **só**
+`test_v0150_performance.py` (17 testes). Os **9** de `test_v0180_performance.py` ficavam de fora — e
+`ENGINE_VALIDATION_MATRIX.csv` cita esse arquivo como evidência dos motores `reputation` e `seals`.
+Uma auditoria independente notou a lacuna. Agora os dois arquivos rodam:
+
+| Arquivo | Testes | `PERF=1` | `PERF_FULL=1` |
+|---|---|---|---|
+| `test_v0150_performance.py` | 17 | **OK** | **OK** |
+| `test_v0180_performance.py` | 9 | **OK** | **OK** |
+| | **26** | | |
+
+**2.158 + 26 = 2.184**, e os 26 passam no passo próprio. Nenhum teste ficou sem rodar nesta rodada.
 
 ### As cinco falhas da primeira execução, e o que cada uma era
 

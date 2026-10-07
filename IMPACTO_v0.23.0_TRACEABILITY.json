@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T15:09:21+00:00",
-  "files_total": 1814,
-  "size_bytes_total": 32464806,
+  "generated_at": "2026-10-07T16:11:53+00:00",
+  "files_total": 1815,
+  "size_bytes_total": 32493861,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -11,7 +11,7 @@
     },
     "backend": {
       "files": 59,
-      "size_bytes": 696366
+      "size_bytes": 701591
     },
     "banco: acesso": {
       "files": 4,
@@ -35,7 +35,7 @@
     },
     "documentação técnica": {
       "files": 45,
-      "size_bytes": 1934932
+      "size_bytes": 1938489
     },
     "documento legal": {
       "files": 11,
@@ -99,7 +99,7 @@
     },
     "operação": {
       "files": 27,
-      "size_bytes": 194553
+      "size_bytes": 200473
     },
     "raiz do projeto": {
       "files": 3,
@@ -114,8 +114,8 @@
       "size_bytes": 442022
     },
     "teste": {
-      "files": 106,
-      "size_bytes": 2096982
+      "files": 107,
+      "size_bytes": 2111335
     }
   },
   "files": [
@@ -1537,8 +1537,8 @@
     },
     {
       "file": "backend/impacto/cli.py",
-      "sha256": "1f5bfe14945641c8fede5e09d48acd35a8371acb74a82e04ef85e869bd696243",
-      "size_bytes": 4184,
+      "sha256": "e35a3fa10bad70b9f9d3b7a96789866386319092886a56c3dbcfc39b3de1c84b",
+      "size_bytes": 9409,
       "category": "backend"
     },
     {
@@ -3552,6 +3552,12 @@
       "category": "teste"
     },
     {
+      "file": "backend/tests/test_v0231_cli.py",
+      "sha256": "26dae8451b0d98d988ed724b65938b7d53b69848d9fead087b0b2669d27b4ed5",
+      "size_bytes": 14353,
+      "category": "teste"
+    },
+    {
       "file": "backend/tests/test_v080.py",
       "sha256": "2b1648f859ba4e6f3d2c75a74978da84c2108a54931bd31ec9d83605625a092b",
       "size_bytes": 53633,
@@ -3793,8 +3799,8 @@
     },
     {
       "file": "docs/PUBLICACAO.md",
-      "sha256": "0f9e889a568c05746b700960cb581f50e986ec12549be42b3bd8bcfcc9538257",
-      "size_bytes": 6485,
+      "sha256": "7a381a824c4fef64b33f64fe02e871950831979c660243bb559badd4c3fde97e",
+      "size_bytes": 10042,
       "category": "documentação técnica"
     },
     {
@@ -10399,8 +10405,8 @@
     },
     {
       "file": "scripts/smoke_test.py",
-      "sha256": "2fde976fedabb7235fdabce892b894a99224e0819559198f98864720b67f58d3",
-      "size_bytes": 17477,
+      "sha256": "7c306423ceb9d116fd405acca2404f6ff5f1c964e502d3c6aae2e71a01a6867b",
+      "size_bytes": 23397,
       "category": "operação"
     },
     {

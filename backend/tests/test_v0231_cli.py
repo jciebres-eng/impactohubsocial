@@ -23,13 +23,32 @@ stdin, carregamento de configuração e pool de banco.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import subprocess
 import sys
 import unittest
 
-from tests.support import APP_DSN, ROOT, Client, db_system, server
+from tests.support import APP_DSN, ROOT, Client, db_system, owner_conn, server
+
+
+#: `legal_documents_summary_check` também tem piso de tamanho.
+RESUMO = ("Resumo da minuta de teste usada pelos comandos operacionais de aprovação "
+          "jurídica, sem valor legal.")
+
+#: `legal_documents_body_md_check` exige mais de 200 caracteres: minuta curta demais não é minuta.
+CORPO = ("# Minuta de teste do CLI\n\nTexto de minuta criado exclusivamente para exercitar os comandos operacionais de aprovação jurídica. Não tem valor legal algum e existe só para que o teste tenha um documento proprio, sem tocar nas minutas reais do produto.")
+
+
+@contextlib.contextmanager
+def _dono():
+    """Conexão como DONO do banco. `owner_conn()` é autocommit e não é gerenciador de contexto."""
+    c = owner_conn()
+    try:
+        yield c
+    finally:
+        c.close()
 
 
 def _cli(*args: str, senha: str = "Senha-Do-Admin-Forte-2026") -> subprocess.CompletedProcess:
@@ -139,25 +158,91 @@ class TheLegalGateHasAWayOutThatIsNotPsqlTests(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         self.assertIn("legal-list", r.stderr, "a mensagem não diz como descobrir as chaves válidas")
 
-    def test_approving_clears_the_block_and_leaves_a_trail(self):
-        antes = _cli("legal-list")
-        self.assertIn("BLOQUEANDO O PRODUTO", antes.stdout,
-                      "nada estava bloqueando: o teste mediria o vazio")
-        for chave in ("terms_of_use", "privacy_policy"):
-            r = _cli("legal-approve", "--doc-key", chave,
-                     "--reviewed-by", "Fulana de Tal, OAB/MT 1234",
-                     "--review-reference", "Parecer 12/2026")
-            self.assertEqual(r.returncode, 0, f"{chave}: {r.stderr[-800:]}")
-            self.assertIn("Aprovado", r.stdout)
-        depois = _cli("legal-list")
-        self.assertIn("Nenhum documento bloqueando", depois.stdout,
-                      f"o bloqueio continua depois de aprovar as duas:\n{depois.stdout[-500:]}")
+    def test_approving_a_draft_works_and_leaves_a_trail(self):
+        """Usa uma minuta PRÓPRIA, porque o estado das reais é compartilhado — e irreversível.
+
+        A primeira versão forçava `terms_of_use` e `privacy_policy` de volta a rascunho para testar
+        a transição. O banco recusou:
+
+            CheckViolation: situação de documento legal não volta: approved -> draft
+
+        O produto está certo, e a trava é boa: documento jurídico aprovado não se desaprova por
+        UPDATE. Quem precisa mudar publica versão nova. Então o teste para de brigar com a trava e
+        cria a própria minuta, que não bloqueia nada (`requires_acceptance = false`) e não atrapalha
+        teste nenhum.
+        """
+        chave = "minuta_de_teste_do_cli"
+        # Pelo papel DONO: `impacto_app` não tem INSERT em `legal_documents`, e está certo — minuta
+        # jurídica entra pelo migrador, não pela aplicação. O arranjo do teste respeita isso.
+        with _dono() as c:
+            c.run("INSERT INTO legal_documents(doc_key, version, title, summary, source_path,"
+                  " body_md, body_sha256, audience, requires_acceptance, status, software_version)"
+                  " VALUES ($1,1,'Minuta de teste do CLI',$3,'docs/legal/teste.md',"
+                  " $2,'0'::text,'all',false,'draft','0.23.0')"
+                  " ON CONFLICT DO NOTHING", chave, CORPO, RESUMO)
+            self.addCleanup(lambda: self._remover(chave))
+
+        listagem = _cli("legal-list")
+        self.assertEqual(listagem.returncode, 0, listagem.stderr[-500:])
+        self.assertIn(chave, listagem.stdout, "a minuta criada não aparece na listagem")
+
+        r = _cli("legal-approve", "--doc-key", chave,
+                 "--reviewed-by", "Fulana de Tal, OAB/MT 1234",
+                 "--review-reference", "Parecer 12/2026")
+        self.assertEqual(r.returncode, 0, f"aprovação falhou: {r.stderr[-800:]}")
+        self.assertIn("Aprovado", r.stdout)
+
+        with db_system() as c:
+            d = c.one("SELECT status, reviewed_by, review_reference, effective_from"
+                      " FROM legal_documents WHERE doc_key = $1", chave)
+        self.assertEqual(d["status"], "approved")
+        self.assertIn("OAB", d["reviewed_by"], "não registrou quem assumiu a revisão")
+        self.assertTrue(d["review_reference"], "não registrou a referência da revisão")
+        self.assertIsNotNone(d["effective_from"], "aprovou sem data de vigência")
+
         with db_system() as c:
             ev = c.query("SELECT payload FROM audit_events WHERE action = 'legal.approved'"
-                         " ORDER BY at DESC LIMIT 2")
-        self.assertEqual(len(ev), 2, "a aprovação pelo CLI não deixou rastro de auditoria")
-        self.assertIn("Fulana", json.dumps(ev[0]["payload"], ensure_ascii=False),
-                      "o rastro não registra quem assumiu a revisão")
+                         " ORDER BY at DESC LIMIT 1")
+        self.assertTrue(ev, "a aprovação pelo CLI não deixou rastro de auditoria")
+        self.assertIn("Fulana", json.dumps(ev[0]["payload"], ensure_ascii=False))
+
+    def test_approving_something_already_approved_is_refused_with_a_clear_message(self):
+        """O operador vai rodar duas vezes. A recusa precisa dizer por quê, não só falhar."""
+        chave = "minuta_de_teste_ja_aprovada"
+        with _dono() as c:
+            c.run("INSERT INTO legal_documents(doc_key, version, title, summary, source_path,"
+                  " body_md, body_sha256, audience, requires_acceptance, status, reviewed_by,"
+                  " review_reference, reviewed_at, effective_from, software_version)"
+                  " VALUES ($1,1,'Minuta já aprovada',$3,'docs/legal/t2.md',$2,'0'::text,"
+                  " 'all',false,'approved','Alguém','Ref',now(),current_date,'0.23.0')"
+                  " ON CONFLICT DO NOTHING", chave, CORPO, RESUMO)
+            self.addCleanup(lambda: self._remover(chave))
+        r = _cli("legal-approve", "--doc-key", chave, "--reviewed-by", "Outra Pessoa",
+                 "--review-reference", "Parecer 2/2026")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("minuta", r.stderr.lower(),
+                      f"a mensagem não explica por que recusou: {r.stderr}")
+
+    def test_the_listing_agrees_with_the_database_about_what_is_blocking(self):
+        """A listagem é o que o operador lê para decidir. Ela não pode divergir do banco."""
+        r = _cli("legal-list")
+        self.assertEqual(r.returncode, 0, r.stderr[-500:])
+        with db_system() as c:
+            bloqueando = {x["doc_key"] for x in c.query(
+                "SELECT doc_key FROM legal_overview() WHERE blocks_product")}
+        if bloqueando:
+            self.assertIn("BLOQUEANDO O PRODUTO", r.stdout,
+                          f"o banco diz que {bloqueando} bloqueia e a listagem não avisa")
+            for k in bloqueando:
+                self.assertIn(k, r.stdout)
+        else:
+            self.assertIn("Nenhum documento bloqueando", r.stdout,
+                          "nada bloqueia no banco e a listagem diz o contrário")
+
+    @staticmethod
+    def _remover(doc_key: str):
+        with _dono() as c:
+            c.run("DELETE FROM legal_documents WHERE doc_key = $1", doc_key)
 
 
 class GenSecretsProducesKeysTheProductAcceptsTests(unittest.TestCase):

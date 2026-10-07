@@ -224,3 +224,67 @@ def permission_matrix(ctx: Ctx):
 def _routes_with_permission():
     from ..http import ROUTES
     return [r for r in ROUTES if r.permission]
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+# INTERRUPTOR DE EMERGÊNCIA
+#
+# Três rotas. Todas isentas do próprio interruptor (`core/killswitch.EXEMPT_PREFIXES`) — é o vidro
+# quebrado: o caminho que libera a plataforma não pode ser bloqueado pela plataforma bloqueada.
+# A permissão `security.kill_switch` é exclusiva de super-administrador e exige reautenticação
+# (`STEP_UP_PERMISSIONS`), como as outras operações que não têm volta fácil.
+
+@route("GET", "/v1/admin/kill-switch", auth="admin", permission="security.kill_switch", tags=T,
+       summary="Estado do interruptor de emergência e histórico do incidente")
+def kill_switch_read(ctx: Ctx):
+    from ..core import killswitch
+    # `fresh=True`: quem está respondendo a um incidente não pode ver estado de 5 segundos atrás.
+    atual = killswitch.state(ctx, fresh=True)
+    return {
+        "scopes": [
+            {"scope": s,
+             "engaged": bool(atual.get(s, {}).get("engaged")),
+             "reason": atual.get(s, {}).get("reason"),
+             "since": atual.get(s, {}).get("since"),
+             "effect": _EFEITO[s]}
+            for s in killswitch.SCOPES],
+        "history": killswitch.history(ctx, limit=100),
+        "exempt": [{"path": p, "reason": r} for p, r in sorted(killswitch.EXEMPT_PREFIXES.items())],
+        "propagation_seconds": killswitch.CACHE_TTL_SECONDS,
+        "note": "A auditoria nunca é bloqueada, em nenhum escopo. O escopo 'logins' não bloqueia a "
+                "equipe interna: quem responde ao incidente precisa poder entrar.",
+    }
+
+
+_EFEITO = {
+    "mutations": "Recusa POST/PUT/PATCH/DELETE em toda a API. Consultas seguem funcionando.",
+    "logins": "Recusa a emissão de novas sessões para quem não é da equipe interna. Sessões abertas continuam.",
+    "uploads": "Recusa envio de arquivo. O restante da plataforma segue disponível.",
+    "integrations": "Recusa as rotas de integração externa (entrada e saída).",
+    "maintenance": "Recusa toda operação, inclusive leitura, para quem não é da equipe interna.",
+}
+
+
+@route("POST", "/v1/admin/kill-switch", auth="admin", permission="security.kill_switch",
+       body=S.KillSwitchIn, tags=T, summary="Aciona ou libera um escopo do interruptor")
+def kill_switch_write(ctx: Ctx, body: S.KillSwitchIn):
+    from ..core import killswitch
+    atual = killswitch.record(ctx, scope=body.scope, action=body.action, reason=body.reason)
+    return {"scope": atual["scope"], "engaged": atual["engaged"], "reason": atual["reason"],
+            "since": atual["since"], "effect": _EFEITO[body.scope]}
+
+
+@route("GET", "/v1/meta/platform-status", auth="none", tags=T,
+       summary="A plataforma está aceitando operações? (sem motivo do incidente)")
+def platform_status(ctx: Ctx):
+    """Rota pública para a aplicação exibir aviso em vez de erro sem explicação.
+
+    Devolve o QUE está suspenso, nunca o POR QUÊ: motivo de incidente é informação de operação e
+    dizer "banco comprometido" a quem não entrou ainda é entregar reconhecimento ao atacante.
+    """
+    from ..core import killswitch
+    atual = killswitch.state(ctx)
+    bloqueados = [s for s in killswitch.SCOPES if atual.get(s, {}).get("engaged")]
+    return {"operating": not bloqueados, "halted": bloqueados,
+            "message": None if not bloqueados else
+            "Algumas operações estão temporariamente suspensas. Consultas podem seguir disponíveis."}

@@ -87,7 +87,11 @@ class NoDeadCodeReturnsTests(unittest.TestCase):
                 definicoes[no.name] = f"{f.relative_to(PKG)}:{no.lineno}"
 
         ocorrencias: Counter[str] = Counter()
-        identificador = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+        # `\w` em Python é Unicode por padrão. A primeira versão usava `[A-Za-z_][A-Za-z0-9_]*`,
+        # que não casa com identificador acentuado: `_é_equipe` era tokenizado como `_` + `_equipe`
+        # e a função aparecia como morta mesmo sendo chamada. A mesma classe de defeito do guarda de
+        # RLS derrotado por espaço em branco — um guarda não pode depender da grafia do nome.
+        identificador = re.compile(r"[^\W\d]\w*")
         for raiz in (PKG, TESTES, ROOT / "scripts"):
             for f in raiz.rglob("*.py"):
                 ocorrencias.update(identificador.findall(f.read_text(encoding="utf-8")))

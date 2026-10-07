@@ -120,24 +120,88 @@ class AuthTests(unittest.TestCase):
         self.assertEqual(c.get("/v1/projects").status, 200)
 
     def test_mfa_flow_and_recovery_code(self):
+        """v0.23.0 — cada passo usa um código NOVO, porque o código agora é queimado.
+
+        Até esta versão o teste reusava o mesmo código de seis dígitos em `mfa/enable` e em
+        `mfa/verify` — e passava, porque o reuso era possível. Era o defeito encontrando o teste:
+        `totp.verify()` devolvia o contador aceito com o comentário "para impedir reuso" e nenhum
+        dos quatro chamadores o guardava. Agora cada etapa avança o passo, como uma pessoa faz
+        quando espera o código seguinte.
+        """
+        import time as _t
         from impacto.security import totp
         c = new_account("osc")
         secret = c.post("/v1/auth/mfa/setup").json["secret"]
         self.assertEqual(c.post("/v1/auth/mfa/enable", {"code": "000000"}).status, 400)
-        r = c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)})
+        agora = _t.time()
+        r = c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret, at=agora)})
         codes = r.json["recovery_codes"]
         x = Client()
         r = x.post("/v1/auth/login", {"email": c.email, "password": PASSWORD})
         self.assertTrue(r.json["mfa_required"])
         self.assertNotIn("access_token", r.json)
         self.assertEqual(x.post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"], "code": "123456"}).status, 401)
-        ok = x.post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"], "code": totp.totp(secret)})
+        ok = x.post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"],
+                                            "code": totp.totp(secret, at=agora + 30)})
         self.assertEqual(ok.status, 200)
         y = Client()
         r = y.post("/v1/auth/login", {"email": c.email, "password": PASSWORD})
         self.assertEqual(y.post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"], "recovery_code": codes[0]}).status, 200)
         r = Client().post("/v1/auth/login", {"email": c.email, "password": PASSWORD})
         self.assertEqual(Client().post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"], "recovery_code": codes[0]}).status, 401)
+
+    def test_the_same_totp_code_never_works_twice(self):
+        """Replay de código TOTP — encontrado por auditoria independente.
+
+        `security/totp.py::verify()` devolvia o contador aceito desde sempre, com o docstring
+        dizendo "para impedir reuso", e **nenhum dos quatro chamadores o guardava**. Com janela de
+        ±1 passo, o mesmo código de seis dígitos valia cerca de 90 segundos e podia ser
+        reapresentado. Quem o lê por cima do ombro, ou o captura numa página falsa, o usa de novo.
+        """
+        import time as _t
+        from impacto.security import totp
+        c = new_account("osc")
+        secret = c.post("/v1/auth/mfa/setup").json["secret"]
+        agora = _t.time()
+        self.assertEqual(c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret, at=agora)}).status, 200)
+
+        codigo = totp.totp(secret, at=agora + 30)
+        primeiro = Client()
+        r = primeiro.post("/v1/auth/login", {"email": c.email, "password": PASSWORD})
+        self.assertEqual(primeiro.post("/v1/auth/mfa/verify",
+                                       {"mfa_token": r.json["mfa_token"], "code": codigo}).status, 200)
+
+        # O MESMO código, no mesmo passo de tempo, num desafio novo: tem de falhar.
+        segundo = Client()
+        r2 = segundo.post("/v1/auth/login", {"email": c.email, "password": PASSWORD})
+        reuso = segundo.post("/v1/auth/mfa/verify",
+                             {"mfa_token": r2.json["mfa_token"], "code": codigo})
+        self.assertEqual(reuso.status, 401, f"o código foi aceito duas vezes: {reuso.body[:200]}")
+        self.assertEqual(reuso.json["code"], "invalid_mfa_code")
+
+    def test_the_counter_cannot_be_moved_backwards_even_by_the_database_owner(self):
+        """A segunda trava: o gatilho recusa regredir o contador.
+
+        Uma via de verificação futura que esquecesse de gravar o contador não conseguiria, nem por
+        engano, voltar atrás e reaceitar um código já usado.
+        """
+        import time as _t
+        from impacto.security import totp
+        from tests.support import db_system, owner_conn
+        c = new_account("osc")
+        secret = c.post("/v1/auth/mfa/setup").json["secret"]
+        c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret, at=_t.time())})
+        with db_system() as d:
+            contador = d.scalar("SELECT mfa_last_counter FROM users WHERE id = $1", c.user["id"])
+        self.assertIsNotNone(contador, "o contador do código aceito não foi gravado")
+        conn = owner_conn()
+        try:
+            with self.assertRaises(Exception) as cm:
+                conn.run("UPDATE users SET mfa_last_counter = $2 WHERE id = $1",
+                         c.user["id"], int(contador) - 5)
+            self.assertIn("não retrocede", str(cm.exception))
+        finally:
+            conn.close()
 
     def test_password_reset_revokes_sessions(self):
         c = new_account("osc")

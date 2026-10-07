@@ -21,3 +21,98 @@ groups:
     for: 30m
     labels: { severity: ticket }
     annotations: { summary: "Provedor de IA externo falhando; usando fallback local" }
+
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+# v0.23.0 — ALERTAS DE SEGURANÇA E DE OPERAÇÃO
+#
+# Auditoria independente desta versão apontou o defeito que este bloco corrige: a plataforma
+# DETECTAVA os eventos de segurança mais graves que sabe produzir, gravava-os na trilha imutável e
+# notificava o TITULAR da conta — e ninguém da operação era alertado. `auth.refresh_reuse_detected`
+# é o sinal mais forte de roubo de sessão que o produto gera: um token de renovação já rotacionado
+# sendo apresentado de novo. Até aqui, só aparecia para quem abrisse a tela de auditoria.
+#
+# As séries vêm de dois pontos de estrangulamento, não de chamadas espalhadas:
+#   impacto_security_events_total{action}  → services/audit.py::record() + core/access.py
+#   impacto_job_runs_total{job,status}     → ops/runs.py::_fechar()
+# Ver `SecurityMetricsReachTheAlertsTests` e `EveryAlertReadsASeriesThatExistsTests`.
+- name: impacto_seguranca
+  rules:
+  - alert: ReusoDeTokenDeRenovacao
+    # Sem janela de tolerância: UM reuso já é indício de sessão roubada. A plataforma revoga a
+    # família inteira sozinha; o alerta existe para a investigação começar, não para a contenção.
+    expr: increase(impacto_security_events_total{action="auth.refresh_reuse_detected"}[5m]) > 0
+    for: 0m
+    labels: { severity: page }
+    annotations:
+      summary: "Reuso de refresh token detectado — família de sessão revogada automaticamente"
+      runbook: "SECURITY.md#reuso-de-token-de-renovacao"
+  - alert: PicoDeLoginFalho
+    expr: sum(increase(impacto_security_events_total{action="auth.login_failed"}[10m])) > 50
+    for: 5m
+    labels: { severity: page }
+    annotations: { summary: "Mais de 50 falhas de login em 10 min — possível força bruta ou vazamento de credenciais" }
+  - alert: EntradaPrivilegiadaRecusadaEmSerie
+    # Alguém da equipe sondando rotas internas e levando 403 em todas. Cada recusa é gravada em
+    # `privileged_access_log` com DENIED; em série, é varredura, não erro de navegação.
+    expr: sum(increase(impacto_security_events_total{action="security.privileged_access_denied"}[15m])) > 10
+    for: 5m
+    labels: { severity: page }
+    annotations: { summary: "Mais de 10 entradas privilegiadas recusadas em 15 min — sondagem de rota interna" }
+  - alert: SessoesExpirandoEmMassa
+    expr: sum(increase(impacto_security_events_total{action=~"auth.session_too_old|auth.session_idle"}[1h])) > 200
+    for: 15m
+    labels: { severity: ticket }
+    annotations: { summary: "Expiração de sessão em massa — conferir se os limites de vida de sessão foram alterados por engano" }
+  - alert: MfaDesligadoEmSerie
+    expr: sum(increase(impacto_security_events_total{action="auth.mfa_disabled"}[1h])) > 3
+    for: 0m
+    labels: { severity: page }
+    annotations: { summary: "MFA desligado em mais de 3 contas em 1 h — desligar MFA é passo clássico de tomada de conta" }
+  - alert: PapelInternoConcedido
+    # Concessão de papel interno é rara e consequente. O alerta não acusa: dá ciência imediata.
+    expr: increase(impacto_security_events_total{action="staff.role_granted"}[10m]) > 0
+    for: 0m
+    labels: { severity: ticket }
+    annotations: { summary: "Papel interno concedido — conferir se houve pedido correspondente" }
+  - alert: InterruptorDeEmergenciaAcionado
+    # Não é alarme de defeito: é ciência imediata de que alguém parou a plataforma. Se o
+    # acionamento não foi coordenado, esta é a primeira notícia — e o escopo diz o que parou.
+    expr: increase(impacto_security_events_total{action="security.kill_switch_engaged"}[5m]) > 0
+    for: 0m
+    labels: { severity: page }
+    annotations:
+      summary: "Interruptor de emergência ACIONADO — conferir incidente em /v1/admin/kill-switch"
+      runbook: "SECURITY.md#interruptor-de-emergencia"
+  - alert: OperacoesRecusadasPeloInterruptor
+    # Mede o custo do bloqueio enquanto ele dura: quantas operações estão sendo recusadas. Serve
+    # para decidir quando liberar, e para notar um interruptor esquecido ligado.
+    expr: sum(rate(impacto_kill_switch_blocked_total[15m])) > 0
+    for: 30m
+    labels: { severity: ticket }
+    annotations: { summary: "Interruptor de emergência recusando operações há mais de 30 min (escopo {{ $labels.scope }})" }
+- name: impacto_operacao
+  rules:
+  - alert: BackupFalhou
+    expr: increase(impacto_job_runs_total{job="backup",status="failed"}[1h]) > 0
+    for: 0m
+    labels: { severity: page }
+    annotations:
+      summary: "Backup falhou — `due()` conta do ÚLTIMO SUCESSO, então a janela reabre, mas não há cópia nova"
+      runbook: "DISASTER_RECOVERY.md"
+  - alert: BackupSemSucessoEm26h
+    # O contrário do alerta acima: a tarefa que PARA de rodar não emite falha nenhuma. Silêncio
+    # também é defeito — `absent()` é o que separa "rodou e falhou" de "ninguém chamou".
+    expr: increase(impacto_job_runs_total{job="backup",status="ok"}[26h]) == 0 or absent(impacto_job_runs_total{job="backup",status="ok"})
+    for: 30m
+    labels: { severity: page }
+    annotations: { summary: "Nenhum backup bem-sucedido em 26 h" }
+  - alert: TarefaOperacionalFalhando
+    expr: sum by (job) (increase(impacto_job_runs_total{status="failed"}[1h])) > 2
+    for: 10m
+    labels: { severity: ticket }
+    annotations: { summary: "Tarefa {{ $labels.job }} falhou mais de 2 vezes em 1 h" }
+  - alert: TarefaPresaEmExecucao
+    expr: histogram_quantile(0.95, sum(rate(impacto_job_duration_seconds_bucket[1h])) by (le, job)) > 900
+    for: 15m
+    labels: { severity: ticket }
+    annotations: { summary: "Tarefa {{ $labels.job }} com p95 acima de 15 min" }

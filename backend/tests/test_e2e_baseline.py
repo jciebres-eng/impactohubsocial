@@ -5,7 +5,7 @@ import re
 import unittest
 import uuid
 
-from tests.support import PASSWORD, ROOT, db_system, last_token_for, make_admin, new_account, next_cnpj, server
+from tests.support import PASSWORD, ROOT, db_system, fresh_totp, last_token_for, make_admin, new_account, next_cnpj, server
 
 DIST = ROOT / "web" / "dist" / "index.html"
 try:
@@ -125,14 +125,13 @@ class BaselineE2E(unittest.TestCase):
 
     # Jornada: administração com MFA real (TOTP) → visão geral e auditoria
     def test_admin_logs_in_with_mfa_and_reaches_overview_and_audit(self):
-        from impacto.security import totp
         adm, secret = make_admin()
         p = self.page()
         p.goto(self.base + "/entrar")
         p.get_by_label("E-mail").fill(adm.email)
         p.get_by_label("Senha").fill(PASSWORD)
         p.get_by_role("button", name="Entrar").click()
-        p.get_by_label("Código do aplicativo autenticador").fill(totp.totp(secret))
+        p.get_by_label("Código do aplicativo autenticador").fill(fresh_totp(secret))
         p.get_by_role("button", name="Confirmar").click()
         p.get_by_role("heading", name=re.compile("Olá")).first.wait_for()
         # a interface libera a administração quando a organização ATIVA é a plataforma: troca pelo seletor do menu

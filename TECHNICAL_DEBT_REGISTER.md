@@ -100,6 +100,53 @@ escrever nessa trilha.
 | F1 | App mobile: código pronto (Capacitor), **nunca construído** |
 | F2 | Internacionalização além de pt-BR: 294 traduções existem; segundo idioma não foi revisado |
 
+## v0.23.0 — cadeia de suprimentos do frontend (bloqueio externo, não decisão de projeto)
+
+### D-SUP1 · `web/package-lock.json` não existe
+
+**Severidade: HIGH.** Bloqueia a publicação web? **Não.** Bloqueia o Designer? **Não.**
+
+O que isto significa, sem suavizar: a árvore de dependências do frontend **não é reprodutível**.
+Dois `npm install` em datas diferentes podem instalar versões transitivas diferentes, e
+`npm audit --omit=dev` audita a árvore que acabou de ser resolvida — não necessariamente a que foi
+para produção. É a lacuna clássica de cadeia de suprimentos: não há como provar que o pacote
+publicado foi construído com as mesmas dependências que passaram no CI.
+
+**Por que não foi corrigido nesta rodada.** Gerar o lockfile exige resolver a árvore contra o
+registro npm. O ambiente desta rodada não tem essa rota de rede:
+
+```
+npm error 403 403 Forbidden - GET https://registry.npmjs.org/@capacitor%2fandroid
+```
+
+`npm install --package-lock-only` falha no primeiro pacote. **Isto é um bloqueio de ambiente, não
+uma escolha de arquitetura, e não há maneira honesta de contorná-lo aqui:** escrever à mão um
+`package-lock.json` com hashes de integridade que não foram verificados seria inventar o artefato
+cuja única função é ser verificável — pior que não tê-lo.
+
+**O que foi feito no lugar.**
+
+1. As quatro dependências que **entram no pacote construído** estão fixadas em versão exata:
+   `react` 19.2.8, `react-dom` 19.2.8, `esbuild` 0.28.2, `typescript` 6.0.3. Não há faixa `^` em
+   nenhuma delas, então o bundle que o `build.mjs` produz não muda por conta de resolução.
+2. Sete dependências seguem com faixa `^`: `@types/react`, `@types/react-dom` e os cinco
+   `@capacitor/*`. **Nenhuma das sete está instalada neste ambiente**, logo a versão exata não pode
+   ser lida nem do `node_modules`. Fixá-las em um número escolhido por mim seria inventar versão —
+   exatamente o que as regras desta rodada proíbem. As sete são de tipagem (tempo de compilação) e
+   de empacotamento mobile (F1: nunca construído), nenhuma vai para o bundle web.
+3. O CI passou a **gerar** o lockfile quando ele não existe e a publicá-lo como artefato
+   (`package-lock-para-commitar`), e a usar `npm ci` quando existe. A primeira execução do
+   pipeline num ambiente com rede produz o arquivo pronto para commit.
+
+**Ação necessária (uma vez, por pessoa com acesso ao registro npm):**
+
+```bash
+cd web && npm install --package-lock-only && git add package-lock.json
+```
+
+**Risco de não corrigir:** uma dependência transitiva comprometida entra no build sem que nada
+acuse, e a auditoria de vulnerabilidade não tem árvore estável para comparar entre execuções.
+
 ## Como esta lista foi feita
 
 Não é uma lista de impressões. Cada item CRITICAL e HIGH veio de uma destas três fontes:

@@ -97,6 +97,14 @@ OVERRIDES: dict[tuple[str, str], tuple[str, str, str]] = {
         "CRITICAL", "four_eyes",
         "Regra fiscal aprovada passa a produzir estimativa para todo mundo. Dupla aprovação por "
         "revisores distintos, garantida por CHECK no banco."),
+    ("POST", "/v1/admin/kill-switch"): (
+        "CRITICAL", "human_approval",
+        "Para a plataforma inteira: interrompe o trabalho de todas as organizações ao mesmo tempo. "
+        "É a operação mais destrutiva alcançável sem acesso ao banco. NÃO é quatro olhos, e isso é "
+        "decisão escrita: exigir um segundo aprovador para parar a plataforma significa que o "
+        "ataque continua enquanto se procura a segunda pessoa. O controle é identidade "
+        "reconfirmada (step-up), papel mais alto, motivo obrigatório de 10 caracteres travado no "
+        "banco e histórico append-only que não se reescreve."),
     ("POST", "/v1/reports"): (
         "MEDIUM", "audit_trail",
         "Abrir denúncia NÃO tem efeito por si: nenhuma medida, nenhum ponto de reputação. "

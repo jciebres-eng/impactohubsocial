@@ -86,7 +86,25 @@ class ArchitectureTests(unittest.TestCase):
                    #       (`permission=`), conferida em test_v0220_authorization.py e
                    #       test_v0220_internal_ui.py, e cada entrada fica em
                    #       `privileged_access_log`.
-                   "internal_routes.py"}
+                   "internal_routes.py",
+                   #   core/killswitch.py → o interruptor de emergência. Precisa de contexto de
+                   #       sistema por três razões, e cada uma é deliberada: (1) `kill_switch_state`
+                   #       é escrito SÓ pelo gatilho, cuja política de RLS exige `app_system()`, e é
+                   #       isso que impede qualquer caminho de código de ligar o interruptor sem
+                   #       deixar o evento no histórico append-only; (2) o estado é lido em toda
+                   #       requisição, inclusive de sessão sem organização ativa e de rota pública;
+                   #       (3) o histórico do incidente não pertence a nenhuma organização cliente —
+                   #       o sujeito é a plataforma. A porta é a permissão `security.kill_switch`,
+                   #       exclusiva de super-administrador e com reautenticação obrigatória.
+                   #   api/ops_routes.py já consta na lista acima. O relatório de integridade
+                   #       acrescentado na v0.23.0 (`GET /v1/admin/integrity`) usa o mesmo motivo:
+                   #       percorre as 25 colunas de referência POLIMÓRFICA de todo o banco e as
+                   #       três cadeias de hash. Restringir ao `org_id` da sessão devolveria
+                   #       "nenhum órfão" para quem tem uma organização pequena e esconderia o dado
+                   #       quebrado das outras — o que faz um verificador de integridade mentir. A
+                   #       porta é a permissão `security.audit.read` e cada entrada fica em
+                   #       `privileged_access_log`.
+                   "killswitch.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:
@@ -155,7 +173,14 @@ class ArchitectureTests(unittest.TestCase):
                            # aceitar um documento precisa poder lê-lo ANTES de ter conta, e a minuta
                            # já se identifica como minuta na primeira linha. `legal_text()` nunca
                            # devolve versão superada, e aceite de minuta é recusado pelo banco.
-                           "/v1/legal/registry", "/v1/legal/documents/{doc_key}"}
+                           "/v1/legal/registry", "/v1/legal/documents/{doc_key}",
+                           # v0.23.0 — situação do interruptor de emergência. Pública por
+                           # necessidade: sem ela a aplicação não tem como exibir "a plataforma
+                           # está em manutenção" e devolve erro sem explicação a quem nem entrou.
+                           # Devolve O QUE está suspenso e NUNCA o POR QUÊ — `platform_status()`
+                           # monta a resposta a partir dos escopos ligados e não toca em `reason`,
+                           # conferido por `test_the_public_status_route_does_not_leak_the_reason`.
+                           "/v1/meta/platform-status"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):

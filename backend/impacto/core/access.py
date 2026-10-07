@@ -39,6 +39,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..http import ApiError
+from ..observability import METRICS
 
 # Permissões que exigem reautenticação recente, por serem irreversíveis ou financeiras. A lista é
 # aqui, e não no banco, porque é regra de SEGURANÇA: mudá-la deve aparecer no diff e passar por
@@ -61,6 +62,10 @@ STEP_UP_PERMISSIONS = frozenset({
     #                          enquanto mudar o preço de um plano exigia.
     #   `free_period.write`  → concede gratuidade. É conceder privilégio comercial.
     "billing.write", "free_period.write",
+    # v0.23.0: parar a plataforma interrompe o trabalho de todas as organizações ao mesmo tempo. É
+    # a operação mais destrutiva alcançável sem acesso ao banco, e a mais atraente para quem
+    # sequestrou uma sessão interna — negação de serviço com as credenciais da própria vítima.
+    "security.kill_switch",
 })
 
 # Papéis que NÃO alteram nada. Usado para recusar, por desenho, qualquer permissão de escrita
@@ -314,6 +319,9 @@ def log_privileged(ctx, permission: str | None, *, denied: bool = False) -> None
     chegava, nem em `audit_events`, que só registra alteração. Uma tentativa de olhar também é um
     olhar, e uma sequência de tentativas recusadas é o sinal que uma investigação procura.
     """
+    if denied:
+        from ..services.audit import DENIED_PRIVILEGED_ACTION
+        METRICS.inc("impacto_security_events_total", action=DENIED_PRIVILEGED_ACTION)
     try:
         with ctx.system_tx() as c:
             c.run("INSERT INTO privileged_access_log(user_id, roles_used, permission, method, path,"
@@ -380,7 +388,8 @@ def verify_identity(ctx, *, password: str | None = None, mfa_code: str | None = 
             if not mfa_code:
                 raise ApiError(401, "mfa_code_required",
                                "Sua conta tem segundo fator: informe o código do aplicativo.")
-            if totp.verify(ctx.app.cipher.decrypt(u["mfa_secret_enc"]), mfa_code) is None:
+            if not totp.verify_once(c, ctx.principal.user_id,
+                                    ctx.app.cipher.decrypt(u["mfa_secret_enc"]), mfa_code):
                 raise ApiError(401, "reauth_failed", "Código de verificação incorreto.")
         if stamp:
             c.run("UPDATE sessions SET reauth_at = now() WHERE id = $1", ctx.principal.session_id)

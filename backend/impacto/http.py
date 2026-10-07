@@ -245,7 +245,8 @@ def load_principal(ctx: Ctx) -> Principal | None:
     with ctx.pool.tx(DbContext(system=True)) as c:
         row = c.one(
             "SELECT s.id::text AS session_id, s.user_id::text AS user_id, s.org_id::text AS org_id, s.mfa_verified,"
-            " s.last_seen_at, u.email::text AS email, u.full_name, u.status, u.is_platform_admin,"
+            " s.last_seen_at, s.family_started_at, s.family_id::text AS family_id,"
+            " u.email::text AS email, u.full_name, u.status, u.is_platform_admin,"
             " u.email_verified_at IS NOT NULL AS email_verified, u.mfa_enabled_at IS NOT NULL AS mfa_enabled,"
             " coalesce((SELECT array_agg(sr.role) FROM staff_roles sr WHERE sr.user_id = u.id), '{}') AS staff_roles,"
             " o.kind AS org_kind, o.legal_name AS org_name, o.status AS org_status, m.role"
@@ -256,7 +257,29 @@ def load_principal(ctx: Ctx) -> Principal | None:
             sha256_hex(token))
         if not row or row["status"] != "active":
             return None
-        if (time.time() - row["last_seen_at"].timestamp()) > 60:
+        # IDADE MÁXIMA e INATIVIDADE também no caminho do token de acesso, não só na renovação.
+        # Conferir apenas na renovação deixaria uma sessão vencida valendo até 15 minutos a mais —
+        # e, pior, uma sessão esquecida continuaria respondendo enquanto alguém a usasse a cada 14
+        # minutos. A linha já está carregada, então a conferência não custa consulta nova.
+        agora = time.time()
+        idade = agora - row["family_started_at"].timestamp()
+        inativa = agora - row["last_seen_at"].timestamp()
+        motivo = ("session_too_old" if idade > ctx.settings.session_absolute_ttl
+                  else "session_idle" if inativa > ctx.settings.session_idle_ttl else None)
+        if motivo:
+            c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = $2"
+                  " WHERE family_id = $1 AND revoked_at IS NULL", row["family_id"], motivo)
+            # Deixa trilha também aqui. A revogação acontece UMA vez (depois dela a consulta não
+            # encontra mais a sessão), então não há custo recorrente — e uma sessão que morre sem
+            # registro é uma pessoa desconectada sem explicação e um incidente sem evidência.
+            from .services.audit import record
+            record(c, org_id=row["org_id"], actor=row["user_id"], action=f"auth.{motivo}",
+                   object_type="session", object_id=row["session_id"],
+                   payload={"family_age_seconds": int(idade), "idle_seconds": int(inativa),
+                            "detected_on": "access_token"},
+                   ip=ctx.ip, request_id=ctx.request_id)
+            return None
+        if (agora - row["last_seen_at"].timestamp()) > 60:
             c.run("UPDATE sessions SET last_seen_at = now() WHERE id = $1", row["session_id"])
     has_org = row["org_id"] and row["role"] and row["org_status"] == "active"
     return Principal(
@@ -419,6 +442,12 @@ def make_endpoint(spec: RouteSpec, app_state):
                     hit(ctx, bucket, ctx.ip, limit, window)
                 ctx.principal = load_principal(ctx)
                 authorize(ctx, spec)   # autoriza ANTES de validar o corpo (não expõe o schema a quem não tem acesso)
+                # Interruptor de emergência, DEPOIS de autorizar: quem não tem acesso recebe
+                # 401/403 antes de descobrir que a plataforma está parada. Estado de incidente não
+                # é informação pública. A auditoria e as rotas do próprio interruptor são isentas —
+                # ver `core/killswitch.EXEMPT_PREFIXES`, cada isenção com motivo escrito.
+                from .core.killswitch import enforce as _halt_check
+                _halt_check(ctx, spec)
                 body_obj = payload
                 if spec.body is not None:
                     try:

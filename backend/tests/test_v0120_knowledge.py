@@ -7,18 +7,17 @@ import unittest
 import uuid
 from datetime import datetime, timedelta, UTC
 
-from tests.support import Client, db_system, last_token_for, make_admin, new_account, server
+from tests.support import Client, db_system, fresh_totp, last_token_for, make_admin, new_account, server
 
 
 def staff(*roles: str) -> Client:
     """Conta interna com papéis editoriais/suporte e MFA verificado (exigido nas rotas internas)."""
-    from impacto.security import totp
     c = new_account("osc")
     with db_system() as d:
         for r in roles:
             d.run("INSERT INTO staff_roles(user_id, role) VALUES ($1,$2) ON CONFLICT DO NOTHING", c.user["id"], r)
     secret = c.post("/v1/auth/mfa/setup").json["secret"]
-    assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)}).status == 200
+    assert c.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)}).status == 200
     return c
 
 

@@ -53,7 +53,11 @@ class Settings:
     voucher_hmac_key: str = ""
     field_encryption_key: str = ""       # Fernet (MFA secrets)
     access_token_ttl: int = 900           # 15 min
-    refresh_token_ttl: int = 30 * 86400   # 30 dias
+    refresh_token_ttl: int = 30 * 86400   # 30 dias (vida de UMA credencial de renovação)
+    # v0.23.0 — os dois prazos que faltavam. `refresh_token_ttl` era contado da ÚLTIMA rotação, o
+    # que significa que uma sessão em uso nunca vencia: 30 dias a partir de agora, sempre.
+    session_absolute_ttl: int = 30 * 86400    # idade máxima da FAMÍLIA de sessão
+    session_idle_ttl: int = 14 * 86400        # inatividade máxima antes de pedir login de novo
     cookie_secure: bool = True
     cors_origins: list[str] = field(default_factory=list)
     trust_proxy_headers: bool = False
@@ -148,6 +152,8 @@ def load_settings() -> Settings:
         field_encryption_key=_env("FIELD_ENCRYPTION_KEY", "") or "",
         access_token_ttl=_int("ACCESS_TOKEN_TTL_SECONDS", 900),
         refresh_token_ttl=_int("REFRESH_TOKEN_TTL_SECONDS", 30 * 86400),
+        session_absolute_ttl=_int("SESSION_ABSOLUTE_TTL_SECONDS", 30 * 86400),
+        session_idle_ttl=_int("SESSION_IDLE_TTL_SECONDS", 14 * 86400),
         cookie_secure=_bool("COOKIE_SECURE", hardened),
         cors_origins=_list("CORS_ORIGINS"),
         trust_proxy_headers=_bool("TRUST_PROXY_HEADERS", False),

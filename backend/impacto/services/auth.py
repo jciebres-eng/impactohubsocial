@@ -30,15 +30,45 @@ def _now() -> datetime:
 # Sessões
 # ------------------------------------------------------------------------------------------------
 def issue_session(c: Connection, ctx: Ctx, user_id: str, org_id: str | None, mfa_verified: bool,
-                  family_id: str | None = None) -> dict:
+                  family_id: str | None = None, family_started_at=None) -> dict:
+    """Emite a sessão. `family_started_at` é propagado nas rotações — e é ele que vence.
+
+    Até a v0.22.0 esta função gravava `refresh_expires_at = now() + 30 dias` em TODA rotação,
+    inclusive nas da mesma família. O efeito, encontrado por auditoria: 30 dias contados sempre do
+    último uso nunca vencem para quem está usando, então um refresh token roubado e renovado dentro
+    da janela sobrevivia indefinidamente. A credencial continua valendo 30 dias; a FAMÍLIA agora
+    tem idade máxima própria, e ela não se renova.
+    """
+    # Interruptor de emergência, escopo `logins`. Fica AQUI e não no `http.py` por duas razões:
+    # esta é a função por onde passa TODA emissão de sessão (senha, MFA, OIDC, convite), e é o
+    # primeiro ponto em que se sabe QUEM está entrando. Bloquear login na porta HTTP bloquearia
+    # também a equipe que responde ao incidente — e um interruptor que tranca a equipe do lado de
+    # fora transforma incidente em indisponibilidade permanente.
+    from ..core.killswitch import engaged as _halt_engaged
+    if _halt_engaged(ctx, "logins") or _halt_engaged(ctx, "maintenance"):
+        é_equipe = bool(c.scalar(
+            "SELECT EXISTS (SELECT 1 FROM users WHERE id = $1 AND is_platform_admin)"
+            "     OR EXISTS (SELECT 1 FROM staff_roles WHERE user_id = $1)", user_id))
+        if not é_equipe:
+            # A recusa é contada aqui e não auditada: levantar dentro da transação desfaz qualquer
+            # escrita feita nela, auditoria incluída — a mesma lição de `refresh_reuse_detected`.
+            # A métrica sai do processo, não da transação, então sobrevive ao rollback.
+            from ..observability import METRICS
+            escopo = "logins" if _halt_engaged(ctx, "logins") else "maintenance"
+            METRICS.inc("impacto_kill_switch_blocked_total", scope=escopo)
+            raise ApiError(503, "platform_halted",
+                           "A entrada na plataforma está suspensa neste momento.", {"scope": escopo})
+
     s = ctx.settings
     access, refresh = new_token(), new_token(48)
     sid = str(uuid.uuid4())
-    c.run("INSERT INTO sessions(id, user_id, org_id, family_id, access_hash, access_expires_at, refresh_hash, refresh_expires_at,"
-          " mfa_verified, ip, user_agent) VALUES ($1,$2,$3,$4,$5, now() + make_interval(secs => $6), $7,"
+    c.run("INSERT INTO sessions(id, user_id, org_id, family_id, family_started_at, access_hash,"
+          " access_expires_at, refresh_hash, refresh_expires_at, mfa_verified, ip, user_agent)"
+          " VALUES ($1,$2,$3,$4, coalesce($12, now()), $5, now() + make_interval(secs => $6), $7,"
           " now() + make_interval(secs => $8), $9, $10, $11)",
           sid, user_id, org_id, family_id or str(uuid.uuid4()), sha256_hex(access), s.access_token_ttl,
-          sha256_hex(refresh), s.refresh_token_ttl, mfa_verified, ctx.ip, ctx.user_agent)
+          sha256_hex(refresh), s.refresh_token_ttl, mfa_verified, ctx.ip, ctx.user_agent,
+          family_started_at)
     return {"session_id": sid, "access_token": access, "refresh_token": refresh, "expires_in": s.access_token_ttl,
             "csrf_token": csrf_for_session(s.secret_key, sid)}
 
@@ -264,7 +294,8 @@ def mfa_login(ctx: Ctx, body):
             pass
         elif body.code:
             secret = ctx.app.cipher.decrypt(row["mfa_secret_enc"])
-            ok = totp.verify(secret, body.code) is not None
+            # `verify_once` queima o código: reapresentá-lo dentro da janela de 90 s falha.
+            ok = totp.verify_once(c, row["user_id"], secret, body.code)
         elif body.recovery_code:
             h = sha256_hex(body.recovery_code.strip().upper())
             if h in (row["mfa_recovery_hashes"] or []):
@@ -296,12 +327,39 @@ def refresh(ctx: Ctx, body):
     if not rt:
         raise ApiError(401, "no_refresh_token", "Sessão expirada")
     with ctx.system_tx() as c:
-        s = c.one("SELECT id::text AS id, user_id::text AS user_id, org_id::text AS org_id, family_id::text AS family_id,"
-                  " rotated_at, revoked_at, refresh_expires_at, mfa_verified FROM sessions WHERE refresh_hash = $1 FOR UPDATE",
-                  sha256_hex(rt))
+        s = c.one("SELECT id::text AS id, user_id::text AS user_id, org_id::text AS org_id,"
+                  " family_id::text AS family_id, family_started_at, last_seen_at,"
+                  " rotated_at, revoked_at, refresh_expires_at, mfa_verified"
+                  " FROM sessions WHERE refresh_hash = $1 FOR UPDATE", sha256_hex(rt))
         if not s or s["refresh_expires_at"] < _now():
             raise ApiError(401, "invalid_refresh_token", "Sessão expirada")
-        if s["rotated_at"] or s["revoked_at"]:
+        # IDADE MÁXIMA DA FAMÍLIA e INATIVIDADE. As duas recusas são AQUI, na renovação, porque é
+        # aqui que a sessão pediria mais tempo. E as duas revogam a família inteira: deixar as
+        # irmãs vivas permitiria renovar por outra credencial da mesma árvore.
+        limite = ctx.settings
+        idade = (_now() - s["family_started_at"]).total_seconds()
+        inativa = (_now() - s["last_seen_at"]).total_seconds()
+        motivo = ("session_too_old" if idade > limite.session_absolute_ttl
+                  else "session_idle" if inativa > limite.session_idle_ttl else None)
+        if motivo:
+            c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = $2"
+                  " WHERE family_id = $1 AND revoked_at IS NULL", s["family_id"], motivo)
+            from .audit import record
+            record(c, org_id=s["org_id"], actor=s["user_id"], action=f"auth.{motivo}",
+                   object_type="session", object_id=s["id"],
+                   payload={"family_age_seconds": int(idade), "idle_seconds": int(inativa)},
+                   ip=ctx.ip, request_id=ctx.request_id)
+            # A exceção é guardada e levantada DEPOIS do bloco: levantá-la aqui desfaria a
+            # transação e a revogação e a trilha iriam embora com ela. É o mesmo cuidado que o
+            # caminho de reuso de refresh já tomava — e que eu teria perdido se não houvesse um
+            # teste exigindo a trilha.
+            error = ApiError(401, motivo,
+                             "Esta sessão atingiu o tempo máximo. Entre de novo."
+                             if motivo == "session_too_old"
+                             else "Esta sessão ficou inativa por muito tempo. Entre de novo.")
+        if error:
+            pass
+        elif s["rotated_at"] or s["revoked_at"]:
             # Reuso de refresh token já rotacionado ⇒ possível roubo: revoga toda a família.
             c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = 'refresh_reuse' WHERE family_id = $1 AND revoked_at IS NULL",
                   s["family_id"])
@@ -320,13 +378,15 @@ def refresh(ctx: Ctx, body):
                      "foram encerradas. Entre de novo e, se não reconhecer o acesso, troque a "
                      "senha e revise os dispositivos conectados.")
             error = ApiError(401, "refresh_reuse", "Sessão invalidada por segurança. Faça login novamente.")
-        else:
+        elif not error:
             u = c.one("SELECT status FROM users WHERE id = $1", s["user_id"])
             if not u or u["status"] != "active":
                 error = ApiError(401, "invalid_refresh_token", "Sessão expirada")
             else:
                 c.run("UPDATE sessions SET rotated_at = now(), revoked_at = now(), revoke_reason = 'rotated' WHERE id = $1", s["id"])
-                tokens = issue_session(c, ctx, s["user_id"], s["org_id"], s["mfa_verified"], family_id=s["family_id"])
+                tokens = issue_session(c, ctx, s["user_id"], s["org_id"], s["mfa_verified"],
+                                       family_id=s["family_id"],
+                                       family_started_at=s["family_started_at"])
     if error:
         raise error
     return session_response(ctx, tokens)
@@ -435,7 +495,7 @@ def mfa_enable(ctx: Ctx, code: str) -> dict:
         enc = c.scalar("SELECT mfa_secret_enc FROM users WHERE id = $1 AND mfa_enabled_at IS NULL", p.user_id)
         if not enc:
             raise ApiError(409, "mfa_not_pending", "Inicie a configuração do MFA primeiro")
-        if totp.verify(ctx.app.cipher.decrypt(enc), code) is None:
+        if not totp.verify_once(c, p.user_id, ctx.app.cipher.decrypt(enc), code):
             raise ApiError(400, "invalid_mfa_code", "Código inválido")
         codes = totp.recovery_codes()
         c.run("UPDATE users SET mfa_enabled_at = now(), mfa_recovery_hashes = $2::text[] WHERE id = $1",
@@ -454,9 +514,11 @@ def mfa_disable(ctx: Ctx, password: str, code: str) -> dict:
         if u["is_platform_admin"] and ctx.settings.require_mfa_for_admins:
             raise forbidden_admin_mfa()
         if not passwords.verify_password(password, u["password_hash"]) or not u["mfa_secret_enc"] \
-                or totp.verify(ctx.app.cipher.decrypt(u["mfa_secret_enc"]), code) is None:
+                or not totp.verify_once(c, p.user_id, ctx.app.cipher.decrypt(u["mfa_secret_enc"]), code):
             raise ApiError(401, "invalid_credentials", "Senha ou código inválidos")
-        c.run("UPDATE users SET mfa_enabled_at = NULL, mfa_secret_enc = NULL, mfa_recovery_hashes = '{}' WHERE id = $1", p.user_id)
+        # Desligar o MFA zera o contador: religar depois não pode herdar a trava do segredo antigo.
+        c.run("UPDATE users SET mfa_enabled_at = NULL, mfa_secret_enc = NULL, mfa_recovery_hashes = '{}',"
+              " mfa_last_counter = NULL WHERE id = $1", p.user_id)
         from .audit import record
         record(c, org_id=p.org_id, actor=p.user_id, action="auth.mfa_disabled", object_type="user", object_id=p.user_id,
                payload={}, ip=ctx.ip, request_id=ctx.request_id)

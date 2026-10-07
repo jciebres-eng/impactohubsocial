@@ -1379,3 +1379,16 @@ class ApprovalDecisionIn(In):
     approve: bool
     permission_used: Annotated[str, StringConstraints(min_length=3, max_length=60)]
     note: Annotated[str, StringConstraints(max_length=500)] | None = None
+
+
+class KillSwitchIn(In):
+    """Acionamento do interruptor de emergência. O motivo é obrigatório e tem piso de 10 caracteres.
+
+    O piso existe no schema E no banco (`kill_switch_events_reason_check`). Duplicar a trava é
+    deliberado: o schema dá mensagem boa a quem está respondendo a um incidente sob pressão, e a
+    trava do banco garante que nenhum caminho — inclusive uma migração futura ou um script de
+    operação — consiga gravar "teste" como justificativa de parada da plataforma.
+    """
+    scope: Literal["mutations", "logins", "uploads", "integrations", "maintenance"]
+    action: Literal["engage", "release"]
+    reason: Annotated[str, StringConstraints(min_length=10, max_length=2000)]

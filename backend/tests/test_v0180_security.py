@@ -499,13 +499,20 @@ class BiasTests(unittest.TestCase):
                 "kind": "attendance", "title": "Lista de presença"}).json["id"]
             oc.run("UPDATE evidences SET status = 'accepted' WHERE id = $1", ev)
             for i in range(total):
+                # v0.23.0 — medição validada EXIGE evidência (`indicator_validated_needs_evidence`).
+                # As que não têm evidência entram como REPORTADAS, que é o estado que elas podem
+                # ocupar de verdade. A dimensão continua exercitada: `evidence_discipline` é
+                # "medições validadas COM evidência sobre medições REPORTADAS", então o
+                # denominador conta as duas e a proporção segue diferente entre as organizações.
+                tem_evidencia = i < com_evidencia
                 oc.run(
                     "INSERT INTO indicator_values(project_indicator_id, project_id, org_id, value,"
                     " measured_on, evidence_id, status, validated_by, validated_by_org)"
-                    " SELECT $1,$2,$3,$4,current_date,$5,'validated',"
-                    "        (SELECT id FROM users LIMIT 1), $6",
-                    pi, pid, client.org_id, 10 + i, (ev if i < com_evidencia else None),
-                    self.osc.org_id)
+                    " SELECT $1,$2,$3,$4,current_date,$5,$7,"
+                    "        CASE WHEN $7 = 'validated' THEN (SELECT id FROM users LIMIT 1) END,"
+                    "        CASE WHEN $7 = 'validated' THEN $6::uuid END",
+                    pi, pid, client.org_id, 10 + i, (ev if tem_evidencia else None),
+                    self.osc.org_id, "validated" if tem_evidencia else "reported")
         p = next(d for d in pequena.get("/v1/reputation/me").json["dimensions"]
                  if d["dimension"] == "evidence_discipline")
         g = next(d for d in grande.get("/v1/reputation/me").json["dimensions"]

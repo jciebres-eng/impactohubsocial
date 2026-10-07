@@ -68,12 +68,26 @@ class ClaimBase(unittest.TestCase):
             ev = self.osc.post(f"/v1/projects/{project}/evidences", {
                 "kind": "attendance", "title": "Lista de presença da turma"}).json["id"]
             oc.run("UPDATE evidences SET status = 'accepted' WHERE id = $1", ev)
-        oc.run(
+        else:
+            # v0.23.0 — `indicator_validated_needs_evidence` tornou este estado IMPOSSÍVEL pelo
+            # esquema: medição validada exige evidência, e nem o dono do banco escapa de um CHECK.
+            # Para seguir provando que o verificador de alegação detecta o estado, o teste simula o
+            # único jeito de ele aparecer: alguém com acesso ao banco removendo a restrição e
+            # forjando a linha. É defesa em profundidade — a prevenção está no esquema, a detecção
+            # continua no motor de alegação, e este caminho prova as duas.
+            oc.run("ALTER TABLE indicator_values DROP CONSTRAINT indicator_validated_needs_evidence")
+        try:
+            oc.run(
                 "INSERT INTO indicator_values(project_indicator_id, project_id, org_id, value,"
-            " measured_on, evidence_id, status, validated_by, validated_by_org)"
-            " SELECT $1, $2, $3, $4, current_date, $5, 'validated',"
-            "        (SELECT id FROM users LIMIT 1), $6",
-            pi, project, self.osc.org_id, value, ev, self.other.org_id)
+                " measured_on, evidence_id, status, validated_by, validated_by_org)"
+                " SELECT $1, $2, $3, $4, current_date, $5, 'validated',"
+                "        (SELECT id FROM users LIMIT 1), $6",
+                pi, project, self.osc.org_id, value, ev, self.other.org_id)
+        finally:
+            if not evidence:
+                oc.run("ALTER TABLE indicator_values ADD CONSTRAINT"
+                       " indicator_validated_needs_evidence"
+                       " CHECK (status <> 'validated' OR evidence_id IS NOT NULL) NOT VALID")
         return ev
 
 
@@ -233,7 +247,14 @@ class RuleBehaviourTests(ClaimBase):
         depois = self._check(p, "Acompanhamos o indicador de pessoas formadas no período dois.")
         self.assertTrue(self._rule(depois, "indicator_without_measurement")["passed"])
 
-    def test_a_validated_measurement_without_evidence_is_a_point_of_attention(self):
+    def test_a_forged_validated_measurement_without_evidence_is_still_detected(self):
+        """Prevenção no esquema, detecção no motor: as duas, não uma no lugar da outra.
+
+        A v0.23.0 fez deste estado um estado impossível (`indicator_validated_needs_evidence`).
+        O auxiliar simula o único caminho que ainda o produz — acesso ao banco removendo a
+        restrição — e o verificador de alegação continua acusando. Se a detecção fosse removida
+        porque "agora é impossível", uma manipulação no banco passaria a sair limpa no relatório.
+        """
         p = self._project()
         pi = self._indicator(p)
         self._validated_value(p, pi, 40, evidence=False)
@@ -241,6 +262,22 @@ class RuleBehaviourTests(ClaimBase):
         hit = self._rule(out, "measurement_without_evidence")
         self.assertFalse(hit["passed"])
         self.assertIn("sem evidência", hit["detail"])
+
+    def test_the_schema_is_what_prevents_it_in_the_first_place(self):
+        """O par do teste acima: pelo caminho normal, o estado não nasce."""
+        from tests.support import db_system
+        p = self._project()
+        pi = self._indicator(p)
+        with db_system() as c:
+            c.run("SAVEPOINT s")
+            with self.assertRaises(Exception) as erro:
+                c.run("INSERT INTO indicator_values(project_indicator_id, project_id, org_id,"
+                      " value, measured_on, status, validated_by, validated_by_org)"
+                      " SELECT $1, $2, $3, 40, current_date, 'validated',"
+                      "        (SELECT id FROM users LIMIT 1), $4",
+                      pi, p, self.osc.org_id, self.other.org_id)
+            c.run("ROLLBACK TO SAVEPOINT s")
+            self.assertIn("indicator_validated_needs_evidence", str(erro.exception))
 
     def test_absolute_language_passes_when_there_is_a_measurement_with_evidence(self):
         """A regra não pune a palavra: pune a palavra SEM base. Essa distinção é o produto."""

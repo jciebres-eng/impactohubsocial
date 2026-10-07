@@ -4,7 +4,7 @@
 
 VOCABULÁRIO OFICIAL do Impacto Trust. Este arquivo é a origem: o rótulo que a interface mostra, o termo que a API devolve e o texto de ajuda têm de sair daqui. Os rótulos são sincronizados para config/i18n.json (e de lá para a tabela translations) por scripts/sync_glossary.py. A definição em pt-BR é para quem desenha e para quem escreve texto de ajuda — não é texto de tela.
 
-Idioma de origem: **pt-BR** · Idiomas: pt-BR, en, es · Gerado em 2026-10-06
+Idioma de origem: **pt-BR** · Idiomas: pt-BR, en, es · Gerado em 2026-10-07
 
 ## Como ler
 

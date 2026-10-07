@@ -144,9 +144,14 @@ def report_value(ctx: Ctx, body: S.IndicatorValueIn):
             raise not_found("Indicador do projeto")
         if body.evidence_id and not c.one("SELECT 1 FROM evidences WHERE id = $1 AND project_id = $2", body.evidence_id, pi["project_id"]):
             raise not_found("Evidência")
-        vid = c.scalar("INSERT INTO indicator_values(project_indicator_id, project_id, org_id, value, measured_on, evidence_id, note, created_by)"
-                       " VALUES ($1,$2,$3,$4::numeric,$5::date,$6,$7,$8) RETURNING id::text", pi["id"], pi["project_id"], ctx.org_id, body.value,
-                       body.measured_on, body.evidence_id, body.note, ctx.user_id)
+        # v0.23.0 — PROVENIÊNCIA. A origem é derivada do que a medição traz, não pedida ao cliente:
+        # perguntar "qual a origem?" num campo livre convidaria a dizer "documento" sem documento.
+        # Quem anexa evidência tem origem `evidence_document`; quem não anexa é `self_declared` — e
+        # o banco recusa que uma medição autodeclarada chegue a `validated`.
+        origem = "evidence_document" if body.evidence_id else "self_declared"
+        vid = c.scalar("INSERT INTO indicator_values(project_indicator_id, project_id, org_id, value, measured_on, evidence_id, note, created_by, source_kind)"
+                       " VALUES ($1,$2,$3,$4::numeric,$5::date,$6,$7,$8,$9) RETURNING id::text", pi["id"], pi["project_id"], ctx.org_id, body.value,
+                       body.measured_on, body.evidence_id, body.note, ctx.user_id, origem)
         ledger(c, project_id=pi["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="result_reported", ref_type="indicator_value", ref_id=vid,
                payload={"value": body.value, "measured_on": str(body.measured_on), "has_evidence": bool(body.evidence_id)})
         # v0.20.0 — `Indicator.measured` estava declarado e nunca era emitido. Um número reportado
@@ -475,3 +480,25 @@ def risk_levels(ctx: Ctx):
     from ..http import ROUTES
     api.load_all()
     return RL.inventory(list(ROUTES))
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+# PROVENIÊNCIA — "de onde veio este número"
+#
+# A rota existe para uma pergunta que o produto não conseguia responder numa consulta só: dado um
+# indicador, mostrar projeto → indicador → linha de base e a fonte dela → documento com hash e
+# versão → quem enviou → evidência → quem revisou → medição → quem validou e de qual organização →
+# lançamentos do Impact Ledger (com `seq` e hash) → eventos de auditoria.
+#
+# E mostrar o que FALTA. `gaps` nomeia cada elo ausente e o efeito dele sobre o que o número prova.
+# Cadeia que esconde o elo que falta transforma ausência de prova em aparência de prova.
+
+@route("GET", "/v1/indicator-values/{value_id}/provenance", min_role="viewer", tags=T,
+       summary="Cadeia de proveniência de uma medição: origem, evidência, revisão, validação e lacunas")
+def value_provenance(ctx: Ctx):
+    from ..engines import provenance
+    with ctx.tx(readonly=True) as c:
+        dados = provenance.indicator_value(c, ctx.path["value_id"])
+    if not dados:
+        raise not_found("Valor")
+    return dados

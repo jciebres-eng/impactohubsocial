@@ -346,8 +346,38 @@ def set_compliance(org_id: str, status: str) -> None:
         c.run("UPDATE organizations SET compliance_status = $2 WHERE id = $1", org_id, status)
 
 
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+# CÓDIGO TOTP QUE NÃO SE REPETE
+#
+# A v0.23.0 fechou o reuso de código TOTP: `verify_once()` grava o contador aceito e o gatilho
+# `totp_counter_moves_forward` recusa aceitar um contador igual ou menor. A trava é correta e a
+# auditoria a pediu — mas ela quebrou os auxiliares de teste, que gravavam `totp.totp(segredo)`
+# duas vezes seguidas (ligar o MFA e depois reautenticar) dentro da mesma janela de 30 segundos.
+#
+# O defeito encontrou o teste, não o contrário: o arranjo só funcionava porque o reuso era possível.
+#
+# `fresh_totp()` emite um código por PASSO DISTINTO, sempre à frente do último usado. A janela de
+# verificação é de ±1 passo, então há três passos utilizáveis em cada janela de 30 segundos
+# (n-1, n, n+1). Quem precisar de um quarto código na mesma janela recebe um erro claro em vez de
+# um 401 misterioso — e a resposta certa nesse caso é reaproveitar a sessão já reautenticada
+# (a janela de step-up dura 15 minutos), não pedir outro código.
+_ultimo_passo: dict[str, int] = {}
+
+
+def fresh_totp(secret: str) -> str:
+    from impacto.security import totp as _t
+    agora = int(time.time() // 30)
+    passo = max(agora - 1, _ultimo_passo.get(secret, agora - 2) + 1)
+    if passo > agora + 1:
+        raise AssertionError(
+            "mais de três códigos TOTP pedidos na mesma janela de 30 s para o mesmo segredo. "
+            "A janela de verificação é de ±1 passo, então não existe quarto código válido. "
+            "Reaproveite a sessão já reautenticada (step-up vale 15 min) em vez de pedir outro código.")
+    _ultimo_passo[secret] = passo
+    return _t.totp(secret, at=passo * 30)
+
+
 def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
-    from impacto.security import totp
     c = new_account("osc")
     with db_system() as db:
         plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
@@ -357,7 +387,7 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
     secret = None
     if mfa:
         secret = c.post("/v1/auth/mfa/setup").json["secret"]
-        assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)}).status == 200
+        assert c.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)}).status == 200
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     # v0.22.0 — ADMINISTRADOR TRABALHANDO. A partir desta versão, as permissões de
     # `core/access.py::STEP_UP_PERMISSIONS` exigem identidade confirmada há menos de 15 minutos:
@@ -370,9 +400,8 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
     # A exigência em si é exercitada em `test_v0220_authorization.StepUpTests`, com `make_staff`,
     # que de propósito NÃO confirma: lá o assunto é o step-up.
     if mfa:
-        from impacto.security import totp as _totp
         assert c.post("/v1/auth/reauth", {"password": PASSWORD,
-                                          "mfa_code": _totp.totp(secret)}).status == 200
+                                          "mfa_code": fresh_totp(secret)}).status == 200
         c.mfa_secret = secret
     return c, secret
 
@@ -397,7 +426,6 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
 
     O MFA é ligado porque toda rota `auth="admin"` o exige na sessão.
     """
-    from impacto.security import totp
     c = new_account("osc")
     with db_system() as db:
         plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
@@ -410,7 +438,7 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
                    " ON CONFLICT DO NOTHING", c.user["id"], papel)
     if mfa:
         segredo = c.post("/v1/auth/mfa/setup").json["secret"]
-        assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(segredo)}).status == 200
+        assert c.post("/v1/auth/mfa/enable", {"code": fresh_totp(segredo)}).status == 200
         c.mfa_secret = segredo
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     c.staff_roles = tuple(roles)
@@ -419,11 +447,10 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
 
 def reauth(c: Client) -> None:
     """Confirma a identidade da sessão — exigido pelas permissões de STEP_UP_PERMISSIONS."""
-    from impacto.security import totp
     corpo = {"password": PASSWORD}
     segredo = getattr(c, "mfa_secret", None)
     if segredo:
-        corpo["mfa_code"] = totp.totp(segredo)
+        corpo["mfa_code"] = fresh_totp(segredo)
     r = c.post("/v1/auth/reauth", corpo)
     assert r.status == 200, r
 

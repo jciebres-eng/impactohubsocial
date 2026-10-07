@@ -24,8 +24,15 @@ def funded_pair(funder_kind="company", amount=100000, budget_items=((1, 100000),
     grant_premium(osc)
     pid = published_project(osc, budget_items=budget_items)
     with db_system() as d:
-        aid = d.scalar("INSERT INTO applications(project_id, osc_org_id, funder_org_id, origin, status) VALUES ($1,$2,$3,'funder_interest','approved') RETURNING id::text",
+        # v0.23.0 — a candidatura nasce em rascunho e CAMINHA. `trg_application_status_graph`
+        # recusa nascer aprovada, porque isso pularia o processo inteiro sem deixar uma única
+        # transição registrada. O atalho que existia aqui era exatamente o estado impossível que
+        # a máquina de estados no banco passou a impedir, então o arranjo percorre o grafo.
+        aid = d.scalar("INSERT INTO applications(project_id, osc_org_id, funder_org_id, origin, status)"
+                       " VALUES ($1,$2,$3,'funder_interest','draft') RETURNING id::text",
                        pid, osc.org_id, fu.org_id)
+        for passo in ("submitted", "screening", "due_diligence", "approved"):
+            d.run("UPDATE applications SET status = $2 WHERE id = $1", aid, passo)
     r = fu.post(f"/v1/applications/{aid}/commitments", {"amount_cents": amount})
     assert r.status == 201, r
     return {"osc": osc, "fu": fu, "pid": pid, "aid": aid, "cid": r.json["id"]}

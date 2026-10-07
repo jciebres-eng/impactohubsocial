@@ -3,7 +3,7 @@
 import re
 import unittest
 
-from tests.support import PASSWORD, db_system, make_admin, new_account, server
+from tests.support import PASSWORD, db_system, fresh_totp, make_admin, new_account, server
 from tests.test_e2e_v080 import A11Y_JS
 from tests.test_e2e_web import DIST, HAVE_PW
 from tests.test_v090_solutions import mk
@@ -41,8 +41,7 @@ class WebV0101(unittest.TestCase):
         p.get_by_label("Senha").fill(PASSWORD)
         p.get_by_role("button", name="Entrar").click()
         if secret:  # administrador: MFA real (TOTP), sem desligar a exigência
-            from impacto.security import totp
-            p.get_by_label("Código do aplicativo autenticador").fill(totp.totp(secret))
+            p.get_by_label("Código do aplicativo autenticador").fill(fresh_totp(secret))
             p.get_by_role("button", name="Confirmar").click()
         p.get_by_role("heading", name=re.compile("Olá")).wait_for()
         return p

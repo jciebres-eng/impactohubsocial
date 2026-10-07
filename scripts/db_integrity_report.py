@@ -80,7 +80,35 @@ QUERIES: dict[str, str] = {
         WHERE grantee = 'impacto_app' AND privilege_type = 'DELETE' AND table_schema = 'public'""",
     "app_role_column_grants": """SELECT count(*) FROM information_schema.column_privileges
         WHERE grantee = 'impacto_app' AND table_schema = 'public'""",
-    "orphan_rows_check": """SELECT 'nenhuma verificação de órfão aplicável: toda referência é FK declarada'""",
+    # v0.23.0 — até aqui esta linha era uma STRING LITERAL dizendo "nenhuma verificação de órfão
+    # aplicável: toda referência é FK declarada". Não consultava nada, e a afirmação era falsa: as
+    # 25 colunas de referência POLIMÓRFICA do banco não podem ter FK (apontam para tabelas
+    # diferentes conforme o tipo) e eram justamente as únicas sem verificação.
+    "orphan_rows_check": """SELECT CASE WHEN sum(orphans) = 0
+             THEN 'nenhum órfão em ' || count(*) || ' combinações tipo→tabela verificadas'
+             ELSE sum(orphans) || ' LINHAS ÓRFÃS: ' || string_agg(
+                  source_table || '.' || id_column || ' [' || type_value || '] ' || orphans,
+                  '; ' ORDER BY orphans DESC) FILTER (WHERE orphans > 0)
+        END FROM integrity_orphans()""",
+    "polymorphic_columns_catalogued": "SELECT count(*) FROM polymorphic_refs",
+    "polymorphic_catalog_drift": """SELECT coalesce(string_agg(
+            source_table || '.' || id_column || ' (' || situation || ')', '; '),
+            'nenhuma: o catálogo cobre todas as colunas polimórficas sem FK')
+        FROM integrity_catalog_drift()""",
+    "unresolved_ref_types": """SELECT coalesce(string_agg(
+            source_table || '.' || type_column || ' = ' || type_value || ' (' || rows_affected || ' linhas)', '; '),
+            'nenhum: todo valor de tipo presente nos dados resolve para uma tabela ou tem exceção escrita')
+        FROM integrity_unresolved_refs()""",
+    "value_ledger_chain": """SELECT CASE WHEN count(*) = 0 THEN 'sem eventos de valor encadeados'
+             WHEN bool_and(valid) THEN count(*) || ' organizações com cadeia de valor íntegra'
+             ELSE 'CADEIA DE VALOR QUEBRADA' END
+        FROM (SELECT (value_verify(org_id)).* FROM (SELECT DISTINCT org_id FROM value_events WHERE seq IS NOT NULL) o) v""",
+    "value_events_without_chain": """SELECT count(*) || ' linhas anteriores à v0.23.0 (fora da verificação de propósito)'
+        FROM value_events WHERE seq IS NULL""",
+    "indicator_provenance": """SELECT count(*) || ' medições, ' ||
+            count(*) FILTER (WHERE evidence_id IS NOT NULL) || ' com evidência, ' ||
+            count(*) FILTER (WHERE status = 'validated' AND evidence_id IS NULL) || ' validadas SEM evidência (tem de ser 0)'
+        FROM indicator_values""",
     "ods_goals": "SELECT count(*) FROM ods_goals",
     "status_graph_edges": "SELECT count(*) FROM project_status_graph",
     "signature_providers_in_production": "SELECT count(*) FROM signature_providers WHERE state = 'production'",

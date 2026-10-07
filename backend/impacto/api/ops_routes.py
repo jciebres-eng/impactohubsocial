@@ -156,3 +156,20 @@ def ops_health(ctx: Ctx):
         "delivery_note": ("E-mail com status accepted_by_smtp foi ACEITO pelo servidor. A plataforma "
                           "não recebe retorno de entrega do provedor, então entrega não é afirmada."),
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────────────
+# MOTOR DE INTEGRIDADE RELACIONAL
+#
+# Até a v0.22.0, a verificação de órfão do relatório de integridade era uma string literal que dizia
+# "nenhuma verificação aplicável: toda referência é FK declarada". A afirmação é falsa: 25 colunas
+# de referência polimórfica não podem ter FK, e eram as únicas sem verificação nenhuma.
+
+@route("GET", "/v1/admin/integrity", auth="admin", permission="security.audit.read", tags=T,
+       summary="Órfãos, referências não resolvidas, deriva de catálogo, cadeias de hash e cobertura de proveniência")
+def integrity_report(ctx: Ctx):
+    from ..core.access import log_privileged
+    from ..engines import integrity
+    log_privileged(ctx, "security.audit.read")
+    with ctx.system_tx() as c:
+        return integrity.report(c)

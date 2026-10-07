@@ -5,6 +5,7 @@ import time
 from contextlib import contextmanager
 
 from ..db.pq import Connection
+from ..observability import METRICS
 
 
 @contextmanager
@@ -30,16 +31,23 @@ def record(conn: Connection, job: str):
     except Exception as exc:
         estado["status"] = "failed"
         estado["error"] = f"{type(exc).__name__}: {exc}".split("\n")[0][:2000]
-        _fechar(conn, row["id"], estado, inicio)
+        _fechar(conn, row["id"], job, estado, inicio)
         raise
-    _fechar(conn, row["id"], estado, inicio)
+    _fechar(conn, row["id"], job, estado, inicio)
 
 
-def _fechar(conn: Connection, run_id: int, estado: dict, inicio: float) -> None:
+def _fechar(conn: Connection, run_id: int, job: str, estado: dict, inicio: float) -> None:
     from ..db.pq import Json
+    duracao = int((time.monotonic() - inicio) * 1000)
+    # Métrica no mesmo ponto de estrangulamento onde o resultado é gravado. Sem isto, "o backup
+    # falhou" só aparecia para quem abrisse a tela de operações — o alerta não tinha série para ler.
+    # `job` é um identificador constante (ver `JobNamesAreIdentitiesNotSentencesTests`), nunca uma
+    # frase montada com parâmetro, então a cardinalidade é o número de tarefas e não cresce.
+    METRICS.inc("impacto_job_runs_total", job=job, status=estado["status"])
+    METRICS.observe("impacto_job_duration_seconds", duracao / 1000.0, job=job)
     conn.run("UPDATE ops_job_runs SET status = $2, finished_at = now(), duration_ms = $3,"
              " detail = $4::jsonb, error = $5 WHERE id = $1",
-             run_id, estado["status"], int((time.monotonic() - inicio) * 1000),
+             run_id, estado["status"], duracao,
              Json(estado["detail"] or {}), estado["error"])
 
 

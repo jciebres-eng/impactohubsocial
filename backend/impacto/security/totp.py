@@ -50,3 +50,29 @@ def provisioning_uri(secret: str, account: str, issuer: str = "Impacto") -> str:
 def recovery_codes(n: int = 8) -> list[str]:
     alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     return ["-".join("".join(secrets.choice(alphabet) for _ in range(4)) for _ in range(3)) for _ in range(n)]
+
+
+def verify_once(conn, user_id: str, secret: str, code: str, *, window: int = 1) -> bool:
+    """Confere o código TOTP e o QUEIMA: o mesmo código não serve duas vezes.
+
+    O defeito que isto corrige foi encontrado por auditoria: `verify()` devolve o contador aceito e
+    o docstring dela diz, desde sempre, "para impedir reuso" — e **nenhum dos quatro chamadores
+    guardava esse contador**. Com janela de ±1 passo, o mesmo código de seis dígitos valia cerca de
+    90 segundos e podia ser usado mais de uma vez. Quem lê o código por cima do ombro, ou o captura
+    numa página falsa, o reapresenta.
+
+    A trava é dupla de propósito: aqui o contador é comparado e gravado, e no banco o gatilho
+    `totp_counter_moves_forward()` recusa qualquer regressão — então uma via de verificação futura
+    que esquecesse de gravar não conseguiria, nem por engano, aceitar um código já usado.
+
+    O `UPDATE ... WHERE mfa_last_counter IS NULL OR mfa_last_counter < $2` é o que torna a operação
+    atômica: duas requisições simultâneas com o mesmo código disputam a linha, uma grava e a outra
+    recebe zero linhas afetadas.
+    """
+    contador = verify(secret, code, window=window)
+    if contador is None:
+        return False
+    afetadas = conn.run(
+        "UPDATE users SET mfa_last_counter = $2 WHERE id = $1"
+        "   AND (mfa_last_counter IS NULL OR mfa_last_counter < $2)", user_id, contador)
+    return bool(afetadas)

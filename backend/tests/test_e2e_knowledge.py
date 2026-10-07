@@ -4,7 +4,7 @@ import re
 import unittest
 import uuid
 
-from tests.support import PASSWORD, ROOT, Client, new_account, server
+from tests.support import PASSWORD, ROOT, Client, fresh_totp, new_account, server
 from tests.test_e2e_v080 import A11Y_JS
 from tests.test_v0120_knowledge import publish_article, staff, uniq
 
@@ -199,19 +199,18 @@ class KnowledgeE2E(unittest.TestCase):
 
     # Jornada 5 — equipe editorial: editor cria o guia no CMS (com MFA real), não consegue aprovar o próprio; revisor publica; visitante lê
     def test_cms_editor_cannot_self_approve_and_reviewer_publishes(self):
-        from impacto.security import totp
         ed = new_account("osc")
         from tests.support import db_system
         with db_system() as d:
             d.run("INSERT INTO staff_roles(user_id, role) VALUES ($1,'editor') ON CONFLICT DO NOTHING", ed.user["id"])
         secret = ed.post("/v1/auth/mfa/setup").json["secret"]
-        self.assertEqual(ed.post("/v1/auth/mfa/enable", {"code": totp.totp(secret)}).status, 200)
+        self.assertEqual(ed.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)}).status, 200)
         p = self.page()
         p.goto(self.base + "/entrar")
         p.get_by_label("E-mail").fill(ed.email)
         p.get_by_label("Senha").fill(PASSWORD)
         p.get_by_role("button", name="Entrar").click()
-        p.get_by_label("Código do aplicativo autenticador").fill(totp.totp(secret))
+        p.get_by_label("Código do aplicativo autenticador").fill(fresh_totp(secret))
         p.get_by_role("button", name="Confirmar").click()
         p.get_by_role("heading", name=re.compile("Olá")).wait_for()
         p.get_by_role("link", name="Central (equipe)").click()

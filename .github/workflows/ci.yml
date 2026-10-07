@@ -16,6 +16,13 @@ jobs:
       TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # a varredura de segredo precisa do histórico
+      # VARREDURA DE SEGREDO. Até a v0.22.0 não havia nenhuma, em lugar nenhum: nem no CI, nem em
+      # pre-commit, nem na suíte. O fail-fast de `config.py` recusa subir sem segredo configurado —
+      # isso protege o BOOT, não o histórico do git. Um segredo commitado por engano ficava lá.
+      - name: Varredura de segredo (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env: { GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false" }
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - uses: actions/setup-node@v4
@@ -25,7 +32,22 @@ jobs:
       - name: Lint (ruff)
         run: cd backend && ruff check impacto
       - name: Frontend — dependências, typecheck (tipos oficiais) e build
-        run: cd web && npm install --no-audit && npx tsc -p tsconfig.json --noEmit && node build.mjs
+        run: |
+          cd web
+          # `npm ci` quando houver lockfile commitado; `npm install` enquanto não houver. A
+          # diferença importa: sem lockfile, `npm audit` audita uma árvore que pode não ser a de
+          # produção. A geração do lockfile exige acesso ao registro npm, que o ambiente de
+          # desenvolvimento desta rodada não tem — então o CI o GERA e o publica como artefato,
+          # para ser commitado. Ver TECHNICAL_DEBT_REGISTER.md (dívida de cadeia de suprimentos).
+          if [ -f package-lock.json ]; then npm ci --no-audit; else npm install --no-audit; fi
+          npx tsc -p tsconfig.json --noEmit
+          node build.mjs
+      - name: Lockfile do frontend (gerar para commit, quando ausente)
+        if: ${{ hashFiles('web/package-lock.json') == '' }}
+        run: cd web && npm install --package-lock-only --no-audit
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('web/package-lock.json') == '' }}
+        with: { name: package-lock-para-commitar, path: web/package-lock.json, if-no-files-found: warn }
       - run: python -m playwright install --with-deps chromium
       - name: Testes (unit, integração, segurança/RLS, OIDC, E2E navegador)
         run: cd backend && python -m unittest discover -s tests -t . -v
@@ -33,6 +55,33 @@ jobs:
         run: |
           pip-audit -r backend/requirements.txt
           cd web && npm audit --omit=dev --audit-level=high
+      # TESTE DE RESTAURAÇÃO. `scripts/restore_test.sh` é o ativo de recuperação mais forte do
+      # repositório — confere o sha256 do dump, restaura num banco descartável, verifica as cadeias
+      # de hash e prova que o restore NÃO traz estado que não deveria existir. E nada o executava:
+      # não estava no CI, no Makefile nem na suíte. É exatamente o defeito que `ops/backup.py`
+      # critica na primeira linha: "script que ninguém executa não é backup".
+      - name: Backup e RESTAURAÇÃO conferida (ciclo completo)
+        env:
+          ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          DB_NAME: impacto_restore_ci
+          OWNER_PASSWORD: owner_ci_pw
+        run: |
+          set -euo pipefail
+          # Banco novo com os papéis reais (impacto_owner/impacto_app) e todas as migrations.
+          bash scripts/dev_reset_db.sh
+          export BACKUP_DATABASE_URL="postgresql://impacto_owner:$OWNER_PASSWORD@localhost:5432/$DB_NAME"
+          bash scripts/backup.sh "${{ runner.temp }}/backups"
+          DUMP=$(ls -t "${{ runner.temp }}"/backups/impacto-*.dump | head -1)
+          bash scripts/restore_test.sh "$DUMP"
+          # Um restore que confere o hash de um dump que ninguém alterou prova pouco. Aqui o dump é
+          # corrompido de propósito: o teste TEM de falhar. Se passar, a verificação é decorativa.
+          cp "$DUMP" "$DUMP.adulterado"; printf 'x' >> "$DUMP.adulterado"
+          cp "$DUMP.sha256" "$DUMP.adulterado.sha256"
+          sed -i "s|$(basename "$DUMP")|$(basename "$DUMP").adulterado|" "$DUMP.adulterado.sha256"
+          if bash scripts/restore_test.sh "$DUMP.adulterado" 2>/dev/null; then
+            echo "FALHA: restore_test.sh aceitou um dump adulterado"; exit 1
+          fi
+          echo "restore_test.sh recusa dump adulterado, como deve"
   docker:
     runs-on: ubuntu-24.04
     needs: backend

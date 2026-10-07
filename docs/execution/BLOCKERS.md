@@ -66,3 +66,38 @@ testado. É o risco que nenhum teste local elimina.
   `billing_provider=none`, `ai_provider=local`. Nenhum caminho de código chama fornecedor externo
   nesta configuração.
 - `credentials` é `ausentes` nas 14 linhas, e um teste recusa o commit de credencial.
+
+---
+
+## D-SUP2 — Nenhuma base de vulnerabilidade alcançável (SCA)
+
+**Bloqueado:** a execução de SCA (*software composition analysis*) contra uma base de avisos viva.
+
+**Causa:** `pip-audit`, `bandit`, `gitleaks`, `semgrep` e `safety` não estão instalados, o índice PyPI
+responde indisponível a `pip install`, a API GraphQL do GitHub recusa a sessão e o endpoint REST
+`/advisories` recusa chamada fora dos repositórios configurados. Não há, deste ambiente, caminho até
+OSV, GHSA ou qualquer base equivalente.
+
+**Quem desbloqueia:** qualquer ambiente com rede para PyPI/OSV. O fluxo de CI já executa
+`pip-audit -r backend/requirements.txt` e `npm audit --omit=dev --audit-level=high`.
+
+**Risco de seguir sem ele:** uma das nove dependências de terceiro pode ter aviso publicado e não
+conferido nesta rodada. É risco real e não há como reduzi-lo a zero daqui.
+
+**Redução do risco:**
+- O inventário exato está versionado e fixado por versão em `backend/requirements.txt` (11 pacotes,
+  todos com `==`), que é a entrada que o `pip-audit` consome. Nenhuma faixa aberta.
+- O que o runtime importa de terceiro são nove módulos: `starlette`, `pydantic`, `cryptography`,
+  `PyJWT`, `pypdf`, `reportlab`, `defusedxml`, mais `pytesseract`/`Pillow` que são OPCIONAIS (import
+  protegido em `services/documents.py`; sem eles o OCR devolve "sem texto" e o envio segue válido) e
+  por isso declarados como opcionais em `THIRD_PARTY_DEPENDENCIES.md`, fora de `requirements.txt`.
+- A superfície é pequena por desenho: o driver de PostgreSQL é próprio (`impacto/db/pq.py`, sobre
+  libpq do sistema), e não há ORM, cliente HTTP de terceiro nem framework web além do Starlette.
+
+**O que NÃO é bloqueado por isto, e foi executado:**
+- **SAST**: as regras `S` do ruff (flake8-bandit) estão selecionadas em `backend/pyproject.toml`, e
+  `ruff check impacto tests` passa limpo. Um teste exige que a seleção `"S"` continue lá.
+- **Varredura de segredo**: `scripts/secrets_scan.py` roda em cada suíte, varre os 731 arquivos de
+  texto rastreados pelo git, e tem CONTROLE NEGATIVO — um teste planta chave da AWS, token do
+  GitHub, chave do Stripe e bloco PEM e exige que a varredura acuse os quatro. Sem esse controle,
+  uma varredura que não acha nada é indistinguível de uma que não procura nada.

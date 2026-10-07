@@ -92,27 +92,92 @@ build) — é onde a limitação D-SUP1 do ambiente de desenvolvimento deixa de 
 
 Suba o contêiner atrás do proxy TLS. `infra/nginx/impacto.conf` tem uma configuração de referência.
 
-## 6. Verificação pós-publicação
+**Suba também o processo de tarefas.** Ele não é opcional:
 
 ```bash
-curl -fsS https://SEU-DOMINIO/healthz    # {"status":"ok", …}
-curl -fsS https://SEU-DOMINIO/readyz     # {"status":"ready", "database":"ok", …}
+python3 -m impacto.jobs loop          # laço contínuo (JOBS_INTERVAL_SECONDS, padrão 900)
+# ou, por cron / CronJob:
+python3 -m impacto.jobs once          # executa as 21 tarefas uma vez
 ```
+
+Sem ele **não há backup agendado, não há canário de e-mail, não há retenção de dados e a tabela
+`rate_events` nunca é limpa**. O produto continua respondendo — e vai acumulando dívida silenciosa
+até alguém perguntar por que o último backup é de três semanas atrás.
+
+## 6. Primeiro administrador
+
+```bash
+python3 -m impacto.cli create-admin --email voce@dominio --name "Seu Nome"
+# a senha é lida do stdin, nunca por argumento
+```
+
+É o único caminho para o primeiro administrador: sem ele não há MFA, não há aprovação das minutas
+jurídicas e não há painel. O comando é idempotente — rodar de novo com o mesmo e-mail promove em vez
+de duplicar.
+
+**No primeiro acesso à área administrativa, o MFA é exigido.** Não é possível pular: toda rota
+`auth="admin"` recusa sessão sem MFA verificado.
+
+## 7. Portão jurídico — o cadastro responde 503 até você abrir
+
+> **Isto é desenho, não defeito.** Enquanto `terms_of_use` e `privacy_policy` não estiverem
+> **aprovados**, `POST /v1/auth/register` responde **503 `legal_documents_not_published`**. O produto
+> recusa coletar aceite de documento que ninguém aprovou.
+
+```bash
+python3 -m impacto.cli legal-list      # situação das 11 minutas, com o id de cada uma
+python3 -m impacto.cli legal-approve --doc-key terms_of_use \
+        --reviewed-by "Fulana de Tal, OAB/UF 1234" --review-reference "Parecer 12/2026"
+python3 -m impacto.cli legal-approve --doc-key privacy_policy \
+        --reviewed-by "Fulana de Tal, OAB/UF 1234" --review-reference "Parecer 12/2026"
+```
+
+A aprovação **exige revisor nomeado e referência da revisão** — o comando não aceita sem, e o banco
+também não. Isto não é atalho para aprovar sem revisão: é o registro de que alguém com nome assumiu
+a revisão. Se o nome for inventado, a mentira passa a ter autor, que é o máximo que software pode
+fazer a respeito.
+
+As outras nove minutas só bloqueiam quando o recurso correspondente entrar em uso (cobrança,
+marketplace, contrato público). Veja o documento de dependências para quando cada uma é necessária.
+
+## 8. Verificação pós-publicação
+
+```bash
+python3 scripts/smoke_test.py --base https://SEU-DOMINIO \
+        --email conta-de-teste@dominio --password '…' --out /tmp/smoke.json
+```
+
+São **27 verificações** com veredito ao final: `GO`, `GO WITH CONDITIONS` ou `NO-GO`, e código de
+saída diferente de zero quando alguma obrigatória falha — dá para usar em automação.
+
+Quatro delas merecem atenção porque falham em silêncio no mundo real:
+
+| Verificação | O que pega |
+|---|---|
+| `hardened_env` | alvo em https com `IMPACTO_ENV` esquecido — a isenção de loopback do SSRF continua ativa e o HSTS não é emitido |
+| `session_ip_is_real` | proxy sem `X-Forwarded-For`, ou `TRUST_PROXY_HEADERS` desligado: o limite por IP vira **coletivo** (um pico derruba o login de todo mundo) e a auditoria grava o IP do proxy |
+| `legal_gate` | diz, em vez de deixar você descobrir, que o cadastro está em 503 por desenho |
+| `rate_limit_present` | só com `--exercise-rate-limit`, e **por último**: exercitá-la bloqueia o seu IP por ~15 minutos |
+
+Rode com uma conta de **organização cliente** (OSC ou empresa), não com o administrador da
+plataforma — a organização dele é do tipo `platform` e não tem projetos, então a leitura de banco
+aparece como ignorada.
 
 `/readyz` devolve **503** se o banco estiver fora ou se houver migração pendente, e nomeia quais
 faltam. **Não direcione tráfego enquanto ele não devolver 200** — 503 por migração pendente significa
 que o código espera um esquema que o banco não tem.
 
-Depois, o caminho que prova que o conjunto funciona de verdade:
+Depois do smoke, o caminho que só uma pessoa confirma:
 
-1. cadastro → **e-mail chega** → verificação → login
+1. cadastro → **o e-mail chega de verdade** → verificação → login
 2. criar organização → enviar documento → ver o documento
 3. administrador → login com MFA → painel
 
-O passo 1 é o que falha se o SMTP estiver mal configurado, e é o mais comum de dar errado: confira
-SPF, DKIM e DMARC no DNS, senão o e-mail sai e cai em spam.
+O passo 1 é o que mais falha, e por motivo de DNS, não de código: sem SPF, DKIM e DMARC o e-mail sai
+e cai em spam. O produto registra a tentativa em `email_events`; se houver linha com `status='failed'`,
+o problema é do provedor ou da rede, não da aplicação.
 
-## 7. Backup — antes de qualquer dado real
+## 9. Backup — antes de qualquer dado real
 
 ```bash
 BACKUP_DATABASE_URL="…impacto_owner…" bash scripts/backup.sh /caminho/backups
@@ -131,7 +196,7 @@ um backup.
 **Os arquivos do cofre de documentos não estão no dump do PostgreSQL.** Se `STORAGE_PROVIDER=s3`,
 use o versionamento do bucket; se for local, inclua o volume no snapshot.
 
-## 8. Observabilidade
+## 10. Observabilidade
 
 - `/metrics` exige `METRICS_TOKEN`; sem token em produção, a rota responde 404 de propósito.
 - `infra/monitoring/alerts.yml` traz 16 regras prontas, entre elas **backup falhou** e **backup sem

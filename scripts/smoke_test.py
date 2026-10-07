@@ -100,7 +100,8 @@ class Skip(Exception):
     pass
 
 
-def run(base: str, email: str | None, password: str | None, *, insecure: bool) -> dict:
+def run(base: str, email: str | None, password: str | None, *, insecure: bool,
+        exercitar_limite: bool = False) -> dict:
     h = Http(base, insecure=insecure)
     s = Smoke(h, email=email, password=password)
     print(f"smoke em {base}")
@@ -131,6 +132,40 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
                      if str(body.get(k)).lower() in ("noop", "local", "sandbox", "console", "none")]
         return ("todos declarados" + (f" · ATENÇÃO, em modo não produtivo: {simulados}" if simulados else ""))
 
+    @s.check("hardened_env", "ambiente endurecido quando o alvo é https")
+    def _():
+        """Um IMPACTO_ENV esquecido é silencioso e caro.
+
+        Sem `staging`/`production`, a isenção de loopback do bloqueio de SSRF continua valendo — a
+        porta para todo serviço interno da máquina — e o HSTS não é emitido. Nada disso aparece na
+        tela; só aqui.
+        """
+        if not base.startswith("https://"):
+            raise Skip("alvo não é https: o endurecimento não se aplica")
+        _st, body, _ms, _hd = h.call("GET", "/healthz")
+        env = str(body.get("env", "")).lower()
+        assert env in ("staging", "production"), (
+            f"alvo em https com IMPACTO_ENV={env!r}: a isenção de loopback do SSRF continua ativa "
+            "e o HSTS não é emitido")
+        return f"IMPACTO_ENV={env}"
+
+    @s.check("legal_gate", "portão jurídico: minutas que bloqueiam o cadastro")
+    def _():
+        """O cadastro responde 503 até `terms_of_use` e `privacy_policy` serem aprovados.
+
+        Isso é DESENHO, não defeito — mas quem roda o smoke precisa saber, senão interpreta o 503
+        como falha de implantação e sai procurando no lugar errado.
+        """
+        st, body, _ms, _hd = h.call("GET", "/v1/legal/registry")
+        if st != 200:
+            raise Skip(f"registro jurídico respondeu {st}")
+        bloqueando = body.get("blocking_product") or []
+        if bloqueando:
+            raise Skip(f"cadastro responde 503 POR DESENHO: faltam aprovar {', '.join(bloqueando)}. "
+                       "Use: python3 -m impacto.cli legal-approve --doc-key <chave> "
+                       "--reviewed-by ... --review-reference ...")
+        return "nenhuma minuta bloqueando o cadastro"
+
     @s.check("meta_config", "/v1/meta/config devolve versão de termos e privacidade")
     def _():
         st, body, _ms, _hd = h.call("GET", "/v1/meta/config")
@@ -150,10 +185,15 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
     def _():
         _st, _b, _ms, hd = h.call("GET", "/healthz")
         presentes = {k.lower() for k in hd}
-        faltando = [k for k in ("X-Content-Type-Options", "Referrer-Policy")
-                    if k.lower() not in presentes]
+        exigidos = ["X-Content-Type-Options", "Referrer-Policy", "X-Frame-Options",
+                    "Content-Security-Policy"]
+        # HSTS só existe quando a configuração está ENDURECIDA. Num alvo https, a ausência dele
+        # significa que o ambiente não está endurecido — e aí outras travas também estão desligadas.
+        if base.startswith("https://"):
+            exigidos.append("Strict-Transport-Security")
+        faltando = [k for k in exigidos if k.lower() not in presentes]
         assert not faltando, f"faltando: {faltando}"
-        return "X-Content-Type-Options e Referrer-Policy presentes"
+        return f"{len(exigidos)} cabeçalhos presentes"
 
     @s.check("https_or_local", "TLS em produção (ou alvo local declarado)")
     def _():
@@ -171,17 +211,28 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
 
     @s.check("rate_limit_present", "limitador de taxa responde no login")
     def _():
+        """VERIFICAÇÃO INERTE ATÉ ESTA CORREÇÃO, e por construção.
+
+        O limite de login é 30 por 15 minutos; a versão anterior fazia 12 tentativas. Nunca podia
+        chegar a 429 — passava como SKIPPED para sempre, parecendo uma verificação que roda.
+
+        Agora é opt-in (`--exercise-rate-limit`) e roda POR ÚLTIMO, porque exercitá-la de verdade
+        bloqueia o IP de quem está rodando o smoke pelos 15 minutos seguintes. Deixá-la ligada por
+        padrão faria o próprio smoke derrubar as verificações seguintes.
+        """
+        if not exercitar_limite:
+            raise Skip("não exercitada: use --exercise-rate-limit (bloqueia seu IP por ~15 min)")
         vistos = set()
-        for _ in range(12):
+        for _ in range(31):
             st, _b, _ms, _hd = h.call("POST", "/v1/auth/login",
                                       {"email": "nao-existe@exemplo.org", "password": "x"})
             vistos.add(st)
             if st == 429:
                 break
-        if 429 in vistos:
-            return "429 após tentativas repetidas"
-        raise Skip(f"não houve 429 em 12 tentativas (status vistos: {sorted(vistos)});"
-                   " confira RATE_LIMIT_MULTIPLIER do ambiente")
+        assert 429 in vistos, (
+            f"31 tentativas de login sem 429 (status vistos: {sorted(vistos)}): o limitador não "
+            "está valendo. Confira RATE_LIMIT_MULTIPLIER — tem de ser 1 em produção")
+        return "429 após tentativas repetidas"
 
     @s.check("login", "login com a conta de smoke")
     def _():
@@ -193,6 +244,39 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
         if tok:
             h.token = tok
         return f"sessão estabelecida em {ms:.0f} ms"
+
+    @s.check("session_ip_is_real", "o IP gravado na sessão é o do cliente, não o do proxy")
+    def _():
+        """Proxy mal configurado transforma o limite por IP em limite COLETIVO.
+
+        Se o `X-Forwarded-For` não chega, ou `TRUST_PROXY_HEADERS` está desligado, toda sessão grava
+        o IP do proxy. Aí o limite de 30 logins por 15 minutos passa a valer para TODOS os usuários
+        somados — o primeiro pico de acesso derruba o login de todo mundo — e a trilha de auditoria
+        registra o endereço do proxy em vez do de quem agiu. Nada disso aparece na tela.
+        """
+        import ipaddress
+        # Contra alvo local o IP de loopback é o CORRETO, e acusar ali seria alarme falso — a
+        # primeira versão desta verificação reprovou o próprio smoke rodando em 127.0.0.1.
+        if base.startswith(("http://127.0.0.1", "http://localhost", "https://127.0.0.1",
+                            "https://localhost")):
+            raise Skip("alvo local: o IP de loopback é o esperado")
+        if not h.token and not any(c.name.startswith("impacto") for c in h.jar):
+            raise Skip("sem sessão")
+        st, body, _ms, _hd = h.call("GET", "/v1/auth/sessions")
+        if st != 200:
+            raise Skip(f"/v1/auth/sessions respondeu {st}")
+        atual = next((x for x in body.get("items", []) if x.get("current")), None)
+        if not atual or not atual.get("ip"):
+            raise Skip("a sessão atual não declara IP")
+        try:
+            ip = ipaddress.ip_address(str(atual["ip"]).split("%")[0])
+        except ValueError:
+            raise Skip(f"IP não reconhecido: {atual['ip']!r}") from None
+        assert not (ip.is_loopback or ip.is_private), (
+            f"a sessão gravou {ip}, que é endereço interno: o proxy não está repassando "
+            "X-Forwarded-For, ou TRUST_PROXY_HEADERS está desligado. O limite por IP vira "
+            "coletivo e a auditoria grava o IP do proxy")
+        return f"IP do cliente: {ip}"
 
     @s.check("session", "/v1/me devolve a sessão e a organização ativa")
     def _():
@@ -209,6 +293,14 @@ def run(base: str, email: str | None, password: str | None, *, insecure: bool) -
         if not h.token and not any(c.name.startswith("impacto") for c in h.jar):
             raise Skip("sem sessão")
         st, body, ms, _hd = h.call("GET", "/v1/projects?limit=1")
+        # O ADMINISTRADOR DA PLATAFORMA NÃO LISTA PROJETOS, e isso é correto: a organização dele é
+        # do tipo `platform`, que não tem projetos. Mas o operador acabou de criar esse admin com
+        # `create-admin` e é a credencial que ele tem à mão — sem esta distinção, o smoke reprova e
+        # ele vai procurar defeito onde não há.
+        if st == 403 and str((body or {}).get("code")) == "wrong_org_kind":
+            raise Skip("a conta usada é da administração da plataforma, que não tem projetos: "
+                       "rode com uma conta de organização cliente (OSC, empresa) para exercitar "
+                       "a leitura de banco pela rota de projetos")
         assert st == 200, f"status {st} · {body}"
         return f"{len(body.get('items') or [])} projeto(s) · {ms:.0f} ms"
 
@@ -353,8 +445,12 @@ def main() -> int:
     ap.add_argument("--password")
     ap.add_argument("--insecure", action="store_true", help="aceita certificado inválido (só homologação)")
     ap.add_argument("--out")
+    ap.add_argument("--exercise-rate-limit", action="store_true",
+                    help="exercita o limitador de verdade (31 tentativas). BLOQUEIA o IP de quem roda "
+                         "por ~15 min, então roda por último e fica desligado por padrão")
     a = ap.parse_args()
-    out = run(a.base, a.email, a.password, insecure=a.insecure)
+    out = run(a.base, a.email, a.password, insecure=a.insecure,
+              exercitar_limite=a.exercise_rate_limit)
     if a.out:
         with open(a.out, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, indent=2)

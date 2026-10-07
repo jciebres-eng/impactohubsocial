@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T16:11:53+00:00",
-  "files_total": 1815,
-  "size_bytes_total": 32493861,
+  "generated_at": "2026-10-07T16:35:58+00:00",
+  "files_total": 1817,
+  "size_bytes_total": 32508917,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -30,12 +30,12 @@
       "size_bytes": 199142
     },
     "documentação da raiz": {
-      "files": 150,
-      "size_bytes": 1637542
+      "files": 151,
+      "size_bytes": 1643656
     },
     "documentação técnica": {
-      "files": 45,
-      "size_bytes": 1938489
+      "files": 46,
+      "size_bytes": 1947431
     },
     "documento legal": {
       "files": 11,
@@ -813,6 +813,12 @@
       "file": "PROJECT_LIFECYCLE.md",
       "sha256": "e447023e0fd3e05a2a59ca655960a2ec4431a52e4176006effd8f0a132af9c7a",
       "size_bytes": 9655,
+      "category": "documentação da raiz"
+    },
+    {
+      "file": "PROMPT_SESSAO_NUVEM.md",
+      "sha256": "63e6c5365df1562cc7c4b3694588d404de472ceb3217c16f353c35b8391c6822",
+      "size_bytes": 6114,
       "category": "documentação da raiz"
     },
     {
@@ -4065,6 +4071,12 @@
       "file": "docs/execution/ENGINE_VALIDATION_MATRIX.csv",
       "sha256": "0e2d82ac133ba85c0ae42b55c07bc135dc4ecb6ece545cf26180d6ad0177aa8a",
       "size_bytes": 25530,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/ESTADO_PARA_SESSAO_NUVEM.md",
+      "sha256": "04fe54429cd9a19f921f7d788cd5afde7190532b219b8233af95a922ec339484",
+      "size_bytes": 8942,
       "category": "documentação técnica"
     },
     {

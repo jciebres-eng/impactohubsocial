@@ -104,7 +104,16 @@ class ArchitectureTests(unittest.TestCase):
                    #       quebrado das outras — o que faz um verificador de integridade mentir. A
                    #       porta é a permissão `security.audit.read` e cada entrada fica em
                    #       `privileged_access_log`.
-                   "killswitch.py"}
+                   "killswitch.py",
+                   #   api/ai_routes.py → a CENTRAL DE CONTROLE de IA e o histórico de versão de
+                   #       prompt. O sujeito do dado é a plataforma: prompt, faixa de risco, tabela
+                   #       de preço de provedor e distribuição de resultado por `status` não
+                   #       pertencem a nenhuma organização cliente. Restringir ao `org_id` da
+                   #       sessão devolveria o painel vazio para quem opera. As rotas de IA do
+                   #       CLIENTE (`/v1/ai/usage`, `/budget`, `/credits`, `/estimate`,
+                   #       `/policies`) usam `ctx.tx()` com a RLS normal, e `/policies` lê a visão
+                   #       `ai_prompt_public`, que não tem a coluna do texto da instrução.
+                   "ai_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:

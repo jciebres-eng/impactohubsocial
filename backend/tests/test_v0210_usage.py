@@ -31,20 +31,63 @@ class OneCountForTheAiQuotaTests(unittest.TestCase):
         self.assertEqual(scalar("SELECT ai_usage_this_month($1)", cli.org_id), 2)
         painel = cli.get("/v1/ai/usage")
         self.assertEqual(painel.status, 200, painel.body)
-        self.assertEqual(painel.json["used_this_month"], 2,
+        # v0.23.0 — o painel passou a separar COTA (chamadas), ORÇAMENTO (dinheiro) e CRÉDITO
+        # (unidade comercial), porque são três controles diferentes e qualquer um pode barrar uma
+        # chamada. O número da cota continua vindo da mesma função que bloqueia; o que mudou é o
+        # lugar dele na resposta.
+        self.assertEqual(painel.json["quota"]["used_this_month"], 2,
                          "o painel voltou a contar diferente do bloqueio")
+        self.assertEqual("chamadas", painel.json["quota"]["counts"],
+                         "a cota conta CHAMADAS, e a resposta tem de dizer isso: chamada não é "
+                         "unidade de custo, e confundir as duas foi o defeito que o orçamento "
+                         "em dinheiro corrige")
 
     def test_the_panel_and_the_block_read_the_same_function(self):
+        """Nenhuma segunda contagem de cota mensal de IA fora de `ai_usage_this_month()`.
+
+        A v0.23.0 precisou apertar este guarda. A primeira versão procurava duas frases no MESMO
+        ARQUIVO — `FROM ai_usage WHERE org_id` e `date_trunc('month'` — e reprovava por
+        coincidência: a central de IA tem um recorte de 30 dias sobre `ai_usage` e, noutra consulta
+        do mesmo arquivo, a competência do ORÇAMENTO. Nenhuma das duas é contagem de cota.
+
+        Guarda que reprova por coincidência é guarda que alguém afrouxa, e aí ele deixa de proteger.
+        A conferência agora é por INSTRUÇÃO: o Python junta literais adjacentes em tempo de análise,
+        então cada constante de texto na árvore é uma consulta inteira. A reprovação exige as três
+        marcas na MESMA consulta — contagem, `ai_usage` e recorte de mês.
+        """
+        import ast
         import pathlib
         raiz = pathlib.Path(__file__).resolve().parents[1] / "impacto"
         copias = []
         for f in raiz.rglob("*.py"):
-            txt = f.read_text(encoding="utf-8")
-            if "FROM ai_usage WHERE org_id" in txt and "date_trunc('month'" in txt:
-                copias.append(str(f.relative_to(raiz)))
+            arvore = ast.parse(f.read_text(encoding="utf-8"))
+            for no in ast.walk(arvore):
+                if not (isinstance(no, ast.Constant) and isinstance(no.value, str)):
+                    continue
+                sql = no.value.lower()
+                # As QUATRO marcas juntas. `org_id` é a que separa cota de ORGANIZAÇÃO de custo
+                # da PLATAFORMA: `economics/metrics.py` conta chamadas de IA por mês para apurar
+                # despesa da plataforma inteira, sem recorte de inquilino, e isso é outra pergunta.
+                if ("ai_usage" in sql and "count(" in sql and "org_id" in sql
+                        and ("date_trunc('month'" in sql or "current_date)" in sql)):
+                    copias.append(f"{f.relative_to(raiz)}:{no.lineno}")
         self.assertEqual(copias, [],
                          "voltou a existir contagem de cota de IA fora de ai_usage_this_month(): "
                          + ", ".join(copias))
+
+    def test_the_tightened_guard_would_still_catch_a_real_duplicate(self):
+        """Contraprova: um guarda apertado só vale se ainda souber reprovar a cópia de verdade."""
+        duplicata = ("SELECT count(*) FROM ai_usage WHERE org_id = $1"
+                     " AND date_trunc('month', created_at) = date_trunc('month', current_date)")
+        sql = duplicata.lower()
+        self.assertTrue("ai_usage" in sql and "count(" in sql and "org_id" in sql
+                        and "date_trunc('month'" in sql,
+                        "a regra do guarda deixaria passar uma segunda contagem de cota")
+        # E a contraprova do outro lado: a despesa da PLATAFORMA (sem `org_id`) não é cota e não
+        # pode ser reprovada, senão o guarda obrigaria a apagar a apuração de custo.
+        despesa = ("SELECT count(*) FROM ai_usage WHERE created_at >= "
+                   "date_trunc('month', $1::date)").lower()
+        self.assertNotIn("org_id", despesa)
 
 
 class CounterMirrorsTheLiveCountTests(unittest.TestCase):

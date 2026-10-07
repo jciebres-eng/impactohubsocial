@@ -1392,3 +1392,23 @@ class KillSwitchIn(In):
     scope: Literal["mutations", "logins", "uploads", "integrations", "maintenance"]
     action: Literal["engage", "release"]
     reason: Annotated[str, StringConstraints(min_length=10, max_length=2000)]
+
+
+class AiEstimateQ(In):
+    """Parâmetros da estimativa de custo. `input_chars` em vez do texto: estimar não precisa do
+    conteúdo, e pedir o conteúdo faria a rota de ESTIMATIVA receber o dado que a operação real
+    processaria — dobrando a superfície sem necessidade."""
+    prompt_key: Annotated[str, StringConstraints(min_length=3, max_length=60, pattern=r"^[a-z][a-z0-9_.]*$")]
+    input_chars: int = Field(ge=1, le=1_000_000)
+
+
+class AiBudgetIn(In):
+    """Orçamento de IA da organização, em centavos.
+
+    `hard_stop` tem padrão FALSO de propósito: um limite que para o trabalho sem a organização ter
+    pedido para parar é a plataforma escolhendo por ela. Quem quiser parada rígida pede.
+    """
+    limit_cents: int = Field(ge=100, le=100_000_000)
+    warn_at_pct: int = Field(default=80, ge=1, le=100)
+    hard_stop: bool = False
+    note: Annotated[str, StringConstraints(max_length=400)] | None = None

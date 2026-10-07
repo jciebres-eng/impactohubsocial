@@ -310,7 +310,6 @@ class EveryPermissionInTheCatalogGuardsSomethingTests(unittest.TestCase):
         "content.write": "CMS da Central ainda usa `staff=` (editor/revisor), da v0.12.0",
         "content.publish": "idem: o fluxo editorial tem quatro olhos próprios",
         "support.write": "fila de suporte ainda usa `staff=('support',)`",
-        "security.audit.export": "a exportação da trilha não tem rota: hoje se lê, não se exporta",
         # Escrita de recurso que EXISTE no banco e ainda não tem rota de escrita — e não deveria
         # ganhar uma sem decisão: mexer nestes muda a régua de todas as medições.
         "budget.write": "orçamento é carregado por migração/seed; não há rota que o edite",
@@ -641,6 +640,18 @@ class SystemContextNeverTravelsWithoutAPermissionTests(unittest.TestCase):
                                 "rota com contexto de sistema e SEM permissão declarada: a RLS "
                                 "está desligada e não sobrou porta nenhuma")
 
+    #: Rotas que usam POST para uma operação de LEITURA, com o motivo escrito. A exceção é estreita
+    #: de propósito: alargar o teste para aceitar `.export` em qualquer POST abriria a porta a uma
+    #: rota de escrita de verdade protegida por permissão de leitura, que é o defeito oposto.
+    LEITURA_VIA_POST = {
+        "POST /v1/admin/audit/export":
+            "Exportar a trilha é LEITURA — nenhuma linha de negócio é alterada. É POST porque os "
+            "filtros são treze e vão no corpo, não na URL. A permissão `security.audit.export` é "
+            "separada de `security.audit.read` justamente porque LEVAR PARA FORA é mais grave que "
+            "ler, e ela exige reautenticação. O único efeito de escrita é o evento "
+            "`audit.log_exported` que a própria rota grava sobre si mesma.",
+    }
+
     def test_the_write_routes_require_a_write_permission(self):
         """Rota que escreve exigindo permissão de leitura seria privilégio concedido por descuido."""
         from impacto import api
@@ -649,10 +660,26 @@ class SystemContextNeverTravelsWithoutAPermissionTests(unittest.TestCase):
         for r in ROUTES:
             if not r.permission or r.method in ("GET", "HEAD"):
                 continue
+            if f"{r.method} {r.path}" in self.LEITURA_VIA_POST:
+                continue
             with self.subTest(rota=f"{r.method} {r.path}"):
                 self.assertFalse(
                     r.permission.endswith((".read", ".export")),
                     f"{r.method} {r.path} escreve e exige apenas `{r.permission}`")
+
+    def test_every_read_via_post_exception_is_justified_and_exists(self):
+        """Exceção sem motivo, ou para rota que não existe mais, é um buraco esquecido."""
+        from impacto import api
+        from impacto.http import ROUTES
+        api.load_all()
+        existentes = {f"{r.method} {r.path}" for r in ROUTES}
+        for rota, motivo in self.LEITURA_VIA_POST.items():
+            with self.subTest(rota=rota):
+                self.assertIn(rota, existentes, "exceção para rota que não existe")
+                self.assertGreaterEqual(len(motivo), 120,
+                                        "exceção a um guarda de segurança exige motivo escrito")
+        self.assertLessEqual(len(self.LEITURA_VIA_POST), 1,
+                             "a lista de exceções cresceu: cada entrada nova é uma decisão")
 
     def test_no_read_route_requires_a_write_permission(self):
         """E o inverso: leitura pedindo permissão de escrita obriga a conceder escrita para ler."""

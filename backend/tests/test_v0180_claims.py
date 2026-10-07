@@ -77,17 +77,33 @@ class ClaimBase(unittest.TestCase):
             # continua no motor de alegação, e este caminho prova as duas.
             oc.run("ALTER TABLE indicator_values DROP CONSTRAINT indicator_validated_needs_evidence")
         try:
-            oc.run(
+            vid = oc.scalar(
                 "INSERT INTO indicator_values(project_indicator_id, project_id, org_id, value,"
                 " measured_on, evidence_id, status, validated_by, validated_by_org)"
                 " SELECT $1, $2, $3, $4, current_date, $5, 'validated',"
-                "        (SELECT id FROM users LIMIT 1), $6",
+                "        (SELECT id FROM users LIMIT 1), $6 RETURNING id::text",
                 pi, project, self.osc.org_id, value, ev, self.other.org_id)
         finally:
             if not evidence:
                 oc.run("ALTER TABLE indicator_values ADD CONSTRAINT"
                        " indicator_validated_needs_evidence"
                        " CHECK (status <> 'validated' OR evidence_id IS NOT NULL) NOT VALID")
+        if not evidence:
+            # A linha forjada é estado IMPOSSÍVEL: ela tem de sair ao fim do teste. Deixá-la no
+            # banco faz a cobertura de proveniência (`integrity.provenance_coverage`) reprovar num
+            # ARQUIVO DIFERENTE, por um motivo que não é dele — foi o que a suíte completa mostrou.
+            def limpar():
+                c = owner_conn()
+                try:
+                    c.run("ALTER TABLE indicator_values DROP CONSTRAINT"
+                          " indicator_validated_needs_evidence")
+                    c.run("DELETE FROM indicator_values WHERE id = $1", vid)
+                    c.run("ALTER TABLE indicator_values ADD CONSTRAINT"
+                          " indicator_validated_needs_evidence"
+                          " CHECK (status <> 'validated' OR evidence_id IS NOT NULL)")
+                finally:
+                    c.close()
+            self.addCleanup(limpar)
         return ev
 
 

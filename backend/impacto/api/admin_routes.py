@@ -672,7 +672,10 @@ def audit_export(ctx: Ctx, body: AuditQ):
     with ctx.tx(readonly=True) as c:
         linhas = c.query(f"SELECT {_AUDIT_COLS} FROM audit_events{_AUDIT_WHERE}"
                          " ORDER BY id LIMIT $14", *_audit_args(body), min(body.limit, 10_000))
-    with ctx.system_tx() as c:
+    # `ctx.tx()` e não contexto de sistema: a política de INSERT de `audit_events` aceita
+    # `app_priv()`, que é o que uma sessão de administração tem. Usar contexto de sistema aqui
+    # alargaria a lista de módulos que podem ignorar a RLS para ganhar nada.
+    with ctx.tx() as c:
         evento = ctx.audit(c, "audit.log_exported", "audit_events", None,
                            {"rows": len(linhas), "filters": body.model_dump(mode="json",
                                                                             exclude_none=True)},

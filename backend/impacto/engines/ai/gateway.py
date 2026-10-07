@@ -17,12 +17,19 @@ import time
 
 from ...adapters.http_client import HttpClient
 from ...observability import METRICS, log
-from . import local
+from . import local, policy, prompts
 
 logger = logging.getLogger("impacto.ai")
 
 _PII = [
     (re.compile(r"\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b"), "[CPF]"),
+    # v0.23.0 — CNPJ faltava. É o identificador que aparece em TODO documento desta plataforma:
+    # contrato, nota, estatuto, certidão. Redigir CPF e deixar CNPJ passar protege a pessoa física
+    # e entrega a organização, que também é titular de dado protegido por contrato.
+    (re.compile(r"\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b"), "[CNPJ]"),
+    # Chave PIX aleatória e número de cartão: não são dado pessoal no sentido estrito, e sair da
+    # instalação dentro de um prompt é pior que isso.
+    (re.compile(r"\b(?:\d[ -]*?){13,16}\b"), "[NUMERO_LONGO]"),
     (re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"), "[EMAIL]"),
     (re.compile(r"(?:\+?55\s?)?\(?\d{2}\)?\s?9?\d{4}-?\d{4}\b"), "[TELEFONE]"),
     (re.compile(r"\b\d{5}-?\d{3}\b"), "[CEP]"),
@@ -98,14 +105,20 @@ class AiGateway:
             raise ApiError(402, "ai_quota_exceeded", f"Cota mensal de assistência por IA atingida ({lim}). Faça upgrade do plano.",
                            {"limit": lim, "used": used})
 
-    def _log(self, conn, ctx, feature, provider, status, text_in, text_out, meta, latency, redactions):
+    def _log(self, conn, ctx, feature, provider, status, text_in, text_out, meta, latency, redactions,
+             *, prompt: dict | None = None, schema_valid: bool | None = None,
+             credits: int | None = None, idempotency: str | None = None):
         usage_id = conn.scalar(
             "INSERT INTO ai_usage(org_id, user_id, feature, provider, model, status, input_chars, output_chars, tokens_in,"
-            " tokens_out, latency_ms, input_sha256, redactions) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)"
+            " tokens_out, latency_ms, input_sha256, redactions, prompt_key, prompt_version, tier,"
+            " schema_valid, credits_charged, idempotency_key, request_id)"
+            " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)"
             " RETURNING id",
             ctx.org_id, ctx.user_id, feature, provider, self.settings.ai_model or None, status, len(text_in), len(text_out),
             meta.get("tokens_in"), meta.get("tokens_out"), int(latency * 1000),
-            hashlib.sha256(text_in.encode()).hexdigest(), redactions)
+            hashlib.sha256(text_in.encode()).hexdigest(), redactions,
+            (prompt or {}).get("prompt_key"), (prompt or {}).get("version"), (prompt or {}).get("tier"),
+            schema_valid, credits, idempotency, getattr(ctx, "request_id", None))
         METRICS.inc("impacto_ai_requests_total", feature=feature, provider=provider, status=status)
         # CUSTO: a auditoria econômica encontrou `ai_usage` registrando tokens e não registrando custo —
         # e sem custo não existe margem por evento de valor, que é o cálculo central desta rodada.
@@ -137,16 +150,58 @@ class AiGateway:
                                              "tokens_in": meta.get("tokens_in"),
                                              "tokens_out": meta.get("tokens_out")})
 
-    def _external(self, system: str, user: str) -> tuple[str | None, dict, str, int]:
-        if not self.external:
-            return None, {}, "local", 0
-        red, n = redact(user[: self.settings.ai_max_input_chars])
+    def _external(self, conn, prompt: dict, user: str) -> dict:
+        """Uma passagem única: política da faixa → redação → chamada → conferência de esquema.
+
+        Devolve um dicionário com `text`, `meta`, `provider`, `redactions`, `status`,
+        `schema_valid` e `problems`. O `status` é REAL — antes desta versão o gateway gravava
+        sempre `'ok'`, inclusive quando a resposta externa era descartada por ser inválida, e a
+        tabela de uso dizia que o provedor externo havia funcionado.
+        """
+        base = prompts.active(conn, "system_base")
+        sistema = prompts.system_text(base) + "\n" + prompt["system_text"]
+        conteudo = prompts.wrap_user_content(user)
+
+        politica = policy.load(conn, prompt["tier"])
+        tem_externo = bool(self.external)
         try:
-            text, meta = self.external.complete(SYSTEM_BASE + "\n" + system, red)
-            return text, meta, self.provider_name, n
-        except Exception as exc:  # noqa: BLE001 — fallback controlado
-            log(logger, logging.WARNING, "ai_provider_failed_fallback_local", error_type=type(exc).__name__)
-            return None, {"fallback": True}, "local-fallback", n
+            policy.check_request(politica, input_chars=len(conteudo), external=tem_externo)
+        except policy.PolicyViolation as pv:
+            return {"text": None, "meta": {"policy": pv.code}, "provider": "local",
+                    "redactions": 0, "status": "blocked_policy", "schema_valid": None,
+                    "problems": [pv.message], "violation": pv}
+
+        if not tem_externo:
+            return {"text": None, "meta": {}, "provider": "local", "redactions": 0,
+                    "status": "local_only", "schema_valid": None, "problems": []}
+
+        red, n = redact(conteudo)
+        try:
+            texto, meta = self.external.complete(sistema, red,
+                                                 max_tokens=politica["max_output_tokens"])
+        except Exception as exc:  # noqa: BLE001 — fallback controlado para o motor local
+            log(logger, logging.WARNING, "ai_provider_failed_fallback_local",
+                error_type=type(exc).__name__)
+            return {"text": None, "meta": {"fallback": True}, "provider": "local-fallback",
+                    "redactions": n, "status": "fallback_local", "schema_valid": None,
+                    "problems": [f"{type(exc).__name__}"]}
+
+        esquema = prompt.get("output_schema")
+        if esquema is None:
+            return {"text": texto, "meta": meta, "provider": self.provider_name,
+                    "redactions": n, "status": "ok", "schema_valid": None, "problems": []}
+
+        valor, falha = policy.extract_json(texto or "")
+        problemas = [falha] if falha else policy.validate(esquema, valor)
+        if problemas:
+            log(logger, logging.WARNING, "ai_output_rejected_by_schema",
+                prompt_key=prompt["prompt_key"], version=prompt["version"],
+                problems=problemas[:3])
+            return {"text": None, "meta": meta, "provider": self.provider_name,
+                    "redactions": n, "status": "invalid_output", "schema_valid": False,
+                    "problems": problemas, "value": None}
+        return {"text": texto, "meta": meta, "provider": self.provider_name, "redactions": n,
+                "status": "ok", "schema_valid": True, "problems": [], "value": valor}
 
     # -- recursos ---------------------------------------------------------------------------------
     def structure_need(self, ctx, text: str) -> dict:
@@ -156,25 +211,33 @@ class AiGateway:
         t0 = time.perf_counter()
         with ctx.tx() as c:
             self._check_quota(c, ctx)
+            self._check_budget(c, ctx)
+            prompt = prompts.active(c, "structure_need")
             base = local.structure_need(text)
-            out_text, meta, provider, n = self._external(
-                "Transforme a necessidade descrita em JSON com as chaves: title (<=90 caracteres), summary (<=600), problem, objectives, "
-                "beneficiaries_description, questions (lista de perguntas para completar lacunas). Responda SOMENTE com JSON.", text)
+            r = self._external(c, prompt, text)
             result = dict(base)
-            if out_text:
-                try:
-                    data = json.loads(out_text[out_text.find("{"): out_text.rfind("}") + 1])
-                    for k in ("title", "summary", "problem", "objectives", "beneficiaries_description"):
-                        if isinstance(data.get(k), str):
-                            result[k] = data[k][:2000]
-                    if isinstance(data.get("questions"), list):
-                        result["questions"] = [str(q)[:300] for q in data["questions"][:8]]
-                    result["engine"] = f"{provider}+local-rules"
-                except (ValueError, TypeError):
-                    result["engine"] = "local-rules@1.0 (resposta externa inválida descartada)"
-            self._log(c, ctx, "structure_need", provider, "ok", text, json.dumps(result, ensure_ascii=False), meta,
-                      time.perf_counter() - t0, n)
-        result.update({"draft": True, "human_review_required": True})
+            if r["status"] == "ok" and r.get("value"):
+                data = r["value"]
+                for k in ("title", "summary", "problem", "objectives", "beneficiaries_description"):
+                    if isinstance(data.get(k), str):
+                        result[k] = data[k][:2000]
+                if isinstance(data.get("questions"), list):
+                    result["questions"] = [str(q)[:300] for q in data["questions"][:8]]
+                result["engine"] = f'{r["provider"]}+local-rules'
+            else:
+                # A resposta externa não foi usada, e o resultado diz POR QUÊ. Antes desta versão o
+                # motivo aparecia só como sufixo numa string de motor, e `status` ia como 'ok'.
+                result["engine"] = "local-rules@1.0"
+                result["external_outcome"] = r["status"]
+                if r["problems"]:
+                    result["external_problems"] = r["problems"][:3]
+            self._log(c, ctx, "structure_need", r["provider"], r["status"], text,
+                      json.dumps(result, ensure_ascii=False), r["meta"],
+                      time.perf_counter() - t0, r["redactions"],
+                      prompt=prompt, schema_valid=r["schema_valid"])
+        result.update({"draft": True, "human_review_required": True,
+                       "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
+                       "tier": prompt["tier"], "tier_label": prompt["tier_label"]})
         return result
 
     def draft(self, ctx, kind: str, project: dict, org: dict, call: dict | None, items: list, milestones: list,
@@ -186,20 +249,60 @@ class AiGateway:
         template = local.draft_document(kind, project, org, call, items, milestones, instructions)
         with ctx.tx() as c:
             self._check_quota(c, ctx)
-            out, meta, provider, n = self._external(
-                "Reescreva o rascunho abaixo melhorando clareza e coesão, mantendo TODOS os números, nomes e marcações [COMPLETAR] "
-                "exatamente como estão. Não acrescente dados novos. Devolva apenas o texto final.", template)
-            content = out.strip() if out and len(out) > 200 else template
-            self._log(c, ctx, f"draft:{kind}", provider, "ok", template, content, meta, time.perf_counter() - t0, n)
-        return {"content": content, "engine": provider if out else "local-template@1.0", "draft": True, "human_review_required": True}
+            self._check_budget(c, ctx)
+            prompt = prompts.active(c, "draft_document")
+            r = self._external(c, prompt, template)
+            usou = bool(r["text"]) and len(r["text"]) > 200
+            content = r["text"].strip() if usou else template
+            self._log(c, ctx, f"draft:{kind}", r["provider"],
+                      r["status"] if usou or r["status"] != "ok" else "invalid_output",
+                      template, content, r["meta"], time.perf_counter() - t0, r["redactions"],
+                      prompt=prompt, schema_valid=r["schema_valid"])
+        return {"content": content,
+                "engine": r["provider"] if usou else "local-template@1.0",
+                "external_outcome": r["status"],
+                "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
+                "tier": prompt["tier"], "tier_label": prompt["tier_label"],
+                "draft": True, "human_review_required": True}
 
     def summarize(self, ctx, project: dict) -> dict:
         t0 = time.perf_counter()
         base = local.summarize_project(project)
         with ctx.tx() as c:
             self._check_quota(c, ctx)
+            self._check_budget(c, ctx)
+            prompt = prompts.active(c, "summarize_project")
             src = "\n".join(str(project.get(k) or "") for k in ("title", "summary", "problem", "objectives", "methodology"))
-            out, meta, provider, n = self._external("Resuma em até 4 frases para um financiador, sem adjetivos promocionais.", src)
-            text = out.strip()[:1200] if out else base
-            self._log(c, ctx, "summarize", provider, "ok", src, text, meta, time.perf_counter() - t0, n)
-        return {"summary": text, "engine": provider if out else "local-extractive@1.0", "draft": True}
+            r = self._external(c, prompt, src)
+            text = r["text"].strip()[:1200] if r["text"] else base
+            self._log(c, ctx, "summarize", r["provider"], r["status"], src, text, r["meta"],
+                      time.perf_counter() - t0, r["redactions"],
+                      prompt=prompt, schema_valid=r["schema_valid"])
+        return {"summary": text,
+                "engine": r["provider"] if r["text"] else "local-extractive@1.0",
+                "external_outcome": r["status"],
+                "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
+                "tier": prompt["tier"], "tier_label": prompt["tier_label"], "draft": True}
+
+    # -- orçamento em dinheiro --------------------------------------------------------------------
+    def _check_budget(self, conn, ctx) -> None:
+        """Cota conta CHAMADAS; orçamento limita DINHEIRO. São controles diferentes.
+
+        Uma chamada de 200 mil caracteres consome o mesmo da cota que uma de 200 e custa muito
+        mais. `hard_stop` separa "avise" de "pare": um limite que só avisa não é limite, e parar
+        sem a organização ter pedido para parar interromperia trabalho por decisão da plataforma.
+        """
+        from ...http import ApiError
+        if not ctx.org_id:
+            return
+        estado = conn.one("SELECT * FROM ai_budget_state($1, current_date)", ctx.org_id)
+        if not estado or estado["state"] != "exceeded" or not estado["hard_stop"]:
+            return
+        raise ApiError(
+            402, "ai_budget_exceeded",
+            "O orçamento de IA desta organização para o mês foi atingido e está configurado para "
+            "PARAR ao atingir o limite. Ajuste o limite em Configurações → IA para continuar.",
+            {"limit_cents": estado["limit_cents"], "spent_cents": estado["spent_cents"],
+             "unpriced_calls": estado["unpriced_calls"],
+             "note": "Chamadas sem preço vigente na tabela do provedor NÃO entram no gasto "
+                     "apurado; `unpriced_calls` diz quantas são."})

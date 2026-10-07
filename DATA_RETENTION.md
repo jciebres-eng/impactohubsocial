@@ -4,7 +4,7 @@
 
 CLASSIFICAÇÃO DE RETENÇÃO. Para cada tabela com vínculo a organização ou a titular, diz o que acontece quando a conta é excluída e por quê. A origem da verdade é o banco: a classe declarada aqui é CONFERIDA contra a regra real da chave estrangeira por tests/test_v0190_lgpd_deletion.py. Declarar uma coisa e o banco fazer outra reprova.
 
-Conferido em 2026-10-07 · 192 vínculos a organização ou titular.
+Conferido em 2026-10-07 · 194 vínculos a organização ou titular.
 
 ## Classes
 
@@ -24,7 +24,7 @@ Conferido em 2026-10-07 · 192 vínculos a organização ou titular.
 | `append_only` | 19 |
 | `audit_only` | 3 |
 | `deletable_with_parent` | 138 |
-| `retainable` | 11 |
+| `retainable` | 13 |
 
 Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE ser deletable_with_parent (CASCADE). Uma coluna nova que não seja cascata reprova o teste: é exatamente assim que uma obrigação de guarda, ou um bloqueio de exclusão, entra sem ninguém decidir.
 
@@ -32,6 +32,8 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 
 | vínculo | classe | ação real | motivo |
 | --- | --- | --- | --- |
+| `ai_budgets.org_id` | `retainable` | `a` | Orçamento de IA é decisão comercial da organização e sustenta a conferência de cobrança: quanto a organização autorizou gastar num mês é o que explica a fatura daquele mês. Some com a organização, não com a pessoa. |
+| `ai_credit_ledger.org_id` | `retainable` | `a` | Razão de crédito de IA: o saldo é a SOMA dos lançamentos, então apagar um lançamento mudaria o saldo sem deixar rastro. A tabela é append-only por gatilho e o vínculo é NO ACTION — some com a organização por decisão explícita, nunca em cascata. Concessão, consumo e devolução são fatos sobre a ORGANIZAÇÃO. |
 | `ai_usage.user_id` | `anonymizable` | `n` | Contabilidade de uso de IA é agregada; perde o vínculo e continua somando. |
 | `audit_events.org_id` | `audit_only` | `none` | Trilha de auditoria sem FK de propósito: apagar a organização não pode apagar a prova do que ela fez. |
 | `billable_events.org_id` | `append_only` | `c` | Evento faturável: base do que foi cobrado. Append-only por obrigação de prestação de contas. |

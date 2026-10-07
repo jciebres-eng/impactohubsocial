@@ -1,0 +1,2571 @@
+{
+ "o_que_e": "cruzamento das telas com as 888 operações registradas por impacto.http.ROUTES; as chamadas vêm da leitura do corpo de cada componente exportado",
+ "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
+ "operacoes_no_backend": 888,
+ "telas": 218,
+ "estados": {
+  "backend presente": 157,
+  "endpoint ausente": 1,
+  "chamada dinâmica": 0,
+  "sem chamada direta": 60
+ },
+ "interface_sem_backend": {
+  "/entrar": [
+   "GET /v1/meta/config"
+  ]
+ },
+ "arquivos_do_front_varridos": 54,
+ "operacoes_que_nenhuma_tela_chama": 231,
+ "orfas_backend": [
+  "DELETE /v1/frameworks/mappings/{}",
+  "DELETE /v1/integrations/connections/{}",
+  "DELETE /v1/integrations/connections/{}/credential",
+  "DELETE /v1/integrations/subscriptions/{}",
+  "DELETE /v1/network/follow/{}",
+  "DELETE /v1/procurement/{}/quotes/{}",
+  "DELETE /v1/programs/{}/calls/{}",
+  "DELETE /v1/projects/{}/equity/barriers/{}",
+  "DELETE /v1/projects/{}/graph/edges/{}",
+  "DELETE /v1/projects/{}/indicators/{}",
+  "DELETE /v1/projects/{}/milestones/{}",
+  "DELETE /v1/workspace/personas/{}",
+  "GET /v1/admin/agreements/{}/members",
+  "GET /v1/admin/ai",
+  "GET /v1/admin/ai/cost",
+  "GET /v1/admin/ai/prompts/{}",
+  "GET /v1/admin/flags",
+  "GET /v1/admin/integrations/overview",
+  "GET /v1/admin/jobs",
+  "GET /v1/admin/legal/acceptances",
+  "GET /v1/admin/match/calibration",
+  "GET /v1/admin/messages/{}",
+  "GET /v1/admin/monetization/pipeline",
+  "GET /v1/admin/ops/health",
+  "GET /v1/admin/payments/reconciliation",
+  "GET /v1/admin/payments/revenue",
+  "GET /v1/admin/price-benchmark",
+  "GET /v1/admin/reports",
+  "GET /v1/admin/risk-levels",
+  "GET /v1/admin/voucher-batches/{}/redemptions",
+  "GET /v1/ai/credits",
+  "GET /v1/ai/estimate",
+  "GET /v1/auth/oidc/callback",
+  "GET /v1/billing/price-history",
+  "GET /v1/claims/review-requests",
+  "GET /v1/claims/{}",
+  "GET /v1/data-quality/vocabulary",
+  "GET /v1/diagnoses/{}/versions/{}",
+  "GET /v1/directory/services",
+  "GET /v1/document-templates/{}",
+  "GET /v1/documents/{}/integrity",
+  "GET /v1/engines/coverage",
+  "GET /v1/equity/denominators",
+  "GET /v1/fee-tables/{}",
+  "GET /v1/files/{}",
+  "GET /v1/financeiro/fee-preview",
+  "GET /v1/fiscal/rules",
+  "GET /v1/frameworks/mappings",
+  "GET /v1/frameworks/{}/coverage",
+  "GET /v1/institutional/maturity",
+  "GET /v1/institutional/rules",
+  "GET /v1/integrations/connections",
+  "GET /v1/integrations/connections/{}",
+  "GET /v1/integrations/connections/{}/mappings",
+  "GET /v1/integrations/datasets",
+  "GET /v1/integrations/deliveries",
+  "GET /v1/integrations/events",
+  "GET /v1/integrations/events/catalog",
+  "GET /v1/integrations/exports",
+  "GET /v1/integrations/imports",
+  "GET /v1/integrations/imports/{}",
+  "GET /v1/integrations/jobs",
+  "GET /v1/integrations/jobs/{}",
+  "GET /v1/integrations/links",
+  "GET /v1/integrations/providers",
+  "GET /v1/integrations/subscriptions",
+  "GET /v1/legal/acceptances/mine",
+  "GET /v1/legal/documents/{}",
+  "GET /v1/marketplace/graph",
+  "GET /v1/materiality/topics",
+  "GET /v1/materiality/{}",
+  "GET /v1/meta/platform-status",
+  "GET /v1/monetization/legal-cards",
+  "GET /v1/monetization/pipeline",
+  "GET /v1/monetization/rules",
+  "GET /v1/needs/{}/professionals",
+  "GET /v1/network/relationships/counts",
+  "GET /v1/notifications/catalog",
+  "GET /v1/org/credentials/{}/history",
+  "GET /v1/organizations/{}",
+  "GET /v1/organizations/{}/compliance",
+  "GET /v1/organizations/{}/reputation",
+  "GET /v1/organizations/{}/reputation/timeline",
+  "GET /v1/payments/charges/{}",
+  "GET /v1/plans/price",
+  "GET /v1/privacy/retention",
+  "GET /v1/programs/feed",
+  "GET /v1/programs/status-graph",
+  "GET /v1/programs/{}",
+  "GET /v1/projects/{}/context-return",
+  "GET /v1/projects/{}/data-quality",
+  "GET /v1/projects/{}/equity/assessments",
+  "GET /v1/projects/{}/result-chain",
+  "GET /v1/projects/{}/state",
+  "GET /v1/public/glossary",
+  "GET /v1/public/profiles/{}/open-graph",
+  "GET /v1/public/projects/{}/impact",
+  "GET /v1/public/relationships/{}/{}",
+  "GET /v1/public/translations",
+  "GET /v1/public/verify/{}/qr",
+  "GET /v1/reputation/dimensions",
+  "GET /v1/responsibility/history",
+  "GET /v1/responsibility/mine",
+  "GET /v1/seals/awards/{}",
+  "GET /v1/seals/rules",
+  "GET /v1/signatures/verify",
+  "GET /v1/solutions/{}/adaptations",
+  "GET /v1/solutions/{}/versions",
+  "GET /v1/territories/catalog-status",
+  "GET /v1/territories/definitions",
+  "GET /v1/territories/search",
+  "GET /v1/territories/{}",
+  "GET /v1/trust/custody",
+  "GET /v1/value/events",
+  "GET /v1/value/summary",
+  "GET /v1/value/types",
+  "GET /v1/workspace/personas",
+  "PATCH /v1/admin/monetization/rules/{}",
+  "PATCH /v1/integrations/connections/{}",
+  "PATCH /v1/integrations/subscriptions/{}",
+  "PATCH /v1/programs/{}",
+  "PATCH /v1/solution-replications/{}",
+  "POST /v1/access/check",
+  "POST /v1/admin/agreements/{}/members/{}/revoke",
+  "POST /v1/admin/ai/prices",
+  "POST /v1/admin/audit/export",
+  "POST /v1/admin/calls/{}/status",
+  "POST /v1/admin/calls/{}/verify",
+  "POST /v1/admin/content/events/{}/recording-to-resource",
+  "POST /v1/admin/content/resources/{}/new-version",
+  "POST /v1/admin/datasets",
+  "POST /v1/admin/equity/denominators",
+  "POST /v1/admin/funding-quotas/pledges/{}/confirm",
+  "POST /v1/admin/hub/certificates/{}/revoke",
+  "POST /v1/admin/institutional/catalog/{}/action",
+  "POST /v1/admin/institutional/catalog/{}/new-version",
+  "POST /v1/admin/institutional/rules/{}/action",
+  "POST /v1/admin/institutional/rules/{}/new-version",
+  "POST /v1/admin/integrations/providers/{}/maturity",
+  "POST /v1/admin/integrations/run-worker",
+  "POST /v1/admin/invoices",
+  "POST /v1/admin/invoices/{}/paid",
+  "POST /v1/admin/legal/documents/{}/approve",
+  "POST /v1/admin/legal/documents/{}/review",
+  "POST /v1/admin/marketplace/listings/{}/transition",
+  "POST /v1/admin/messages/{}/remove",
+  "POST /v1/admin/monetization/legal-cards",
+  "POST /v1/admin/monetization/pipeline/{}/waive",
+  "POST /v1/admin/organizations/{}/manual-subscription",
+  "POST /v1/admin/reputation/disputes/{}/resolution",
+  "POST /v1/admin/seals/awards",
+  "POST /v1/admin/seals/awards/{}/revoke",
+  "POST /v1/admin/seals/definitions",
+  "POST /v1/admin/seals/definitions/{}/publish",
+  "POST /v1/admin/seals/definitions/{}/retire",
+  "POST /v1/admin/solutions/{}/remove",
+  "POST /v1/admin/support/tickets/{}/to-article",
+  "POST /v1/admin/territory-indicators",
+  "POST /v1/admin/trust/credentials/{}/revoke",
+  "POST /v1/admin/value/baselines",
+  "POST /v1/ai/classify-document/{}",
+  "POST /v1/ai/summarize-project",
+  "POST /v1/auth/mfa/disable",
+  "POST /v1/billing/price-notices/{}/ack",
+  "POST /v1/billing/webhooks/stripe",
+  "POST /v1/claims/{}/review",
+  "POST /v1/claims/{}/review-requests",
+  "POST /v1/claims/{}/withdraw",
+  "POST /v1/commitments/{}/payments",
+  "POST /v1/contabilidade/batches",
+  "POST /v1/contribution-models/{}/retire",
+  "POST /v1/document-templates/{}/fields",
+  "POST /v1/document-templates/{}/publish",
+  "POST /v1/drafts/{}/export",
+  "POST /v1/equity/compare",
+  "POST /v1/equity/denominators",
+  "POST /v1/frameworks/mappings",
+  "POST /v1/graph-edges/{}/validate",
+  "POST /v1/integrations/connections",
+  "POST /v1/integrations/connections/{}/health",
+  "POST /v1/integrations/connections/{}/jobs",
+  "POST /v1/integrations/deliveries/{}/replay",
+  "POST /v1/integrations/exports",
+  "POST /v1/integrations/imports",
+  "POST /v1/integrations/imports/{}/approve",
+  "POST /v1/integrations/inbound/{}",
+  "POST /v1/integrations/jobs/{}/cancel",
+  "POST /v1/integrations/subscriptions",
+  "POST /v1/integrations/subscriptions/{}/test",
+  "POST /v1/materiality/{}/publish",
+  "POST /v1/needs/{}/close",
+  "POST /v1/network/follow/{}",
+  "POST /v1/org/credentials/{}/document",
+  "POST /v1/payments/charges/{}/transition",
+  "POST /v1/payments/{}/reconcile-manual",
+  "POST /v1/privacy/consents",
+  "POST /v1/programs/{}/calls",
+  "POST /v1/programs/{}/indicators",
+  "POST /v1/programs/{}/needs",
+  "POST /v1/programs/{}/projects",
+  "POST /v1/programs/{}/transition",
+  "POST /v1/projects/{}/equity/assessments",
+  "POST /v1/reputation/snapshots",
+  "POST /v1/responsibility/assignments",
+  "POST /v1/responsibility/assignments/{}/end",
+  "POST /v1/seals/evaluate",
+  "POST /v1/signatures/{}/revoke",
+  "POST /v1/solutions/intent/parse",
+  "POST /v1/solutions/{}/archive",
+  "POST /v1/solutions/{}/events",
+  "POST /v1/solutions/{}/relationships",
+  "POST /v1/solutions/{}/reviews",
+  "POST /v1/statements/reconcile",
+  "POST /v1/verifiable-records/{}/timestamp",
+  "POST /v1/workspace/personas",
+  "PUT /v1/admin/content/courses/{}",
+  "PUT /v1/admin/content/faqs/{}",
+  "PUT /v1/admin/content/resources/{}",
+  "PUT /v1/admin/flags/{}",
+  "PUT /v1/admin/plans/{}/price",
+  "PUT /v1/admin/signature-providers/{}",
+  "PUT /v1/admin/support/sla/{}",
+  "PUT /v1/conversations/{}/status",
+  "PUT /v1/integrations/connections/{}/credential",
+  "PUT /v1/integrations/connections/{}/mappings",
+  "PUT /v1/materiality/{}/topics",
+  "PUT /v1/network/relationships/{}/visibility",
+  "PUT /v1/org/geo",
+  "PUT /v1/payments/charges/{}/installments",
+  "PUT /v1/projects/{}/equity/context",
+  "PUT /v1/solutions/{}/people"
+ ],
+ "telas_sem_chamada_direta": [
+  "/legal/privacidade",
+  "/legal/termos",
+  "/planos",
+  "/verificar-email",
+  "/@:handle",
+  "/verificar",
+  "/verificar/:code",
+  "/",
+  "/acordos",
+  "/admin",
+  "/admin/auditoria",
+  "/admin/central/cursos",
+  "/admin/central/faqs",
+  "/admin/central/recursos",
+  "/admin/integracoes",
+  "/admin/integridade",
+  "/admin/linha-do-tempo",
+  "/admin/permissoes",
+  "/admin/proveniencia",
+  "/admin/rastro",
+  "/administrativo/orcamento",
+  "/assinatura/provedores",
+  "/auditoria",
+  "/candidaturas",
+  "/carteira",
+  "/conquistas",
+  "/contabilidade/plano-de-contas",
+  "/controladoria",
+  "/controladoria/conciliacao",
+  "/conversas",
+  "/cotas/:id/apoios",
+  "/dados-territoriais",
+  "/determinantes",
+  "/documentos/modelos",
+  "/editais",
+  "/editais/:id/candidaturas",
+  "/financeiro",
+  "/instituicoes/:id",
+  "/mapa",
+  "/marketplace",
+  "/marketplace/:id",
+  "/operacoes",
+  "/operacoes/alertas",
+  "/pagamentos",
+  "/perfil-publico/:id/identificadores",
+  "/projetos",
+  "/projetos/:id/equipe",
+  "/projetos/:id/linha-do-tempo",
+  "/prontidao",
+  "/propostas",
+  "/rede/atividade",
+  "/rede/grafo",
+  "/relatorios",
+  "/relatorios-impacto",
+  "/responsabilidade",
+  "/revisoes",
+  "/selos",
+  "/solucoes/replicacao",
+  "/tesouraria",
+  "/vocabulario"
+ ],
+ "telas_com_chamada_dinamica": [],
+ "lista": [
+  {
+   "rota": "/cadastro",
+   "componente": "Pub.Register",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [
+    "POST /v1/auth/register"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/convite",
+   "componente": "Pub.AcceptInvite",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [
+    "POST /v1/auth/accept-invite"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/entrar",
+   "componente": "Pub.Login",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [
+    "GET /v1/meta/config",
+    "POST /v1/auth/login",
+    "POST /v1/auth/mfa/verify"
+   ],
+   "ausentes": [
+    "GET /v1/meta/config"
+   ],
+   "estado": "endpoint ausente"
+  },
+  {
+   "rota": "/esqueci-senha",
+   "componente": "Pub.Forgot",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [
+    "POST /v1/auth/forgot-password"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/legal/privacidade",
+   "componente": "Pub.Legal",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/legal/termos",
+   "componente": "Pub.Legal",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/planos",
+   "componente": "Com.Pricing",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/redefinir-senha",
+   "componente": "Pub.Reset",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [
+    "POST /v1/auth/reset-password"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/verificar-email",
+   "componente": "Pub.VerifyEmail",
+   "arquivo": "web/src/pages/public.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/@:handle",
+   "componente": "PP.PublicProfilePage",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/ajuda",
+   "componente": "Help.HelpHome",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/categories",
+    "GET /v1/help/events",
+    "GET /v1/help/faqs",
+    "POST /v1/help/assistant"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/:slug",
+   "componente": "Help.Article",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/articles/{}",
+    "PUT /v1/help/checklists"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/academia",
+   "componente": "Help.Academy",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/courses"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/academia/:slug",
+   "componente": "Help.Course",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/courses/{}",
+    "POST /v1/help/courses/{}/certificate",
+    "POST /v1/help/courses/{}/enroll"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/academia/aula/:id",
+   "componente": "Help.Lesson",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/lessons/{}",
+    "POST /v1/help/lessons/{}/complete"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/atividades",
+   "componente": "Help.Activities",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/activities"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/biblioteca",
+   "componente": "Help.Library",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/resources{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/biblioteca/:slug",
+   "componente": "Help.Resource",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/resources/{}",
+    "POST /v1/help/resources/{}/download-url",
+    "POST /v1/help/resources/{}/use-template",
+    "PUT /v1/help/checklists"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/boletim",
+   "componente": "Help.Newsletter",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/help/newsletter"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/boletim/cancelar",
+   "componente": "Help.NewsletterToken",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/help/newsletter/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/boletim/confirmar",
+   "componente": "Help.NewsletterToken",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/help/newsletter/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/busca",
+   "componente": "Help.HelpSearch",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/search{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/certificado/:code",
+   "componente": "Help.Certificate",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/certificates/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/comece-aqui",
+   "componente": "Help.Start",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/start"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/demonstracao",
+   "componente": "Help.DemoForm",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/help/demo-requests"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/eventos",
+   "componente": "Help.Events",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/events{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/eventos/:slug",
+   "componente": "Help.EventPage",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "DELETE /v1/help/events/{}/register",
+    "GET /v1/help/events/{}",
+    "POST /v1/help/events/{}/rate",
+    "POST /v1/help/events/{}/register"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/faq",
+   "componente": "Help.Faq",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/categories",
+    "GET /v1/help/faqs{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/faq/:id",
+   "componente": "Help.Faq",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/categories",
+    "GET /v1/help/faqs{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/parcerias",
+   "componente": "Help.PartnershipForm",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/help/partnerships"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/pendencias",
+   "componente": "Help.Pending",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/pending"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/preferencias",
+   "componente": "Help.Prefs",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/notifications/prefs",
+    "PUT /v1/notifications/prefs"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/suporte",
+   "componente": "Help.Tickets",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/support/tickets{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/suporte/:id",
+   "componente": "Help.Ticket",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/support/tickets/{}",
+    "POST /v1/support/tickets/{}/close",
+    "POST /v1/support/tickets/{}/messages",
+    "POST /v1/support/tickets/{}/rate"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/suporte/novo",
+   "componente": "Help.NewTicket",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "POST /v1/support/tickets"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/teste",
+   "componente": "Help.TrialRequest",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [
+    "GET /v1/help/trial-requests",
+    "POST /v1/help/trial-requests"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/campanha/:slug",
+   "componente": "Funding.PublicCampaign",
+   "arquivo": "web/src/pages/funding.tsx",
+   "operacoes": [
+    "GET /v1/public/campaigns/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/verificar",
+   "componente": "Verify.VerifyPage",
+   "arquivo": "web/src/pages/verify.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/verificar/:code",
+   "componente": "Verify.VerifyPage",
+   "arquivo": "web/src/pages/verify.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/",
+   "componente": "Home.Dashboard",
+   "arquivo": "web/src/pages/home.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/acordos",
+   "componente": "Trust.Agreements",
+   "arquivo": "web/src/pages/trust.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/acordos/:id",
+   "componente": "Trust.AgreementDetail",
+   "arquivo": "web/src/pages/trust.tsx",
+   "operacoes": [
+    "PATCH /v1/signed-agreements/{}/milestones/{}",
+    "POST /v1/signed-agreements/{}/decline",
+    "POST /v1/signed-agreements/{}/milestones",
+    "POST /v1/signed-agreements/{}/parties",
+    "POST /v1/signed-agreements/{}/publish",
+    "POST /v1/verifiable-records"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/acordos/novo",
+   "componente": "Trust.AgreementForm",
+   "arquivo": "web/src/pages/trust.tsx",
+   "operacoes": [
+    "POST /v1/signed-agreements"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin",
+   "componente": "Admin.Overview",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/auditoria",
+   "componente": "Admin.Audit",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/central",
+   "componente": "HelpA.Overview",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/content/overview",
+    "POST /v1/admin/content/{}/{}/reviewed"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/analytics",
+   "componente": "HelpA.Analytics",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/hub/analytics",
+    "GET /v1/admin/hub/newsletter",
+    "POST /v1/admin/hub/newsletter/dispatch"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/artigos",
+   "componente": "HelpA.Articles",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/content/articles{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/artigos/:slug",
+   "componente": "HelpA.ArticleEditor",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "POST /v1/admin/content/articles",
+    "POST /v1/admin/content/articles/{}/versions",
+    "PUT /v1/admin/content/article-versions/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/cursos",
+   "componente": "HelpA.Courses",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/central/equipe",
+   "componente": "HelpA.StaffRoles",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "DELETE /v1/admin/staff-roles/{}/{}",
+    "GET /v1/admin/staff-roles",
+    "POST /v1/admin/staff-roles"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/eventos",
+   "componente": "HelpA.EventsAdmin",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/content/overview",
+    "GET /v1/help/events",
+    "PATCH /v1/admin/content/events/{}",
+    "POST /v1/admin/content/events/{}/attendance"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/faqs",
+   "componente": "HelpA.Faqs",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/central/parcerias",
+   "componente": "HelpA.Partnerships",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/hub/partnerships{}",
+    "POST /v1/admin/hub/partnerships/{}/move",
+    "POST /v1/admin/hub/partnerships/{}/notes"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/recursos",
+   "componente": "HelpA.Resources",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/central/suporte",
+   "componente": "HelpA.SupportQueue",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/support/sla",
+    "GET /v1/admin/support/tickets{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/suporte/:id",
+   "componente": "HelpA.SupportTicket",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/support/tickets/{}",
+    "PATCH /v1/admin/support/tickets/{}",
+    "POST /v1/admin/support/tickets/{}/messages"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/central/testes",
+   "componente": "HelpA.Trials",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "operacoes": [
+    "GET /v1/admin/hub/demo-requests",
+    "GET /v1/admin/hub/trial-requests",
+    "GET /v1/admin/hub/trials",
+    "POST /v1/admin/hub/demo-requests/{}/handle",
+    "POST /v1/admin/hub/trial-requests/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/chaves",
+   "componente": "Core.EncryptionKeys",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/admin/encryption/keys",
+    "POST /v1/admin/encryption/reencrypt"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/cobranca",
+   "componente": "Admin.OrgBilling",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "GET /v1/admin/billing/organizations/{}",
+    "POST /v1/admin/grants/{}/revoke",
+    "POST /v1/admin/organizations/{}/grants",
+    "POST /v1/admin/organizations/{}/trial"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/compliance",
+   "componente": "Admin.ComplianceQueue",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/compliance-reviews/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/contribuicao",
+   "componente": "Ops.ContributionReview",
+   "arquivo": "web/src/pages/ops.tsx",
+   "operacoes": [
+    "POST /v1/admin/contribution-models/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/convenios",
+   "componente": "Admin.Agreements",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/agreements",
+    "POST /v1/admin/agreements/{}/action"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/credenciais",
+   "componente": "Admin.Credentials",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/credentials/{}/verify"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/credenciais-profissionais",
+   "componente": "TrustA.CredentialQueue",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "operacoes": [
+    "POST /v1/admin/trust/credentials/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/denuncias",
+   "componente": "Admin.Reports",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/reports/{}/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/editais",
+   "componente": "Admin.CuratedCalls",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/call-sources",
+    "POST /v1/admin/call-sources/{}/run",
+    "POST /v1/admin/calls"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/erros",
+   "componente": "Ops.Errors",
+   "arquivo": "web/src/pages/ops.tsx",
+   "operacoes": [
+    "POST /v1/admin/errors/{}/resolve"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/fiscal",
+   "componente": "Admin.FiscalRules",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/fiscal-rules/{}/action"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/honorarios",
+   "componente": "TrustA.FeeTables",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "operacoes": [
+    "POST /v1/admin/fee-tables",
+    "POST /v1/admin/fee-tables/{}/items",
+    "POST /v1/admin/fee-tables/{}/publish"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/identidade",
+   "componente": "TrustA.IdentityQueue",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "operacoes": [
+    "POST /v1/admin/trust/identity/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/institucional",
+   "componente": "Inst.InstitutionAdmin",
+   "arquivo": "web/src/pages/institution.tsx",
+   "operacoes": [
+    "GET /v1/admin/institutional/organizations/{}",
+    "POST /v1/admin/institutional/catalog",
+    "POST /v1/admin/institutional/documents/{}/validate",
+    "POST /v1/admin/institutional/organizations/{}/status",
+    "POST /v1/admin/institutional/qualifications/{}/decide",
+    "POST /v1/admin/institutional/rules",
+    "POST /v1/admin/institutional/rules/import-candidates"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/integracoes",
+   "componente": "Int.Integracoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/integridade",
+   "componente": "Trace.Integridade",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/interruptor",
+   "componente": "Trace.Interruptor",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "operacoes": [
+    "POST /v1/admin/kill-switch"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/linha-do-tempo",
+   "componente": "Trace.LinhaDoTempo",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/medidas",
+   "componente": "Mod.EnforcementAdmin",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "operacoes": [
+    "POST /v1/admin/enforcement",
+    "POST /v1/admin/enforcement/{}/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/organizacoes",
+   "componente": "Admin.Orgs",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/organizations/{}/compliance-checks",
+    "POST /v1/admin/organizations/{}/grants",
+    "POST /v1/admin/organizations/{}/status"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/permissoes",
+   "componente": "Int.MatrizPermissoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/proveniencia",
+   "componente": "Trace.Proveniencia",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/rastro",
+   "componente": "Trace.Rastro",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/admin/risco",
+   "componente": "Ops.Risk",
+   "arquivo": "web/src/pages/ops.tsx",
+   "operacoes": [
+    "POST /v1/admin/risk/orgs/{}/block",
+    "POST /v1/admin/risk/orgs/{}/unblock",
+    "POST /v1/admin/risk/scan",
+    "POST /v1/admin/risk/signals/{}/review"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/solucoes",
+   "componente": "SolM.AdminSolutions",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "POST /v1/admin/solution-disputes/{}/decide",
+    "POST /v1/admin/solution-evidence/{}/review",
+    "POST /v1/admin/solution-results/{}/validate",
+    "POST /v1/admin/solutions/{}/verify"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/usuarios",
+   "componente": "Admin.Users",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/users/{}/status"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/vouchers",
+   "componente": "Admin.Vouchers",
+   "arquivo": "web/src/pages/admin.tsx",
+   "operacoes": [
+    "POST /v1/admin/voucher-batches",
+    "POST /v1/admin/voucher-batches/{}/action"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/administrativo/orcamento",
+   "componente": "Int.Orcamento",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/afirmacoes",
+   "componente": "IL.Claims",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [
+    "POST /v1/claims",
+    "POST /v1/claims/{}/check"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/aprovacoes",
+   "componente": "Int.Aprovacoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [
+    "POST /v1/aprovacoes/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/area",
+   "componente": "Ws.Workspace",
+   "arquivo": "web/src/pages/workspace.tsx",
+   "operacoes": [
+    "POST /v1/recommendations/refresh",
+    "POST /v1/recommendations/{}/resolve"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/assinatura/politica",
+   "componente": "Core.SignaturePolicies",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "PUT /v1/signature-policies"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/assinatura/provedores",
+   "componente": "Core.SignatureProviders",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/auditoria",
+   "componente": "Int.AcessoPrivilegiado",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/campanha-gestao",
+   "componente": "Funding.Campaigns",
+   "arquivo": "web/src/pages/funding.tsx",
+   "operacoes": [
+    "GET /v1/campaigns",
+    "PATCH /v1/campaigns/{}",
+    "POST /v1/campaigns"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/candidaturas",
+   "componente": "Apps.Applications",
+   "arquivo": "web/src/pages/applications.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/candidaturas/:id",
+   "componente": "Apps.ApplicationDetail",
+   "arquivo": "web/src/pages/applications.tsx",
+   "operacoes": [
+    "PATCH /v1/applications/{}/steps/{}",
+    "POST /v1/applications/{}/commitments",
+    "POST /v1/applications/{}/conflict",
+    "POST /v1/applications/{}/transition",
+    "POST /v1/commitments/{}/status"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/carteira",
+   "componente": "Proj.Portfolio",
+   "arquivo": "web/src/pages/projects.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/compras/:id",
+   "componente": "Fin.ProcurementDetail",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [
+    "POST /v1/procurement/{}/approve-exception",
+    "POST /v1/procurement/{}/decide",
+    "POST /v1/procurement/{}/quotes"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conquistas",
+   "componente": "Net.Badges",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/conta",
+   "componente": "Org.Account",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "DELETE /v1/auth/sessions/{}",
+    "POST /v1/auth/change-password",
+    "POST /v1/auth/logout-all",
+    "POST /v1/auth/mfa/enable",
+    "POST /v1/auth/mfa/setup",
+    "POST /v1/privacy/delete-account"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/comercial",
+   "componente": "Com.Commercial",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "operacoes": [
+    "POST /v1/commercial/consent/revoke",
+    "POST /v1/commercial/offers/{}/accept"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/consumo",
+   "componente": "Com.Usage",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "operacoes": [
+    "PUT /v1/commercial/spend-limit"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/denuncias",
+   "componente": "Mod.MyReports",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "operacoes": [
+    "POST /v1/conta/denuncias/{}/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/moderacao",
+   "componente": "Mod.MyModeration",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "operacoes": [
+    "POST /v1/conta/moderacao/{}/contestar"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/plano",
+   "componente": "Org.Plan",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/agreements/join",
+    "POST /v1/billing/cancel",
+    "POST /v1/billing/change-plan",
+    "POST /v1/billing/checkout",
+    "POST /v1/billing/portal",
+    "POST /v1/billing/quote",
+    "POST /v1/billing/reactivate",
+    "POST /v1/vouchers/redeem"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/preferencias",
+   "componente": "Prefs.Preferences",
+   "arquivo": "web/src/pages/prefs.tsx",
+   "operacoes": [
+    "PUT /v1/me/preferences"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/conta/seguranca",
+   "componente": "Sec.CentroDeSeguranca",
+   "arquivo": "web/src/pages/security.tsx",
+   "operacoes": [
+    "DELETE /v1/auth/sessions/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/contabilidade",
+   "componente": "Int.Contabilidade",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [
+    "POST /v1/contabilidade/close"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/contabilidade/plano-de-contas",
+   "componente": "Int.PlanoDeContas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/controladoria",
+   "componente": "Int.Controladoria",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/controladoria/conciliacao",
+   "componente": "Int.Conciliacao",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/conversas",
+   "componente": "Talk.Conversations",
+   "arquivo": "web/src/pages/talk.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/conversas/:id",
+   "componente": "Talk.Conversation",
+   "arquivo": "web/src/pages/talk.tsx",
+   "operacoes": [
+    "POST /v1/conversations/{}/messages",
+    "POST /v1/conversations/{}/read"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/cotas",
+   "componente": "Funding.Quotas",
+   "arquivo": "web/src/pages/funding.tsx",
+   "operacoes": [
+    "PATCH /v1/funding-quotas/{}",
+    "POST /v1/funding-quotas"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/cotas/:id/apoios",
+   "componente": "Funding.QuotaPledges",
+   "arquivo": "web/src/pages/funding.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/dados-territoriais",
+   "componente": "Org.GovData",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/determinantes",
+   "componente": "Impact.Determinants",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/diagnosticos",
+   "componente": "Impact.Diagnoses",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [
+    "POST /v1/diagnoses"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/diagnosticos/:id",
+   "componente": "Impact.DiagnosisEditor",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [
+    "POST /v1/diagnoses/{}/apply",
+    "PUT /v1/diagnoses/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/diagnosticos/:id/roteiro",
+   "componente": "DiagGuide.DiagnosisGuide",
+   "arquivo": "web/src/pages/diagnosisGuide.tsx",
+   "operacoes": [
+    "PUT /v1/diagnoses/{}/guide/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/diagnosticos/:id/versoes",
+   "componente": "Core.DiagnosisVersions",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "GET /v1/diagnoses/{}/versions/compare",
+    "POST /v1/diagnoses/{}/versions",
+    "PUT /v1/diagnoses/{}/actions/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/documentos",
+   "componente": "Docs.Documents",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [
+    "DELETE /v1/documents/{}",
+    "PATCH /v1/documents/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/documentos/modelos",
+   "componente": "Core.Templates",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/documentos/montagens",
+   "componente": "Core.Assemblies",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/document-assemblies"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/documentos/montagens/:id",
+   "componente": "Core.AssemblyDetail",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/document-assemblies/{}/generate",
+    "POST /v1/document-assemblies/{}/review",
+    "PUT /v1/document-assemblies/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/editais",
+   "componente": "Calls.MyCalls",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/editais/:id/candidaturas",
+   "componente": "Calls.CallApplications",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/editais/:id/editar",
+   "componente": "Calls.CallForm",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [
+    "POST /v1/calls",
+    "PUT /v1/calls/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/editais/novo",
+   "componente": "Calls.CallForm",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [
+    "POST /v1/calls",
+    "PUT /v1/calls/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/explorar",
+   "componente": "Proj.Feed",
+   "arquivo": "web/src/pages/projects.tsx",
+   "operacoes": [
+    "GET /v1/feed/compare",
+    "POST /v1/feed/projects/{}/feedback"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/extratos",
+   "componente": "Fin.Statements",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [
+    "POST /v1/statements"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/financeiro",
+   "componente": "Int.Financeiro",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/financeiro/despesas",
+   "componente": "Int.Despesas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [
+    "POST /v1/financeiro/expenses"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/financeiro/instrucoes",
+   "componente": "Int.Instrucoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [
+    "POST /v1/financeiro/instructions",
+    "POST /v1/financeiro/instructions/{}/executed",
+    "POST /v1/financeiro/instructions/{}/issue"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/financeiro/periodos-gratuitos",
+   "componente": "Int.PeriodosGratuitos",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [
+    "POST /v1/admin/free-periods",
+    "POST /v1/admin/free-periods/{}/cancel"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/fiscal",
+   "componente": "Org.Fiscal",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "PUT /v1/org/tax-profile"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ia",
+   "componente": "Sec.PainelDeIa",
+   "arquivo": "web/src/pages/security.tsx",
+   "operacoes": [
+    "PUT /v1/ai/budget"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ideias",
+   "componente": "Core.Ideas",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/ideas",
+    "POST /v1/ideas/{}/promote",
+    "PUT /v1/ideas/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/identidade",
+   "componente": "Trust.Identity",
+   "arquivo": "web/src/pages/trust.tsx",
+   "operacoes": [
+    "POST /v1/trust/identity/verifications",
+    "POST /v1/trust/identity/verifications/{}/documents"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/instituicao",
+   "componente": "Inst.Institution",
+   "arquivo": "web/src/pages/institution.tsx",
+   "operacoes": [
+    "DELETE /v1/institutional/qualifications/{}",
+    "GET /v1/institutional/qualifications/{}/events",
+    "POST /v1/institutional/qualifications",
+    "PUT /v1/institutional/profile"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "componente": "Inst.PublicOrg",
+   "arquivo": "web/src/pages/institution.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/mapa",
+   "componente": "Rep.MapView",
+   "arquivo": "web/src/pages/reports.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/marketplace",
+   "componente": "Mkt.Marketplace",
+   "arquivo": "web/src/pages/market.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/marketplace/:id",
+   "componente": "Mkt.ListingDetail",
+   "arquivo": "web/src/pages/market.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/marketplace/meus",
+   "componente": "Mkt.MyListings",
+   "arquivo": "web/src/pages/market.tsx",
+   "operacoes": [
+    "POST /v1/marketplace/listings/{}/transition"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/marketplace/novo",
+   "componente": "Mkt.NewListing",
+   "arquivo": "web/src/pages/market.tsx",
+   "operacoes": [
+    "POST /v1/marketplace/listings"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/materiais",
+   "componente": "Org.Materials",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/materials"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/mensagens",
+   "componente": "Net.Messages",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [
+    "POST /v1/messages/{}",
+    "POST /v1/network/block/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/mensagens/:id",
+   "componente": "Net.Messages",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [
+    "POST /v1/messages/{}",
+    "POST /v1/network/block/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/minhas-atividades",
+   "componente": "TrustA.MyServices",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "operacoes": [
+    "PATCH /v1/professional-services/{}",
+    "POST /v1/professional-services"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/necessidades/:id",
+   "componente": "Net.NeedDetail",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [
+    "POST /v1/offers/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/notificacoes",
+   "componente": "Home.Notifications",
+   "arquivo": "web/src/pages/home.tsx",
+   "operacoes": [
+    "POST /v1/notifications/read-all",
+    "POST /v1/notifications/{}/read"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/operacoes",
+   "componente": "Int.Operacoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/operacoes/alertas",
+   "componente": "Int.Alertas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/oportunidades",
+   "componente": "Calls.Opportunities",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [
+    "DELETE /v1/saved-searches/{}",
+    "POST /v1/saved-searches",
+    "POST /v1/saved-searches/{}/run"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/oportunidades-profissionais",
+   "componente": "Net.Opportunities",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [
+    "POST /v1/needs/{}/offers"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "componente": "Calls.CallDetail",
+   "arquivo": "web/src/pages/calls.tsx",
+   "operacoes": [
+    "POST /v1/applications"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/organizacao",
+   "componente": "Org.OrgProfile",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "PATCH /v1/org",
+    "POST /v1/org/credentials",
+    "PUT /v1/org/funder-profile",
+    "PUT /v1/org/provider-profile"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "componente": "Org.Compliance",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/compliance/request-review"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "componente": "Org.Team",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "DELETE /v1/org/invitations/{}",
+    "DELETE /v1/org/members/{}",
+    "PATCH /v1/org/members/{}",
+    "POST /v1/org/invitations"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/organizacao/nova",
+   "componente": "Org.CreateOrg",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/orgs"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/pagamentos",
+   "componente": "Fin.Payments",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/pagamentos/:id",
+   "componente": "Fin.PaymentDetail",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [
+    "POST /v1/payments/{}/refunds",
+    "POST /v1/payments/{}/transition",
+    "POST /v1/refunds/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/perfil-publico",
+   "componente": "PP.MyPublicProfile",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "operacoes": [
+    "GET /v1/profiles/handle-available",
+    "PATCH /v1/profiles/{}",
+    "POST /v1/profiles",
+    "POST /v1/profiles/{}/rebuild"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/perfil-publico/:id/identificadores",
+   "componente": "PP.HandleHistory",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "componente": "PP.Experiences",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "operacoes": [
+    "POST /v1/profile/experiences"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/portal",
+   "componente": "Portal.Portal",
+   "arquivo": "web/src/pages/portal.tsx",
+   "operacoes": [
+    "POST /v1/me/switch-org"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/profissionais",
+   "componente": "Docs.Directory",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [
+    "POST /v1/professional-reviews"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos",
+   "componente": "Proj.Projects",
+   "arquivo": "web/src/pages/projects.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/projetos/:id",
+   "componente": "Proj.ProjectDetail",
+   "arquivo": "web/src/pages/projects.tsx",
+   "operacoes": [
+    "DELETE /v1/feed/projects/{}/favorite",
+    "DELETE /v1/projects/{}/budget-items/{}",
+    "POST /v1/applications/interest",
+    "POST /v1/feed/projects/{}/favorite",
+    "POST /v1/projects/{}/budget-items",
+    "POST /v1/projects/{}/evidences",
+    "POST /v1/projects/{}/expenses",
+    "POST /v1/projects/{}/feedbacks",
+    "POST /v1/projects/{}/milestones",
+    "POST /v1/projects/{}/publish",
+    "POST /v1/projects/{}/unpublish"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/apoio-profissional",
+   "componente": "Net.ProjectNeeds",
+   "arquivo": "web/src/pages/network.tsx",
+   "operacoes": [
+    "POST /v1/projects/{}/needs"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/compras",
+   "componente": "Fin.Procurement",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [
+    "POST /v1/projects/{}/procurement"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "componente": "Fin.ContributionModels",
+   "arquivo": "web/src/pages/finance.tsx",
+   "operacoes": [
+    "POST /v1/contribution-models/{}/submit",
+    "POST /v1/projects/{}/contribution-models"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "componente": "IL.Equity",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [
+    "POST /v1/projects/{}/equity/barriers"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "componente": "Talk.ProjectTeam",
+   "arquivo": "web/src/pages/talk.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "componente": "Impact.ImpactGraph",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [
+    "DELETE /v1/projects/{}/graph/nodes/{}",
+    "POST /v1/projects/{}/graph/edges",
+    "POST /v1/projects/{}/graph/nodes"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "componente": "Impact.ProjectImpact",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [
+    "POST /v1/indicator-values/{}/review",
+    "POST /v1/project-indicators/{}/values",
+    "POST /v1/projects/{}/indicators"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/linha-do-tempo",
+   "componente": "Core.Timeline",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/projetos/:id/localizacao",
+   "componente": "Rep.LocationEditor",
+   "arquivo": "web/src/pages/reports.tsx",
+   "operacoes": [
+    "PUT /v1/projects/{}/location"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "componente": "IL.OdsTargets",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [
+    "PUT /v1/projects/{}/ods-targets"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "componente": "IR.ProjectImpactReports",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "operacoes": [
+    "POST /v1/impact-updates"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/retratos",
+   "componente": "Core.Snapshots",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "GET /v1/projects/{}/snapshots/compare",
+    "POST /v1/projects/{}/snapshots"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/riscos",
+   "componente": "Core.Risks",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/projects/{}/risks",
+    "POST /v1/projects/{}/risks/scan",
+    "PUT /v1/projects/{}/risks/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/situacao",
+   "componente": "Core.Lifecycle",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [
+    "POST /v1/projects/{}/transitions"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/novo",
+   "componente": "Proj.NewProject",
+   "arquivo": "web/src/pages/projects.tsx",
+   "operacoes": [
+    "POST /v1/ai/structure-need",
+    "POST /v1/projects",
+    "POST /v1/projects/{}/budget-items"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/prontidao",
+   "componente": "Core.Readiness",
+   "arquivo": "web/src/pages/core.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "componente": "IR.ReadinessPurposes",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "operacoes": [
+    "POST /v1/readiness/snapshots{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/propostas",
+   "componente": "NetX.Proposals",
+   "arquivo": "web/src/pages/net.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/propostas/:id",
+   "componente": "NetX.ProposalDetail",
+   "arquivo": "web/src/pages/net.tsx",
+   "operacoes": [
+    "POST /v1/proposals/{}/attachments",
+    "POST /v1/proposals/{}/transition"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/propostas/nova",
+   "componente": "NetX.NewProposal",
+   "arquivo": "web/src/pages/net.tsx",
+   "operacoes": [
+    "POST /v1/proposals"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/rascunhos",
+   "componente": "Docs.Drafts",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [
+    "POST /v1/ai/draft",
+    "POST /v1/drafts"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/rascunhos/:id",
+   "componente": "Docs.DraftEditor",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [
+    "PATCH /v1/drafts/{}",
+    "POST /v1/drafts/{}/export-pdf",
+    "POST /v1/drafts/{}/new-version",
+    "POST /v1/signatures"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/rede/atividade",
+   "componente": "Talk.NetworkEvents",
+   "arquivo": "web/src/pages/talk.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/rede/experiencias",
+   "componente": "PP.ExperienceRequests",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "operacoes": [
+    "POST /v1/org/experience-requests/{}/decide"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/rede/grafo",
+   "componente": "NetX.NetworkGraph",
+   "arquivo": "web/src/pages/net.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/rede/relacoes",
+   "componente": "NetX.Relationships",
+   "arquivo": "web/src/pages/net.tsx",
+   "operacoes": [
+    "POST /v1/network/relationships/{}/transition"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/relatorios",
+   "componente": "Rep.ReportCenter",
+   "arquivo": "web/src/pages/reports.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "componente": "IR.ImpactReportInbox",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/relatorios-impacto/:id",
+   "componente": "IR.ImpactReportDetail",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "operacoes": [
+    "POST /v1/impact-updates/{}/transition"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/reputacao",
+   "componente": "IL.Reputation",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [
+    "POST /v1/reputation/disputes"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/responsabilidade",
+   "componente": "IL.Responsibility",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/revisoes",
+   "componente": "Docs.Reviews",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/revisoes/:id",
+   "componente": "Docs.ReviewDetail",
+   "arquivo": "web/src/pages/documents.tsx",
+   "operacoes": [
+    "POST /v1/professional-reviews/{}/respond",
+    "POST /v1/signatures"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/selos",
+   "componente": "IL.Seals",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/settings/billing",
+   "componente": "Org.Plan",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/agreements/join",
+    "POST /v1/billing/cancel",
+    "POST /v1/billing/change-plan",
+    "POST /v1/billing/checkout",
+    "POST /v1/billing/portal",
+    "POST /v1/billing/quote",
+    "POST /v1/billing/reactivate",
+    "POST /v1/vouchers/redeem"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes",
+   "componente": "Sol.Library",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "operacoes": [
+    "POST /v1/solutions/assistant",
+    "POST /v1/solutions/search",
+    "PUT /v1/solutions/{}/save"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/:id",
+   "componente": "Sol.Profile",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "operacoes": [
+    "POST /v1/reports",
+    "POST /v1/solution-intents/{}/stage",
+    "POST /v1/solutions/{}/adapt",
+    "POST /v1/solutions/{}/develop",
+    "POST /v1/solutions/{}/disputes",
+    "POST /v1/solutions/{}/evidence",
+    "POST /v1/solutions/{}/match",
+    "POST /v1/solutions/{}/publish",
+    "POST /v1/solutions/{}/replications",
+    "POST /v1/solutions/{}/request-review",
+    "POST /v1/solutions/{}/requests",
+    "POST /v1/solutions/{}/results",
+    "PUT /v1/solutions/{}/intent",
+    "PUT /v1/solutions/{}/replication-profile",
+    "PUT /v1/solutions/{}/save"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/:id/editar",
+   "componente": "SolM.SolutionForm",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "PATCH /v1/solutions/{}",
+    "POST /v1/solutions",
+    "POST /v1/solutions/{}/confirm-review"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "componente": "Sol.Compare",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "operacoes": [
+    "POST /v1/solutions/combine",
+    "POST /v1/solutions/compare"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "POST /v1/solution-replications/{}/confirm",
+    "POST /v1/solution-requests/{}/close",
+    "POST /v1/solution-requests/{}/respond"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/nova",
+   "componente": "SolM.SolutionForm",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "PATCH /v1/solutions/{}",
+    "POST /v1/solutions",
+    "POST /v1/solutions/{}/confirm-review"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "POST /v1/solution-replications/{}/confirm",
+    "POST /v1/solution-requests/{}/close",
+    "POST /v1/solution-requests/{}/respond"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "componente": "SolM.Preferences",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "PUT /v1/solutions/funder-preferences",
+    "PUT /v1/solutions/personalization"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "componente": "SolM.Marketplace",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "operacoes": [
+    "POST /v1/solution-replications/{}/confirm",
+    "POST /v1/solution-requests/{}/close",
+    "POST /v1/solution-requests/{}/respond"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "componente": "Terr.TerritoryNeeds",
+   "arquivo": "web/src/pages/territory.tsx",
+   "operacoes": [
+    "POST /v1/territory/needs"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/tesouraria",
+   "componente": "Int.Tesouraria",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/verificacoes",
+   "componente": "Trust.VerifiableRecords",
+   "arquivo": "web/src/pages/trust.tsx",
+   "operacoes": [
+    "POST /v1/verifiable-records/{}/revoke"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/vocabulario",
+   "componente": "Terr.Taxonomies",
+   "arquivo": "web/src/pages/territory.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  }
+ ]
+}

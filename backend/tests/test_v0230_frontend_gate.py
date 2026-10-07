@@ -299,3 +299,207 @@ class TheInstalledTreeInventoryMatchesWhatIsOnDiskTests(unittest.TestCase):
             with self.subTest(pacote):
                 self.assertIn(pacote, instalados,
                               f"{pacote} é usado pelo build e não está na árvore instalada")
+
+
+class TheScreenInventoryLosesNoScreenTests(unittest.TestCase):
+    """Inventário que perde tela em silêncio é pior que inventário nenhum.
+
+    Quatro defeitos já fizeram o extrator perder tela sem emitir um único erro: ancorar o padrão no
+    fim da linha (`app.tsx` tem linha com DUAS rotas, a segunda sumia); pegar o `[` do TIPO (`R[]`)
+    em vez do da lista (zero telas); exigir que o terceiro elemento fosse uma lista (as 30 entradas
+    de `HELP`, cujo terceiro elemento é `true`, ficavam fora); e procurar o primeiro `=` depois de
+    `const`, que em `[string, () => ReactNode][]` é o `=` de `=>` (as 9 de `PUBLIC`, fora).
+
+    E a primeira versão DESTE teste conferia a contagem contra o bloco `ROUTES` — o mesmo recorte que
+    o extrator lia —, então passava com 179 de 218. Um instrumento que se confere contra o próprio
+    recorte não confere nada. Agora a conferência varre a região inteira das rotas com um método que
+    não é o do extrator: todo `["/…"` entre `const ROUTES` e `const NAV`, qualquer que seja a tabela.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        cls.inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
+                             .read_text(encoding="utf-8"))
+        cls.app = (ROOT / "web" / "src" / "app.tsx").read_text(encoding="utf-8")
+
+    def _caminhos_declarados(self) -> set[str]:
+        regiao = self.app[self.app.index("const ROUTES"):self.app.index("const NAV")]
+        return set(re.findall(r'\["(/[^"]*)"\s*,', regiao))
+
+    def test_every_route_the_router_declares_is_in_the_inventory(self):
+        declarados = self._caminhos_declarados()
+        inventariados = {t["rota"] for t in self.inv["lista"]}
+        self.assertEqual(declarados - inventariados, set(),
+                         "telas declaradas no roteador e ausentes do inventário")
+        self.assertEqual(inventariados - declarados, set(),
+                         "telas no inventário que o roteador não declara: o extrator inventou")
+
+    def test_all_three_route_tables_are_represented(self):
+        """`PUBLIC` e `HELP` já ficaram fora inteiras. Contar o total não pega isso: 179 parece muito."""
+        por_tabela = self.inv["por_tabela"]
+        for tabela in ("PUBLIC", "HELP", "ROUTES"):
+            self.assertGreater(por_tabela.get(tabela, 0), 0, f"tabela {tabela} ausente do inventário")
+        self.assertEqual(sum(por_tabela.values()), len(self.inv["lista"]))
+
+    def test_no_screen_is_shadowed_by_an_earlier_table(self):
+        """O roteador casa PUBLIC, depois HELP, depois ROUTES: padrão repetido antes torna a tela morta."""
+        self.assertEqual(self.inv["sombreadas"], [],
+                         "tela que o roteador nunca alcança porque uma tabela anterior casa primeiro")
+
+    def test_the_inventory_is_not_trivially_small(self):
+        """Contraprova dos defeitos anteriores: 0, 178 e 179 telas passariam todos despercebidos."""
+        self.assertGreater(len(self.inv["lista"]), 200,
+                           f"só {len(self.inv['lista'])} telas: o extrator deve ter quebrado")
+
+    def test_regenerating_the_inventory_reproduces_what_is_committed(self):
+        import json
+        import subprocess
+        import sys
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            saida = pathlib.Path(tmp) / "i.json"
+            r = subprocess.run([sys.executable, str(ROOT / "scripts" / "make_screen_inventory.py"),
+                                str(saida)], capture_output=True, text=True, cwd=ROOT, timeout=120)
+            self.assertEqual(r.returncode, 0, r.stderr[-1200:])
+            self.assertEqual(json.loads(saida.read_text(encoding="utf-8")), self.inv,
+                             "screen_inventory.json divergiu de app.tsx. Regere com: "
+                             "python3 scripts/make_screen_inventory.py")
+
+
+class TheScreenBackendMapTellsTheTruthAboutCoverageTests(unittest.TestCase):
+    """O cruzamento tela × backend é acusação séria: tem que estar certo antes de ser publicado.
+
+    Quatro números deste cruzamento já estiveram errados por defeito do extrator, não do produto:
+
+      569 "operações sem interface"  → o front faz quase todo GET por `useLoad(caminho)`, e o
+                                        extrator só enxergava `api.<verbo>(`.
+      7   "telas sem backend"        → 1 era template aninhado (``…${pid ? `?x=${pid}` : ""}``) que
+                                        a expressão regular cortava na crase de dentro, e 5 eram
+                                        `${mode}` interpolando um literal registrado no backend.
+
+    Sobrou UMA, e ela é de verdade: `/entrar` chama `GET /v1/meta/config`, que o backend não registra
+    (só existe `GET /v1/meta/platform-status`). A chamada está dentro de um `.catch(() => {})`, então
+    falha calada e o botão de SSO simplesmente nunca aparece.
+
+    Este teste trava esse número. Se alguém corrigir a chamada, ele FALHA — de propósito: corrigir o
+    produto deve exigir atualizar o que foi dito publicamente sobre ele.
+    """
+
+    #: Única divergência real conhecida. Não é lista de exceções: é o que o produto tem hoje.
+    AUSENTES = {"/entrar": ["GET /v1/meta/config"]}
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        cls.mapa = json.loads((ROOT / "docs" / "execution" / "screen_backend_map.json")
+                              .read_text(encoding="utf-8"))
+
+    def test_the_only_missing_endpoint_is_the_one_we_declared(self):
+        self.assertEqual(self.mapa["interface_sem_backend"], self.AUSENTES,
+                         "mudou a lista de telas que chamam endpoint inexistente — atualize o que o"
+                         " relatório afirma antes de mexer no teste")
+
+    def test_the_map_covers_every_screen_in_the_inventory(self):
+        import json
+        inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
+                         .read_text(encoding="utf-8"))
+        self.assertEqual({t["rota"] for t in self.mapa["lista"]}, {t["rota"] for t in inv["lista"]})
+        self.assertEqual(self.mapa["operacoes_no_backend"], 888)
+
+    def test_most_screens_resolve_to_a_registered_operation(self):
+        """Contraprova do defeito do `useLoad`: com ele fora, só 138 das 218 'chamavam o backend'."""
+        self.assertGreater(self.mapa["estados"]["backend presente"], 150,
+                           "cobertura caiu: ou o front mudou, ou o extrator parou de ver um envoltório")
+
+    def test_the_limits_of_the_method_are_written_in_the_script(self):
+        """Quem ler o número precisa ler o que ele não prova, no mesmo arquivo que o produz."""
+        fonte = (ROOT / "scripts" / "make_screen_backend_map.py").read_text(encoding="utf-8")
+        for frase in ("quer dizer que a tela funciona", "O LIMITE DESTE MÉTODO",
+                      "não chama diretamente"):
+            self.assertIn(frase, fonte, f"sumiu do script a ressalva: {frase!r}")
+
+    def test_regenerating_the_map_reproduces_what_is_committed(self):
+        import json
+        import subprocess
+        import sys
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            saida = pathlib.Path(tmp) / "m.json"
+            r = subprocess.run([sys.executable, str(ROOT / "scripts" / "make_screen_backend_map.py"),
+                                str(saida)], capture_output=True, text=True, cwd=ROOT, timeout=180)
+            self.assertEqual(r.returncode, 0, r.stderr[-1500:])
+            self.assertEqual(json.loads(saida.read_text(encoding="utf-8")), self.mapa,
+                             "screen_backend_map.json divergiu. Regere com: "
+                             "python3 scripts/make_screen_backend_map.py")
+
+
+class TheWrittenDocsQuoteTheGeneratedNumbersTests(unittest.TestCase):
+    """Documento que cita número gerado e não é conferido envelhece calado.
+
+    `DEMO.md`, `TESTER_GUIDE.md` e `TROUBLESHOOTING.md` afirmam quantidades que saem do inventário e
+    do cruzamento com o backend. Quando o roteador mudar, os três passam a mentir sem que nada
+    reclame — e quem lê não tem como saber. Este teste quebra nessa hora.
+
+    Já serviu uma vez: os dois guias diziam "35 telas só de Administração" e o inventário dizia 37.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        cls.inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
+                             .read_text(encoding="utf-8"))
+        cls.mapa = json.loads((ROOT / "docs" / "execution" / "screen_backend_map.json")
+                              .read_text(encoding="utf-8"))
+        cls.textos = {n: (ROOT / "docs" / f"{n}.md").read_text(encoding="utf-8")
+                      for n in ("DEMO", "TESTER_GUIDE", "TROUBLESHOOTING")}
+
+    def _numeros(self) -> dict[str, int]:
+        so_admin = sum(1 for t in self.inv["lista"] if t["alcanca"] == ["Administração"])
+        return {
+            "telas": self.inv["telas"],
+            "sem menu": self.inv["so_por_link_direto"],
+            "com parâmetro": self.inv["com_parametro"],
+            "só Administração": so_admin,
+            "sem chamada direta": self.mapa["estados"]["sem chamada direta"],
+            "órfãs do backend": self.mapa["operacoes_que_nenhuma_tela_chama"],
+        }
+
+    def test_the_three_docs_exist_and_are_substantial(self):
+        for nome, texto in self.textos.items():
+            self.assertGreater(len(texto), 2000, f"{nome}.md é curto demais para servir a alguém")
+
+    def test_every_number_the_docs_quote_matches_what_is_generated(self):
+        n = self._numeros()
+        # A âncora é só o texto ao redor; o número vem do JSON gerado, nunca escrito aqui.
+        esperado = {
+            "DEMO": [(n["telas"], "telas** servidas pelo roteador"),
+                     (n["sem menu"], f"das {n['telas']} telas não estão em menu nenhum")],
+            "TESTER_GUIDE": [(n["telas"], "telas** que o roteador serve"),
+                             (n["sem menu"], "telas não estão em menu nenhum"),
+                             (n["com parâmetro"], "telas exigem um registro existente"),
+                             (n["só Administração"], "telas só existem para Administração"),
+                             (n["sem chamada direta"], "telas): o componente não chama"),
+                             (n["órfãs do backend"], "operações de API não têm tela")],
+            "TROUBLESHOOTING": [(n["só Administração"], "telas são só de Administração"),
+                                (n["sem chamada direta"], "telas): o componente não chama")],
+        }
+        for doc, pares in esperado.items():
+            for valor, ancora in pares:
+                self.assertIn(f"{valor} {ancora}", self.textos[doc],
+                              f"{doc}.md não diz '{valor} {ancora}' — o número gerado mudou, o texto não")
+
+    def test_the_known_broken_endpoint_is_named_in_both_guides(self):
+        """Defeito conhecido escondido do testador faz ele gastar o dia a redescobri-lo."""
+        for doc in ("TESTER_GUIDE", "TROUBLESHOOTING"):
+            self.assertIn("/v1/meta/config", self.textos[doc])
+
+    def test_no_doc_claims_the_system_cannot_be_broken_into(self):
+        """Regra que está acima das outras: nenhum sistema ligado à internet recebe essa garantia."""
+        for nome, texto in self.textos.items():
+            baixo = texto.lower()
+            for frase in ("impossível de invadir", "inviolável", "100% seguro", "à prova de invasão"):
+                if frase in baixo:
+                    # A menção é permitida só quando o texto a está NEGANDO.
+                    self.assertIn("não", baixo[max(0, baixo.index(frase) - 120):baixo.index(frase)],
+                                  f"{nome}.md afirma {frase!r}")

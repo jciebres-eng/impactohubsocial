@@ -1,0 +1,4061 @@
+{
+ "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
+ "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
+ "telas": 218,
+ "por_tabela": {
+  "PUBLIC": 9,
+  "HELP": 30,
+  "ROUTES": 179
+ },
+ "sem_login": 30,
+ "com_parametro": 52,
+ "em_algum_menu": 47,
+ "so_por_link_direto": 119,
+ "sombreadas": [],
+ "menus_por_tipo": {
+  "Empresa": 14,
+  "Governo": 16,
+  "Apoiador": 12,
+  "OSC": 19,
+  "Administração": 8,
+  "Profissional": 25
+ },
+ "arquivos": [
+  "web/src/pages/admin.tsx",
+  "web/src/pages/applications.tsx",
+  "web/src/pages/calls.tsx",
+  "web/src/pages/commercial.tsx",
+  "web/src/pages/core.tsx",
+  "web/src/pages/diagnosisGuide.tsx",
+  "web/src/pages/documents.tsx",
+  "web/src/pages/finance.tsx",
+  "web/src/pages/funding.tsx",
+  "web/src/pages/help.tsx",
+  "web/src/pages/helpAdmin.tsx",
+  "web/src/pages/home.tsx",
+  "web/src/pages/impact.tsx",
+  "web/src/pages/impactlayer.tsx",
+  "web/src/pages/impactreport.tsx",
+  "web/src/pages/institution.tsx",
+  "web/src/pages/internal.tsx",
+  "web/src/pages/market.tsx",
+  "web/src/pages/moderation.tsx",
+  "web/src/pages/net.tsx",
+  "web/src/pages/network.tsx",
+  "web/src/pages/ops.tsx",
+  "web/src/pages/org.tsx",
+  "web/src/pages/portal.tsx",
+  "web/src/pages/prefs.tsx",
+  "web/src/pages/projects.tsx",
+  "web/src/pages/public.tsx",
+  "web/src/pages/publicprofile.tsx",
+  "web/src/pages/reports.tsx",
+  "web/src/pages/security.tsx",
+  "web/src/pages/solutions.tsx",
+  "web/src/pages/solutions_manage.tsx",
+  "web/src/pages/talk.tsx",
+  "web/src/pages/territory.tsx",
+  "web/src/pages/traceability.tsx",
+  "web/src/pages/trust.tsx",
+  "web/src/pages/trustAdmin.tsx",
+  "web/src/pages/verify.tsx",
+  "web/src/pages/workspace.tsx"
+ ],
+ "lista": [
+  {
+   "rota": "/cadastro",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Register",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/convite",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.AcceptInvite",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/entrar",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Login",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/esqueci-senha",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Forgot",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/legal/privacidade",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Legal",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/legal/termos",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Legal",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/planos",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Com.Pricing",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/redefinir-senha",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.Reset",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/verificar-email",
+   "tabela": "PUBLIC",
+   "ordem_de_casamento": 1,
+   "entrada": "sem login",
+   "exige_login": false,
+   "componente": "Pub.VerifyEmail",
+   "arquivo": "web/src/pages/public.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/@:handle",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "PP.PublicProfilePage",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.HelpHome",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/:slug",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Article",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/academia",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Academy",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/academia/:slug",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Course",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/academia/aula/:id",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Lesson",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/atividades",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Activities",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/biblioteca",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Library",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/biblioteca/:slug",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Resource",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/boletim",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Newsletter",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/boletim/cancelar",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.NewsletterToken",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/boletim/confirmar",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.NewsletterToken",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/busca",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.HelpSearch",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/certificado/:code",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Certificate",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/comece-aqui",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Start",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/demonstracao",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.DemoForm",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/eventos",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Events",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/eventos/:slug",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.EventPage",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/faq",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Faq",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/faq/:id",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Faq",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/parcerias",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.PartnershipForm",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/pendencias",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Pending",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/preferencias",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Prefs",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/suporte",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Tickets",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/suporte/:id",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.Ticket",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/suporte/novo",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.NewTicket",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ajuda/teste",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": true,
+   "componente": "Help.TrialRequest",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/campanha/:slug",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Funding.PublicCampaign",
+   "arquivo": "web/src/pages/funding.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/verificar",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Verify.VerifyPage",
+   "arquivo": "web/src/pages/verify.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/verificar/:code",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Verify.VerifyPage",
+   "arquivo": "web/src/pages/verify.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Home.Dashboard",
+   "arquivo": "web/src/pages/home.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Início",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/acordos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trust.Agreements",
+   "arquivo": "web/src/pages/trust.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Acordos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/acordos/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trust.AgreementDetail",
+   "arquivo": "web/src/pages/trust.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/acordos/novo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trust.AgreementForm",
+   "arquivo": "web/src/pages/trust.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Overview",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Visão geral",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/auditoria",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Audit",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Overview",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/analytics",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Analytics",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/artigos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Articles",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/artigos/:slug",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.ArticleEditor",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/admin/central/cursos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Courses",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/equipe",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.StaffRoles",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/eventos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.EventsAdmin",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/faqs",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Faqs",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/parcerias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Partnerships",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/recursos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Resources",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/suporte",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.SupportQueue",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/central/suporte/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.SupportTicket",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/admin/central/testes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "HelpA.Trials",
+   "arquivo": "web/src/pages/helpAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/chaves",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.EncryptionKeys",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/cobranca",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.OrgBilling",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/compliance",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.ComplianceQueue",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Compliance",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/contribuicao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Ops.ContributionReview",
+   "arquivo": "web/src/pages/ops.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/convenios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Agreements",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/credenciais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Credentials",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Credenciais",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/credenciais-profissionais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "TrustA.CredentialQueue",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Credenciais profissionais",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/denuncias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Reports",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/editais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.CuratedCalls",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/erros",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Ops.Errors",
+   "arquivo": "web/src/pages/ops.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/fiscal",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.FiscalRules",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/honorarios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "TrustA.FeeTables",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Honorários",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/identidade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "TrustA.IdentityQueue",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Identidade",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/institucional",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Inst.InstitutionAdmin",
+   "arquivo": "web/src/pages/institution.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/integracoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Integracoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/integridade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trace.Integridade",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/interruptor",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trace.Interruptor",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/linha-do-tempo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trace.LinhaDoTempo",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/medidas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mod.EnforcementAdmin",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/organizacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Orgs",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/permissoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.MatrizPermissoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/proveniencia",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trace.Proveniencia",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/rastro",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trace.Rastro",
+   "arquivo": "web/src/pages/traceability.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/risco",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Ops.Risk",
+   "arquivo": "web/src/pages/ops.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/solucoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.AdminSolutions",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/usuarios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Users",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/admin/vouchers",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Admin.Vouchers",
+   "arquivo": "web/src/pages/admin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/administrativo/orcamento",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Orcamento",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/afirmacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.Claims",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Afirmações de impacto",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/aprovacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Aprovacoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/area",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Ws.Workspace",
+   "arquivo": "web/src/pages/workspace.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Administração",
+    "Profissional"
+   ],
+   "rotulo": "Área de trabalho",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/assinatura/politica",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.SignaturePolicies",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/assinatura/provedores",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.SignatureProviders",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/auditoria",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.AcessoPrivilegiado",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/campanha-gestao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Funding.Campaigns",
+   "arquivo": "web/src/pages/funding.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/candidaturas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Apps.Applications",
+   "arquivo": "web/src/pages/applications.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Governo",
+    "Apoiador"
+   ],
+   "rotulo": "Candidaturas",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/candidaturas/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Apps.ApplicationDetail",
+   "arquivo": "web/src/pages/applications.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/carteira",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Proj.Portfolio",
+   "arquivo": "web/src/pages/projects.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "individual"
+   ],
+   "alcanca": [
+    "Apoiador"
+   ],
+   "em_menu_de": [
+    "Governo",
+    "Apoiador"
+   ],
+   "rotulo": "Execução e resultados",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/compras/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.ProcurementDetail",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/conquistas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.Badges",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "company"
+   ],
+   "alcanca": [
+    "Empresa"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Conquistas",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/conta",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Account",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/comercial",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Com.Commercial",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/consumo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Com.Usage",
+   "arquivo": "web/src/pages/commercial.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/denuncias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mod.MyReports",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/moderacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mod.MyModeration",
+   "arquivo": "web/src/pages/moderation.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/plano",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Plan",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/preferencias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Prefs.Preferences",
+   "arquivo": "web/src/pages/prefs.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/seguranca",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Sec.CentroDeSeguranca",
+   "arquivo": "web/src/pages/security.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/contabilidade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Contabilidade",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/contabilidade/plano-de-contas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.PlanoDeContas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/controladoria",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Controladoria",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/controladoria/conciliacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Conciliacao",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conversas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Talk.Conversations",
+   "arquivo": "web/src/pages/talk.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Conversas",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/conversas/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Talk.Conversation",
+   "arquivo": "web/src/pages/talk.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/cotas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Funding.Quotas",
+   "arquivo": "web/src/pages/funding.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/cotas/:id/apoios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Funding.QuotaPledges",
+   "arquivo": "web/src/pages/funding.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/dados-territoriais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.GovData",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/determinantes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.Determinants",
+   "arquivo": "web/src/pages/impact.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/diagnosticos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.Diagnoses",
+   "arquivo": "web/src/pages/impact.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/diagnosticos/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.DiagnosisEditor",
+   "arquivo": "web/src/pages/impact.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/diagnosticos/:id/roteiro",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "DiagGuide.DiagnosisGuide",
+   "arquivo": "web/src/pages/diagnosisGuide.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/diagnosticos/:id/versoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.DiagnosisVersions",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/documentos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.Documents",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Documentos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/documentos/modelos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Templates",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Modelos de documento",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/documentos/montagens",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Assemblies",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Montagem de documentos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/documentos/montagens/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.AssemblyDetail",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/editais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.MyCalls",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo"
+   ],
+   "rotulo": "Editais",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/editais/:id/candidaturas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.CallApplications",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/editais/:id/editar",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.CallForm",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/editais/novo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.CallForm",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/explorar",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Proj.Feed",
+   "arquivo": "web/src/pages/projects.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "individual"
+   ],
+   "alcanca": [
+    "Apoiador"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Apoiador"
+   ],
+   "rotulo": "Projetos para apoiar",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/extratos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.Statements",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/financeiro",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Financeiro",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/financeiro/despesas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Despesas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/financeiro/instrucoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Instrucoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/financeiro/periodos-gratuitos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.PeriodosGratuitos",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/fiscal",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Fiscal",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "company"
+   ],
+   "alcanca": [
+    "Empresa"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ia",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Sec.PainelDeIa",
+   "arquivo": "web/src/pages/security.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/ideias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Ideas",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Ideias",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/identidade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trust.Identity",
+   "arquivo": "web/src/pages/trust.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Identidade",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/instituicao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Inst.Institution",
+   "arquivo": "web/src/pages/institution.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "individual"
+   ],
+   "alcanca": [
+    "Apoiador"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Perfil institucional",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Inst.PublicOrg",
+   "arquivo": "web/src/pages/institution.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/mapa",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Rep.MapView",
+   "arquivo": "web/src/pages/reports.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/marketplace",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mkt.Marketplace",
+   "arquivo": "web/src/pages/market.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Marketplace",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/marketplace/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mkt.ListingDetail",
+   "arquivo": "web/src/pages/market.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/marketplace/meus",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mkt.MyListings",
+   "arquivo": "web/src/pages/market.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Meus anúncios",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/marketplace/novo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Mkt.NewListing",
+   "arquivo": "web/src/pages/market.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/materiais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Materials",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/mensagens",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.Messages",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Mensagens",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/mensagens/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.Messages",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/minhas-atividades",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "TrustA.MyServices",
+   "arquivo": "web/src/pages/trustAdmin.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "individual"
+   ],
+   "alcanca": [
+    "Apoiador"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Minhas atividades",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/necessidades/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.NeedDetail",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/notificacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Home.Notifications",
+   "arquivo": "web/src/pages/home.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/operacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Operacoes",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/operacoes/alertas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Alertas",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/oportunidades",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.Opportunities",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Oportunidades",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/oportunidades-profissionais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.Opportunities",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "provider"
+   ],
+   "alcanca": [
+    "Profissional"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Oportunidades",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Calls.CallDetail",
+   "arquivo": "web/src/pages/calls.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/organizacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.OrgProfile",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Compliance",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Team",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/organizacao/nova",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.CreateOrg",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/pagamentos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.Payments",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/pagamentos/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.PaymentDetail",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "government"
+   ],
+   "alcanca": [
+    "Governo"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/perfil-publico",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "PP.MyPublicProfile",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Perfil público",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/perfil-publico/:id/identificadores",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "PP.HandleHistory",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "PP.Experiences",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Minhas experiências",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/portal",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Portal.Portal",
+   "arquivo": "web/src/pages/portal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/profissionais",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.Directory",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/projetos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Proj.Projects",
+   "arquivo": "web/src/pages/projects.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Projetos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/projetos/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Proj.ProjectDetail",
+   "arquivo": "web/src/pages/projects.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/apoio-profissional",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Net.ProjectNeeds",
+   "arquivo": "web/src/pages/network.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/compras",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.Procurement",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Fin.ContributionModels",
+   "arquivo": "web/src/pages/finance.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.Equity",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Talk.ProjectTeam",
+   "arquivo": "web/src/pages/talk.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.ImpactGraph",
+   "arquivo": "web/src/pages/impact.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.ProjectImpact",
+   "arquivo": "web/src/pages/impact.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/linha-do-tempo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Timeline",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/localizacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Rep.LocationEditor",
+   "arquivo": "web/src/pages/reports.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.OdsTargets",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IR.ProjectImpactReports",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/retratos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Snapshots",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/riscos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Risks",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/situacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Lifecycle",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/novo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Proj.NewProject",
+   "arquivo": "web/src/pages/projects.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/prontidao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Core.Readiness",
+   "arquivo": "web/src/pages/core.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc"
+   ],
+   "alcanca": [
+    "OSC"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IR.ReadinessPurposes",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Prontidão por finalidade",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/propostas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "NetX.Proposals",
+   "arquivo": "web/src/pages/net.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Propostas",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/propostas/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "NetX.ProposalDetail",
+   "arquivo": "web/src/pages/net.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/propostas/nova",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "NetX.NewProposal",
+   "arquivo": "web/src/pages/net.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/rascunhos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.Drafts",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Rascunhos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/rascunhos/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.DraftEditor",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/rede/atividade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Talk.NetworkEvents",
+   "arquivo": "web/src/pages/talk.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "OSC"
+   ],
+   "rotulo": "Atividade da rede",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/rede/experiencias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "PP.ExperienceRequests",
+   "arquivo": "web/src/pages/publicprofile.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Experiências declaradas",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/rede/grafo",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "NetX.NetworkGraph",
+   "arquivo": "web/src/pages/net.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/rede/relacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "NetX.Relationships",
+   "arquivo": "web/src/pages/net.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Relações",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/relatorios",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Rep.ReportCenter",
+   "arquivo": "web/src/pages/reports.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IR.ImpactReportInbox",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador"
+   ],
+   "rotulo": "Relatórios para analisar",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/relatorios-impacto/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IR.ImpactReportDetail",
+   "arquivo": "web/src/pages/impactreport.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/reputacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.Reputation",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Reputação",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/responsabilidade",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.Responsibility",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC"
+   ],
+   "rotulo": "Responsabilidade",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/revisoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.Reviews",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Validações",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/revisoes/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Docs.ReviewDetail",
+   "arquivo": "web/src/pages/documents.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/selos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "IL.Seals",
+   "arquivo": "web/src/pages/impactlayer.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Selos",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/settings/billing",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Plan",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Sol.Library",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Governo",
+    "Apoiador",
+    "Profissional"
+   ],
+   "rotulo": "Biblioteca de soluções",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/solucoes/:id",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Sol.Profile",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/solucoes/:id/editar",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.SolutionForm",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": true,
+   "tipos_declarados": [
+    "provider"
+   ],
+   "alcanca": [
+    "Profissional"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Sol.Compare",
+   "arquivo": "web/src/pages/solutions.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Apoiador",
+    "Profissional"
+   ],
+   "rotulo": "Minhas soluções",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/solucoes/nova",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.SolutionForm",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "provider"
+   ],
+   "alcanca": [
+    "Profissional"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.Preferences",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.Marketplace",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "SolM.MyArea",
+   "arquivo": "web/src/pages/solutions_manage.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Terr.TerritoryNeeds",
+   "arquivo": "web/src/pages/territory.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Governo"
+   ],
+   "rotulo": "Necessidades do território",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/tesouraria",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.Tesouraria",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/verificacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Trust.VerifiableRecords",
+   "arquivo": "web/src/pages/trust.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "Profissional"
+   ],
+   "rotulo": "Verificação pública",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/vocabulario",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Terr.Taxonomies",
+   "arquivo": "web/src/pages/territory.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC",
+    "Administração"
+   ],
+   "rotulo": "Vocabulário",
+   "alcance": "menu"
+  }
+ ]
+}

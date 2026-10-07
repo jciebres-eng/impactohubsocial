@@ -1,6 +1,65 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.23.1] — 2026-10-07
+
+### O inventário de telas estava incompleto, e o teste que o guardava não guardava nada
+
+Esta versão não muda o produto. Muda o que a documentação afirma sobre ele — e corrige uma afirmação
+que estava errada.
+
+**179 telas eram 218.** `web/src/app.tsx` tem TRÊS tabelas de rota, tentadas nesta ordem: `PUBLIC`
+(9 telas, abrem sem login), `HELP` (30, Central de Conhecimento) e `ROUTES` (179, aplicação
+autenticada). O extrator lia só a última. As 39 de fora não sumiam com erro: um inventário menor
+continua parecendo um inventário.
+
+**E o teste que deveria pegar isso conferia a contagem contra o mesmo recorte que o extrator lia.**
+Passava com 179 de 218 sem reclamar. Instrumento que se confere contra o próprio recorte não confere
+nada. A conferência passou a varrer a região inteira das rotas por um método que não é o do extrator,
+e a exigir que as três tabelas apareçam. O número foi confirmado por três caminhos independentes:
+extrator, `grep` direto, e a subtração dos itens de menu do total de ocorrências no arquivo.
+
+Quatro defeitos de extração, todos silenciosos, estão agora escritos no código que os causou: âncora
+no fim da linha (perdia a segunda rota de linhas com duas), `[` do tipo `R[]` em vez do da lista
+(zero telas), terceiro elemento exigido como lista (perdia as 30 de `HELP`, cujo terceiro elemento é
+`true`), e primeiro `=` depois de `const` (que em `[string, () => ReactNode][]` é o `=` de `=>`,
+perdendo as 9 de `PUBLIC`).
+
+### Cruzamento tela × backend: o que tem interface, o que não tem, o que não é chamado
+
+`scripts/make_screen_backend_map.py` lê as chamadas dentro do corpo de cada componente exportado e
+confere contra as 888 operações registradas por `impacto.http.ROUTES`.
+
+- **157 telas** chamam operação registrada; **60** não chamam a API diretamente.
+- **231 das 888 operações** não têm nenhuma referência no front. O backend está à frente da interface,
+  e agora isso é um número medido em vez de uma impressão.
+- **1 defeito real encontrado:** `/entrar` chama `GET /v1/meta/config`, que o backend não registra —
+  só existe `GET /v1/meta/platform-status`. A chamada está dentro de um `.catch(() => {})`, então
+  falha calada e o botão de SSO nunca aparece. Travado por teste: corrigir o produto passa a exigir
+  atualizar o que foi dito publicamente sobre ele.
+
+Seis "telas sem backend" que o primeiro cruzamento acusou eram defeito do cruzamento, não do produto:
+uma era template aninhado (``…${pid ? `?x=${pid}` : ""}``) cortado na crase de dentro, cinco eram
+`${mode}` interpolando um literal que o backend registra. E "569 operações sem interface" virou 231
+quando o extrator passou a enxergar `useLoad(caminho)`, o envoltório por onde o front faz quase todo
+GET.
+
+### Painel navegável das telas, compartilhável e anotável
+
+`scripts/make_screen_panel.py` monta uma página só, gerada do inventário, para publicar como artefato:
+filtro por tipo de organização, por alcance e por estado de backend, busca, e revisão por tela —
+verde (aprovada), amarelo (ajustar), vermelho (bloqueada) — com nota, salva fora da página e
+compartilhada entre quem abre o link. O cabeçalho da página diz, antes de tudo, que aquilo é o
+inventário do roteador e **não** a aplicação rodando.
+
+### Três documentos que faltavam
+
+`docs/DEMO.md` (o que dá para mostrar e, item a item, o que não dá e de quem depende),
+`docs/TESTER_GUIDE.md` (como testar, o que já se sabe que está quebrado, e o que o teste manual não
+prova) e `docs/TROUBLESHOOTING.md` (falha por falha, com a mensagem exata do código, a causa e o que
+fazer). Os números que os três citam são conferidos contra os JSON gerados por um teste — documento
+que cita número gerado e não é conferido envelhece calado.
+
 ## [0.23.0] — 2026-10-07
 
 ### Rodada de conclusão da auditoria (pacote de execução, 11 portões)

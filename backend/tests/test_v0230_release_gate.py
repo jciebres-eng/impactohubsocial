@@ -109,8 +109,12 @@ class TheManifestAndTheRepositoryAgreeTests(unittest.TestCase):
     #: são auto-referência: um manifesto não pode conter o próprio hash. As demais são registro
     #: histórico de execução, excluído por `scripts/make_release.py` — o pacote distribui o
     #: software, não o log das versões anteriores.
+    #: A auto-referência é estrutural, não de uma versão: escrevê-la com o número fixo fez o portão
+    #: falhar na primeira vez que a versão subiu (0.23.0 → 0.23.1), acusando o manifesto NOVO de ser
+    #: arquivo sem motivo. O nome passa a sair de `VERSION`, que é a fonte.
     FORA_DO_MANIFESTO = {
-        "IMPACTO_v0.23.0_TRACEABILITY.json": "auto-referência: o manifesto não contém o próprio hash",
+        f"IMPACTO_v{_versao_declarada()}_TRACEABILITY.json":
+            "auto-referência: o manifesto não contém o próprio hash",
         "RELEASE_MANIFEST.csv": "auto-referência: gerado no empacotamento, depois do manifesto",
         "RELEASE_MANIFEST.sha256": "auto-referência: é a lista de hashes do pacote",
     }

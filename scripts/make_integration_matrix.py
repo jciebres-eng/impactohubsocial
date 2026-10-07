@@ -57,10 +57,12 @@ INFRA = (
 )
 
 
-#: Testes que falam SOBRE as matrizes, e não sobre os provedores. Citar `totvs` ao explicar por que a
-#: matriz deixou de ler o banco não é evidência de teste de contrato com a TOTVS — e contá-los
+#: Testes que falam SOBRE as matrizes e os portões, e não sobre os provedores. Citar `totvs` ao
+#: explicar por que a matriz deixou de ler o banco, ou `clamav` ao conferir que o interruptor de
+#: antivírus embarca inerte, não é evidência de teste de contrato com aquele fornecedor — e contá-los
 #: inflaria a coluna `test_files` com o próprio instrumento de medição.
-META = ("test_v0230_execution_matrices.py",)
+META = ("test_v0230_execution_matrices.py", "test_v0230_data_infra_gate.py",
+        "test_v0230_security_gate.py")
 
 
 def _testes_que_citam(marcas: tuple[str, ...]) -> list[str]:

@@ -191,3 +191,73 @@ class TheMatricesStillAgreeWithTheCodeTests(unittest.TestCase):
             for jornada in {l["journey"] for l in linhas if l["persona"] == persona}:
                 passos = [l for l in linhas if l["persona"] == persona and l["journey"] == jornada]
                 self.assertGreater(len(passos), 1, f"{persona} · {jornada} tem um passo só")
+
+
+class TheSixNamedIntegrationsAreCoveredAndInertTests(unittest.TestCase):
+    """Gate 7 do pacote: Stripe, SMTP, S3, ClamAV, OIDC e APIs governamentais.
+
+    O pacote de execução nomeia seis integrações. A matriz prova que existem e têm teste de
+    contrato; o que FALTA provar é que estão DESLIGADAS — porque uma integração que sai do pacote
+    apontando para um fornecedor real cobra dinheiro, manda e-mail e grava arquivo em nome de alguém,
+    e ninguém pediu. Os cinco interruptores de provedor são a trava, e aqui se confere o valor de
+    fábrica de cada um.
+    """
+
+    #: Interruptor → valor inerte de fábrica, e o que ele desliga.
+    INERTES: tuple[tuple[str, str, str], ...] = (
+        ("mail_provider", "console", "e-mail vai para o log, não para a caixa de ninguém"),
+        ("storage_provider", "local", "arquivo fica em disco local, nenhum bucket de terceiro"),
+        ("antivirus_provider", "none", "sem ClamAV configurado; o download de não escaneado é "
+                                       "governado por allow_unscanned_downloads"),
+        ("billing_provider", "none", "nenhuma cobrança real é possível"),
+        ("ai_provider", "local", "nenhuma chamada a modelo de terceiro"),
+    )
+
+    def test_the_pack_names_six_integrations_and_the_matrix_covers_all_six(self):
+        linhas = _linhas("INTEGRATION_HOMOLOGATION_MATRIX.csv")
+        for chave, nome in (("stripe", "Stripe"), ("smtp", "SMTP"), ("s3", "S3"),
+                            ("clamav", "ClamAV"), ("oidc", "OIDC"),
+                            ("government", "APIs governamentais")):
+            with self.subTest(nome):
+                casos = [r for r in linhas if chave in r["provider"]]
+                self.assertTrue(casos, f"{nome} não aparece na matriz de homologação")
+                for r in casos:
+                    self.assertEqual(r["contract_test"], "sim",
+                                     f"{r['provider']} sem teste de contrato")
+                    self.assertIn("ausentes", r["credentials"],
+                                  f"{r['provider']} declara credencial presente")
+
+    def test_every_provider_switch_ships_inert(self):
+        """Lê o PADRÃO da dataclass, não `load_settings()`: o que importa é o valor de fábrica, e
+        exigir um banco configurado para conferir isso seria conferir o ambiente, não o produto."""
+        from impacto.config import Settings
+        campos = Settings.__dataclass_fields__
+        for interruptor, inerte, efeito in self.INERTES:
+            with self.subTest(interruptor):
+                self.assertIn(interruptor, campos, f"{interruptor} não existe mais em Settings")
+                self.assertEqual(campos[interruptor].default, inerte,
+                                 f"{interruptor} embarca como {campos[interruptor].default!r} e não "
+                                 f"como {inerte!r}; efeito do valor inerte: {efeito}")
+
+    def test_no_credential_variable_has_a_value_in_the_repository(self):
+        """A regra permanente: nenhuma senha, chave, token ou segredo em entregável.
+
+        `scripts/secrets_scan.py` já varre o repositório inteiro; aqui a conferência é dirigida às
+        variáveis que ATIVARIAM cada integração — é o caminho mais curto entre um descuido e uma
+        cobrança real no cartão de alguém.
+        """
+        from impacto.config import Settings
+        campos = Settings.__dataclass_fields__
+        # `access_token_ttl` e `refresh_token_ttl` contêm "token" e NÃO são credenciais: são
+        # tempos de vida, e têm valor de fábrica por obrigação. A primeira versão desta conferência
+        # as acusou — o nome do campo não diz o que ele é, e casar por substring solta mede a
+        # palavra em vez da coisa.
+        sensiveis = [n for n in campos
+                     if any(m in n for m in ("secret", "token", "key", "password", "credential"))
+                     and not n.endswith(("_ttl", "_seconds", "_minutes", "_days", "_rotation"))]
+        self.assertTrue(sensiveis, "nenhum campo sensível encontrado: a conferência mediria nada")
+        for nome in sensiveis:
+            with self.subTest(nome):
+                padrao = campos[nome].default
+                self.assertIn(padrao, (None, "", 0, False),
+                              f"{nome} embarca com valor de fábrica {padrao!r}")

@@ -14,7 +14,7 @@ import os
 import time
 import unittest
 
-from tests.support import Client, grant_premium, new_account, owner_conn, server
+from tests.support import PASSWORD, Client, grant_premium, new_account, owner_conn, server
 
 # O volume sintético vive no MESMO banco de teste do processo. Rodar junto com a suíte funcional mudaria o resultado
 # de testes que dependem de ranking e de listagem (foi o que aconteceu: ordenação de soluções e página de documentos).
@@ -52,6 +52,19 @@ class VolumeTests(unittest.TestCase):
         cls._build_volume(cls.own, cls.osc.org_id, cls.osc.user["id"])
         cls.build_s = time.perf_counter() - t0
         cls.own.run("ANALYZE")
+        # A SESSÃO EXPIRA DURANTE A PRÓPRIA PREPARAÇÃO, em escala cheia.
+        #
+        # `access_token_ttl` é 900 s e a construção do volume cheio leva ~1.047 s: as sessões criadas
+        # acima morrem antes da primeira medição, e TODO teste desta classe devolvia 401. Rodando com
+        # `PERF=1` (escala reduzida, volume em 1,6 s) isso nunca aparecia — foi a primeira execução
+        # com `PERF_FULL=1` desta rodada que expôs 10 falhas e 1 erro, nenhuma de desempenho.
+        #
+        # Renovar aqui é o lugar certo: o que está sob medição é a CONSULTA sob volume, não a
+        # duração da sessão (que tem suíte própria em `test_v0230_session_hardening.py`). Aumentar o
+        # TTL para o teste passar seria mudar o produto para acomodar o arranjo.
+        for cliente in (cls.osc, cls.company):
+            r = cliente.login(cliente.email, PASSWORD)
+            assert r.status == 200, f"renovação de sessão falhou depois do volume: {r.body}"
 
     @staticmethod
     def _build_volume(c, own_org: str, own_user: str) -> None:

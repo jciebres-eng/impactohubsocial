@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T09:03:01+00:00",
-  "files_total": 1779,
-  "size_bytes_total": 31690731,
+  "generated_at": "2026-10-07T12:40:08+00:00",
+  "files_total": 1802,
+  "size_bytes_total": 32243648,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -31,11 +31,11 @@
     },
     "documentação da raiz": {
       "files": 150,
-      "size_bytes": 1634616
+      "size_bytes": 1637542
     },
     "documentação técnica": {
-      "files": 26,
-      "size_bytes": 1366349
+      "files": 37,
+      "size_bytes": 1750002
     },
     "documento legal": {
       "files": 11,
@@ -51,7 +51,7 @@
     },
     "frontend": {
       "files": 10,
-      "size_bytes": 10402
+      "size_bytes": 10408
     },
     "frontend: build": {
       "files": 17,
@@ -98,8 +98,8 @@
       "size_bytes": 181458
     },
     "operação": {
-      "files": 20,
-      "size_bytes": 129513
+      "files": 25,
+      "size_bytes": 180901
     },
     "raiz do projeto": {
       "files": 3,
@@ -114,8 +114,8 @@
       "size_bytes": 442022
     },
     "teste": {
-      "files": 98,
-      "size_bytes": 1961382
+      "files": 105,
+      "size_bytes": 2076326
     }
   },
   "files": [
@@ -217,8 +217,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "7310b70942a2475eca894591dc47123f61fb0000a08c5a4c72ef38f4802c43b8",
-      "size_bytes": 116753,
+      "sha256": "4d34946ef68c2b9c8585d5e57debc2a3a4ba71ebedd556081c19fc874ff87f42",
+      "size_bytes": 119679,
       "category": "documentação da raiz"
     },
     {
@@ -445,7 +445,7 @@
     },
     {
       "file": "FINAL_TRACEABILITY_REPORT.md",
-      "sha256": "10112139781797280f2506ac3ebd78dff07a4e70341e63f08ab70e3e82f72dbe",
+      "sha256": "9d62f6502f8217cdd08a9b697381aa1db636cb3caee208c82b642634565fffdb",
       "size_bytes": 18479,
       "category": "documentação da raiz"
     },
@@ -2899,7 +2899,7 @@
     },
     {
       "file": "backend/pyproject.toml",
-      "sha256": "03136db52d2170c477fe5d31df47194b583ddbf0e51a5ef9e65e79588af8fde5",
+      "sha256": "4e0648ddb1e752e4dc64ca867ed6ca5e8e7ae5de7df14ca9d0f85ec8cfa7e0d3",
       "size_bytes": 655,
       "category": "backend"
     },
@@ -2941,8 +2941,8 @@
     },
     {
       "file": "backend/tests/support.py",
-      "sha256": "605e5dfeb4767310d0e59d4b46ad5ffc853c68acf70cbedc441f2ea321a8408b",
-      "size_bytes": 23081,
+      "sha256": "b917080b909965b665a6211cbf5bdfab752960211c0844ac149a1ed561122870",
+      "size_bytes": 23709,
       "category": "teste"
     },
     {
@@ -3030,6 +3030,12 @@
       "category": "teste"
     },
     {
+      "file": "backend/tests/test_e2e_v0230_moderation_journey.py",
+      "sha256": "ecea09daad342d8bdbf3939548647d9bc90621a1e08bcc664a94a8b84cb8c1ec",
+      "size_bytes": 15126,
+      "category": "teste"
+    },
+    {
       "file": "backend/tests/test_e2e_v080.py",
       "sha256": "69ddec9a5c09a25bb7d6ae8a8011bfa338f6989543f777429ba22a5005243089",
       "size_bytes": 4994,
@@ -3061,8 +3067,8 @@
     },
     {
       "file": "backend/tests/test_security_tenancy.py",
-      "sha256": "6771342a1d787ae28ba8807fd15d8266dacbb17204fc157666163e7315118941",
-      "size_bytes": 14168,
+      "sha256": "0d06f1c32b581e53c0cd240e11b6132cd542d0c32c864f7ece202521bc80c5cd",
+      "size_bytes": 15198,
       "category": "teste"
     },
     {
@@ -3103,8 +3109,8 @@
     },
     {
       "file": "backend/tests/test_v0130_integrations.py",
-      "sha256": "4e3832451ded9b46bd1f519ce8b76a22147b721cbd77aed06f0bbb7ab4b659f6",
-      "size_bytes": 83244,
+      "sha256": "4e8bbab8e88cd7639b5a41495721a196a32eecddc77a613c14b99b5e92494bf8",
+      "size_bytes": 83750,
       "category": "teste"
     },
     {
@@ -3451,14 +3457,38 @@
     },
     {
       "file": "backend/tests/test_v0230_audit_engine.py",
-      "sha256": "75c7d1c66c262c1db15b3cce7ed50e3f6ac62a398c19b67040c8d6657b35f93d",
-      "size_bytes": 32130,
+      "sha256": "2da06830e12a818e48341c90337cc1a1a6ee4bb8e87ae838db323bcc7ad9c20f",
+      "size_bytes": 34121,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_authorization_matrix.py",
+      "sha256": "fafcf8e6c7b9c4b36d562214cf07b6279fbd73567a182cbcc822023f54de7671",
+      "size_bytes": 19489,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_data_infra_gate.py",
+      "sha256": "464310fd8f78e63e7f6dfa9d86a1818b28106aa77cd5f0597dd81c29e9f822cd",
+      "size_bytes": 13673,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_execution_matrices.py",
+      "sha256": "3211f0a6facd155704d36da1cb0e1322311b9b77ee292207d7ea755f11a88be7",
+      "size_bytes": 15346,
       "category": "teste"
     },
     {
       "file": "backend/tests/test_v0230_frontend.py",
       "sha256": "3e4412fa3f66734f09c0c5b313bfec09454f9e5de75131ff529c218e1c515950",
       "size_bytes": 14702,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_frontend_gate.py",
+      "sha256": "997a6bb88709ff0a05916d92f47e1f29b584563c89cf3b26e63bbe90aace1371",
+      "size_bytes": 12862,
       "category": "teste"
     },
     {
@@ -3477,6 +3507,18 @@
       "file": "backend/tests/test_v0230_provenance.py",
       "sha256": "faebe36bcbea3cb073fa1a4c996bdd6328a2418c25b8dece1243b56a681ccc9f",
       "size_bytes": 30928,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_release_gate.py",
+      "sha256": "ad4fc5d107e8014116aed81cecaa867a593e2015e2b7ef7559a78d9ab19b6bc1",
+      "size_bytes": 8452,
+      "category": "teste"
+    },
+    {
+      "file": "backend/tests/test_v0230_security_gate.py",
+      "sha256": "1575a3966a4adbbcf759870252b9151eb46714072cd8adc31aaa0f7d3ba27292",
+      "size_bytes": 25841,
       "category": "teste"
     },
     {
@@ -3721,8 +3763,8 @@
     },
     {
       "file": "docs/OPERATIONS.md",
-      "sha256": "27381b7a8264a7bde61c152685277b1284b99cd7bb17d70e3c4591d0f93700a6",
-      "size_bytes": 2488,
+      "sha256": "34c12e04f3daf529f2f8125a3953703b1908edbbebc293a55e919fd80ae7f694",
+      "size_bytes": 6133,
       "category": "documentação técnica"
     },
     {
@@ -3970,6 +4012,72 @@
       "sha256": "475b0d7c2a488be47ce7b9328433846cc8b6df0e78f6e84d6f05dfc266dc13b3",
       "size_bytes": 5927,
       "category": "evidência de execução"
+    },
+    {
+      "file": "docs/execution/API_AUTHORIZATION_MATRIX.csv",
+      "sha256": "24bbfaf17c1bd45be30c9aa550ac3497b252cbe387ccd538d33074eb7ef90d06",
+      "size_bytes": 264454,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/BLOCKERS.md",
+      "sha256": "a1b10b85aecb7e2d4cdcb1adde761e5fd4c4af37184cf7bf4f7bb529228af456",
+      "size_bytes": 6257,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/CHANGELOG_v0.23.0.md",
+      "sha256": "db146176a75105f43611e5810aac4867041dd8f138ff608c23064bbb6243f729",
+      "size_bytes": 18051,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/DATA_INFRA_GATE.md",
+      "sha256": "c7e774e30ee07724018e29a04ad4179423e29c50837425a805fc115b8a51ffa6",
+      "size_bytes": 8775,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/ENGINE_VALIDATION_MATRIX.csv",
+      "sha256": "0e2d82ac133ba85c0ae42b55c07bc135dc4ecb6ece545cf26180d6ad0177aa8a",
+      "size_bytes": 25530,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/FRONTEND_GATE.md",
+      "sha256": "0e87a056d279d02de5220e4c024ec0d9a7a2df0a78702e10157a380df18830f6",
+      "size_bytes": 7163,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/IMPLEMENTATION_LOG.md",
+      "sha256": "5019537ee83d1c5aa4f90ccf69ed5eb5a7e4203d317372ca657a0576fb88057a",
+      "size_bytes": 8081,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/INTEGRATION_HOMOLOGATION_MATRIX.csv",
+      "sha256": "4e24971b42857be92a63dfce2a2a5d73df0bc81c1c5f9186501168f719103bce",
+      "size_bytes": 7618,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/MASTER_EXECUTION_STATUS.md",
+      "sha256": "a13a657fde882c98a3a69ffac7505b057563dd249163a970474f97635ef98ce1",
+      "size_bytes": 4580,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/PERSONA_E2E_MATRIX.csv",
+      "sha256": "1edaa5a8c222240ffbadfc1084f683ac5e74dd7db7f169965c806fe90c604077",
+      "size_bytes": 21649,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/SECURITY_GATE.md",
+      "sha256": "997877bc8b2bb315580b371354f359a98a8acad8dfbbd7c9e9d203aca430bf1b",
+      "size_bytes": 7850,
+      "category": "documentação técnica"
     },
     {
       "file": "docs/legal/B2B.md",
@@ -10170,9 +10278,33 @@
       "category": "operação"
     },
     {
+      "file": "scripts/make_authorization_matrix.py",
+      "sha256": "305438b839e6a575989056f97722f44abd505b1b4c9badb54a17c6ef05842ebb",
+      "size_bytes": 7773,
+      "category": "operação"
+    },
+    {
       "file": "scripts/make_engine_coverage.py",
       "sha256": "7463938a2a5b10f596c3a08fcfe11c1ab22f30727dfcab51e14f11d13e72911f",
       "size_bytes": 1037,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/make_engine_matrix.py",
+      "sha256": "86c1cece4aab58e72a6137c7abb071fadd45895d525babdef0c39f69a50459d3",
+      "size_bytes": 9594,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/make_integration_matrix.py",
+      "sha256": "57ae429b85118841b108d9045ed89a6c6f04af5850cfd44fccab3b8ba714e3dc",
+      "size_bytes": 10268,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/make_persona_matrix.py",
+      "sha256": "dee382800cd5ab3ce0f21dc0ed5f4716cce075599f9fcd4f87381170de79b547",
+      "size_bytes": 13882,
       "category": "operação"
     },
     {
@@ -10203,6 +10335,12 @@
       "file": "scripts/restore_test.sh",
       "sha256": "f445ee6c2adf05077253bde9f14291284f0685bc47c8b641c3fb26f5f62c2541",
       "size_bytes": 5999,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/secrets_scan.py",
+      "sha256": "2dfe6a723fceb9d567956515c7ff6bc8e15bf4fa1ececa21d7414335d38b9abf",
+      "size_bytes": 9871,
       "category": "operação"
     },
     {
@@ -10255,7 +10393,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "3c8fae08a900430221b2d458f5b9c2564f6783031e58b420e3d2219798ce4759",
+      "sha256": "bff805344187643c7b0f46a1a82c72740a0da1b8729dcc27e10ecad4f0866995",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -10351,8 +10489,8 @@
     },
     {
       "file": "web/package.json",
-      "sha256": "36053ffd5b8e186679f096608d5f38f9da4ed0f03b8d61c2c3364e8c0a292d56",
-      "size_bytes": 830,
+      "sha256": "f17e8f66ab3efcfdc0169e88734e9627a9b51cd964882e7f2486ee7c02fc63e5",
+      "size_bytes": 836,
       "category": "frontend"
     },
     {

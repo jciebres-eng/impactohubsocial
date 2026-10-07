@@ -3,6 +3,48 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 
 ## [0.23.0] — 2026-10-07
 
+### Rodada de conclusão da auditoria (pacote de execução, 11 portões)
+
+Uma auditoria externa foi convertida em backlog de engenharia com 11 portões e 4 matrizes
+obrigatórias. Todos os portões foram percorridos; o que não pôde ser executado está `BLOCKED` com
+causa escrita, nunca mascarado como `PASS`.
+
+**Divergência de versão, real e corrigida.** `backend/pyproject.toml` e `web/package.json`
+declaravam `0.14.0` enquanto `VERSION` dizia `0.23.0`. O runtime lê `VERSION`, então o produto
+funcionava e os dois arquivos ficaram parados por nove versões. Corrigidos, com teste exigindo que os
+quatro declarantes concordem.
+
+**Quatro matrizes, geradas do produto e travadas contra deriva.** 888 operações de API (lidas do
+ROTEADOR, não do OpenAPI, que é derivado), 42 motores, 14 integrações, 49 passos de persona. Cada uma
+é regerada em diretório temporário e comparada byte a byte com a versionada — um CSV versionado sem
+essa trava é uma fotografia que continua parecendo completa no dia em que alguém adiciona uma rota.
+
+**A matriz de integrações parou de ler o banco.** `maturity` é promovível pela administração, e um
+teste promove `totvs` a `homologated` no meio da suíte. Uma matriz gerada naquele instante declararia
+homologação real de um provedor jamais homologado. Passa a ler o catálogo embarcado, com teste
+exigindo que nada embarque acima de `contract_tested`.
+
+**Duas travessias novas**, pelo que a matriz de personas mostrou faltar: denúncia → análise →
+contraditório → manifestação → conclusão → medida → recurso → julgamento, e o incidente do
+interruptor de emergência. Cada regra já estava provada isolada; o CAMINHO nunca era percorrido.
+
+**Segurança: 9 de 10 executados.** 165 testes. SSRF recusa 22 grafias do mesmo destino interno e a
+isenção de loopback é conferida morrendo em produção; CRLF testado por socket cru; injeção de SQL
+provada pela carga que volta IDÊNTICA. Varredura de segredo própria (gitleaks ausente) **com controle
+negativo**. SCA **não executado** — nenhuma base de vulnerabilidade é alcançável do ambiente.
+
+**Dados e infraestrutura, executados do zero** contra PostgreSQL 16.15: 62 migrações, 322 tabelas,
+321 com RLS, 667 políticas, 0 com `FORCE RLS`; backup, restauração em banco limpo com verificação
+completa, e controle negativo com dump adulterado em um byte. `/readyz` passa a ter os dois ramos de
+503 testados — o caminho feliz era o único coberto.
+
+**Quatro testes que vazavam estado entre arquivos** foram corrigidos sem serem enfraquecidos: três
+forjam cadeias de hash para provar detecção e agora restauram o valor original.
+
+**O que esta rodada NÃO afirma:** nenhuma homologação de integração, nenhuma conformidade WCAG 2.2 AA
+plena, nenhum teste de intrusão, nenhum SCA, e **nenhuma garantia de inviolabilidade** — nenhum
+sistema conectado à internet pode recebê-la.
+
 ### O que esta rodada fez, e o que ela recusou fazer
 
 Quatro prompts mestres pediram: camada de IA transversal (170 seções), motor de auditoria e

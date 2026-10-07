@@ -1,7 +1,7 @@
 # Relatório final — v0.23.0 · Rastreabilidade, proveniência, governança de IA e emergência
 
 **Data:** 7 de outubro de 2026 · **Versão:** 0.23.0 · **Pacote:** `IMPACTO_v0.23.0_TRACEABILITY.zip`
-**sha256:** `dd0e46928b8b023f07b7c4874932de5fa313813251e980f4b557c068d1d63823`
+**sha256:** `bfc4d3c23c219d4fbd1bfaf0f5d5c2d12feccf24faf38db3d3bec2106ff813e6`
 
 ---
 
@@ -277,8 +277,8 @@ que pareciam funcionar:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `IMPACTO_v0.23.0_TRACEABILITY.zip` | 1 779 arquivos · 10,49 MB · manifesto verificado |
-| `IMPACTO_v0.23.0_TRACEABILITY.json` | manifesto de versão: 1 778 arquivos em 28 categorias |
+| `IMPACTO_v0.23.0_TRACEABILITY.zip` | 1 780 arquivos · 10,50 MB · manifesto verificado |
+| `IMPACTO_v0.23.0_TRACEABILITY.json` | manifesto de versão: 1 779 arquivos em 28 categorias |
 | `AUDIT_ENGINE.md` | motor de auditoria, lista de 28 itens, o que não está implementado |
 | `PROVENANCE_ENGINE.md` | proveniência, integridade relacional, máquina de estados |
 | `AI_FINAL_AUDIT.md` | os 11 achados, o implementado, e §3 com as recusas |
@@ -289,7 +289,7 @@ que pareciam funcionar:
 
 Conferências do pacote: **nenhum ZIP dentro de ZIP** · **nenhum `.env`, `.pem`, `.key` ou chave
 privada** · **nenhum `node_modules`** · manifesto `RELEASE_MANIFEST.sha256` verificado arquivo por
-arquivo (1 779 de 1 779).
+arquivo (1 780 de 1 780).
 
 ---
 

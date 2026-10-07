@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T08:59:50+00:00",
-  "files_total": 1778,
-  "size_bytes_total": 31672252,
+  "generated_at": "2026-10-07T09:03:01+00:00",
+  "files_total": 1779,
+  "size_bytes_total": 31690731,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -30,8 +30,8 @@
       "size_bytes": 199142
     },
     "documentação da raiz": {
-      "files": 149,
-      "size_bytes": 1616137
+      "files": 150,
+      "size_bytes": 1634616
     },
     "documentação técnica": {
       "files": 26,
@@ -441,6 +441,12 @@
       "file": "FINAL_TECHNICAL_RELEASE_REPORT.md",
       "sha256": "2545ece1dfb36b11dedba80e8b037b715c32719e2edd70e0ba023018723703c4",
       "size_bytes": 13422,
+      "category": "documentação da raiz"
+    },
+    {
+      "file": "FINAL_TRACEABILITY_REPORT.md",
+      "sha256": "10112139781797280f2506ac3ebd78dff07a4e70341e63f08ab70e3e82f72dbe",
+      "size_bytes": 18479,
       "category": "documentação da raiz"
     },
     {

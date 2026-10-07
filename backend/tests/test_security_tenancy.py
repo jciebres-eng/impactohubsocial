@@ -239,10 +239,28 @@ class DatabaseRlsTests(unittest.TestCase):
         self.assertTrue(ok["valid"])
         self.assertGreaterEqual(ok["entries"], 2)
         # Ataque com privilégio de DBA: desliga o trigger e altera o payload
-        sql = (f"ALTER TABLE ledger_entries DISABLE TRIGGER trg_append_only;"
-               f"UPDATE ledger_entries SET amount_cents = 1 WHERE project_id = '{self.pa}' AND seq = 1;"
-               f"ALTER TABLE ledger_entries ENABLE TRIGGER trg_append_only;")
-        subprocess.run(["psql", ADMIN_URL.rsplit("/", 1)[0] + "/" + DB_NAME, "-v", "ON_ERROR_STOP=1", "-q", "-c", sql], check=True, capture_output=True)
+        dsn = ADMIN_URL.rsplit("/", 1)[0] + "/" + DB_NAME
+
+        def psql(sql: str):
+            subprocess.run(["psql", dsn, "-v", "ON_ERROR_STOP=1", "-q", "-c", sql],
+                           check=True, capture_output=True)
+
+        # A FORJA PRECISA SER DESFEITA. `ledger_verify` roda sobre TODOS os projetos no portão de
+        # dados (`test_v0230_data_infra_gate.py`): um ledger forjado e deixado para trás faz um teste
+        # de OUTRO arquivo reprovar com um defeito que não existe — foi o que aconteceu na primeira
+        # execução completa desta rodada. Restaurar o valor original restaura o hash, porque o hash é
+        # calculado sobre o conteúdo.
+        with self.ctx(self.a) as c:
+            original = c.scalar("SELECT amount_cents FROM ledger_entries"
+                                " WHERE project_id = $1 AND seq = 1", self.pa)
+        self.addCleanup(lambda: psql(
+            "ALTER TABLE ledger_entries DISABLE TRIGGER trg_append_only;"
+            f"UPDATE ledger_entries SET amount_cents = {int(original)}"
+            f" WHERE project_id = '{self.pa}' AND seq = 1;"
+            "ALTER TABLE ledger_entries ENABLE TRIGGER trg_append_only;"))
+        psql(f"ALTER TABLE ledger_entries DISABLE TRIGGER trg_append_only;"
+             f"UPDATE ledger_entries SET amount_cents = 1 WHERE project_id = '{self.pa}' AND seq = 1;"
+             f"ALTER TABLE ledger_entries ENABLE TRIGGER trg_append_only;")
         with self.ctx(self.a) as c:
             bad = c.one("SELECT * FROM ledger_verify($1)", self.pa)
         self.assertFalse(bad["valid"])

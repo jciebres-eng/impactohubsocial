@@ -423,8 +423,8 @@ class TheSecretsScanRunsAndFindsNothingTests(unittest.TestCase):
         plantado = ROOT / "backend" / "impacto" / "_controle_negativo_da_varredura.py"
         # As amostras são MONTADAS em pedaços, de propósito. Escritas inteiras, elas seriam
         # segredos literais DENTRO deste arquivo — e a varredura, fazendo seu trabalho, acusaria o
-        # próprio teste que a verifica. Isentar este arquivo seria a saída errada: abriria um buraco
-        # permanente num teste de segurança. A proteção de push do GitHub recusa o literal também.
+        # próprio teste que a verifica. Foi o que aconteceu na primeira execução completa. Isentar
+        # este arquivo seria a saída errada: abriria um buraco permanente num teste de segurança.
         amostras = (
             ("AKIA" + "2J4QRSTUVWXYZ7BC", "chave de acesso da AWS"),
             ("ghp" + "_aB3dEfGhIjKlMnOpQrStUvWxYz0123456789", "token do GitHub"),
@@ -435,7 +435,12 @@ class TheSecretsScanRunsAndFindsNothingTests(unittest.TestCase):
 
         def limpar():
             plantado.unlink(missing_ok=True)
-            subprocess.run(["git", "reset", "-q", str(plantado)], cwd=ROOT, capture_output=True)
+            # `git rm --cached`, e não `git reset`: o arquivo entrou no índice por `git add -N`
+            # (intenção de adicionar) e foi removido do disco, e `git reset` deixa a entrada como
+            # " D" — a árvore fica suja e o Gate 10 exige Git limpo. Descoberto depois da primeira
+            # execução completa, que deixou o repositório com uma remoção pendente.
+            subprocess.run(["git", "rm", "--cached", "--ignore-unmatch", "-q", str(plantado)],
+                           cwd=ROOT, capture_output=True)
         self.addCleanup(limpar)
 
         plantado.write_text(conteudo + "\n", encoding="utf-8")

@@ -178,8 +178,26 @@ class BeforeAndAfterSayFromWhatToWhatTests(unittest.TestCase):
             record(conn, org_id=c.org_id, actor=None, action="teste.protegido",
                    object_type="teste", object_id="2",
                    before={"valor": 1}, after={"valor": 2})
+        # A FORJA PRECISA SER DESFEITA, e não é zelo: `audit_verify` roda sobre TODAS as
+        # organizações no portão de dados (`test_v0230_data_infra_gate.py`). Uma cadeia forjada e
+        # deixada para trás faz um teste de OUTRO arquivo reprovar com um defeito que não existe —
+        # exatamente o que aconteceu na primeira execução completa desta rodada. Restaurar o
+        # conteúdo original restaura o hash, porque o hash é calculado sobre o conteúdo.
+        def restaura(original):
+            conn = owner_conn()
+            try:
+                conn.run("ALTER TABLE audit_events DISABLE TRIGGER trg_append_only")
+                conn.run("UPDATE audit_events SET after_state = $2::jsonb"
+                         " WHERE action = 'teste.protegido' AND org_id = $1", c.org_id, original)
+                conn.run("ALTER TABLE audit_events ENABLE TRIGGER trg_append_only")
+            finally:
+                conn.close()
+
         conn = owner_conn()
         try:
+            antes = conn.scalar("SELECT after_state::text FROM audit_events"
+                                " WHERE action = 'teste.protegido' AND org_id = $1", c.org_id)
+            self.addCleanup(restaura, antes)
             conn.run("ALTER TABLE audit_events DISABLE TRIGGER trg_append_only")
             conn.run("UPDATE audit_events SET after_state = '{\"valor\": 999}'::jsonb"
                      " WHERE action = 'teste.protegido' AND org_id = $1", c.org_id)
@@ -326,6 +344,19 @@ class TheCausalTreeAnswersWhatLedToWhatTests(unittest.TestCase):
         try:
             # Aponta um filho para fora da correlação — o que o gatilho recusa, e é por isso que
             # a simulação precisa desligá-lo. É exatamente o cenário "alteração direta no banco".
+            # `correlation_id` entra no material do hash, então esta simulação quebra a cadeia da
+            # organização. Ela precisa ser desfeita: `audit_verify` roda sobre TODAS as organizações
+            # no portão de dados, e uma cadeia forjada deixada para trás faz um teste de OUTRO
+            # arquivo reprovar com um defeito que não existe.
+            def restaura():
+                c2 = owner_conn()
+                try:
+                    c2.run("ALTER TABLE audit_events DISABLE TRIGGER trg_append_only")
+                    c2.run("UPDATE audit_events SET correlation_id = $2 WHERE id = $1", raiz, rastro)
+                    c2.run("ALTER TABLE audit_events ENABLE TRIGGER trg_append_only")
+                finally:
+                    c2.close()
+            self.addCleanup(restaura)
             conn.run("ALTER TABLE audit_events DISABLE TRIGGER trg_append_only")
             conn.run("UPDATE audit_events SET correlation_id = 'outro-rastro'"
                      " WHERE id = $1", raiz)

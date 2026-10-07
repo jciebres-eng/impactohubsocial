@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T13:50:46+00:00",
-  "files_total": 1805,
-  "size_bytes_total": 32277327,
+  "generated_at": "2026-10-07T14:38:35+00:00",
+  "files_total": 1812,
+  "size_bytes_total": 32436192,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -34,8 +34,8 @@
       "size_bytes": 1637542
     },
     "documentação técnica": {
-      "files": 40,
-      "size_bytes": 1782680
+      "files": 43,
+      "size_bytes": 1906318
     },
     "documento legal": {
       "files": 11,
@@ -50,8 +50,8 @@
       "size_bytes": 844558
     },
     "frontend": {
-      "files": 10,
-      "size_bytes": 10408
+      "files": 11,
+      "size_bytes": 12328
     },
     "frontend: build": {
       "files": 17,
@@ -98,8 +98,8 @@
       "size_bytes": 181458
     },
     "operação": {
-      "files": 25,
-      "size_bytes": 180901
+      "files": 27,
+      "size_bytes": 194553
     },
     "raiz do projeto": {
       "files": 3,
@@ -114,8 +114,8 @@
       "size_bytes": 442022
     },
     "teste": {
-      "files": 105,
-      "size_bytes": 2077327
+      "files": 106,
+      "size_bytes": 2096982
     }
   },
   "files": [
@@ -3456,6 +3456,12 @@
       "category": "teste"
     },
     {
+      "file": "backend/tests/test_v0230_api_sweep.py",
+      "sha256": "0ce2cd5ccc961846b3c5432962a474a6b9ee8e41a077e0aa7b2d99562a6cdea9",
+      "size_bytes": 16813,
+      "category": "teste"
+    },
+    {
       "file": "backend/tests/test_v0230_audit_engine.py",
       "sha256": "2da06830e12a818e48341c90337cc1a1a6ee4bb8e87ae838db323bcc7ad9c20f",
       "size_bytes": 34121,
@@ -3487,8 +3493,8 @@
     },
     {
       "file": "backend/tests/test_v0230_frontend_gate.py",
-      "sha256": "997a6bb88709ff0a05916d92f47e1f29b584563c89cf3b26e63bbe90aace1371",
-      "size_bytes": 12862,
+      "sha256": "49554d4ad72c00d13540f7722eb700c4f1bfc4c0d02932db6d2a1e112f7538fd",
+      "size_bytes": 15704,
       "category": "teste"
     },
     {
@@ -4015,14 +4021,14 @@
     },
     {
       "file": "docs/execution/API_AUTHORIZATION_MATRIX.csv",
-      "sha256": "24bbfaf17c1bd45be30c9aa550ac3497b252cbe387ccd538d33074eb7ef90d06",
-      "size_bytes": 264454,
+      "sha256": "cde803cee6b23ac38e5697e6ae0861c89dc83d1849fc872a1148a6fbf07ab80e",
+      "size_bytes": 290125,
       "category": "documentação técnica"
     },
     {
       "file": "docs/execution/BLOCKERS.md",
-      "sha256": "a1b10b85aecb7e2d4cdcb1adde761e5fd4c4af37184cf7bf4f7bb529228af456",
-      "size_bytes": 6257,
+      "sha256": "2a0ce320820ba92bdb010b508e5ebdc205863ded162b84e916abb2fb088b5b85",
+      "size_bytes": 7678,
       "category": "documentação técnica"
     },
     {
@@ -4045,20 +4051,26 @@
     },
     {
       "file": "docs/execution/FINAL_RELEASE_REPORT.md",
-      "sha256": "eb5c7be864998d375d1961f7a1c83cb229cf7c94d01f5b7e59fa7b280ab2f7d7",
-      "size_bytes": 15485,
+      "sha256": "9e0c4207a28381640ffd4cd80fa807d22741fc72d620e6a5ea241c346f385132",
+      "size_bytes": 20156,
       "category": "documentação técnica"
     },
     {
       "file": "docs/execution/FINAL_ZERO_PENDING_REPORT.md",
-      "sha256": "64dc92c8ce3be997f4cfdbd3bbbdd64752835b3cb45e5d9df5c4c18936a795ed",
-      "size_bytes": 7411,
+      "sha256": "f0315a47de9fb9a65c715360583cc08eaf45a2d1b599f8cde41c674947893538",
+      "size_bytes": 7684,
       "category": "documentação técnica"
     },
     {
       "file": "docs/execution/FRONTEND_GATE.md",
       "sha256": "0e87a056d279d02de5220e4c024ec0d9a7a2df0a78702e10157a380df18830f6",
       "size_bytes": 7163,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/GIT_EVIDENCE.md",
+      "sha256": "be9213a083b7ed842cfe65f0c0bd0853b432b8c9e1b215511b4bbd995e423e94",
+      "size_bytes": 7305,
       "category": "documentação técnica"
     },
     {
@@ -4075,8 +4087,8 @@
     },
     {
       "file": "docs/execution/MASTER_EXECUTION_STATUS.md",
-      "sha256": "a13a657fde882c98a3a69ffac7505b057563dd249163a970474f97635ef98ce1",
-      "size_bytes": 4580,
+      "sha256": "009c5b6ea7a63cb36a9ecc4614726c0baecabec84ade315ab2589b7efb1f5bf2",
+      "size_bytes": 4853,
       "category": "documentação técnica"
     },
     {
@@ -4093,8 +4105,20 @@
     },
     {
       "file": "docs/execution/TEST_EVIDENCE.md",
-      "sha256": "de6b46576595433c33f33f73e82a8d05aa6b2814b9b27e066b72386ea6b91b46",
-      "size_bytes": 8431,
+      "sha256": "732440e31d531ffc7b76fe5dcffe60cee3d5d047d95e535c3abb1252fc7549c5",
+      "size_bytes": 9207,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/api_sweep_layers.json",
+      "sha256": "daffc7241884067f01eb5d75c39bcdc5d9eec7c15578e3956d67b5a0ec4a1c37",
+      "size_bytes": 44629,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/api_sweep_observed.json",
+      "sha256": "d6284b744107e92a2018072df7a3c270693ad65b85b30f55a88a19456918bbdc",
+      "size_bytes": 38619,
       "category": "documentação técnica"
     },
     {
@@ -10297,8 +10321,8 @@
     },
     {
       "file": "scripts/make_authorization_matrix.py",
-      "sha256": "305438b839e6a575989056f97722f44abd505b1b4c9badb54a17c6ef05842ebb",
-      "size_bytes": 7773,
+      "sha256": "366f6b1d94bb90fcc2ae516e4654c8c6e75ca61b4d7419885482cc2142db1fe9",
+      "size_bytes": 10300,
       "category": "operação"
     },
     {
@@ -10333,8 +10357,8 @@
     },
     {
       "file": "scripts/make_release.py",
-      "sha256": "853cc81625f4ba67f470ce3efaa983e2f33754dddb7cdb991775767dfea583d5",
-      "size_bytes": 16645,
+      "sha256": "03c90b3d30426a9fb9b178ecb640cc04f9d27af128164b5b54d8373c30555105",
+      "size_bytes": 17735,
       "category": "operação"
     },
     {
@@ -10380,10 +10404,28 @@
       "category": "operação"
     },
     {
+      "file": "scripts/verify_package_against_git.py",
+      "sha256": "4f8119e70f8926ddf6f3b84267bd9d6f67fe231268424ac54f5264a50cd69d86",
+      "size_bytes": 4908,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/web_installed_tree.py",
+      "sha256": "79e0b9321d4b5e525f93303af60f6f39c08a508aab3e46f56b4dd918a1d097b6",
+      "size_bytes": 5127,
+      "category": "operação"
+    },
+    {
       "file": "scripts/weights_sensitivity.py",
       "sha256": "eeb3d309dec78a1d1569c6de5c5798b19befb35f96cae812a3872e745d0503e1",
       "size_bytes": 4995,
       "category": "operação"
+    },
+    {
+      "file": "web/INSTALLED_TREE.json",
+      "sha256": "58365a311cfa748e50174db86436519afa94627b50237f7ded0617796fe39f1f",
+      "size_bytes": 1920,
+      "category": "frontend"
     },
     {
       "file": "web/build.mjs",

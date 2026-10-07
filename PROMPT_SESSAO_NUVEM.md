@@ -78,13 +78,19 @@ mentira.
 
 ## 6. Inventário de telas e os documentos que faltam
 
-232 entradas de rota em `web/src/app.tsx`. Gere a tabela: tela · rota · perfis que alcançam · estado
-(completa / parcial / sem backend) · testável.
+**FEITO na v0.23.1.** O número 232 escrito aqui estava errado: eram **218**, em três tabelas de rota
+(`PUBLIC` 9, `HELP` 30, `ROUTES` 179), confirmado por extrator, por `grep` e pela subtração dos itens
+de menu. A tabela está em `docs/execution/screen_inventory.json` (rota, componente, arquivo, tipos que
+alcançam, menu, alcance) e `docs/execution/screen_backend_map.json` (operações que cada componente
+chama, cruzadas com as 888 registradas). Painel navegável: `scripts/make_screen_panel.py`.
 
-**BLOQUEIO:** toda rota classificada, nenhuma inventada. Funcionalidade de backend sem interface,
-interface sem backend e botão sem implementação **identificados**, não escondidos.
+O que o cruzamento achou: 157 telas chamam operação registrada · 60 não chamam a API diretamente ·
+231 das 888 operações sem referência no front · **1 defeito real** (`/entrar` chama
+`GET /v1/meta/config`, que o backend não registra). Tudo travado por teste em
+`backend/tests/test_v0230_frontend_gate.py`.
 
-Depois escreva `DEMO.md`, `TESTER_GUIDE.md` e `TROUBLESHOOTING.md`. Se criar túnel para testadores
+`DEMO.md`, `TESTER_GUIDE.md` e `TROUBLESHOOTING.md` **já estão escritos** (v0.23.1), em `docs/`, com
+os números conferidos contra os JSON gerados por teste. Atualize-os se a publicação mudar algo. Se criar túnel para testadores
 externos, documente o ciclo (iniciar → URL → compartilhar → encerrar) e deixe claro que é ambiente de
 teste.
 
@@ -121,7 +127,7 @@ INSTALAÇÃO LIMPA:    ok | falhou — qual passo
 SCA:                 n vulnerabilidades · críticas/altas
 LOCKFILE:            gerado | não
 ACESSIBILIDADE:      pendências fechadas / mantidas
-TELAS INVENTARIADAS: n de 232
+TELAS INVENTARIADAS: 218 de 218 (feito na v0.23.1)
 REGRESSÃO:           n testes · falhas · erros
 ZIP + SHA256
 O QUE AINDA FALTA ANTES DE PRODUÇÃO

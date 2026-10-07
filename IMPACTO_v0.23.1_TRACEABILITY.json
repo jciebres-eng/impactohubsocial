@@ -1,9 +1,9 @@
 {
   "version": "0.23.1",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T17:49:46+00:00",
+  "generated_at": "2026-10-07T17:51:29+00:00",
   "files_total": 1980,
-  "size_bytes_total": 34864944,
+  "size_bytes_total": 34865649,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -31,11 +31,11 @@
     },
     "documentação da raiz": {
       "files": 151,
-      "size_bytes": 1647490
+      "size_bytes": 1648127
     },
     "documentação técnica": {
       "files": 52,
-      "size_bytes": 2187339
+      "size_bytes": 2187407
     },
     "documento legal": {
       "files": 11,
@@ -827,8 +827,8 @@
     },
     {
       "file": "PROMPT_SESSAO_NUVEM.md",
-      "sha256": "63e6c5365df1562cc7c4b3694588d404de472ceb3217c16f353c35b8391c6822",
-      "size_bytes": 6114,
+      "sha256": "487da6bbcd1b2b9475d4f85851f96074c7e0a1955bf7eb6f58ef95eabdf90bba",
+      "size_bytes": 6751,
       "category": "documentação da raiz"
     },
     {
@@ -4103,8 +4103,8 @@
     },
     {
       "file": "docs/execution/ESTADO_PARA_SESSAO_NUVEM.md",
-      "sha256": "04fe54429cd9a19f921f7d788cd5afde7190532b219b8233af95a922ec339484",
-      "size_bytes": 8942,
+      "sha256": "bb0aee1180173b4254df0506d732488d26f383ac4c4d721f1d17eee5f3f8d0e0",
+      "size_bytes": 9010,
       "category": "documentação técnica"
     },
     {

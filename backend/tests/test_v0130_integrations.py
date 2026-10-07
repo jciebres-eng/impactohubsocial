@@ -1199,4 +1199,14 @@ class SimulatedProductionFlow(unittest.TestCase):
         out = JOBS.integration_ops(server()["state"])
         self.assertEqual(out["status"], "ok", out)
         with db_system() as d:
-            self.assertTrue(d.scalar("SELECT count(*) FROM job_runs WHERE job = 'integration_ops'"))
+            # v0.22.0: a trilha é UMA (`ops_job_runs`) e passou a registrar duração e erro — a
+            # tabela antiga (`job_runs`) sabia apenas que a tarefa "rodou". O teste ficou mais
+            # exigente junto com a trilha: não basta existir a linha, ela tem de dizer quanto
+            # tempo levou e ter terminado.
+            execucao = d.one("SELECT status, duration_ms, finished_at, error FROM ops_job_runs"
+                             " WHERE job = 'integration_ops' ORDER BY id DESC LIMIT 1")
+            self.assertIsNotNone(execucao, "a execução do trabalhador não foi registrada")
+            self.assertEqual(execucao["status"], "ok")
+            self.assertIsNotNone(execucao["duration_ms"])
+            self.assertIsNotNone(execucao["finished_at"])
+            self.assertIsNone(execucao["error"])

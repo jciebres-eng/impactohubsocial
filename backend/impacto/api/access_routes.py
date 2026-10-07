@@ -39,8 +39,70 @@ def me_context(ctx: Ctx):
         # O painel que a pessoa deve receber é decidido AQUI, no servidor. Deixar o frontend
         # escolher faria a decisão existir em dois lugares, e um deles ficaria para trás.
         "dashboard": dashboard_for(ac),
+        # O MENU também. Até a v0.21.0 a barra lateral da administração era uma lista fixa no
+        # frontend, igual para toda a equipe: quem atendia chamado via "Cobrança por organização"
+        # e "Auditoria" no menu e levava 403 ao clicar. Menu que oferece o que a porta recusa é
+        # pior do que menu incompleto — ensina a pessoa a desconfiar da tela.
+        "menu": menu_for(ac),
         "step_up_window_seconds": 900,
     }
+
+
+# [caminho, rótulo, grupo, permissão exigida]. A permissão é a MESMA que a rota exige: é isso que
+# faz o menu não poder discordar da porta (conferido em test_v0220_internal_ui.py).
+STAFF_MENU: tuple[tuple[str, str, str, str | None], ...] = (
+    ("/controladoria", "Painel executivo", "Controladoria", "metrics.read"),
+    ("/controladoria/conciliacao", "Conciliação", "Controladoria", "finance.read"),
+    ("/aprovacoes", "Aprovações", "Controladoria", "finance.read"),
+    ("/financeiro", "Recebíveis e pagáveis", "Financeiro", "finance.read"),
+    ("/financeiro/despesas", "Despesas da plataforma", "Financeiro", "finance.read"),
+    ("/financeiro/instrucoes", "Instruções de pagamento", "Financeiro", "instruction.read"),
+    ("/admin/cobranca", "Cobrança por organização", "Financeiro", "billing.read"),
+    # FULL FREE 2026 existia desde a v0.21.0 com rota, serviço, banco e teste — e nenhuma tela.
+    # Quem concedia cortesia fazia por chamada de API; quem auditava não tinha onde olhar.
+    ("/financeiro/periodos-gratuitos", "Períodos gratuitos", "Financeiro", "free_period.write"),
+    ("/contabilidade", "Balancete e competência", "Contabilidade", "accounting.read"),
+    ("/contabilidade/plano-de-contas", "Plano de contas", "Contabilidade", "accounting.read"),
+    ("/tesouraria", "Caixa e patrimônio", "Tesouraria", "treasury.read"),
+    ("/administrativo/orcamento", "Orçamento", "Administrativo", "budget.read"),
+    ("/admin/fiscal", "Regras fiscais", "Fiscal", "fiscal.read"),
+    ("/operacoes", "Saúde do sistema", "Operações", "health.read"),
+    ("/operacoes/alertas", "Central de alertas", "Operações", "health.read"),
+    ("/admin/erros", "Erros", "Operações", "maintenance.read"),
+    ("/admin/risco", "Sinais de risco", "Operações", "maintenance.read"),
+    ("/admin/compliance", "Fila de compliance", "Compliance", "compliance.read"),
+    ("/admin/organizacoes", "Organizações", "Compliance", "admin.organizations.read"),
+    ("/auditoria", "Acesso privilegiado", "Auditoria", "security.audit.read"),
+    ("/admin/auditoria", "Trilha de auditoria", "Auditoria", "security.audit.read"),
+    ("/admin/chaves", "Chaves de cifragem", "Segurança", "security.keys.read"),
+    ("/admin/usuarios", "Usuários e papéis", "Segurança", "admin.users.read"),
+    ("/admin/permissoes", "Matriz de permissões", "Segurança", "admin.users.read"),
+    ("/admin/central/suporte", "Fila de suporte", "Suporte", "support.read"),
+    ("/admin/central", "Central de Conhecimento", "Conteúdo", "content.read"),
+    ("/admin/integracoes", "Integrações", "Operações", "integration.read"),
+)
+
+
+def menu_for(ac: ACCESS.AccessContext) -> list[dict]:
+    """O menu INTERNO que esta pessoa pode receber, agrupado, na ordem declarada.
+
+    Devolve vazio para quem não é da equipe: a ausência de menu interno é a resposta correta, e não
+    um menu vazio com títulos de grupo.
+    """
+    if not (ac.is_staff or ac.is_platform_admin):
+        return []
+    grupos: list[dict] = []
+    por_nome: dict[str, dict] = {}
+    for caminho, rotulo, grupo, permissao in STAFF_MENU:
+        if permissao and not ac.has_permission(permissao):
+            continue
+        g = por_nome.get(grupo)
+        if g is None:
+            g = {"group": grupo, "items": []}
+            por_nome[grupo] = g
+            grupos.append(g)
+        g["items"].append({"to": caminho, "label": rotulo, "permission": permissao})
+    return grupos
 
 
 def dashboard_for(ac: ACCESS.AccessContext) -> str:

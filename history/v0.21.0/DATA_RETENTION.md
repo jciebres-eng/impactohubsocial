@@ -4,7 +4,7 @@
 
 CLASSIFICAÇÃO DE RETENÇÃO. Para cada tabela com vínculo a organização ou a titular, diz o que acontece quando a conta é excluída e por quê. A origem da verdade é o banco: a classe declarada aqui é CONFERIDA contra a regra real da chave estrangeira por tests/test_v0190_lgpd_deletion.py. Declarar uma coisa e o banco fazer outra reprova.
 
-Conferido em 2026-10-07 · 192 vínculos a organização ou titular.
+Conferido em 2026-10-06 · 184 vínculos a organização ou titular.
 
 ## Classes
 
@@ -20,10 +20,10 @@ Conferido em 2026-10-07 · 192 vínculos a organização ou titular.
 
 | classe | vínculos |
 | --- | --- |
-| `anonymizable` | 21 |
-| `append_only` | 19 |
+| `anonymizable` | 20 |
+| `append_only` | 18 |
 | `audit_only` | 3 |
-| `deletable_with_parent` | 138 |
+| `deletable_with_parent` | 132 |
 | `retainable` | 11 |
 
 Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE ser deletable_with_parent (CASCADE). Uma coluna nova que não seja cascata reprova o teste: é exatamente assim que uma obrigação de guarda, ou um bloqueio de exclusão, entra sem ninguém decidir.
@@ -63,14 +63,12 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `partnership_requests.org_id` | `anonymizable` | `n` | Pedido de parceria envolve duas partes; a outra conserva o registro. |
 | `partnership_requests.user_id` | `anonymizable` | `n` | Idem. |
 | `price_change_notices.org_id` | `append_only` | `c` | Aviso de reajuste: prova de que a mudança foi comunicada. |
-| `privileged_access_log.user_id` | `anonymizable` | `n` | Trilha de acesso PRIVILEGIADO, inclusive de leitura. Precisa sobreviver à exclusão da conta de quem foi registrado: a pergunta de uma investigação é "quem olhou a receita na semana do vazamento?", e ela deixaria de ter resposta justamente quando a pessoa apagasse a própria conta. ON DELETE SET NULL mantém a linha e derruba o apontamento — o que já basta, porque a trilha também guarda os papéis usados, a rota e o momento. |
 | `professional_experiences.org_id` | `anonymizable` | `n` | Experiência declarada perde o vínculo com a organização encerrada. |
 | `professional_services.user_id` | `anonymizable` | `n` | Serviço anunciado perde o vínculo com o titular. |
 | `project_barriers.org_id` | `deletable_with_parent` | `c` | Barreira é atributo do contexto do projeto. |
 | `project_snapshots.org_id` | `append_only` | `c` | Retrato do projeto num instante; é o que sustenta comparação longitudinal. |
 | `project_transitions.org_id` | `append_only` | `c` | Transição de estado do projeto, com autor e data. |
 | `readiness_snapshots.org_id` | `append_only` | `c` | Retrato de prontidão: a série temporal é a informação. |
-| `report_responses.org_id` | `append_only` | `c` | Manifestação de quem foi denunciado. A tabela é append-only por gatilho (v0.20.0, migração 0038): o que a parte respondeu na apuração NÃO se apaga, porque é a prova de que ela teve direito de resposta. Se pudesse ser removida, a plataforma perderia exatamente o registro que a protege de ter decidido sem ouvir. |
 | `reputation_disputes.org_id` | `append_only` | `c` | Contestação acompanha a organização contestante. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui. |
 | `reputation_snapshots.org_id` | `append_only` | `c` | Retrato de reputação é derivado; sem a organização não tem sujeito. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui. |
 | `responsibility_assignments.org_id` | `append_only` | `c` | A designação é da organização, e a trilha é append-only: responsabilidade registrada não se apaga. |

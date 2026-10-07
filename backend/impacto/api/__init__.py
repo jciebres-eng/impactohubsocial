@@ -9,6 +9,8 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            "commercial_routes",
            # v0.22.0 — contexto de acesso, permissão granular, reautenticação
            "access_routes",
+           # v0.22.0 — operação interna: controladoria, financeiro, contabilidade, operações
+           "internal_routes",
            # v0.16.0 — camada de rede
            "network_core_routes", "network_hub_routes",
            # v0.17.0 — camada econômica

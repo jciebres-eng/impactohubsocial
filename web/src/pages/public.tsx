@@ -53,7 +53,10 @@ export function Login() {
   const [useRecovery, setUseRecovery] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const next = query.get("proximo") || "/";
+  // v0.22.0 — sem destino pedido, a entrada é o /portal, que RESOLVE o acesso no servidor
+  // (organização, perfil, função, plano, recursos, situação financeira) e encaminha ao painel
+  // certo. Antes, todo mundo caía em "/" e quem tinha mais de um vínculo tinha de se achar.
+  const next = query.get("proximo") || "/portal";
   const [sso, setSso] = useState(false);
   useEffect(() => { api.get("/v1/meta/config").then((c) => setSso(!!c.sso_enabled)).catch(() => {}); }, []);
 

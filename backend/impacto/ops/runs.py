@@ -21,7 +21,9 @@ def record(conn: Connection, job: str):
     este módulo existe para corrigir.
     """
     inicio = time.monotonic()
-    row = conn.one("INSERT INTO ops_job_runs(job, status) VALUES ($1,'skipped') RETURNING id", job)
+    # Abre como 'running': a execução em curso não é "pulada". Enquanto a linha ficar nesse estado
+    # sem `finished_at`, ela é exatamente o que parece — uma tarefa que começou e não terminou.
+    row = conn.one("INSERT INTO ops_job_runs(job, status) VALUES ($1,'running') RETURNING id", job)
     estado: dict = {"status": "skipped", "detail": {}, "error": None}
     try:
         yield estado

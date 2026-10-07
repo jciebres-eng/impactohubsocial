@@ -40,6 +40,10 @@ import * as PP from "./pages/publicprofile";
 import * as Terr from "./pages/territory";
 import * as Mod from "./pages/moderation";
 import * as IL from "./pages/impactlayer";
+// v0.22.0 — login inteligente e operação interna da plataforma
+import * as Portal from "./pages/portal";
+import * as Int from "./pages/internal";
+import { useAccess } from "./access";
 
 type R = [string, (p: Record<string, string>) => ReactNode, string[]?];
 
@@ -204,6 +208,29 @@ const ROUTES: R[] = [
   ["/conta/moderacao", () => <Mod.MyModeration />],
   ["/conta/denuncias", () => <Mod.MyReports />],
   ["/admin/medidas", () => <Mod.EnforcementAdmin />, ["platform"]],
+
+  // ------------------------------------------------------------- v0.22.0 — OPERAÇÃO INTERNA
+  // Sem a lista de `kinds`: quem entra aqui é decidido pela PERMISSÃO na rota da API, não pelo
+  // tipo da organização ativa. Alguém da controladoria pode ter a própria OSC como organização
+  // ativa e continuar sendo da controladoria; o tipo da organização nunca disse nada sobre isso.
+  ["/portal", () => <Portal.Portal />],
+  ["/organizacao/nova", () => <Org.CreateOrg />],
+  ["/controladoria", () => <Int.Controladoria />],
+  ["/controladoria/conciliacao", () => <Int.Conciliacao />],
+  ["/aprovacoes", () => <Int.Aprovacoes />],
+  ["/financeiro", () => <Int.Financeiro />],
+  ["/financeiro/despesas", () => <Int.Despesas />],
+  ["/financeiro/instrucoes", () => <Int.Instrucoes />],
+  ["/financeiro/periodos-gratuitos", () => <Int.PeriodosGratuitos />],
+  ["/contabilidade", () => <Int.Contabilidade />],
+  ["/contabilidade/plano-de-contas", () => <Int.PlanoDeContas />],
+  ["/tesouraria", () => <Int.Tesouraria />],
+  ["/administrativo/orcamento", () => <Int.Orcamento />],
+  ["/operacoes", () => <Int.Operacoes />],
+  ["/operacoes/alertas", () => <Int.Alertas />],
+  ["/auditoria", () => <Int.AcessoPrivilegiado />],
+  ["/admin/permissoes", () => <Int.MatrizPermissoes />],
+  ["/admin/integracoes", () => <Int.Integracoes />],
 ];
 
 
@@ -312,14 +339,30 @@ function NotHere({ notFound }: { notFound?: boolean }) {
 
 function Shell({ children }: { children: ReactNode }) {
   const { me, logout, reload } = useSession();
+  const { ctx } = useAccess();
   const { path } = useLocation();
   const [open, setOpen] = useState(false);
   const { run } = useAction();
   useEffect(() => setOpen(false), [path]);
   if (!me) return null;
   const kind = me.active_org?.kind || "osc";
-  const nav = NAV[kind] || NAV.osc;
   const active = (to: string) => (to === "/" ? path === "/" : path === to || path.startsWith(to + "/"));
+
+  // O MENU INTERNO VEM DO SERVIDOR (v0.22.0).
+  //
+  // Até a v0.21.0 `NAV.platform` era uma lista fixa aqui, idêntica para toda a equipe: quem
+  // atendia chamado via "Cobrança por organização", "Organizações" e "Auditoria" no menu e levava
+  // 403 ao clicar. A regra de acesso existia em dois lugares e um deles estava errado.
+  //
+  // Agora `GET /v1/me/context` devolve os grupos que esta pessoa pode receber, derivados da mesma
+  // matriz de permissões que a porta da API confere. O que não aparece aqui não passa lá.
+  const grupos = ctx?.menu || [];
+  const noMenuDoServidor = new Set(grupos.flatMap((g) => g.items.map((i) => i.to)));
+  // Sobra da administração: rotas que ainda exigem o booleano `is_platform_admin` e não têm
+  // permissão nomeada. Só quem tem o booleano as vê — porque é literalmente só quem as alcança.
+  const nav = kind === "platform"
+    ? (ctx?.staff.is_platform_admin ? NAV.platform.filter(([to]) => !noMenuDoServidor.has(to)) : [])
+    : (NAV[kind] || NAV.osc);
   return (
     <div className="shell">
       <a className="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -348,6 +391,16 @@ function Shell({ children }: { children: ReactNode }) {
             <li key={to}><Link to={to} className={active(to) ? "on" : ""} aria-current={active(to) ? "page" : undefined}>{label}</Link></li>
           ))}
         </ul>
+        {grupos.map((g) => (
+          <div className="rail-group" key={g.group}>
+            <span>{g.group}</span>
+            <ul>
+              {g.items.map((i) => (
+                <li key={i.to}><Link to={i.to} className={active(i.to) ? "on" : ""} aria-current={active(i.to) ? "page" : undefined}>{i.label}</Link></li>
+              ))}
+            </ul>
+          </div>
+        ))}
         <ul className="rail-foot">
           <li><Link to="/ajuda" className={active("/ajuda") ? "on" : ""}>Ajuda</Link></li>
           {kind !== "platform" && !!me.user.staff_roles?.length && <li><Link to="/admin/central" className={active("/admin/central") ? "on" : ""}>Central (equipe)</Link></li>}

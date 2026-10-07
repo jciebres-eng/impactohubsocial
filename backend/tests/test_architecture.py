@@ -74,7 +74,19 @@ class ArchitectureTests(unittest.TestCase):
                    #       organização não alcança; e o registro de acesso privilegiado escreve
                    #       numa trilha que a própria pessoa registrada não pode escrever pelo
                    #       contexto dela. O `user_id` vem sempre do principal da sessão.
-                   "access.py"}
+                   "access.py",
+                   #   api/internal_routes.py → painéis da PRÓPRIA plataforma (controladoria,
+                   #       financeiro, contabilidade, tesouraria, operações). Não há organização
+                   #       cliente a que a RLS pudesse restringir: o sujeito do dado é a
+                   #       plataforma. Restringir ao `org_id` da sessão esconderia exatamente o
+                   #       dado que o painel existe para mostrar, e prendê-lo à organização
+                   #       `platform` faria o acesso depender de qual organização a pessoa tem
+                   #       ativa — quem é da controladoria continua sendo da controladoria com a
+                   #       própria OSC ativa. A porta é a PERMISSÃO declarada na rota
+                   #       (`permission=`), conferida em test_v0220_authorization.py e
+                   #       test_v0220_internal_ui.py, e cada entrada fica em
+                   #       `privileged_access_log`.
+                   "internal_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:
@@ -97,10 +109,19 @@ class ArchitectureTests(unittest.TestCase):
                 self.assertIsNone(re.search(p, txt), f"Possível segredo em {f}")
 
     def test_every_table_has_rls(self):
+        """Toda tabela tem política de RLS — e o guarda não se derrota com espaço em branco.
+
+        A v0.22.0 descobriu que este teste lia `CREATE POLICY \\w+ ON (\\w+)`: uma declaração
+        alinhada com dois espaços antes do `ON` não era encontrada, e a tabela aparecia como "sem
+        política" mesmo tendo uma. O inverso é pior e era igualmente possível: alinhar o
+        `CREATE TABLE` fazia a tabela desaparecer da conferência inteira, e uma tabela sem RLS
+        passaria sem ninguém ver. Guarda que depende de formatação não é guarda.
+        """
         sql = "\n".join(p.read_text(encoding="utf-8") for p in sorted((BACKEND / "migrations").glob("*.sql")))
-        tables = set(re.findall(r"CREATE TABLE (\w+)", sql))
+        tables = set(re.findall(r"CREATE TABLE\s+(?:IF NOT EXISTS\s+)?(\w+)", sql))
         self.assertIn("ENABLE ROW LEVEL SECURITY", sql)
-        with_policy = set(re.findall(r"CREATE POLICY \w+ ON (\w+)", sql))
+        with_policy = set(re.findall(r"CREATE POLICY\s+\w+\s+ON\s+(\w+)", sql))
+        self.assertGreater(len(tables), 250, "a conferência precisa ver TODAS as tabelas")
         self.assertEqual(tables - with_policy - {"chain_heads"}, set(), "Tabelas sem política RLS")
 
     def test_handlers_declare_auth(self):

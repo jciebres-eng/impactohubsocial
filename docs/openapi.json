@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -27073,6 +27073,736 @@
     }
    }
   },
+  "/v1/me/context": {
+   "get": {
+    "summary": "AccessContext: identidade, organização, papéis, plano, período gratuito, permissões",
+    "operationId": "get_access_routes_me_context",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/access/check": {
+   "post": {
+    "summary": "Posso executar esta ação? Devolve decisão com motivo, nunca só um booleano",
+    "operationId": "post_access_routes_check",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AccessCheckIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/auth/reauth": {
+   "post": {
+    "summary": "Confirma a identidade para operações sensíveis (vale por 15 minutos)",
+    "operationId": "post_access_routes_reauth",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 20/900s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReauthIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/privileged-access": {
+   "get": {
+    "summary": "Quem entrou com papel interno, quando, em qual rota e com qual permissão",
+    "operationId": "get_access_routes_privileged_access",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/permissions": {
+   "get": {
+    "summary": "Matriz papel → permissão, como está no banco",
+    "operationId": "get_access_routes_permission_matrix",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/controladoria/summary": {
+   "get": {
+    "summary": "Painel executivo: MRR, ARR, receita, caixa, despesa, GMV, resultado e autonomia",
+    "operationId": "get_internal_routes_controladoria",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/controladoria/reconciliation": {
+   "get": {
+    "summary": "Conciliação: o que foi esperado × o que aconteceu. APONTA, não corrige",
+    "operationId": "get_internal_routes_reconciliation",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/financeiro/summary": {
+   "get": {
+    "summary": "Recebível, pagável, instruções em aberto e gasto por centro de custo",
+    "operationId": "get_internal_routes_financeiro",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/financeiro/expenses": {
+   "post": {
+    "summary": "Registra despesa da plataforma (quem registra não aprova)",
+    "operationId": "post_internal_routes_create_expense",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PlatformExpenseIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Despesas da plataforma por competência",
+    "operationId": "get_internal_routes_list_expenses",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/financeiro/instructions": {
+   "post": {
+    "summary": "Emite instrução de pagamento (documento; a plataforma não executa o pagamento)",
+    "operationId": "post_internal_routes_create_instruction",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/InstructionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/financeiro/instructions/{instruction_id}/issue": {
+   "post": {
+    "summary": "Emite a instrução aprovada — valor e destinatário congelam a partir daqui",
+    "operationId": "post_internal_routes_issue_instruction",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "instruction_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/financeiro/instructions/{instruction_id}/executed": {
+   "post": {
+    "summary": "Registra que quem paga executou, com evidência (obrigatória)",
+    "operationId": "post_internal_routes_record_execution",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "instruction_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExecutionEvidenceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/contabilidade/summary": {
+   "get": {
+    "summary": "Balancete da competência, plano de contas e situação do período",
+    "operationId": "get_internal_routes_contabilidade",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/contabilidade/chart": {
+   "get": {
+    "summary": "Plano de contas da plataforma",
+    "operationId": "get_internal_routes_chart",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/contabilidade/batches": {
+   "post": {
+    "summary": "Lança um lote (tem de fechar: débitos iguais a créditos)",
+    "operationId": "post_internal_routes_post_batch",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AccountingBatchIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/contabilidade/close": {
+   "post": {
+    "summary": "Fecha a competência — irreversível; recusa se houver lote que não fecha",
+    "operationId": "post_internal_routes_close_period",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ClosePeriodIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/aprovacoes": {
+   "get": {
+    "summary": "Pedidos de aprovação pendentes, com quantas faltam e quais permissões servem",
+    "operationId": "get_internal_routes_pending_approvals",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/aprovacoes/{request_id}/decide": {
+   "post": {
+    "summary": "Decide um pedido. Quem pede não aprova, e faixas de duas exigem permissões diferentes",
+    "operationId": "post_internal_routes_decide_approval",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "request_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ApprovalDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/operacoes/health": {
+   "get": {
+    "summary": "HEALTH CENTER: banco, migrações, tarefas, backup, integrações e cobrança presa",
+    "operationId": "get_internal_routes_health_center",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/operacoes/alerts": {
+   "get": {
+    "summary": "CENTRAL DE ALERTAS: o que exige ação agora, por prioridade",
+    "operationId": "get_internal_routes_alert_center",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/tesouraria/summary": {
+   "get": {
+    "summary": "Caixa e patrimônio PRÓPRIO da plataforma (nunca valor de terceiro)",
+    "operationId": "get_internal_routes_tesouraria",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/administrativo/budget": {
+   "get": {
+    "summary": "Orçado × comprometido × realizado, por conta e centro de custo",
+    "operationId": "get_internal_routes_budget",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/financeiro/fee-preview": {
+   "get": {
+    "summary": "CALCULA a taxa de marketplace sobre um valor — e diz que ela não é cobrável",
+    "operationId": "get_internal_routes_fee_preview",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
   "/v1/network/relationship-kinds": {
    "get": {
     "summary": "Tipos de relação, com alvos aceitos e teto de visibilidade de cada um",
@@ -52179,6 +52909,396 @@
      }
     },
     "title": "SpendLimitIn",
+    "type": "object"
+   },
+   "AccessCheckIn": {
+    "additionalProperties": false,
+    "description": "Pergunta ao motor: posso executar esta ação? Devolve decisão COM MOTIVO.\n\nExiste para que a tela possa perguntar antes de tentar — e, ao receber não, dizer à pessoa o\nque fazer (pedir permissão a quem, mudar de plano, confirmar identidade) em vez de mostrar um\nbotão que falha.",
+    "properties": {
+     "permission": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Permission"
+     },
+     "feature": {
+      "anyOf": [
+       {
+        "maxLength": 60,
+        "minLength": 2,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Feature"
+     },
+     "min_role": {
+      "anyOf": [
+       {
+        "enum": [
+         "viewer",
+         "member",
+         "analyst",
+         "manager",
+         "admin",
+         "owner"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Min Role"
+     }
+    },
+    "title": "AccessCheckIn",
+    "type": "object"
+   },
+   "ReauthIn": {
+    "additionalProperties": false,
+    "description": "Confirmação de identidade para operação sensível.\n\nA senha é sempre exigida. O código de MFA é exigido quando a pessoa tem MFA ativo — não aceitar\nsó a senha de quem tem segundo fator seria oferecer o fator mais fraco justamente na operação\nmais perigosa.",
+    "properties": {
+     "password": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Password",
+      "type": "string"
+     },
+     "mfa_code": {
+      "anyOf": [
+       {
+        "maxLength": 8,
+        "minLength": 6,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Mfa Code"
+     }
+    },
+    "required": [
+     "password"
+    ],
+    "title": "ReauthIn",
+    "type": "object"
+   },
+   "PlatformExpenseIn": {
+    "additionalProperties": false,
+    "description": "Despesa da PRÓPRIA plataforma. Quem registra não aprova (restrição de tabela).",
+    "properties": {
+     "period": {
+      "title": "Period",
+      "type": "string"
+     },
+     "account_code": {
+      "maxLength": 12,
+      "minLength": 1,
+      "title": "Account Code",
+      "type": "string"
+     },
+     "cost_center": {
+      "maxLength": 20,
+      "minLength": 2,
+      "title": "Cost Center",
+      "type": "string"
+     },
+     "description": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Description",
+      "type": "string"
+     },
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "supplier_name": {
+      "anyOf": [
+       {
+        "maxLength": 160,
+        "minLength": 2,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Supplier Name"
+     },
+     "supplier_doc": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9]{11,14}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Supplier Doc"
+     },
+     "due_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Due On"
+     },
+     "document_ref": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Ref"
+     },
+     "recurring": {
+      "default": false,
+      "title": "Recurring",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "period",
+     "account_code",
+     "cost_center",
+     "description",
+     "amount_cents"
+    ],
+    "title": "PlatformExpenseIn",
+    "type": "object"
+   },
+   "InstructionIn": {
+    "additionalProperties": false,
+    "description": "INSTRUÇÃO de pagamento — documento, não transferência (ADR-284).",
+    "properties": {
+     "kind": {
+      "enum": [
+       "supplier",
+       "reimbursement",
+       "tax",
+       "payroll",
+       "marketplace_fee",
+       "refund",
+       "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "payee_name": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Payee Name",
+      "type": "string"
+     },
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "due_on": {
+      "format": "date",
+      "title": "Due On",
+      "type": "string"
+     },
+     "reference": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Reference",
+      "type": "string"
+     },
+     "payee_doc": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9]{11,14}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Payee Doc"
+     },
+     "account_code": {
+      "anyOf": [
+       {
+        "maxLength": 12,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Account Code"
+     },
+     "cost_center": {
+      "anyOf": [
+       {
+        "maxLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cost Center"
+     },
+     "idempotency_key": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 8,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Idempotency Key"
+     }
+    },
+    "required": [
+     "kind",
+     "payee_name",
+     "amount_cents",
+     "due_on",
+     "reference"
+    ],
+    "title": "InstructionIn",
+    "type": "object"
+   },
+   "ExecutionEvidenceIn": {
+    "additionalProperties": false,
+    "description": "Evidência de que QUEM PAGA executou. Obrigatória: a plataforma não vê o pagamento.",
+    "properties": {
+     "evidence_doc": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Evidence Doc",
+      "type": "string"
+     }
+    },
+    "required": [
+     "evidence_doc"
+    ],
+    "title": "ExecutionEvidenceIn",
+    "type": "object"
+   },
+   "AccountingBatchIn": {
+    "additionalProperties": false,
+    "description": "Lote de lançamentos. Tem de FECHAR: débitos iguais a créditos.",
+    "properties": {
+     "entries": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "maxItems": 200,
+      "minItems": 2,
+      "title": "Entries",
+      "type": "array"
+     }
+    },
+    "required": [
+     "entries"
+    ],
+    "title": "AccountingBatchIn",
+    "type": "object"
+   },
+   "ClosePeriodIn": {
+    "additionalProperties": false,
+    "properties": {
+     "period": {
+      "title": "Period",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 5,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "period"
+    ],
+    "title": "ClosePeriodIn",
+    "type": "object"
+   },
+   "ApprovalDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "approve": {
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "permission_used": {
+      "maxLength": 60,
+      "minLength": 3,
+      "title": "Permission Used",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "approve",
+     "permission_used"
+    ],
+    "title": "ApprovalDecisionIn",
     "type": "object"
    },
    "RelationshipIn": {

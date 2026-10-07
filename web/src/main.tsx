@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./app";
 import { RouterProvider } from "./router";
 import { SessionProvider } from "./session";
+import { AccessProvider } from "./access";
 import { ToastProvider } from "./ui/kit";
 import { ErrorBoundary as Boundary } from "./ui/boundary";
 import { bootTheme } from "./pages/prefs";
@@ -17,7 +18,9 @@ createRoot(document.getElementById("root")!).render(
     <RouterProvider>
       <ToastProvider>
         <SessionProvider>
-          <ErrorBoundary><App /></ErrorBoundary>
+          <AccessProvider>
+            <ErrorBoundary><App /></ErrorBoundary>
+          </AccessProvider>
         </SessionProvider>
       </ToastProvider>
     </RouterProvider>

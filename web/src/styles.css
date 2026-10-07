@@ -498,3 +498,45 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .plan-note h2 { font-size: 1rem; margin: 0 0 .5rem; }
 .row-warn > td { background: color-mix(in srgb, var(--alerta, #b45309) 8%, transparent); }
 @media (max-width: 480px) { .plan-grid { grid-template-columns: 1fr; } }
+
+/* ------------------------------------------------- v0.22.0 — operação interna e portal de entrada
+   Painel de controladoria: o NÚMERO é o conteúdo, e a procedência do número vem logo abaixo dele.
+   Nenhum indicador aparece sem dizer de onde veio — e o que não pôde ser medido aparece com o
+   motivo no lugar do valor, nunca com zero. */
+.metrics { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.metric { display: flex; flex-direction: column; gap: .15rem; padding: .85rem .95rem;
+  border: 1px solid var(--linha); border-radius: var(--raio-m); background: var(--folha); min-width: 0; }
+.metric-label { font-size: .78rem; letter-spacing: .01em; color: var(--texto-3); }
+.metric-value { font: 600 22px/1.15 var(--serif); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.metric-why { font-size: .72rem; color: var(--texto-3); line-height: 1.35; }
+/* Indicador sem base de dados: cinza, em itálico, com o motivo onde estaria o valor. */
+.metric-void { border-style: dashed; background: transparent; }
+.metric-void .metric-value { font-style: italic; font-weight: 400; color: var(--texto-3); }
+.metric-alert { border-color: var(--barro); }
+.metric-alert .metric-value { color: var(--barro); }
+
+/* Nota de honestidade: o que a tela NÃO sabe, ou não faz, dito na própria tela. */
+.note-honesty { border-left: 3px solid var(--texto-3); padding: .5rem .75rem; margin: .75rem 0 0;
+  font-size: .85rem; color: var(--texto-2); background: var(--linha-2); border-radius: 0 4px 4px 0; }
+
+.bullets { margin: .25rem 0 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .3rem; font-size: .9rem; }
+.code-block { font: 400 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--linha-2);
+  padding: .6rem .75rem; border-radius: var(--raio-s); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+.form-grid { display: grid; gap: .6rem 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: .75rem; }
+.form-grid > .field-wide { grid-column: 1 / -1; }
+.neg { color: var(--barro); }
+
+/* Menu interno agrupado — vem do servidor, derivado das permissões. */
+.rail-group { margin-top: .9rem; }
+.rail-group > span { display: block; padding: 0 .9rem .25rem; font-size: .68rem; letter-spacing: .08em;
+  text-transform: uppercase; color: color-mix(in srgb, var(--papel) 55%, var(--tinta-3)); }
+
+/* /portal — a cadeia de resolução do acesso, legível de cima para baixo. */
+.portal { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.chain { list-style: none; margin: 0; padding: 0; counter-reset: etapa; }
+.chain li { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr; gap: .5rem 1rem; align-items: baseline;
+  padding: .45rem 0; border-bottom: 1px solid var(--linha-2); }
+.chain li:last-child { border-bottom: 0; }
+.chain-label { font-size: .78rem; color: var(--texto-3); }
+.chain-value { font-size: .95rem; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .chain li { grid-template-columns: 1fr; gap: .1rem; } }

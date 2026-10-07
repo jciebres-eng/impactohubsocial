@@ -1,60 +1,14 @@
-# Plataforma Impacto — v0.22.0
+# Plataforma Impacto — v0.20.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** **BASE TÉCNICA FECHADA** na v0.22.0 para a entrega ao Designer. Leia
-> `TECHNICAL_FINALIZATION_STATUS.md` para o estado fase por fase, `NON_CUSTODIAL_ARCHITECTURE.md` para a regra de
-> arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
-> **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
-> cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
-
-**Novo no v0.22.0 (login inteligente, controladoria e o fim do booleano único de administrador):** a regra que
-governou a rodada veio antes do escopo — *"não implemente uma fintech dentro do IMPACTO só porque isso parece
-aumentar a monetização; primeiro prove que a mesma receita e garantia operacional podem ser obtidas com uma
-arquitetura muito mais simples"*. A auditoria dessa exigência encontrou algo melhor do que uma lista de remoções:
-**a regra já era verdadeira no código**. `split`, `payout`, `recipient`, `repasse`, `escrow`, `wallet` e saldo de
-terceiro têm **zero ocorrências** em 325 módulos Python, 45 arquivos de frontend e 298 tabelas — e a v0.20.0 havia
-*removido* o gerador de PIX justamente porque, sem provedor, chamá-lo exigiria valor inventado. O trabalho passou a
-ser **provar, documentar e travar** isso (`NON_CUSTODIAL_ARCHITECTURE.md`, ADR-284) e recusar, item por item, os
-pedidos de custódia.
-
-E corrigiu o defeito simétrico do lado de dentro:
-
-* **Havia UM booleano para toda a equipe interna.** Quem tivesse `is_platform_admin` alcançava receita apurada,
-  custo de IA, fatura e tabela de preços **sem nenhum papel financeiro no caminho**. Os três papéis nomeados que
-  existiam eram todos de conteúdo. Agora são **14 papéis** e **43 permissões**, com a permissão funcionando como
-  **chave na porta** da API, não como rótulo.
-* **Quatro olhos declarados e não implementados.** `core/risk_levels.py` dizia quais operações exigiam dupla
-  aprovação sem implementar nenhuma — o próprio docstring dele chamava isso de "a forma mais cara de mentir nesta
-  plataforma". Agora a alçada é **dado no banco**, com 8 faixas e dois gatilhos: quem pede não aprova, e faixa de
-  duas assinaturas recusa a mesma permissão duas vezes.
-* **224 das 848 rotas não tinham tela nenhuma** — a saúde do sistema, a receita apurada, as tarefas agendadas e o
-  Integration Hub inteiro. **16 telas internas** foram construídas, e um teste passou a reprovar a suíte quando um
-  domínio de permissão tem rota e não tem tela. Foi esse teste que encontrou o FULL FREE 2026: rota, serviço, banco
-  e teste desde a v0.21.0, e nenhuma tela por onde conceder ou auditar cortesia.
-* **Duas tabelas registravam a execução das tarefas** com respostas divergentes — e a que cobria 22 tarefas era a
-  que não sabia duração nem erro. Unificadas; a antiga **removida** do esquema.
-* **Indicador sem base responde `available: false` com o motivo, nunca zero.** Churn, LTV, CAC e custo de IA estão
-  nesse estado, declaradamente — zero parece medição.
-
-Mais: `/portal` resolvendo a cadeia *quem entra → organização → perfil → função → plano → recursos → situação
-financeira → painel* no servidor; contabilidade por competência com partida dobrada real; instrução de pagamento
-como **documento** que congela na emissão e exige evidência; Health Center; Central de Alertas derivada do estado.
-
-**1.772 testes, 872 operações, 49 migrações, 42 motores.** Documentos desta rodada:
-`NON_CUSTODIAL_ARCHITECTURE.md`, `AUTHORIZATION.md`, `FINANCIAL_ENGINE.md`, `INTERNAL_OPERATIONS.md` e
-`TECHNICAL_FINALIZATION_STATUS.md`.
-
-**Novo no v0.21.0 (monetização):** a infraestrutura comercial **existia inteira e estava vazia** — versionamento de
-preço com gatilho de imutabilidade, aviso de 30 dias e aceite congelado, com **zero linhas** em
-`plan_price_versions` e 7 planos pagos com preço nulo. Esta rodada publicou o catálogo 2027.01 (8 versões vigentes,
-2 pisos de proposta, 5 planos gratuitos, **nenhum valor em código**), criou a **gratuidade temporal por conta**
-(`free_periods`, com origem, motivo e autor) e separou **ACESSO GRATUITO** de **AUTORIZAÇÃO DE COBRANÇA** em dois
-atos com dois registros, com gatilho de banco recusando cobrança real sem autorização vigente. Comece por
-`PRICING_BIBLE.md`, `PRICING_RECONCILIATION.md` e `COMMERCIAL_TERMS.md`.
+> **Estado:** **BASE TÉCNICA CONGELADA** na v0.20.0 para a entrega ao Designer. Leia
+> `FINAL_TECHNICAL_RELEASE_REPORT.md` para a decisão desta rodada e `RELEASE_READINESS.md` §5 para o que esta
+> versão **NÃO** entrega. **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não
+> construídos**.
 
 **Novo no v0.20.0 (fechamento da engenharia antes do Designer):** rodada de **auditoria**, não de funcionalidade,
 dividida em onze etapas. Cada etapa procurou a diferença entre o que a plataforma **afirmava** e o que ela
@@ -202,9 +156,6 @@ recebido** — as seções que dependiam dele não foram executadas, e isso est�
 | entender a rede de impacto | `IMPACT_NETWORK_ARCHITECTURE.md`, `IMPACT_GRAPH.md`, `RELATIONSHIP_MODEL.md`, `PROPOSAL_ENGINE.md`, `IMPACT_MARKETPLACE.md`, `IMPACT_REPORTING.md` |
 | entender as personas e o workspace | `ROLE_BASED_EXPERIENCE.md`, `WORKSPACE_ARCHITECTURE.md` |
 | saber quem vê o quê | **`PRIVACY_VISIBILITY_MATRIX.md`** |
-| saber quem pode o quê (equipe interna) | **`AUTHORIZATION.md`**, `INTERNAL_OPERATIONS.md` |
-| entender o motor financeiro e por que ele não custodia | **`NON_CUSTODIAL_ARCHITECTURE.md`**, `FINANCIAL_ENGINE.md` |
-| saber o estado de cada fase do fechamento técnico | **`TECHNICAL_FINALIZATION_STATUS.md`** |
 | entender moderação e cobrança | `MODERATION_LADDER.md`, `BILLING_V2.md` |
 | publicar no celular | `MOBILE_READINESS_FINAL.md`, `STORE_READINESS.md` |
 | saber o que depende de terceiro | `EXTERNAL_DEPENDENCIES.md`, `HOMOLOGATION_MATRIX.md`, `SIGNATURE_VALIDATION_MATRIX.md` |

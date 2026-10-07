@@ -19,7 +19,7 @@ from datetime import datetime, UTC
 
 from .adapters.http_client import HttpClient
 from .db.pool import DbContext
-from .db.pq import Connection, Json
+from .db.pq import Connection
 from .observability import log, setup_logging
 
 logger = logging.getLogger("impacto.jobs")
@@ -27,16 +27,23 @@ JOB_LOCK = 726_431_002
 
 
 def _run(app, name: str, fn) -> dict:
+    """Executa a rotina e registra a execução em `ops_job_runs` — a ÚNICA trilha (v0.22.0).
+
+    Até a v0.21.0 esta função mantinha a sua própria tabela (`job_runs`), sem duração e sem campo
+    de erro, enquanto `ops/runs.py` mantinha outra com as duas coisas. Eram duas respostas
+    diferentes para "o backup rodou?", e a que cobria 22 tarefas era a que menos sabia.
+    """
+    from .ops import runs as RUNS
     with app.pool.tx(DbContext(system=True)) as c:
-        rid = c.scalar("INSERT INTO job_runs(job, status) VALUES ($1,'running') RETURNING id", name)
-    try:
-        details = fn() or {}
-        status = "ok"
-    except Exception as exc:  # noqa: BLE001
-        details, status = {"error": f"{type(exc).__name__}: {str(exc)[:300]}"}, "failed"
-        log(logger, logging.ERROR, "job_failed", job=name, error=details["error"])
-    with app.pool.tx(DbContext(system=True)) as c:
-        c.run("UPDATE job_runs SET status = $2, details = $3::jsonb, finished_at = now() WHERE id = $1", rid, status, Json(details))
+        with RUNS.record(c, name) as execucao:
+            try:
+                details = fn() or {}
+                status = "ok"
+            except Exception as exc:  # noqa: BLE001
+                details, status = {"error": f"{type(exc).__name__}: {str(exc)[:300]}"}, "failed"
+                log(logger, logging.ERROR, "job_failed", job=name, error=details["error"])
+                execucao["error"] = details["error"]
+            execucao["status"], execucao["detail"] = status, details
     return {"job": name, "status": status, **details}
 
 
@@ -195,7 +202,12 @@ def import_source(app, s: dict, http: HttpClient | None = None) -> dict:
             c.run("UPDATE call_sources SET last_run_at = now(), last_status = 'ok', last_error = NULL WHERE id = $1", s["id"])
         return {"source": s["name"], "items": len(items), "created": created, "updated": updated, "skipped": skipped}
 
-    res = _run(app, f"import:{s['name']}", run)
+    # O nome da tarefa é a IDENTIDADE dela, não a identidade mais o parâmetro. Até a v0.21.0 isto
+    # era `f"import:{nome da fonte}"`: cada fonte criava uma "tarefa" nova na trilha, com texto
+    # livre vindo do cadastro, e não havia como perguntar "a importação rodou?" — só "a importação
+    # da fonte X rodou?", para um X que ninguém sabia enumerar. A fonte vai no DETALHE, que é onde
+    # se guarda parâmetro, e o nome passou a caber na restrição de formato da trilha.
+    res = _run(app, "import_source", run)
     if res["status"] == "failed":
         with app.pool.tx(DbContext(system=True)) as c:
             c.run("UPDATE call_sources SET last_run_at = now(), last_status = 'failed', last_error = $2 WHERE id = $1", s["id"], res.get("error"))

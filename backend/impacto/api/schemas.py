@@ -1308,3 +1308,53 @@ class ReauthIn(In):
     """
     password: Annotated[str, StringConstraints(min_length=1, max_length=200)]
     mfa_code: Annotated[str, StringConstraints(min_length=6, max_length=8)] | None = None
+
+
+# --- v0.22.0 — operação interna: contabilidade, despesa, instrução, aprovação ---------------------
+
+class PlatformExpenseIn(In):
+    """Despesa da PRÓPRIA plataforma. Quem registra não aprova (restrição de tabela)."""
+    period: str                     # AAAA-MM-01
+    account_code: Annotated[str, StringConstraints(min_length=1, max_length=12)]
+    cost_center: Annotated[str, StringConstraints(min_length=2, max_length=20)]
+    description: Annotated[str, StringConstraints(min_length=3, max_length=300)]
+    amount_cents: int = Field(gt=0)
+    supplier_name: Annotated[str, StringConstraints(min_length=2, max_length=160)] | None = None
+    supplier_doc: Annotated[str, StringConstraints(pattern=r"^[0-9]{11,14}$")] | None = None
+    due_on: date | None = None
+    document_ref: Annotated[str, StringConstraints(max_length=200)] | None = None
+    recurring: bool = False
+
+
+class AccountingBatchIn(In):
+    """Lote de lançamentos. Tem de FECHAR: débitos iguais a créditos."""
+    entries: list[dict] = Field(min_length=2, max_length=200)
+
+
+class ClosePeriodIn(In):
+    period: str
+    note: Annotated[str, StringConstraints(min_length=5, max_length=300)] | None = None
+
+
+class InstructionIn(In):
+    """INSTRUÇÃO de pagamento — documento, não transferência (ADR-284)."""
+    kind: Literal["supplier", "reimbursement", "tax", "payroll", "marketplace_fee", "refund", "other"]
+    payee_name: Annotated[str, StringConstraints(min_length=2, max_length=160)]
+    amount_cents: int = Field(gt=0)
+    due_on: date
+    reference: Annotated[str, StringConstraints(min_length=3, max_length=200)]
+    payee_doc: Annotated[str, StringConstraints(pattern=r"^[0-9]{11,14}$")] | None = None
+    account_code: Annotated[str, StringConstraints(max_length=12)] | None = None
+    cost_center: Annotated[str, StringConstraints(max_length=20)] | None = None
+    idempotency_key: Annotated[str, StringConstraints(min_length=8, max_length=200)] | None = None
+
+
+class ExecutionEvidenceIn(In):
+    """Evidência de que QUEM PAGA executou. Obrigatória: a plataforma não vê o pagamento."""
+    evidence_doc: Annotated[str, StringConstraints(min_length=3, max_length=300)]
+
+
+class ApprovalDecisionIn(In):
+    approve: bool
+    permission_used: Annotated[str, StringConstraints(min_length=3, max_length=60)]
+    note: Annotated[str, StringConstraints(max_length=500)] | None = None

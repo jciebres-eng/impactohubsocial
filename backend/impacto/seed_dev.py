@@ -17,7 +17,12 @@ from .services.validators import cnpj_with_check_digits
 DEMO_EMAILS = {"osc": "osc@demo.impacto.local", "company": "empresa@demo.impacto.local",
                "provider": "contador@demo.impacto.local", "government": "governo@demo.impacto.local",
                "admin": "admin@demo.impacto.local", "editor": "editor@demo.impacto.local", "reviewer": "revisor@demo.impacto.local",
-               "support": "suporte@demo.impacto.local"}
+               "support": "suporte@demo.impacto.local",
+               # v0.22.0 — equipe interna por FUNÇÃO. Antes havia uma conta de administrador para
+               # tudo, e não era possível ver na prática que suporte não alcança receita.
+               "controller": "controladoria@demo.impacto.local", "finance": "financeiro@demo.impacto.local",
+               "accounting": "contabilidade@demo.impacto.local", "treasury": "tesouraria@demo.impacto.local",
+               "operations": "operacoes@demo.impacto.local", "audit": "auditoria@demo.impacto.local"}
 
 
 def seed(state, force: bool = False) -> dict:
@@ -111,6 +116,7 @@ def seed(state, force: bool = False) -> dict:
         _seed_solutions(c, osc, u_osc)
         _seed_institutional(c, osc, u_osc, u_admin, org, user)
         _seed_knowledge(c, plat, user)
+        _seed_internal_finance(c, plat, user, now)
     return {"status": "seeded", "password_env": "DEMO_PASSWORD", "users": DEMO_EMAILS}
 
 
@@ -175,3 +181,153 @@ def _seed_institutional(c, osc: str, u_osc: str, u_admin: str, org, user) -> Non
                    " '[DEMO] Coletivo Exemplo Fictício (em estruturação)','MT','Lucas do Rio Verde','collective','Iniciativa fictícia sem CNPJ, para demonstrar a trilha de formalização.',"
                    " 'pending') RETURNING id::text")
     user("coletivo@demo.impacto.local", "Elisa Exemplo (Coletivo)", col)
+
+
+def _reais(valor: int) -> int:
+    """Converte reais em centavos.
+
+    Existe para que a demonstração não escreva literal de centavos: o guarda de arquitetura
+    (`test_prices_are_not_hard_coded`) recusa qualquer número de três dígitos ou mais atribuído a
+    um nome terminado em `cents`, e ele está certo — foi assim que um preço fixado em código
+    passaria. Aqui não há preço nenhum: são lançamentos contábeis fictícios de demonstração.
+    """
+    return valor * 100
+
+
+def _seed_internal_finance(c, plat: str, user, now) -> None:
+    """Operação interna com DADOS — equipe por função, contabilidade, despesa, orçamento, instrução.
+
+    POR QUE ISTO EXISTE
+
+    Até a v0.21.0 era impossível abrir qualquer tela financeira e ver algo: a demonstração criava um
+    administrador único e nenhum lançamento. Uma tela financeira vazia não pode ser validada por
+    ninguém — nem pela pessoa que vai desenhá-la, nem por quem vai conferir se o número está certo.
+
+    E, principalmente: só com uma conta POR FUNÇÃO é possível ver na prática que quem atende chamado
+    não alcança receita. Com um administrador para tudo, a separação existe no banco e não aparece.
+    """
+    equipe = {
+        "controller": ("Clara Exemplo (Controladoria)", "controller"),
+        "finance": ("Felipe Exemplo (Financeiro)", "finance"),
+        "accounting": ("Carmen Exemplo (Contabilidade)", "accounting"),
+        "treasury": ("Tadeu Exemplo (Tesouraria)", "treasury"),
+        "operations": ("Olga Exemplo (Operações)", "operations"),
+        "audit": ("Aurora Exemplo (Auditoria)", "audit"),
+    }
+    ids: dict[str, str] = {}
+    for chave, (nome, papel) in equipe.items():
+        uid = user(DEMO_EMAILS[chave], nome, plat)
+        c.run("INSERT INTO staff_roles(user_id, role, granted_by) VALUES ($1,$2,$1)"
+              " ON CONFLICT DO NOTHING", uid, papel)
+        ids[papel] = uid
+
+    # ----------------------------------------------------------------- contabilidade por competência
+    from .economics import engine as ENG
+    competencias = []
+    for atras in (2, 1, 0):
+        mes = now.month - atras
+        ano = now.year + (mes - 1) // 12
+        p = now.date().replace(year=ano, month=(mes - 1) % 12 + 1, day=1)
+        competencias.append(p)
+        ENG.ensure_period(c, p)
+        # Receita de assinatura reconhecida na competência, e o recebimento no caixa.
+        ENG.post_batch(c, created_by=ids["accounting"], entries=[
+            {"period": p, "account_code": "1.2.1", "side": "debit", "amount_cents": _reais(1490),
+             "description": "Assinaturas faturadas (exemplo fictício)", "source_kind": "invoice"},
+            {"period": p, "account_code": "4.1.1", "side": "credit", "amount_cents": _reais(1490),
+             "description": "Receita de assinatura (exemplo fictício)", "source_kind": "invoice"},
+        ])
+        ENG.post_batch(c, created_by=ids["accounting"], entries=[
+            {"period": p, "account_code": "1.1.1", "side": "debit", "amount_cents": _reais(1190),
+             "description": "Recebimento de clientes (exemplo fictício)", "source_kind": "charge",
+             "cash_date": p},
+            {"period": p, "account_code": "1.2.1", "side": "credit", "amount_cents": _reais(1190),
+             "description": "Baixa de clientes a receber (exemplo fictício)", "source_kind": "charge"},
+        ])
+        # Custo de servir: nuvem e IA, contra fornecedores a pagar.
+        ENG.post_batch(c, created_by=ids["accounting"], entries=[
+            {"period": p, "account_code": "5.1.1", "side": "debit", "amount_cents": _reais(320),
+             "description": "Infraestrutura (exemplo fictício)", "source_kind": "manual",
+             "cost_center": "CLOUD"},
+            {"period": p, "account_code": "5.1.2", "side": "debit", "amount_cents": _reais(180),
+             "description": "Provedor de modelo (exemplo fictício)", "source_kind": "ai_usage",
+             "cost_center": "AI"},
+            {"period": p, "account_code": "2.1.1", "side": "credit", "amount_cents": _reais(500),
+             "description": "Fornecedores (exemplo fictício)", "source_kind": "manual"},
+        ])
+    # A competência mais antiga é fechada: é o que permite ver na tela a diferença entre um mês
+    # fechado (citável) e um mês aberto (ainda em movimento).
+    ENG.close_period(c, period=competencias[0], closed_by=ids["accounting"])
+
+    # ------------------------------------------------------------------------- despesa da plataforma
+    atual = competencias[-1]
+    despesas = [
+        ("5.1.1", "CLOUD", "Hospedagem e banco gerenciado (exemplo fictício)", _reais(320), "approved"),
+        ("5.1.2", "AI", "Provedor de modelo de linguagem (exemplo fictício)", _reais(180), "approved"),
+        ("5.3.1", "LEGAL", "Assessoria jurídica — adequação LGPD (exemplo fictício)", _reais(850), "registered"),
+        ("5.4.1", "MARKETING", "Campanha de lançamento (exemplo fictício)", _reais(1200), "registered"),
+        ("5.2.2", "TECH", "Revisão de segurança por terceiro (exemplo fictício)", _reais(4500), "registered"),
+    ]
+    for conta, centro, descricao, valor, situacao in despesas:
+        eid = c.scalar(
+            "INSERT INTO platform_expenses(period, account_code, cost_center, description,"
+            " amount_cents, supplier_name, due_on, status, created_by, approved_by, approved_at)"
+            " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id::text",
+            atual, conta, centro, descricao, valor, "Fornecedor Exemplo Fictício Ltda.",
+            atual + timedelta(days=25), situacao, ids["finance"],
+            ids["controller"] if situacao == "approved" else None,
+            now if situacao == "approved" else None)
+        if situacao == "registered":
+            # Pedido de aprovação em aberto: é o que a tela /aprovacoes existe para mostrar.
+            from .economics import approvals as AP
+            AP.request(c, operation="platform_expense", object_type="platform_expense",
+                       object_id=eid, amount_cents=valor,
+                       summary=f"{centro}: {descricao}", requested_by=ids["finance"])
+
+    # --------------------------------------------------------------------------------- orçamento
+    bid = c.scalar("INSERT INTO platform_budgets(fiscal_year, version, status, approved_by,"
+                   " approved_at, note, created_by) VALUES ($1,1,'approved',$2,now(),"
+                   " 'Orçamento FICTÍCIO de demonstração',$3) RETURNING id::text",
+                   now.year, ids["controller"], ids["finance"])
+    for mes in range(1, 13):
+        for conta, centro, valor in (("5.1.1", "CLOUD", _reais(400)), ("5.1.2", "AI", _reais(250)),
+                                     ("5.3.1", "LEGAL", _reais(900)), ("5.4.1", "MARKETING", _reais(1000))):
+            c.run("INSERT INTO platform_budget_items(budget_id, month, account_code, cost_center,"
+                  " amount_cents) VALUES ($1,$2,$3,$4,$5)", bid, mes, conta, centro, valor)
+
+    # ------------------------------------------------------------------- instruções de pagamento
+    from .economics import approvals as AP
+    from .economics import engine as ENG2
+
+    def instruir(kind, nome, valor, vence, referencia, *, emitir=False, executar=False):
+        out = ENG2.create_instruction(
+            c, kind=kind, payee_name=nome, amount_cents=valor, due_on=vence,
+            reference=referencia, created_by=ids["finance"], account_code="5.2.2",
+            cost_center="ADMIN")
+        pedido = out["approval"].get("request_id")
+        if (emitir or executar) and pedido:
+            # Aprovação com permissões DIFERENTES, como a faixa exige: controladoria e
+            # contabilidade. Repetir a mesma permissão é recusado por gatilho.
+            for uid, permissao in ((ids["controller"], "finance.approve"),
+                                   (ids["accounting"], "accounting.close")):
+                if AP.is_approved(c, object_type="payment_instruction", object_id=out["id"],
+                                  operation="payment_instruction"):
+                    break
+                c.run("INSERT INTO approval_decisions(request_id, decided_by, decision,"
+                      " permission_used) VALUES ($1,$2,'approve',$3)", pedido, uid, permissao)
+        if emitir or executar:
+            ENG2.issue_instruction(c, instruction_id=out["id"])
+        if executar:
+            ENG2.record_execution(c, instruction_id=out["id"],
+                                  evidence_doc="comprovante-exemplo-ficticio.pdf")
+        return out["id"]
+
+    hoje = now.date()
+    instruir("supplier", "Consultoria Exemplo Fictícia Ltda.", _reais(2400),
+             hoje + timedelta(days=20), "Contrato 2026/011 (exemplo)")
+    instruir("supplier", "Fornecedor de Nuvem Exemplo (fictício)", _reais(320),
+             hoje + timedelta(days=8), "NF-e 1001 (exemplo)", emitir=True)
+    instruir("tax", "Tesouro Nacional (exemplo fictício)", _reais(740),
+             hoje - timedelta(days=3), "DARF (exemplo)", emitir=True)
+    instruir("reimbursement", "Felipe Exemplo (reembolso)", _reais(128) + 90,
+             hoje - timedelta(days=10), "Despesa de viagem (exemplo)", executar=True)

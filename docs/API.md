@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.21.0)
+# API REST /v1 — referência gerada do código (v0.22.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,10 +10,11 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (848)
+## Operações (872)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
+| POST | `/v1/access/check` | usuário autenticado | — | Posso executar esta ação? Devolve decisão com motivo, nunca só um booleano |
 | GET | `/v1/admin/agreements` | admin da plataforma + MFA | — | Lista convênios (sem o código) |
 | POST | `/v1/admin/agreements` | admin da plataforma + MFA | — | Cria convênio (rascunho). O código é exibido UMA vez; a ativação exige outro administrador. |
 | POST | `/v1/admin/agreements/{agreement_id}/action` | admin da plataforma + MFA | — | Ativa (por outro administrador), suspende ou encerra um convênio |
@@ -153,8 +154,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/overview` | admin da plataforma + MFA | — | Métricas operacionais da plataforma |
 | GET | `/v1/admin/payments/reconciliation` | admin da plataforma + MFA | — | Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura |
 | GET | `/v1/admin/payments/revenue` | admin da plataforma + MFA | — | Receita apurada, com o simulado em colunas próprias e nunca somado ao real |
+| GET | `/v1/admin/permissions` | admin da plataforma + MFA | — | Matriz papel → permissão, como está no banco |
 | PUT | `/v1/admin/plans/{plan_key}/price` | admin da plataforma + MFA | — | Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide) |
 | GET | `/v1/admin/price-benchmark` | admin da plataforma + MFA | — | Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido |
+| GET | `/v1/admin/privileged-access` | admin da plataforma + MFA | — | Quem entrou com papel interno, quando, em qual rota e com qual permissão |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
 | GET | `/v1/admin/reports/queue` | admin da plataforma + MFA | — | Fila de apuração, com a distinção entre arquivada e não procedente |
 | POST | `/v1/admin/reports/{report_id}/conclude` | admin da plataforma + MFA | — | Conclusão fundamentada. Só 'substantiated' autoriza medida |
@@ -205,6 +208,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/voucher-batches` | admin da plataforma + MFA | — | Gera lote de vouchers (códigos exibidos UMA vez; armazenados só como HMAC). Ativação exige segundo administrador. |
 | POST | `/v1/admin/voucher-batches/{batch_id}/action` | admin da plataforma + MFA | — | batch action |
 | GET | `/v1/admin/voucher-batches/{batch_id}/redemptions` | admin da plataforma + MFA | — | Utilizações de um lote de vouchers (quem usou e quando; código só pelo final) |
+| GET | `/v1/administrativo/budget` | admin da plataforma + MFA | — | Orçado × comprometido × realizado, por conta e centro de custo |
 | POST | `/v1/agreements/join` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos. |
 | POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
 | POST | `/v1/ai/draft` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Gera rascunho de proposta/plano/relatório a partir dos dados do projeto (marca [COMPLETAR] onde faltar) |
@@ -219,6 +223,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/applications/{application_id}/conflict` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Declaração de conflito de interesse do avaliador (obrigatória antes de aprovar) |
 | PATCH | `/v1/applications/{application_id}/steps/{step_id}` | membro da organização ativa | papel ≥ member | Atualiza uma etapa do checklist (passo a passo) |
 | POST | `/v1/applications/{application_id}/transition` | membro da organização ativa | papel ≥ member | Avança/retrocede o status conforme a máquina de estados (validações e devolutiva obrigatória na reprovação) |
+| GET | `/v1/aprovacoes` | admin da plataforma + MFA | — | Pedidos de aprovação pendentes, com quantas faltam e quais permissões servem |
+| POST | `/v1/aprovacoes/{request_id}/decide` | admin da plataforma + MFA | — | Decide um pedido. Quem pede não aprova, e faixas de duas exigem permissões diferentes |
 | POST | `/v1/auth/accept-invite` | usuário autenticado | — | accept invite |
 | POST | `/v1/auth/change-password` | usuário autenticado | limite 10/3600s | change password |
 | POST | `/v1/auth/forgot-password` | pública | limite 5/3600s | forgot |
@@ -231,6 +237,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/auth/mfa/verify` | pública | limite 30/900s | Conclui login com TOTP ou código de recuperação |
 | GET | `/v1/auth/oidc/callback` | pública | limite 60/900s | Retorno do provedor de identidade: valida id_token (JWKS, iss, aud, nonce) e cria a sessão |
 | GET | `/v1/auth/oidc/start` | pública | limite 60/900s | Inicia login corporativo (OIDC Authorization Code + PKCE) |
+| POST | `/v1/auth/reauth` | usuário autenticado | limite 20/900s | Confirma a identidade para operações sensíveis (vale por 15 minutos) |
 | POST | `/v1/auth/refresh` | pública | limite 120/900s | Rotaciona o refresh token (reuso revoga toda a família de sessões) |
 | POST | `/v1/auth/register` | pública | limite 10/3600s | Cadastra usuário (e organização opcional). Resposta não revela se o e-mail já existe. |
 | POST | `/v1/auth/resend-verification` | usuário autenticado | limite 5/3600s | resend |
@@ -284,8 +291,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/conta/denuncias/{report_id}/recurso` | membro da organização ativa | papel ≥ admin | Recurso da conclusão (a conclusão só muda por aqui) |
 | GET | `/v1/conta/moderacao` | membro da organização ativa | papel ≥ admin | Medidas de moderação contra a sua organização, com o direito de contestar |
 | POST | `/v1/conta/moderacao/{action_id}/contestar` | membro da organização ativa | papel ≥ admin | Contesta uma medida (uma vez por medida) |
+| POST | `/v1/contabilidade/batches` | admin da plataforma + MFA | — | Lança um lote (tem de fechar: débitos iguais a créditos) |
+| GET | `/v1/contabilidade/chart` | admin da plataforma + MFA | — | Plano de contas da plataforma |
+| POST | `/v1/contabilidade/close` | admin da plataforma + MFA | — | Fecha a competência — irreversível; recusa se houver lote que não fecha |
+| GET | `/v1/contabilidade/summary` | admin da plataforma + MFA | — | Balancete da competência, plano de contas e situação do período |
 | POST | `/v1/contribution-models/{model_id}/retire` | membro da organização ativa | tipos: osc; papel ≥ manager | retire model |
 | POST | `/v1/contribution-models/{model_id}/submit` | membro da organização ativa | tipos: osc; papel ≥ manager | Envia o modelo à revisão jurídica da administração |
+| GET | `/v1/controladoria/reconciliation` | admin da plataforma + MFA | — | Conciliação: o que foi esperado × o que aconteceu. APONTA, não corrige |
+| GET | `/v1/controladoria/summary` | admin da plataforma + MFA | — | Painel executivo: MRR, ARR, receita, caixa, despesa, GMV, resultado e autonomia |
 | GET | `/v1/conversations` | membro da organização ativa | papel ≥ viewer | list conversations |
 | POST | `/v1/conversations` | membro da organização ativa | papel ≥ member | Abre (ou reaproveita) a conversa naquele contexto |
 | GET | `/v1/conversations/unread` | membro da organização ativa | papel ≥ viewer | unread |
@@ -357,6 +370,13 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/feed/projects/{project_id}/favorite` | membro da organização ativa | tipos: company, individual; papel ≥ analyst | favorite |
 | POST | `/v1/feed/projects/{project_id}/feedback` | membro da organização ativa | tipos: company, individual; papel ≥ analyst | Salvar ou descartar com motivo (sinal de preferência para o ranking do próprio financiador) |
 | GET | `/v1/files/{token}` | pública | limite 600/3600s | Entrega do arquivo via token assinado e de curta duração (storage local) |
+| GET | `/v1/financeiro/expenses` | admin da plataforma + MFA | — | Despesas da plataforma por competência |
+| POST | `/v1/financeiro/expenses` | admin da plataforma + MFA | — | Registra despesa da plataforma (quem registra não aprova) |
+| GET | `/v1/financeiro/fee-preview` | admin da plataforma + MFA | — | CALCULA a taxa de marketplace sobre um valor — e diz que ela não é cobrável |
+| POST | `/v1/financeiro/instructions` | admin da plataforma + MFA | — | Emite instrução de pagamento (documento; a plataforma não executa o pagamento) |
+| POST | `/v1/financeiro/instructions/{instruction_id}/executed` | admin da plataforma + MFA | — | Registra que quem paga executou, com evidência (obrigatória) |
+| POST | `/v1/financeiro/instructions/{instruction_id}/issue` | admin da plataforma + MFA | — | Emite a instrução aprovada — valor e destinatário congelam a partir daqui |
+| GET | `/v1/financeiro/summary` | admin da plataforma + MFA | — | Recebível, pagável, instruções em aberto e gasto por centro de custo |
 | GET | `/v1/firstrun` | usuário autenticado | papel ≥ viewer | Estado de primeiro acesso por área: o que é, por que está vazia, próximo passo e o que se ganha |
 | GET | `/v1/fiscal/estimates` | membro da organização ativa | tipos: company; papel ≥ analyst; plano: `fiscal.estimates` | Mecanismos possivelmente aplicáveis (regras aprovadas e vigentes): REGRA × ELEGIBILIDADE PROVÁVEL × ESTIMATIVA × VALIDAÇÃO |
 | GET | `/v1/fiscal/rules` | membro da organização ativa | papel ≥ viewer | Regras fiscais aprovadas (fonte, versão e vigência) |
@@ -522,6 +542,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/materials` | membro da organização ativa | papel ≥ viewer | Biblioteca de materiais governamentais e institucionais publicados |
 | POST | `/v1/materials` | membro da organização ativa | tipos: government, platform; papel ≥ manager | create material |
 | GET | `/v1/me` | usuário autenticado | — | Usuário, organizações, direitos do plano e token CSRF |
+| GET | `/v1/me/context` | usuário autenticado | — | AccessContext: identidade, organização, papéis, plano, período gratuito, permissões |
 | GET | `/v1/me/preferences` | usuário autenticado | — | Idioma e tema da pessoa (tema: system, light ou dark) |
 | PUT | `/v1/me/preferences` | usuário autenticado | — | Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso) |
 | POST | `/v1/me/switch-org` | usuário autenticado | — | switch org |
@@ -558,6 +579,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/ods` | membro da organização ativa | papel ≥ viewer | 17 ODS e quantidade de metas oficiais carregadas (metas/indicadores oficiais entram por importação) |
 | GET | `/v1/ods/{number}/targets` | membro da organização ativa | papel ≥ viewer | ods targets |
 | POST | `/v1/offers/{offer_id}/decide` | membro da organização ativa | tipos: osc; papel ≥ manager | decide offer |
+| GET | `/v1/operacoes/alerts` | admin da plataforma + MFA | — | CENTRAL DE ALERTAS: o que exige ação agora, por prioridade |
+| GET | `/v1/operacoes/health` | admin da plataforma + MFA | — | HEALTH CENTER: banco, migrações, tarefas, backup, integrações e cobrança presa |
 | GET | `/v1/org` | membro da organização ativa | papel ≥ viewer | Perfil completo da organização ativa |
 | PATCH | `/v1/org` | membro da organização ativa | papel ≥ admin | Atualiza o perfil da organização |
 | GET | `/v1/org/credentials` | membro da organização ativa | tipos: provider; papel ≥ viewer | list credentials |
@@ -844,6 +867,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/territories/{code}` | usuário autenticado | — | Perfil do território: cadeia, indicadores com fonte e o que NÃO foi medido |
 | GET | `/v1/territory/needs` | usuário autenticado | — | list territory needs |
 | POST | `/v1/territory/needs` | membro da organização ativa | papel ≥ member | Registra necessidade do território (estimativa exige fonte declarada) |
+| GET | `/v1/tesouraria/summary` | admin da plataforma + MFA | — | Caixa e patrimônio PRÓPRIO da plataforma (nunca valor de terceiro) |
 | GET | `/v1/trust/councils` | membro da organização ativa | papel ≥ viewer | Conselhos profissionais do catálogo (o formato do registro só é validado quando há padrão configurado) |
 | GET | `/v1/trust/custody` | membro da organização ativa | papel ≥ viewer | Cadeia de custódia do objeto e conferência do encadeamento por hash |
 | GET | `/v1/trust/identity` | usuário autenticado | — | Meu nível de identidade, pedidos e documentos enviados |

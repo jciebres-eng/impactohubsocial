@@ -578,5 +578,6 @@ def set_flag(ctx: Ctx, body: FlagIn):
 @A("GET", "/v1/admin/jobs", permission="maintenance.read")
 def jobs(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
-        return {"items": c.query("SELECT job, status, details, started_at, finished_at FROM job_runs ORDER BY id DESC LIMIT 100"),
+        return {"items": c.query("SELECT job, status, detail AS details, started_at, finished_at, duration_ms, error"
+                                 " FROM ops_job_runs ORDER BY id DESC LIMIT 100"),
                 "billing_events": c.query("SELECT provider, event_id, type, status, error, received_at FROM billing_events ORDER BY id DESC LIMIT 50")}

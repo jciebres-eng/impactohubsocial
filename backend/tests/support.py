@@ -346,6 +346,19 @@ def set_compliance(org_id: str, status: str) -> None:
         c.run("UPDATE organizations SET compliance_status = $2 WHERE id = $1", org_id, status)
 
 
+def set_role(user_id: str, org_id: str, role: str) -> None:
+    """Troca o papel da pessoa na organização, pelo banco.
+
+    A rota real exige um segundo membro com papel de dono (uma organização não pode ficar sem
+    dono), e o assunto dos testes que usam isto é a CONFERÊNCIA DE PAPEL na rota, não o fluxo de
+    gestão de equipe — que tem testes próprios em `test_api_auth.py`.
+    """
+    with db_system() as c:
+        n = c.run("UPDATE memberships SET role = $3 WHERE user_id = $1 AND org_id = $2",
+                  user_id, org_id, role)
+        assert n == 1, f"nenhum vínculo de {user_id} com {org_id}"
+
+
 # ─────────────────────────────────────────────────────────────────────────────────────────────────
 # CÓDIGO TOTP QUE NÃO SE REPETE
 #

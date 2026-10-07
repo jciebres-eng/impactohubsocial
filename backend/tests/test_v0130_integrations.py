@@ -891,6 +891,15 @@ class HealthAndOperations(unittest.TestCase):
 
     def test_provider_maturity_requires_admin_and_evidence(self):
         adm, _ = make_admin()
+        # A restauração entra como cleanup, não como última linha: se uma asserção no meio falhar,
+        # a última linha não roda e `totvs` fica `homologated` no banco. Isso vazava para FORA deste
+        # arquivo — a matriz de integrações lia `maturity` ao vivo e passaria a declarar homologação
+        # real de um provedor jamais homologado. A matriz hoje lê o catálogo de produto, e esta
+        # limpeza fecha o vazamento na origem.
+        self.addCleanup(lambda: adm.post(
+            "/v1/admin/integrations/providers/totvs/maturity",
+            {"maturity": "contract_tested",
+             "evidence": "Rebaixado: homologação do cliente X expirou em 2026; sem evidência vigente."}))
         self.assertEqual(self.org.post("/v1/admin/integrations/providers/totvs/maturity",
                                        {"maturity": "production_active", "evidence": "x" * 30}).status, 403)
         self.assertEqual(adm.post("/v1/admin/integrations/providers/totvs/maturity",
@@ -902,8 +911,6 @@ class HealthAndOperations(unittest.TestCase):
             self.assertEqual(d.scalar("SELECT maturity FROM integration_providers WHERE key = 'totvs'"), "homologated")
             ev = d.query("SELECT payload FROM audit_events WHERE action = 'integration.provider_maturity' ORDER BY at DESC LIMIT 1")
         self.assertIn("Ata de homologação", json.dumps(ev[0]["payload"], ensure_ascii=False))
-        adm.post("/v1/admin/integrations/providers/totvs/maturity",
-                 {"maturity": "contract_tested", "evidence": "Rebaixado: homologação do cliente X expirou em 2026; sem evidência vigente."})
 
 
 # ------------------------------------------------------------------------------------------------ J. segurança da camada de integração

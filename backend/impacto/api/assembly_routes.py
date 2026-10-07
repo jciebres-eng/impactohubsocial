@@ -304,7 +304,7 @@ def A(method, path, **kw):
     return route(method, path, auth="admin", tags=TA, **kw)
 
 
-@A("GET", "/v1/admin/encryption/keys", summary="Inventário de chaves por impressão digital (a chave nunca é gravada)")
+@A("GET", "/v1/admin/encryption/keys", permission="security.keys.read", summary="Inventário de chaves por impressão digital (a chave nunca é gravada)")
 def key_inventory(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         out = KEYS.inventory(c)
@@ -313,7 +313,7 @@ def key_inventory(ctx: Ctx):
     return out
 
 
-@A("POST", "/v1/admin/encryption/keys", body=C.KeyRegisterIn, status=201,
+@A("POST", "/v1/admin/encryption/keys", permission="security.keys.write", body=C.KeyRegisterIn, status=201,
    summary="Registra no inventário as chaves em uso para uma finalidade")
 def key_register(ctx: Ctx, body: C.KeyRegisterIn):
     provider = KEYS.EnvKeyProvider(ctx.settings)

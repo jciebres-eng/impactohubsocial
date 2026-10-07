@@ -77,6 +77,13 @@ def decide(c, ac, *, request_id: str, approve: bool, permission_used: str,
     if not ac.has_permission(permission_used):
         raise ApiError(403, "permission_denied", "Você não tem a permissão que informou.",
                        {"required_permission": permission_used})
+    # Recusa SEM motivo é recusa que ninguém pode revisar — e a obrigatoriedade existia apenas no
+    # navegador (botão desabilitado), o que significa que não existia: a rota aceitava a recusa
+    # sem justificativa e devolvia 200.
+    if not approve and len((note or "").strip()) < 5:
+        raise ApiError(422, "reason_required",
+                       "Recusar exige justificativa de no mínimo 5 caracteres.",
+                       {"field": "note"})
 
     c.run("INSERT INTO approval_decisions(request_id, decided_by, decision, permission_used, note)"
           " VALUES ($1,$2,$3,$4,$5)",
@@ -123,7 +130,15 @@ def require_approved(c, *, object_type: str, object_id: str, operation: str,
 
 
 def pending(c, limit: int = 100) -> list[dict]:
-    return [dict(r) for r in c.query(
+    """Pedidos pendentes, cada um já com a faixa dele resolvida.
+
+    A tela reimplementava `approval_rule_for()` em JavaScript para descobrir quais permissões
+    servem — segunda implementação da mesma regra, com desempate diferente (`find` pega a primeira
+    faixa em ordem crescente; o SQL usa `ORDER BY min_cents DESC LIMIT 1`). Com faixas contíguas dá
+    no mesmo; e as faixas são DADO editável, então bastava alguém cadastrar faixas que se sobrepõem
+    para a tela oferecer um botão que o servidor recusa com `permission_not_in_band`.
+    """
+    itens = [dict(r) for r in c.query(
         "SELECT q.id::text AS id, q.operation, q.object_type, q.object_id, q.amount_cents,"
         " q.currency, q.summary, q.approvals_needed, q.created_at, u.email AS requested_by,"
         " (SELECT count(*) FROM approval_decisions d WHERE d.request_id = q.id"
@@ -132,3 +147,13 @@ def pending(c, limit: int = 100) -> list[dict]:
         "  WHERE dd.request_id = q.id) AS permissions_used"
         " FROM approval_requests q JOIN users u ON u.id = q.requested_by"
         " WHERE q.state = 'pending' ORDER BY q.created_at LIMIT $1", limit)]
+    for item in itens:
+        faixa = rule_for(c, item["operation"], item["amount_cents"])
+        usadas = set(item.get("permissions_used") or [])
+        exigidas = list(faixa["required_permissions"]) if faixa else []
+        item["required_permissions"] = exigidas
+        # As que AINDA servem: a faixa menos o que já foi usado. É o que a tela precisa para
+        # oferecer um botão por permissão sem recalcular a regra.
+        item["permissions_available"] = [x for x in exigidas if x not in usadas]
+        item["remaining"] = max(0, int(item["approvals_needed"]) - int(item["approvals_given"]))
+    return itens

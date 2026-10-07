@@ -13,7 +13,7 @@ class SignalQ(S.Pagination):
     severity: str | None = None
 
 
-@route("GET", "/v1/admin/risk/signals", auth="admin", query=SignalQ, tags=T, summary="Sinais de risco (para revisão humana; não são acusações)")
+@route("GET", "/v1/admin/risk/signals", auth="admin", permission="compliance.read", query=SignalQ, tags=T, summary="Sinais de risco (para revisão humana; não são acusações)")
 def list_signals(ctx: Ctx, q: SignalQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT s.id::text AS id, s.org_id::text AS org_id, o.legal_name AS org_name, s.project_id::text AS project_id, s.signal_type, s.severity, s.summary,"
@@ -24,7 +24,7 @@ def list_signals(ctx: Ctx, q: SignalQ):
     return page(rows, q.limit, q.offset)
 
 
-@route("POST", "/v1/admin/risk/scan", auth="admin", body=S.RiskScanIn, tags=T, summary="Executa os detectores agora (todas as organizações ou uma)")
+@route("POST", "/v1/admin/risk/scan", auth="admin", permission="compliance.write", body=S.RiskScanIn, tags=T, summary="Executa os detectores agora (todas as organizações ou uma)")
 def run_scan(ctx: Ctx, body: S.RiskScanIn):
     with ctx.system_tx() as c:
         out = risk.scan(c, body.org_id)
@@ -32,7 +32,7 @@ def run_scan(ctx: Ctx, body: S.RiskScanIn):
     return out
 
 
-@route("POST", "/v1/admin/risk/signals/{signal_id}/review", auth="admin", body=S.RiskReviewIn, tags=T,
+@route("POST", "/v1/admin/risk/signals/{signal_id}/review", auth="admin", permission="compliance.write", body=S.RiskReviewIn, tags=T,
        summary="Revisão humana do sinal (relevante ou descartado), com justificativa obrigatória")
 def review_signal(ctx: Ctx, body: S.RiskReviewIn):
     with ctx.tx() as c:
@@ -45,7 +45,7 @@ def review_signal(ctx: Ctx, body: S.RiskReviewIn):
     return {"id": s["id"], "status": body.status}
 
 
-@route("GET", "/v1/admin/risk/assessments", auth="admin", tags=T)
+@route("GET", "/v1/admin/risk/assessments", auth="admin", permission="compliance.read", tags=T)
 def list_assessments(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT a.org_id::text AS org_id, o.legal_name AS org_name, a.level, a.rationale, a.open_signals, a.updated_at FROM risk_assessments a"
@@ -53,7 +53,7 @@ def list_assessments(ctx: Ctx):
     return {"items": rows}
 
 
-@route("POST", "/v1/admin/risk/orgs/{org_id}/block", auth="admin", body=S.RiskBlockIn, tags=T,
+@route("POST", "/v1/admin/risk/orgs/{org_id}/block", auth="admin", permission="compliance.write", body=S.RiskBlockIn, tags=T,
        summary="Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível")
 def block_org(ctx: Ctx, body: S.RiskBlockIn):
     with ctx.tx() as c:
@@ -68,7 +68,7 @@ def block_org(ctx: Ctx, body: S.RiskBlockIn):
     return {"org_id": ctx.path["org_id"], "level": "blocked"}
 
 
-@route("POST", "/v1/admin/risk/orgs/{org_id}/unblock", auth="admin", body=S.RiskBlockIn, tags=T)
+@route("POST", "/v1/admin/risk/orgs/{org_id}/unblock", auth="admin", permission="compliance.write", body=S.RiskBlockIn, tags=T)
 def unblock_org(ctx: Ctx, body: S.RiskBlockIn):
     with ctx.tx() as c:
         if not c.run("DELETE FROM risk_assessments WHERE org_id = $1 AND level = 'blocked'", ctx.path["org_id"]):
@@ -79,7 +79,7 @@ def unblock_org(ctx: Ctx, body: S.RiskBlockIn):
 
 
 # ------------------------------------------------------------------------------------------------ erros agregados
-@route("GET", "/v1/admin/errors", permission="security.audit.read", auth="admin", query=S.Pagination, tags=T, summary="Erros 5xx agregados por impressão digital (sem dados pessoais)")
+@route("GET", "/v1/admin/errors", permission="maintenance.read", auth="admin", query=S.Pagination, tags=T, summary="Erros 5xx agregados por impressão digital (sem dados pessoais)")
 def list_errors(ctx: Ctx, q: S.Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT id::text AS id, route, status, exception_type, message, occurrences, first_seen, last_seen, last_request_id, last_trace_id, resolved"
@@ -87,7 +87,7 @@ def list_errors(ctx: Ctx, q: S.Pagination):
     return page(rows, q.limit, q.offset)
 
 
-@route("POST", "/v1/admin/errors/{error_id}/resolve", auth="admin", tags=T)
+@route("POST", "/v1/admin/errors/{error_id}/resolve", auth="admin", permission="maintenance.execute", tags=T)
 def resolve_error(ctx: Ctx):
     with ctx.tx() as c:
         if not c.run("UPDATE error_events SET resolved = true WHERE id = $1", ctx.path["error_id"]):

@@ -27360,6 +27360,30 @@
    }
   },
   "/v1/financeiro/instructions": {
+   "get": {
+    "summary": "Instruções de pagamento, por situação",
+    "operationId": "get_internal_routes_list_instructions",
+    "tags": [
+     "interno"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   },
    "post": {
     "summary": "Emite instrução de pagamento (documento; a plataforma não executa o pagamento)",
     "operationId": "post_internal_routes_create_instruction",
@@ -27751,7 +27775,7 @@
     "description": "Administração da plataforma com MFA"
    }
   },
-  "/v1/administrativo/budget": {
+  "/v1/administrativo/orcamento": {
    "get": {
     "summary": "Orçado × comprometido × realizado, por conta e centro de custo",
     "operationId": "get_internal_routes_budget",
@@ -53218,14 +53242,84 @@
     "title": "ExecutionEvidenceIn",
     "type": "object"
    },
+   "AccountingEntryIn": {
+    "additionalProperties": false,
+    "description": "Uma linha de lançamento.\n\nEra `list[dict]` sem validação nenhuma, e caía direto no SQL: `{\"foo\": 1}` virava KeyError e\n`period: \"nao-e-data\"` virava erro de conversão — os dois como HTTP 500. E `side` inválido só\nera pego pela restrição do banco, que responde 422 com nome de constraint em vez de dizer à\npessoa qual campo está errado.",
+    "properties": {
+     "period": {
+      "format": "date",
+      "title": "Period",
+      "type": "string"
+     },
+     "account_code": {
+      "pattern": "^[0-9](\\.[0-9]{1,2}){0,3}$",
+      "title": "Account Code",
+      "type": "string"
+     },
+     "side": {
+      "enum": [
+       "debit",
+       "credit"
+      ],
+      "title": "Side",
+      "type": "string"
+     },
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "description": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Description",
+      "type": "string"
+     },
+     "cost_center": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Z][A-Z0-9_]{1,19}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cost Center"
+     },
+     "cash_date": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Cash Date"
+     }
+    },
+    "required": [
+     "period",
+     "account_code",
+     "side",
+     "amount_cents",
+     "description"
+    ],
+    "title": "AccountingEntryIn",
+    "type": "object"
+   },
    "AccountingBatchIn": {
     "additionalProperties": false,
     "description": "Lote de lançamentos. Tem de FECHAR: débitos iguais a créditos.",
     "properties": {
      "entries": {
       "items": {
-       "additionalProperties": true,
-       "type": "object"
+       "$ref": "#/components/schemas/AccountingEntryIn"
       },
       "maxItems": 200,
       "minItems": 2,

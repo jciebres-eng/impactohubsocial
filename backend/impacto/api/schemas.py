@@ -1326,9 +1326,30 @@ class PlatformExpenseIn(In):
     recurring: bool = False
 
 
+class AccountingEntryIn(In):
+    """Uma linha de lançamento.
+
+    Era `list[dict]` sem validação nenhuma, e caía direto no SQL: `{"foo": 1}` virava KeyError e
+    `period: "nao-e-data"` virava erro de conversão — os dois como HTTP 500. E `side` inválido só
+    era pego pela restrição do banco, que responde 422 com nome de constraint em vez de dizer à
+    pessoa qual campo está errado.
+    """
+    period: date
+    account_code: Annotated[str, StringConstraints(pattern=r"^[0-9](\.[0-9]{1,2}){0,3}$")]
+    side: Literal["debit", "credit"]
+    amount_cents: int = Field(gt=0, le=10**12)
+    description: Annotated[str, StringConstraints(min_length=3, max_length=300)]
+    # `source_kind`/`source_id` ficam de fora de propósito: o lote manual é MANUAL. Deixar o
+    # chamador escolher a origem permitiria forjar `source_kind='manual'` com o id de uma despesa,
+    # que é exatamente o campo que a conciliação de "despesa paga sem lançamento" lê — e a
+    # conferência passaria a confirmar a si mesma.
+    cost_center: Annotated[str, StringConstraints(pattern=r"^[A-Z][A-Z0-9_]{1,19}$")] | None = None
+    cash_date: date | None = None
+
+
 class AccountingBatchIn(In):
     """Lote de lançamentos. Tem de FECHAR: débitos iguais a créditos."""
-    entries: list[dict] = Field(min_length=2, max_length=200)
+    entries: list[AccountingEntryIn] = Field(min_length=2, max_length=200)
 
 
 class ClosePeriodIn(In):

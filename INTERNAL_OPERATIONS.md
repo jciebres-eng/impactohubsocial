@@ -39,6 +39,7 @@ não a recalcula. Recalcular seria criar uma segunda regra para discordar da pri
 | `/financeiro` | Financeiro | `finance.read` | a receber, a pagar, vencido, caixa, despesa por centro de custo, instruções em aberto |
 | `/financeiro/despesas` | Financeiro | `finance.read` | registra despesa (abre aprovação) e lista a competência, com quem registrou e quem aprovou |
 | `/financeiro/instrucoes` | Financeiro | `instruction.read` | cria, emite e registra execução com evidência |
+| `/v1/financeiro/instructions` | (rota) | `instruction.read` | a leitura própria da tela: ela lia o resumo financeiro, e o menu a oferecia por uma permissão que nenhuma rota exigia |
 | `/financeiro/periodos-gratuitos` | Financeiro | `free_period.write` | quem está sem pagar, por qual motivo, concedido por quem, até quando |
 | `/contabilidade` | Contabilidade | `accounting.read` | balancete, situação da competência, lotes que não fecham, fechamento |
 | `/contabilidade/plano-de-contas` | Contabilidade | `accounting.read` | 43 contas (sintética × analítica) e 11 centros de custo |
@@ -128,3 +129,22 @@ quebra em silêncio não demonstra nada.
   comparação campo a campo de valor anterior e novo não está implementada para todas as entidades.
 - **Refino visual.** Esta é a camada funcional mínima: as telas existem, respondem e podem ser
   conferidas. O desenho é a fase seguinte.
+
+## 8. Correções de auditoria independente
+
+Depois de a suíte estar verde, uma auditoria independente conferiu cada afirmação deste documento
+contra o código. Quatro correções nas telas:
+
+- a tela de **orçamento** chamava `/v1/administrativo/orcamento` e a rota era `/budget`: erro em
+  toda abertura. Agora há um teste que lê as chamadas de API das telas internas e exige que todas
+  existam no roteador;
+- **sete indicadores do painel executivo** liam chaves que a resposta não tem, e o componente
+  devolvia `null` em silêncio — receita bruta, receita líquida, entradas, saídas, queima e
+  autonomia **desapareciam** sem erro visível;
+- a tela **reimplementava a alçada em JavaScript** para escolher quais permissões servem, com
+  desempate diferente do SQL. A faixa passou a vir resolvida do servidor
+  (`permissions_available`, `remaining`);
+- a tela calculava o **saldo do balancete** no navegador e obrigava a justificativa de recusa só
+  pelo botão desabilitado. O saldo passou a ser apurado no servidor, com a regra escrita na
+  resposta, e a justificativa passou a ser exigida pela rota — a obrigatoriedade existia apenas no
+  navegador, e a rota aceitava recusa sem motivo com 200.

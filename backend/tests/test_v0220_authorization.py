@@ -16,6 +16,7 @@ O teste central deste arquivo é
 from __future__ import annotations
 
 import unittest
+import uuid
 
 from tests.support import PASSWORD, db_system, make_admin, make_staff, new_account, reauth
 
@@ -92,11 +93,31 @@ class PermissionMatrixIsDataTests(unittest.TestCase):
 
     def test_the_catalog_and_the_mapping_cannot_drift(self):
         """Mapear papel para permissão fora do catálogo é erro de digitação que só apareceria
-        quando alguém tentasse usar a rota. A chave estrangeira recusa antes."""
+        quando alguém tentasse usar a rota. A chave estrangeira recusa antes.
+
+        Confere a restrição NOMEADA: `assertRaises(Exception)` em volta de um INSERT passaria por
+        erro de privilégio, de RLS ou de tipo — qualquer coisa menos a chave estrangeira que o
+        teste diz provar. Apontado por auditoria independente.
+        """
+        from tests.support import owner_conn
+        # Duas camadas, e as duas conferidas. A primeira versão deste teste usava
+        # `assertRaises(Exception)` no contexto da aplicação e passava por PRIVILÉGIO (42501), não
+        # pela chave estrangeira — provava uma coisa e afirmava outra.
         with db_system() as c:
-            with self.assertRaises(Exception):
+            with self.assertRaises(Exception) as cm:
                 c.run("INSERT INTO staff_permissions(role, permission)"
                       " VALUES ('finance','finance.inventada')")
+            self.assertEqual(getattr(cm.exception, "sqlstate", None), "42501",
+                             "o papel da aplicação não deveria poder escrever na matriz")
+        conn = owner_conn()
+        try:
+            with self.assertRaises(Exception) as cm:
+                conn.run("INSERT INTO staff_permissions(role, permission)"
+                         " VALUES ('finance','finance.inventada')")
+            self.assertEqual(getattr(cm.exception, "sqlstate", None), "23503",
+                             f"não foi a chave estrangeira que recusou: {cm.exception}")
+        finally:
+            conn.close()
 
     def test_super_admin_receives_the_catalog_including_its_exclusive_permissions(self):
         """O defeito que o teste da matriz encontrou: as exclusivas de super_admin não estavam no
@@ -152,7 +173,15 @@ class MoneyIsSeparatedFromContentTests(unittest.TestCase):
         an = make_staff("analyst")
         self.assertEqual(an.get("/v1/admin/ops/health").status, 200)      # health.read
         self.assertEqual(an.get("/v1/admin/payments/revenue").status, 403)
-        self.assertEqual(an.get("/v1/admin/invoices" if False else "/v1/admin/free-periods").status, 403)
+        # As duas rotas, sem condicional morta: a primeira versão escrevia
+        # `"/v1/admin/invoices" if False else "/v1/admin/free-periods"`, e a rota de faturas nunca
+        # era exercitada.
+        # `/v1/admin/invoices` existe só em POST (emissão de cobrança manual): a condicional
+        # morta da primeira versão escondia que a rota não respondia a GET.
+        self.assertEqual(an.post("/v1/admin/invoices", {"org_id": str(uuid.uuid4()),
+                                                        "amount_cents": 1000,
+                                                        "description": "tentativa"}).status, 403)
+        self.assertEqual(an.get("/v1/admin/free-periods").status, 403)
 
     def test_a_platform_admin_keeps_everything_because_the_migration_said_so(self):
         """Nenhuma pessoa perdeu acesso com a v0.22.0. É isto que torna a mudança implantável."""
@@ -241,17 +270,33 @@ class StepUpTests(unittest.TestCase):
         self.assertEqual(fin.get("/v1/admin/payments/revenue").status, 200)
 
     def test_there_is_only_one_implementation_of_identity_verification(self):
+        """Ninguém mais confere senha no próprio handler.
+
+        A primeira versão procurava a string `reauth_failed` fora de `core/access.py`: uma cópia
+        nova que levantasse outro código de erro passaria. Agora a varredura é pelo ATO — conferir
+        senha — e não pela mensagem. Apontado por auditoria independente.
+        """
         import pathlib
         raiz = pathlib.Path(__file__).resolve().parents[1] / "impacto"
         culpados = []
         for f in raiz.rglob("*.py"):
-            if f.name == "access.py":
-                continue
-            if "reauth_failed" in f.read_text(encoding="utf-8"):
+            if f.name in ("access.py", "passwords.py", "auth.py", "oidc.py"):
+                continue   # auth.py é o login; oidc.py é o provedor externo; passwords.py é a cifra
+            texto = f.read_text(encoding="utf-8")
+            if "verify_password(" in texto or "reauth_failed" in texto:
                 culpados.append(str(f.relative_to(raiz)))
         self.assertEqual(culpados, [],
                          "voltou a existir cópia da verificação de identidade fora de "
                          "core/access.py: " + ", ".join(culpados))
+
+    def test_the_three_routes_that_had_copies_delegate_to_the_single_one(self):
+        """E as três que tinham cópia chamam a implementação única, nominalmente."""
+        import pathlib
+        raiz = pathlib.Path(__file__).resolve().parents[1] / "impacto" / "api"
+        for arquivo in ("privacy_routes.py", "trust_routes.py", "document_routes.py"):
+            texto = (raiz / arquivo).read_text(encoding="utf-8")
+            self.assertIn("verify_identity", texto,
+                          f"{arquivo} deixou de delegar a confirmação de identidade")
 
 
 class PrivilegedAccessIsLoggedTests(unittest.TestCase):
@@ -288,6 +333,29 @@ class PrivilegedAccessIsLoggedTests(unittest.TestCase):
         self.assertEqual(aud.get("/v1/admin/privileged-access").status, 200)
 
 
+    def test_a_refused_attempt_is_logged_too(self):
+        """Sondagem recusada deixava rastro em lugar NENHUM.
+
+        O registro só acontecia depois de a conferência passar: alguém da equipe batendo em
+        cinquenta rotas financeiras e levando 403 em todas não aparecia aqui (não chegava) nem em
+        `audit_events` (que só registra alteração). Uma tentativa de olhar também é um olhar, e uma
+        sequência de tentativas recusadas é o sinal que uma investigação procura. Encontrado por
+        auditoria independente.
+        """
+        suporte = make_staff("support")
+        r = suporte.get("/v1/controladoria/summary")
+        self.assertEqual(r.status, 403, r)
+        with db_system() as c:
+            linha = c.one(
+                "SELECT roles_used, permission, path FROM privileged_access_log"
+                " WHERE user_id = (SELECT id FROM users WHERE email = $1)"
+                "   AND path = '/v1/controladoria/summary' ORDER BY id DESC LIMIT 1",
+                suporte.email)
+        self.assertIsNotNone(linha, "a tentativa recusada não entrou na trilha")
+        self.assertIn("DENIED", linha["roles_used"],
+                      "a trilha não distingue tentativa recusada de acesso concedido")
+        self.assertEqual(linha["permission"], "metrics.read")
+
 class AccessContextTests(unittest.TestCase):
 
     def test_the_context_answers_everything_the_screen_needs(self):
@@ -298,7 +366,7 @@ class AccessContextTests(unittest.TestCase):
                       "dashboard", "step_up_window_seconds"):
             self.assertIn(chave, r.json)
         self.assertEqual(r.json["organization"]["id"], cli.org_id)
-        self.assertEqual(r.json["dashboard"], "/area")
+        self.assertEqual(r.json["dashboard"], "/")
         self.assertFalse(r.json["staff"]["is_platform_admin"])
         self.assertEqual(r.json["staff"]["permissions"], [])
 
@@ -365,8 +433,25 @@ class StepUpBlocksEvenAnAdministratorTests(unittest.TestCase):
                      if p.split(".")[-1] in ("approve", "close", "refund", "issue", "cancel",
                                              "execute", "write")}
         faltando = sorted(perigosas - STEP_UP_PERMISSIONS)
-        # `content.write` e `support.write` não movem dinheiro nem conceder privilégio; o resto sim.
-        permitidas_fora = {"content.write", "content.publish", "support.write", "compliance.write",
-                           "integration.write", "free_period.write", "billing.write"}
+        # A isenção é ESTREITA e cada entrada diz por que está aqui. A primeira versão desta lista
+        # isentava `billing.write` e `free_period.write` sob um comentário que dizia "o resto sim" —
+        # auditoria independente mostrou a contradição: `billing.write` dá baixa em fatura de
+        # cliente e `free_period.write` concede gratuidade. As duas entraram na lista de step-up.
+        permitidas_fora = {
+            # Conteúdo editorial não move dinheiro nem concede privilégio, e já exige quatro olhos
+            # próprios (autor ≠ revisor) no fluxo de publicação.
+            "content.write", "content.publish",
+            # Atendimento escreve em chamado e resposta, não em conta nem em permissão.
+            "support.write",
+            # Apuração de conformidade registra decisão sobre organização; a medida que dela
+            # decorre tem o seu próprio fluxo de apuração, com gatilho no banco.
+            "compliance.write",
+            # Conexão de integração não transfere valor; a credencial é cifrada e nunca devolvida.
+            "integration.write",
+        }
         self.assertEqual(sorted(set(faltando) - permitidas_fora), [],
                          "permissão perigosa fora de STEP_UP_PERMISSIONS: " + ", ".join(faltando))
+        # E a isenção não pode crescer em silêncio: toda permissão de escrita que não está no
+        # step-up tem de estar nomeada acima, com motivo escrito.
+        self.assertLessEqual(len(permitidas_fora), 8,
+                             "isenção de step-up grande demais: cada entrada precisa de motivo")

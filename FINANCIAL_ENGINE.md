@@ -126,13 +126,26 @@ Detalhes do mecanismo em `AUTHORIZATION.md` §7.
 
 ## 7. Métricas — cada número diz de onde veio
 
-`economics/metrics.py`. Todo indicador carrega `source`, `calculation`, `period` e `last_updated`.
+`economics/metrics.py`. Todo indicador carrega `source`, `calculation`, `period` e
+`last_updated` — este último passou a existir na correção pós-auditoria: estava prometido aqui e
+ausente da resposta, promessa escrita no lugar de dado.
 
 E o que **não pode ser medido** responde `available: false` com o motivo, nunca zero. Zero parece
 medição, e num painel executivo é a forma mais convincente de mentir. `null` não explica.
 
 Hoje respondem **indisponíveis, com motivo**: churn, LTV, CAC, custo de IA (a tabela
 `ai_price_table` está vazia — ver §9) e autonomia de caixa quando não há queima.
+
+Duas correções pós-auditoria nesse ponto, porque a regra valia menos do que o texto dizia:
+
+- o **custo de IA** respondia **zero, disponível**, com nota de procedência. A condição era
+  `not (chamadas and sem_preco == chamadas)`: com zero chamadas o `and` curto-circuitava e o
+  indicador saía disponível valendo zero. Pior, com dez chamadas das quais quatro sem preço, ele
+  somava as seis precificadas e apresentava o total como apurado — custo **subestimado** com cara
+  de medição. Agora é indisponível em ambos os casos, com o motivo dizendo qual dos dois;
+- um indicador indisponível **sem motivo escrito** agora levanta erro na construção, onde é
+  barato. `available: false` com `unavailable_reason: null` é o próprio "`null` não explica" que
+  este módulo existe para recusar, e era o que `free_to_paid` devolvia sem organização ativa.
 
 Respondem com valor: MRR, ARR, assinaturas ativas, receita bruta/deduções/líquida por competência,
 entradas e saídas de caixa, despesa total e por centro de custo, GMV, conversão de teste para pago.
@@ -145,14 +158,22 @@ a receita, e o cálculo publicado diz isso.
 
 ## 8. Take rate: calculado e não cobrável
 
-`compute_marketplace_fee()` calcula o percentual sobre o valor do contrato e devolve
-`billable: false`, com motivo.
+`compute_marketplace_fee()` devolve `billable: false` em qualquer caso, com **dois motivos
+diferentes**, e a distinção importa:
 
-A regra de 10% existe em `monetization_rules` com `active = false`, e continua inativa por decisão
-registrada: cobrar percentual sobre contrato de terceiro **sem contrato comercial assinado e sem
-nota fiscal própria** é receita inventada. Ver `NON_CUSTODIAL_ARCHITECTURE.md` §4 e §7.
+- **`percentage_not_declared`** — é o estado de hoje. A regra `marketplace.take_rate` existe em
+  `monetization_rules` com `percentage = NULL`, `active = false` e `legal_status = refused`.
+  **Não existe alíquota nenhuma declarada**, e a função devolve `fee_cents: null`: não há cálculo
+  a fazer, e devolver um número aqui seria inventar a alíquota. Uma versão anterior deste documento
+  afirmava que "a regra de 10% existe" — não existe, e o teste que devia travar isso conferia
+  apenas `billable` e nunca olhava o valor. Auditoria independente apontou os dois.
+- **`rule_inactive`** — quando houver alíquota declarada e a regra seguir desligada. Aí sim a
+  função **calcula** (`fee_cents`) e continua recusando a cobrança.
 
-Quando houver base contratual, o que muda é uma linha de dado — não o motor.
+A regra continua desligada por decisão registrada: cobrar percentual sobre contrato de terceiro
+**sem contrato comercial assinado e sem nota fiscal própria** é receita inventada. Ver
+`NON_CUSTODIAL_ARCHITECTURE.md` §4 e §7. Quando houver base contratual, o que muda é uma linha de
+dado — não o motor.
 
 ## 9. Limitações desta versão, ditas como limitações
 
@@ -161,6 +182,10 @@ Quando houver base contratual, o que muda é uma linha de dado — não o motor.
   seria passando valor inventado.
 - **`ai_price_table` está vazia**, então o custo de IA responde indisponível em vez de zero. O
   consumo é medido (tokens, latência, provedor); o preço não foi declarado.
+- **Não há rota de estorno.** A faixa de alçada de `billing_refund` está cadastrada em
+  `approval_rules` (duas faixas) e **inerte**: nenhuma rota abre pedido com essa operação, porque
+  nenhum provedor de pagamento está ligado e estornar o que não foi cobrado não existe. A faixa
+  espera a rota; a alçada não precisa ser reimplantada quando ela chegar.
 - **Nenhum provedor fiscal ligado**: não há emissão de NFS-e. O adaptador e o contrato existem.
 - **Não há `payouts`, `split`, `recipient`, `wallet`, `escrow` nem saldo de terceiro** — nem código
   nem tabela. É verificado por teste: nenhuma tabela cujo nome contenha `wallet|payout|split|escrow|custod|repasse` ou termine em `_balance(s)`.

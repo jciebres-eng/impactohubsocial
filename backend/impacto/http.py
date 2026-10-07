@@ -311,6 +311,12 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
             #     saber a quem pedir é melhor do que tentar de novo;
             #   · quem NÃO é da equipe recebe apenas "área restrita" — não se confirma a existência
             #     da rota nem o que ela exige a quem não deveria estar ali.
+            # A TENTATIVA recusada entra na trilha de acesso privilegiado. Antes, o registro só
+            # acontecia DEPOIS de a conferência passar: alguém da equipe sondando cinquenta rotas
+            # financeiras e levando 403 em todas não deixava rastro em lugar nenhum — nem aqui,
+            # porque não chegava, nem em `audit_events`, que só registra alteração.
+            if p.staff_roles or p.is_platform_admin:
+                ACCESS.log_privileged(ctx, spec.permission, denied=True)
             if p.staff_roles and spec.permission:
                 raise ApiError(403, "permission_denied",
                                "Seu papel na equipe não inclui esta permissão",

@@ -39,13 +39,45 @@ def _sys(ctx: Ctx, readonly: bool = True):
 
 
 def _period(valor: str | None):
+    """Competência a partir de `AAAA-MM` ou `AAAA-MM-DD`.
+
+    Levanta 422 em vez de 500: `?period=abacaxi` e `?period=2026-13` devolviam erro interno, com
+    trace completo em `error_events` e contagem de 5xx na telemetria, por um parâmetro de URL que
+    qualquer pessoa pode digitar errado.
+    """
     from ..clock import today
     if not valor:
-        d = today()
-        return d.replace(day=1)
+        return today().replace(day=1)
     from datetime import date as _d
-    p = valor if len(valor) > 7 else valor + "-01"
-    return _d.fromisoformat(p).replace(day=1)
+    try:
+        p = valor if len(valor) > 7 else valor + "-01"
+        return _d.fromisoformat(p).replace(day=1)
+    except ValueError:
+        raise ApiError(422, "invalid_period",
+                       "Competência inválida: use AAAA-MM (ex.: 2026-10).",
+                       {"received": valor[:40]}) from None
+
+
+def _inteiro(nome: str, valor: str | None, *, padrao: int, minimo: int, maximo: int) -> int:
+    """Inteiro de parâmetro de consulta, com faixa. Também era 500, e também aceitava negativo.
+
+    `?days=-5` respondia 200 e virava `now() - interval '-5 days'` — janela no FUTURO, em que as
+    conferências vinham vazias e a contagem de divergências ficava subcontada. Um relatório de
+    conciliação que responde "nenhuma divergência" por causa do sinal de um parâmetro é pior do que
+    um erro.
+    """
+    if valor is None or valor == "":
+        return padrao
+    try:
+        n = int(valor)
+    except ValueError:
+        raise ApiError(422, "invalid_number", f"`{nome}` precisa ser um número inteiro.",
+                       {"parameter": nome, "received": str(valor)[:40]}) from None
+    if not (minimo <= n <= maximo):
+        raise ApiError(422, "out_of_range",
+                       f"`{nome}` precisa estar entre {minimo} e {maximo}.",
+                       {"parameter": nome, "received": n, "min": minimo, "max": maximo})
+    return n
 
 
 # ------------------------------------------------------------------------------------------------
@@ -66,7 +98,8 @@ def controladoria(ctx: Ctx):
 @route("GET", "/v1/controladoria/reconciliation", auth="admin", permission="finance.read", tags=T,
        summary="Conciliação: o que foi esperado × o que aconteceu. APONTA, não corrige")
 def reconciliation(ctx: Ctx):
-    dias = min(int(ctx.request.query_params.get("days") or 30), 180)
+    dias = _inteiro("days", ctx.request.query_params.get("days"),
+                    padrao=30, minimo=1, maximo=180)
     with _sys(ctx) as c:
         return ENG.reconcile(c, days=dias)
 
@@ -144,6 +177,35 @@ def list_expenses(ctx: Ctx):
 # INSTRUÇÃO DE PAGAMENTO — o "INSTRUI" do motor
 # ------------------------------------------------------------------------------------------------
 
+@route("GET", "/v1/financeiro/instructions", auth="admin", permission="instruction.read", tags=T,
+       summary="Instruções de pagamento, por situação")
+def list_instructions(ctx: Ctx):
+    """A tela de instruções lia `/v1/financeiro/summary`, que exige `finance.read`.
+
+    O menu a oferecia por `instruction.read` — uma permissão que NENHUMA rota declarava. Quem
+    tivesse só ela via o item e levava 403. A auditoria desta versão encontrou cinco casos assim;
+    este é o único que precisava de rota nova, porque a tela merece a sua própria leitura: ela
+    mostra instrução, não resumo financeiro.
+    """
+    estados = ctx.request.query_params.get("state")
+    with _sys(ctx) as c:
+        itens = [dict(r) for r in c.query(
+            "SELECT i.id::text AS id, i.kind, i.payee_name, i.payee_doc, i.amount_cents,"
+            " i.currency, i.due_on, i.reference, i.state, i.account_code, i.cost_center,"
+            " i.issued_at, i.executed_at, i.evidence_doc, i.cancel_reason,"
+            " u.email AS created_by"
+            " FROM payment_instructions i LEFT JOIN users u ON u.id = i.created_by"
+            " WHERE ($1::text IS NULL OR i.state = ANY (string_to_array($1, ',')))"
+            " ORDER BY i.due_on, i.created_at DESC LIMIT 300", estados)]
+        por_estado = {r["state"]: int(r["n"]) for r in c.query(
+            "SELECT state, count(*) AS n FROM payment_instructions GROUP BY state")}
+    abertas = [i for i in itens if i["state"] not in
+               ("executed", "reconciled", "cancelled", "rejected")]
+    return {"items": itens, "open": abertas, "by_state": por_estado,
+            "note": "Instrução é DOCUMENTO: a plataforma não executa a transferência e não guarda "
+                    "valor de terceiro. A evidência é a prova de que quem paga pagou (ADR-284)."}
+
+
 @route("POST", "/v1/financeiro/instructions", auth="admin", permission="instruction.create",
        body=S.InstructionIn, status=201, tags=T,
        summary="Emite instrução de pagamento (documento; a plataforma não executa o pagamento)")
@@ -193,10 +255,17 @@ def contabilidade(ctx: Ctx):
     p = _period(ctx.request.query_params.get("period"))
     with _sys(ctx) as c:
         periodo = c.one("SELECT period, status, closed_at FROM accounting_periods WHERE period = $1", p)
+        # O SALDO sai daqui, não do navegador. A tela calculava `devedora ? d - c : c - d` com a
+        # natureza lida da própria resposta: aritmética certa, procedência nenhuma — e a regra
+        # desta rodada é que todo número apurado diz de onde veio.
         balancete = [dict(r) for r in c.query(
             "SELECT a.account_code, coa.name, coa.nature,"
             " sum(CASE WHEN a.side = 'debit' THEN a.amount_cents ELSE 0 END) AS debit_cents,"
-            " sum(CASE WHEN a.side = 'credit' THEN a.amount_cents ELSE 0 END) AS credit_cents"
+            " sum(CASE WHEN a.side = 'credit' THEN a.amount_cents ELSE 0 END) AS credit_cents,"
+            " CASE WHEN coa.nature IN ('asset','expense')"
+            "      THEN sum(CASE WHEN a.side = 'debit' THEN a.amount_cents ELSE -a.amount_cents END)"
+            "      ELSE sum(CASE WHEN a.side = 'credit' THEN a.amount_cents ELSE -a.amount_cents END)"
+            " END AS balance_cents"
             " FROM accounting_entries a JOIN chart_of_accounts coa ON coa.code = a.account_code"
             " WHERE a.period = $1 GROUP BY a.account_code, coa.name, coa.nature"
             " ORDER BY a.account_code", p)]
@@ -212,6 +281,9 @@ def contabilidade(ctx: Ctx):
         "status": periodo["status"] if periodo else "not_opened",
         "closed_at": periodo["closed_at"] if periodo else None,
         "trial_balance": balancete,
+        "balance_note": "Saldo apurado no servidor: conta de natureza ativo ou despesa é devedora "
+                        "(débito menos crédito); passivo, patrimônio líquido e receita são "
+                        "credoras (crédito menos débito).",
         "totals": {"debit_cents": debitos, "credit_cents": creditos,
                    "balanced": debitos == creditos},
         "batches": lotes,
@@ -237,10 +309,13 @@ def chart(ctx: Ctx):
        body=S.AccountingBatchIn, status=201, tags=T,
        summary="Lança um lote (tem de fechar: débitos iguais a créditos)")
 def post_batch(ctx: Ctx, body: S.AccountingBatchIn):
+    # `source_kind` é fixado em `manual` aqui: este é o lançamento manual, e a origem de um
+    # lançamento automático pertence a quem o gera, não a quem o envia.
+    linhas = [{**e.model_dump(exclude_none=True), "source_kind": "manual"} for e in body.entries]
     with _sys(ctx, readonly=False) as c:
-        for e in body.entries:
+        for e in linhas:
             ENG.ensure_period(c, e["period"])
-        lote = ENG.post_batch(c, entries=body.entries, created_by=ctx.user_id)
+        lote = ENG.post_batch(c, entries=linhas, created_by=ctx.user_id)
         ctx.audit(c, "internal.accounting_batch", "accounting_batch", lote,
                   {"entries": len(body.entries)})
     return {"batch_id": lote, "entries": len(body.entries)}
@@ -252,7 +327,7 @@ def post_batch(ctx: Ctx, body: S.AccountingBatchIn):
 def close_period(ctx: Ctx, body: S.ClosePeriodIn):
     p = _period(body.period)
     with _sys(ctx, readonly=False) as c:
-        out = ENG.close_period(c, period=p, closed_by=ctx.user_id)
+        out = ENG.close_period(c, period=p, closed_by=ctx.user_id, note=body.note)
         ctx.audit(c, "internal.period_closed", "accounting_period", str(p),
                   {"note": body.note})
     return out
@@ -444,11 +519,12 @@ def tesouraria(ctx: Ctx):
     }
 
 
-@route("GET", "/v1/administrativo/budget", auth="admin", permission="budget.read", tags=T,
+@route("GET", "/v1/administrativo/orcamento", auth="admin", permission="budget.read", tags=T,
        summary="Orçado × comprometido × realizado, por conta e centro de custo")
 def budget(ctx: Ctx):
     from ..clock import today
-    ano = int(ctx.request.query_params.get("year") or today().year)
+    ano = _inteiro("year", ctx.request.query_params.get("year"),
+                   padrao=today().year, minimo=2000, maximo=2100)
     with _sys(ctx) as c:
         orcamento = c.one("SELECT id::text AS id, version, status FROM platform_budgets"
                           " WHERE fiscal_year = $1 AND status = 'approved'", ano)
@@ -478,8 +554,7 @@ def budget(ctx: Ctx):
 @route("GET", "/v1/financeiro/fee-preview", auth="admin", permission="finance.read", tags=T,
        summary="CALCULA a taxa de marketplace sobre um valor — e diz que ela não é cobrável")
 def fee_preview(ctx: Ctx):
-    valor = int(ctx.request.query_params.get("amount_cents") or 0)
-    if valor <= 0:
-        raise ApiError(422, "amount_required", "Informe amount_cents maior que zero.")
+    valor = _inteiro("amount_cents", ctx.request.query_params.get("amount_cents"),
+                     padrao=0, minimo=1, maximo=10**12)
     with _sys(ctx) as c:
         return ENG.compute_marketplace_fee(c, contract_amount_cents=valor)

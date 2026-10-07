@@ -164,7 +164,11 @@ irrelevante.
 
 ## 4. O TAKE RATE SEM CUSTÓDIA
 
-A `PRICING_BIBLE.md` §18 pede 10% de take rate no marketplace. A ADR-022 recusa cobrar percentual
+A `PRICING_BIBLE.md` §18 pede 10% de take rate no marketplace. **No banco não há alíquota
+nenhuma**: `monetization_rules.marketplace.take_rate` tem `percentage = NULL`, `active = false` e
+`legal_status = refused`. Os 10% são um pedido comercial, não um dado do produto — e confundir os
+dois fez a documentação da v0.22.0 afirmar que "a regra de 10% existe" até uma auditoria
+independente conferir o banco. A ADR-022 recusa cobrar percentual
 sobre valor que a plataforma não vê. As duas coisas são conciliáveis, e a conciliação **não** exige
 custódia:
 

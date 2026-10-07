@@ -14,7 +14,7 @@
 // não recalcula nada — recalcular seria criar uma segunda regra para discordar da primeira.
 import { useEffect } from "react";
 import { api } from "../api";
-import { navigate } from "../router";
+import { navigate, useLocation } from "../router";
 import { Button, Panel, Pill, StateView, useAction } from "../ui/kit";
 import { useAccess } from "../access";
 import { useSession } from "../session";
@@ -30,16 +30,29 @@ const ESTADO_COMERCIAL: Record<string, [string, string]> = {
 export function Portal() {
   const { me } = useSession();
   const { ctx, loading, reload } = useAccess();
+  const { query } = useLocation();
   const { busy, run } = useAction();
 
-  // Com UM vínculo e nada a decidir, não há portal a mostrar: a pessoa vai direto ao painel.
+  // RESOLVER É ENCAMINHAR, NÃO INTERROMPER.
+  //
+  // A primeira versão desta tela parava o login de quem tem mais de uma organização para oferecer
+  // a troca de contexto. Mas o contexto JÁ está resolvido — a sessão tem organização ativa — e
+  // quem tem dois vínculos passava a ver uma tela intermediária em todo login, todos os dias, para
+  // confirmar o que o servidor já havia decidido. Quatro testes de ponta a ponta apontaram isso.
+  //
+  // Agora: com organização ativa, encaminha. A cadeia de resolução aparece quando a pessoa ABRE o
+  // portal de propósito (`/portal?escolher=1`, link no menu) ou quando há algo realmente a
+  // decidir — nenhuma organização ainda.
+  const escolhendo = query.get("escolher") === "1";
+  const encaminhar = !!ctx && !!ctx.organization && !escolhendo;
   useEffect(() => {
-    if (!ctx) return;
-    const umSo = (me?.organizations.length || 0) <= 1;
-    if (umSo && ctx.organization) navigate(ctx.dashboard, true);
-  }, [ctx, me]);
+    if (encaminhar && ctx) navigate(ctx.dashboard, true);
+  }, [encaminhar, ctx]);
 
-  if (loading || !ctx) return <div className="boot"><StateView loading /></div>;
+  // Enquanto o encaminhamento acontece, a tela mostra o estado de carregamento — e não a cadeia de
+  // resolução, que apareceria por um instante e desapareceria. Um lampejo de tela intermediária é
+  // pior do que esperar: a pessoa lê metade de algo que não era para ela.
+  if (loading || !ctx || encaminhar) return <div className="boot"><StateView loading /></div>;
 
   const org = ctx.organization;
   const [rotuloComercial, tomComercial] = ESTADO_COMERCIAL[ctx.commercial.state || "none"] || [ctx.commercial.state || "—", "muted"];

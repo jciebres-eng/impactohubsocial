@@ -24,7 +24,7 @@ import unittest
 import uuid
 from datetime import date, timedelta
 
-from tests.support import db_system, make_staff, new_account, reauth
+from tests.support import ROOT, db_system, make_staff, new_account, reauth
 
 HOJE = date.today()
 COMP = HOJE.replace(day=1)
@@ -164,17 +164,39 @@ class RevenueRecognitionIsCalculatedNotGuessedTests(unittest.TestCase):
         self.assertEqual(plano[0]["amount_cents"], 8337)
         self.assertEqual(plano[-1]["amount_cents"], 8333)
 
-    def test_the_marketplace_fee_is_calculated_and_declared_not_billable(self):
-        """A taxa de 10% EXISTE como cálculo e está inativa como cobrança — de propósito.
+    def test_without_a_declared_rate_the_fee_is_not_calculated_and_says_so(self):
+        """Não há alíquota declarada — e a resposta diz isso, em vez de devolver zero ou inventar.
 
-        `NON_CUSTODIAL_ARCHITECTURE.md` §7: cobrar percentual sobre contrato de terceiro sem
-        contrato comercial assinado e sem nota fiscal própria é receita inventada.
+        A primeira versão deste teste chamava-se "a taxa de 10% EXISTE como cálculo", conferia
+        apenas `billable` e `reason`, e NUNCA olhava `fee_cents`. A documentação repetiu a mesma
+        afirmação. Auditoria independente mostrou que `monetization_rules.percentage` é NULL: não
+        existem 10% em lugar nenhum do banco. Um teste que afirma no nome o que não exercita é
+        pior do que teste nenhum, porque documenta o contrário do que o código faz.
         """
         from impacto.economics import engine as ENG
         with db_system() as c:
             out = ENG.compute_marketplace_fee(c, contract_amount_cents=1000000)
-        self.assertFalse(out["billable"])
-        self.assertTrue(out.get("reason"))
+            self.assertFalse(out["billable"])
+            self.assertEqual(out["reason"], "percentage_not_declared")
+            self.assertIsNone(out["percentage"])
+            self.assertIsNone(out["fee_cents"], "sem alíquota não há cálculo a devolver")
+            self.assertEqual(out["base_cents"], 1000000)
+
+    def test_with_a_declared_rate_it_calculates_and_still_refuses_to_bill(self):
+        """CALCULA de verdade — e continua `billable: false` enquanto a regra estiver inativa."""
+        from impacto.economics import engine as ENG
+        with db_system() as c:
+            anterior = c.scalar("SELECT percentage FROM monetization_rules"
+                                " WHERE key = 'marketplace.take_rate'")
+            c.run("UPDATE monetization_rules SET percentage = 10"
+                  " WHERE key = 'marketplace.take_rate'")
+            out = ENG.compute_marketplace_fee(c, contract_amount_cents=1000000)
+            self.assertEqual(out["percentage"], 10.0)
+            self.assertEqual(out["fee_cents"], 100000, "10% de R$ 10.000,00 são R$ 1.000,00")
+            self.assertFalse(out["billable"], "a regra segue inativa por decisão registrada")
+            self.assertEqual(out["reason"], "rule_inactive")
+            c.run("UPDATE monetization_rules SET percentage = $1"
+                  " WHERE key = 'marketplace.take_rate'", anterior)
 
 
 class ApprovalIsFourEyesNotADecorationTests(unittest.TestCase):
@@ -374,14 +396,22 @@ class AnInstructionIsADocumentNotATransferTests(unittest.TestCase):
 class ExpenseSeparationOfDutiesTests(unittest.TestCase):
 
     def test_whoever_registers_an_expense_cannot_be_its_approver(self):
+        """Confere a restrição NOMEADA, não qualquer erro que contenha "expense".
+
+        O INSERT viola DUAS restrições cujo nome contém "expense" (`expense_four_eyes` e
+        `expense_approval_is_complete`, porque passava `approved_by` sem `approved_at`). Conferir
+        só a substring deixaria o teste verde se alguém removesse justamente o quatro-olhos.
+        Encontrado por auditoria independente.
+        """
         with db_system() as c:
             usuario = _um_usuario(c)
             with self.assertRaises(Exception) as cm:
                 c.run("INSERT INTO platform_expenses(period, account_code, cost_center,"
-                      " description, amount_cents, created_by, approved_by, status)"
-                      " VALUES ($1,'5.1.1','CLOUD','autoaprovada',9900,$2,$2,'approved')",
+                      " description, amount_cents, created_by, approved_by, approved_at, status)"
+                      " VALUES ($1,'5.1.1','CLOUD','autoaprovada',9900,$2,$2, now(),'approved')",
                       COMP, usuario)
-            self.assertIn("expense", str(cm.exception).lower())
+            self.assertEqual(getattr(cm.exception, "constraint", None), "expense_four_eyes",
+                             f"outra restrição barrou antes: {cm.exception}")
 
 
 class MetricsAnswerWithTheirSourceOrWithTheirAbsenceTests(unittest.TestCase):
@@ -427,21 +457,92 @@ class MetricsAnswerWithTheirSourceOrWithTheirAbsenceTests(unittest.TestCase):
                              f"{chave} não tem base real nesta versão e não pode parecer medido")
             self.assertTrue(conv[chave].get("unavailable_reason"))
 
-    def test_gmv_is_never_summed_with_platform_revenue(self):
-        """GMV é dinheiro de TERCEIRO. Somá-lo à receita é o erro que infla avaliação de SaaS."""
-        from impacto.economics import metrics as MET
-        with db_system() as c:
-            g = MET.gmv(c, period=COMP)
-            rec = MET.recurring_revenue(c)
-        self.assertEqual(g["platform_revenue_on_gmv"]["value"], 0)
-        self.assertTrue(g.get("warning"))
-        self.assertNotIn("gmv", str(rec["mrr"]["calculation"]).lower())
+    def test_platform_revenue_and_network_gmv_come_from_disjoint_sources(self):
+        """GMV é dinheiro de TERCEIRO. Somá-lo à receita é o erro que infla avaliação de SaaS.
 
-    def test_mrr_ignores_sandbox_charges(self):
+        A primeira versão deste teste conferia `platform_revenue_on_gmv == 0` — um zero literal
+        escrito no próprio módulo — e a ausência da palavra "gmv" numa string. Nenhuma das duas
+        tocava a receita.
+
+        Agora o teste exercita uma direção de verdade (lançar receita da plataforma não move o GMV)
+        e prova a outra estruturalmente: nenhum código converte `commitments` em lançamento
+        contábil, então um aporte de terceiro não tem como virar receita apurada.
+        """
+        from pathlib import Path as _P
+        from impacto.economics import engine as ENG
         from impacto.economics import metrics as MET
         with db_system() as c:
-            rec = MET.recurring_revenue(c)
-        self.assertIn("sandbox", rec["mrr"]["calculation"].lower())
+            gmv_antes = MET.gmv(c, period=COMP)["gmv"]["value"]
+            receita_antes = MET.revenue_recognized(c, period=COMP)["gross_revenue"]["value"]
+            ENG.ensure_period(c, COMP)
+            ENG.post_batch(c, created_by=_um_usuario(c), entries=[
+                {"period": COMP, "account_code": "1.2.1", "side": "debit", "amount_cents": 123400,
+                 "description": "Receita da plataforma", "source_kind": "invoice"},
+                {"period": COMP, "account_code": "4.1.1", "side": "credit",
+                 "amount_cents": 123400, "description": "Assinatura", "source_kind": "invoice"},
+            ])
+            depois = MET.gmv(c, period=COMP)
+            receita_depois = MET.revenue_recognized(c, period=COMP)["gross_revenue"]["value"]
+            self.assertEqual(receita_depois - receita_antes, 123400,
+                             "a receita da plataforma não foi reconhecida")
+            self.assertEqual(depois["gmv"]["value"], gmv_antes,
+                             "receita da plataforma entrou no GMV da rede")
+            self.assertEqual(depois["platform_revenue_on_gmv"]["value"], 0)
+            self.assertTrue(depois.get("warning"))
+            # As duas medições leem tabelas diferentes, e o módulo diz quais.
+            self.assertIn("commitments", depois["gmv"]["source"])
+            self.assertIn("accounting_entries",
+                          MET.revenue_recognized(c, period=COMP)["gross_revenue"]["source"])
+
+        # E nada no código converte aporte de terceiro em lançamento contábil: se convertesse, o
+        # GMV viraria receita por um caminho que nenhuma tela mostraria.
+        pkg = _P(ROOT) / "backend" / "impacto"
+        culpados = []
+        for f in pkg.rglob("*.py"):
+            texto = f.read_text(encoding="utf-8")
+            if "INSERT INTO accounting_entries" in texto and "commitments" in texto:
+                culpados.append(f.name)
+        self.assertEqual(culpados, [],
+                         "módulo que grava lançamento contábil e lê compromissos: "
+                         + ", ".join(culpados))
+
+    def test_mrr_excludes_a_sandbox_subscription_that_really_exists(self):
+        """Cria a assinatura em sandbox e confere que o MRR NÃO a conta.
+
+        A primeira versão conferia a FRASE do campo `calculation`: apagar
+        `AND s.provider <> 'sandbox'` do SQL e deixar o texto deixaria o teste verde e o MRR
+        inflado por um ambiente de testes.
+        """
+        from impacto.economics import metrics as MET
+        conta = new_account("osc")
+        with db_system() as c:
+            antes = MET.recurring_revenue(c)["mrr"]["value"]
+            c.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, amount_cents,"
+                  " interval, current_period_end)"
+                  " VALUES ($1,'osc_plus','active','sandbox', 500000, 'month', now() + interval '30 days')",
+                  conta.org_id)
+            depois = MET.recurring_revenue(c)["mrr"]["value"]
+            self.assertEqual(depois, antes,
+                             "assinatura em sandbox entrou no MRR: um ambiente de testes passaria "
+                             "a inflar a receita apurada")
+
+    def test_an_annual_subscription_enters_the_mrr_without_losing_a_cent(self):
+        """Divisão por 12 em numérico, não inteira.
+
+        `amount_cents / 12` é divisão INTEIRA no PostgreSQL: uma anual de R$ 999,95 entrava como
+        R$ 83,32 em vez de R$ 83,33 — truncando para menos a cada assinatura anual, com o campo
+        `calculation` dizendo apenas "dividida por 12". Encontrado por auditoria independente.
+        """
+        from impacto.economics import metrics as MET
+        conta = new_account("osc")
+        with db_system() as c:
+            antes = MET.recurring_revenue(c)["mrr"]["value"]
+            c.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, amount_cents,"
+                  " interval, current_period_end)"
+                  " VALUES ($1,'osc_plus','active','manual', 99995, 'year', now() + interval '365 days')",
+                  conta.org_id)
+            depois = MET.recurring_revenue(c)["mrr"]["value"]
+        self.assertEqual(depois - antes, 8333, "99995 ÷ 12 = 8332,92 → 8333, não 8332")
 
     def test_runway_is_absent_when_there_is_no_burn(self):
         from impacto.economics import metrics as MET
@@ -517,13 +618,13 @@ class TheInternalPanelsAreReachableAndSeparatedTests(unittest.TestCase):
         for rota in ("/v1/controladoria/summary", "/v1/financeiro/summary",
                      "/v1/contabilidade/summary", "/v1/tesouraria/summary",
                      "/v1/operacoes/health", "/v1/operacoes/alerts",
-                     "/v1/administrativo/budget", "/v1/aprovacoes"):
+                     "/v1/administrativo/orcamento", "/v1/aprovacoes"):
             r = cliente.get(rota)
             self.assertEqual(r.status, 403, f"{rota} aberta a cliente: {r}")
 
     def test_the_budget_panel_says_when_there_is_no_approved_budget(self):
         c = make_staff("controller")
-        r = c.get("/v1/administrativo/budget?year=2019")
+        r = c.get("/v1/administrativo/orcamento?year=2019")
         self.assertEqual(r.status, 200, r)
         self.assertIsNone(r.json["approved_budget"])
         self.assertIn("Nenhum orçamento aprovado", r.json["note"])
@@ -548,6 +649,296 @@ class TheInternalPanelsAreReachableAndSeparatedTests(unittest.TestCase):
         for chave in ("overdue_instructions", "executed_without_evidence",
                       "paid_expenses_without_entry", "unbalanced_batches", "divergences"):
             self.assertIn(chave, r.json)
+
+
+class TheDecisionReachesTheObjectTests(unittest.TestCase):
+    """O defeito mais grave desta versão, encontrado por AUDITORIA INDEPENDENTE depois de a suíte
+    inteira estar verde.
+
+    `POST /v1/financeiro/expenses` criava a despesa em `registered` e abria o pedido.
+    `POST /v1/aprovacoes/{id}/decide` gravava a decisão, o gatilho fechava o PEDIDO como aprovado —
+    e ninguém escrevia de volta na DESPESA. Não existia um único `UPDATE platform_expenses` em todo
+    o código de aplicação.
+
+    O resultado era uma tela que mentia com números certos: despesas registradas E APROVADAS, com o
+    painel Financeiro mostrando "A pagar R$ 0,00" ao lado da despesa total — porque `payable` soma
+    `status IN ('approved','scheduled')` e nada nunca chegava nesses estados. Em cascata, a posição
+    líquida da tesouraria SUPERESTIMAVA o caixa, e a conferência de "despesa paga sem lançamento"
+    apontava para um estado inalcançável.
+
+    Por que a suíte não pegou: o único teste de quatro olhos de despesa atacava a restrição por SQL
+    direto e nunca passava pela rota. Testar a restrição não testa o fluxo.
+    """
+
+    def _despesa_aprovada(self, centavos: int):
+        financeiro, controlador = make_staff("finance"), make_staff("controller")
+        reauth(financeiro)
+        criada = financeiro.post("/v1/financeiro/expenses", {
+            "period": str(COMP), "account_code": "5.1.1", "cost_center": "CLOUD",
+            "description": "Despesa do teste de aplicação da decisão", "amount_cents": centavos})
+        self.assertEqual(criada.status, 201, criada)
+        pedido = criada.json["approval"]["request_id"]
+        self.assertTrue(pedido, "a despesa nasceu sem pedido de aprovação")
+        return financeiro, controlador, criada.json["id"], pedido
+
+    def test_approving_the_request_approves_the_expense(self):
+        _, controlador, despesa, pedido = self._despesa_aprovada(9900)
+        reauth(controlador)
+        decisao = controlador.post(f"/v1/aprovacoes/{pedido}/decide",
+                                   {"approve": True, "permission_used": "finance.approve"})
+        self.assertEqual(decisao.status, 200, decisao)
+        self.assertEqual(decisao.json["state"], "approved")
+        with db_system() as c:
+            linha = c.one("SELECT status, approved_by, approved_at FROM platform_expenses"
+                          " WHERE id = $1", despesa)
+        self.assertEqual(linha["status"], "approved",
+                         "o pedido fechou como aprovado e a DESPESA ficou em 'registered'")
+        self.assertIsNotNone(linha["approved_by"], "aprovação sem autor registrado")
+        self.assertIsNotNone(linha["approved_at"], "aprovação sem data: não se audita")
+
+    def test_the_approved_expense_appears_as_payable(self):
+        """A consequência que a tela mostra. É o número que estava errado."""
+        _, controlador, _despesa, pedido = self._despesa_aprovada(12300)
+        reauth(controlador)
+        antes = controlador.get("/v1/financeiro/summary").json["payable"]["cents"]
+        controlador.post(f"/v1/aprovacoes/{pedido}/decide",
+                         {"approve": True, "permission_used": "finance.approve"})
+        depois = controlador.get("/v1/financeiro/summary")
+        self.assertEqual(depois.json["payable"]["cents"] - antes, 12300,
+                         "despesa aprovada não entrou em 'a pagar'")
+
+    def test_the_treasury_position_counts_the_approved_expense(self):
+        """A posição líquida SUPERESTIMAVA o caixa pelo total das despesas aprovadas."""
+        _, controlador, _d, pedido = self._despesa_aprovada(45600)
+        tesoureiro = make_staff("treasury")
+        antes = tesoureiro.get("/v1/tesouraria/summary").json
+        reauth(controlador)
+        controlador.post(f"/v1/aprovacoes/{pedido}/decide",
+                         {"approve": True, "permission_used": "finance.approve"})
+        depois = tesoureiro.get("/v1/tesouraria/summary").json
+        self.assertEqual(depois["payable_cents"] - antes["payable_cents"], 45600)
+        self.assertEqual(antes["net_position_cents"] - depois["net_position_cents"], 45600,
+                         "a posição líquida não baixou com a despesa aprovada")
+
+    def test_rejecting_the_request_cancels_the_expense(self):
+        """Recusada não volta a 'registered': ficaria indistinguível de uma que ninguém olhou."""
+        _, controlador, despesa, pedido = self._despesa_aprovada(7700)
+        reauth(controlador)
+        r = controlador.post(f"/v1/aprovacoes/{pedido}/decide",
+                             {"approve": False, "permission_used": "finance.approve",
+                              "note": "fora do orçamento do centro de custo"})
+        self.assertEqual(r.status, 200, r)
+        with db_system() as c:
+            self.assertEqual(c.scalar("SELECT status FROM platform_expenses WHERE id = $1",
+                                      despesa), "cancelled")
+
+    def test_refusing_without_a_reason_is_refused_by_the_server(self):
+        """A obrigatoriedade existia só no navegador — o botão desabilitado.
+
+        A rota aceitava a recusa sem justificativa e devolvia 200. Recusa sem motivo é recusa que
+        ninguém pode revisar.
+        """
+        _, controlador, _d, pedido = self._despesa_aprovada(5500)
+        reauth(controlador)
+        r = controlador.post(f"/v1/aprovacoes/{pedido}/decide",
+                             {"approve": False, "permission_used": "finance.approve"})
+        self.assertEqual(r.status, 422, r)
+        self.assertEqual(r.json["code"], "reason_required")
+
+    def test_an_approved_instruction_leaves_pending_approval(self):
+        """A tela oferecia "Emitir" em `pending_approval`, estado que a emissão recusa por 409."""
+        from impacto.economics import approvals as AP
+        from impacto.economics import engine as ENG
+        pedinte, aprovador = new_account("osc"), make_staff("controller")
+        with db_system() as c:
+            instrucao = ENG.create_instruction(
+                c, kind="supplier", payee_name="Fornecedor do teste de estado",
+                amount_cents=30000, due_on=HOJE, reference="NF do teste",
+                created_by=_uid(c, pedinte.email))
+            self.assertEqual(c.scalar("SELECT state FROM payment_instructions WHERE id = $1",
+                                      instrucao["id"]), "pending_approval")
+            _aprovar(c, instrucao["approval"]["request_id"],
+                     [(_uid(c, aprovador.email), "finance.approve")])
+            self.assertEqual(
+                c.scalar("SELECT state FROM payment_instructions WHERE id = $1", instrucao["id"]),
+                "approved", "a instrução aprovada ficou em 'pending_approval'")
+            self.assertTrue(AP.is_approved(c, object_type="payment_instruction",
+                                           object_id=instrucao["id"],
+                                           operation="payment_instruction"))
+            # E agora a emissão funciona — é o estado que a tela oferece.
+            ENG.issue_instruction(c, instruction_id=instrucao["id"])
+
+
+class MalformedParametersAnswerWithFourTwentyTwoTests(unittest.TestCase):
+    """Oito rotas internas devolviam HTTP 500 por um parâmetro de URL digitado errado.
+
+    Cada 500 grava trace completo em `error_events` e conta como erro de servidor na telemetria —
+    por `?period=abacaxi`. Encontrado por auditoria independente.
+    """
+
+    def test_an_invalid_period_is_a_client_error(self):
+        c = make_staff("controller")
+        for valor in ("abacaxi", "2026-13", "0000-00", "2026-02-30", ""):
+            with self.subTest(valor=valor):
+                r = c.get(f"/v1/controladoria/summary?period={valor}")
+                self.assertIn(r.status, (200, 422), f"500 em period={valor!r}: {r.body[:200]}")
+                if r.status == 422:
+                    self.assertEqual(r.json["code"], "invalid_period")
+
+    def test_an_invalid_number_is_a_client_error(self):
+        c = make_staff("controller")
+        casos = [("/v1/controladoria/reconciliation?days=abc", "invalid_number"),
+                 ("/v1/controladoria/reconciliation?days=-5", "out_of_range"),
+                 ("/v1/controladoria/reconciliation?days=99999", "out_of_range"),
+                 ("/v1/administrativo/orcamento?year=xyz", "invalid_number"),
+                 ("/v1/financeiro/fee-preview?amount_cents=abc", "invalid_number"),
+                 ("/v1/financeiro/fee-preview?amount_cents=0", "out_of_range")]
+        for rota, codigo in casos:
+            with self.subTest(rota=rota):
+                r = c.get(rota)
+                self.assertEqual(r.status, 422, f"esperava 422 em {rota}: {r.body[:200]}")
+                self.assertEqual(r.json["code"], codigo)
+
+    def test_a_negative_window_never_becomes_a_window_into_the_future(self):
+        """`?days=-5` respondia 200 e virava `now() - interval '-5 days'`.
+
+        A janela ia para o FUTURO, as conferências vinham vazias e `divergences` ficava
+        subcontado — um relatório de conciliação dizendo "nenhuma divergência" por causa de um
+        sinal.
+        """
+        c = make_staff("controller")
+        self.assertEqual(c.get("/v1/controladoria/reconciliation?days=-5").status, 422)
+
+    def test_a_malformed_accounting_batch_is_a_client_error(self):
+        c = make_staff("accounting")
+        reauth(c)
+        casos = [
+            [{"foo": 1}, {"bar": 2}],
+            [{"period": "nao-e-data", "account_code": "1.2.1", "side": "debit",
+              "amount_cents": 100, "description": "x"}] * 2,
+            [{"period": str(COMP), "account_code": "1.2.1", "side": "ESQUERDA",
+              "amount_cents": 100, "description": "x"}] * 2,
+            [{"period": str(COMP), "account_code": "nao-e-conta", "side": "debit",
+              "amount_cents": 100, "description": "x"}] * 2,
+        ]
+        for entradas in casos:
+            with self.subTest(entradas=str(entradas)[:60]):
+                r = c.post("/v1/contabilidade/batches", {"entries": entradas})
+                self.assertEqual(r.status, 422, f"esperava 422: {r.body[:200]}")
+
+    def test_the_caller_cannot_choose_the_origin_of_a_manual_entry(self):
+        """`source_kind`/`source_id` ficaram FORA do schema de propósito.
+
+        Deixá-los abertos permitiria a `accounting.write` forjar
+        `source_kind='manual', source_id=<id da despesa>` — exatamente o campo que a conciliação de
+        "despesa paga sem lançamento" lê. A conferência passaria a confirmar a si mesma.
+        """
+        c = make_staff("accounting")
+        reauth(c)
+        r = c.post("/v1/contabilidade/batches", {"entries": [
+            {"period": str(COMP), "account_code": "1.2.1", "side": "debit", "amount_cents": 100,
+             "description": "tentativa de escolher a origem", "source_kind": "invoice",
+             "source_id": "00000000-0000-0000-0000-000000000000"},
+            {"period": str(COMP), "account_code": "4.1.1", "side": "credit", "amount_cents": 100,
+             "description": "contrapartida"},
+        ]})
+        self.assertEqual(r.status, 422, f"o schema aceitou campo extra: {r.body[:200]}")
+
+
+class EveryMetricCarriesItsProvenanceTests(unittest.TestCase):
+    """Três afirmações da documentação que o código não cumpria. Auditoria independente."""
+
+    def test_last_updated_is_actually_emitted(self):
+        """`FINANCIAL_ENGINE.md` prometia `last_updated` em todo indicador. Nenhum o tinha."""
+        from impacto.economics import metrics as MET
+        with db_system() as c:
+            resumo = MET.summary(c, period=COMP)
+        vistos = 0
+        for bloco in ("recurring", "revenue", "cash", "expenses", "gmv", "conversion", "result"):
+            for chave, valor in resumo[bloco].items():
+                if isinstance(valor, dict) and "source" in valor:
+                    self.assertIn("last_updated", valor, f"{bloco}.{chave}")
+                    self.assertTrue(valor["last_updated"])
+                    vistos += 1
+        self.assertGreater(vistos, 10)
+
+    def test_an_unavailable_metric_without_a_reason_is_a_programming_error(self):
+        """`available: false` com `unavailable_reason: null` é o "`null` não explica" que o
+        próprio módulo recusa. Agora levanta na construção, onde é barato."""
+        from impacto.economics.metrics import _metric
+        with self.assertRaises(ValueError):
+            _metric(None, source="x", calculation="y", period="z", available=False)
+
+    def test_the_ai_cost_is_available_only_when_every_call_has_a_price(self):
+        """O INVARIANTE, conferido contra o estado real do banco — não contra um estado montado.
+
+        `ai_price_table` não é escrita pelo papel da aplicação (e não deveria ser: preço de modelo
+        é declaração, não operação), então o teste não pode preparar o cenário. O que ele confere é
+        a regra: o custo só está disponível quando existe tabela de preço E nenhuma chamada do mês
+        ficou sem preço. Qualquer outro estado responde indisponível COM MOTIVO.
+
+        A versão anterior respondia **zero, disponível**, porque a condição
+        `not (chamadas and sem_preco == chamadas)` curto-circuita com zero chamadas.
+        """
+        from impacto.economics import metrics as MET
+        with db_system() as c:
+            tem_tabela = bool(c.scalar("SELECT count(*) FROM ai_price_table"))
+            sem_preco = int(c.scalar(
+                "SELECT count(*) FROM ai_usage WHERE cost_status = 'no_price_table'"
+                "   AND created_at >= date_trunc('month', $1::date)"
+                "   AND created_at < date_trunc('month', $1::date) + interval '1 month'", COMP))
+            ia = MET.expenses(c, period=COMP)["ai_cost"]
+        esperado = tem_tabela and sem_preco == 0
+        self.assertEqual(ia["available"], esperado,
+                         f"tabela de preço: {tem_tabela}, chamadas sem preço: {sem_preco}")
+        if esperado:
+            self.assertIsNotNone(ia["value"])
+        else:
+            self.assertIsNone(ia["value"], "custo de IA não apurável devolveu número")
+            self.assertTrue(ia["unavailable_reason"])
+            # O motivo diz QUAL dos dois estados: sem tabela, ou com chamada sem preço.
+            self.assertTrue(
+                ("ai_price_table" in ia["unavailable_reason"]) if not tem_tabela
+                else ("sem preço declarado" in ia["unavailable_reason"]),
+                ia["unavailable_reason"])
+
+    def test_zero_calls_never_means_zero_cost(self):
+        """O caso exato do curto-circuito: nenhuma chamada no mês não é "a IA custou zero"."""
+        from impacto.economics import metrics as MET
+        vazio = _periodo(-24)
+        with db_system() as c:
+            self.assertEqual(c.scalar(
+                "SELECT count(*) FROM ai_usage WHERE created_at >= date_trunc('month', $1::date)"
+                "   AND created_at < date_trunc('month', $1::date) + interval '1 month'", vazio), 0)
+            ia = MET.expenses(c, period=vazio)["ai_cost"]
+        if not ia["available"]:
+            self.assertIsNone(ia["value"])
+            self.assertTrue(ia["unavailable_reason"])
+        else:
+            # Só pode estar disponível se houver tabela de preço — e aí zero é zero de verdade.
+            with db_system() as c:
+                self.assertTrue(c.scalar("SELECT count(*) FROM ai_price_table"),
+                                "custo de IA disponível valendo zero SEM tabela de preço: é "
+                                "exatamente o zero que o módulo existe para recusar")
+
+    def test_conversion_without_organizations_says_why(self):
+        from impacto.economics.metrics import _metric
+        # Reproduz o estado do banco vazio sem precisar esvaziá-lo: o motivo tem de existir para a
+        # construção ser possível, e é isso que o guarda acima garante.
+        m = _metric(None, currency=None, source="x", calculation="y", period="z",
+                    available=False, unavailable_reason="não há denominador")
+        self.assertTrue(m["unavailable_reason"])
+
+    def test_closing_a_period_keeps_the_note(self):
+        """A rota aceitava a nota e o motor a descartava: a coluna ficava nula."""
+        from impacto.economics import engine as ENG
+        p = _periodo(-19)
+        with db_system() as c:
+            ENG.ensure_period(c, p)
+            ENG.close_period(c, period=p, closed_by=_um_usuario(c),
+                             note="Fechamento conferido contra o extrato bancário")
+            self.assertIn("extrato", c.scalar(
+                "SELECT note FROM accounting_periods WHERE period = $1", p))
 
 
 if __name__ == "__main__":

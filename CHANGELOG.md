@@ -52,9 +52,12 @@ nomeados que existiam eram todos de conteúdo.
 - **Conciliação que aponta e não corrige**, em quatro conferências.
 - **Métricas que dizem de onde vieram** — e que respondem `available: false` **com o motivo** no
   lugar de zero. Churn, LTV, CAC e custo de IA estão nesse estado, declaradamente.
-- **Take rate calculado e declarado não cobrável**: a regra de 10% continua `active = false`, porque
-  cobrar percentual sobre contrato de terceiro sem contrato comercial assinado e sem nota fiscal
-  própria é receita inventada.
+- **Take rate: nem alíquota declarada, nem cobrança.** A regra `marketplace.take_rate` existe com
+  `percentage = NULL` e `active = false`, e a função devolve `fee_cents: null` com motivo
+  `percentage_not_declared` — porque devolver um número sem alíquota seria inventar a alíquota.
+  Quando houver decisão comercial, o percentual entra no dado e a função passa a calcular, ainda
+  recusando a cobrança enquanto a regra estiver desligada: cobrar percentual sobre contrato de
+  terceiro sem contrato assinado e sem nota fiscal própria é receita inventada.
 
 ### Operação interna: 16 telas para 224 rotas que não tinham nenhuma
 
@@ -89,6 +92,47 @@ orçamento com 48 linhas, quatro instruções e quatro aprovações pendentes. E
 qualquer tela financeira e ver algo — e, com um administrador único, a separação entre quem atende
 chamado e quem vê receita existia no banco e não aparecia para ninguém.
 
+### Auditoria independente, depois de a suíte estar verde
+
+Com 1.772 testes passando, a rodada passou por uma **auditoria independente** feita por quem não
+produziu o trabalho, com instrução de verificar cada afirmação contra o código e o banco em vez de
+ler a documentação. Ela encontrou onze defeitos reais, e os quatro primeiros tornavam telas
+financeiras inúteis ou enganosas:
+
+1. **A decisão de aprovação nunca chegava ao objeto aprovado.** O pedido fechava como `approved` e
+   a despesa ficava em `registered` para sempre: não existia um único `UPDATE platform_expenses` em
+   todo o código. O painel mostrava "A pagar R$ 0,00" ao lado da despesa total, a posição líquida
+   da tesouraria **superestimava** o caixa, e a conferência de "despesa paga sem lançamento"
+   apontava para um estado inalcançável. Corrigido no gatilho (migração 0050), não no handler —
+   porque o handler é um caminho e o gatilho é o único.
+2. **O menu oferecia o que a porta recusava**, em quatro papéis — exatamente o defeito que esta
+   versão declarava ter fechado. E o teste citado como prova era **tautológico**: comparava a
+   permissão do item com a lista de permissões da pessoa, que é a mesma lista por onde o menu já
+   filtra. Cinco itens exigiam permissão que nenhuma rota declarava.
+3. **A tela de orçamento chamava `/v1/administrativo/orcamento` e a rota era `/budget`**: erro em
+   toda abertura, e nenhum teste conferia as chamadas de API das telas.
+4. **Sete indicadores do painel executivo liam chaves que a resposta não tem** — `revenue.gross` em
+   vez de `gross_revenue`, `cash.inflow` em vez de `cash_in`, `burn.*` em vez de `result.*`. O
+   componente devolvia `null` para chave ausente, então não havia erro visível: receita bruta,
+   receita líquida, entradas, saídas, queima e autonomia simplesmente **desapareciam** do painel.
+5. **O custo de IA respondia zero, disponível** — a condição curto-circuitava com zero chamadas.
+6. **`last_updated` estava prometido na documentação e ausente da resposta.**
+7. **Oito rotas devolviam HTTP 500** por parâmetro de URL malformado (`?period=abacaxi`), e
+   `?days=-5` virava uma janela no futuro em que a conciliação não achava divergência nenhuma.
+8. **`billing.write` e `free_period.write` estavam isentas de reautenticação** sob um comentário que
+   dizia o contrário: a primeira dá baixa em fatura de cliente, a segunda concede gratuidade.
+9. **Tentativa de acesso privilegiado recusada não deixava rastro em lugar nenhum** — nem na trilha
+   (não chegava) nem em `audit_events` (que só registra alteração).
+10. **A documentação afirmava "a regra de 10%"** e não existe alíquota nenhuma no banco.
+11. **Nove testes não rodavam na execução direta do arquivo**: `unittest.main()` estava no meio
+    dele, antes de três classes serem definidas.
+
+Tudo corrigido, e **cada achado virou teste**. Nove testes fracos foram reescritos para exercitar
+o que o nome deles afirma: o da taxa confere o valor em dois ramos; o do MRR cria a assinatura em
+sandbox em vez de ler a frase do campo `calculation`; o do GMV lança receita e confere que o GMV
+não se move; o dos quatro olhos confere a restrição **nomeada**, porque o INSERT violava duas e
+remover a certa deixaria o teste verde.
+
 ### Defeitos encontrados e corrigidos
 
 Treze, todos por teste. Os mais instrutivos:
@@ -113,9 +157,9 @@ Treze, todos por teste. Os mais instrutivos:
 
 ### Testes
 
-**1.772 testes, verde, 26 ignorados** (439 s). **89 novos nesta versão**, em três arquivos:
-`test_v0220_authorization.py` (32), `test_v0220_financial_engine.py` (34),
-`test_v0220_internal_ui.py` (23).
+**1.806 testes, verde, 26 ignorados** (454 s). **123 novos nesta versão**, em três arquivos:
+`test_v0220_authorization.py` (34), `test_v0220_financial_engine.py` (53),
+`test_v0220_internal_ui.py` (36).
 
 **Nenhum teste foi enfraquecido ou removido.** Dois ficaram obsoletos pela unificação da trilha de
 tarefas e foram **reescritos mais exigentes**: passaram a cobrar duração de execução e ausência de

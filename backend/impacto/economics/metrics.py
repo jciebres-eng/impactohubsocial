@@ -30,8 +30,22 @@ from __future__ import annotations
 
 def _metric(value, *, source: str, calculation: str, period: str, available: bool = True,
             unavailable_reason: str | None = None, currency: str | None = "BRL") -> dict:
+    """Um indicador, com a procedência dele.
+
+    `last_updated` é o instante da APURAÇÃO, não do dado: estes indicadores são calculados na
+    requisição, e dizer qualquer outra coisa sugeriria um cache que não existe. A auditoria desta
+    versão encontrou o campo prometido na documentação e ausente da resposta — promessa escrita no
+    lugar de dado.
+
+    E um indicador indisponível SEMPRE carrega o motivo. `available: false` com
+    `unavailable_reason: null` é o "`null` não explica" que este módulo existe para recusar, então
+    a ausência do motivo é erro de programação e levanta aqui, onde é barato.
+    """
+    from ..clock import now
+    if not available and not unavailable_reason:
+        raise ValueError(f"indicador indisponível sem motivo escrito: {source}")
     d = {"value": value, "available": available, "source": source,
-         "calculation": calculation, "period": period}
+         "calculation": calculation, "period": period, "last_updated": now().isoformat()}
     if currency and value is not None:
         d["currency"] = currency
     if not available:
@@ -48,8 +62,11 @@ def recurring_revenue(c) -> dict:
     decisão com base nisso.
     """
     row = c.one(
-        "SELECT coalesce(sum(CASE WHEN s.interval = 'year' THEN s.amount_cents / 12"
-        "                         ELSE s.amount_cents END), 0) AS mrr_cents,"
+        # `amount_cents / 12` é divisão INTEIRA no PostgreSQL: uma anual de R$ 999,95 entrava como
+        # R$ 83,32 em vez de R$ 83,33, truncando para menos a cada assinatura anual. `::numeric`
+        # com `round` mantém o centavo e arredonda uma vez, no fim.
+        "SELECT coalesce(round(sum(CASE WHEN s.interval = 'year' THEN s.amount_cents::numeric / 12"
+        "                               ELSE s.amount_cents END)), 0) AS mrr_cents,"
         " count(*) AS subscriptions,"
         " count(*) FILTER (WHERE s.interval = 'year') AS annual"
         " FROM subscriptions s"
@@ -60,8 +77,9 @@ def recurring_revenue(c) -> dict:
     return {
         "mrr": _metric(mrr,
                        source="subscriptions (status=active, provider<>sandbox)",
-                       calculation=("soma do valor mensal; assinatura anual dividida por 12;"
-                                    " assinatura com provider=sandbox excluída"),
+                       calculation=("soma do valor mensal; assinatura anual dividida por 12 em"
+                                    " numérico e arredondada uma vez no fim; assinatura com"
+                                    " provider=sandbox excluída"),
                        period="instantâneo"),
         "arr": _metric(mrr * 12,
                        source="mrr × 12",
@@ -129,9 +147,10 @@ def expenses(c, *, period) -> dict:
                      " WHERE period = date_trunc('month', $1::date)::date"
                      "   AND status <> 'cancelled'", period) or 0
     por_cc = [dict(r) for r in c.query(
-        "SELECT cost_center, sum(amount_cents) AS cents FROM platform_expenses"
-        " WHERE period = date_trunc('month', $1::date)::date AND status <> 'cancelled'"
-        " GROUP BY cost_center ORDER BY sum(amount_cents) DESC", period)]
+        "SELECT e.cost_center, cc.name, sum(e.amount_cents) AS cents FROM platform_expenses e"
+        " LEFT JOIN cost_centers cc ON cc.code = e.cost_center"
+        " WHERE e.period = date_trunc('month', $1::date)::date AND e.status <> 'cancelled'"
+        " GROUP BY e.cost_center, cc.name ORDER BY sum(e.amount_cents) DESC", period)]
     por_conta = [dict(r) for r in c.query(
         "SELECT e.account_code, coa.name, sum(e.amount_cents) AS cents FROM platform_expenses e"
         " JOIN chart_of_accounts coa ON coa.code = e.account_code"
@@ -143,6 +162,28 @@ def expenses(c, *, period) -> dict:
                " coalesce(sum(cost_cents_estimate),0) AS cents FROM ai_usage"
                " WHERE created_at >= date_trunc('month', $1::date)"
                "   AND created_at < date_trunc('month', $1::date) + interval '1 month'", period)
+    # A tabela de preço de IA está VAZIA nesta versão. Três estados, e a primeira versão deste
+    # código acertava só um deles:
+    #   - sem tabela de preço → indisponível, qualquer que seja o número de chamadas. A versão
+    #     anterior usava `not (chamadas and sem_preco == chamadas)`: com zero chamadas, `chamadas`
+    #     é falsy, o `and` curto-circuita e o indicador saía DISPONÍVEL valendo zero. A tela
+    #     imprimia "Custo de IA R$ 0,00" com nota de procedência — exatamente o zero que este
+    #     módulo existe para recusar.
+    #   - tabela com preço, mas parte das chamadas sem preço → indisponível também: somar só as
+    #     precificadas apresentaria um custo SUBESTIMADO como apurado, que é pior do que não medir.
+    #   - tudo precificado → disponível.
+    tem_tabela = bool(c.scalar("SELECT count(*) FROM ai_price_table"))
+    chamadas, sem_preco = int(ia["chamadas"] or 0), int(ia["sem_preco"] or 0)
+    if not tem_tabela:
+        ia_motivo = ("`ai_price_table` está vazia: nenhum preço de modelo foi declarado, então o "
+                     "custo não pode ser apurado. Zero significaria 'a IA não custou nada'; a "
+                     "verdade é 'ninguém declarou quanto custa'.")
+    elif sem_preco:
+        ia_motivo = (f"{sem_preco} de {chamadas} chamadas estão sem preço declarado "
+                     "(cost_status='no_price_table'). Somar apenas as precificadas devolveria um "
+                     "custo subestimado com aparência de apurado.")
+    else:
+        ia_motivo = None
     return {
         "total": _metric(int(total), source="platform_expenses (status<>cancelled)",
                          calculation="soma por competência", period=str(period)),
@@ -150,14 +191,12 @@ def expenses(c, *, period) -> dict:
         "by_account": por_conta,
         "ai_cost": _metric(
             int(ia["cents"] or 0), source="ai_usage × ai_price_table",
-            calculation="soma de cost_cents_estimate",
+            calculation="soma de cost_cents_estimate das chamadas do mês",
             period=str(period),
-            available=not (ia["chamadas"] and ia["sem_preco"] == ia["chamadas"]),
-            unavailable_reason=("`ai_price_table` está vazia: toda chamada fica em "
-                                "cost_status='no_price_table' e o custo é nulo — nunca zero, "
-                                "porque zero mentiria")
-            if (ia["chamadas"] and ia["sem_preco"] == ia["chamadas"]) else None),
-        "ai_calls_without_price": int(ia["sem_preco"] or 0),
+            available=ia_motivo is None,
+            unavailable_reason=ia_motivo),
+        "ai_calls": chamadas,
+        "ai_calls_without_price": sem_preco,
     }
 
 
@@ -201,7 +240,10 @@ def conversion(c) -> dict:
             round(pagas * 100 / orgs, 2) if orgs else None, currency=None,
             source="subscriptions ativas ÷ organizações ativas",
             calculation="percentual de organizações com assinatura paga",
-            period="instantâneo", available=bool(orgs)),
+            period="instantâneo", available=bool(orgs),
+            unavailable_reason=None if orgs else
+            "Não há organização ativa: a divisão não tem denominador. Zero por cento diria "
+            "'ninguém converteu'; a verdade é 'não há ninguém para converter'."),
         "churn": _metric(
             None, currency=None, source="subscriptions",
             calculation="(cancelamentos no mês) ÷ (assinaturas ativas no início do mês)",

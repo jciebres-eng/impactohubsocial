@@ -16,11 +16,11 @@
 
 | medida | valor |
 | --- | --- |
-| rotas no roteador tipado | 872 |
-| rotas com permissão granular declarada | 62 |
+| rotas no roteador tipado | 873 |
+| rotas com permissão granular declarada | 75 |
 | rotas `auth="admin"` | 212 |
 | rotas públicas (`auth="none"`) | 51 |
-| migrações aplicadas (forward-only, sha256 por arquivo) | 49 |
+| migrações aplicadas (forward-only, sha256 por arquivo) | 50 |
 | arquivos de teste | 84 |
 | linhas de teste | 29.013 |
 | módulos Python de produção | 226 |
@@ -68,10 +68,11 @@
 
 ## FASE 05 — AUTH / RBAC / PERFIS — **DONE**
 
-- **Implementado:** 14 papéis internos, 43 permissões no catálogo, 65 mapeamentos, permissão como
-  chave na porta da API, step-up de 17 permissões, trilha de acesso privilegiado, `AccessContext`
-  numa consulta, `/v1/access/check`, três cópias de reautenticação unificadas em uma.
-- **Testado:** `test_v0220_authorization.py` (32), `test_v0220_internal_ui.py` (27).
+- **Implementado:** 14 papéis internos, 43 permissões no catálogo, 69 mapeamentos, permissão como
+  chave na porta da API, step-up de **19** permissões, trilha de acesso privilegiado que registra
+  também a tentativa **recusada**, `AccessContext` numa consulta, `/v1/access/check`, três cópias
+  de reautenticação unificadas em uma.
+- **Testado:** `test_v0220_authorization.py` (34), `test_v0220_internal_ui.py` (31).
 - **Documentado:** `AUTHORIZATION.md`.
 - **Pendente (declarado em `AUTHORIZATION.md` §12):** ABAC por atributo de linha além do `org_id`;
   risco por IP/dispositivo; sessão curta dedicada à área interna.
@@ -187,15 +188,22 @@ WhatsApp: adaptador e contrato; **sem provedor oficial contratado**.
 
 ## FASE 24 — TESTES — **DONE**
 
-1.772 testes, 26 ignorados, suíte verde (439 s). 89 testes novos nesta versão em três arquivos.
-Nenhum
+**1.806 testes**, 26 ignorados, suíte verde (454 s). **123 testes novos** nesta versão em três
+arquivos. Nenhum
 teste foi enfraquecido nem removido: os três que ficaram obsoletos foram **reescritos para o
 invariante durável** (ver `CHANGELOG.md`).
 
 ## FASE 25 — DEBUG — **DONE**
 
-13 defeitos reais corrigidos nesta versão, todos encontrados por teste e todos com ratchet. Os
-cinco mais instrutivos estão em `CHANGELOG.md` → *Defeitos encontrados e corrigidos*.
+**24 defeitos reais** corrigidos nesta versão: 13 encontrados pela própria suíte durante a
+construção, e **11 por auditoria independente feita DEPOIS de a suíte estar verde** — entre eles a
+decisão de aprovação que nunca chegava ao objeto aprovado, o menu que oferecia o que a porta
+recusava (com um teste tautológico citado como prova), a tela de orçamento chamando uma rota
+inexistente e sete indicadores do painel executivo lendo chaves que a resposta não tem.
+
+Todos com ratchet. Os dois conjuntos estão em `CHANGELOG.md`, em seções separadas — a distinção
+importa: a primeira lista é o que uma suíte bem escrita pega; a segunda é o que ela não pega, e é
+a razão de a auditoria final ser feita por quem não produziu o trabalho.
 
 ## FASE 26 — CLEANUP — **DONE**
 
@@ -215,6 +223,11 @@ Novos: `AUTHORIZATION.md`, `FINANCIAL_ENGINE.md`, `INTERNAL_OPERATIONS.md`,
 Ver `CHANGELOG.md` e o relatório final para o hash.
 
 ## FASE 29 — AUDITORIA FINAL — **DONE**
+
+Feita por **agente independente**, que não produziu o trabalho, com instrução explícita de
+verificar cada afirmação contra o código e o banco em vez de ler a documentação. Encontrou 11
+defeitos reais e 12 testes fracos ou tautológicos; todos corrigidos antes do fechamento, e cada
+achado virou teste. Nove testes foram **reescritos para exercitar o que o nome deles afirma**.
 
 Seis perguntas por item (implementado / integrado / testado / auditado / documentado / versionado).
 O resultado está no relatório final, com GO/NO-GO por frente — **não um GO único**.

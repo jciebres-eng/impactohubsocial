@@ -53,6 +53,14 @@ STEP_UP_PERMISSIONS = frozenset({
     "budget.write", "cost_center.write",
     "security.keys.write", "security.audit.export",
     "admin.users.write", "admin.organizations.write", "maintenance.execute",
+    # Encontradas por AUDITORIA INDEPENDENTE desta versão. Estavam numa lista de isenção cujo
+    # comentário dizia "o resto sim" e as isentava — isto é, o comentário contradizia a lista:
+    #   `billing.write`      → `POST /v1/admin/invoices/{id}/paid` marca fatura de CLIENTE como
+    #                          paga, e `manual-subscription` concede assinatura. Uma sessão de
+    #                          cobrança sequestrada dava baixa em fatura sem confirmar identidade,
+    #                          enquanto mudar o preço de um plano exigia.
+    #   `free_period.write`  → concede gratuidade. É conceder privilégio comercial.
+    "billing.write", "free_period.write",
 })
 
 # Papéis que NÃO alteram nada. Usado para recusar, por desenho, qualquer permissão de escrita
@@ -293,12 +301,18 @@ def require(ctx, permission: str) -> AccessContext:
 # Registro de acesso privilegiado
 # ------------------------------------------------------------------------------------------------
 
-def log_privileged(ctx, permission: str | None) -> None:
-    """Registra a entrada privilegiada, inclusive de LEITURA.
+def log_privileged(ctx, permission: str | None, *, denied: bool = False) -> None:
+    """Registra a entrada privilegiada, inclusive de LEITURA e inclusive quando é RECUSADA.
 
     Numa investigação a pergunta é "quem olhou", não só "quem mudou" — e `audit_events` só registra
     alteração. Falha de registro NÃO derruba a requisição: perder a trilha de uma leitura é ruim,
     recusar a operação de quem está trabalhando por causa disso é pior.
+
+    A TENTATIVA recusada entra também. Auditoria independente desta versão apontou que o registro
+    acontecia só depois da conferência passar: alguém da equipe sondando cinquenta rotas
+    financeiras e levando 403 em todas não deixava rastro em lugar nenhum — nem aqui, porque não
+    chegava, nem em `audit_events`, que só registra alteração. Uma tentativa de olhar também é um
+    olhar, e uma sequência de tentativas recusadas é o sinal que uma investigação procura.
     """
     try:
         with ctx.system_tx() as c:
@@ -306,7 +320,8 @@ def log_privileged(ctx, permission: str | None) -> None:
                   " org_scope, request_id, ip) VALUES ($1,$2::text[],$3,$4,$5,$6,$7,$8)",
                   ctx.principal.user_id,
                   list(ctx.principal.staff_roles or ()) + (
-                      ["platform_admin"] if ctx.principal.is_platform_admin else []),
+                      ["platform_admin"] if ctx.principal.is_platform_admin else [])
+                  + (["DENIED"] if denied else []),
                   permission, ctx.request.method, ctx.request.url.path,
                   ctx.principal.org_id, ctx.request_id, ctx.ip)
     except Exception:

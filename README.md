@@ -44,7 +44,13 @@ Mais: `/portal` resolvendo a cadeia *quem entra → organização → perfil →
 financeira → painel* no servidor; contabilidade por competência com partida dobrada real; instrução de pagamento
 como **documento** que congela na emissão e exige evidência; Health Center; Central de Alertas derivada do estado.
 
-**1.772 testes, 872 operações, 49 migrações, 42 motores.** Documentos desta rodada:
+E uma **auditoria final independente**, feita por quem não produziu o trabalho: com a suíte já
+verde, ela encontrou 11 defeitos reais e 12 testes fracos — entre eles a decisão de aprovação que
+nunca chegava à despesa aprovada (o painel mostrava "A pagar R$ 0,00" ao lado da despesa total), o
+menu que ainda oferecia o que a porta recusa em quatro papéis, e um teste **tautológico** que a
+própria documentação citava como prova do contrário. Tudo corrigido; cada achado virou teste.
+
+**1.806 testes, 873 operações, 50 migrações, 42 motores.** Documentos desta rodada:
 `NON_CUSTODIAL_ARCHITECTURE.md`, `AUTHORIZATION.md`, `FINANCIAL_ENGINE.md`, `INTERNAL_OPERATIONS.md` e
 `TECHNICAL_FINALIZATION_STATUS.md`.
 

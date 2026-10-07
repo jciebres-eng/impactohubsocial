@@ -55,16 +55,35 @@ def compute_marketplace_fee(c, *, contract_amount_cents: int) -> dict:
     if not regra:
         return {"billable": False, "reason": "rule_missing"}
     pct = regra["percentage"]
+    # DOIS motivos diferentes, e confundi-los foi o que fez a documentação afirmar que havia "a
+    # regra de 10%": não há percentual nenhum declarado. Enquanto `percentage` é nulo, esta função
+    # não calcula — ela não tem o que calcular, e dizer "calculado" seria inventar a alíquota.
+    if pct is None:
+        return {
+            "billable": False,
+            "reason": "percentage_not_declared",
+            "legal_status": regra["legal_status"],
+            "percentage": None,
+            "base_cents": contract_amount_cents,
+            "fee_cents": None,
+            "note": ("Não há alíquota declarada para `marketplace.take_rate`: a regra existe com "
+                     "`percentage = NULL` e `active = false`. Não há cálculo a devolver — e "
+                     "devolver um número aqui seria inventar a alíquota. Quando houver decisão "
+                     "comercial, o percentual entra no DADO e esta função passa a calcular, sem "
+                     "mudar de código. Ver NON_CUSTODIAL_ARCHITECTURE.md §4."),
+        }
+    fee = int(contract_amount_cents * float(pct) / 100)
     return {
         "billable": bool(regra["active"]),
-        "reason": "rule_inactive" if not regra["active"] else "ok",
+        "reason": "ok" if regra["active"] else "rule_inactive",
         "legal_status": regra["legal_status"],
-        "percentage": float(pct) if pct is not None else None,
+        "percentage": float(pct),
         "base_cents": contract_amount_cents,
-        "fee_cents": (int(contract_amount_cents * float(pct) / 100) if pct is not None else None),
+        "fee_cents": fee,
         "note": ("Valor CALCULADO, não cobrável: a regra está inativa e o banco recusa ativá-la "
                  "enquanto a plataforma não custodiar o valor (ADR-022). Ver "
-                 "NON_CUSTODIAL_ARCHITECTURE.md §4 para o caminho sem custódia."),
+                 "NON_CUSTODIAL_ARCHITECTURE.md §4 para o caminho sem custódia.")
+        if not regra["active"] else "Regra ativa.",
     }
 
 
@@ -111,7 +130,7 @@ def ensure_period(c, period) -> None:
           " ON CONFLICT DO NOTHING", period)
 
 
-def close_period(c, *, period, closed_by: str) -> dict:
+def close_period(c, *, period, closed_by: str, note: str | None = None) -> dict:
     """Fecha a competência. É o que torna o número de um mês citável depois.
 
     Recusa fechar com lote desbalanceado: fechar um mês que não fecha é publicar um número errado
@@ -124,13 +143,14 @@ def close_period(c, *, period, closed_by: str) -> dict:
         raise ApiError(409, "unbalanced_batches",
                        "Há lotes que não fecham nesta competência.",
                        {"batches": [str(b) for b in quebrados[:20]]})
-    row = c.one("UPDATE accounting_periods SET status = 'closed', closed_at = now(), closed_by = $2"
-                " WHERE period = $1 AND status <> 'closed' RETURNING period, closed_at",
-                period, closed_by)
+    row = c.one("UPDATE accounting_periods SET status = 'closed', closed_at = now(), closed_by = $2,"
+                " note = coalesce($3, note)"
+                " WHERE period = $1 AND status <> 'closed' RETURNING period, closed_at, note",
+                period, closed_by, note)
     if not row:
         raise ApiError(409, "period_not_open",
                        "Esta competência não está aberta: ou já foi fechada, ou nunca existiu.")
-    return {"period": row["period"], "closed_at": row["closed_at"]}
+    return {"period": row["period"], "closed_at": row["closed_at"], "note": row["note"]}
 
 
 # ------------------------------------------------------------------------------------------------
@@ -219,7 +239,7 @@ def reconcile(c, *, days: int = 30) -> dict:
         " WHERE e.status = 'paid' AND NOT EXISTS ("
         "   SELECT 1 FROM accounting_entries a WHERE a.source_kind = 'manual'"
         "     AND a.source_id = e.id::text)"
-        " AND e.period >= (current_date - make_interval(days => $1))::date LIMIT 200", days)]
+        " AND e.period >= date_trunc('month', current_date - make_interval(days => $1))::date LIMIT 200", days)]
     lotes_quebrados = [str(r["batch_id"]) for r in c.query(
         "SELECT DISTINCT batch_id FROM accounting_entries"
         " WHERE created_at > now() - make_interval(days => $1)", days)

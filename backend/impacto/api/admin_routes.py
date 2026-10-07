@@ -281,7 +281,7 @@ class FiscalRuleIn(S.In):
     notes: Annotated[str | None, Field(max_length=4000)] = None
 
 
-@A("GET", "/v1/admin/fiscal-rules")
+@A("GET", "/v1/admin/fiscal-rules", permission="fiscal.read")
 def list_rules(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": c.query("SELECT id::text AS id, code, version, name, status, jurisdiction, limit_pct::float AS limit_pct, source_citation,"

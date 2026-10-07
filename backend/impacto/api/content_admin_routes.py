@@ -78,7 +78,7 @@ def staff_revoke(ctx: Ctx, q: H.StaffRevokeQ):
 
 
 # ------------------------------------------------------------------------------------------------ painel editorial
-@A("GET", "/v1/admin/content/overview", staff=EDIT + SUPPORT, summary="Painel editorial: itens por estado, aguardando revisão e conteúdo desatualizado")
+@A("GET", "/v1/admin/content/overview", staff=EDIT + SUPPORT, permission="content.read", summary="Painel editorial: itens por estado, aguardando revisão e conteúdo desatualizado")
 def overview(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         by = {
@@ -518,7 +518,7 @@ def event_recording(ctx: Ctx):
 
 
 # ------------------------------------------------------------------------------------------------ suporte (fila)
-@A("GET", "/v1/admin/support/tickets", staff=SUPPORT, query=H.TicketQ, summary="Fila de chamados (por estado, prioridade e atraso de SLA)")
+@A("GET", "/v1/admin/support/tickets", staff=SUPPORT, permission="support.read", query=H.TicketQ, summary="Fila de chamados (por estado, prioridade e atraso de SLA)")
 def queue(ctx: Ctx, q: H.TicketQ):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT t.id::text AS id, t.number, t.category, t.priority, t.status, t.subject, t.created_at, t.first_response_due, t.resolution_due, t.escalated_at, t.recurring,"

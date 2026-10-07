@@ -52,8 +52,13 @@ sendo da controladoria com a própria OSC ativa — o tipo da organização nunc
 
 ## 3. Os 14 papéis internos
 
-`super_admin`, `controller`, `finance`, `accounting`, `treasury`, `billing`, `fiscal` (reservado),
-`operations`, `compliance`, `audit`, `security`, `support`, `analyst`, `editor`, `reviewer`.
+`super_admin`, `controller`, `finance`, `accounting`, `treasury`, `billing`, `operations`,
+`compliance`, `audit`, `security`, `support`, `analyst`, `editor`, `reviewer`.
+
+Treze deles têm mapeamento de permissão; `super_admin` recebe o catálogo (§4). **Não existe papel
+`fiscal`**: uma versão anterior deste documento o listava como "reservado" e ele nunca estava na
+restrição da tabela — era impossível conceder. As permissões fiscais vivem com `accounting`
+(`fiscal.read`) e com `super_admin` (`fiscal.issue`, `fiscal.cancel`).
 
 `super_admin` é concedido **pelo banco**, não pela aplicação: o gatilho
 `platform_admin_implies_super()` o concede quando `users.is_platform_admin` passa a verdadeiro e o
@@ -67,8 +72,9 @@ Duas tabelas, com papéis distintos:
 - **`permission_catalog`** — o que EXISTE. 43 permissões, cada uma com domínio, verbo e descrição.
   Três são exclusivas de `super_admin` (`admin.users.write`, `fiscal.issue`, `fiscal.cancel`) e cada
   uma dessas carrega um `only_reason` obrigatório de 30 caracteres ou mais.
-- **`staff_permissions`** — QUEM tem o quê. 65 mapeamentos papel → permissão, com nota explicando
-  cada concessão. Chave estrangeira para o catálogo: não se concede permissão que não existe.
+- **`staff_permissions`** — QUEM tem o quê. **69** mapeamentos papel → permissão em **13**
+  papéis, com nota explicando cada concessão. Chave estrangeira para o catálogo: não se concede
+  permissão que não existe.
 
 `super_admin` recebe o **catálogo**, não o mapeamento. A diferença importa: uma lista explícita
 esqueceria a permissão criada no mês seguinte, e foi exatamente isso que aconteceu na primeira
@@ -157,10 +163,17 @@ registrando o que mudou; são perguntas diferentes.
 pessoa pode receber — derivado da mesma matriz que a porta confere. Cada item declara a permissão
 que o justifica.
 
-Dois testes garantem que o menu não minta:
+Três testes garantem que o menu não minta:
 
-- todo item oferecido é um item que a API concede (por papel, para 12 papéis);
-- todo item aponta para uma rota que existe no roteador web.
+- **toda permissão que o menu exige é exigida por alguma rota.** Esta é a conferência que faltava:
+  a primeira versão comparava a permissão do item com a lista de permissões da pessoa — e
+  `menu_for()` filtra por exatamente essa lista, então o teste não podia falhar. Auditoria
+  independente encontrou quatro papéis recebendo item que a API recusava, com aquele teste
+  tautológico citado como prova do contrário;
+- **cada papel chama uma rota de cada permissão que recebeu** e confere que não leva 403;
+- todo item aponta para uma rota que existe no roteador web, e **toda chamada de API das telas
+  internas existe no roteador** — a tela de orçamento chamava `/orcamento` quando a rota era
+  `/budget`, e mostrava erro em toda abertura.
 
 E um terceiro fecha o buraco inverso: **todo domínio de permissão usado por alguma rota tem de
 aparecer em algum item de menu**. É o que transforma "224 rotas sem tela" num defeito que reprova,
@@ -182,16 +195,17 @@ corrigidas por defeito encontrado em teste:
 
 ## 11. O que foi testado
 
-`backend/tests/test_v0220_authorization.py` (32 testes) e
-`backend/tests/test_v0220_internal_ui.py` (27 testes). Entre eles:
+`backend/tests/test_v0220_authorization.py` (34 testes) e
+`backend/tests/test_v0220_internal_ui.py` (36 testes). Entre eles:
 
 - suporte não vê receita, **embora alcance a área administrativa**;
 - cliente não alcança nenhum painel interno (8 rotas conferidas uma a uma);
 - a matriz é dado: o teste lê o banco, não uma lista no teste;
 - o step-up é real: três testes usam `make_admin_without_reauth()` e provam que a operação é
   recusada sem reautenticação — inclusive para administrador;
-- a trilha de acesso privilegiado grava;
-- o menu casa com a porta, papel por papel.
+- a trilha de acesso privilegiado grava — **inclusive a tentativa recusada**;
+- o menu casa com a porta: toda permissão que o menu exige é exigida por alguma rota, e cada
+  papel chama de fato uma rota de cada permissão que recebeu, conferindo que não leva 403.
 
 ## 12. O que NÃO está implementado
 
@@ -206,3 +220,13 @@ Dito explicitamente para que ninguém o conte como feito:
 - **`fiscal.issue` / `fiscal.cancel`** existem no catálogo como exclusivas de `super_admin`, e
   **nenhum provedor fiscal está ligado**: a permissão existe, a emissão não.
 - **Busca global (⌘K)** e **Quick Actions** não foram implementadas nesta versão.
+- **12 das 43 permissões do catálogo ainda não guardam rota nenhuma.** Cada uma está nomeada com o
+  motivo em `test_v0220_internal_ui.py::EveryPermissionInTheCatalogGuardsSomethingTests.SEM_ROTA`,
+  e uma permissão nova sem rota reprova a suíte. Quatro delas (`content.write`, `content.publish`,
+  `support.write`, `admin.organizations.write`) guardam rotas que ainda estão atrás de `staff=` ou
+  do booleano; quatro são escrita de recurso que não tem rota de escrita (`budget.write`,
+  `cost_center.write`, `treasury.write`, `cost_center.read`); e quatro são recusadas por
+  arquitetura ou por falta de provedor (`billing.refund`, `fiscal.issue`, `fiscal.cancel`,
+  `security.audit.export`).
+- **150 das 212 rotas `auth="admin"` continuam sem permissão nomeada** — estado herdado, não
+  regressão desta rodada. 75 rotas declaram permissão (eram 0 antes da v0.22.0).

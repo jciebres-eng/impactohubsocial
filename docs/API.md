@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (872)
+## Operações (873)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -208,7 +208,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/voucher-batches` | admin da plataforma + MFA | — | Gera lote de vouchers (códigos exibidos UMA vez; armazenados só como HMAC). Ativação exige segundo administrador. |
 | POST | `/v1/admin/voucher-batches/{batch_id}/action` | admin da plataforma + MFA | — | batch action |
 | GET | `/v1/admin/voucher-batches/{batch_id}/redemptions` | admin da plataforma + MFA | — | Utilizações de um lote de vouchers (quem usou e quando; código só pelo final) |
-| GET | `/v1/administrativo/budget` | admin da plataforma + MFA | — | Orçado × comprometido × realizado, por conta e centro de custo |
+| GET | `/v1/administrativo/orcamento` | admin da plataforma + MFA | — | Orçado × comprometido × realizado, por conta e centro de custo |
 | POST | `/v1/agreements/join` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos. |
 | POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
 | POST | `/v1/ai/draft` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Gera rascunho de proposta/plano/relatório a partir dos dados do projeto (marca [COMPLETAR] onde faltar) |
@@ -373,6 +373,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/financeiro/expenses` | admin da plataforma + MFA | — | Despesas da plataforma por competência |
 | POST | `/v1/financeiro/expenses` | admin da plataforma + MFA | — | Registra despesa da plataforma (quem registra não aprova) |
 | GET | `/v1/financeiro/fee-preview` | admin da plataforma + MFA | — | CALCULA a taxa de marketplace sobre um valor — e diz que ela não é cobrável |
+| GET | `/v1/financeiro/instructions` | admin da plataforma + MFA | — | Instruções de pagamento, por situação |
 | POST | `/v1/financeiro/instructions` | admin da plataforma + MFA | — | Emite instrução de pagamento (documento; a plataforma não executa o pagamento) |
 | POST | `/v1/financeiro/instructions/{instruction_id}/executed` | admin da plataforma + MFA | — | Registra que quem paga executou, com evidência (obrigatória) |
 | POST | `/v1/financeiro/instructions/{instruction_id}/issue` | admin da plataforma + MFA | — | Emite a instrução aprovada — valor e destinatário congelam a partir daqui |

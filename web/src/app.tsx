@@ -407,6 +407,7 @@ function Shell({ children }: { children: ReactNode }) {
           <li><Link to="/notificacoes" className={active("/notificacoes") ? "on" : ""}>Notificações {me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}</Link></li>
           {kind !== "platform" && <li><Link to="/organizacao" className={active("/organizacao") ? "on" : ""}>Organização</Link></li>}
           {kind !== "platform" && <li><Link to="/conta/plano" className={active("/conta/plano") ? "on" : ""}>Plano</Link></li>}
+          {me.organizations.length > 1 && <li><Link to="/portal?escolher=1" className={path === "/portal" ? "on" : ""}>Trocar de contexto</Link></li>}
           <li><Link to="/conta" className={path === "/conta" ? "on" : ""}>Minha conta</Link></li>
           <li><button className="rail-logout" onClick={async () => { await logout(); navigate("/entrar"); }}>Sair</button></li>
         </ul>

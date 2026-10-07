@@ -113,6 +113,17 @@ def dashboard_for(ac: ACCESS.AccessContext) -> str:
     fazendo quando entra pelo trabalho.
     """
     perms = ac.permissions
+    # QUEM TEM TUDO não tem especialidade. `super_admin` recebe o catálogo inteiro, então casaria
+    # com a PRIMEIRA regra de especialidade abaixo e cairia sempre na controladoria — que não é a
+    # casa dele: a dele é a torre de controle, de onde se alcança tudo. Encontrado por quatro
+    # testes de ponta a ponta que procuravam a visão geral da administração depois do login.
+    if ac.is_platform_admin or "super_admin" in ac.staff_roles:
+        # A torre de controle (`/admin`) exige que a organização ATIVA seja a plataforma — é regra
+        # da própria interface, não desta função. Quem administra a plataforma e tem também uma
+        # organização cliente ativa vai para a casa dessa organização e troca de contexto no menu
+        # quando quiser administrar. Mandá-lo para `/admin` com a OSC ativa o levaria à tela
+        # "esta área não está disponível para este perfil" logo depois do login.
+        return "/admin" if ac.org_kind == "platform" else "/"
     # Ordem por ESPECIFICIDADE, da mais restrita para a mais ampla. A primeira versão disto usava
     # `"finance.read" in perms and "accounting.read" in perms` para identificar a controladoria, e
     # mandava a contabilidade para lá — porque contabilidade tem as duas leituras. O que distingue
@@ -134,11 +145,17 @@ def dashboard_for(ac: ACCESS.AccessContext) -> str:
         return "/operacoes"
     if "security.audit.read" in perms:
         return "/auditoria"
-    if ac.is_platform_admin or ac.staff_roles:
-        return "/admin"
+    if ac.staff_roles:
+        # Papel interno sem painel especializado (conteúdo, suporte): a torre de controle só se a
+        # organização ativa for a plataforma; senão, a casa da organização dele.
+        return "/admin" if ac.org_kind == "platform" else "/"
     if not ac.org_id:
         return "/organizacao/nova"
-    return "/area"
+    # A casa de quem é CLIENTE é o início da organização dele — a tela que já cumpria esse papel
+    # antes desta versão. `/area` é a área de trabalho da persona, uma tela a mais, não a porta:
+    # mandar para lá foi uma mudança de produto que esta rodada não precisava fazer, e 40 testes
+    # de ponta a ponta apontaram isso ao procurar a saudação da tela inicial.
+    return "/"
 
 
 @route("POST", "/v1/access/check", auth="user", body=S.AccessCheckIn, tags=T,

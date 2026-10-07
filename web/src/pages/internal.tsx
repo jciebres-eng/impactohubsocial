@@ -68,24 +68,25 @@ export function Controladoria() {
               <div className="metrics">
                 <Indicator title="MRR" m={data.recurring?.mrr} />
                 <Indicator title="ARR" m={data.recurring?.arr} />
-                <Indicator title="Assinaturas ativas" m={data.recurring?.active_subscriptions} kind="count" />
+                <div className="metric"><span className="metric-label">Assinaturas ativas</span><strong className="metric-value">{data.recurring?.subscriptions ?? 0}</strong><span className="metric-why">subscriptions status=active, provider&lt;&gt;sandbox</span></div>
               </div>
             </Panel>
             <Panel title="Competência" actions={<Link to="/contabilidade">Abrir contabilidade</Link>}>
               <div className="metrics">
-                <Indicator title="Receita bruta" m={data.revenue?.gross} />
+                <Indicator title="Receita bruta" m={data.revenue?.gross_revenue} />
                 <Indicator title="Deduções" m={data.revenue?.deductions} />
-                <Indicator title="Receita líquida" m={data.revenue?.net} />
+                <Indicator title="Receita líquida" m={data.revenue?.net_revenue} />
               </div>
             </Panel>
             <Panel title="Caixa e despesa" actions={<Link to="/financeiro">Abrir financeiro</Link>}>
               <div className="metrics">
-                <Indicator title="Entradas" m={data.cash?.inflow} />
-                <Indicator title="Saídas" m={data.cash?.outflow} />
+                <Indicator title="Entradas" m={data.cash?.cash_in} />
+                <Indicator title="Saídas" m={data.cash?.cash_out} />
                 <Indicator title="Despesa total" m={data.expenses?.total} />
                 <Indicator title="Custo de IA" m={data.expenses?.ai_cost} />
-                <Indicator title="Queima mensal" m={data.burn?.burn} />
-                <Indicator title="Autonomia" m={data.burn?.runway_months} kind="months" />
+                <Indicator title="Resultado" m={data.result?.net_result} />
+                <Indicator title="Queima mensal" m={data.result?.burn} />
+                <Indicator title="Autonomia" m={data.result?.runway_months} kind="months" />
               </div>
             </Panel>
             <Panel title="Volume transacionado na rede (GMV)">
@@ -135,7 +136,7 @@ export function Conciliacao() {
             <Panel quiet>
               <div className="metrics">
                 <div className="metric"><span className="metric-label">Divergências</span><strong className="metric-value">{data.divergences}</strong>
-                  <span className="metric-why">últimos {data.days} dias</span></div>
+                  <span className="metric-why">últimos {data.window_days} dias</span></div>
               </div>
             </Panel>
             {blocos.map(([chave, titulo, explicacao]) => (
@@ -182,12 +183,12 @@ export function Aprovacoes() {
               {data.items.length === 0 ? <p className="muted">Nada aguardando decisão.</p> : (
                 <ul className="rows">
                   {data.items.map((p: any) => {
-                    const faltam = Number(p.approvals_needed) - Number(p.approvals_given);
+                    // A faixa e o que falta vêm RESOLVIDOS do servidor (`permissions_available`,
+                    // `remaining`). Esta tela recalculava `approval_rule_for()` em JavaScript —
+                    // segunda implementação da mesma regra, com desempate diferente do SQL.
+                    const faltam = Number(p.remaining ?? 0);
                     const usadas: string[] = p.permissions_used || [];
-                    const faixa = (data.bands || []).find((b: any) => b.operation === p.operation
-                      && Number(p.amount_cents) >= Number(b.min_cents)
-                      && (b.max_cents === null || Number(p.amount_cents) < Number(b.max_cents)));
-                    const disponiveis: string[] = (faixa?.required_permissions || []).filter((x: string) => has(x) && !usadas.includes(x));
+                    const disponiveis: string[] = (p.permissions_available || []).filter((x: string) => has(x));
                     return (
                       <li key={p.id}>
                         <span>
@@ -258,15 +259,15 @@ export function Financeiro() {
             </Panel>
             <Panel title="Caixa da competência">
               <div className="metrics">
-                <Indicator title="Entradas" m={data.cash?.inflow} />
-                <Indicator title="Saídas" m={data.cash?.outflow} />
-                <Indicator title="Resultado de caixa" m={data.cash?.net} />
+                <Indicator title="Entradas" m={data.cash?.cash_in} />
+                <Indicator title="Saídas" m={data.cash?.cash_out} />
+                <Indicator title="Resultado de caixa" m={data.cash?.net_cash} />
               </div>
             </Panel>
             <Panel title="Despesa por centro de custo" actions={<Link to="/financeiro/despesas">Ver despesas</Link>}>
               {(data.expenses?.by_cost_center || []).length === 0 ? <p className="muted">Nenhuma despesa registrada nesta competência.</p> : (
                 <table className="table"><thead><tr><th>Centro de custo</th><th>Valor</th></tr></thead>
-                  <tbody>{data.expenses.by_cost_center.map((r: any) => <tr key={r.cost_center}><td>{r.name || r.cost_center}</td><td>{money(r.amount_cents)}</td></tr>)}</tbody></table>
+                  <tbody>{data.expenses.by_cost_center.map((r: any) => <tr key={r.cost_center}><td>{r.name || r.cost_center}</td><td>{money(r.cents)}</td></tr>)}</tbody></table>
               )}
             </Panel>
             <Panel title={`Instruções em aberto (${(data.open_instructions || []).length})`} actions={<Link to="/financeiro/instrucoes">Gerenciar</Link>}>
@@ -339,7 +340,7 @@ export function Despesas() {
 const TIPOS: [string, string][] = [["supplier", "Fornecedor"], ["reimbursement", "Reembolso"], ["tax", "Tributo"], ["payroll", "Folha"], ["marketplace_fee", "Taxa de marketplace"], ["refund", "Devolução"], ["other", "Outro"]];
 
 export function Instrucoes() {
-  const { data, error, loading, reload } = useLoad<any>("/v1/financeiro/summary");
+  const { data, error, loading, reload } = useLoad<any>("/v1/financeiro/instructions");
   const { has } = useAccess();
   const { busy, run } = useAction();
   const [f, setF] = useState({ kind: "supplier", payee_name: "", valor: "", due_on: "", reference: "" });
@@ -375,15 +376,18 @@ export function Instrucoes() {
               </Button>
             </Panel>
           )}
-          <Panel title={`Em aberto (${(data?.open_instructions || []).length})`}>
-            {(data?.open_instructions || []).length === 0 ? <p className="muted">Nenhuma instrução em aberto.</p> : (
-              <ul className="rows">{data.open_instructions.map((i: any) => (
+          <Panel title={`Em aberto (${(data?.open || []).length})`}>
+            {(data?.open || []).length === 0 ? <p className="muted">Nenhuma instrução em aberto.</p> : (
+              <ul className="rows">{data.open.map((i: any) => (
                 <li key={i.id}>
                   <span><strong>{money(i.amount_cents)}</strong> · {i.payee_name}
                     <div className="muted">{i.kind} · vence {date(i.due_on)}</div></span>
                   <span className="stack-row">
                     <Pill status={i.state} />
-                    {has("instruction.approve") && (i.state === "approved" || i.state === "pending_approval" || i.state === "draft") && (
+                    {/* Só `approved`: `issue_instruction()` chama `require_approved()` e recusa
+                        qualquer outro estado com 409. O botão era oferecido em `pending_approval`
+                        e `draft` — botão que o servidor recusa por construção. */}
+                    {has("instruction.approve") && i.state === "approved" && (
                       <Button variant="ink" busy={busy}
                         onClick={() => run(() => api.post(`/v1/financeiro/instructions/${i.id}/issue`, {}), "Instrução emitida").then(reload)}>Emitir</Button>
                     )}
@@ -436,13 +440,12 @@ export function Contabilidade() {
             <Panel title="Balancete" actions={<Link to="/contabilidade/plano-de-contas">Plano de contas</Link>}>
               {data.trial_balance.length === 0 ? <p className="muted">Nenhum lançamento nesta competência.</p> : (
                 <table className="table"><thead><tr><th>Conta</th><th>Natureza</th><th>Débito</th><th>Crédito</th><th>Saldo</th></tr></thead>
-                  <tbody>{data.trial_balance.map((r: any) => {
-                    const d = Number(r.debit_cents), c = Number(r.credit_cents);
-                    const devedora = r.nature === "asset" || r.nature === "expense";
-                    return <tr key={r.account_code}><td>{r.account_code}<div className="muted">{r.name}</div></td><td>{r.nature}</td>
-                      <td>{money(d)}</td><td>{money(c)}</td><td>{money(devedora ? d - c : c - d)}</td></tr>;
-                  })}</tbody></table>
+                  <tbody>{data.trial_balance.map((r: any) => (
+                    <tr key={r.account_code}><td>{r.account_code}<div className="muted">{r.name}</div></td><td>{r.nature}</td>
+                      <td>{money(r.debit_cents)}</td><td>{money(r.credit_cents)}</td><td>{money(r.balance_cents)}</td></tr>
+                  ))}</tbody></table>
               )}
+              {data.balance_note && <p className="note-honesty">{data.balance_note}</p>}
             </Panel>
             {data.unbalanced_batches.length > 0 && (
               <Panel title={`Lotes que não fecham (${data.unbalanced_batches.length})`}>

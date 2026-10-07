@@ -16,24 +16,26 @@ https://github.com/jciebres-eng/impactohubsocial
 branch: audit/v0.23.0-completion
 ```
 
-| | |
-|---|---|
-| Commit publicado | `3b4306c9fb89fcfc35bc7bb9481817b3bee9e4b7` |
-| Árvore (`tree`) | `e80077107b308f03c10d718f4fae865dbc7acb2d` |
-| Tag | `v0.23.0-audit-completion` → aponta para o mesmo commit, **localmente** |
-| Local × remoto (branch) | **idênticos** |
-| Local × remoto (tag) | **a tag NÃO está no remoto** |
+**Este documento não fixa o hash do commit, de propósito.** A versão anterior fixava, e ficou errada
+no dia seguinte: o relatório final citava cinco commits que uma reescrita de histórico havia
+eliminado, e uma auditoria independente encontrou a contradição. Hash escrito em dois lugares vira
+contradição no primeiro commit seguinte — e empacotar sempre produz pelo menos mais um commit, porque
+o manifesto é escrito depois que o conteúdo fecha.
 
-**A tag não está publicada, e isso não é detalhe.** O envio é recusado por este ambiente (HTTP 403).
-Ela existe no repositório local e no `bundle` que acompanha o pacote de auditoria; no GitHub, não.
-Quem clonar o remoto encontra o commit e **não** encontra a tag, e precisa conferir pelo hash do
-commit ou pela árvore. A versão anterior desta seção listava a tag sob "o histórico está público" sem
-essa ressalva — uma auditoria independente notou que `git ls-remote --tags` não a traz, e tinha
-razão. Para publicá-la: `git push --tags` de onde houver permissão.
+Os valores vigentes estão em **um** lugar só, gerado **depois** do empacotamento e embarcado no pacote
+de auditoria:
 
-O hash da **árvore** é o que mais importa para auditoria: ele depende só do conteúdo dos arquivos, não
-de autor, data ou mensagem. Duas pessoas que reconstruam o mesmo conjunto de arquivos chegam ao mesmo
-`tree`, independentemente de como o commitaram.
+```
+logs/verificacao_pacote_contra_git.log
+```
+
+Esse log traz o commit, o hash da **árvore** e o resultado da conferência arquivo por arquivo. O hash
+da árvore é o que mais importa para auditoria: depende só do conteúdo dos arquivos, não de autor,
+data ou mensagem. Duas pessoas que reconstruam o mesmo conjunto chegam ao mesmo `tree`.
+
+A tag `v0.23.0-audit-completion` existe **localmente e no bundle**; o envio ao remoto é recusado por
+este ambiente (HTTP 403). Quem clonar o GitHub encontra o commit e **não** encontra a tag, e confere
+pelo hash do commit ou da árvore. Para publicá-la: `git push --tags` de onde houver permissão.
 
 ### Por que os commits citados no relatório anterior não existem mais com aqueles hashes
 
@@ -70,15 +72,10 @@ e o que foi versionado.
 
 `scripts/verify_package_against_git.py` compara o conteúdo do pacote com os **objetos do Git**, pelo
 sha1 que o próprio Git calcula (`git hash-object`) — uma cadeia **independente** do sha256 do
-manifesto. Execução desta rodada:
+manifesto. A saída da execução desta rodada está em `logs/verificacao_pacote_contra_git.log`, no
+pacote de auditoria, e termina em:
 
 ```
-commit conferido: 3b4306c9fb89fcfc35bc7bb9481817b3bee9e4b7
-árvore:           e80077107b308f03c10d718f4fae865dbc7acb2d
-arquivos no pacote: 1808 · conferidos contra o Git: 1806
-exceções declaradas (geradas no empacotamento): 2
-versionados e FORA do pacote: 13
-
 OK: todo arquivo do pacote é o objeto Git do commit, byte a byte.
 ```
 
@@ -114,7 +111,7 @@ git bundle verify impacto-v0.23.0.bundle
 
 git clone impacto-v0.23.0.bundle repo && cd repo
 git log --oneline
-git rev-parse HEAD^{tree}     # deve dar e80077107b308f03c10d718f4fae865dbc7acb2d
+git rev-parse HEAD^{tree}     # compare com o log de verificação no pacote de auditoria
 ```
 
 ---
@@ -124,13 +121,13 @@ git rev-parse HEAD^{tree}     # deve dar e80077107b308f03c10d718f4fae865dbc7acb2
 ```bash
 # com rede
 git clone https://github.com/jciebres-eng/impactohubsocial && cd impactohubsocial
-git checkout 3b4306c9fb89fcfc35bc7bb9481817b3bee9e4b7
+git checkout <commit do log de verificação>
 
 # ou, sem rede, a partir do bundle que acompanha o pacote de auditoria
 git clone impacto-v0.23.0.bundle impactohubsocial && cd impactohubsocial
 
 # a árvore tem de bater
-git rev-parse HEAD^{tree}        # e80077107b308f03c10d718f4fae865dbc7acb2d
+git rev-parse HEAD^{tree}        # tem de bater com o log de verificação
 
 # e o pacote tem de ser essa árvore, arquivo por arquivo
 unzip IMPACTO_v0.23.0_AUDIT_COMPLETION.zip -d /tmp/pkg

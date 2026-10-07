@@ -262,13 +262,19 @@ Em `docs/DEPLOYMENT.md` e `DEPLOYMENT_CHECKLIST.md`. O essencial:
 
 ### 25. Hashes
 
-| Artefato | Valor |
+| Artefato | sha256 |
 |---|---|
-| Manifesto de rastreabilidade | `IMPACTO_v0.23.0_TRACEABILITY.json` — 1.802 arquivos, 28 categorias, 32,24 MB, sha256 por arquivo |
-| ZIP distribuível | sha256 em `RELEASE_MANIFEST.sha256`, dentro do pacote |
-| ZIP de auditoria | sha256 publicado na entrega |
-| Migrações | sha256 por arquivo em `schema_migrations.checksum`, conferido arquivo por arquivo por teste |
-| Cadeias de hash | `audit_verify`, `ledger_verify`, `value_verify`, `trust_verify` — todas verificam |
+| `IMPACTO_v0.23.0_AUDIT_COMPLETION.zip` (distribuível, 1.806 arquivos, 10,64 MB) | `a77db64686222cdb26bd931ef0b6b812d91799722129d9ef6b79fec07d7360ba` |
+| `IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip` (auditoria, 270 kB) | `75c985a65e7c2e5668bd0b2e62ae6d04ed50a67c5a1af4ee70d5d83567d6b0dd` |
+
+| Outros artefatos verificáveis | Como |
+|---|---|
+| Manifesto de rastreabilidade | `IMPACTO_v0.23.0_TRACEABILITY.json` — 1.805 arquivos, 28 categorias, 32,28 MB, **sha256 por arquivo** |
+| Pacote distribuível, arquivo por arquivo | `RELEASE_MANIFEST.sha256`, dentro do próprio pacote; `scripts/make_release.py --verify` confere os 1.806 |
+| Migrações | sha256 por arquivo em `schema_migrations.checksum`, conferido arquivo por arquivo por teste — uma migração que mude de conteúdo **depois** de aplicada reprova |
+| Cadeias de hash do produto | `audit_verify`, `ledger_verify`, `value_verify`, `trust_verify` — todas verificam |
+
+Os dois ZIPs são **irmãos, nunca aninhados**: não há ZIP dentro de ZIP, conforme a regra permanente.
 
 ---
 

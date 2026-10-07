@@ -1,9 +1,9 @@
 {
   "version": "0.23.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-07T12:40:08+00:00",
-  "files_total": 1802,
-  "size_bytes_total": 32243648,
+  "generated_at": "2026-10-07T13:34:41+00:00",
+  "files_total": 1805,
+  "size_bytes_total": 32276393,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -34,8 +34,8 @@
       "size_bytes": 1637542
     },
     "documentação técnica": {
-      "files": 37,
-      "size_bytes": 1750002
+      "files": 40,
+      "size_bytes": 1781746
     },
     "documento legal": {
       "files": 11,
@@ -115,7 +115,7 @@
     },
     "teste": {
       "files": 105,
-      "size_bytes": 2076326
+      "size_bytes": 2077327
     }
   },
   "files": [
@@ -3133,8 +3133,8 @@
     },
     {
       "file": "backend/tests/test_v0150_performance.py",
-      "sha256": "16ecba3a1532ad7cdfc767bad6b96af5b1f76f7bc3444cc770b20fcae45c2204",
-      "size_bytes": 27689,
+      "sha256": "3bd864e46366fdabdf096ebae38544d35c7e2b612793ec2d08a8c3de04689747",
+      "size_bytes": 28690,
       "category": "teste"
     },
     {
@@ -4044,6 +4044,18 @@
       "category": "documentação técnica"
     },
     {
+      "file": "docs/execution/FINAL_RELEASE_REPORT.md",
+      "sha256": "64a03a680809bf04f06e211893b212e78da50c86d2ef05193a429ce1a5d6a628",
+      "size_bytes": 14551,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/FINAL_ZERO_PENDING_REPORT.md",
+      "sha256": "64dc92c8ce3be997f4cfdbd3bbbdd64752835b3cb45e5d9df5c4c18936a795ed",
+      "size_bytes": 7411,
+      "category": "documentação técnica"
+    },
+    {
       "file": "docs/execution/FRONTEND_GATE.md",
       "sha256": "0e87a056d279d02de5220e4c024ec0d9a7a2df0a78702e10157a380df18830f6",
       "size_bytes": 7163,
@@ -4051,8 +4063,8 @@
     },
     {
       "file": "docs/execution/IMPLEMENTATION_LOG.md",
-      "sha256": "5019537ee83d1c5aa4f90ccf69ed5eb5a7e4203d317372ca657a0576fb88057a",
-      "size_bytes": 8081,
+      "sha256": "f1b2a7a813b3fdb9ee329a25110ec6b4a985257878962590cfaf52d67acebaed",
+      "size_bytes": 9432,
       "category": "documentação técnica"
     },
     {
@@ -4077,6 +4089,12 @@
       "file": "docs/execution/SECURITY_GATE.md",
       "sha256": "997877bc8b2bb315580b371354f359a98a8acad8dfbbd7c9e9d203aca430bf1b",
       "size_bytes": 7850,
+      "category": "documentação técnica"
+    },
+    {
+      "file": "docs/execution/TEST_EVIDENCE.md",
+      "sha256": "de6b46576595433c33f33f73e82a8d05aa6b2814b9b27e066b72386ea6b91b46",
+      "size_bytes": 8431,
       "category": "documentação técnica"
     },
     {

@@ -60,30 +60,53 @@ nenhuma foi resolvida enfraquecendo teste.
 
 ## Desempenho
 
+Executado nas duas escalas que a suíte oferece.
+
+### Escala cheia (`PERF_FULL=1`) — 10.000 soluções, 100.000 documentos, 100.000 avaliações
+
 ```
-cd backend && PERF=1 … python3 -m unittest discover -s tests -t . -p "test_v0150_performance.py"
+cd backend && PERF_FULL=1 … python3 -m unittest discover -s tests -t . -p "test_v0150_performance.py"
 ```
 
-**17 testes, OK**, em escala reduzida. Medidas (ms):
+**17 testes, OK.** Volume criado em **1.072 s**. Orçamento declarado: **2.500 ms por consulta**.
 
 | Consulta | ms | | Consulta | ms |
 |---|---|---|---|---|
-| cobranças | 11 | | prontidão | 9 |
-| documentos | 7 | | prontidão por finalidade | 9 |
-| feed do financiador | 752 | | propostas | 15 |
-| feed de programas | 32 | | registro legal | 33 |
-| grafo (2 níveis) | 9 | | relações | 9 |
-| linha do tempo | 9 | | resumo de valor | 8 |
-| marketplace público | 11 | | área do investidor | 37 |
-| projetos (100) | 826 | | área da OSC | 58 |
-| projetos (5) | 785 | | funções de catálogo (5) | 1–2 |
+| feed do financiador | **1.552** | | propostas | 70 |
+| projetos (100 por página) | **1.361** | | registro legal | 36 |
+| projetos (5 por página) | **1.307** | | feed de programas | 32 |
+| área da OSC | 329 | | marketplace público | 15 |
+| área do investidor | 72 | | grafo (2 níveis) | 13 |
+| linha do tempo | 9 | | relações | 9 |
+| prontidão | 8 | | prontidão por finalidade | 8 |
+| resumo de valor | 8 | | documentos | 7 |
+| cobranças | 6 | | funções de catálogo (5) | 1–6 |
 
-Volume criado em 1,6 s. A suíte **declara quando a escala não conclui**: imprimiu *"inconclusivo
-nesta escala: aceites do titular (legal_acceptances com menos de 500 linhas)"* em vez de dar o item
-por verificado — e um teste recusa a escala baixa demais para conferir algo de verdade.
+Todas abaixo do orçamento. A mais lenta (feed do financiador, 1.552 ms) usa 62% dele.
 
-Os números de escala plena (10.000 soluções, 100.000 documentos, 100.000 avaliações) estão em
-`PERFORMANCE_REPORT.md`, com o hardware em que foram obtidos registrado ao lado.
+Um teste confere ainda que **a lista não cresce linearmente com o tamanho da página**: uma página
+20× maior não pode custar mais de 8× — é o indício de consulta por linha.
+
+### A primeira execução em escala cheia media 401, não consulta
+
+Vale registrar porque o engano era convincente. Antes da correção descrita em `IMPLEMENTATION_LOG.md`,
+a execução em escala cheia imprimia números **melhores** que a escala reduzida: feed do financiador
+6 ms, projetos (100) 5 ms. Pareciam excelentes.
+
+Eram respostas **401**. A construção do volume cheio leva ~1.072 s e `access_token_ttl` é 900 s: a
+sessão do arranjo morria durante a própria preparação, e o que estava sendo cronometrado era o tempo
+de o servidor recusar uma sessão expirada. Depois da correção, os números verdadeiros são os da
+tabela acima — três deles acima de um segundo.
+
+### Escala reduzida (`PERF=1`)
+
+**17 testes, OK**, volume em 1,6 s. Serve para a suíte rodar rápido; **não** serve para afirmar
+desempenho, e os números divergem dos de escala cheia nos dois sentidos, porque com estatísticas
+reais o planejador usa índices onde antes varria sequencialmente.
+
+A suíte **declara quando a escala não conclui**: imprimiu *"inconclusivo nesta escala: aceites do
+titular (legal_acceptances com menos de 500 linhas)"* em vez de dar o item por verificado — e um
+teste recusa a escala baixa demais para conferir algo de verdade.
 
 ---
 

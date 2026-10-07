@@ -122,3 +122,26 @@ arquivo não carrega segredo e o arquivo **plantado** continua carregando os qua
 teria aberto um buraco permanente num teste de segurança.
 
 A quinta falha era o manifesto do release, resolvida na regeneração do Gate 10.
+
+## Desempenho — a medição que cronometrava a recusa
+
+A suíte de volume roda em passo próprio. Com `PERF=1` (escala reduzida, volume em 1,6 s) passava há
+versões. A primeira execução com `PERF_FULL=1` desta rodada deu **10 falhas e 1 erro** — e nenhuma
+era de desempenho: todas eram **401**.
+
+`access_token_ttl` é 900 s; a construção do volume cheio leva ~1.072 s. As sessões criadas em
+`setUpClass` morriam **antes da primeira medição**. Em um dos testes o sintoma apareceu como
+`KeyError: 'id'`, lendo `.json["id"]` de uma resposta 401.
+
+O detalhe que fazia o engano convincente: os números impressos eram **melhores** que em escala
+reduzida — feed do financiador 752 ms → 6 ms, projetos (100) 826 ms → 5 ms. Pareciam uma vitória do
+`ANALYZE`. Eram o tempo de o servidor recusar uma sessão expirada.
+
+Corrigido renovando as sessões depois do volume e antes das medições. O que está sob medição é a
+**consulta sob volume**, não a duração da sessão — que tem suíte própria em
+`test_v0230_session_hardening.py`. Aumentar o TTL para o teste passar seria mudar o produto para
+acomodar o arranjo.
+
+Números verdadeiros, em escala cheia, todos abaixo do orçamento de 2.500 ms: feed do financiador
+1.552 ms, projetos (100) 1.361 ms, projetos (5) 1.307 ms, área da OSC 329 ms, demais 18 consultas
+abaixo de 72 ms.

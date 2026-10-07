@@ -139,12 +139,23 @@ travados por teste, e nenhum campo de credencial de `Settings` embarca com valor
 
 ### 15. Desempenho
 
-**17 testes, OK.** Em escala reduzida: feed do financiador 752 ms, projetos (100) 826 ms, área da OSC
-58 ms, área do investidor 37 ms, registro legal 33 ms, demais abaixo de 20 ms. Volume criado em 1,6 s.
+**17 testes, OK em escala cheia** (10.000 soluções, 100.000 documentos, 100.000 avaliações; volume
+criado em 1.072 s). Orçamento declarado: **2.500 ms por consulta**, e todas ficam abaixo.
 
-A suíte **declara quando a escala não conclui** em vez de dar o item por verificado, e um teste
-recusa escala baixa demais para conferir algo de verdade. Números de escala plena em
-`PERFORMANCE_REPORT.md`, com o hardware registrado.
+| Mais lentas (escala cheia) | ms | % do orçamento |
+|---|---|---|
+| feed do financiador | 1.552 | 62% |
+| projetos (100 por página) | 1.361 | 54% |
+| projetos (5 por página) | 1.307 | 52% |
+| área da OSC | 329 | 13% |
+| demais 18 consultas | ≤ 72 | ≤ 3% |
+
+Um teste confere que a lista **não cresce linearmente com o tamanho da página** (20× maior não pode
+custar mais de 8×), que é o indício de consulta por linha.
+
+A primeira execução em escala cheia desta rodada parecia **melhor** — feed do financiador 6 ms — e
+estava medindo respostas **401**: a sessão do arranjo expirava durante a própria preparação. Corrigido
+e registrado em `IMPLEMENTATION_LOG.md`; os números acima são os reais.
 
 ### 16. Acessibilidade
 

@@ -21,9 +21,9 @@ seria a fraude que este documento existe para impedir.
 
 | Conjunto | Itens | Prova |
 |---|---|---|
-| Operações de API classificadas e exercitadas | **888** | `API_AUTHORIZATION_MATRIX.csv`; 221 chamadas HTTP reais contra a porta da plataforma, todas 403; 83 rotas com permissão nomeada recusando papel sem ela, com contraprova |
+| Operações de API classificadas e **invocadas uma a uma** | **888** | `API_AUTHORIZATION_MATRIX.csv` + `test_v0230_api_sweep.py`: **883 invocadas por HTTP, 0 responderam 5xx**, 5 puladas por serem destrutivas com motivo escrito. Autorização: 221 chamadas de recusa, todas 403; 83 rotas com permissão nomeada recusando papel sem ela, com contraprova. **Não é prova de caminho feliz individual** — ver item 12 do relatório final |
 | Motores validados | **42** | `ENGINE_VALIDATION_MATRIX.csv`; 42/42 com arquivo de teste, caso de dado faltante, caso adversarial e rotas conferidas; 0 FAILED |
-| Passos de jornada por persona | **49** | `PERSONA_E2E_MATRIX.csv`; **49 de 49 ponta a ponta** (6 de navegador + 43 de travessia), 0 ausentes, 5 personas |
+| Passos de jornada por persona | **49** | `PERSONA_E2E_MATRIX.csv`; 49 passos em **7 jornadas** e 5 personas — **19 de navegador** (Chromium real) + **30 de travessia** de API, 0 ausentes. Um passo não é uma jornada |
 | | **979** | |
 
 Testes automatizados que sustentam estes 979: **2.184 executados, 0 falhas, 0 erros** (585 s), mais

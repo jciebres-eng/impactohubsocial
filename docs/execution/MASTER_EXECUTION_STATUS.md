@@ -20,13 +20,13 @@ escrita em `BLOCKERS.md`.
 | **0** | Inventário | **DONE** | 1.795 arquivos rastreados conciliados com o manifesto; 16 diferenças, todas declaradas |
 | **1** | Ambiente | **DONE** | PostgreSQL 16.15, Python 3.13.16, Chromium presente; npm 403 e PyPI indisponível declarados |
 | **2** | Release | **DONE** | divergência de versão **real** encontrada e corrigida; 13 testes travam os quatro declarantes |
-| **3** | API — 888 operações | **DONE** | `API_AUTHORIZATION_MATRIX.csv` + 33 testes, 221 chamadas HTTP reais contra a porta da plataforma |
+| **3** | API — 888 operações | **DONE** | `API_AUTHORIZATION_MATRIX.csv`; **883 invocadas por HTTP, 0 responderam 5xx** (5 puladas com motivo); + 33 testes de autorização, 221 chamadas de recusa |
 | **4** | Motores — 42 | **DONE** | `ENGINE_VALIDATION_MATRIX.csv`, 42/42, 0 FAILED |
 | **5** | Segurança | **DONE** (9 PASS · 1 BLOCKED) | `SECURITY_GATE.md`, 165 testes; SCA bloqueado (D-SUP2) |
 | **6** | Dados / Infra | **DONE** | `DATA_INFRA_GATE.md`, ciclo completo executado contra PostgreSQL real |
 | **7** | Integrações | **DONE** (14 BLOCKED declarados) | `FRONTEND_GATE.md`, 129 testes; homologação exige credencial de fornecedor (D-INT1..14) |
 | **8** | Frente | **DONE** (6 pendências de acessibilidade declaradas) | `FRONTEND_GATE.md`, typecheck + build + 91 E2E |
-| **9** | Jornadas por persona | **DONE** | `PERSONA_E2E_MATRIX.csv`, 49/49 passos, **49 ponta a ponta** |
+| **9** | Jornadas por persona | **DONE** | `PERSONA_E2E_MATRIX.csv`, 49 passos em 7 jornadas, 5 personas; 19 navegador + 30 travessia |
 | **10** | Release | **DONE** | regressão completa, Git limpo, relatórios, ZIPs |
 
 ---
@@ -39,6 +39,9 @@ escrita em `BLOCKERS.md`.
 | `ENGINE_VALIDATION_MATRIX.csv` | 42 | 42 PASS | regeração + cobertura do registro de motores |
 | `INTEGRATION_HOMOLOGATION_MATRIX.csv` | 14 | 14 BLOCKED | regeração + `BLOCKERS.md` obrigatório |
 | `PERSONA_E2E_MATRIX.csv` | 49 | 49 PASS | regeração + 5 personas + mínimo de passos por jornada |
+
+**Modalidade dos 49 passos:** 19 de navegador (Chromium real) + 30 de travessia de API, em **7
+jornadas**. Um passo não é uma jornada: não são 49 jornadas independentes completas.
 
 Nenhuma célula de nenhuma matriz contém `OPEN`, `PENDENTE`, `ABERTO` ou `TBD` — conferido por teste.
 

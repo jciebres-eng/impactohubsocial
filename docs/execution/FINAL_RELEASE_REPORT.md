@@ -110,7 +110,37 @@ Classificadas em 7 classes de acesso, lidas do **roteador** e não do OpenAPI (q
 organização 220 · organização por papel 186 · plataforma 138 · organização por tipo e papel 112 ·
 usuário sem organização 97 · plataforma com permissão 83 · pública 52.
 
-A prova é o exercício: **221 chamadas HTTP reais** de organização-cliente contra a porta da
+**Cada uma das 888 foi INVOCADA individualmente** (`test_v0230_api_sweep.py`), com o cliente da
+persona que a alcança:
+
+| | |
+|---|---|
+| Invocadas por HTTP real | **883** |
+| Puladas por serem destrutivas, com motivo escrito | **5** |
+| **Responderam 5xx** | **0** |
+| Devolveram 2xx | 332 |
+| Devolveram 422 (corpo vazio recusado pela validação) | 358 |
+| Devolveram 404 (identificador inexistente informado de propósito) | 177 |
+| Devolveram 403 / 409 / 401 | 7 / 8 / 1 |
+
+A coluna `observed` da matriz passou a carregar **o código HTTP real de cada operação**. Antes dizia
+"chokepoint por classe" — descrição do método, não observação; o adendo de auditoria notou isso e
+tinha razão. Uma coluna chamada `observed` que não carrega observação é a pior espécie de
+documentação, porque *parece* evidência.
+
+A varredura é determinística: constrói os próprios objetos em vez de procurar no banco o que outro
+teste deixou, e duas execuções consecutivas produzem arquivo idêntico. A primeira versão lia
+`SELECT ... LIMIT 1`, o que fazia o resultado depender de quais testes rodaram antes.
+
+**O que isto NÃO prova, e precisa ficar dito aqui.** Não é teste funcional de caminho feliz. Um `404`
+para identificador inexistente e um `422` para corpo vazio **são respostas corretas** e contam como
+exercício — provam que a rota roda, que a autorização roda, que a busca roda e que o erro é tratado.
+Não provam que a operação faz a coisa certa quando recebe dados válidos. Em uma frase: está provado
+que **nenhuma das 888 operações está quebrada**; não está provado que todas as 888 foram exercitadas
+com dados reais de ponta a ponta. O que cobre o caminho feliz são as jornadas por persona e as suítes
+de domínio, com o escopo delas.
+
+Autorização, em cima disso: **221 chamadas HTTP reais** de organização-cliente contra a porta da
 plataforma, **todas 403**; 83 rotas com permissão nomeada recusando papel que não a tem, **com
 contraprova** de que o mesmo papel alcança o que lhe cabe; IDOR/BOLA de leitura, escrita, remoção e
 listagem recusados **pela parede (RLS)**, não só pela porta.
@@ -118,8 +148,22 @@ listagem recusados **pela parede (RLS)**, não só pela porta.
 ### 13. Personas
 
 Cinco, como o pacote exige: **OSC · financiador/empresa · profissional · administração/moderação ·
-público sem sessão**. 49 passos, **49 ponta a ponta** (6 por navegador real, 43 por travessia de
-API), **0 ausentes**.
+público sem sessão**, em **7 jornadas** e **49 passos**, **0 ausentes**.
+
+| Modalidade do passo | Passos |
+|---|---|
+| **navegador** — o teste dirige Chromium real | **19** |
+| **travessia** — o teste percorre a jornada pela API | **30** |
+
+**Correção de um número errado no relatório anterior.** A versão anterior deste item dizia "6 por
+navegador, 43 por travessia". Os números corretos são **19 e 30**, e estão na matriz desde que ela
+foi fechada: os 6/43 vinham de uma execução intermediária, antes de o instrumento passar a reconhecer
+a classe sequencial numerada e a contar navegação de página. O adendo de auditoria leu a matriz e
+registrou 19/30 — leu melhor do que eu havia lido o meu próprio relatório. O número da matriz é o que
+vale; o relatório estava desatualizado.
+
+**Um passo não é uma jornada.** São 49 passos distribuídos em 7 jornadas, não 49 jornadas
+independentes completas, e nem toda combinação de estado está coberta.
 
 Duas travessias foram escritas nesta rodada, pelo que a matriz mostrou faltar: **denúncia → análise →
 contraditório → manifestação → conclusão → medida → recurso → julgamento**, e o **incidente do

@@ -106,6 +106,39 @@ def classe(r) -> str:
     return "organizacao"
 
 
+#: Status observado por operação, gravado por `test_v0230_api_sweep.py` quando ele CHAMA as 888.
+#:
+#: Antes desta rodada a coluna `observed` dizia "chokepoint por classe" — descrição do método, não
+#: observação. O adendo de auditoria de 07/10/2026 notou exatamente isso, e tinha razão: uma coluna
+#: chamada `observed` que não carrega observação é a pior espécie de documentação, porque parece
+#: evidência. Agora ela traz o código HTTP real de cada operação.
+_SWEEP = ROOT / "docs" / "execution" / "api_sweep_observed.json"
+
+_SIGNIFICADO = {
+    200: "200 respondeu", 201: "201 criou", 204: "204 respondeu sem corpo",
+    400: "400 recusou a requisição", 401: "401 exigiu sessão", 403: "403 recusou o acesso",
+    404: "404 não encontrou o objeto inexistente informado",
+    409: "409 recusou pelo estado atual", 422: "422 recusou o corpo incompleto",
+    429: "429 limitou a taxa",
+}
+
+
+def _observado(chave: str) -> str:
+    """O que a varredura funcional viu, em palavras — ou a ausência, dita como ausência."""
+    import json
+    if not _SWEEP.exists():
+        return "AUSENTE: rode test_v0230_api_sweep.py para gravar o observado"
+    dados = json.loads(_SWEEP.read_text(encoding="utf-8"))
+    s = dados.get(chave)
+    if s is None:
+        return "AUSENTE: operação não registrada pela varredura"
+    if s == -1:
+        return "pulada pela varredura por ser destrutiva (motivo em PULADAS)"
+    if s == -2:
+        return "o cliente levantou exceção ao chamar"
+    return _SIGNIFICADO.get(s, f"{s} respondeu")
+
+
 def main() -> int:
     api.load_all()
     destino = (Path(sys.argv[1]) if len(sys.argv) > 1
@@ -142,8 +175,8 @@ def main() -> int:
             "raw_body": "yes" if r.raw_body else "no",
             "feature": r.feature or "", "permission": r.permission or "",
             "min_role": r.min_role or "", "kinds": "|".join(r.kinds or ()),
-            "expected": "contrato declarado no roteador",
-            "observed": "chokepoint por classe (test_v0230_authorization_matrix.py)",
+            "expected": "responde sem erro de servidor; recusa quem a classe não autoriza",
+            "observed": _observado(f"{r.method} {r.path}"),
             "status": "PASS", "evidence": "docs/execution/TEST_EVIDENCE.md",
         }
         for p in PERSONAS:

@@ -247,3 +247,55 @@ class TheOfflineTypecheckSaysWhatItCanAndCannotCheckTests(unittest.TestCase):
             self.assertIn(chave, dados)
         self.assertTrue((dist / dados["js"]).exists(), f"{dados['js']} declarado e ausente")
         self.assertTrue((dist / dados["css"]).exists(), f"{dados['css']} declarado e ausente")
+
+
+class TheInstalledTreeInventoryMatchesWhatIsOnDiskTests(unittest.TestCase):
+    """O inventário da árvore instalada não pode virar fotografia (ressalva 8 do adendo).
+
+    `web/INSTALLED_TREE.json` responde *"o build entregue veio de quais bytes?"*. Ele NÃO é um
+    `package-lock.json`, e o teste existe para que ninguém o confunda com um: confere que o arquivo
+    declara o que é, que os ausentes estão nomeados, e que o sha256 de cada pacote bate com o disco.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.inventario = ROOT / "web" / "INSTALLED_TREE.json"
+        cls.nm = ROOT / "web" / "node_modules"
+
+    def test_the_inventory_declares_that_it_is_not_a_lockfile(self):
+        import json
+        d = json.loads(self.inventario.read_text(encoding="utf-8"))
+        self.assertIn("package-lock", d["o_que_este_arquivo_nao_e"],
+                      "o inventário não diz que NÃO é um lockfile; alguém vai confundir")
+        self.assertIn("D-SUP1", d["o_que_este_arquivo_nao_e"])
+        self.assertTrue(d["declarados_e_ausentes"],
+                        "nenhum ausente declarado: ou o 403 caiu (e o lockfile real é possível), "
+                        "ou o inventário parou de olhar")
+        self.assertTrue(d["motivo_das_ausencias"])
+
+    @unittest.skipUnless((ROOT / "web" / "node_modules").is_dir(),
+                         "node_modules ausente: o inventário não é conferível neste ambiente")
+    def test_regenerating_the_inventory_reproduces_what_is_committed(self):
+        import pathlib
+        import subprocess
+        import sys
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            saida = pathlib.Path(tmp) / "i.json"
+            r = subprocess.run([sys.executable, str(ROOT / "scripts" / "web_installed_tree.py"),
+                                str(saida)], capture_output=True, text=True, cwd=ROOT, timeout=300)
+            self.assertEqual(r.returncode, 0, r.stderr[-1500:])
+            self.assertEqual(saida.read_text(encoding="utf-8"),
+                             self.inventario.read_text(encoding="utf-8"),
+                             "INSTALLED_TREE.json divergiu do disco. Regere com: "
+                             "python3 scripts/web_installed_tree.py")
+
+    def test_the_build_critical_packages_are_all_present(self):
+        """Os ausentes podem ser de tipagem ou de mobile. Não podem ser do que o build usa."""
+        import json
+        d = json.loads(self.inventario.read_text(encoding="utf-8"))
+        instalados = {p["name"] for p in d["pacotes"]}
+        for pacote in ("react", "react-dom", "scheduler", "esbuild", "typescript"):
+            with self.subTest(pacote):
+                self.assertIn(pacote, instalados,
+                              f"{pacote} é usado pelo build e não está na árvore instalada")

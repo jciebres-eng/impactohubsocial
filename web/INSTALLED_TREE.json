@@ -1,0 +1,66 @@
+{
+ "o_que_este_arquivo_e": "inventário verificável da árvore node_modules que produziu o build",
+ "o_que_este_arquivo_nao_e": "um package-lock.json; ver D-SUP1 em docs/execution/BLOCKERS.md",
+ "declarados_em_package_json": 11,
+ "instalados": 6,
+ "declarados_e_ausentes": [
+  "@capacitor/android",
+  "@capacitor/cli",
+  "@capacitor/core",
+  "@capacitor/ios",
+  "@capacitor/preferences",
+  "@types/react",
+  "@types/react-dom"
+ ],
+ "motivo_das_ausencias": "o registry npm responde 403 neste ambiente; @types/* afetam apenas o typecheck (contornado por tsconfig.offline.json) e @capacitor/* são de empacotamento móvel, fora do escopo desta rodada",
+ "pacotes": [
+  {
+   "name": "@esbuild/linux-x64",
+   "version": "0.28.2",
+   "declared_range": null,
+   "files": 3,
+   "bytes": 11428465,
+   "sha256_tree": "3abc70f6b1d5360fe810c6b806ca2faefbcd8332353d45a6c9d2d218345b1331"
+  },
+  {
+   "name": "esbuild",
+   "version": "0.28.2",
+   "declared_range": "0.28.2",
+   "files": 7,
+   "bytes": 147361,
+   "sha256_tree": "743d4b3e8a72633f6d96074ddf57d750d3dc29d10a746a21d7d8483b3f26e717"
+  },
+  {
+   "name": "react",
+   "version": "19.2.8",
+   "declared_range": "19.2.8",
+   "files": 27,
+   "bytes": 171598,
+   "sha256_tree": "25413c4ef6a8ad016c707737e43619b4a9186737b0bf9803df90d08886da936c"
+  },
+  {
+   "name": "react-dom",
+   "version": "19.2.8",
+   "declared_range": "19.2.8",
+   "files": 43,
+   "bytes": 7319407,
+   "sha256_tree": "35b7dfb998d6bfe4c9f98e3602396e0918aa161ecfe622cbc5cd049632246b40"
+  },
+  {
+   "name": "scheduler",
+   "version": "0.27.0",
+   "declared_range": null,
+   "files": 15,
+   "bytes": 82665,
+   "sha256_tree": "47fa1b932cd085424119b16c6ea568011499d14d889e21f89c772a602c832309"
+  },
+  {
+   "name": "typescript",
+   "version": "6.0.3",
+   "declared_range": "6.0.3",
+   "files": 140,
+   "bytes": 24346827,
+   "sha256_tree": "b731aca7d669f8c8849ea8c8f7c70a1c4e655d40443f06cadcd121ff948a0996"
+  }
+ ]
+}

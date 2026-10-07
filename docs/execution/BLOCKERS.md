@@ -27,7 +27,30 @@ qualquer máquina com acesso gera o lockfile, que então é versionado.
 dependências de desenvolvimento. O que vai a produção não é afetado: o `build.mjs` empacota a partir
 do que está em `web/src`, e o resultado é um pacote estático.
 
+**Tentativa de contorno, registrada porque falhou:** gerar o lockfile a partir do cache do npm,
+sem rede.
+
+```
+cd web && npm install --package-lock-only --offline
+→ npm error code ENOTCACHED
+  request to https://registry.npmjs.org/@capacitor%2fandroid failed:
+  cache mode is 'only-if-cached' but no cached response is available.
+```
+
+Um `package-lock.json` legítimo precisa da árvore resolvida, da URL de origem e do `integrity` de
+**cada** pacote declarado. O cache tem 6 dos 11: faltam `@types/react`, `@types/react-dom` e os cinco
+`@capacitor/*`, que nunca foram baixados aqui. Escrever um arquivo com esse nome contendo só os seis
+presentes seria **pior que não ter**: `npm ci` o trataria como a árvore completa e instalaria menos do
+que o projeto declara.
+
 **Redução do risco:**
+- `web/INSTALLED_TREE.json` (gerado por `scripts/web_installed_tree.py`) inventaria a árvore que
+  **produziu o build entregue**: nome, versão exata e sha256 do conteúdo de cada pacote instalado.
+  **Não é um lockfile e não é chamado de um** — responde à pergunta verificável *"o build veio de
+  quais bytes?"* sem fingir que resolve a reprodutibilidade. Cobre `react` 19.2.8, `react-dom`
+  19.2.8, `scheduler` 0.27.0, `esbuild` 0.28.2, `@esbuild/linux-x64` 0.28.2 e `typescript` 6.0.3 —
+  exatamente o que `build.mjs` usa. Os 7 ausentes são de tipagem (só afetam o typecheck) e de
+  empacotamento móvel (fora do escopo desta rodada).
 - `web/tsconfig.offline.json` declara stubs mínimos em `web/types/react/index.d.ts` e roda com
   `strict: true` e `noImplicitAny: true`. A verificação de tipos acontece — sob stubs, e isso está
   dito aqui e no relatório.

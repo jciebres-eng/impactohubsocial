@@ -262,16 +262,18 @@ Em `docs/DEPLOYMENT.md` e `DEPLOYMENT_CHECKLIST.md`. O essencial:
 
 ### 25. Hashes
 
-| Artefato | sha256 |
-|---|---|
-| `IMPACTO_v0.23.0_AUDIT_COMPLETION.zip` (distribuível, 1.806 arquivos, 10,64 MB) | `a77db64686222cdb26bd931ef0b6b812d91799722129d9ef6b79fec07d7360ba` |
-| `IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip` (auditoria, 270 kB) | `75c985a65e7c2e5668bd0b2e62ae6d04ed50a67c5a1af4ee70d5d83567d6b0dd` |
+**Um pacote não pode conter o próprio sha256** — calculá-lo o mudaria. Então os hashes dos dois ZIPs
+são publicados **com a entrega**, fora deles, e acompanhados dos arquivos `.sha256` ao lado de cada
+um. É a mesma razão pela qual `RELEASE_MANIFEST.sha256`, `RELEASE_MANIFEST.csv` e o próprio manifesto
+de rastreabilidade constam como exceções declaradas em `test_v0230_release_gate.py`.
 
-| Outros artefatos verificáveis | Como |
+| Artefato | Como verificar |
 |---|---|
-| Manifesto de rastreabilidade | `IMPACTO_v0.23.0_TRACEABILITY.json` — 1.805 arquivos, 28 categorias, 32,28 MB, **sha256 por arquivo** |
-| Pacote distribuível, arquivo por arquivo | `RELEASE_MANIFEST.sha256`, dentro do próprio pacote; `scripts/make_release.py --verify` confere os 1.806 |
-| Migrações | sha256 por arquivo em `schema_migrations.checksum`, conferido arquivo por arquivo por teste — uma migração que mude de conteúdo **depois** de aplicada reprova |
+| `IMPACTO_v0.23.0_AUDIT_COMPLETION.zip` (distribuível, 1.806 arquivos, ~10,6 MB) | `sha256sum -c IMPACTO_v0.23.0_AUDIT_COMPLETION.zip.sha256`, publicado ao lado |
+| `IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip` (auditoria) | `sha256sum -c IMPACTO_v0.23.0_AUDIT_EVIDENCE.zip.sha256`, publicado ao lado |
+| Pacote distribuível, **arquivo por arquivo** | `python3 scripts/make_release.py --verify plataforma-impacto-v0.23.0` — confere os 1.806 contra `RELEASE_MANIFEST.sha256` embutido |
+| Manifesto de rastreabilidade | `IMPACTO_v0.23.0_TRACEABILITY.json` — 1.805 arquivos com sha256, tamanho e categoria |
+| Migrações | sha256 por arquivo em `schema_migrations.checksum`; um teste confere arquivo por arquivo, e uma migração que mude de conteúdo **depois** de aplicada reprova |
 | Cadeias de hash do produto | `audit_verify`, `ledger_verify`, `value_verify`, `trust_verify` — todas verificam |
 
 Os dois ZIPs são **irmãos, nunca aninhados**: não há ZIP dentro de ZIP, conforme a regra permanente.

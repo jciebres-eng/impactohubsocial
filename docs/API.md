@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.22.0)
+# API REST /v1 — referência gerada do código (v0.23.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (873)
+## Operações (888)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -20,9 +20,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/agreements/{agreement_id}/action` | admin da plataforma + MFA | — | Ativa (por outro administrador), suspende ou encerra um convênio |
 | GET | `/v1/admin/agreements/{agreement_id}/members` | admin da plataforma + MFA | — | Organizações vinculadas ao convênio |
 | POST | `/v1/admin/agreements/{agreement_id}/members/{org_id}/revoke` | admin da plataforma + MFA | — | Remove uma organização do convênio (revoga a licença e libera a vaga) |
+| GET | `/v1/admin/ai` | admin da plataforma + MFA | — | Central de controle de IA: prompts, faixas, resultados reais, custo e o que não está implementado |
 | GET | `/v1/admin/ai/cost` | admin da plataforma + MFA | — | Custo estimado de IA por provedor, modelo e recurso — insumo da margem |
 | POST | `/v1/admin/ai/prices` | admin da plataforma + MFA | — | Declara o preço de um modelo de IA (versionado, com fonte) |
+| GET | `/v1/admin/ai/prompts/{prompt_key}` | admin da plataforma + MFA | — | Histórico de versões de um prompt (sem o texto, que é do produto) |
 | GET | `/v1/admin/audit` | admin da plataforma + MFA | — | audit search |
+| POST | `/v1/admin/audit/export` | admin da plataforma + MFA | — | Exporta a trilha filtrada — e registra a própria exportação na trilha |
+| GET | `/v1/admin/audit/timeline` | admin da plataforma + MFA | — | Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização |
+| GET | `/v1/admin/audit/trail` | admin da plataforma + MFA | — | Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id |
 | GET | `/v1/admin/audit/verify` | admin da plataforma + MFA | — | Verifica a cadeia de hashes da trilha de auditoria |
 | GET | `/v1/admin/billing/organizations/{org_id}` | admin da plataforma + MFA | — | Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização |
 | GET | `/v1/admin/call-sources` | admin da plataforma + MFA | — | list sources |
@@ -130,9 +135,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/integrations/overview` | admin da plataforma + MFA | — | Qual integração está quebrada agora? Saúde, filas, falhas, dead-letters |
 | POST | `/v1/admin/integrations/providers/{key}/maturity` | admin da plataforma + MFA | — | Promove/rebaixa a maturidade de um provedor COM evidência registrada (nunca automático) |
 | POST | `/v1/admin/integrations/run-worker` | admin da plataforma + MFA | — | Executa um ciclo do trabalhador agora (jobs devidos + entregas devidas) |
+| GET | `/v1/admin/integrity` | admin da plataforma + MFA | — | Órfãos, referências não resolvidas, deriva de catálogo, cadeias de hash e cobertura de proveniência |
 | POST | `/v1/admin/invoices` | admin da plataforma + MFA | — | Emite cobrança manual (registro interno; NF-e é emitida no sistema fiscal da empresa) |
 | POST | `/v1/admin/invoices/{invoice_id}/paid` | admin da plataforma + MFA | — | invoice paid |
 | GET | `/v1/admin/jobs` | admin da plataforma + MFA | — | jobs |
+| GET | `/v1/admin/kill-switch` | admin da plataforma + MFA | — | Estado do interruptor de emergência e histórico do incidente |
+| POST | `/v1/admin/kill-switch` | admin da plataforma + MFA | — | Aciona ou libera um escopo do interruptor |
 | GET | `/v1/admin/legal/acceptances` | admin da plataforma + MFA | — | Prova de aceite: quem, quando, qual versão e qual hash |
 | POST | `/v1/admin/legal/documents/{doc_id}/approve` | admin da plataforma + MFA | — | Aprova a versão, exigindo quem revisou e sob qual referência |
 | POST | `/v1/admin/legal/documents/{doc_id}/review` | admin da plataforma + MFA | — | Marca a minuta como enviada para revisão jurídica |
@@ -210,11 +218,15 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/voucher-batches/{batch_id}/redemptions` | admin da plataforma + MFA | — | Utilizações de um lote de vouchers (quem usou e quando; código só pelo final) |
 | GET | `/v1/administrativo/orcamento` | admin da plataforma + MFA | — | Orçado × comprometido × realizado, por conta e centro de custo |
 | POST | `/v1/agreements/join` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos. |
-| POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
+| PUT | `/v1/ai/budget` | membro da organização ativa | papel ≥ admin | Define o orçamento de IA da organização para o mês corrente |
+| POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member; limite 60/3600s | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
+| GET | `/v1/ai/credits` | membro da organização ativa | papel ≥ viewer | Extrato de crédito de IA: concessão, consumo e devolução, em ordem |
 | POST | `/v1/ai/draft` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Gera rascunho de proposta/plano/relatório a partir dos dados do projeto (marca [COMPLETAR] onde faltar) |
+| GET | `/v1/ai/estimate` | membro da organização ativa | papel ≥ viewer | Estimativa de custo ANTES de uma operação paga (ou a declaração de que não há preço) |
+| GET | `/v1/ai/policies` | membro da organização ativa | papel ≥ viewer | Política de IA por faixa de risco: o que sai da instalação e o que exige revisão humana |
 | POST | `/v1/ai/structure-need` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Transforma uma necessidade descrita livremente em projeto estruturado (título, causas, ODS, itens de orçamento, perguntas) |
 | POST | `/v1/ai/summarize-project` | membro da organização ativa | papel ≥ viewer; limite 60/3600s | Resumo do projeto para leitura rápida do financiador |
-| GET | `/v1/ai/usage` | membro da organização ativa | papel ≥ viewer | Uso de IA no mês (cota do plano) |
+| GET | `/v1/ai/usage` | membro da organização ativa | papel ≥ viewer | Uso de IA no mês: cota, orçamento em dinheiro, crédito e como as chamadas terminaram |
 | GET | `/v1/applications` | membro da organização ativa | papel ≥ viewer | Candidaturas da organização (enviadas pela OSC ou recebidas pelo financiador) |
 | POST | `/v1/applications` | membro da organização ativa | tipos: osc; papel ≥ member | Inicia candidatura assistida (plataforma) ou acompanhamento de edital externo, com checklist gerado dos requisitos |
 | POST | `/v1/applications/interest` | membro da organização ativa | tipos: company, individual; papel ≥ analyst | Financiador manifesta interesse em projeto publicado (OSC aceita para iniciar a diligência) |
@@ -449,6 +461,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/impact-updates/{update_id}` | membro da organização ativa | papel ≥ viewer | get impact update |
 | PATCH | `/v1/impact-updates/{update_id}` | membro da organização ativa | papel ≥ member | patch impact update |
 | POST | `/v1/impact-updates/{update_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, pede ajuste, aceita ou publica — conforme o lado |
+| GET | `/v1/indicator-values/{value_id}/provenance` | membro da organização ativa | papel ≥ viewer | Cadeia de proveniência de uma medição: origem, evidência, revisão, validação e lacunas |
 | POST | `/v1/indicator-values/{value_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador do projeto valida ou rejeita um valor reportado (a OSC não valida o próprio valor — garantido no banco) |
 | GET | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ viewer | Catálogo de indicadores (plataforma, oficiais e definidos pela organização) |
 | POST | `/v1/indicators/catalog` | membro da organização ativa | papel ≥ manager | Cria indicador próprio da organização (origem 'org_defined'; não é indicador oficial) |
@@ -546,10 +559,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/me/context` | usuário autenticado | — | AccessContext: identidade, organização, papéis, plano, período gratuito, permissões |
 | GET | `/v1/me/preferences` | usuário autenticado | — | Idioma e tema da pessoa (tema: system, light ou dark) |
 | PUT | `/v1/me/preferences` | usuário autenticado | — | Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso) |
+| GET | `/v1/me/security` | usuário autenticado | — | Centro de segurança da conta: sessões, dispositivos, MFA, eventos e alterações de permissão |
 | POST | `/v1/me/switch-org` | usuário autenticado | — | switch org |
 | GET | `/v1/messages/conversations` | membro da organização ativa | papel ≥ viewer | conversations |
 | GET | `/v1/messages/conversations/{conversation_id}` | membro da organização ativa | papel ≥ viewer | get conversation |
 | POST | `/v1/messages/{org_id}` | membro da organização ativa | papel ≥ member; limite 120/3600s | Envia mensagem a outra organização (exige relação prévia; limites por hora; bloqueio respeitado) |
+| GET | `/v1/meta/platform-status` | pública | — | A plataforma está aceitando operações? (sem motivo do incidente) |
 | GET | `/v1/moderation/ladder` | usuário autenticado | — | A escada de medidas, com o que cada degrau significa e se exige prazo |
 | GET | `/v1/monetization/legal-cards` | usuário autenticado | — | Pesquisa de base normativa por receita (não é parecer jurídico) |
 | GET | `/v1/monetization/pipeline` | membro da organização ativa | papel ≥ viewer | O que a plataforma criou de valor que alguma regra alcança — e por que não é cobrado |

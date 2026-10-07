@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -915,6 +915,31 @@
       }
      }
     ]
+   }
+  },
+  "/v1/me/security": {
+   "get": {
+    "summary": "Centro de segurança da conta: sessões, dispositivos, MFA, eventos e alterações de permissão",
+    "operationId": "get_auth_routes_security_center",
+    "tags": [
+     "auth"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
    }
   },
   "/v1/org": {
@@ -4848,7 +4873,7 @@
       "description": "Erro (application/problem+json)"
      }
     },
-    "description": "Requer organização ativa · Papel mínimo: member",
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 60/3600s por IP",
     "parameters": [
      {
       "name": "document_id",
@@ -4863,7 +4888,7 @@
   },
   "/v1/ai/usage": {
    "get": {
-    "summary": "Uso de IA no mês (cota do plano)",
+    "summary": "Uso de IA no mês: cota, orçamento em dinheiro, crédito e como as chamadas terminaram",
     "operationId": "get_ai_routes_usage",
     "tags": [
      "ai"
@@ -4885,6 +4910,233 @@
      }
     },
     "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/ai/policies": {
+   "get": {
+    "summary": "Política de IA por faixa de risco: o que sai da instalação e o que exige revisão humana",
+    "operationId": "get_ai_routes_ai_policies",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/ai/estimate": {
+   "get": {
+    "summary": "Estimativa de custo ANTES de uma operação paga (ou a declaração de que não há preço)",
+    "operationId": "get_ai_routes_ai_estimate",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "prompt_key",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maxLength": 60,
+       "minLength": 3,
+       "pattern": "^[a-z][a-z0-9_.]*$",
+       "title": "Prompt Key",
+       "type": "string"
+      }
+     },
+     {
+      "name": "input_chars",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "maximum": 1000000,
+       "minimum": 1,
+       "title": "Input Chars",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/budget": {
+   "put": {
+    "summary": "Define o orçamento de IA da organização para o mês corrente",
+    "operationId": "put_ai_routes_set_budget",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AiBudgetIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/credits": {
+   "get": {
+    "summary": "Extrato de crédito de IA: concessão, consumo e devolução, em ordem",
+    "operationId": "get_ai_routes_credits",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/ai": {
+   "get": {
+    "summary": "Central de controle de IA: prompts, faixas, resultados reais, custo e o que não está implementado",
+    "operationId": "get_ai_routes_ai_control_center",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/ai/prompts/{prompt_key}": {
+   "get": {
+    "summary": "Histórico de versões de um prompt (sem o texto, que é do produto)",
+    "operationId": "get_ai_routes_ai_prompt_versions",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "prompt_key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
    }
   },
   "/v1/plans": {
@@ -6569,8 +6821,356 @@
        "default": null,
        "title": "Action"
       }
+     },
+     {
+      "name": "actor_user_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^[0-9a-fA-F-]{36}$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Actor User Id"
+      }
+     },
+     {
+      "name": "actor_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "user",
+          "admin",
+          "system",
+          "ai",
+          "automation",
+          "integration"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Actor Type"
+      }
+     },
+     {
+      "name": "object_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Object Type"
+      }
+     },
+     {
+      "name": "object_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Object Id"
+      }
+     },
+     {
+      "name": "correlation_id",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Correlation Id"
+      }
+     },
+     {
+      "name": "severity",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "info",
+          "notice",
+          "warning",
+          "critical"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Severity"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "success",
+          "denied",
+          "failed"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Status"
+      }
+     },
+     {
+      "name": "source",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "api",
+          "job",
+          "cli",
+          "webhook",
+          "migration",
+          "test"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Source"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Category"
+      }
+     },
+     {
+      "name": "since",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "format": "date-time",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Since"
+      }
+     },
+     {
+      "name": "until",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "format": "date-time",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Until"
+      }
      }
     ]
+   }
+  },
+  "/v1/admin/audit/timeline": {
+   "get": {
+    "summary": "Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização",
+    "operationId": "get_admin_routes_audit_timeline",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "object_type",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "title": "Object Type",
+       "type": "string"
+      }
+     },
+     {
+      "name": "object_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "title": "Object Id",
+       "type": "string"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 200,
+       "maximum": 1000,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/audit/trail": {
+   "get": {
+    "summary": "Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id",
+    "operationId": "get_admin_routes_audit_trail",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "correlation_id",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "title": "Correlation Id",
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/audit/export": {
+   "post": {
+    "summary": "Exporta a trilha filtrada — e registra a própria exportação na trilha",
+    "operationId": "post_admin_routes_audit_export",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AuditQ"
+       }
+      }
+     }
+    }
    }
   },
   "/v1/admin/audit/verify": {
@@ -8156,6 +8756,42 @@
      }
     },
     "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/indicator-values/{value_id}/provenance": {
+   "get": {
+    "summary": "Cadeia de proveniência de uma medição: origem, evidência, revisão, validação e lacunas",
+    "operationId": "get_impact_routes_value_provenance",
+    "tags": [
+     "impact"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "value_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
    }
   },
   "/v1/procurement/policy": {
@@ -10574,6 +11210,32 @@
    "get": {
     "summary": "Última execução de cada tarefa de operação e falhas de e-mail na janela",
     "operationId": "get_ops_routes_ops_health",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/integrity": {
+   "get": {
+    "summary": "Órfãos, referências não resolvidas, deriva de catálogo, cadeias de hash e cobertura de proveniência",
+    "operationId": "get_ops_routes_integrity_report",
     "tags": [
      "admin"
     ],
@@ -27221,6 +27883,84 @@
     "description": "Administração da plataforma com MFA"
    }
   },
+  "/v1/admin/kill-switch": {
+   "get": {
+    "summary": "Estado do interruptor de emergência e histórico do incidente",
+    "operationId": "get_access_routes_kill_switch_read",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   },
+   "post": {
+    "summary": "Aciona ou libera um escopo do interruptor",
+    "operationId": "post_access_routes_kill_switch_write",
+    "tags": [
+     "acesso"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/KillSwitchIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/meta/platform-status": {
+   "get": {
+    "summary": "A plataforma está aceitando operações? (sem motivo do incidente)",
+    "operationId": "get_access_routes_platform_status",
+    "tags": [
+     "acesso"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
   "/v1/controladoria/summary": {
    "get": {
     "summary": "Painel executivo: MRR, ARR, receita, caixa, despesa, GMV, resultado e autonomia",
@@ -40136,6 +40876,48 @@
     "title": "AiSummarizeIn",
     "type": "object"
    },
+   "AiBudgetIn": {
+    "additionalProperties": false,
+    "description": "Orçamento de IA da organização, em centavos.\n\n`hard_stop` tem padrão FALSO de propósito: um limite que para o trabalho sem a organização ter\npedido para parar é a plataforma escolhendo por ela. Quem quiser parada rígida pede.",
+    "properties": {
+     "limit_cents": {
+      "maximum": 100000000,
+      "minimum": 100,
+      "title": "Limit Cents",
+      "type": "integer"
+     },
+     "warn_at_pct": {
+      "default": 80,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Warn At Pct",
+      "type": "integer"
+     },
+     "hard_stop": {
+      "default": false,
+      "title": "Hard Stop",
+      "type": "boolean"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 400,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "limit_cents"
+    ],
+    "title": "AiBudgetIn",
+    "type": "object"
+   },
    "QuoteIn": {
     "additionalProperties": false,
     "properties": {
@@ -41062,6 +41844,215 @@
      "reason"
     ],
     "title": "GrantIn",
+    "type": "object"
+   },
+   "AuditQ": {
+    "additionalProperties": false,
+    "description": "Filtros da trilha. Cada um corresponde a uma pergunta de investigação, não a uma coluna.\n\nAté a v0.22.0 havia dois: organização e prefixo de ação. Quem investiga pergunta outras coisas —\n\"o que ESTA pessoa fez\", \"o que aconteceu com ESTE documento\", \"o que foi RECUSADO\", \"o que é\ngrave\" — e nenhuma dessas tinha filtro, então a resposta era paginar milhares de linhas.",
+    "properties": {
+     "limit": {
+      "default": 25,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+     },
+     "offset": {
+      "default": 0,
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Offset",
+      "type": "integer"
+     },
+     "org_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Org Id"
+     },
+     "action": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Action"
+     },
+     "actor_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Actor User Id"
+     },
+     "actor_type": {
+      "anyOf": [
+       {
+        "enum": [
+         "user",
+         "admin",
+         "system",
+         "ai",
+         "automation",
+         "integration"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Actor Type"
+     },
+     "object_type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Object Type"
+     },
+     "object_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Object Id"
+     },
+     "correlation_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Correlation Id"
+     },
+     "severity": {
+      "anyOf": [
+       {
+        "enum": [
+         "info",
+         "notice",
+         "warning",
+         "critical"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Severity"
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "success",
+         "denied",
+         "failed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Status"
+     },
+     "source": {
+      "anyOf": [
+       {
+        "enum": [
+         "api",
+         "job",
+         "cli",
+         "webhook",
+         "migration",
+         "test"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Source"
+     },
+     "category": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Category"
+     },
+     "since": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Since"
+     },
+     "until": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Until"
+     }
+    },
+    "title": "AuditQ",
     "type": "object"
    },
    "FlagIn": {
@@ -53020,6 +54011,44 @@
      "password"
     ],
     "title": "ReauthIn",
+    "type": "object"
+   },
+   "KillSwitchIn": {
+    "additionalProperties": false,
+    "description": "Acionamento do interruptor de emergência. O motivo é obrigatório e tem piso de 10 caracteres.\n\nO piso existe no schema E no banco (`kill_switch_events_reason_check`). Duplicar a trava é\ndeliberado: o schema dá mensagem boa a quem está respondendo a um incidente sob pressão, e a\ntrava do banco garante que nenhum caminho — inclusive uma migração futura ou um script de\noperação — consiga gravar \"teste\" como justificativa de parada da plataforma.",
+    "properties": {
+     "scope": {
+      "enum": [
+       "mutations",
+       "logins",
+       "uploads",
+       "integrations",
+       "maintenance"
+      ],
+      "title": "Scope",
+      "type": "string"
+     },
+     "action": {
+      "enum": [
+       "engage",
+       "release"
+      ],
+      "title": "Action",
+      "type": "string"
+     },
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "scope",
+     "action",
+     "reason"
+    ],
+    "title": "KillSwitchIn",
     "type": "object"
    },
    "PlatformExpenseIn": {

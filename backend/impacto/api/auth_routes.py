@@ -228,3 +228,102 @@ def oidc_callback(ctx: Ctx, q: OidcCallbackQ):
     resp = RedirectResponse(redirect_to, status_code=302)
     auth.set_session_cookies(ctx, resp, tokens)
     return resp
+
+
+@route("GET", "/v1/me/security", auth="user", tags=T,
+       summary="Centro de segurança da conta: sessões, dispositivos, MFA, eventos e alterações de permissão")
+def security_center(ctx: Ctx):
+    """Tudo o que a conta precisa ver sobre si, numa consulta.
+
+    POR QUE NUMA CONSULTA SÓ
+
+    As informações já existiam espalhadas: sessões em `/v1/auth/sessions`, MFA em `/v1/me`,
+    eventos em nenhum lugar acessível ao titular. Quem suspeita de acesso indevido não vai
+    percorrer quatro telas — e é justamente nessa situação que o tempo importa.
+
+    O QUE ESTA ROTA NÃO MOSTRA
+
+    Nada de outra pessoa, nem com organização em comum. Os eventos vêm de `audit_events` filtrados
+    por `actor_user_id = ` o próprio titular, com uma exceção deliberada: alterações de PERMISSÃO
+    DELE feitas por administradores da organização aparecem, porque o titular tem direito de saber
+    quando o próprio acesso muda — e aí o que se mostra é o fato, nunca quem o fez.
+    """
+    with ctx.tx(readonly=True) as c:
+        sessoes = c.query(
+            "SELECT id::text AS id, ip::text AS ip, user_agent, created_at, last_seen_at,"
+            "       mfa_verified, family_started_at, revoked_at, revoke_reason"
+            "  FROM sessions WHERE user_id = $1 ORDER BY last_seen_at DESC NULLS LAST LIMIT 40",
+            ctx.user_id)
+        conta = c.one(
+            "SELECT email::text AS email, mfa_enabled_at, last_login_at, failed_login_count,"
+            "       locked_until, email_verified_at, created_at,"
+            "       coalesce(array_length(mfa_recovery_hashes, 1), 0) AS recovery_codes_left"
+            "  FROM users WHERE id = $1", ctx.user_id)
+        # Eventos do PRÓPRIO titular. `severity` e `status` vieram da migração 0056 e são o que
+        # permite destacar o que importa em vez de listar tudo em ordem de tempo.
+        eventos = c.query(
+            "SELECT id, action, audit_category(action) AS category, severity, status, at,"
+            "       ip::text AS ip, user_agent, object_type, object_id, resource_name"
+            "  FROM audit_events WHERE actor_user_id = $1"
+            " ORDER BY id DESC LIMIT 60", ctx.user_id)
+        # Alterações do acesso DELE feitas por outra pessoa. Sem isto, uma mudança de papel feita
+        # por um administrador seria invisível para quem a sofreu.
+        permissoes = c.query(
+            "SELECT id, action, at, severity FROM audit_events"
+            " WHERE object_type = 'user' AND object_id = $1::text"
+            "   AND action IN ('member.role_changed','staff.role_granted','staff.role_revoked',"
+            "                  'admin.user_status','auth.password_changed','auth.mfa_disabled',"
+            "                  'auth.mfa_enabled')"
+            " ORDER BY id DESC LIMIT 30", ctx.user_id)
+        # CHAVES DE API: esta instalação NÃO tem a tabela. A seção aparece vazia em vez de
+        # ausente, porque seção ausente parece tela incompleta — e porque "nenhuma chave de API"
+        # é uma informação de segurança boa: não há credencial de longa duração para roubar.
+        tem_chaves = _tem_tabela(c, "api_keys")
+        chaves = c.query(
+            "SELECT id::text AS id, name, created_at, last_used_at, revoked_at"
+            "  FROM api_keys WHERE org_id = $1 ORDER BY created_at DESC LIMIT 20",
+            ctx.org_id) if tem_chaves else []
+        integracoes = c.query(
+            "SELECT id::text AS id, provider_key AS provider, name, environment, status,"
+            "       health_state, last_success_at, created_at"
+            "  FROM integration_connections WHERE org_id = $1 ORDER BY created_at DESC LIMIT 20",
+            ctx.org_id) if _tem_tabela(c, "integration_connections") else []
+    ativas = [s for s in sessoes if not s["revoked_at"]]
+    for s in sessoes:
+        s["current"] = s["id"] == ctx.principal.session_id
+    graves = [e for e in eventos if e["severity"] in ("warning", "critical")
+              or e["status"] != "success"]
+    return {
+        "account": dict(conta) | {
+            "mfa_enabled": bool(conta["mfa_enabled_at"]),
+            "locked": bool(conta["locked_until"]),
+        },
+        "sessions": {"active": len(ativas), "items": sessoes},
+        "session_limits": {
+            "absolute_ttl_seconds": ctx.settings.session_absolute_ttl,
+            "idle_ttl_seconds": ctx.settings.session_idle_ttl,
+            "note": "A FAMÍLIA de sessão tem idade máxima própria e ela não se renova nas "
+                    "rotações. Antes da v0.23.0, trinta dias contados sempre do último uso nunca "
+                    "venciam para quem estava usando — e um token roubado e renovado dentro da "
+                    "janela sobrevivia indefinidamente.",
+        },
+        "recent_events": eventos,
+        "attention": graves,
+        "access_changes": permissoes,
+        "api_keys": chaves,
+        # `false` significa que a instalação NÃO tem chave de API — e isso é informação de
+        # segurança boa: não existe credencial de longa duração para ser roubada.
+        "api_keys_available": tem_chaves,
+        "integrations": integracoes,
+        "note": "Esta tela mostra apenas a sua conta. Eventos de outras pessoas da organização, "
+                "inclusive com acesso em comum, não aparecem aqui.",
+    }
+
+
+def _tem_tabela(c, nome: str) -> bool:
+    """Tabela opcional: a instalação pode não ter o módulo. Devolver lista vazia é melhor que 500.
+
+    E é melhor que omitir o campo: a tela precisa poder dizer "nenhuma chave de API" em vez de não
+    mostrar a seção, porque seção ausente parece tela incompleta.
+    """
+    return bool(c.scalar("SELECT to_regclass($1) IS NOT NULL", nome))

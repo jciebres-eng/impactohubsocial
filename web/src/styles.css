@@ -540,3 +540,46 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .chain-label { font-size: .78rem; color: var(--texto-3); }
 .chain-value { font-size: .95rem; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .chain li { grid-template-columns: 1fr; gap: .1rem; } }
+
+/* ------------------------------------------------------------------ v0.23.0 · rastreabilidade
+   Classes acrescentadas para as telas de linha do tempo, cadeia de causa, proveniência e
+   interruptor de emergência. São poucas de propósito: o resto reaproveita `.metrics`, `.metric`,
+   `.table`, `.panel` e `.timeline`, que já existiam. Tela nova que traz um sistema visual próprio
+   é como um produto deixa de parecer um produto. */
+
+/* Texto monoespaçado para identificador e hash: aqui a leitura é caractere por caractere, e
+   fonte proporcional faz `l`, `1` e `I` parecerem a mesma coisa num uuid. */
+.mono { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: .82em; overflow-wrap: anywhere; }
+
+/* Cabeçalho de um passo na linha do tempo: nome do evento, quem agiu, gravidade e quando. */
+.timeline-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem .55rem; }
+.timeline-head strong { font-weight: 600; }
+
+/* Passo AUSENTE da cadeia de proveniência. Tracejado e cinza, com a palavra "ausente" ao lado —
+   nunca só a cor: quem confere uma cadeia de evidência pode ser daltônico, e o elo que falta é
+   justamente a informação que não pode depender de distinguir vermelho de verde. */
+.timeline-missing { opacity: .75; }
+.timeline-missing .timeline-head strong { font-weight: 400; font-style: italic; }
+
+/* Árvore de causa: a indentação vem de `style` por nó (profundidade), não de regra fixa, porque a
+   profundidade é dado. */
+.tree { list-style: none; padding: 0; margin: 0; }
+.tree li { padding: .35rem 0; border-bottom: 1px solid var(--linha-2); font-size: 14px;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem; }
+
+/* Tabela de antes/depois, mais compacta que a padrão porque fica dentro de um item de lista. */
+.table-compact { font-size: 13px; margin: .4rem 0 0; }
+.table-compact th, .table-compact td { padding: .25rem .5rem; }
+/* Linha em que o valor mudou. A faixa à esquerda é o sinal; a cor é reforço. */
+.row-changed td:first-child { box-shadow: inset 3px 0 0 var(--ambar); font-weight: 600; }
+
+/* Lista simples com marcador, para garantias e itens de deriva. */
+.list-plain { margin: 0; padding-left: 1.1rem; font-size: 14px; line-height: 1.6; }
+.list-plain li { margin-bottom: .3rem; }
+
+@media (max-width: 640px) {
+  /* A árvore de causa em celular: a indentação por profundidade estoura a largura, então o
+     recuo máximo é limitado por CSS e o nível continua legível pela ordem. */
+  .tree li { margin-left: 0 !important; padding-left: .5rem; border-left: 2px solid var(--linha); }
+}

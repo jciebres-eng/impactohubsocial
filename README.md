@@ -1,15 +1,41 @@
-# Plataforma Impacto — v0.22.0
+# Plataforma Impacto — v0.23.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
 papel entra no mesmo ciclo de impacto — do contexto à evidência — sem produto separado, sem domínio duplicado e sem
 permissão frouxa.
 
-> **Estado:** **BASE TÉCNICA FECHADA** na v0.22.0 para a entrega ao Designer. Leia
+> **Estado:** **BASE TÉCNICA FECHADA** desde a v0.22.0 para a entrega ao Designer; a v0.23.0
+> acrescentou rastreabilidade, integridade, governança de IA e o interruptor de emergência. Leia
 > `TECHNICAL_FINALIZATION_STATUS.md` para o estado fase por fase, `NON_CUSTODIAL_ARCHITECTURE.md` para a regra de
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.23.0 (rastreabilidade, proveniência, governança de IA e interruptor de emergência):**
+a rodada começou **auditando o que já existia** (`AI_AUDIT.md`, `PLATFORM_AUDIT_v0230.md`), e as duas
+conclusões decidiram o escopo: a base é mais madura do que os prompts supõem, e a pilha de referência
+deles (Supabase + Vercel + Next.js) não é a desta plataforma — então a infraestrutura **não foi
+trocada** e os requisitos de segurança dela foram aplicados à pilha real.
+
+As lacunas reais eram específicas. As quatro mais graves:
+
+1. **O refresh token não vencia.** Trinta dias eram recontados a cada rotação, inclusive na mesma
+   família — um token roubado e renovado dentro da janela sobrevivia indefinidamente. A família
+   passou a ter idade máxima própria, que não se renova.
+2. **O código TOTP servia duas vezes.** `verify()` devolvia o contador aceito e o docstring dela
+   dizia "para impedir reuso" desde sempre; nenhum chamador usava o valor.
+3. **O evento de segurança mais grave não alertava ninguém da operação.** Reuso de refresh token era
+   registrado, auditado e notificado ao titular — e esperava que alguém abrisse uma tela.
+4. **A verificação de órfão era uma string literal** afirmando que nenhuma verificação era aplicável,
+   num banco com 25 colunas de referência polimórfica sem chave estrangeira.
+
+E a regra de proveniência passou a valer no banco: **medição autodeclarada é permitida; autodeclarada
+apresentada como validada, não.** `GET /v1/indicator-values/{id}/provenance` devolve a cadeia inteira
+— projeto, indicador, linha de base e fonte, documento com sha256, evidência, revisão, validação,
+Impact Ledger com hash, auditoria — **e `gaps`**, que nomeia cada elo ausente com o efeito dele sobre
+o que o número prova. Cadeia que esconde o elo que falta transforma ausência de prova em aparência de
+prova. Leia `PROVENANCE_ENGINE.md`, `AUDIT_ENGINE.md` e `AI_FINAL_AUDIT.md`.
 
 **Novo no v0.22.0 (login inteligente, controladoria e o fim do booleano único de administrador):** a regra que
 governou a rodada veio antes do escopo — *"não implemente uma fintech dentro do IMPACTO só porque isso parece

@@ -1,0 +1,31 @@
+{
+ "largura": 390,
+ "telas_visitadas": 230,
+ "por_perfil": {
+  "osc": {
+   "telas_do_menu": 48,
+   "com_rolagem_lateral": {}
+  },
+  "company": {
+   "telas_do_menu": 37,
+   "com_rolagem_lateral": {}
+  },
+  "provider": {
+   "telas_do_menu": 33,
+   "com_rolagem_lateral": {}
+  },
+  "government": {
+   "telas_do_menu": 34,
+   "com_rolagem_lateral": {}
+  },
+  "individual": {
+   "telas_do_menu": 25,
+   "com_rolagem_lateral": {}
+  },
+  "admin": {
+   "telas_do_menu": 53,
+   "com_rolagem_lateral": {}
+  }
+ },
+ "falhas": []
+}

@@ -1,13 +1,13 @@
 {
- "visitas": 790,
- "rotas": 218,
- "rotas_abertas_com_sucesso": 218,
- "persona_sem_registro_proprio": 54,
+ "visitas": 89,
+ "rotas": 33,
+ "rotas_abertas_com_sucesso": 33,
+ "persona_sem_registro_proprio": 5,
  "estados": {
-  "OK": 504,
-  "VAZIA": 140,
-  "RECUSA_CORRETA": 92,
-  "SEM_REGISTRO": 54
+  "OK": 55,
+  "VAZIA": 20,
+  "RECUSA_CORRETA": 9,
+  "SEM_REGISTRO": 5
  },
  "falhas": []
 }

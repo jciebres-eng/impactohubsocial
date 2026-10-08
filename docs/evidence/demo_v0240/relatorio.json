@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-10-08T04:49:22.634728+00:00",
+ "gerado_em": "2026-10-08T06:58:02.295833+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
@@ -56,11 +56,7 @@
     "/conta/plano",
     "/conta"
    ],
-   "telas_4xx": {
-    "/responsabilidade": [
-     "422 /v1/responsibility/current"
-    ]
-   },
+   "telas_4xx": {},
    "telas_5xx": {},
    "erros_js": {}
   },
@@ -109,13 +105,46 @@
     "/conta"
    ],
    "telas_4xx": {
-    "/responsabilidade": [
-     "422 /v1/responsibility/current"
-    ],
     "/documentos/montagens": [
      "403 /v1/projects?limit=100"
     ]
    },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "individual": {
+   "email": "apoiador@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 25,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/area",
+    "/marketplace",
+    "/propostas",
+    "/relatorios-impacto",
+    "/rede/relacoes",
+    "/conversas",
+    "/explorar",
+    "/candidaturas",
+    "/carteira",
+    "/solucoes",
+    "/solucoes/minhas",
+    "/pagamentos",
+    "/instituicao",
+    "/relatorios",
+    "/mapa",
+    "/acordos",
+    "/mensagens",
+    "/ia",
+    "/conta/seguranca",
+    "/ajuda",
+    "/notificacoes",
+    "/organizacao",
+    "/conta/plano",
+    "/conta"
+   ],
+   "telas_4xx": {},
    "telas_5xx": {},
    "erros_js": {}
   },
@@ -209,9 +238,6 @@
     "/conta"
    ],
    "telas_4xx": {
-    "/responsabilidade": [
-     "422 /v1/responsibility/current"
-    ],
     "/documentos/montagens": [
      "403 /v1/projects?limit=100"
     ]
@@ -522,5 +548,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 295
+ "total_telas_de_menu_visitadas": 320
 }

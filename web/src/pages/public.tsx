@@ -216,6 +216,9 @@ function TokenPage({ title, path, okText, extra }: { title: string; path: string
   const [msg, setMsg] = useState("");
   useEffect(() => {
     if (extra) return;
+    // v0.25.0: sem token no endereço não há o que conferir — a tela chamava a API com token vazio e
+    // mostrava o 422 cru. Agora explica de onde vem o link.
+    if (!token) { setMsg("Este endereço precisa do link completo enviado por e-mail. Abra o link da mensagem ou peça um novo."); setState("err"); return; }
     api.post(path, { token }).then(() => setState("ok")).catch((e) => { setMsg(describeError(e)); setState("err"); });
   }, []);  // eslint-disable-line
   return (

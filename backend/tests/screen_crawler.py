@@ -98,7 +98,7 @@ KIND_DA_PERSONA = {"osc": "osc", "company": "company", "provider": "provider", "
 
 #: classificações. As três primeiras são sucesso; as demais são achado.
 OK, VAZIA, RECUSA_CERTA = "OK", "VAZIA", "RECUSA_CORRETA"
-FALHAS = ("SEM_ACAO", "ERRO_JS", "5XX", "ERRO_NA_TELA", "NAO_ENCONTRADA", "RECUSA_INDEVIDA", "NAO_RECUSOU",
+FALHAS = ("CHAMADA_RECUSADA", "SEM_ACAO", "ERRO_JS", "5XX", "ERRO_NA_TELA", "NAO_ENCONTRADA", "RECUSA_INDEVIDA", "NAO_RECUSOU",
           "SEM_REGISTRO", "LOGIN_PEDIDO", "TRAVOU")
 
 
@@ -192,13 +192,25 @@ def classificar(p, deve_ver: bool, eventos: dict, url_final: str, rota_pedida: s
     return OK, texto_h1[:80]
 
 
+#: axe-core (quando fornecido): regras WCAG 2.0/2.1 nível A e AA, sobre a página renderizada.
+AXE_RUN_JS = """async () => {
+  const r = await axe.run(document, {runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']}});
+  return r.violations.map(v => ({id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.length,
+                                 exemplo: (v.nodes[0] && v.nodes[0].target || []).join(' ').slice(0, 120)}));
+}"""
+
+
 class Robo:
-    def __init__(self, browser, base: str, senha: str, totp_codigo):
+    def __init__(self, browser, base: str, senha: str, totp_codigo, axe_src: str | None = None):
         self.browser, self.base, self.senha, self.totp_codigo = browser, base, senha, totp_codigo
         self.paginas: dict[str, object] = {}
+        # axe roda UMA vez por rota (na primeira visita bem-sucedida): a regra é da tela, não da persona
+        self.axe_src, self.axe_feitas = axe_src, set()
 
     def _nova(self):
-        ctx = self.browser.new_context(viewport={"width": 1366, "height": 900})
+        # Com axe ligado a CSP é ignorada SÓ nesta página de auditoria: o produto proíbe script injetado
+        # (como deve), e o axe é um script injetado. Sem axe, a CSP real vale.
+        ctx = self.browser.new_context(viewport={"width": 1366, "height": 900}, bypass_csp=bool(self.axe_src))
         p = ctx.new_page()
         p.ev = {"js": [], "5xx": [], "4xx": [], "api": 0}
 
@@ -277,7 +289,28 @@ class Robo:
             sem_acao = []
         if sem_acao:
             estado, detalhe = "SEM_ACAO", "; ".join(sorted(set(sem_acao)))[:200]
-        return {"estado": estado, "detalhe": detalhe, "ms": int((time.monotonic() - t0) * 1000),
+        # Chamada RECUSADA por trás de uma tela que abriu (v0.25.0): a tela parece vazia, mas pediu à
+        # API algo que o perfil não pode ter, ou pediu errado. 401 fica de fora (sessão do visitante
+        # anônimo; confirmação de identidade, que o robô completa) e 402 também (plano: estado legítimo).
+        recusadas = sorted({f"{s} {u.split('?')[0]}" for s, u in p.ev["4xx"] if s in (403, 404, 409, 422)})
+        # Única exceção: visitante SEM LOGIN em conteúdo só para quem tem conta. O servidor responde 404
+        # de propósito (não revela que existe) e a tela convida a entrar — é o comportamento certo.
+        convite = persona == "" and recusadas and all(r.startswith("404 /v1/help/") for r in recusadas) \
+            and p.get_by_text("Entre para ver este conteúdo").count() > 0
+        if recusadas and estado in (OK, VAZIA) and not convite:
+            estado, detalhe = "CHAMADA_RECUSADA", " | ".join(recusadas)[:200]
+        elif convite:
+            detalhe = "convite para entrar (conteúdo só para quem tem conta)"
+        axe = None
+        chave = re.sub(r"[0-9a-f]{8}-[0-9a-f-]{27}", ":id", rota)
+        if self.axe_src and deve_ver and estado in (OK, VAZIA) and chave not in self.axe_feitas:
+            self.axe_feitas.add(chave)
+            try:
+                p.add_script_tag(content=self.axe_src)
+                axe = p.evaluate(AXE_RUN_JS)
+            except Exception as exc:  # noqa: BLE001 — falha do axe é registrada, não escondida
+                axe = [{"id": "axe-nao-rodou", "impact": "?", "help": str(exc)[:120], "nodes": 0, "exemplo": ""}]
+        return {"estado": estado, "detalhe": detalhe, "ms": int((time.monotonic() - t0) * 1000), "axe": axe,
                 "chamadas_api": p.ev["api"], "api_4xx": sorted({f"{s} {u}" for s, u in p.ev["4xx"]})[:4]}
 
     def fechar(self):
@@ -286,9 +319,9 @@ class Robo:
         self.paginas.clear()
 
 
-def rodar(browser, base: str, senha: str, emails: dict, consulta, totp_codigo, lista=None) -> list[dict]:
+def rodar(browser, base: str, senha: str, emails: dict, consulta, totp_codigo, lista=None, axe_src=None) -> list[dict]:
     lista = lista or inventario()
-    robo = Robo(browser, base, senha, totp_codigo)
+    robo = Robo(browser, base, senha, totp_codigo, axe_src)
     linhas = []
     try:
         for t, persona, deve_ver in plano(lista):
@@ -297,7 +330,7 @@ def rodar(browser, base: str, senha: str, emails: dict, consulta, totp_codigo, l
                           "persona": persona or "anônimo", "deve_ver": deve_ver, "alcance": t["alcance"]}
             if rota is None:
                 linhas.append({**base_linha, "url": "", "estado": "SEM_REGISTRO", "detalhe": motivo, "ms": 0,
-                               "chamadas_api": 0, "api_4xx": []})
+                               "chamadas_api": 0, "api_4xx": [], "axe": None})
                 continue
             r = robo.visitar(persona, emails.get(persona) if persona else None, rota, deve_ver)
             linhas.append({**base_linha, "url": rota, **r})

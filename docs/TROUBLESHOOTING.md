@@ -109,7 +109,7 @@ O usuário existe e não tem organização ativa. Quase toda rota exige uma.
 ### `403 wrong_org_kind` — "Recurso indisponível para este tipo de organização"
 
 A rota declara os tipos que a alcançam, e o seu não está na lista. **Confira no painel de telas antes
-de abrir chamado**: 37 telas são só de Administração, e isso é desenho.
+de abrir chamado**: 35 telas são só de Administração, e isso é desenho.
 
 ### `403 insufficient_role` / `403 permission_denied`
 

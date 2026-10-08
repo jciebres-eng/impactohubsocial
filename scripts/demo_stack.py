@@ -51,6 +51,7 @@ def main() -> int:
     ap.add_argument("--telas", action="store_true", help="roda também o robô das 218 telas (Playwright)")
     ap.add_argument("--saida", default="dist-stack")
     ap.add_argument("--sem-jornadas", action="store_true", help="só o robô de telas (dados já criados)")
+    ap.add_argument("--axe", help="caminho do axe.min.js: roda a auditoria WCAG A/AA em cada tela (uma vez por rota)")
     a = ap.parse_args()
     senha, segredo = os.getenv("DEMO_PASSWORD", ""), os.getenv("DEMO_TOTP_SECRET", "")
     if not senha or not segredo:
@@ -97,8 +98,9 @@ def main() -> int:
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             try:
+                axe_src = Path(a.axe).read_text(encoding="utf-8") if a.axe else None
                 linhas = robo.rodar(browser, a.base.rstrip("/"), senha, seed_dev.DEMO_EMAILS, consulta,
-                                    lambda: fresh_totp(segredo))
+                                    lambda: fresh_totp(segredo), axe_src=axe_src)
             finally:
                 browser.close()
         campos = ["rota", "persona", "deve_ver", "url", "estado", "detalhe", "chamadas_api", "api_4xx", "ms"]
@@ -117,6 +119,24 @@ def main() -> int:
         for x in falhas:
             print(f"  FALHA {x['estado']} {x['persona']} {x['url'] or x['rota']} {x['detalhe'][:160]}")
         falhou = falhou or bool(falhas) or rotas != ok
+        if a.axe:
+            auditadas = [x for x in linhas if x.get("axe") is not None]
+            regras: dict[str, dict] = {}
+            for x in auditadas:
+                for v in x["axe"]:
+                    r = regras.setdefault(v["id"], {"impacto": v["impact"], "ajuda": v["help"], "telas": [], "elementos": 0})
+                    r["telas"].append(x["rota"])
+                    r["elementos"] += v["nodes"]
+            (saida / "axe.json").write_text(json.dumps({"versao_wcag": "2.0/2.1 A e AA", "telas_auditadas": len(auditadas),
+                                                        "telas_sem_violacao": sum(1 for x in auditadas if not x["axe"]),
+                                                        "regras": regras}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+            print(f"axe-core: {len(auditadas)} telas auditadas · {sum(1 for x in auditadas if not x['axe'])} sem violação · "
+                  f"{len(regras)} regra(s) violada(s)")
+            ordem = {"critical": 0, "serious": 1, "moderate": 2, "minor": 3}
+            for rid, r in sorted(regras.items(), key=lambda kv: (ordem.get(kv[1]["impacto"], 9), -len(kv[1]["telas"]))):
+                exemplo = ", ".join(sorted(set(r["telas"]))[:4])
+                print(f"::warning title=axe {r['impacto']}: {rid}::{len(set(r['telas']))} tela(s), {r['elementos']} elemento(s) — "
+                      f"{r['ajuda']} — ex.: {exemplo}")
     return 1 if falhou else 0
 
 

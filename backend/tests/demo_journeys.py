@@ -472,7 +472,9 @@ class Jornadas:
                        {"body": "Em Documentos, escolha o tipo 'Ata de eleição'."})
             self.passo(J, "OSC lê a resposta", osc, "GET", f"/v1/support/tickets/{t['id']}")
         cursos = self.passo(J, "OSC lista cursos", osc, "GET", "/v1/help/courses") or {}
-        curso = next((c for c in cursos.get("items", []) if c.get("cert_enabled")), None)
+        # o curso DA DEMONSTRAÇÃO (kb_seed), pelo nome: outros cursos com certificado podem existir
+        from impacto.services import kb_seed
+        curso = next((c for c in cursos.get("items", []) if c.get("slug") == kb_seed.COURSE["slug"]), None)
         if curso:
             self.passo(J, "OSC se inscreve no curso", osc, "POST", f"/v1/help/courses/{curso['slug']}/enroll")
             det = self.passo(J, "OSC abre o curso", osc, "GET", f"/v1/help/courses/{curso['slug']}") or {}

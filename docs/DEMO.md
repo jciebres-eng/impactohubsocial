@@ -30,7 +30,7 @@ Portanto, a escolha é consciente:
 
 ## 1.1 As contas de demonstração (v0.24.0)
 
-`seed-demo` cria 14 contas fictícias, todas com a senha de `DEMO_PASSWORD` (se a variável não for
+`seed-demo` cria 15 contas fictícias (a Apoiadora, pessoa física, entrou na v0.25.0), todas com a senha de `DEMO_PASSWORD` (se a variável não for
 definida, o padrão escrito em `backend/impacto/seed_dev.py`, que só vale onde o seed roda):
 
 | Perfil | E-mail | Entra com |
@@ -39,6 +39,7 @@ definida, o padrão escrito em `backend/impacto/seed_dev.py`, que só vale onde 
 | Empresa | `empresa@demo.impacto.local` | senha |
 | Profissional (contadora) | `contador@demo.impacto.local` | senha |
 | Governo | `governo@demo.impacto.local` | senha |
+| Apoiadora (pessoa física) | `apoiador@demo.impacto.local` | senha |
 | Administrador da plataforma | `admin@demo.impacto.local` | senha **+ aplicativo autenticador** |
 | Editora, Revisor, Suporte | `editor@`, `revisor@`, `suporte@demo.impacto.local` | senha **+ aplicativo autenticador** |
 | Controladoria, Financeiro, Contabilidade, Tesouraria, Operações, Auditoria | `controladoria@`, `financeiro@`, `contabilidade@`, `tesouraria@`, `operacoes@`, `auditoria@demo.impacto.local` | senha **+ aplicativo autenticador** |
@@ -75,14 +76,15 @@ a tese do produto melhor que qualquer slide:
 
 | Tipo | Itens de menu | Onde a demonstração costuma render |
 |---|---|---|
-| OSC | 19 | diagnóstico → prontidão → projeto → candidatura → prestação de contas |
-| Empresa | 14 | explorar projetos → carteira → relatórios recebidos |
-| Governo | 16 | necessidades do território → edital → execução |
-| Profissional | 25 | marketplace → proposta → acordo → validação |
-| Apoiador | 12 | apoiar → carteira → prestação de contas recebida |
-| Administração | 8 | compliance, auditoria, integridade, interruptor |
+| OSC | 43 | diagnóstico → prontidão → projeto → candidatura → prestação de contas |
+| Empresa | 32 | explorar projetos → carteira → relatórios recebidos |
+| Governo | 29 | necessidades do território → edital → execução |
+| Profissional | 28 | marketplace → proposta → acordo → validação |
+| Apoiador | 20 | apoiar → carteira → prestação de contas recebida |
+| Administração | 32 | compliance, auditoria, integridade, interruptor |
 
-**119 das 218 telas não estão em menu nenhum** — abrem só por link direto. Em boa parte é correto
+**82 das 218 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
+inventário lia só a primeira linha de cada menu e dizia 119; corrigido na v0.25.0). Em boa parte é correto
 (detalhe de item, formulário de edição), mas é a primeira pergunta que o Designer vai querer
 responder, e o painel permite marcá-las uma a uma.
 

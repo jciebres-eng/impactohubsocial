@@ -147,7 +147,10 @@ export function Seals() {
 export function Claims() {
   const { data, error, loading, reload } = useLoad<any>("/v1/claims");
   const rules = useLoad<any>("/v1/claims/rules");
-  const projetos = useLoad<any>("/v1/projects");
+  const { me: sessao } = useSession();
+  // v0.25.0: projetos são da OSC. Os outros perfis recebiam 403 nesta chamada escondida (o robô de
+  // telas viu); a lista só é pedida a quem pode tê-la.
+  const projetos = useLoad<any>(sessao?.active_org?.kind === "osc" ? "/v1/projects" : null);
   const act = useAction();
   const [novo, setNovo] = useState(false);
   // Uma afirmação é SEMPRE sobre alguma coisa: projeto, programa, organização, solução ou
@@ -330,10 +333,9 @@ export function Responsibility() {
   // que a API não devolve (`role_label`, `person_name`). O escopo aqui é a ORGANIZAÇÃO ativa.
   const { me } = useSession();
   const org = me?.active_org?.id;
-  const q = org ? `?scope=organization&subject_id=${org}` : null;
-  const atual = useLoad<any>(q && `/v1/responsibility/current${q}`, [q]);
+  const atual = useLoad<any>(org ? `/v1/responsibility/current?scope=organization&subject_id=${org}` : null, [org]);
   const papeis = useLoad<any>("/v1/responsibility/roles");
-  const decisoes = useLoad<any>(q && `/v1/responsibility/decisions${q}`, [q]);
+  const decisoes = useLoad<any>(org ? `/v1/responsibility/decisions?scope=organization&subject_id=${org}` : null, [org]);
   return (
     <>
       <PageHead title="Responsabilidade"

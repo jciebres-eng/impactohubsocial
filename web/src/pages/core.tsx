@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
+import { useSession } from "../session";
 // Vocabulário oficial: o rótulo de banda sai de config/glossary.json (gerado em src/glossary.ts).
 import { CONFIDENCE_BAND, term } from "../glossary";
 import { date, dateTime } from "../format";
@@ -575,7 +576,10 @@ export function Assemblies() {
   const [offset, setOffset] = useState(0);
   const { data, error, loading, reload } = useLoad<any>(`/v1/document-assemblies?limit=25&offset=${offset}`, [offset]);
   const templates = useLoad<any>("/v1/document-templates?status=published&limit=100");
-  const projects = useLoad<any>("/v1/projects?limit=100");
+  const { me: sessao } = useSession();
+  // v0.25.0: projetos são da OSC. Os outros perfis recebiam 403 nesta chamada escondida (o robô de
+  // telas viu); a lista só é pedida a quem pode tê-la.
+  const projects = useLoad<any>(sessao?.active_org?.kind === "osc" ? "/v1/projects?limit=100" : null);
   const [open, setOpen] = useState(false);
   const f = useForm<any>({ template_id: "", title: "", project_id: "" });
   const { busy, run } = useAction();

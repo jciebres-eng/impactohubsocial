@@ -135,3 +135,24 @@ class TheDeadButtonDetectorDetectsTests(unittest.TestCase):
             finally:
                 browser.close()
         self.assertEqual(achados, ["botão: Morto", "link: Link sem destino"])
+
+
+@unittest.skipUnless(HAVE_PW, "Playwright indisponível")
+class TheAxeHookReportsViolationsTests(unittest.TestCase):
+    """O axe-core real só é baixado no CI (o registro npm é bloqueado no ambiente de desenvolvimento).
+    Aqui se prova a LIGAÇÃO: com um axe falso que devolve uma violação conhecida, o robô a relata no
+    formato que o relatório espera — para que zero violações no CI não seja zero por fiação quebrada."""
+
+    def test_the_axe_result_is_collected_in_the_expected_shape(self):
+        falso = ("window.axe = {run: async (doc, opts) => ({violations: [{id: 'color-contrast', impact: 'serious',"
+                 " help: 'Contraste', nodes: [{target: ['p.x']}, {target: ['p.y']}]}]})};")
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch()
+            try:
+                p = browser.new_page()
+                p.set_content("<p class='x'>a</p><p class='y'>b</p>")
+                p.add_script_tag(content=falso)
+                r = p.evaluate(robo.AXE_RUN_JS)
+            finally:
+                browser.close()
+        self.assertEqual(r, [{"id": "color-contrast", "impact": "serious", "help": "Contraste", "nodes": 2, "exemplo": "p.x"}])

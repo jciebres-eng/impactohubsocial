@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
+import { useSession } from "../session";
 import { date, money } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, PageHead, Pager, Panel, Pill, Select, StateView, TextArea,
@@ -167,7 +168,10 @@ export function NewListing() {
   const f = useForm({ subject_type: "project", subject_id: "", headline: "", summary: "", seeking: [] as string[],
                       amount: "", territory: "", stage: "" });
   const act = useAction();
-  const projects = useLoad<any>("/v1/projects?limit=50");
+  const { me: sessao } = useSession();
+  // v0.25.0: projetos são da OSC. Os outros perfis recebiam 403 nesta chamada escondida (o robô de
+  // telas viu); a lista só é pedida a quem pode tê-la.
+  const projects = useLoad<any>(sessao?.active_org?.kind === "osc" ? "/v1/projects?limit=50" : null);
   const create = async () => {
     const r = await act.run(() => api.post("/v1/marketplace/listings", {
       subject_type: f.v.subject_type, subject_id: f.v.subject_id, headline: f.v.headline,

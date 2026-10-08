@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
+import { useSession } from "../session";
 import { date, dateTime } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, Modal, PageHead, Panel, Pill, Select, StateView, TextArea,
@@ -211,7 +212,10 @@ export function ImpactReportInbox() {
 
 // ============================================================================ prontidão por finalidade
 export function ReadinessPurposes() {
-  const projects = useLoad<any>("/v1/projects?limit=50");
+  const { me: sessao } = useSession();
+  // v0.25.0: projetos são da OSC. Os outros perfis recebiam 403 nesta chamada escondida (o robô de
+  // telas viu); a lista só é pedida a quem pode tê-la.
+  const projects = useLoad<any>(sessao?.active_org?.kind === "osc" ? "/v1/projects?limit=50" : null);
   const [pid, setPid] = useState("");
   const { data, error, loading, reload } = useLoad<any>(
     `/v1/readiness/purposes${pid ? `?project_id=${pid}` : ""}`, [pid]);

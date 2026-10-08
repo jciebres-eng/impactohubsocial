@@ -39,6 +39,8 @@ class TheFromZeroStackIsShapedLikeSupabaseTests(unittest.TestCase):
         self.assertIn("docker compose -f infra/compose/demo/compose.yml", job)
         self.assertIn("scripts/demo_stack.py", job)
         self.assertIn("--telas", job)
+        self.assertIn("--axe", job)
+        self.assertIn("axe-core@4.10.2", job, "versão do axe fixada")
         self.assertIn("restart app", job)
         self.assertIn('test "$antes" = "$depois"', job)
         self.assertIn("::add-mask::", job, "segredos gerados na hora precisam ser mascarados")

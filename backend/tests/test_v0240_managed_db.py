@@ -159,6 +159,9 @@ class TheSupabaseToolingIsSafeByConstructionTests(unittest.TestCase):
         casos = {
             f"postgresql://postgres.exemplo:{segredo}@host-inexistente.invalid:5432/postgres": "HOST não existe",
             f"postgresql://usuario_que_nao_existe_exemplo:{segredo}@127.0.0.1:1/postgres": "porta recusada",
+            # run 37725482610: o rótulo do passo a passo foi colado junto com o endereço
+            f"Valor: postgresql://postgres.exemplo:{segredo}@aws-1-exemplo.pooler.supabase.com:5432/postgres":
+                "SÓ o endereço",
         }
         for url, dica in casos.items():
             with tempfile.NamedTemporaryFile("r", suffix=".md") as resumo:

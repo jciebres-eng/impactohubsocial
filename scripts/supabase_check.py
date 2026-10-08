@@ -57,6 +57,8 @@ def _tenta_login(url: str) -> str | None:
 #: Mensagem do servidor → o que a pessoa corrige. O log das Actions não é lido por quem não programa;
 #: a falha de conexão tem de aparecer no resumo da execução, com o próximo passo (v0.24.2).
 _CAUSAS = (
+    ("formato:", "o segredo tem de conter SÓ o endereço, começando em postgresql:// — sem a palavra "
+     "\"Valor:\", sem aspas, sem espaço ou linha antes. Edite o segredo e cole só a linha do endereço."),
     ("password authentication failed", "SENHA recusada. Confira a senha do administrador dentro de "
      "SUPABASE_ADMIN_URL; símbolos @ : / # ? % precisam virar %40 %3A %2F %23 %3F %25."),
     ("tenant or user not found", "USUÁRIO ou REGIÃO não reconhecidos pelo pooler. O usuário tem de ser "
@@ -86,6 +88,11 @@ def main() -> int:
     if not url:
         print("DATABASE_URL ausente", file=sys.stderr)
         return 2
+    if not url.strip().startswith(("postgresql://", "postgres://")):
+        # Não repete o conteúdo: o segredo inteiro pode ter a senha. Run 37725482610: o valor colado
+        # começava com o rótulo "Valor:" do passo a passo, e o libpq ecoou um pedaço dele.
+        return falha_de_conexao("formato: SUPABASE_ADMIN_URL não começa com postgresql://")
+    url = url.strip()
     u = urlsplit(url)
     diz(f"## Diagnóstico do banco — somente leitura\n\nhost `{u.hostname}` · porta `{u.port or 5432}` · "
         f"usuário `{unquote(u.username or '')}`\n")

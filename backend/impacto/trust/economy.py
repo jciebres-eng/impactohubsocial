@@ -107,7 +107,7 @@ def propose_participation(conn: Connection, *, project_id: str, org_id: str, act
         contribution, actor_user_id)
     from ..services.audit import ledger
     ledger(conn, project_id=project_id, org_id=org_id, actor=actor_user_id, entry_type="participation_proposed",
-           ref_type="participation", ref_id=pid, payload={"proponent_org_id": proponent_org_id, "share_bps": share_bps,
+           ref_type="proponent_participation", ref_id=pid, payload={"proponent_org_id": proponent_org_id, "share_bps": share_bps,
                                                           "authorship_type": authorship_type})
     return {"id": pid, "status": "proposed"}
 
@@ -153,7 +153,7 @@ def consolidate_for_project(conn: Connection, *, project_id: str, actor_user_id:
     for r in rows:
         conn.run("UPDATE proponent_participations SET status = 'consolidated' WHERE id = $1", r["id"])
         ledger(conn, project_id=project_id, org_id=r["org_id"], actor=actor_user_id, entry_type="participation_consolidated",
-               ref_type="participation", ref_id=r["id"], payload={})
+               ref_type="proponent_participation", ref_id=r["id"], payload={})
     return len(rows)
 
 
@@ -255,7 +255,7 @@ def instruct_payouts(conn: Connection, *, agreement: dict, allocation_id: str, a
         if agreement.get("project_id"):
             from ..services.audit import ledger
             ledger(conn, project_id=agreement["project_id"], org_id=agreement["org_id"], actor=actor_user_id, entry_type="payout_instructed",
-                   amount_cents=int(line["cents"]), ref_type="payout", ref_id=pid,
+                   amount_cents=int(line["cents"]), ref_type="allocation_payout", ref_id=pid,
                    payload={"line": kind, "recipient_org_id": recipient, "state": state, "pix_informed": bool(pix)})
         out.append({"id": pid, "line_kind": kind, "state": state, "amount_cents": int(line["cents"])})
     return out
@@ -403,7 +403,7 @@ def reconcile_payout(conn: Connection, *, payout_id: str, org_id: str | None, us
     pend = []
     if p["project_id"]:
         pend.append(dict(project_id=p["project_id"], org_id=p["org_id"], actor=user_id, entry_type="payout_reconciled",
-                         amount_cents=int(p["amount_cents"]), ref_type="payout", ref_id=payout_id, payload={"note": note[:200]}))
+                         amount_cents=int(p["amount_cents"]), ref_type="allocation_payout", ref_id=payout_id, payload={"note": note[:200]}))
     return {"id": payout_id, "state": "reconciled", "_ledger": pend}
 
 
@@ -475,7 +475,7 @@ def after_confirm(conn: Connection, *, payout_id: str, actor_user_id: str | None
     """Contexto PRIVILEGIADO, depois da confirmação: reconhecimento do proponente pago e tentativa de quitação."""
     p = _payout(conn, payout_id)
     if p["state"] in ("confirmed", "reconciled") and p["line_kind"] == "proponent" and p["recipient_org_id"]:
-        _recognize(conn, org_id=p["recipient_org_id"], kind="participation_paid", ref_type="payout", ref_id=p["id"],
+        _recognize(conn, org_id=p["recipient_org_id"], kind="participation_paid", ref_type="allocation_payout", ref_id=p["id"],
                    project_id=p["project_id"], amount_cents=int(p["amount_cents"]), evidence={"agreement_id": p["agreement_id"]})
     return settle_if_complete(conn, agreement_id=p["agreement_id"], actor_user_id=actor_user_id)
 
@@ -497,15 +497,15 @@ def settle_if_complete(conn: Connection, *, agreement_id: str, actor_user_id: st
         conn.run("UPDATE signed_agreements SET status = 'completed' WHERE id = $1", agreement_id)
     conn.run("UPDATE proponent_participations SET status = 'validated', validated_at = now() WHERE agreement_id = $1 AND status = 'accrued'", agreement_id)
     conn.run("UPDATE proponent_participations SET status = 'payable' WHERE agreement_id = $1 AND status = 'validated'", agreement_id)
-    _recognize(conn, org_id=a["org_id"], kind="operation_settled", ref_type="agreement", ref_id=agreement_id, project_id=a["project_id"],
+    _recognize(conn, org_id=a["org_id"], kind="operation_settled", ref_type="signed_agreement", ref_id=agreement_id, project_id=a["project_id"],
                amount_cents=int(a["value_cents"] or 0), evidence={"deliveries": st["deliveries_total"], "payouts": len(st["confirmed"])})
     if a["funder_org_id"]:
-        _recognize(conn, org_id=a["funder_org_id"], kind="funding_settled", ref_type="agreement", ref_id=agreement_id, project_id=a["project_id"],
+        _recognize(conn, org_id=a["funder_org_id"], kind="funding_settled", ref_type="signed_agreement", ref_id=agreement_id, project_id=a["project_id"],
                    amount_cents=int(a["value_cents"] or 0), evidence={"deliveries": st["deliveries_total"]})
     if a["project_id"]:
         from ..services.audit import ledger
         ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="operation_settled",
-               amount_cents=int(a["value_cents"] or 0), ref_type="agreement", ref_id=agreement_id,
+               amount_cents=int(a["value_cents"] or 0), ref_type="signed_agreement", ref_id=agreement_id,
                payload={"deliveries": st["deliveries_total"], "payouts_confirmed": len(st["confirmed"])})
         from ..economics import value_ledger as VL
         VL.record(conn, event_type="operation.settled", org_id=a["org_id"], units=1, project_id=a["project_id"],

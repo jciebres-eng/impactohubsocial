@@ -1,4 +1,4 @@
-"""Matriz de autorização das 893 operações (888 na v0.23.0; +6 na v0.26.0; v0.27.0: −19 de assinatura/trial, +18 da camada econômica): classificação completa + chokepoint exaustivo.
+"""Matriz de autorização das 895 operações (888 na v0.23.0; +6 na v0.26.0; v0.27.0: −19 de assinatura/trial, +18 da camada econômica, +2 torre master e cartões do dia): classificação completa + chokepoint exaustivo.
 
 O QUE ESTE ARQUIVO AFIRMA, E O QUE NÃO AFIRMA
 
@@ -21,7 +21,7 @@ declarar nada.
 
 E há três subconjuntos testados a 100%, não por amostra, porque são os de maior consequência:
 
-* **as 219 rotas de plataforma** (`auth="admin"`) — nenhuma alcançável por organização cliente;
+* **as 220 rotas de plataforma** (`auth="admin"`) — nenhuma alcançável por organização cliente;
 * **as 83 rotas com permissão interna** — nenhuma alcançável por papel interno que não a tenha;
 * **as 52 rotas públicas** — todas na lista revisada de `test_architecture.py`.
 """
@@ -103,17 +103,17 @@ class EveryOperationIsClassifiedTests(unittest.TestCase):
 
     def test_the_counts_match_what_the_report_states(self):
         """Número citado em relatório que ninguém confere é número que envelhece."""
-        self.assertEqual(893, len(self.linhas))   # v0.27.0 (ADR-341): −19 rotas de assinatura/trial/preço, +18 da camada econômica (PIX, repasses, participações, contrato, licença, regras)
+        self.assertEqual(895, len(self.linhas))   # v0.27.0 (ADR-341): −19 rotas de assinatura/trial/preço, +18 da camada econômica (PIX, repasses, participações, contrato, licença, regras), +2 (torre master, cartões do dia)
         # v0.27.0: −6 rotas de plataforma de assinatura/trial (trial, manual-subscription, preço de plano, trial-requests ×2,
         # painel de testes) +4 (proposta de contrato, licença, confirmação e conciliação de repasse pela administração);
         # +1 permissão nomeada líquida (torre master, proposta de contrato; −preço, −trial); −2 públicas (preço, webhook).
-        self.assertEqual(219, sum(1 for l in self.linhas if l["class"].startswith("plataforma")))
-        self.assertEqual(84, sum(1 for l in self.linhas if l["permission"]))
+        self.assertEqual(220, sum(1 for l in self.linhas if l["class"].startswith("plataforma")))   # v0.27.0: +1 GET /v1/control-tower/master (finance.read)
+        self.assertEqual(85, sum(1 for l in self.linhas if l["permission"]))   # v0.27.0: +finance.read da torre master
         self.assertEqual(50, sum(1 for l in self.linhas if l["class"] == "publica"))
 
 
 class ThePlatformDoorIsClosedToEveryClientOrganizationTests(unittest.TestCase):
-    """As 219 rotas de plataforma, a 100% — não por amostra."""
+    """As 220 rotas de plataforma, a 100% — não por amostra."""
 
     @classmethod
     def setUpClass(cls):
@@ -124,7 +124,7 @@ class ThePlatformDoorIsClosedToEveryClientOrganizationTests(unittest.TestCase):
         self.assertGreaterEqual(len(self.rotas), 200)
 
     def test_no_platform_route_is_reachable_by_a_client_organization(self):
-        """Uma chamada por rota, com o verbo real. 219 chamadas, não 42 mil.
+        """Uma chamada por rota, com o verbo real. 220 chamadas, não 42 mil.
 
         O que se confere é o PONTO DE ESTRANGULAMENTO: `authorize()` recusa antes de validar o
         corpo, então o resultado não depende de montar um corpo válido para cada uma.

@@ -396,20 +396,21 @@ class NetworkInvariants(unittest.TestCase):
                 self.assertIn(r["confidence_band"], ("high", "medium", "low", "insufficient_data"))
 
     # ------------------------------------------------------------------ 14
-    def test_price_comes_from_the_server_with_an_effective_period(self):
-        q = Client().get("/v1/plans/price?plan_key=osc_premium&interval=month")
-        self.assertEqual(q.status, 200, q)
-        self.assertIn("currency", q.json)
-        self.assertIn("tax_note", q.json)
-        # A moeda vem do produto (`monetization.DEFAULT_CURRENCY`), não está fixa no teste: a v0.17.0
-        # voltou de USD para BRL e o invariante é "UMA vigente", não "uma vigente em dólar".
-        from impacto.services.monetization import DEFAULT_CURRENCY
-        self.assertEqual(q.json["currency"], DEFAULT_CURRENCY)
+    def test_the_economic_percentages_come_from_the_versioned_catalog(self):
+        """v0.27.0 (ADR-341): o invariante "preço vem do servidor, com vigência" continua — mas o preço é o percentual
+        da camada econômica em `economic_rules`, por versão de preço, e não uma mensalidade (não existe)."""
+        self.assertIn(Client().get("/v1/plans/price?plan_key=osc_premium&interval=month").status, (404, 405))
+        from impacto.services.monetization import pricing_version_name
+        pv = pricing_version_name()
         with db_system() as c:
-            n = c.scalar("SELECT count(*) FROM plan_price_versions WHERE plan_key = 'osc_premium'"
-                         " AND interval = 'month' AND currency = $1 AND effective_until IS NULL",
-                         DEFAULT_CURRENCY)
-        self.assertEqual(int(n), 1, "exatamente uma versão vigente por plano, intervalo e moeda")
+            rows = c.query("SELECT key, bps, payer_role, recipient_kind FROM economic_rules WHERE pricing_version = $1"
+                           " AND (effective_until IS NULL OR effective_until > current_date) ORDER BY key", pv)
+        self.assertEqual([r["key"] for r in rows], ["funding.platform_service", "funding.proponent_participation"])
+        self.assertEqual({r["key"]: r["bps"] for r in rows}, {"funding.platform_service": 350, "funding.proponent_participation": 150})
+        with db_system() as c:
+            por_versao = c.query("SELECT pricing_version, count(*) AS n FROM economic_rules GROUP BY 1")
+        for r in por_versao:
+            self.assertEqual(int(r["n"]), 2, "exatamente uma regra por chave e versão de preço")
 
     # ------------------------------------------------------------------ 15
     def test_history_is_never_rewritten(self):

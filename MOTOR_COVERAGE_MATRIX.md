@@ -38,7 +38,7 @@ Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/
 | `contract_rules` — Contrato como regra de operação | econômico | deterministic | 3 | sim | sim | sim | sim | sim | sim | sim | VERDE |
 | `control_tower` — Torres de controle (financiador e governo) | econômico | deterministic | 2 | sim | sim | sim | sim | sim | sim | não | AMARELO |
 | `economic_layer` — Camada econômica da operação (matriz, repasses, participação, quitação) | econômico | deterministic | 10 | sim | sim | sim | sim | sim | sim | sim | VERDE |
-| `master_tower` — Torre MASTER / financeira do proprietário | econômico | deterministic | 1 | sim | sim | sim | sim | não | sim | não | AMARELO |
+| `master_tower` — Torre MASTER / financeira do proprietário | econômico | deterministic | 1 | sim | sim | sim | sim | sim | sim | não | AMARELO |
 | `result_chain` — Cadeia de resultado | econômico | deterministic | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `territorial_gap` — Lacuna territorial da carteira | econômico | deterministic | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `value_ledger` — Registro de valor entregue | econômico | deterministic | 2 | sim | sim | sim | sim | não | sim | sim | VERDE |
@@ -61,7 +61,7 @@ Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/
 | `funding_readiness` — Prontidão de captação de uma solução | prontidão | deterministic | 2 | sim | sim | sim | sim | sim | sim | não | AMARELO |
 | `impacto_ready` — Estado verificável 'Projeto IMPACTO Ready' | prontidão | deterministic | 1 | sim | sim | sim | sim | não | sim | não | AMARELO |
 | `readiness` — Prontidão da organização e do projeto | prontidão | deterministic | 3 | sim | sim | sim | sim | sim | sim | sim | VERDE |
-| `today_cards` — Para você hoje (cartões e contadores do menu) | rede | deterministic | 1 | sim | sim | sim | sim | não | sim | não | AMARELO |
+| `today_cards` — Para você hoje (cartões e contadores do menu) | rede | deterministic | 1 | sim | sim | sim | sim | sim | sim | não | AMARELO |
 | `intent_parser` — Interpretação de intenção de busca | soluções | deterministic | 1 | sim | sim | sim | sim | não | sim | não | AMARELO |
 | `solution_adaptation` — Adaptação de solução a outro território | soluções | deterministic | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `solution_combine` — Combinação de soluções | soluções | deterministic | 2 | sim | sim | sim | sim | não | sim | sim | VERDE |

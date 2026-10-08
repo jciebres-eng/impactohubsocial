@@ -613,7 +613,9 @@ def _flush_ledger(ctx: Ctx, out: dict) -> dict:
                 ledger(c, **e)
     return out
 
-@route("PUT", "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix", body=TSch.PartyPixIn, min_role=WRITE, tags=("agreements",),
+# v0.27.0: informar chave PIX, registrar/confirmar/recusar transferência e conciliar são atos FINANCEIROS da organização —
+# só a pessoa dona (owner) os pratica, como as demais rotas de dinheiro.
+@route("PUT", "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix", body=TSch.PartyPixIn, min_role=OWNER, tags=("agreements",),
        summary="A própria parte informa a chave PIX que receberá os repasses deste acordo (formato conferido pelo banco)")
 def party_set_pix(ctx: Ctx, body: TSch.PartyPixIn):
     from ..trust import economy as ECO
@@ -646,7 +648,7 @@ def agreement_value(ctx: Ctx):
         return ECO.explain_value(c, ctx.path["agreement_id"])
 
 
-@route("POST", "/v1/payouts/{payout_id}/transfers", body=TSch.TransferIn, min_role=WRITE, status=201, tags=("agreements",),
+@route("POST", "/v1/payouts/{payout_id}/transfers", body=TSch.TransferIn, min_role=OWNER, status=201, tags=("agreements",),
        summary="Quem paga registra uma transferência feita (a qualquer momento, inclusive parcial); a mesma referência é idempotente")
 def payout_register_transfer(ctx: Ctx, body: TSch.TransferIn):
     from ..trust import economy as ECO
@@ -667,7 +669,7 @@ def payout_register_transfer(ctx: Ctx, body: TSch.TransferIn):
     return _flush_ledger(ctx, out)
 
 
-@route("POST", "/v1/payout-transfers/{transfer_id}/confirm", min_role=WRITE, tags=("agreements",),
+@route("POST", "/v1/payout-transfers/{transfer_id}/confirm", min_role=OWNER, tags=("agreements",),
        summary="Quem RECEBE confirma o recebimento; com o valor inteiro confirmado o repasse fica confirmado e o evento econômico nasce")
 def transfer_confirm(ctx: Ctx):
     from ..trust import economy as ECO
@@ -694,7 +696,7 @@ def transfer_confirm(ctx: Ctx):
     return out
 
 
-@route("POST", "/v1/payout-transfers/{transfer_id}/reject", body=TSch.RevokeIn, min_role=WRITE, tags=("agreements",),
+@route("POST", "/v1/payout-transfers/{transfer_id}/reject", body=TSch.RevokeIn, min_role=OWNER, tags=("agreements",),
        summary="Quem recebe recusa uma transferência registrada (não chegou, valor errado): o repasse fica em disputa")
 def transfer_reject(ctx: Ctx, body: TSch.RevokeIn):
     from ..trust import economy as ECO
@@ -704,7 +706,7 @@ def transfer_reject(ctx: Ctx, body: TSch.RevokeIn):
     return out
 
 
-@route("POST", "/v1/payouts/{payout_id}/reconcile", body=TSch.RevokeIn, min_role=WRITE, tags=("agreements",),
+@route("POST", "/v1/payouts/{payout_id}/reconcile", body=TSch.RevokeIn, min_role=OWNER, tags=("agreements",),
        summary="Quem recebe concilia o repasse confirmado com o extrato (nota obrigatória)")
 def payout_reconcile(ctx: Ctx, body: TSch.RevokeIn):
     from ..trust import economy as ECO

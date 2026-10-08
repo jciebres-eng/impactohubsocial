@@ -19,13 +19,53 @@
 -- Nada aqui apaga dado histórico de cobrança (invoices, platform_charges, billing_events): o que foi
 -- faturado continua provado. O que deixa de existir é a MÁQUINA de assinatura, não o registro do passado.
 
+-- ============================================================================ 0. ARQUIVO do que será removido (nenhuma linha se perde)
+-- Antes de qualquer DROP, toda linha das tabelas de assinatura e todo valor não nulo das colunas removidas é copiado
+-- para `legacy_subscription_archive` (append-only, só leitura privilegiada). É o que permite responder "esta
+-- organização chegou a ter assinatura/trial?" depois da remoção — e é a prova, exigida pelo portão de dados, de que a
+-- migração não destrói dado em silêncio. `trial_claims` guarda só HMAC de e-mail/CNPJ (antifraude do trial, retenção
+-- de 24 meses): sem trial não há o que proteger, e arquivar o hash seria reter dado pessoal sem finalidade — não entra.
+CREATE TABLE legacy_subscription_archive (
+  id          bigserial PRIMARY KEY,
+  source      text NOT NULL,                  -- tabela ou tabela.coluna de origem
+  source_id   text,                           -- id da linha de origem, quando havia
+  row         jsonb NOT NULL,
+  archived_at timestamptz NOT NULL DEFAULT now()
+);
+COMMENT ON TABLE legacy_subscription_archive IS
+  'v0.27.0 (ADR-341): cópia integral do que a retirada da assinatura removeu do esquema. Só leitura; nunca alimenta tela, direito ou cobrança.';
+CREATE TRIGGER trg_append_only BEFORE UPDATE OR DELETE ON legacy_subscription_archive FOR EACH ROW EXECUTE FUNCTION forbid_mutation();
+ALTER TABLE legacy_subscription_archive ENABLE ROW LEVEL SECURITY;
+CREATE POLICY legacy_archive_priv ON legacy_subscription_archive FOR ALL USING (app_priv()) WITH CHECK (app_priv());
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['subscriptions','subscription_prices','price_change_notices','org_trials','trial_requests','plan_prices','plan_price_versions'] LOOP
+    EXECUTE format('INSERT INTO legacy_subscription_archive(source, source_id, row) SELECT %L, (to_jsonb(x)->>''id''), to_jsonb(x) FROM %I x', t, t);
+  END LOOP;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'invoices.subscription_id', id::text, jsonb_build_object('subscription_id', subscription_id) FROM invoices WHERE subscription_id IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'platform_charges.subscription_id', id::text, jsonb_build_object('subscription_id', subscription_id) FROM platform_charges WHERE subscription_id IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'free_periods.subscription_id', id::text, jsonb_build_object('subscription_id', subscription_id) FROM free_periods WHERE subscription_id IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'voucher_redemptions.consumed_by_subscription', id::text, jsonb_build_object('consumed_by_subscription', consumed_by_subscription) FROM voucher_redemptions WHERE consumed_by_subscription IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'commercial_offers.price_version_id+interval', id::text, jsonb_build_object('price_version_id', price_version_id, 'interval', interval) FROM commercial_offers WHERE price_version_id IS NOT NULL OR interval IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'offer_acceptances.price_version_id', id::text, jsonb_build_object('price_version_id', price_version_id) FROM offer_acceptances WHERE price_version_id IS NOT NULL;
+  INSERT INTO legacy_subscription_archive(source, source_id, row)
+    SELECT 'plans.price_cents+interval', plan_key, jsonb_build_object('price_cents', price_cents, 'interval', interval) FROM plans;
+END $$;
+
 -- ============================================================================ 1. colunas dependentes (DELETE)
-ALTER TABLE invoices            DROP COLUMN IF EXISTS subscription_id;
-ALTER TABLE platform_charges    DROP COLUMN IF EXISTS subscription_id;
-ALTER TABLE free_periods        DROP COLUMN IF EXISTS subscription_id;
+ALTER TABLE invoices DROP COLUMN IF EXISTS subscription_id;
+ALTER TABLE platform_charges DROP COLUMN IF EXISTS subscription_id;
+ALTER TABLE free_periods DROP COLUMN IF EXISTS subscription_id;
 ALTER TABLE voucher_redemptions DROP COLUMN IF EXISTS consumed_by_subscription;
-ALTER TABLE commercial_offers   DROP COLUMN IF EXISTS price_version_id;
-ALTER TABLE offer_acceptances   DROP COLUMN IF EXISTS price_version_id;
+ALTER TABLE commercial_offers DROP COLUMN IF EXISTS price_version_id;
+ALTER TABLE offer_acceptances DROP COLUMN IF EXISTS price_version_id;
 
 -- ============================================================================ 2. tabelas de assinatura (DELETE)
 DROP TABLE IF EXISTS price_change_notices;
@@ -227,4 +267,17 @@ UPDATE chart_of_accounts SET name = 'Taxa de operação instruída e não quitad
 -- ============================================================================ 10. Central de Conhecimento (MIGRATE)
 UPDATE kb_categories SET name = 'Acesso, concessões e contratos', description = 'De onde vem o acesso, vouchers, convênios e contratos — não existe assinatura'
  WHERE slug = 'assinatura-trial';
+
+-- ============================================================================ 11. catálogo de referências polimórficas (MIGRATE)
+-- `recognitions.ref_type/ref_id` aponta para o registro que gerou o reconhecimento (signed_agreement, allocation_payout).
+-- Entra no catálogo para que `integrity_catalog_drift()` e a conferência de órfãos o vejam.
+INSERT INTO polymorphic_refs (source_table, type_column, id_column, note) VALUES
+  ('recognitions','ref_type','ref_id','registro que gerou o reconhecimento: acordo quitado (signed_agreement) ou repasse confirmado (allocation_payout)')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================ 12. categorias de auditoria (MIGRATE)
+INSERT INTO audit_action_categories (prefix, category, note) VALUES
+  ('participation','FINANCE','participação de autoria: proposta, aceite, cancelamento (camada econômica, v0.27.0)'),
+  ('payout','FINANCE','instrução de repasse: transferência registrada, confirmada, recusada, conciliada (v0.27.0)')
+ON CONFLICT DO NOTHING;
 

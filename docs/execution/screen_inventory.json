@@ -1,16 +1,16 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 220,
+ "telas": 221,
  "por_tabela": {
   "PUBLIC": 9,
   "HELP": 29,
-  "ROUTES": 182
+  "ROUTES": 183
  },
  "sem_login": 30,
  "com_parametro": 52,
  "em_algum_menu": 87,
- "so_por_link_direto": 81,
+ "so_por_link_direto": 82,
  "sombreadas": [],
  "menus_por_tipo": {
   "Empresa": 33,
@@ -2114,6 +2114,25 @@
    "entrada": "dentro da aplicação",
    "exige_login": true,
    "componente": "Int.Conciliacao",
+   "arquivo": "web/src/pages/internal.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "staff"
+   ],
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/controladoria/torre",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Int.TorreMaster",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
    "tipos_declarados": [

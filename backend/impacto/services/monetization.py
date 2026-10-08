@@ -18,7 +18,7 @@ Nenhum pacote, voucher ou convênio altera match, elegibilidade ou ranking (test
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from ..http import ApiError
 
@@ -105,11 +105,6 @@ def join_agreement(c, *, code_hash: str, org_id: str, user_id: str, user_email: 
     # `discount_percent` continua na tabela por histórico, mas não é aplicado a nada: não há preço de assinatura.
     return {"agreement_id": str(a["id"]), "name": a["name"], "plan_key": a["plan_key"],
             "ends_at": c.scalar("SELECT ends_at FROM entitlement_grants WHERE id = $1", grant_id) if grant_id else None}
-
-
-# ------------------------------------------------------------------------------------------------ textos do produto
-def fmt_date(d: datetime | None) -> str:
-    return d.astimezone(timezone(timedelta(hours=-4))).strftime("%d/%m/%Y") if d else "—"      # America/Cuiaba
 
 
 # --- v0.21.0: catálogo lido da configuração ------------------------------------------------------

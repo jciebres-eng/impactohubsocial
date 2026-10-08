@@ -1,10 +1,10 @@
 {
- "gerado_em": "2026-10-08T18:26:24.597318+00:00",
+ "gerado_em": "2026-10-08T21:47:43.516806+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 48,
+   "telas_do_menu": 49,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -38,6 +38,7 @@
     "/documentos/modelos",
     "/rascunhos",
     "/acordos",
+    "/participacoes",
     "/verificacoes",
     "/profissionais",
     "/solucoes",
@@ -53,7 +54,7 @@
     "/ajuda",
     "/notificacoes",
     "/organizacao",
-    "/conta/plano",
+    "/conta/acesso",
     "/conta"
    ],
    "telas_4xx": {},
@@ -102,7 +103,7 @@
     "/ajuda",
     "/notificacoes",
     "/organizacao",
-    "/conta/plano",
+    "/conta/acesso",
     "/conta"
    ],
    "telas_4xx": {},
@@ -112,11 +113,12 @@
   "individual": {
    "email": "apoiador@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 26,
+   "telas_do_menu": 27,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/torre",
+    "/participacoes",
     "/area",
     "/marketplace",
     "/propostas",
@@ -139,7 +141,7 @@
     "/ajuda",
     "/notificacoes",
     "/organizacao",
-    "/conta/plano",
+    "/conta/acesso",
     "/conta"
    ],
    "telas_4xx": {},
@@ -183,7 +185,7 @@
     "/ajuda",
     "/notificacoes",
     "/organizacao",
-    "/conta/plano",
+    "/conta/acesso",
     "/conta"
    ],
    "telas_4xx": {},
@@ -229,7 +231,7 @@
     "/ajuda",
     "/notificacoes",
     "/organizacao",
-    "/conta/plano",
+    "/conta/acesso",
     "/conta"
    ],
    "telas_4xx": {},
@@ -239,7 +241,7 @@
   "admin": {
    "email": "admin@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 53,
+   "telas_do_menu": 54,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -267,6 +269,7 @@
     "/admin/interruptor",
     "/controladoria",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -364,12 +367,13 @@
   "controller": {
    "email": "controladoria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 15,
+   "telas_do_menu": 16,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -394,11 +398,12 @@
   "finance": {
    "email": "financeiro@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 11,
+   "telas_do_menu": 12,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -423,11 +428,12 @@
   "accounting": {
    "email": "contabilidade@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 11,
+   "telas_do_menu": 12,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -449,11 +455,12 @@
   "treasury": {
    "email": "tesouraria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 9,
+   "telas_do_menu": 10,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -504,12 +511,13 @@
   "audit": {
    "email": "auditoria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 19,
+   "telas_do_menu": 20,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria",
     "/controladoria/conciliacao",
+    "/controladoria/torre",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -539,5 +547,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 323
+ "total_telas_de_menu_visitadas": 331
 }

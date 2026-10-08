@@ -1,6 +1,85 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.27.0] — 2026-10-08
+
+### Não existem mais assinaturas: a receita nasce da operação financiada (ADR-341)
+
+Pedido do proprietário: retirar a assinatura do modelo econômico — sem planos pagos, trial, checkout,
+reajuste, paywall ou cobrança recorrente — e fazer o IMPACTO valer por **estar nele**: acesso a
+recursos, demonstração e comprovação de evidência. 5% da operação financiada = 3,5% taxa de serviço
+da plataforma + 1,5% participação de autoria do proponente (só quando contratualmente elegível, nunca
+automática); percentuais do catálogo versionado, nunca em código; um aporte só do financiador,
+direcionado a cada parte pela chave PIX do contrato; selos e reconhecimentos só na quitação.
+
+**Inventário antes de apagar** (`docs/execution/SUBSCRIPTION_INVENTORY.md`): cada ocorrência de
+assinatura/trial/preço/plano/checkout/paywall classificada KEEP / MIGRATE / DEPRECATE / DELETE, com
+destino. Nada foi apagado às cegas.
+
+**Banco** (`migrations/0067_v0270_no_subscription.sql`):
+- §0 `legacy_subscription_archive` (append-only, só leitura privilegiada): antes de qualquer DROP,
+  arquiva as linhas inteiras de `subscriptions`, `subscription_prices`, `price_change_notices`,
+  `org_trials`, `trial_requests`, `plan_prices`, `plan_price_versions` e os valores das colunas que
+  caem (`invoices/platform_charges/free_periods.subscription_id`,
+  `voucher_redemptions.consumed_by_subscription`, `commercial_offers/offer_acceptances.price_version_id`,
+  `commercial_offers.interval`, `plans.price_cents/interval`). Nenhum dado se perde;
+- DELETE: as sete tabelas de assinatura/trial/preço e `price_current()`;
+- MIGRATE: `plans` vira pacote de capacidades (sem preço, sem intervalo); `org_commercial_state` v2
+  responde "de onde vem o acesso?" (FREE_ACCESS / FREE_GRANT / GRANT_EXPIRING / CONTRACTED);
+  `commercial_offers` vira CONTRATO (avulso ou parcelado, `amount_reason`, `contract_ref`; nunca
+  recorrente); `charge_requires_authorization` v2 aceita contrato aceito OU acordo de financiamento
+  assinado pelo financiador com taxa (ADR-342); `entitlement_grants.source` ganha `contract`;
+  `saas.institutional.funder` passa a `contract`/`contract`, recusada com carta vermelha;
+- `economic_rules` Pricing Version **2027.02** (350/150 bps; 2027.01 permanece no histórico);
+  `audit_action_categories` ganha `participation` e `payout`; `polymorphic_refs` cobre `recognitions`;
+  plano de contas e categoria da central de ajuda renomeados.
+
+**Backend:** `services/billing.py` removido; `monetization.py` reduzido a concessões (vouchers de
+desconto aposentados — resgate recusa 409 `voucher_type_retired`); `entitlements.py`, `offers.py`,
+`free_period.py`, `commercial_routes.py`, `monetization_routes.py`, `admin_routes.py`
+(`POST /v1/admin/organizations/{id}/license` substitui `manual-subscription`), `auth.me`
+(`subscription: null`), `economics/metrics.py` (`operation_revenue` substitui `recurring_revenue`),
+`economics/payments.py` (sem `subscription`), `jobs.py` (sem `billing_lifecycle`), `config.py` (sem
+`billing_provider`, `stripe_prices`, `trial_*`), eventos de integração `OPERATION.ACTIVATED/SETTLED`,
+`PAYOUT.CONFIRMED`. Novos: `economics/master_tower.py` + `GET /v1/control-tower/master`
+(`finance.read`): GMV × camada registrada/devida/paga por mês, participação, marketplace sem
+percentual, uso, contratos, a receber, **banco: DADO FINANCEIRO NÃO CONECTADO**, captura de valor
+(`NÃO MEDIDO` sem denominador); `network/today.py` + `GET /v1/me/today` (cartões do dia, selos,
+progresso de onboarding, trajetória); reconhecimentos reconstroem a projeção pública
+(`trajectory` cumulativa, contagens e datas, nunca valores); rotas financeiras (PIX, transferências,
+confirmação, recusa, conciliação) exigem `OWNER`; ledger/reconhecimentos referenciam
+`proponent_participation`, `allocation_payout`, `signed_agreement`, `agreement_allocation`.
+
+**Interface:** `/conta/acesso` ("Acesso e concessões", sem checkout; `/conta/plano` redireciona),
+`/controladoria/torre` (Torre MASTER), cartões do dia na página inicial (`TodayCards`, dispensa por
+pessoa), trajetória no perfil público, "Como o IMPACTO se sustenta" na área comercial, painel de licença
+na administração; `/ajuda/teste` e `/admin/central/testes` removidos; namespaces i18n
+`subscription/checkout/cancellation` removidos. 221 telas.
+
+**Testes:** `test_v0270_no_subscription.py` (nenhuma assinatura em lugar nenhum; torre master; cartões
+do dia), `test_v0270_economy.py` (anti-bypass A–O), `test_v0270_financial_model.py` (documento =
+gerador; percentuais = catálogo; aritmética), `test_v0160_billing.py` removido com o módulo; 20
+módulos reescritos para o modelo sem assinatura (ADR-340: contagens fixadas atualizadas com a razão
+escrita ao lado — 895 operações, 220 de plataforma, 85 com permissão, 221 telas, 48 motores, 15 tipos
+de evento de valor). Jornada `caminho_dourado` nas jornadas de demonstração.
+
+**Documentos:** `docs/ECONOMIC_MODEL.md` (canônico), `docs/execution/SUBSCRIPTION_INVENTORY.md`,
+`EXTERNAL_INTEGRATIONS.md`, `MOTOR_COVERAGE_MATRIX.md` (gerado: 48 motores, VERDE 35, AMARELO 13,
+VERMELHO 0), `24_MONTH_FINANCIAL_MODEL.md` (gerado por `scripts/make_24_month_model.py` a partir de
+`config/economic_model.json`: 3 cenários, 3 clientes/mês, sensibilidade R$ 50 mil → R$ 10 milhões, GMV
+para R$ 1/5/10 milhões; receita real: R$ 0,00), `DECISIONS.md` ADR-341/342/343, PRICING_BIBLE (2027.02),
+PRICING_RECONCILIATION R-40..R-43, MONETIZATION §9, VALUE_LEDGER (15 tipos), AI_ENGINES (48);
+documentos de assinatura marcados SUPERADO (BILLING_V2, TRIAL_SYSTEM, FULL_FREE_2026, COMMERCIAL_TERMS,
+docs/billing.md, docs/BUSINESS_MODEL.md, BILLING_ARCHITECTURE, MONETIZATION_ARCHITECTURE,
+COMMERCIAL_UX_SPEC, DESIGNER_HANDOFF_MONETIZATION, BILLING_SECURITY). Snapshot da v0.26.0 em
+`history/v0.26.0/`.
+
+**O que NÃO foi feito, de propósito:** cobrança real (regra comercial desligada até parecer jurídico/
+contábil externo); chave PIX real da plataforma (`PLATFORM_PIX_KEY` vazia → "NÃO CONFIGURADA");
+provedor de pagamento/banco (conciliação continua manual, registrada e confirmada pelas partes);
+preço de contrato (negociado por quem tem alçada; piso publicado não é preço). Tag `v0.27.0` a criar
+no GitHub pelo proprietário (envio de tag recusado pelo proxy).
+
 ## [0.26.0] — 2026-10-08
 
 ### A tese econômica virou produto: contrato como regra, distribuição sem custódia, torres de controle, IMPACTO Ready

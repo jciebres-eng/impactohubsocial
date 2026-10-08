@@ -87,9 +87,12 @@ class RoleSweepTests(unittest.TestCase):
 
     def test_no_financial_route_is_reachable_by_anyone_below_owner(self):
         """§64: membro de projeto executando ação financeira de administrador."""
+        # v0.27.0 (ADR-341): checkout/cancelamento/troca de plano saíram com a assinatura; as rotas financeiras de dono
+        # passaram a ser as de cobrança própria, de consentimento de contrato e da camada econômica (chave PIX, repasses).
         financeiras = [r for r in self.routes
                        if r.min_role == "owner" and any(
-                           p in r.path for p in ("/billing", "/payments/charges"))]
+                           p in r.path for p in ("/billing", "/payments/charges", "/commercial/consent", "/commercial/offers",
+                                                 "/parties/{party_id}/pix", "/payouts/", "/payout-transfers/"))]
         self.assertGreater(len(financeiras), 4, "não achei as rotas financeiras: o teste seria vazio")
         for papel in ("member", "analyst", "manager"):
             quem = _membro(self.owner, papel)

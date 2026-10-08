@@ -23,11 +23,11 @@ Cinco testes transformam a declaração em compromisso:
 
 ## O estado real
 
-45 motores (42 até a v0.25.0; a v0.26.0 acrescentou contrato como regra, torres de controle e IMPACTO Ready). Três naturezas, e a distinção muda o que se pode prometer:
+48 motores (42 até a v0.25.0; a v0.26.0 acrescentou contrato como regra, torres de controle e IMPACTO Ready; a v0.27.0 acrescentou a camada econômica da operação, a torre MASTER e os cartões "Para você hoje"). Três naturezas, e a distinção muda o que se pode prometer:
 
 | Natureza | Quantos | O que significa |
 |---|---|---|
-| `deterministic` | 40 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
+| `deterministic` | 43 | mesma entrada, mesma saída; auditável linha a linha; pesos em arquivo de configuração, não embutidos |
 | `grounded_retrieval` | 2 | responde por **extração** do conteúdo cadastrado; nenhum texto é gerado por modelo |
 | `llm_assisted` | 3 | um modelo reescreve ou complementa **sobre base determinística**, como rascunho |
 
@@ -86,7 +86,7 @@ Agrupados como no registro: **prontidão** (2), **compatibilidade** (4), **confo
 
 ## Cobertura: onde a cadeia é forte, e onde não é
 
-`ENGINE_COVERAGE.md` traz os 45 motores com seis colunas — **implemented, integrated, tested, E2E,
+`ENGINE_COVERAGE.md` traz os 48 motores com seis colunas — **implemented, integrated, tested, E2E,
 security, observability** — e `GET /v1/engines/coverage` devolve o mesmo cálculo.
 
 **Nenhuma das seis colunas é declarada.** Todas são derivadas do código, do roteador, da suíte de testes

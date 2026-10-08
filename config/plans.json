@@ -327,10 +327,6 @@
       "default": false,
       "description": "Permite contratar plano pago de prestador"
     },
-    "billing_live": {
-      "default": false,
-      "description": "Indica que a cobrança real foi homologada (exibe aviso de sandbox quando falso)"
-    },
     "public_directory_providers": {
       "default": true,
       "description": "Diretório de profissionais parceiros visível para organizações"

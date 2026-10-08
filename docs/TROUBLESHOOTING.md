@@ -145,7 +145,7 @@ entrypoint do contêiner de verdade (`test_v0240_container_entrypoint.py`) e viu
 
 Antes de chamar de defeito, veja no painel de telas o que aquele componente chama:
 
-- **"sem chamada direta"** (62 telas): o componente não chama a API por conta própria. Pode ser tela
+- **"sem chamada direta"** (63 telas): o componente não chama a API por conta própria. Pode ser tela
   estática, pode buscar por um auxiliar compartilhado — a leitura por componente não distingue.
 - **"chama backend"**: aí sim, vazio é suspeito. Abra o console do navegador e veja a resposta.
 

@@ -563,6 +563,66 @@ class Jornadas:
                            {"statement": "Assino este acordo e me responsabilizo pelo combinado.", "password": self.senha, "code": "000000"},
                            esperado=(409,))
 
+
+    def caminho_dourado(self):
+        """v0.27.0 — o CAMINHO DOURADO da camada econômica, do acordo à quitação: aporte único direcionado, confirmação por
+        quem recebe, entrega aceita → operação quitada → reconhecimentos → trajetória; depois a torre MASTER e o acesso sem
+        assinatura. Um acordo pequeno, de um marco só, para que a quitação aconteça dentro da demonstração."""
+        J, osc, emp, adm, pid = "Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre", \
+            self.c["osc"], self.c["company"], self.c["admin"], self.ids["projeto"]
+        doc = osc.upload("/v1/documents", "acordo-complementar.pdf", b"%PDF-1.4\n% acordo complementar ficticio\n%%EOF\n",
+                         {"doc_type": "contrato", "title": "Acordo complementar — material didático (exemplo)"})
+        if doc.status != 201:
+            return
+        ac = self.passo(J, "OSC cria acordo de financiamento complementar (R$ 20.000, um marco)", osc, "POST", "/v1/signed-agreements", {
+            "kind": "funding", "title": "Financiamento complementar — material didático (exemplo)",
+            "summary": "R$ 20.000 em um marco; aporte único direcionado pela chave PIX do contrato.",
+            "document_id": doc.json["id"], "project_id": pid, "value_cents": 2_000_000, "review_days": 5, "calendar_type": "business", "dispute_days": 5})
+        if not ac:
+            return
+        aid = self.ids["acordo_complementar"] = ac["id"]
+        self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.passo(J, "OSC informa a chave PIX no contrato", osc, "PUT", f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix",
+                   {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
+        m = self.passo(J, "define o único marco", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",
+                       {"title": "Entrega do material didático", "due_on": _d(20), "seq": 1, "amount_cents": 2_000_000})
+        self.passo(J, "publica para assinatura", osc, "POST", f"/v1/signed-agreements/{aid}/publish")
+        for c in (osc, emp):
+            self.assinar(J, c, "agreement", aid, f"/v1/signed-agreements/{aid}/sign", {"statement": "Assino este acordo e me responsabilizo pelo combinado."})
+        po = self.passo(J, "instruções de repasse: projeto (19.000) e plataforma (700, aguardando regra)", emp, "GET", f"/v1/signed-agreements/{aid}/payouts") or {}
+        proj = next((x for x in po.get("items", []) if x["line_kind"] == "project"), None)
+        plat = next((x for x in po.get("items", []) if x["line_kind"] == "platform_fee"), None)
+        self.ids["linha_plataforma_estado"] = plat and plat.get("state")
+        if proj:
+            t = self.passo(J, "financiador registra o aporte ao projeto", emp, "POST", f"/v1/payouts/{proj['id']}/transfers",
+                           {"amount_cents": proj["amount_cents"], "reference": "E2E-DEMO-0003", "paid_on": _d(0)})
+            if t:
+                self.passo(J, "OSC confirma o recebimento", osc, "POST", f"/v1/payout-transfers/{t['id']}/confirm")
+                self.passo(J, "OSC concilia o repasse com nota", osc, "POST", f"/v1/payouts/{proj['id']}/reconcile",
+                           {"reason": "Extrato do dia conferido: valor e remetente batem com a instrução (exemplo)."})
+        if m:
+            self.passo(J, "OSC registra a entrega", osc, "PATCH", f"/v1/signed-agreements/{aid}/milestones/{m['id']}", {"status": "delivered"})
+            r = self.passo(J, "financiador aceita a entrega → operação QUITADA (todo repasse devido confirmado)", emp, "PATCH",
+                           f"/v1/signed-agreements/{aid}/milestones/{m['id']}", {"status": "accepted"}) or {}
+            self.ids["operacao_quitada"] = r.get("operation_settled")
+        d = self.passo(J, "acordo concluído: quitação derivada dos repasses", osc, "GET", f"/v1/signed-agreements/{aid}") or {}
+        self.ids["acordo_complementar_status"] = d.get("status")
+        self.passo(J, "reconhecimentos nascem da quitação: OSC vê a trajetória crescer em 'Para você hoje'", osc, "GET", "/v1/me/today")
+        self.passo(J, "financiador também: aporte integralmente confirmado", emp, "GET", "/v1/me/today")
+        self.passo(J, "perfil público da OSC carrega a trajetória (contagens e datas, nunca valores)", osc, "GET", "/v1/profiles/mine")
+        self.passo(J, "o que o IMPACTO fez nesta operação", emp, "GET", f"/v1/signed-agreements/{aid}/value")
+        self.passo(J, "acesso sem assinatura: de onde vem o direito da OSC", osc, "GET", "/v1/billing")
+        self.passo(J, "catálogo público: pacotes e vias de acesso, nenhum preço recorrente", osc, "GET", "/v1/plans")
+        self.passo(J, "regras do catálogo econômico (versão vigente)", emp, "GET", "/v1/economic-rules")
+        self.confirmar_identidade(adm, J)
+        self.passo(J, "torre MASTER: GMV × camada da plataforma, banco NÃO CONECTADO, captura de valor", adm, "GET", "/v1/control-tower/master")
+        of = self.passo(J, "administração propõe contrato avulso à OSC (valor e motivo de quem tem alçada)", adm, "POST", "/v1/admin/commercial/offers", {
+            "org_id": osc.org_id, "plan_key": "osc_premium", "amount_cents": 120_000, "amount_reason": "Implantação assistida do módulo de prestação de contas (exemplo).",
+            "billing_frequency": "one_time", "payment_method": "pix", "contract_ref": "CT-DEMO-2026-001"})
+        if of:
+            self.passo(J, "OSC aceita com autorização de cobrança → pacote concedido pelo contrato", osc, "POST", f"/v1/commercial/offers/{of['id']}/accept", {"consent_status": "authorized"})
+            self.passo(J, "estado comercial: CONTRATADO", osc, "GET", "/v1/commercial/state")
+
     def mercado_e_perfis(self):
         J, osc, pro, pid = "Marketplace, soluções e perfis públicos", self.c["osc"], self.c["provider"], self.ids["projeto"]
         lst = self.passo(J, "OSC anuncia o projeto no marketplace", osc, "POST", "/v1/marketplace/listings", {
@@ -688,7 +748,7 @@ class Jornadas:
     def run(self) -> dict:
         self.preparar()
         for etapa in (self.osc_projeto_e_diagnostico, self.financiador, self.rede, self.profissional, self.governo,
-                      self.captacao, self.documentos, self.contrato_como_regra, self.mercado_e_perfis, self.suporte_e_conhecimento,
+                      self.captacao, self.documentos, self.contrato_como_regra, self.mercado_e_perfis, self.caminho_dourado, self.suporte_e_conhecimento,
                       self.banco_de_ideias, self.administracao, self.pendencias):
             try:
                 etapa()

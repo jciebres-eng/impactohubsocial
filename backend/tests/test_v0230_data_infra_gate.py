@@ -120,6 +120,25 @@ class TheMigrationsAreForwardOnlyAndFingerprintedTests(unittest.TestCase):
             "consolidação de duas tabelas de ODS numa: as linhas 15-16 da mesma migração copiam "
             "code/name_en/color_hex de sdg_goals para ods_goals ANTES da remoção, e o gatilho de "
             "validação de impact_tags é recriado apontando para ods_goals. Nenhum dado se perde.",
+        # v0.27.0 — a assinatura saiu do modelo econômico (ADR-341). Nove remoções de coluna, uma razão: arquivo prévio.
+        "0067_v0270_no_subscription.sql:ALTER TABLE invoices DROP COLUMN IF EXISTS subscription_id":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE platform_charges DROP COLUMN IF EXISTS subscription_id":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE free_periods DROP COLUMN IF EXISTS subscription_id":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE voucher_redemptions DROP COLUMN IF EXISTS consumed_by_subscription":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE commercial_offers DROP COLUMN IF EXISTS price_version_id":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE offer_acceptances DROP COLUMN IF EXISTS price_version_id":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE commercial_offers DROP COLUMN IF EXISTS interval":
+            "v0.27.0 (ADR-341) — retirada da assinatura. A seção 0 da mesma migração copia, ANTES de qualquer DROP, todo valor não nulo desta coluna para `legacy_subscription_archive` (append-only, só leitura privilegiada), junto com as linhas inteiras das tabelas de assinatura. Nenhum dado se perde; a coluna deixa de existir porque a estrutura que ela referenciava (assinatura) não existe mais.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE plans DROP COLUMN IF EXISTS price_cents":
+            "v0.27.0 (ADR-341) — plano vira pacote de capacidades sem preço nem periodicidade. A seção 0 da mesma migração arquiva price_cents e interval de TODOS os planos em `legacy_subscription_archive` antes do DROP; o catálogo `config/plans.json` (plans@4.0) deixa de declarar as duas chaves e `sync_reference_data` deixa de escrevê-las. Nenhum dado se perde.",
+        "0067_v0270_no_subscription.sql:ALTER TABLE plans DROP COLUMN IF EXISTS interval":
+            "v0.27.0 (ADR-341) — plano vira pacote de capacidades sem preço nem periodicidade. A seção 0 da mesma migração arquiva price_cents e interval de TODOS os planos em `legacy_subscription_archive` antes do DROP; o catálogo `config/plans.json` (plans@4.0) deixa de declarar as duas chaves e `sync_reference_data` deixa de escrevê-las. Nenhum dado se perde.",
     }
 
     def test_no_migration_drops_a_table_or_column_without_a_declared_reason(self):

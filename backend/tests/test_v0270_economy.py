@@ -299,7 +299,7 @@ class AntiBypassTests(EconomyBase):
         self.assertEqual(d["status"], "completed")
         self.assertTrue(d["settlement"]["settled"])
         with db_system() as c:
-            kinds = sorted(r["kind"] for r in c.query("SELECT kind FROM recognitions WHERE ref_type = 'agreement' AND ref_id = $1::uuid", aid))
+            kinds = sorted(r["kind"] for r in c.query("SELECT kind FROM recognitions WHERE ref_type = 'signed_agreement' AND ref_id = $1::uuid", aid))
             prop = c.scalar("SELECT count(*) FROM recognitions WHERE org_id = $1 AND kind = 'participation_paid'", self.proponent.org_id)
             settled = c.scalar("SELECT count(*) FROM economic_events WHERE agreement_id = $1 AND kind = 'operation_settled'", aid)
         self.assertEqual(kinds, ["funding_settled", "operation_settled"])

@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 899,
- "operacoes_registradas": 893,
+ "operacoes_no_backend": 901,
+ "operacoes_registradas": 895,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,12 +11,12 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 220,
+ "telas": 221,
  "estados": {
   "backend presente": 158,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
-  "sem chamada direta": 62
+  "sem chamada direta": 63
  },
  "interface_sem_backend": {},
  "arquivos_do_front_varridos": 61,
@@ -288,6 +288,7 @@
   "/contabilidade/plano-de-contas",
   "/controladoria",
   "/controladoria/conciliacao",
+  "/controladoria/torre",
   "/conversas",
   "/cotas/:id/apoios",
   "/dados-territoriais",
@@ -1443,6 +1444,14 @@
   {
    "rota": "/controladoria/conciliacao",
    "componente": "Int.Conciliacao",
+   "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/controladoria/torre",
+   "componente": "Int.TorreMaster",
    "arquivo": "web/src/pages/internal.tsx",
    "operacoes": [],
    "ausentes": [],

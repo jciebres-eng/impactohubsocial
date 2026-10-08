@@ -239,10 +239,10 @@ def activate(conn: Connection, *, agreement_id: str, actor_user_id: str | None) 
     if a["project_id"]:
         from ..services.audit import ledger
         ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="agreement_activated",
-               amount_cents=alloc["gross_cents"], ref_type="agreement", ref_id=agreement_id,
+               amount_cents=alloc["gross_cents"], ref_type="signed_agreement", ref_id=agreement_id,
                payload={"version": a["version"], "obligations": n})
         ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="allocation_computed",
-               amount_cents=alloc["project_cents"], ref_type="allocation", ref_id=alloc_id,
+               amount_cents=alloc["project_cents"], ref_type="agreement_allocation", ref_id=alloc_id,
                payload={"gross_cents": alloc["gross_cents"], "platform_fee_cents": alloc["platform_fee_cents"],
                         "fee_chargeable": alloc["fee_chargeable"], "fee_mode": alloc["fee_mode"],
                         "allocation_hash": alloc["allocation_hash"]})
@@ -389,6 +389,6 @@ def cancel_active(conn: Connection, *, agreement_id: str, org_id: str, actor_use
     if a["project_id"]:
         from ..services.audit import ledger
         ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="status_changed",
-               ref_type="agreement", ref_id=agreement_id, payload={"agreement_status": "canceled", "reason": reason, "payouts_cancelled": n,
+               ref_type="signed_agreement", ref_id=agreement_id, payload={"agreement_status": "canceled", "reason": reason, "payouts_cancelled": n,
                                                                    "actor_org_id": org_id})
     return {"id": agreement_id, "status": "canceled", "payouts_cancelled": n}

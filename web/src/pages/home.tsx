@@ -42,7 +42,7 @@ export function TodayCards() {
               </button>
               <div className="deck-actions">
                 {c.link && <Link to={c.link} className="btn btn-ink btn-sm">Abrir</Link>}
-                <button type="button" className="linklike small" onClick={() => dismiss(c)}>Dispensar</button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => dismiss(c)}>Dispensar</button>
               </div>
             </li>
           );

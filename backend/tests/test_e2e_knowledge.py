@@ -187,9 +187,11 @@ class KnowledgeE2E(unittest.TestCase):
         pb.goto(f"{self.base}/ajuda/eventos/{slug}")
         pb.get_by_role("button", name="Entrar na lista de espera").click()
         pb.get_by_text("Na lista de espera").wait_for()
-        # v0.27.0 (ADR-341): o pedido de teste saiu com a assinatura; a rota antiga responde "não encontrada".
+        # v0.27.0 (ADR-341): o pedido de teste saiu com a assinatura. A rota antiga cai no artigo genérico
+        # `/ajuda/:slug`, que não existe — a tela diz isso em vez de oferecer um trial.
         pb.goto(self.base + "/ajuda/teste")
-        pb.get_by_text("Página não encontrada").wait_for()
+        pb.get_by_text("Conteúdo não encontrado").wait_for()
+        self.assertNotIn("Solicitar teste", pb.inner_text("main"))
         self.assertEqual(Client().get(f"/v1/help/events/{slug}").json["demo_label"] is not None, True)
         self.assertEqual(pa.errors + pb.errors, [])
 

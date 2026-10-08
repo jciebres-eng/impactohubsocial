@@ -1,9 +1,9 @@
 {
  "largura": 390,
- "telas_visitadas": 233,
+ "telas_visitadas": 236,
  "por_perfil": {
   "osc": {
-   "telas_do_menu": 48,
+   "telas_do_menu": 49,
    "com_rolagem_lateral": {}
   },
   "company": {
@@ -19,11 +19,11 @@
    "com_rolagem_lateral": {}
   },
   "individual": {
-   "telas_do_menu": 26,
+   "telas_do_menu": 27,
    "com_rolagem_lateral": {}
   },
   "admin": {
-   "telas_do_menu": 53,
+   "telas_do_menu": 54,
    "com_rolagem_lateral": {}
   }
  },

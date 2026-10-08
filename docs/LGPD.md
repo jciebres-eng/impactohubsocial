@@ -28,7 +28,7 @@ Governo recebe **estatísticas agregadas** por território (`gov_territory_stats
 ## Limites e riscos conhecidos
 - Localização pública de projetos usa território (UF/município); **granularidade configurável por projeto não está implementada** (RED no prompt-mestre §22).
 - Anonimização de beneficiários individuais não se aplica (não são coletados).
-- Prazos de retenção reais, base legal por tratamento, RIPD/DPIA, contrato de operador com provedores e canal do encarregado: **pendentes de decisão jurídica** (`PRIVACY_POLICY.md` traz propostas marcadas [VALIDAR]).
+- Prazos de retenção reais, base legal por tratamento, RIPD/DPIA, contrato de operador com provedores e canal do encarregado: **pendentes de decisão jurídica** (`docs/legal/PRIVACY_POLICY.md` traz propostas marcadas [VALIDAR]).
 - Dados de crianças: a plataforma não coleta; a OSC é controladora de qualquer dado que insira em documentos.
 
 ## v0.9.0

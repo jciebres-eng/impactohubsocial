@@ -28,16 +28,16 @@ Antes de relatar "tela sumiu", confirme no painel de telas se o seu tipo alcanç
 
 ## 3. O painel de telas
 
-O painel navegável lista as **220 telas** que o roteador serve, com rota, componente, arquivo,
+O painel navegável lista as **221 telas** que o roteador serve, com rota, componente, arquivo,
 quais tipos alcançam, se está em algum menu e quais operações de API o componente chama. É gerado
 direto do código (`scripts/make_screen_inventory.py` e `scripts/make_screen_backend_map.py`), então
 não há tela esquecida nem tela inventada.
 
 Use-o de três maneiras:
 
-- **Para achar o que testar.** Filtre por tipo e percorra. 81 telas não estão em menu nenhum: você
+- **Para achar o que testar.** Filtre por tipo e percorra. 82 telas não estão em menu nenhum: você
   só chega nelas por link direto, digitando a rota.
-- **Para saber o que esperar.** "sem chamada direta" (62 telas): o componente não chama a API por
+- **Para saber o que esperar.** "sem chamada direta" (63 telas): o componente não chama a API por
   conta própria — pode ser tela estática ou pode buscar por um auxiliar compartilhado. Tela vazia ali
   é menos suspeita que tela vazia numa que chama seis operações.
 - **Para registrar o que achou.** Cada tela aceita uma marcação — **verde** (aprovada), **amarelo**

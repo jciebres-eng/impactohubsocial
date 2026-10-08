@@ -52,7 +52,7 @@ da medição que o operador precisa repetir com volume real antes de assumir qua
 | **RPO** (perda máxima aceitável) | Janela de PITR do provedor + frequência de `backup.sh`. Com PITR contínuo, o RPO é de segundos a minutos; com apenas o dump lógico, é o intervalo entre execuções. | `GET /v1/operacoes/health` e `ops_job_runs` dizem quando foi o último backup bem-sucedido. |
 | **RTO** (tempo máximo até voltar) | Tamanho do banco, classe da instância e se a recuperação é PITR do provedor (minutos) ou `pg_restore` do dump (proporcional ao volume). | Medir com `scripts/restore_test.sh` contra um dump de produção, em banco descartável. |
 | **Janela de PITR** | Configuração do provedor. | Console do provedor; não é observável pela aplicação. |
-| **Retenção de backup** | Política do operador. | `docs/DATA_RETENTION.md` trata da retenção de DADOS (prazos legais por tabela), que é assunto diferente da retenção de ARQUIVOS DE BACKUP. |
+| **Retenção de backup** | Política do operador. | `DATA_RETENTION.md` (raiz) trata da retenção de DADOS (prazos legais por tabela), que é assunto diferente da retenção de ARQUIVOS DE BACKUP. |
 
 ### Procedimento de recuperação
 

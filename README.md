@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.26.0
+# Plataforma Impacto — v0.27.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -12,7 +12,22 @@ permissão frouxa.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
 
-**Novo no v0.26.0 (a tese econômica virou produto):** o **contrato é regra de operação** — o acordo
+**Novo no v0.27.0 (não existem mais assinaturas — ADR-341):** o IMPACTO deixa de ser um SaaS por
+mensalidade. Não há plano pago, trial, checkout, reajuste nem paywall: planos viraram **pacotes de
+capacidades** concedidos por concessão, convênio, voucher ou contrato avulso/parcelado. A receita da
+plataforma nasce da **camada econômica da operação financiada**: 5% do valor financiado = **3,5% taxa de
+serviço** da plataforma + **1,5% participação de autoria** do proponente, só quando contratualmente
+elegível, nunca automática. Os percentuais vêm do catálogo `economic_rules` (Pricing Version 2027.02) e
+são congelados no acordo — nunca em código. O financiador faz **um aporte só, direcionado**: a matriz de
+distribuição diz quem recebe, quanto e para qual **chave PIX informada no contrato**; a transferência é
+registrada por quem paga e confirmada por quem recebe; a plataforma não custodia (ADR-284). Selos e
+reconhecimentos nascem da **operação quitada** (entregas aceitas + repasses confirmados), nunca de pagar a
+plataforma. Torre **MASTER** (`/controladoria/torre`): GMV × camada registrada/devida/paga, captura de
+valor, "DADO FINANCEIRO NÃO CONECTADO" onde não há banco. Cartões do dia, trajetória pública cumulativa,
+simulação de 24 meses derivada de hipóteses declaradas (`24_MONTH_FINANCIAL_MODEL.md`). Receita real desta
+instalação: R$ 0,00 — a regra comercial continua desligada até parecer externo.
+
+**v0.26.0 (a tese econômica virou produto):** o **contrato é regra de operação** — o acordo
 assinado traz as cláusulas (taxa, quem paga, modo, prazo de aceite em dias úteis, contestação), ganha
 versão imutável, deriva obrigações (entregar, aceitar, pagar) com prazo, exige aceite a quatro olhos e,
 ao mudar, vira versão nova que invalida a aprovação anterior. A **matriz de distribuição** é calculada
@@ -25,7 +40,7 @@ evidência → mudou → atrasos → riscos → o que preciso decidir) e do gove
 território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados →
 atrasos → territórios descobertos, com k-anonimato). E o estado verificável **"Projeto IMPACTO
 Ready"** na ficha do projeto: 15 critérios, cada um com a tabela e a contagem que o sustenta,
-desconhecido ≠ zero, mesmo resultado para dono e financiador. 220 telas, 893 operações, 45 motores.
+desconhecido ≠ zero, mesmo resultado para dono e financiador. 221 telas, 895 operações, 48 motores.
 Relatório em `FINAL_EXECUTION_REPORT.md`; auditoria em `FINAL_EXECUTION_AUDIT.md`.
 
 **Novo no v0.25.0 (validação operacional de baixo para cima):** as 218 telas do roteador abertas no

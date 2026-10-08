@@ -90,6 +90,10 @@
       "class": "append_only",
       "reason": "Fato de domínio registrado; a trilha é o que reconstrói a história."
     },
+    "economic_events.org_id": {
+      "class": "anonymizable",
+      "reason": "Livro econômico append-only (quem → pagou → quem → quanto → por quê). O vínculo com a organização pode ser anulado (ON DELETE SET NULL) sem apagar o lançamento: o fato econômico sobrevive à conta, como exige a prova de operação; o nome da organização sai com a exclusão."
+    },
     "eligibility_evaluations.org_id": {
       "class": "append_only",
       "reason": "Conferência de elegibilidade lida por quem decidiu."
@@ -158,10 +162,6 @@
       "class": "anonymizable",
       "reason": "Idem."
     },
-    "price_change_notices.org_id": {
-      "class": "append_only",
-      "reason": "Aviso de reajuste: prova de que a mudança foi comunicada."
-    },
     "privileged_access_log.user_id": {
       "class": "anonymizable",
       "reason": "Trilha de acesso PRIVILEGIADO, inclusive de leitura. Precisa sobreviver à exclusão da conta de quem foi registrado: a pergunta de uma investigação é \"quem olhou a receita na semana do vazamento?\", e ela deixaria de ter resposta justamente quando a pessoa apagasse a própria conta. ON DELETE SET NULL mantém a linha e derruba o apontamento — o que já basta, porque a trilha também guarda os papéis usados, a rota e o momento."
@@ -189,6 +189,10 @@
     "readiness_snapshots.org_id": {
       "class": "append_only",
       "reason": "Retrato de prontidão: a série temporal é a informação."
+    },
+    "recognitions.org_id": {
+      "class": "append_only",
+      "reason": "Reconhecimento de conclusão/quitação, só leitura; cai com a organização (ON DELETE CASCADE) porque é atributo dela e não prova de terceiro — a prova fica no livro econômico e no razão do projeto."
     },
     "report_responses.org_id": {
       "class": "append_only",
@@ -265,10 +269,6 @@
     "support_tickets.org_id": {
       "class": "anonymizable",
       "reason": "Atendimento permanece para histórico de suporte."
-    },
-    "trial_claims.org_id": {
-      "class": "anonymizable",
-      "reason": "Controle de uso de teste gratuito, para impedir reuso indevido."
     },
     "trust_events.org_id": {
       "class": "append_only",

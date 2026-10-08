@@ -1,12 +1,10 @@
 """Testes unitários (sem banco): motores, segurança, adapters e validadores — com vetores oficiais quando existem."""
 import base64
 import hashlib
-import hmac
 import json
 import socket
 import struct
 import threading
-import time
 import unittest
 from datetime import date, datetime, UTC
 
@@ -19,7 +17,6 @@ from impacto.security import passwords, totp
 from impacto.security.tokens import sign_payload, verify_payload
 from impacto.security.crypto import FieldCipher, generate_key
 from impacto.services.validators import cnpj_valid, cnpj_with_check_digits, safe_filename
-from impacto.services.billing import stripe_signature_valid
 from impacto.services import documents as docsvc
 from impacto.adapters.storage import LocalStorage, sigv4_presign
 from impacto.adapters.antivirus import ClamdAntivirus
@@ -240,13 +237,11 @@ class SecurityPrimitiveTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             FieldCipher(k2).decrypt(token)
 
-    def test_stripe_signature(self):
-        body, secret, t = b'{"id":"evt"}', "whsec_x", int(time.time())
-        sig = hmac.new(secret.encode(), f"{t}.".encode() + body, hashlib.sha256).hexdigest()
-        self.assertTrue(stripe_signature_valid(body, f"t={t},v1={sig}", secret))
-        self.assertFalse(stripe_signature_valid(body + b" ", f"t={t},v1={sig}", secret))
-        self.assertFalse(stripe_signature_valid(body, f"t={t - 1000},v1={sig}", secret))
-        self.assertFalse(stripe_signature_valid(body, "lixo", secret))
+    def test_the_subscription_webhook_verifier_is_gone(self):
+        """v0.27.0 (ADR-341): o verificador de assinatura do webhook de ASSINATURA saiu com `services/billing.py`."""
+        import importlib
+        with self.assertRaises(ModuleNotFoundError):
+            importlib.import_module("impacto.services.billing")
 
     def test_pii_redaction(self):
         txt, n = redact("CPF 123.456.789-09, email ana@x.org, tel (65) 99999-1234, CEP 78455-000")

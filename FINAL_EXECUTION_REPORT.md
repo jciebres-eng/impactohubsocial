@@ -48,9 +48,12 @@ fintech dentro do produto (ADR-284) e sem inventar preço, parecer, integração
 Commits da rodada (sobre `014c83f`, v0.26.0): `bdde94b` (F3–F6: migração 0067, backend sem
 assinatura, camada econômica, torre MASTER, cartões do dia, telas, testes, documentos), `d781943`
 (correções da primeira regressão, matrizes regeneradas, snapshot `history/v0.26.0/`, versão 0.27.0,
-CHANGELOG) e o commit de fechamento (auditoria, relatório, manifestos, notas de versão), seguido do
-commit do manifesto de release — para o qual a tag `v0.27.0` deve apontar; o hash é registrado em
-`FINAL_RELEASE_MANIFEST.json` e no `.sha256` do pacote (não cabe dentro do próprio commit).
+CHANGELOG), `0a44b31` (fechamento: auditoria, relatório, notas de versão, `test_v0270_release_docs`,
+evidência da regressão), `a94475c` (manifestos), `881ece9` (empacotador passa a incluir toda evidência
+`.log` versionada) e o **commit final dos manifestos**, para o qual a tag `v0.27.0` deve apontar e do
+qual o pacote é construído byte a byte (`verify_package_against_git.py`); o hash desse commit é
+registrado no `.sha256` do pacote e não cabe dentro do próprio commit. `FINAL_RELEASE_MANIFEST.json`
+registra `881ece9` como último commit de conteúdo.
 
 **GitHub Actions:** o envio do ramo é feito ao final; o resultado da run não é conhecido no momento
 em que este relatório é escrito e **não é afirmado aqui**. A suíte oficial (`python -m unittest

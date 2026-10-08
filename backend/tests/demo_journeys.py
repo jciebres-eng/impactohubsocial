@@ -472,7 +472,25 @@ class Jornadas:
             self.passos.append({"jornada": J, "passo": "envia o acordo", "perfil": "osc", "metodo": "POST", "rota": "/v1/documents",
                                 "status": doc.status, "ok": False, "erro": str(doc.json)[:300]})
             return
-        ac = self.passo(J, "OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.01: 3,5% plataforma, aporte único direcionado)", osc, "POST",
+        # v0.27.0 — participação de autoria: a apoiadora (pessoa física) propôs a ideia; a OSC propõe a participação; ela aceita.
+        apo = self.c["individual"]
+        ideia = self.passo(J, "apoiadora registra a ideia na biblioteca de soluções", apo, "POST", "/v1/solutions", {
+            "kind": "idea", "stage": "idea", "title": "Orquestra na escola — ideia original (exemplo)",
+            "summary": "Ideia proposta por uma pessoa física: aulas de música no contraturno com instrumentos emprestados (dados fictícios).",
+            "problem": "Crianças sem acesso a educação musical no bairro.", "approach": "Oficinas semanais com instrumentos da escola.",
+            "themes": ["educacao"], "ownership_type": "author", "authorization_publish": True})
+        part = None
+        if ideia:
+            self.passo(J, "apoiadora publica a ideia", apo, "POST", f"/v1/solutions/{ideia['id']}/publish")
+            part = self.passo(J, "OSC propõe participação de autoria à apoiadora (1,5% quando elegível; nunca automática)", osc, "POST",
+                              f"/v1/projects/{pid}/participations", {"proponent_org_id": apo.org_id, "idea_ref_type": "solution",
+                                                                     "idea_ref_id": ideia["id"], "authorship_type": "author", "share_bps": 10000,
+                                                                     "contribution": "Propôs a ideia original, participou da estruturação e da consolidação do projeto."})
+            if part:
+                self.ids["participacao"] = part["id"]
+                self.passo(J, "apoiadora aceita a participação (projeto já publicado → consolidada)", apo, "POST", f"/v1/participations/{part['id']}/accept")
+                self.passo(J, "apoiadora acompanha as próprias participações", apo, "GET", "/v1/participations")
+        ac = self.passo(J, "OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.01: 3,5% plataforma + 1,5% autoria, aporte único direcionado)", osc, "POST",
                         "/v1/signed-agreements", {
                             "kind": "funding", "title": "Financiamento — Orquestra na escola (exemplo)",
                             "summary": "R$ 100.000 em 2 marcos; o financiador faz um aporte único direcionado a cada destinatário pela chave PIX do contrato.",
@@ -484,6 +502,11 @@ class Jornadas:
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
         self.passo(J, "quem recebe informa a própria chave PIX no contrato", osc, "PUT",
                    f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix", {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
+        if part:
+            self.passo(J, "inclui a apoiadora como proponente (parte opcional)", osc, "POST", f"/v1/signed-agreements/{aid}/parties",
+                       {"org_id": apo.org_id, "role": "proponent", "required": False})
+            self.passo(J, "apoiadora informa a própria chave PIX", apo, "PUT",
+                       f"/v1/signed-agreements/{aid}/parties/{self._party(apo, aid)}/pix", {"pix_key": "elisa@demo.impacto.local", "pix_key_type": "email"})
         marcos = []
         for seq, (titulo, valor, dias) in enumerate((("Compra dos instrumentos", 5_000_000, 30), ("Primeiro semestre de aulas", 5_000_000, 200)), 1):
             m = self.passo(J, f"define o marco {seq}: {titulo}", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",
@@ -491,7 +514,7 @@ class Jornadas:
             if m:
                 marcos.append(m["id"])
         self.passo(J, "publica para assinatura (versão 1 congelada)", osc, "POST", f"/v1/signed-agreements/{aid}/publish")
-        prev = self.passo(J, "financiador vê a PRÉVIA da distribuição antes de assinar (96.500 / 3.500, nada gravado)", emp, "GET",
+        prev = self.passo(J, "financiador vê a PRÉVIA da distribuição antes de assinar (95.000 projeto / 3.500 plataforma / 1.500 autoria, nada gravado)", emp, "GET",
                           f"/v1/signed-agreements/{aid}/allocation") or {}
         self.ids["alocacao_previa"] = (prev.get("preview") or {}).get("platform_fee_cents")
         for c in (osc, emp):
@@ -509,6 +532,12 @@ class Jornadas:
             if t:
                 self.passo(J, "OSC (quem recebe) confirma o recebimento — quem paga nunca confirma", osc, "POST", f"/v1/payout-transfers/{t['id']}/confirm")
                 self.passo(J, "financiador tenta confirmar o que ele mesmo pagou → recusado", emp, "POST", f"/v1/payout-transfers/{t['id']}/confirm", esperado=(403,))
+        prop_line = next((p for p in po.get("items", []) if p["line_kind"] == "proponent"), None)
+        if prop_line:
+            t2 = self.passo(J, "financiador registra a transferência da participação de autoria à apoiadora", emp, "POST",
+                            f"/v1/payouts/{prop_line['id']}/transfers", {"amount_cents": prop_line["amount_cents"], "reference": "E2E-DEMO-0002", "paid_on": _d(0)})
+            if t2:
+                self.passo(J, "apoiadora confirma o recebimento da participação", apo, "POST", f"/v1/payout-transfers/{t2['id']}/confirm")
         self.passo(J, "o que o IMPACTO fez nesta operação (por registro)", emp, "GET", f"/v1/signed-agreements/{aid}/value")
         if marcos:
             self.passo(J, "OSC registra a entrega do marco 1", osc, "PATCH", f"/v1/signed-agreements/{aid}/milestones/{marcos[0]}", {"status": "delivered"})

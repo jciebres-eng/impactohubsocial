@@ -39,6 +39,7 @@ import * as IR from "./pages/impactreport";
 import * as PP from "./pages/publicprofile";
 import * as Terr from "./pages/territory";
 import * as Tower from "./pages/tower";
+import * as Part from "./pages/participations";
 import * as Mod from "./pages/moderation";
 import * as IL from "./pages/impactlayer";
 // v0.22.0 — login inteligente e operação interna da plataforma
@@ -81,6 +82,7 @@ const ROUTES: R[] = [
   ["/carteira", () => <Proj.Portfolio />, ["company", "government", "individual"]],
   // v0.26.0 — torres de controle: a torre responde a cadeia inteira e aponta para a tela da decisão
   ["/torre", () => <Tower.FunderTower />, ["company", "individual"]],
+  ["/participacoes", () => <Part.Participations />, ["osc", "individual", "provider", "company"]],
   ["/torre-territorial", () => <Tower.GovernmentTower />, ["government", "platform"]],
   ["/candidaturas", () => <Apps.Applications />],
   ["/candidaturas/:id", (p) => <Apps.ApplicationDetail id={p.id} />],
@@ -304,7 +306,7 @@ const PUBLIC: [string, () => ReactNode][] = [
 
 const NAV: Record<string, [string, string][]> = {
   osc: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/afirmacoes", "Afirmações de impacto"], ["/responsabilidade", "Responsabilidade"], ["/propostas", "Propostas"], ["/marketplace/meus", "Meus anúncios"], ["/marketplace", "Marketplace"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/prontidao/finalidades", "Prontidão por finalidade"], ["/rede/experiencias", "Experiências declaradas"], ["/rede/atividade", "Atividade da rede"], ["/vocabulario", "Vocabulário"], ["/oportunidades", "Oportunidades"], ["/ideias", "Ideias"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
-    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
+    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/participacoes", "Participação de autoria"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
     ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/solucoes/replicacao", "Replicação"],
     ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/materiais", "Materiais"],
     ["/ia", "Inteligência artificial"], ["/conta/seguranca", "Segurança da conta"]],
@@ -312,7 +314,7 @@ const NAV: Record<string, [string, string][]> = {
     ["/carteira", "Carteira e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"],
     ["/fiscal", "Incentivos fiscais"], ["/instituicao", "Instituição"], ["/documentos", "Documentos"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/materiais", "Materiais"],
     ["/ia", "Inteligência artificial"], ["/conta/seguranca", "Segurança da conta"]],
-  individual: [["/", "Início"], ["/torre", "Torre de controle"], ["/area", "Área de trabalho"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Prestação de contas recebida"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/explorar", "Projetos para apoiar"], ["/candidaturas", "Candidaturas"], ["/carteira", "Meu apoio e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"],
+  individual: [["/", "Início"], ["/torre", "Torre de controle"], ["/participacoes", "Participação de autoria"], ["/area", "Área de trabalho"], ["/marketplace", "Marketplace"], ["/propostas", "Propostas"], ["/relatorios-impacto", "Prestação de contas recebida"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/explorar", "Projetos para apoiar"], ["/candidaturas", "Candidaturas"], ["/carteira", "Meu apoio e resultados"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/pagamentos", "Pagamentos"],
     ["/instituicao", "Perfil institucional"], ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/acordos", "Acordos"], ["/mensagens", "Mensagens"],
     ["/ia", "Inteligência artificial"], ["/conta/seguranca", "Segurança da conta"]],
   provider: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/marketplace", "Oportunidades no marketplace"], ["/propostas", "Propostas"], ["/perfil-publico", "Perfil público"], ["/perfil-publico/experiencias", "Minhas experiências"], ["/conversas", "Conversas"], ["/rede/relacoes", "Relações"], ["/instituicao", "Perfil institucional"], ["/oportunidades-profissionais", "Oportunidades"], ["/revisoes", "Validações"], ["/minhas-atividades", "Minhas atividades"], ["/identidade", "Identidade"], ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/acordos", "Acordos"], ["/verificacoes", "Verificação pública"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/rascunhos", "Rascunhos"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/materiais", "Materiais"],

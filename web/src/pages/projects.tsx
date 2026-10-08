@@ -10,6 +10,7 @@ import { ContextHelp } from "./help";
 import { MatchVerdict } from "../ui/trail";
 import { UploadButton } from "./documents";
 import { ReadyPanel } from "./tower";
+import { ProposeParticipation } from "./participations";
 
 export function Projects() {
   const [offset, setOffset] = useState(0);
@@ -165,7 +166,8 @@ function Overview({ p }: { p: any }) {
           <ul className="rows">
             <li><Link to={`/projetos/${p.id}/impacto`}>Impacto, ODS e indicadores</Link></li>
             <li><Link to={`/projetos/${p.id}/grafo`}>Impact Graph</Link></li>
-            {p.is_owner && <><li><Link to={`/projetos/${p.id}/situacao`}>Situação e transições</Link></li>
+            {p.is_owner && <><li><ProposeParticipation projectId={p.id} onDone={() => navigate("/participacoes")} /></li>
+            <li><Link to={`/projetos/${p.id}/situacao`}>Situação e transições</Link></li>
             <li><Link to={`/projetos/${p.id}/linha-do-tempo`}>Linha de tempo</Link></li>
             <li><Link to={`/projetos/${p.id}/retratos`}>Retratos comparáveis</Link></li>
             <li><Link to={`/projetos/${p.id}/riscos`}>Riscos</Link></li>

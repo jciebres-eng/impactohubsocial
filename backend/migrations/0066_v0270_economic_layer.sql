@@ -82,6 +82,12 @@ COMMENT ON COLUMN signed_agreement_parties.pix_key IS
   'Chave PIX para os repasses e quitações desta parte, informada por ela mesma no acordo. A plataforma nunca a usa '
   'para pagar (não movimenta dinheiro): ela aparece na instrução de pagamento para quem paga.';
 
+-- Quem assina um acordo enxerga as outras partes dele (até aqui cada parte só via a própria linha e a dona via todas):
+-- a matriz de distribuição diz "quem recebe", e isso não pode aparecer como identificador cru para o financiador.
+DROP POLICY IF EXISTS agrparty_read ON signed_agreement_parties;
+CREATE POLICY agrparty_read ON signed_agreement_parties FOR SELECT
+  USING (org_id = app_org() OR app_priv() OR agreement_owner_org(agreement_id) = app_org() OR agreement_has_party(agreement_id, app_org()));
+
 -- ============================================================================ 3. acordo: participação de autoria e versão econômica congelada
 ALTER TABLE signed_agreements
   ADD COLUMN proponent_participation_bps smallint NOT NULL DEFAULT 0 CHECK (proponent_participation_bps BETWEEN 0 AND 10000),

@@ -100,6 +100,11 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
     # Quem recebe o valor: a parte executora; sem uma, a organização dona do acordo (a OSC que executa).
     receiver = next((p for p in parties if p["role"] in ("contractor", "provider", "professional")), None) \
         or {"org_id": a["org_id"], "role": "owner"}
+    ROLE_PT = {"funder": "financiador", "contractor": "contratante", "provider": "prestador", "professional": "profissional", "proponent": "proponente"}
+
+    def nome(org_id: str | None) -> str | None:
+        return conn.scalar("SELECT legal_name FROM organizations WHERE id = $1", org_id) if org_id else None
+
     # Participação de autoria: só com elegibilidade registrada E a parte 'proponent' no acordo.
     prop_bps = int(a.get("proponent_participation_bps") or 0)
     prop_lines: list[dict] = []
@@ -117,7 +122,7 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
             for i, e in enumerate(elig):
                 cents = (pool * int(e["share_bps"]) + 5000) // 10000 if i < len(elig) - 1 else pool - acc
                 acc += cents
-                prop_lines.append({"kind": "proponent", "to_org_id": e["proponent_org_id"], "role": "proponent", "cents": cents,
+                prop_lines.append({"kind": "proponent", "to_org_id": e["proponent_org_id"], "to_name": nome(e["proponent_org_id"]), "role": "proponent", "cents": cents,
                                    "basis": f"{prop_bps / 100:.2f}% sobre {_brl(gross)} × fração {e['share_bps'] / 100:.2f}% ({e['authorship_type']})",
                                    "paid_by": "quem financia, diretamente ao proponente pela chave PIX informada no contrato",
                                    "rule_key": PROPONENT_RULE, "bps": prop_bps, "participation_id": e["id"]})
@@ -139,14 +144,14 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
     if not pricing:
         from ..services.monetization import pricing_version_name
         pricing = pricing_version_name()
-    lines = [{"kind": "project", "to_org_id": receiver["org_id"], "role": receiver["role"],
+    lines = [{"kind": "project", "to_org_id": receiver["org_id"], "to_name": nome(receiver["org_id"]), "role": receiver["role"],
               "cents": project, "basis": "valor da operação" + (" menos a camada econômica (modo deducted)" if deducted and (fee or prop_total) else
                                                                  (" menos a participação de autoria" if prop_total else "")),
               "paid_by": "quem financia, diretamente ao executor pela chave PIX informada no contrato"}]
     if bps:
         lines.append({"kind": "platform_fee", "to_org_id": None, "role": "platform", "cents": fee,
                       "basis": f"{bps / 100:.2f}% sobre {_brl(gross)} ({'descontada do valor' if deducted else 'adicional ao valor'})",
-                      "paid_by": (payer["role"] if payer else "?") + " → plataforma, em instrução própria; nunca descontada em trânsito",
+                      "paid_by": (ROLE_PT.get(payer["role"], payer["role"]) if payer else "?") + " → plataforma, em instrução própria; nunca descontada em trânsito",
                       "chargeable": chargeable, "reason": reason, "rule_key": PLATFORM_RULE, "bps": bps,
                       "monetization_rule_key": FEE_RULE_KEY})
     lines.extend(prop_lines)

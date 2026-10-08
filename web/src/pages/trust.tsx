@@ -19,9 +19,21 @@ const AG_KIND: [string, string][] = [["service", "Prestação de serviço"], ["p
 const AG_STATUS: Record<string, string> = { draft: "Rascunho", awaiting_signatures: "Aguardando assinaturas", active: "Vigente",
   completed: "Concluído", canceled: "Cancelado", expired: "Expirado", superseded: "Substituído por versão nova" };
 const PARTY_ROLE: [string, string][] = [["provider", "Prestador"], ["contractor", "Contratante"], ["funder", "Financiador"],
-  ["professional", "Profissional"], ["witness", "Testemunha"], ["beneficiary_rep", "Representante dos beneficiários"]];
+  ["professional", "Profissional"], ["witness", "Testemunha"], ["beneficiary_rep", "Representante dos beneficiários"], ["proponent", "Proponente (autoria da ideia)"]];
 const FEE_PAYER: [string, string][] = [["funder", "Financiador"], ["contractor", "Contratante"], ["provider", "Prestador"]];
-const FEE_MODE: [string, string][] = [["additional", "Adicional ao valor (o projeto recebe o valor cheio)"], ["deducted", "Descontada do valor contratado"]];
+const FEE_MODE: [string, string][] = [["deducted", "Aporte único: cada destinatário recebe a sua parte do valor da operação"], ["additional", "Adicional ao valor (o projeto recebe o valor cheio)"]];
+const PAYOUT_STATE: Record<string, [string, string]> = {
+  awaiting_rule: ["não exigível (regra jurídica desligada)", "muted"], instruction_created: ["instruída", "warn"], payment_pending: ["transferência registrada — aguarda confirmação", "warn"],
+  confirmed: ["confirmada por quem recebe", "good"], reconciled: ["conciliada", "good"], failed: ["falhou", "bad"], disputed: ["em disputa", "bad"],
+  cancelled: ["cancelada", "muted"], refund_pending: ["devolução pendente", "warn"], refunded: ["devolvida", "muted"],
+};
+const PAYOUT_LINE: Record<string, string> = { project: "Destinação do projeto", platform_fee: "Infraestrutura e inteligência IMPACTO", proponent: "Participação de autoria e desenvolvimento", third_party: "Terceiros" };
+const PART_STATUS: Record<string, [string, string]> = {
+  proposed: ["proposta", "warn"], under_review: ["em análise", "warn"], accepted: ["aceita", "good"], consolidated: ["consolidada", "good"],
+  eligible: ["elegível", "good"], accrued: ["na matriz do acordo", "good"], validated: ["validada", "good"], payable: ["a pagar", "warn"],
+  paid: ["paga", "good"], disputed: ["em disputa", "bad"], cancelled: ["cancelada", "muted"],
+};
+const PIX_TYPES: [string, string][] = [["cnpj", "CNPJ"], ["cpf", "CPF"], ["email", "E-mail"], ["phone", "Telefone"], ["evp", "Chave aleatória"]];
 const CALENDAR: [string, string][] = [["business", "Dias úteis"], ["calendar", "Dias corridos"]];
 const OB_STATUS: Record<string, string> = { open: "em aberto", done: "cumprida", overdue: "vencida", waived: "dispensada" };
 const MS_STATUS: [string, string][] = [["planned", "Planejada"], ["in_progress", "Em andamento"], ["delivered", "Entregue"],
@@ -255,7 +267,7 @@ export function Agreements() {
 }
 
 const EMPTY_AG = { kind: "service", title: "", summary: "", document_id: "", effective_from: "", effective_to: "", value: "",
-  fee_pct: "", fee_payer_role: "funder", fee_mode: "additional", review_days: "10", calendar_type: "business", dispute_days: "5" };
+  fee_pct: "", fee_payer_role: "funder", fee_mode: "deducted", review_days: "10", calendar_type: "business", dispute_days: "5" };
 
 export function AgreementForm() {
   const f = useForm<any>(EMPTY_AG);
@@ -268,11 +280,11 @@ export function AgreementForm() {
       if (f.v.effective_from) body.effective_from = f.v.effective_from;
       if (f.v.effective_to) body.effective_to = f.v.effective_to;
       if (f.v.value) body.value_cents = Math.round(parseFloat(f.v.value.replace(",", ".")) * 100);
-      if (f.v.fee_pct) {
+      if (f.v.kind !== "funding" && f.v.fee_pct) {
         body.platform_fee_bps = Math.round(parseFloat(f.v.fee_pct.replace(",", ".")) * 100);
         body.fee_payer_role = f.v.fee_payer_role;
-        body.fee_mode = f.v.fee_mode;
       }
+      body.fee_mode = f.v.fee_mode;
       if (f.v.review_days) body.review_days = parseInt(f.v.review_days, 10);
       body.calendar_type = f.v.calendar_type;
       if (f.v.dispute_days !== "") body.dispute_days = parseInt(f.v.dispute_days, 10);
@@ -302,11 +314,20 @@ export function AgreementForm() {
             se houver, é calculada na origem e paga por quem o contrato indicar, em cobrança separada — nunca descontada de dinheiro
             em trânsito. Ela só é cobrada quando a regra comercial estiver ativa com parecer jurídico registrado.
           </p>
-          <Field label="Taxa de serviço da plataforma (%)" hint="Deixe em branco se o contrato não prevê taxa.">
-            <Input value={f.v.fee_pct} onChange={f.set("fee_pct")} placeholder="ex.: 3" inputMode="decimal" />
-          </Field>
-          <Field label="Quem paga a taxa"><Select value={f.v.fee_payer_role} onChange={f.set("fee_payer_role")} options={FEE_PAYER} /></Field>
-          <Field label="Como a taxa se relaciona com o valor" wide><Select value={f.v.fee_mode} onChange={f.set("fee_mode")} options={FEE_MODE} /></Field>
+          {f.v.kind === "funding" ? (
+            <p className="small">
+              <strong>Acordo de financiamento:</strong> a camada econômica vem da versão de preços vigente, não deste formulário —
+              infraestrutura e inteligência IMPACTO (3,50%) e, quando houver autoria elegível aceita, participação de autoria e
+              desenvolvimento da ideia (1,50%). Quem financia faz um aporte único, direcionado a cada destinatário pela chave PIX
+              informada no contrato; a plataforma calcula, instrui e concilia, sem custodiar.
+            </p>
+          ) : (<>
+            <Field label="Taxa de serviço da plataforma (%)" hint="Deixe em branco se o contrato não prevê taxa.">
+              <Input value={f.v.fee_pct} onChange={f.set("fee_pct")} placeholder="ex.: 3" inputMode="decimal" />
+            </Field>
+            <Field label="Quem paga a taxa"><Select value={f.v.fee_payer_role} onChange={f.set("fee_payer_role")} options={FEE_PAYER} /></Field>
+          </>)}
+          <Field label="Como a camada econômica se relaciona com o valor" wide><Select value={f.v.fee_mode} onChange={f.set("fee_mode")} options={FEE_MODE} /></Field>
           <Field label="Prazo para aceitar uma entrega" hint="Contado a partir do registro da entrega.">
             <Input type="number" min={1} max={120} value={f.v.review_days} onChange={f.set("review_days")} />
           </Field>
@@ -320,9 +341,9 @@ export function AgreementForm() {
 }
 
 function AllocationMatrix({ alloc, parties, owner, preview }: { alloc: any; parties: any[]; owner: { id: string; name: string }; preview: boolean }) {
-  const name = (orgId: string | null, role: string | null) =>
-    orgId ? (parties.find((p) => p.org_id === orgId)?.legal_name || (orgId === owner.id ? `${owner.name} (executa)` : orgId.slice(0, 8)))
-      : role === "platform" ? "Plataforma Impacto" : "—";
+  const name = (orgId: string | null, role: string | null, toName?: string | null) =>
+    orgId ? ((toName || parties.find((p) => p.org_id === orgId)?.legal_name || (orgId === owner.id ? owner.name : orgId.slice(0, 8))) + (role === "proponent" ? " (autoria)" : orgId === owner.id ? " (executa)" : ""))
+      : role === "platform" ? "Plataforma Impacto — infraestrutura e inteligência" : "—";
   return (
     <>
       {preview && <p className="muted small">Prévia calculada a partir das cláusulas. A matriz definitiva é congelada quando o acordo entra em vigor.</p>}
@@ -331,18 +352,20 @@ function AllocationMatrix({ alloc, parties, owner, preview }: { alloc: any; part
         <tbody>
           {(alloc.lines || []).map((l: any, i: number) => (
             <tr key={i}>
-              <td>{name(l.to_org_id, l.role)}{l.kind === "platform_fee" && (
+              <td>{name(l.to_org_id, l.role, l.to_name)}{l.kind === "platform_fee" && (
                 <> <Pill tone={l.chargeable ? "good" : "muted"}>{l.chargeable ? "cobrável" : "registrada, não cobrada"}</Pill></>)}</td>
               <td className="small">{l.basis}</td>
               <td className="small">{l.paid_by}</td>
               <td>{money(l.cents)}</td>
             </tr>
           ))}
-          <tr><td><strong>Valor contratado (GMV)</strong></td><td className="muted small">não é receita da plataforma</td><td /><td><strong>{money(alloc.gross_cents)}</strong></td></tr>
+          <tr><td><strong>Valor da operação</strong></td><td className="muted small">aporte único de quem financia · não é receita da plataforma</td><td /><td><strong>{money(alloc.gross_cents)}</strong></td></tr>
         </tbody>
       </table>
       <KeyValue items={[
-        ["Taxa da plataforma", alloc.fee_bps ? `${(alloc.fee_bps / 100).toFixed(2)}% · ${alloc.fee_mode === "deducted" ? "descontada do valor" : "adicional ao valor"}` : "não prevista no contrato"],
+        ["Camada econômica", `${money(alloc.economic_layer_cents ?? ((alloc.platform_fee_cents || 0) + (alloc.proponent_cents || 0)))} = plataforma ${money(alloc.platform_fee_cents || 0)}${alloc.proponent_cents ? ` + autoria ${money(alloc.proponent_cents)}` : ""}`],
+        ["Taxa da plataforma", alloc.fee_bps ? `${(alloc.fee_bps / 100).toFixed(2)}% · ${alloc.fee_mode === "deducted" ? "dentro do valor da operação" : "adicional ao valor"}` : "não prevista no contrato"],
+        ...(alloc.proponent_reason ? [["Participação de autoria", alloc.proponent_reason] as [string, ReactNode]] : []),
         ["Situação da taxa", alloc.fee_reason],
         ...(alloc.platform_charge_id ? [["Cobrança própria", <span key="c">nº <code className="small">{alloc.platform_charge_id.slice(0, 8)}</code> emitida ao pagador da taxa — separada do dinheiro do projeto</span>] as [string, ReactNode]] : []),
         ["Tabela de preços", alloc.pricing_version || "—"],
@@ -367,6 +390,18 @@ export function AgreementDetail({ id }: { id: string }) {
   const [rejecting, setRejecting] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState("");
   const [versioning, setVersioning] = useState(false);
+  const [pixParty, setPixParty] = useState<string | null>(null);
+  const [pixKey, setPixKey] = useState("");
+  const [pixType, setPixType] = useState("cnpj");
+  const [transferFor, setTransferFor] = useState<string | null>(null);
+  const [trAmount, setTrAmount] = useState("");
+  const [trRef, setTrRef] = useState("");
+  const [trDate, setTrDate] = useState(new Date().toISOString().slice(0, 10));
+  const [rejectingTransfer, setRejectingTransfer] = useState<string | null>(null);
+  const [rejectTransferNote, setRejectTransferNote] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const { data: value } = useLoad<any>(`/v1/signed-agreements/${id}/value`, [id, data?.status]);
   const [vDoc, setVDoc] = useState("");
   const [vReason, setVReason] = useState("");
 
@@ -406,6 +441,9 @@ export function AgreementDetail({ id }: { id: string }) {
                       {["awaiting_signatures", "active"].includes(data.status) && isOwner && (
                         <Button onClick={() => setVersioning(true)}>Nova versão</Button>
                       )}
+                      {data.status === "active" && (isOwner || data.parties?.some((p: any) => p.org_id === myOrg && p.role === "funder")) && (
+                        <Button onClick={() => setCancelling(true)}>Cancelar acordo</Button>
+                      )}
                       {["active", "completed"].includes(data.status) && (
                         <Button busy={busy} onClick={() => act(
                           () => api.post("/v1/verifiable-records", { subject_type: "agreement", subject_id: id }),
@@ -441,6 +479,8 @@ export function AgreementDetail({ id }: { id: string }) {
             <KeyValue items={[
               ["Taxa da plataforma", terms.platform_fee_bps ? `${(terms.platform_fee_bps / 100).toFixed(2)}%, paga por ${FEE_PAYER.find(([k]) => k === terms.fee_payer_role)?.[1]?.toLowerCase() || "parte não definida"} (${terms.fee_mode === "deducted" ? "descontada do valor" : "adicional ao valor"})` : "não prevista"],
               ["Aceite de entregas", `${terms.review_days ?? 10} ${terms.calendar_type === "calendar" ? "dias corridos" : "dias úteis"} após o registro da entrega${terms.auto_accept ? " · aceite tácito ao vencer" : " · sem aceite tácito"}`],
+              ["Participação de autoria", terms.proponent_participation_bps ? `${(terms.proponent_participation_bps / 100).toFixed(2)}% quando houver proponente elegível e parte no acordo` : "não prevista"],
+              ["Versão de preços", terms.economic_rule_version || "— (cláusula livre entre as partes)"],
               ["Contestação", `${terms.dispute_days ?? 5} dias`],
               ["Versão", `${terms.version || 1}${terms.supersedes_id ? " (substitui versão anterior)" : ""}`],
             ]} />
@@ -459,7 +499,11 @@ export function AgreementDetail({ id }: { id: string }) {
               <li key={p.id}>
                 <span>{p.legal_name}<br /><span className="muted small">
                   {PARTY_ROLE.find(([k]) => k === p.role)?.[1] || p.role}{p.required ? " · obrigatória" : " · opcional"}
-                </span>{p.decline_reason && <><br /><span className="muted small">Recusou: {p.decline_reason}</span></>}</span>
+                </span>{p.decline_reason && <><br /><span className="muted small">Recusou: {p.decline_reason}</span></>}
+                  <br /><span className="muted small">PIX: {p.pix_key ? <code className="small">{p.pix_key}</code> : p.pix_key_masked ? <code className="small">{p.pix_key_masked}</code> : "não informada"}{p.pix_key_type ? ` (${p.pix_key_type})` : ""}</span>
+                  {p.org_id === myOrg && !["canceled", "superseded", "completed"].includes(data.status) && (
+                    <span className="small"> · <button type="button" className="linklike" onClick={() => { setPixParty(p.id); setPixKey(""); setPixType("cnpj"); }}>{p.pix_key ? "alterar" : "informar minha chave"}</button></span>
+                  )}</span>
                 <Pill tone={p.signed_at ? "good" : p.declined_at ? "bad" : "warn"}>
                   {p.signed_at ? `assinou em ${dateTime(p.signed_at)}` : p.declined_at ? "recusou" : "pendente"}
                 </Pill>
@@ -535,6 +579,52 @@ export function AgreementDetail({ id }: { id: string }) {
               </table>
             </Panel>
           )}
+          {data.payouts?.length > 0 && (
+            <Panel title="Repasses: quem paga a quem, por qual chave, e o que já foi confirmado" actions={
+              <Pill tone={data.settlement?.settled ? "good" : data.settlement?.status === "payment_pending" ? "warn" : "muted"}>
+                {data.settlement?.settled ? "operação quitada" : data.settlement?.status === "confirmed" ? "repasses confirmados" : data.settlement?.status === "payment_pending" ? "aguardando confirmação" : "instruída"}
+              </Pill>}>
+              <p className="muted small">A plataforma não move dinheiro. Quem paga transfere pela chave informada no contrato e registra a transferência; quem recebe confirma. Nada fica "pago" por existir registro.</p>
+              <ul className="rows">{data.payouts.map((po: any) => (
+                <li key={po.id}>
+                  <span>{PAYOUT_LINE[po.line_kind] || po.line_kind}: <strong>{po.recipient_label}</strong> · {money(po.amount_cents)}
+                    <br /><span className="muted small">chave PIX: {po.pix_key ? <code className="small">{po.pix_key}</code> : po.pix_key_masked ? <code className="small">{po.pix_key_masked}</code> : (po.line_kind === "platform_fee" ? "NÃO CONFIGURADA" : "não informada no contrato")}
+                      {po.confirmed_cents > 0 ? ` · confirmado ${money(po.confirmed_cents)}` : ""}{po.paid_cents > po.confirmed_cents ? ` · registrado ${money(po.paid_cents)}` : ""}</span>
+                    {po.transfers?.length > 0 && <ul className="small">{po.transfers.map((t: any) => (
+                      <li key={t.id}>{money(t.amount_cents)} · ref. {t.reference} · {date(t.paid_on)} · {t.status === "confirmed" ? "confirmada" : t.status === "rejected" ? `recusada: ${t.rejection_reason}` : "registrada"}
+                        {t.status === "registered" && po.recipient_org_id === myOrg && (<> · <Button busy={busy} onClick={() => act(() => api.post(`/v1/payout-transfers/${t.id}/confirm`), "Recebimento confirmado.")}>Confirmar recebimento</Button>{" "}
+                          <Button busy={busy} onClick={() => { setRejectingTransfer(t.id); setRejectTransferNote(""); }}>Não chegou</Button></>)}
+                      </li>))}</ul>}
+                  </span>
+                  <span>
+                    <Pill tone={PAYOUT_STATE[po.state]?.[1] || "muted"}>{PAYOUT_STATE[po.state]?.[0] || po.state}</Pill>{" "}
+                    {po.payer_org_id === myOrg && ["instruction_created", "payment_pending", "failed", "disputed"].includes(po.state) && po.remaining_cents > 0 && (
+                      <Button variant="primary" onClick={() => { setTransferFor(po.id); setTrAmount(((po.amount_cents - po.paid_cents) / 100).toFixed(2).replace(".", ",")); setTrRef(""); }}>Registrar transferência</Button>
+                    )}
+                    {po.recipient_org_id === myOrg && po.state === "confirmed" && (
+                      <Button busy={busy} onClick={() => act(() => api.post(`/v1/payouts/${po.id}/reconcile`, { reason: "Conferido com o extrato bancário." }), "Repasse conciliado.")}>Conciliar com extrato</Button>
+                    )}
+                  </span>
+                </li>
+              ))}</ul>
+            </Panel>
+          )}
+          {value && (
+            <Panel title="O que o IMPACTO fez nesta operação">
+              <ul className="rows">{value.items.map((it: any, i: number) => (
+                <li key={i}><span>{it.what}<br /><span className="muted small">{it.evidence}</span></span><span className="muted small">{it.source}</span></li>
+              ))}</ul>
+              <p className="muted small">{value.note} {value.value_capture?.ratio_note}</p>
+            </Panel>
+          )}
+          {data.participations?.length > 0 && (
+            <Panel title="Participação de autoria e desenvolvimento da ideia">
+              <ul className="rows">{data.participations.map((pp: any) => (
+                <li key={pp.id}><span>{pp.proponent_name}<br /><span className="muted small">{pp.authorship_type === "author" ? "autoria" : "coautoria"} · fração {(pp.share_bps / 100).toFixed(2)}%</span></span>
+                  <Pill tone={PART_STATUS[pp.status]?.[1] || "muted"}>{PART_STATUS[pp.status]?.[0] || pp.status}</Pill></li>
+              ))}</ul>
+            </Panel>
+          )}
           {data.versions?.length > 0 && (
             <Panel title="Histórico de versões">
               <ul className="rows">{data.versions.map((v: any) => (
@@ -561,6 +651,40 @@ export function AgreementDetail({ id }: { id: string }) {
                                               "Entrega recusada. Quem executa pode corrigir e registrar de novo.").then(() => setRejecting(null))}>Recusar entrega</Button></>}>
             <p>A entrega volta para quem executa, com o motivo registrado no acordo e no razão do projeto.</p>
             <Field label="Motivo"><TextArea value={rejectNote} onChange={setRejectNote} rows={3} /></Field>
+          </Modal>
+          <Modal open={!!pixParty} title="Minha chave PIX neste acordo" onClose={() => setPixParty(null)}
+                 footer={<><Button onClick={() => setPixParty(null)}>Cancelar</Button>
+                   <Button variant="primary" busy={busy} disabled={pixKey.trim().length < 3}
+                           onClick={() => act(() => api.put(`/v1/signed-agreements/${id}/parties/${pixParty}/pix`, { pix_key: pixKey, pix_key_type: pixType }),
+                                              "Chave PIX registrada no acordo.").then(() => setPixParty(null))}>Registrar chave</Button></>}>
+            <p>A chave fica no contrato e aparece na instrução de repasse para quem paga. A plataforma nunca a usa para mover dinheiro.</p>
+            <Field label="Tipo"><Select value={pixType} onChange={setPixType} options={PIX_TYPES} /></Field>
+            <Field label="Chave"><Input value={pixKey} onChange={setPixKey} placeholder={pixType === "cnpj" ? "somente números" : pixType === "phone" ? "+55 DDD número" : ""} /></Field>
+          </Modal>
+          <Modal open={!!transferFor} title="Registrar transferência feita" onClose={() => setTransferFor(null)}
+                 footer={<><Button onClick={() => setTransferFor(null)}>Cancelar</Button>
+                   <Button variant="primary" busy={busy} disabled={!trAmount || trRef.trim().length < 3}
+                           onClick={() => act(() => api.post(`/v1/payouts/${transferFor}/transfers`, { amount_cents: Math.round(parseFloat(trAmount.replace(",", ".")) * 100), reference: trRef, paid_on: trDate }),
+                                              "Transferência registrada. Quem recebe vai confirmar.").then(() => setTransferFor(null))}>Registrar</Button></>}>
+            <p>Registre a transferência que você fez pela chave do contrato (pode ser parcial). A mesma referência nunca é contada duas vezes. Quem recebe confirma o recebimento.</p>
+            <Field label="Valor (R$)"><Input value={trAmount} onChange={setTrAmount} inputMode="decimal" /></Field>
+            <Field label="Referência (E2E / comprovante)"><Input value={trRef} onChange={setTrRef} placeholder="E2E…" /></Field>
+            <Field label="Data"><Input type="date" value={trDate} onChange={setTrDate} /></Field>
+          </Modal>
+          <Modal open={!!rejectingTransfer} title="Transferência não recebida" onClose={() => setRejectingTransfer(null)}
+                 footer={<><Button onClick={() => setRejectingTransfer(null)}>Cancelar</Button>
+                   <Button variant="danger" busy={busy} disabled={rejectTransferNote.trim().length < 10}
+                           onClick={() => act(() => api.post(`/v1/payout-transfers/${rejectingTransfer}/reject`, { reason: rejectTransferNote }),
+                                              "Transferência recusada; o repasse ficou em disputa.").then(() => setRejectingTransfer(null))}>Recusar</Button></>}>
+            <Field label="O que aconteceu"><TextArea value={rejectTransferNote} onChange={setRejectTransferNote} rows={3} /></Field>
+          </Modal>
+          <Modal open={cancelling} title="Cancelar o acordo vigente" onClose={() => setCancelling(false)}
+                 footer={<><Button onClick={() => setCancelling(false)}>Voltar</Button>
+                   <Button variant="danger" busy={busy} disabled={cancelReason.trim().length < 10}
+                           onClick={() => act(() => api.post(`/v1/signed-agreements/${id}/cancel`, { reason: cancelReason }),
+                                              "Acordo cancelado; repasses não confirmados foram cancelados com estorno.").then(() => setCancelling(false))}>Cancelar acordo</Button></>}>
+            <p>Obrigações abertas são dispensadas; instruções de repasse não confirmadas são canceladas e estornadas no ledger econômico. O que já foi confirmado fica registrado.</p>
+            <Field label="Motivo"><TextArea value={cancelReason} onChange={setCancelReason} rows={3} /></Field>
           </Modal>
           <Modal open={versioning} title="Nova versão do acordo" onClose={() => setVersioning(false)}
                  footer={<><Button onClick={() => setVersioning(false)}>Cancelar</Button>

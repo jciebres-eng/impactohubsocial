@@ -603,3 +603,7 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
      recuo máximo é limitado por CSS e o nível continua legível pela ordem. */
   .tree li { margin-left: 0 !important; padding-left: .5rem; border-left: 2px solid var(--linha); }
 }
+
+/* v0.27.0 — botão que parece link (ações pequenas dentro de texto) */
+.linklike { background: none; border: 0; padding: 0; color: var(--tinta); text-decoration: underline; cursor: pointer; font: inherit; }
+.linklike:focus-visible { outline: 2px solid var(--foco, var(--tinta)); outline-offset: 2px; }

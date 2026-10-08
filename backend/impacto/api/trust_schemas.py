@@ -11,7 +11,7 @@ from .schemas import In, Pagination, Uuid
 IdentityLevel = Literal["email", "phone", "document", "professional", "biometric"]
 IdDocKind = Literal["official_id", "drivers_license", "passport", "proof_of_address", "council_card", "other"]
 AgreementKind = Literal["service", "partnership", "funding", "volunteer", "data_sharing", "other"]
-PartyRole = Literal["contractor", "provider", "funder", "professional", "witness", "beneficiary_rep"]
+PartyRole = Literal["contractor", "provider", "funder", "professional", "witness", "beneficiary_rep", "proponent"]
 Taxonomy = Literal["sdg", "esg", "determinant"]
 TagSubject = Literal["project", "solution", "diagnosis", "need", "call", "organization", "agreement"]
 FeeUnit = Literal["hour", "session", "document", "report", "visit", "month", "project", "other"]
@@ -135,6 +135,29 @@ class AgreementNewVersionIn(In):
     calendar_type: Literal["calendar", "business"] | None = None
     auto_accept: bool | None = None
     dispute_days: Annotated[int | None, Field(ge=0, le=60)] = None
+
+
+class PartyPixIn(In):
+    pix_key: Annotated[str, Field(min_length=3, max_length=120)]
+    pix_key_type: Literal["cpf", "cnpj", "email", "phone", "evp"]
+
+
+class TransferIn(In):
+    amount_cents: Annotated[int, Field(gt=0, le=10**13)]
+    reference: Annotated[str, Field(min_length=3, max_length=120)]
+    paid_on: date
+    method: Literal["pix", "bank_transfer", "other"] = "pix"
+    evidence_document_id: Uuid | None = None
+
+
+class ParticipationIn(In):
+    proponent_org_id: Uuid
+    proponent_user_id: Uuid | None = None
+    idea_ref_type: Literal["solution", "idea"]
+    idea_ref_id: Uuid
+    authorship_type: Literal["author", "coauthor"] = "author"
+    share_bps: Annotated[int, Field(ge=1, le=10000)] = 10000
+    contribution: Annotated[str, Field(min_length=20, max_length=2000)]
 
 
 class MilestonePatch(In):

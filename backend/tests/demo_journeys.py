@@ -459,6 +459,10 @@ class Jornadas:
             if len(cot) == 3:
                 self.passo(J, "decide pelo menor orçamento", osc, "POST", f"/v1/procurement/{pr['id']}/decide", {"quotation_id": cot[1]})
 
+    def _party(self, c: Client, aid: str) -> str:
+        d = c.get(f"/v1/signed-agreements/{aid}").json
+        return next(p["id"] for p in d["parties"] if p["org_id"] == c.org_id)
+
     def contrato_como_regra(self):
         """Tese v0.26.0: o contrato vira regra de operação — versões, obrigações, aceite a quatro olhos e matriz de distribuição."""
         J, osc, emp, pid = "Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão", self.c["osc"], self.c["company"], self.ids["projeto"]
@@ -468,17 +472,18 @@ class Jornadas:
             self.passos.append({"jornada": J, "passo": "envia o acordo", "perfil": "osc", "metodo": "POST", "rota": "/v1/documents",
                                 "status": doc.status, "ok": False, "erro": str(doc.json)[:300]})
             return
-        ac = self.passo(J, "OSC cria acordo de financiamento com taxa de serviço contratada (3%, paga pelo financiador)", osc, "POST",
+        ac = self.passo(J, "OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.01: 3,5% plataforma, aporte único direcionado)", osc, "POST",
                         "/v1/signed-agreements", {
                             "kind": "funding", "title": "Financiamento — Orquestra na escola (exemplo)",
-                            "summary": "R$ 100.000 em 2 marcos; taxa de serviço da plataforma de 3% paga pelo financiador, adicional ao valor.",
+                            "summary": "R$ 100.000 em 2 marcos; o financiador faz um aporte único direcionado a cada destinatário pela chave PIX do contrato.",
                             "document_id": doc.json["id"], "project_id": pid, "value_cents": 10_000_000,
-                            "platform_fee_bps": 300, "fee_payer_role": "funder", "fee_mode": "additional",
                             "review_days": 10, "calendar_type": "business", "dispute_days": 5})
         if not ac:
             return
         aid = self.ids["acordo_financiamento"] = ac["id"]
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.passo(J, "quem recebe informa a própria chave PIX no contrato", osc, "PUT",
+                   f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix", {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
         marcos = []
         for seq, (titulo, valor, dias) in enumerate((("Compra dos instrumentos", 5_000_000, 30), ("Primeiro semestre de aulas", 5_000_000, 200)), 1):
             m = self.passo(J, f"define o marco {seq}: {titulo}", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",
@@ -486,7 +491,7 @@ class Jornadas:
             if m:
                 marcos.append(m["id"])
         self.passo(J, "publica para assinatura (versão 1 congelada)", osc, "POST", f"/v1/signed-agreements/{aid}/publish")
-        prev = self.passo(J, "financiador vê a PRÉVIA da distribuição antes de assinar (97.000 / 3.000, nada gravado)", emp, "GET",
+        prev = self.passo(J, "financiador vê a PRÉVIA da distribuição antes de assinar (96.500 / 3.500, nada gravado)", emp, "GET",
                           f"/v1/signed-agreements/{aid}/allocation") or {}
         self.ids["alocacao_previa"] = (prev.get("preview") or {}).get("platform_fee_cents")
         for c in (osc, emp):
@@ -496,6 +501,15 @@ class Jornadas:
                        f"/v1/signed-agreements/{aid}") or {}
         self.ids["alocacao"] = {k: (d.get("allocation") or {}).get(k) for k in ("gross_cents", "project_cents", "platform_fee_cents", "fee_chargeable", "platform_charge_id")}
         self.ids["obrigacoes"] = len(d.get("obligations") or [])
+        po = self.passo(J, "financiador abre as instruções de repasse (quem, quanto, por qual chave)", emp, "GET", f"/v1/signed-agreements/{aid}/payouts") or {}
+        proj = next((p for p in po.get("items", []) if p["line_kind"] == "project"), None)
+        if proj:
+            t = self.passo(J, "financiador registra a transferência PIX feita ao projeto (a qualquer momento)", emp, "POST",
+                           f"/v1/payouts/{proj['id']}/transfers", {"amount_cents": proj["amount_cents"], "reference": "E2E-DEMO-0001", "paid_on": _d(0)})
+            if t:
+                self.passo(J, "OSC (quem recebe) confirma o recebimento — quem paga nunca confirma", osc, "POST", f"/v1/payout-transfers/{t['id']}/confirm")
+                self.passo(J, "financiador tenta confirmar o que ele mesmo pagou → recusado", emp, "POST", f"/v1/payout-transfers/{t['id']}/confirm", esperado=(403,))
+        self.passo(J, "o que o IMPACTO fez nesta operação (por registro)", emp, "GET", f"/v1/signed-agreements/{aid}/value")
         if marcos:
             self.passo(J, "OSC registra a entrega do marco 1", osc, "PATCH", f"/v1/signed-agreements/{aid}/milestones/{marcos[0]}", {"status": "delivered"})
             self.passo(J, "OSC tenta aceitar a própria entrega → recusado (quatro olhos)", osc, "PATCH",

@@ -103,6 +103,10 @@ class Settings:
     billing_provider: str = "none"        # none | sandbox | stripe | manual
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
+    # v0.27.0 — chave PIX da própria plataforma para a linha "infraestrutura e inteligência" das instruções de repasse.
+    # Vazia = "NÃO CONFIGURADA": a instrução sai sem chave e diz isso. Nunca é usada para mover dinheiro.
+    platform_pix_key: str = ""
+    platform_pix_key_type: str = ""
     stripe_prices: dict[str, str] = field(default_factory=dict)   # chaves: <plan_key> (mensal), <plan_key>_month, <plan_key>_year
     trial_auto_start: bool = True
     trial_days: int = 14
@@ -191,6 +195,8 @@ def load_settings() -> Settings:
         billing_provider=_env("BILLING_PROVIDER", "sandbox" if not hardened else "none"),
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
+        platform_pix_key=_env("PLATFORM_PIX_KEY", "") or "",
+        platform_pix_key_type=_env("PLATFORM_PIX_KEY_TYPE", "") or "",
         stripe_prices=prices,
         trial_auto_start=_bool("TRIAL_AUTO_START", True),
         trial_days=_int("TRIAL_DAYS", 14),

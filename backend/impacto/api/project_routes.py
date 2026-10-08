@@ -208,6 +208,9 @@ def publish(ctx: Ctx):
         ledger(c, project_id=p["id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="budget_defined",
                amount_cents=p["budget_total_cents"], payload={"items": items})
         ctx.audit(c, "project.published", "project", p["id"])
+        # v0.27.0 — participação de autoria aceita vira CONSOLIDADA quando o projeto é publicado
+        from ..trust import economy as ECO
+        ECO.consolidate_for_project(c, project_id=p["id"], actor_user_id=ctx.user_id)
     return {"id": p["id"], "visibility": "published"}
 
 

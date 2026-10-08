@@ -222,7 +222,8 @@ class UpgradePathTests(unittest.TestCase):
                          "nenhuma regra de receita pode chegar ativa por atualização")
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_legal_cards"
                                           " WHERE status = 'green'"), 0)
-        self.assertEqual(self.conn.scalar("SELECT count(*) FROM value_event_types"), 11)
+        # v0.27.0 acrescentou 4 tipos de valor (contrato ativado, matriz instruída, repasse confirmado, operação quitada)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM value_event_types"), 15)
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM value_baselines"
                                           " WHERE minutes_per_unit IS NOT NULL"), 0,
                          "nenhuma linha de base pode chegar com número por atualização")

@@ -82,6 +82,12 @@ EVENTS: dict[str, str] = {
     "Claim.review_requested": "Revisão de afirmação solicitada",
     # v0.20.0 — assinatura.
     "Agreement.signature_required": "Assinatura pendente em instrumento",
+    # v0.27.0 — camada econômica: participação de autoria e repasses.
+    "Participation.proposed": "Participação de autoria proposta",
+    "Participation.accepted": "Participação de autoria aceita",
+    "Payout.registered": "Transferência registrada por quem paga",
+    "Payout.confirmed": "Repasse confirmado por quem recebe",
+    "Operation.settled": "Operação concluída e quitada",
     # NÃO existe `Security.*` aqui, e a ausência é deliberada. O reuso de credencial de sessão é
     # detectado durante a RENOVAÇÃO do token, quando ainda não há sessão autenticada —
     # `app_record_event()` amarra a autoria a `app_uid()` e recusaria o registro. O fato fica onde

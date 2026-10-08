@@ -341,14 +341,29 @@ def agreement_create(ctx: Ctx, body: TSch.AgreementIn):
         from ..services.documents import usable_statuses
         if doc["status"] not in usable_statuses():
             raise ApiError(409, "document_not_usable", "O documento está aguardando verificação antivírus ou foi recusado")
+        # v0.27.0 — no acordo de FINANCIAMENTO os percentuais vêm do catálogo versionado (economic_rules), nunca do cliente.
+        # Quem manda outro valor recebe 422: o preço é autoridade do servidor (ADR-342). Nos demais tipos de acordo a taxa
+        # é cláusula livre entre as partes (serviço, parceria), como na v0.26.0.
+        fee_bps, payer, mode, prop_bps, econ_version = body.platform_fee_bps, body.fee_payer_role, body.fee_mode, 0, None
+        if body.kind == "funding":
+            from ..trust import economy as ECO
+            terms = ECO.economic_terms_for_funding(c)
+            if body.platform_fee_bps is not None and body.platform_fee_bps != terms["platform_fee_bps"]:
+                raise ApiError(422, "fee_determined_by_pricing_version",
+                               "No acordo de financiamento a taxa de serviço vem da versão de preços vigente, não do pedido",
+                               {"pricing_version": terms["pricing_version"], "platform_fee_bps": terms["platform_fee_bps"]})
+            if body.fee_payer_role not in (None, terms["fee_payer_role"]):
+                raise ApiError(422, "fee_payer_determined_by_pricing_version", "No acordo de financiamento quem paga a camada é o financiador")
+            fee_bps, payer, mode = terms["platform_fee_bps"], terms["fee_payer_role"], body.fee_mode or terms["fee_mode"]
+            prop_bps, econ_version = terms["proponent_participation_bps"], terms["pricing_version"]
         aid = c.scalar("INSERT INTO signed_agreements(org_id, project_id, kind, title, summary, document_id, content_sha256,"
                        " effective_from, effective_to, value_cents, created_by, platform_fee_bps, fee_payer_role,"
-                       " fee_mode, review_days, calendar_type, auto_accept, dispute_days)"
+                       " fee_mode, review_days, calendar_type, auto_accept, dispute_days, proponent_participation_bps, economic_rule_version)"
                        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9::date,$10,$11,$12,$13,coalesce($14,'additional'),"
-                       " coalesce($15,10),coalesce($16,'calendar'),coalesce($17,false),coalesce($18,5)) RETURNING id::text",
+                       " coalesce($15,10),coalesce($16,'calendar'),coalesce($17,false),coalesce($18,5),$19,$20) RETURNING id::text",
                        ctx.org_id, body.project_id, body.kind, body.title, body.summary, body.document_id, doc["sha256"],
-                       body.effective_from, body.effective_to, body.value_cents, ctx.user_id, body.platform_fee_bps,
-                       body.fee_payer_role, body.fee_mode, body.review_days, body.calendar_type, body.auto_accept, body.dispute_days)
+                       body.effective_from, body.effective_to, body.value_cents, ctx.user_id, fee_bps,
+                       payer, mode, body.review_days, body.calendar_type, body.auto_accept, body.dispute_days, prop_bps, econ_version)
         c.run("INSERT INTO signed_agreement_parties(agreement_id, org_id, role, required, user_id)"
               " VALUES ($1,$2,$3,true,$4)", aid, ctx.org_id,
               "contractor" if body.kind in ("service", "funding") else "provider", ctx.user_id)
@@ -367,7 +382,7 @@ def agreement_list(ctx: Ctx, q: TSch.Pagination):
        summary="Acordo com partes, estado das assinaturas e acompanhamento")
 def agreement_detail(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
-        a = AG.detail(c, ctx.path["agreement_id"])
+        a = AG.detail(c, ctx.path["agreement_id"], viewer_org_id=ctx.org_id)
     if not a:
         raise not_found("Acordo")
     return a
@@ -380,11 +395,15 @@ def agreement_patch(ctx: Ctx, body: TSch.AgreementPatch):
     if not fields:
         raise ApiError(422, "validation_error", "Nada para alterar")
     with ctx.tx() as c:
-        st = c.scalar("SELECT status FROM signed_agreements WHERE id = $1 AND org_id = $2", ctx.path["agreement_id"], ctx.org_id)
+        row = c.one("SELECT status, kind FROM signed_agreements WHERE id = $1 AND org_id = $2", ctx.path["agreement_id"], ctx.org_id)
+        st = row["status"] if row else None
         if st is None:
             raise not_found("Acordo")
         if st != "draft":
             raise ApiError(409, "not_draft", "Somente um acordo em rascunho pode ser alterado")
+        if row["kind"] == "funding" and any(k in fields for k in ("platform_fee_bps", "fee_payer_role")):
+            raise ApiError(422, "fee_determined_by_pricing_version",
+                           "No acordo de financiamento a taxa de serviço e quem a paga vêm da versão de preços, não do pedido")
         sets = ", ".join(f"{k} = ${i + 2}" for i, k in enumerate(fields))
         c.run(f"UPDATE signed_agreements SET {sets} WHERE id = $1", ctx.path["agreement_id"], *fields.values())
         ctx.audit(c, "agreement.updated", "agreement", ctx.path["agreement_id"], {"fields": sorted(fields)})
@@ -477,6 +496,16 @@ def agreement_sign(ctx: Ctx, body: TSch.AgreementSignIn):
                           "próprio — a plataforma não emite nem homologa assinatura qualificada."}
 
 
+@route("POST", "/v1/signed-agreements/{agreement_id}/cancel", body=TSch.RevokeIn, min_role=OWNER, tags=("agreements",),
+       summary="Cancela um acordo VIGENTE (dona ou financiador, motivo obrigatório): obrigações dispensadas, repasses não confirmados cancelados com estorno")
+def agreement_cancel(ctx: Ctx, body: TSch.RevokeIn):
+    from ..trust import contract_rules
+    with ctx.system_tx() as c:
+        out = contract_rules.cancel_active(c, agreement_id=ctx.path["agreement_id"], org_id=ctx.org_id, actor_user_id=ctx.user_id, reason=body.reason)
+        ctx.audit(c, "agreement.cancelled", "agreement", ctx.path["agreement_id"], {"reason": body.reason[:200]})
+    return out
+
+
 @route("POST", "/v1/signed-agreements/{agreement_id}/decline", body=TSch.RevokeIn, min_role=OWNER, tags=("agreements",),
        summary="Recusa o acordo como parte (motivo obrigatório; o acordo é cancelado)")
 def agreement_decline(ctx: Ctx, body: TSch.RevokeIn):
@@ -523,6 +552,11 @@ def agreement_milestone_patch(ctx: Ctx, body: TSch.MilestonePatch):
             ledger(c, project_id=a["project_id"], org_id=a["org_id"], actor=ctx.user_id, entry_type=f"milestone_{body.status}",
                    ref_type="agreement_milestone", ref_id=ctx.path["milestone_id"],
                    payload={"agreement_id": ctx.path["agreement_id"], "actor_org_id": ctx.org_id})
+    if body.status == "accepted":
+        # v0.27.0 — última entrega aceita com todos os repasses confirmados = operação quitada
+        from ..trust import economy as ECO
+        with ctx.system_tx() as c:
+            out["operation_settled"] = ECO.settle_if_complete(c, agreement_id=ctx.path["agreement_id"], actor_user_id=ctx.user_id)
     return {"updated": True, **out}
 
 
@@ -565,3 +599,212 @@ def agreements_pending(ctx: Ctx):
     from ..trust import contract_rules
     with ctx.tx(readonly=True) as c:
         return {"items": contract_rules.pending_for(c, ctx.org_id)}
+
+
+# ================================================================================ v0.27.0 — camada econômica
+def _flush_ledger(ctx: Ctx, out: dict) -> dict:
+    """O razão do projeto é da executora; a contraparte (financiador, proponente, plataforma) escreve nele em
+    contexto de sistema, com o ator real no lançamento — o mesmo desenho do aceite de marco (v0.26.0)."""
+    entries = out.pop("_ledger", None) or []
+    if entries:
+        from ..services.audit import ledger
+        with ctx.system_tx() as c:
+            for e in entries:
+                ledger(c, **e)
+    return out
+
+@route("PUT", "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix", body=TSch.PartyPixIn, min_role=WRITE, tags=("agreements",),
+       summary="A própria parte informa a chave PIX que receberá os repasses deste acordo (formato conferido pelo banco)")
+def party_set_pix(ctx: Ctx, body: TSch.PartyPixIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.set_party_pix(c, agreement_id=ctx.path["agreement_id"], party_id=ctx.path["party_id"], org_id=ctx.org_id,
+                                user_id=ctx.user_id, pix_key=body.pix_key, pix_key_type=body.pix_key_type)
+        ctx.audit(c, "agreement.party_pix_set", "agreement", ctx.path["agreement_id"], {"party_id": ctx.path["party_id"], "type": body.pix_key_type})
+    return out
+
+
+@route("GET", "/v1/signed-agreements/{agreement_id}/payouts", min_role="viewer", tags=("agreements",),
+       summary="Instruções de repasse da matriz: quem paga a quem, quanto, por qual chave, e o estado (instruída → pendente → confirmada → conciliada)")
+def agreement_payouts(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx(readonly=True) as c:
+        if not c.scalar("SELECT 1 FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"]):
+            raise not_found("Acordo")
+        return {"items": ECO.payouts(c, ctx.path["agreement_id"], viewer_org_id=ctx.org_id),
+                "settlement": ECO.settlement(c, ctx.path["agreement_id"]),
+                "note": "A plataforma não move dinheiro: quem paga transfere pela chave informada no contrato e registra; quem recebe confirma."}
+
+
+@route("GET", "/v1/signed-agreements/{agreement_id}/value", min_role="viewer", tags=("agreements",),
+       summary="O que o IMPACTO fez nesta operação — por registro, não por slogan (base do Value Capture)")
+def agreement_value(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx(readonly=True) as c:
+        if not c.scalar("SELECT 1 FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"]):
+            raise not_found("Acordo")
+        return ECO.explain_value(c, ctx.path["agreement_id"])
+
+
+@route("POST", "/v1/payouts/{payout_id}/transfers", body=TSch.TransferIn, min_role=WRITE, status=201, tags=("agreements",),
+       summary="Quem paga registra uma transferência feita (a qualquer momento, inclusive parcial); a mesma referência é idempotente")
+def payout_register_transfer(ctx: Ctx, body: TSch.TransferIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.register_transfer(c, payout_id=ctx.path["payout_id"], org_id=ctx.org_id, user_id=ctx.user_id,
+                                    amount_cents=body.amount_cents, reference=body.reference, paid_on=body.paid_on,
+                                    method=body.method, evidence_document_id=body.evidence_document_id)
+        ctx.audit(c, "payout.transfer_registered", "payout", ctx.path["payout_id"], {"amount_cents": body.amount_cents, "duplicate": out["duplicate"]})
+    if not out["duplicate"] and out.get("recipient_org_id"):
+        from ..network import notify as NOTIFY
+        with ctx.system_tx() as c:
+            NOTIFY.org_event(c, org_id=out["recipient_org_id"], event="Payout.registered", title="Transferência registrada por quem paga",
+                             body="Quem financia registrou uma transferência para você. Confirme o recebimento quando o valor chegar.",
+                             link=f"/acordos/{out['agreement_id']}", actor_user_id=ctx.user_id, ref_type="payout", ref_id=ctx.path["payout_id"],
+                             dedupe_parts=("Payout.registered", out["id"]))
+    out.pop("recipient_org_id", None)
+    out.pop("agreement_id", None)
+    return _flush_ledger(ctx, out)
+
+
+@route("POST", "/v1/payout-transfers/{transfer_id}/confirm", min_role=WRITE, tags=("agreements",),
+       summary="Quem RECEBE confirma o recebimento; com o valor inteiro confirmado o repasse fica confirmado e o evento econômico nasce")
+def transfer_confirm(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.confirm_transfer(c, transfer_id=ctx.path["transfer_id"], org_id=ctx.org_id, user_id=ctx.user_id)
+        ctx.audit(c, "payout.transfer_confirmed", "payout_transfer", ctx.path["transfer_id"], {"payout_state": out["payout_state"]})
+    _flush_ledger(ctx, out)
+    # quitação: avaliada em contexto de sistema (lê marcos e repasses de todas as partes; escreve reconhecimentos)
+    with ctx.system_tx() as c:
+        out["operation_settled"] = ECO.after_confirm(c, payout_id=out.pop("payout_id"), actor_user_id=ctx.user_id)
+        from ..network import notify as NOTIFY
+        if out.get("payer_org_id") and out["payout_state"] == "confirmed":
+            NOTIFY.org_event(c, org_id=out["payer_org_id"], event="Payout.confirmed", title="Repasse confirmado por quem recebe",
+                             body="O destinatário confirmou o recebimento integral do repasse.", link=f"/acordos/{out['agreement_id']}",
+                             actor_user_id=ctx.user_id, ref_type="payout_transfer", ref_id=ctx.path["transfer_id"],
+                             dedupe_parts=("Payout.confirmed", ctx.path["transfer_id"]))
+        if out["operation_settled"] and out.get("owner_org_id"):
+            NOTIFY.org_event(c, org_id=out["owner_org_id"], event="Operation.settled", title="Operação concluída e quitada",
+                             body="Todas as entregas foram aceitas e todos os repasses devidos confirmados. O reconhecimento foi registrado na trajetória.",
+                             link=f"/acordos/{out['agreement_id']}", actor_user_id=ctx.user_id, ref_type="agreement", ref_id=out["agreement_id"],
+                             dedupe_parts=("Operation.settled", out["agreement_id"]))
+    for k in ("agreement_id", "payer_org_id", "owner_org_id"):
+        out.pop(k, None)
+    return out
+
+
+@route("POST", "/v1/payout-transfers/{transfer_id}/reject", body=TSch.RevokeIn, min_role=WRITE, tags=("agreements",),
+       summary="Quem recebe recusa uma transferência registrada (não chegou, valor errado): o repasse fica em disputa")
+def transfer_reject(ctx: Ctx, body: TSch.RevokeIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.reject_transfer(c, transfer_id=ctx.path["transfer_id"], org_id=ctx.org_id, user_id=ctx.user_id, reason=body.reason)
+        ctx.audit(c, "payout.transfer_rejected", "payout_transfer", ctx.path["transfer_id"], {})
+    return out
+
+
+@route("POST", "/v1/payouts/{payout_id}/reconcile", body=TSch.RevokeIn, min_role=WRITE, tags=("agreements",),
+       summary="Quem recebe concilia o repasse confirmado com o extrato (nota obrigatória)")
+def payout_reconcile(ctx: Ctx, body: TSch.RevokeIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.reconcile_payout(c, payout_id=ctx.path["payout_id"], org_id=ctx.org_id, user_id=ctx.user_id, note=body.reason)
+        ctx.audit(c, "payout.reconciled", "payout", ctx.path["payout_id"], {})
+    return _flush_ledger(ctx, out)
+
+
+@route("POST", "/v1/admin/payout-transfers/{transfer_id}/confirm", auth="admin", permission="billing.write", tags=("agreements",),
+       summary="Equipe financeira da plataforma confirma o recebimento da linha 'infraestrutura e inteligência'")
+def admin_transfer_confirm(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.system_tx() as c:
+        out = ECO.confirm_transfer(c, transfer_id=ctx.path["transfer_id"], org_id=ctx.org_id, user_id=ctx.user_id, platform_staff=True)
+        ctx.audit(c, "payout.transfer_confirmed", "payout_transfer", ctx.path["transfer_id"], {"by": "platform"})
+        out["operation_settled"] = ECO.after_confirm(c, payout_id=out.pop("payout_id"), actor_user_id=ctx.user_id)
+    out.pop("agreement_id", None)
+    return _flush_ledger(ctx, out)
+
+
+@route("POST", "/v1/admin/payouts/{payout_id}/reconcile", body=TSch.RevokeIn, auth="admin", permission="billing.write", tags=("agreements",),
+       summary="Equipe financeira concilia a linha da plataforma")
+def admin_payout_reconcile(ctx: Ctx, body: TSch.RevokeIn):
+    from ..trust import economy as ECO
+    with ctx.system_tx() as c:
+        out = ECO.reconcile_payout(c, payout_id=ctx.path["payout_id"], org_id=ctx.org_id, user_id=ctx.user_id, note=body.reason, platform_staff=True)
+        ctx.audit(c, "payout.reconciled", "payout", ctx.path["payout_id"], {"by": "platform"})
+    return _flush_ledger(ctx, out)
+
+
+# ---------------------------------------------------------------- participação de autoria
+@route("POST", "/v1/projects/{project_id}/participations", body=TSch.ParticipationIn, kinds=("osc",), min_role=WRITE, status=201,
+       tags=("participations",), summary="A executora propõe participação de autoria/desenvolvimento da ideia a quem a propôs; só vale com o aceite do proponente")
+def participation_propose(ctx: Ctx, body: TSch.ParticipationIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.propose_participation(c, project_id=ctx.path["project_id"], org_id=ctx.org_id, actor_user_id=ctx.user_id,
+                                        proponent_org_id=body.proponent_org_id, proponent_user_id=body.proponent_user_id,
+                                        idea_ref_type=body.idea_ref_type, idea_ref_id=body.idea_ref_id,
+                                        authorship_type=body.authorship_type, share_bps=body.share_bps, contribution=body.contribution)
+        ctx.audit(c, "participation.proposed", "participation", out["id"], {"proponent_org_id": body.proponent_org_id})
+        from ..network import notify as NOTIFY
+        NOTIFY.org_event(c, org_id=body.proponent_org_id, event="Participation.proposed",
+                         title="Participação de autoria proposta", body="Uma executora propôs sua participação de autoria num projeto. Aceite ou recuse.",
+                         link="/participacoes", actor_user_id=ctx.user_id)
+    return out
+
+
+@route("GET", "/v1/participations", min_role="viewer", tags=("participations",),
+       summary="Participações de autoria em que a organização é executora ou proponente")
+def participations_mine(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx(readonly=True) as c:
+        return {"items": ECO.mine(c, ctx.org_id)}
+
+
+@route("GET", "/v1/participations/{participation_id}", min_role="viewer", tags=("participations",), summary="Detalhe da participação")
+def participation_get(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx(readonly=True) as c:
+        return ECO.participation(c, ctx.path["participation_id"])
+
+
+@route("POST", "/v1/participations/{participation_id}/accept", min_role=OWNER, tags=("participations",),
+       summary="O proponente aceita a participação (confirma a autoria e o combinado)")
+def participation_accept(ctx: Ctx):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.accept_participation(c, participation_id=ctx.path["participation_id"], org_id=ctx.org_id, user_id=ctx.user_id)
+        ctx.audit(c, "participation.accepted", "participation", ctx.path["participation_id"], {"status": out["status"]})
+    # o razão é do projeto da executora; o proponente escreve nele via contexto de sistema, com o ator real registrado
+    from ..services.audit import ledger
+    with ctx.system_tx() as c:
+        ledger(c, project_id=out["project_id"], org_id=out["org_id"], actor=ctx.user_id, entry_type="participation_accepted",
+               ref_type="participation", ref_id=ctx.path["participation_id"], payload={"proponent_org_id": ctx.org_id, "status": out["status"]})
+        from ..network import notify as NOTIFY
+        NOTIFY.org_event(c, org_id=out["org_id"], event="Participation.accepted", title="Participação de autoria aceita",
+                         body="O proponente aceitou a participação de autoria. Ela entra na matriz do acordo de financiamento quando houver um em vigor.",
+                         link="/participacoes", actor_user_id=ctx.user_id, ref_type="participation", ref_id=ctx.path["participation_id"])
+    return {"id": out["id"], "status": out["status"]}
+
+
+@route("POST", "/v1/participations/{participation_id}/cancel", body=TSch.RevokeIn, min_role=OWNER, tags=("participations",),
+       summary="Executora ou proponente cancela a participação (motivo obrigatório)")
+def participation_cancel(ctx: Ctx, body: TSch.RevokeIn):
+    from ..trust import economy as ECO
+    with ctx.tx() as c:
+        out = ECO.cancel_participation(c, participation_id=ctx.path["participation_id"], org_id=ctx.org_id, user_id=ctx.user_id, reason=body.reason)
+        ctx.audit(c, "participation.cancelled", "participation", ctx.path["participation_id"], {})
+    return out
+
+
+@route("GET", "/v1/economic-rules", min_role="viewer", tags=("participations",),
+       summary="Catálogo versionado da camada econômica (percentuais por versão de preços) — o que o contrato congela")
+def economic_rules(ctx: Ctx):
+    from ..services.monetization import pricing_version_name
+    with ctx.tx(readonly=True) as c:
+        rows = c.query("SELECT key, pricing_version, label_pt, applies_to, bps, payer_role, recipient_kind, monetization_rule_key,"
+                       " effective_from, effective_until, what_it_pays_for, reason FROM economic_rules ORDER BY pricing_version DESC, key")
+    return {"items": rows, "current_pricing_version": pricing_version_name(),
+            "note": "Percentual é do contrato por versão de preços; a cobrança da plataforma só existe com a regra jurídica ativa. "
+                    "A participação de autoria não é receita da plataforma."}

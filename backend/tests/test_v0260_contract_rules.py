@@ -42,12 +42,16 @@ class ContractRulesTests(unittest.TestCase):
         cls.project = pr.json["id"]
 
     # ---------------------------------------------------------------- apoio
-    def _acordo(self, *, fee_bps=300, fee_mode="additional", value=10_000_000, review_days=10, calendar="calendar"):
+    # v0.27.0: no acordo de FINANCIAMENTO o percentual vem do catálogo versionado (3,5% em 2027.01), nunca do pedido.
+    # Os testes desta rodada passaram a conferir 3,5%; o modo (deducted/additional) continua cláusula do contrato.
+    FEE_BPS = 350
+
+    def _acordo(self, *, fee_mode="additional", value=10_000_000, review_days=10, calendar="calendar"):
         doc = upload(self.osc, name="acordo-financiamento.txt", body=b"Acordo de financiamento - versao 1", doc_type="contrato")
         r = self.osc.post("/v1/signed-agreements", {
             "kind": "funding", "title": "Financiamento do projeto", "summary": "Aporte em 2 marcos com taxa de serviço contratada.",
-            "document_id": doc, "project_id": self.project, "value_cents": value, "platform_fee_bps": fee_bps,
-            "fee_payer_role": "funder", "fee_mode": fee_mode, "review_days": review_days, "calendar_type": calendar})
+            "document_id": doc, "project_id": self.project, "value_cents": value,
+            "fee_mode": fee_mode, "review_days": review_days, "calendar_type": calendar})
         self.assertEqual(r.status, 201, r)
         aid = r.json["id"]
         self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/parties", {"org_id": self.funder.org_id, "role": "funder"}).status, 201)
@@ -72,15 +76,15 @@ class ContractRulesTests(unittest.TestCase):
         # antes da vigência: só PREVIEW, nada gravado
         pre = self.funder.get(f"/v1/signed-agreements/{aid}/allocation").json
         self.assertIsNone(pre["recorded"])
-        self.assertEqual(pre["preview"]["platform_fee_cents"], 300_000, "3% de R$ 100.000,00 são R$ 3.000,00")
+        self.assertEqual(pre["preview"]["platform_fee_cents"], 350_000, "3,5% de R$ 100.000,00 são R$ 3.500,00")
         self.assertEqual(self._assinar(aid, self.osc, self.funder), "active")
 
         d = self.osc.get(f"/v1/signed-agreements/{aid}").json
         al = d["allocation"]
         self.assertIsNotNone(al, "acordo vigente tem de ter a matriz GRAVADA")
-        self.assertEqual((al["gross_cents"], al["project_cents"], al["platform_fee_cents"]), (10_000_000, 10_000_000, 300_000))
+        self.assertEqual((al["gross_cents"], al["project_cents"], al["platform_fee_cents"]), (10_000_000, 10_000_000, 350_000))
         self.assertEqual(al["fee_mode"], "additional", "modo adicional: o projeto recebe os R$ 100.000 inteiros")
-        self.assertEqual(al["fee_bps"], 300)
+        self.assertEqual(al["fee_bps"], 350)
         self.assertEqual(al["fee_rule_key"], "contract.platform_service_fee")
         self.assertFalse(al["fee_chargeable"], "a regra comercial nasce DESLIGADA: sem parecer, a taxa fica registrada e não é cobrada")
         self.assertIn("parecer", al["fee_reason"])
@@ -89,7 +93,7 @@ class ContractRulesTests(unittest.TestCase):
         self.assertEqual(len(al["allocation_hash"]), 64)
         linhas = {ln["kind"]: ln for ln in al["lines"]}
         self.assertEqual(linhas["project"]["cents"], 10_000_000)
-        self.assertEqual(linhas["platform_fee"]["cents"], 300_000)
+        self.assertEqual(linhas["platform_fee"]["cents"], 350_000)
         self.assertIn("nunca descontada em trânsito", linhas["platform_fee"]["paid_by"])
         # nada na plataforma "segura" dinheiro: não existe payout, carteira ou saldo
         with db_system() as c:
@@ -113,7 +117,7 @@ class ContractRulesTests(unittest.TestCase):
         self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/publish").status, 200)
         self.assertEqual(self._assinar(aid, self.osc, self.funder), "active")
         al = self.osc.get(f"/v1/signed-agreements/{aid}/allocation").json["recorded"]
-        self.assertEqual((al["gross_cents"], al["project_cents"], al["platform_fee_cents"]), (10_000_000, 9_700_000, 300_000))
+        self.assertEqual((al["gross_cents"], al["project_cents"], al["platform_fee_cents"]), (10_000_000, 9_650_000, 350_000))
         self.assertEqual(al["project_cents"] + al["platform_fee_cents"] + al["third_party_cents"], al["gross_cents"])
         # GMV ≠ receita: o valor contratado NÃO entra como receita reconhecida da plataforma
         from impacto.economics import metrics as M
@@ -148,7 +152,7 @@ class ContractRulesTests(unittest.TestCase):
             self.assertIsNotNone(al["platform_charge_id"])
             cob = self.funder.get("/v1/payments/charges").json
             minha = next(x for x in cob["items"] if x["id"] == al["platform_charge_id"])
-            self.assertEqual(minha["amount_cents"], 300_000)
+            self.assertEqual(minha["amount_cents"], 350_000)
             self.assertEqual(minha["state"], "created", "cobrança ABERTA: nada foi cobrado, muito menos confirmado")
             self.assertTrue(minha["is_simulated"], "sem provedor real a cobrança é simulada e diz isso")
             # a OSC NÃO recebe cobrança nenhuma por este acordo
@@ -240,7 +244,7 @@ class ContractRulesTests(unittest.TestCase):
         self.assertEqual((nv["status"], nv["version"], nv["value_cents"]), ("draft", 2, 8_000_000))
         self.assertEqual(nv["pending_signatures"], 2, "todo mundo assina de novo")
         self.assertEqual(nv["allocation"], None)
-        self.assertEqual(nv["allocation_preview"]["platform_fee_cents"], 240_000, "3% do valor NOVO")
+        self.assertEqual(nv["allocation_preview"]["platform_fee_cents"], 280_000, "3,5% do valor NOVO")
         self.assertEqual(len(nv["milestones"]), 2, "marcos copiados")
         # versão substituída não volta
         with db_system() as c:
@@ -267,7 +271,16 @@ class ContractRulesTests(unittest.TestCase):
         self.assertEqual(self.outra.get("/v1/agreements/pending").json["items"], [])
 
     def test_without_a_contracted_fee_there_is_no_fee_line_at_all(self):
-        aid = self._acordo(fee_bps=None)
+        """Acordo de SERVIÇO (não de financiamento): a taxa é cláusula livre entre as partes; sem cláusula, não há linha.
+        No acordo de financiamento ela vem do catálogo (v0.27.0) — ver test_v0270_economy."""
+        doc = upload(self.osc, name="acordo-servico.txt", body=b"Acordo de servico sem taxa", doc_type="contrato")
+        r = self.osc.post("/v1/signed-agreements", {"kind": "service", "title": "Prestação de serviço", "document_id": doc,
+                                                    "project_id": self.project, "value_cents": 10_000_000})
+        self.assertEqual(r.status, 201, r)
+        aid = r.json["id"]
+        self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/parties", {"org_id": self.funder.org_id, "role": "funder"}).status, 201)
+        m = self.osc.post(f"/v1/signed-agreements/{aid}/milestones", {"title": "Entrega", "due_on": _d(30), "seq": 1, "amount_cents": 10_000_000})
+        self.assertEqual(m.status, 201, m)
         self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/publish").status, 200)
         self.assertEqual(self._assinar(aid, self.osc, self.funder), "active")
         al = self.osc.get(f"/v1/signed-agreements/{aid}/allocation").json["recorded"]

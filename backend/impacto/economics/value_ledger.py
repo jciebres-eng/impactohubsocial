@@ -41,6 +41,8 @@ TYPES = (
     "document.blocked_incomplete", "diagnosis.version_published", "risk.scan_completed",
     "program.projects_screened", "impact_report.accepted", "territorial_gap.computed",
     "ai.analysis_completed",
+    # v0.27.0 — a operação de financiamento como valor entregue
+    "contract.activated", "allocation.instructed", "payout.confirmed", "operation.settled",
 )
 ESTIMATE_STATUS = ("no_baseline", "estimated")
 

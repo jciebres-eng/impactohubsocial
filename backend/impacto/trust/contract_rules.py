@@ -56,7 +56,9 @@ def _agreement(conn: Connection, agreement_id: str) -> dict:
     a = conn.one("SELECT a.id::text AS id, a.org_id::text AS org_id, a.project_id::text AS project_id, a.kind, a.title,"
                  " a.status, a.version, a.content_sha256, a.document_id::text AS document_id, a.value_cents,"
                  " a.platform_fee_bps, a.fee_payer_role, a.fee_mode, a.review_days, a.calendar_type, a.auto_accept,"
-                 " a.dispute_days, a.effective_from, a.effective_to, a.supersedes_id::text AS supersedes_id"
+                 " a.dispute_days, a.effective_from, a.effective_to, a.supersedes_id::text AS supersedes_id,"
+                 " a.proponent_participation_bps, a.economic_rule_version, a.proponent_participation_id::text AS proponent_participation_id,"
+                 " a.summary"
                  " FROM signed_agreements a WHERE a.id = $1", agreement_id)
     if not a:
         raise ApiError(404, "not_found", "Acordo não encontrado")
@@ -64,8 +66,8 @@ def _agreement(conn: Connection, agreement_id: str) -> dict:
 
 
 def _parties(conn: Connection, agreement_id: str) -> list[dict]:
-    return conn.query("SELECT org_id::text AS org_id, role, required, signed_at FROM signed_agreement_parties"
-                      " WHERE agreement_id = $1 ORDER BY invited_at", agreement_id)
+    return conn.query("SELECT id::text AS id, org_id::text AS org_id, role, required, signed_at, pix_key, pix_key_type"
+                      " FROM signed_agreement_parties WHERE agreement_id = $1 ORDER BY invited_at", agreement_id)
 
 
 def _milestones(conn: Connection, agreement_id: str) -> list[dict]:
@@ -81,17 +83,49 @@ def fee_rule(conn: Connection) -> dict | None:
 
 
 def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
-    """Só CALCULA (ADR-284). Devolve a matriz com cada linha e o motivo da taxa ser ou não cobrável."""
+    """Só CALCULA (ADR-284). Devolve a matriz com cada linha e o motivo da taxa ser ou não cobrável.
+
+    v0.27.0: a camada econômica tem DUAS linhas possíveis além do projeto — infraestrutura e inteligência da
+    plataforma (percentual do catálogo versionado) e participação de autoria (só com proponente elegível e
+    parte no acordo). No modo `deducted` o financiador faz UM aporte (o bruto) direcionado a cada destinatário;
+    o projeto recebe o que sobra, e a soma fecha em centavos: toda diferença de arredondamento fica no projeto.
+    """
+    from .economy import PLATFORM_RULE, PROPONENT_RULE, eligible_participations
     gross = int(a["value_cents"] or 0)
     bps = a["platform_fee_bps"]
     fee = _bps(gross, bps) if bps else 0
     deducted = a["fee_mode"] == "deducted"
-    project = gross - fee if deducted and fee else gross
     rule = fee_rule(conn)
     payer = next((p for p in parties if p["role"] == a["fee_payer_role"]), None) if a["fee_payer_role"] else None
     # Quem recebe o valor: a parte executora; sem uma, a organização dona do acordo (a OSC que executa).
     receiver = next((p for p in parties if p["role"] in ("contractor", "provider", "professional")), None) \
         or {"org_id": a["org_id"], "role": "owner"}
+    # Participação de autoria: só com elegibilidade registrada E a parte 'proponent' no acordo.
+    prop_bps = int(a.get("proponent_participation_bps") or 0)
+    prop_lines: list[dict] = []
+    prop_total = 0
+    prop_reason = "o acordo não prevê participação de autoria"
+    if prop_bps and a.get("project_id"):
+        elig = eligible_participations(conn, a["project_id"])
+        party_orgs = {p["org_id"] for p in parties if p["role"] == "proponent"}
+        elig = [e for e in elig if e["proponent_org_id"] in party_orgs]
+        if not elig:
+            prop_reason = "há percentual de autoria no acordo, mas nenhum proponente elegível (aceito e consolidado) é parte dele"
+        else:
+            pool = _bps(gross, prop_bps)
+            acc = 0
+            for i, e in enumerate(elig):
+                cents = (pool * int(e["share_bps"]) + 5000) // 10000 if i < len(elig) - 1 else pool - acc
+                acc += cents
+                prop_lines.append({"kind": "proponent", "to_org_id": e["proponent_org_id"], "role": "proponent", "cents": cents,
+                                   "basis": f"{prop_bps / 100:.2f}% sobre {_brl(gross)} × fração {e['share_bps'] / 100:.2f}% ({e['authorship_type']})",
+                                   "paid_by": "quem financia, diretamente ao proponente pela chave PIX informada no contrato",
+                                   "rule_key": PROPONENT_RULE, "bps": prop_bps, "participation_id": e["id"]})
+            prop_total = pool
+            prop_reason = f"{len(elig)} proponente(s) elegível(is): participação de autoria e desenvolvimento da ideia"
+    project = gross - (fee if deducted else 0) - prop_total
+    if project < 0:
+        raise ApiError(422, "allocation_negative", "A camada econômica supera o valor da operação")
     if not bps:
         chargeable, reason = False, "o acordo não prevê taxa de serviço da plataforma"
     elif payer is None:
@@ -101,26 +135,33 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
                                      "e contábil (carta legal) — a taxa fica registrada e NÃO é cobrada")
     else:
         chargeable, reason = True, "regra comercial ativa com carta legal validada; taxa instruída ao pagador em cobrança própria da plataforma"
-    from ..services.monetization import pricing_version_name
-    pricing = pricing_version_name()
+    pricing = a.get("economic_rule_version")
+    if not pricing:
+        from ..services.monetization import pricing_version_name
+        pricing = pricing_version_name()
     lines = [{"kind": "project", "to_org_id": receiver["org_id"], "role": receiver["role"],
-              "cents": project, "basis": "valor contratado" + (" menos a taxa (modo deducted)" if deducted and fee else ""),
-              "paid_by": "quem financia, diretamente ao executor (commitments → payment_records)"}]
+              "cents": project, "basis": "valor da operação" + (" menos a camada econômica (modo deducted)" if deducted and (fee or prop_total) else
+                                                                 (" menos a participação de autoria" if prop_total else "")),
+              "paid_by": "quem financia, diretamente ao executor pela chave PIX informada no contrato"}]
     if bps:
         lines.append({"kind": "platform_fee", "to_org_id": None, "role": "platform", "cents": fee,
                       "basis": f"{bps / 100:.2f}% sobre {_brl(gross)} ({'descontada do valor' if deducted else 'adicional ao valor'})",
-                      "paid_by": (payer["role"] if payer else "?") + " → plataforma, em cobrança separada; nunca descontada em trânsito",
-                      "chargeable": chargeable, "reason": reason, "rule_key": FEE_RULE_KEY})
-    material = "|".join([a["id"], str(a["version"]), a["content_sha256"], a["fee_mode"], str(gross), str(project), str(fee),
+                      "paid_by": (payer["role"] if payer else "?") + " → plataforma, em instrução própria; nunca descontada em trânsito",
+                      "chargeable": chargeable, "reason": reason, "rule_key": PLATFORM_RULE, "bps": bps,
+                      "monetization_rule_key": FEE_RULE_KEY})
+    lines.extend(prop_lines)
+    material = "|".join([a["id"], str(a["version"]), a["content_sha256"], a["fee_mode"], str(gross), str(project), str(fee), str(prop_total),
                          json.dumps(lines, sort_keys=True, ensure_ascii=False)])
-    return {"gross_cents": gross, "project_cents": project, "platform_fee_cents": fee, "third_party_cents": 0,
+    return {"gross_cents": gross, "project_cents": project, "platform_fee_cents": fee, "proponent_cents": prop_total,
+            "proponent_bps": prop_bps or None, "proponent_reason": prop_reason, "third_party_cents": 0,
+            "economic_layer_cents": fee + prop_total,
             "fee_mode": a["fee_mode"], "fee_bps": bps, "fee_payer_org_id": payer["org_id"] if payer else None,
             "fee_rule_key": FEE_RULE_KEY if bps else None, "fee_chargeable": chargeable, "fee_reason": reason,
             "pricing_version": pricing, "lines": lines,
             "allocation_hash": hashlib.sha256(material.encode()).hexdigest(),
-            "note": ("A plataforma calcula, instrui e concilia. Não custodia: cada linha é paga por quem paga, pelo meio "
-                     "que as partes escolheram. GMV (valor contratado) ≠ receita da plataforma (só a taxa cobrável)."),
-            "total_instructed_cents": project + (fee if not deducted else 0) + (fee if deducted else 0)}
+            "note": ("A plataforma calcula, instrui e concilia. Não custodia: quem financia faz o aporte direcionado a cada "
+                     "destinatário pela chave PIX informada no contrato. GMV (valor da operação) ≠ receita da plataforma."),
+            "total_instructed_cents": project + prop_total + fee}
 
 
 def preview(conn: Connection, agreement_id: str) -> dict:
@@ -173,13 +214,23 @@ def activate(conn: Connection, *, agreement_id: str, actor_user_id: str | None) 
     alloc_id = conn.scalar(
         "INSERT INTO agreement_allocations(agreement_id, version, content_sha256, gross_cents, project_cents, platform_fee_cents,"
         " third_party_cents, fee_mode, fee_bps, fee_payer_org_id, fee_rule_key, fee_chargeable, fee_reason, pricing_version,"
-        " lines, allocation_hash, computed_by, platform_charge_id)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,$16,$17,$18) RETURNING id::text",
+        " lines, allocation_hash, computed_by, platform_charge_id, proponent_cents, proponent_bps)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,$16,$17,$18,$19,$20) RETURNING id::text",
         agreement_id, a["version"], a["content_sha256"], alloc["gross_cents"], alloc["project_cents"], alloc["platform_fee_cents"],
         alloc["third_party_cents"], alloc["fee_mode"], alloc["fee_bps"], alloc["fee_payer_org_id"], alloc["fee_rule_key"],
         alloc["fee_chargeable"], alloc["fee_reason"], alloc["pricing_version"], Json(alloc["lines"]), alloc["allocation_hash"],
-        actor_user_id, charge_id)
+        actor_user_id, charge_id, alloc["proponent_cents"], alloc["proponent_bps"])
     conn.run("UPDATE signed_agreements SET activated_at = now() WHERE id = $1 AND activated_at IS NULL", agreement_id)
+    # v0.27.0 — a matriz vira INSTRUÇÕES de repasse (não custodial) e eventos econômicos idempotentes
+    from .economy import instruct_payouts
+    payouts = instruct_payouts(conn, agreement=a, allocation_id=alloc_id, alloc=alloc, parties=parties,
+                               actor_user_id=actor_user_id, platform_charge_id=charge_id)
+    from ..economics import value_ledger as VL
+    VL.record(conn, event_type="contract.activated", org_id=a["org_id"], units=1, project_id=a["project_id"],
+              subject_type="agreement", subject_id=agreement_id, metrics={"obligations": n, "version": a["version"]})
+    if payouts:
+        VL.record(conn, event_type="allocation.instructed", org_id=a["org_id"], units=len(payouts), project_id=a["project_id"],
+                  subject_type="allocation", subject_id=alloc_id, metrics={"gross_cents": alloc["gross_cents"]})
     if a["project_id"]:
         from ..services.audit import ledger
         ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="agreement_activated",
@@ -190,7 +241,7 @@ def activate(conn: Connection, *, agreement_id: str, actor_user_id: str | None) 
                payload={"gross_cents": alloc["gross_cents"], "platform_fee_cents": alloc["platform_fee_cents"],
                         "fee_chargeable": alloc["fee_chargeable"], "fee_mode": alloc["fee_mode"],
                         "allocation_hash": alloc["allocation_hash"]})
-    return {"already": False, "obligations": n, "allocation_id": alloc_id, "platform_charge_id": charge_id, **alloc}
+    return {"already": False, "obligations": n, "allocation_id": alloc_id, "platform_charge_id": charge_id, "payouts": payouts, **alloc}
 
 
 # ------------------------------------------------------------------ nova versão
@@ -206,25 +257,34 @@ def new_version(conn: Connection, *, agreement_id: str, org_id: str, actor_user_
     campos = {k: old[k] for k in ("kind", "title", "summary", "project_id", "effective_from", "effective_to", "value_cents",
                                   "platform_fee_bps", "fee_payer_role", "fee_mode", "review_days", "calendar_type",
                                   "auto_accept", "dispute_days") if k in old}
+    # Percentuais e versão econômica NÃO mudam por versão nova do acordo: a regra congelada na publicação é a que vale
+    # (ADR-343: nunca recalcular operação com regra nova). O cliente não os altera.
+    for k in ("platform_fee_bps", "fee_payer_role", "fee_mode"):
+        changes.pop(k, None)
     campos.update({k: v for k, v in changes.items() if v is not None})
     novo = conn.scalar(
         "INSERT INTO signed_agreements(org_id, project_id, kind, title, summary, document_id, content_sha256, effective_from,"
         " effective_to, value_cents, created_by, version, supersedes_id, version_reason, platform_fee_bps, fee_payer_role,"
-        " fee_mode, review_days, calendar_type, auto_accept, dispute_days)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9::date,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING id::text",
+        " fee_mode, review_days, calendar_type, auto_accept, dispute_days, proponent_participation_bps, economic_rule_version,"
+        " proponent_participation_id)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9::date,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) RETURNING id::text",
         org_id, campos.get("project_id"), old["kind"], campos["title"], campos.get("summary"), document_id, document_sha256,
         campos.get("effective_from"), campos.get("effective_to"), campos.get("value_cents"), actor_user_id, old["version"] + 1,
         agreement_id, reason, campos.get("platform_fee_bps"), campos.get("fee_payer_role"), campos.get("fee_mode"),
-        campos.get("review_days"), campos.get("calendar_type"), campos.get("auto_accept"), campos.get("dispute_days"))
-    for p in conn.query("SELECT org_id::text AS org_id, role, required, user_id::text AS user_id FROM signed_agreement_parties"
-                        " WHERE agreement_id = $1", agreement_id):
-        conn.run("INSERT INTO signed_agreement_parties(agreement_id, org_id, role, required, user_id) VALUES ($1,$2,$3,$4,$5)",
-                 novo, p["org_id"], p["role"], p["required"], p["user_id"])
+        campos.get("review_days"), campos.get("calendar_type"), campos.get("auto_accept"), campos.get("dispute_days"),
+        old.get("proponent_participation_bps") or 0, old.get("economic_rule_version"), old.get("proponent_participation_id"))
+    for p in conn.query("SELECT org_id::text AS org_id, role, required, user_id::text AS user_id, pix_key, pix_key_type,"
+                        " pix_key_set_by::text AS pix_key_set_by, pix_key_set_at FROM signed_agreement_parties WHERE agreement_id = $1", agreement_id):
+        conn.run("INSERT INTO signed_agreement_parties(agreement_id, org_id, role, required, user_id, pix_key, pix_key_type, pix_key_set_by, pix_key_set_at)"
+                 " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+                 novo, p["org_id"], p["role"], p["required"], p["user_id"], p["pix_key"], p["pix_key_type"], p["pix_key_set_by"], p["pix_key_set_at"])
     for m in _milestones(conn, agreement_id):
         conn.run("INSERT INTO signed_agreement_milestones(agreement_id, org_id, title, due_on, seq, amount_cents, source)"
                  " VALUES ($1,$2,$3,$4::date,$5,$6,'manual')", novo, m["org_id"], m["title"], m["due_on"], m["seq"], m["amount_cents"])
     conn.run("UPDATE signed_agreements SET status = 'superseded', superseded_by_id = $2 WHERE id = $1", agreement_id, novo)
     conn.run("UPDATE agreement_obligations SET status = 'waived' WHERE agreement_id = $1 AND status = 'open'", agreement_id)
+    from .economy import cancel_payouts
+    cancel_payouts(conn, agreement_id=agreement_id, actor_user_id=actor_user_id, reason=f"versão {old['version'] + 1} substitui a anterior: {reason}")
     return {"id": novo, "version": old["version"] + 1, "supersedes_id": agreement_id, "status": "draft",
             "note": "As assinaturas da versão anterior continuam no histórico, mas não aprovam esta versão: todas as partes assinam de novo."}
 
@@ -240,7 +300,8 @@ def record_version(conn: Connection, *, agreement_id: str, actor_user_id: str | 
         lineage = sup
     termos = {k: (a[k].isoformat() if isinstance(a[k], date) else a[k]) for k in
               ("kind", "title", "value_cents", "platform_fee_bps", "fee_payer_role", "fee_mode", "review_days",
-               "calendar_type", "auto_accept", "dispute_days", "effective_from", "effective_to")}
+               "calendar_type", "auto_accept", "dispute_days", "effective_from", "effective_to",
+               "proponent_participation_bps", "economic_rule_version")}
     termos["parties"] = _parties(conn, agreement_id)
     termos["milestones"] = [{**m, "due_on": m["due_on"].isoformat() if m["due_on"] else None} for m in _milestones(conn, agreement_id)]
     conn.run("INSERT INTO agreement_versions(agreement_id, lineage_id, version, content_sha256, document_id, terms, reason, created_by)"
@@ -291,7 +352,8 @@ def obligations(conn: Connection, agreement_id: str) -> list[dict]:
 
 
 def allocation(conn: Connection, agreement_id: str) -> dict | None:
-    return conn.one("SELECT id::text AS id, version, gross_cents, project_cents, platform_fee_cents, third_party_cents, fee_mode,"
+    return conn.one("SELECT id::text AS id, version, gross_cents, project_cents, platform_fee_cents, proponent_cents, proponent_bps,"
+                    " economic_layer_cents, third_party_cents, fee_mode,"
                     " fee_bps, fee_payer_org_id::text AS fee_payer_org_id, fee_rule_key, fee_chargeable, fee_reason, pricing_version,"
                     " platform_charge_id::text AS platform_charge_id, lines, allocation_hash, computed_at"
                     " FROM agreement_allocations WHERE agreement_id = $1 ORDER BY computed_at DESC LIMIT 1", agreement_id)
@@ -304,3 +366,24 @@ def pending_for(conn: Connection, org_id: str, *, limit: int = 50) -> list[dict]
                       " FROM agreement_obligations o JOIN signed_agreements a ON a.id = o.agreement_id"
                       " WHERE o.obligor_org_id = $1 AND o.status = 'open' AND a.status = 'active'"
                       " ORDER BY o.due_on NULLS LAST LIMIT $2", org_id, limit)
+
+
+def cancel_active(conn: Connection, *, agreement_id: str, org_id: str, actor_user_id: str, reason: str) -> dict:
+    """Cancela um acordo VIGENTE (dona ou financiador): obrigações abertas dispensadas, instruções de repasse não
+    confirmadas canceladas com estorno econômico; o que já foi confirmado fica registrado (devolução é outro ato)."""
+    a = _agreement(conn, agreement_id)
+    parties = _parties(conn, agreement_id)
+    if org_id != a["org_id"] and not any(p["org_id"] == org_id and p["role"] == "funder" for p in parties):
+        raise ApiError(403, "forbidden", "Só a organização dona do acordo ou o financiador cancelam um acordo vigente")
+    if a["status"] != "active":
+        raise ApiError(409, "not_active", f"Acordo '{a['status']}' não está vigente")
+    conn.run("UPDATE signed_agreements SET status = 'canceled' WHERE id = $1", agreement_id)
+    conn.run("UPDATE agreement_obligations SET status = 'waived' WHERE agreement_id = $1 AND status = 'open'", agreement_id)
+    from .economy import cancel_payouts
+    n = cancel_payouts(conn, agreement_id=agreement_id, actor_user_id=actor_user_id, reason=reason)
+    if a["project_id"]:
+        from ..services.audit import ledger
+        ledger(conn, project_id=a["project_id"], org_id=a["org_id"], actor=actor_user_id, entry_type="status_changed",
+               ref_type="agreement", ref_id=agreement_id, payload={"agreement_status": "canceled", "reason": reason, "payouts_cancelled": n,
+                                                                   "actor_org_id": org_id})
+    return {"id": agreement_id, "status": "canceled", "payouts_cancelled": n}

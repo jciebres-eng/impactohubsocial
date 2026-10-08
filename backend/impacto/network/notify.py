@@ -51,6 +51,8 @@ GRP = {
     # chamada a fechar é oportunidade.
     "seal": "account", "reputation": "account", "security": "account", "agreement": "account",
     "claim": "project", "call": "opportunities",
+    # v0.27.0 — participação de autoria e repasse: assunto de financiamento.
+    "participation": "funding", "payout": "funding",
 }
 
 # Prioridade: muda ordenação e destaque na caixa, nunca o canal. `critical` é para o que trava o trabalho da

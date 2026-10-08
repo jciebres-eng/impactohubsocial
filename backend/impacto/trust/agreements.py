@@ -17,7 +17,7 @@ KINDS = ("service", "partnership", "funding", "volunteer", "data_sharing", "othe
 ROLES = ("contractor", "provider", "funder", "professional", "witness", "beneficiary_rep")
 
 
-def detail(conn: Connection, agreement_id: str) -> dict | None:
+def detail(conn: Connection, agreement_id: str, viewer_org_id: str | None = None) -> dict | None:
     a = conn.one(
         "SELECT a.id::text AS id, a.org_id::text AS org_id, a.project_id::text AS project_id, a.kind, a.title, a.summary,"
         " a.document_id::text AS document_id, a.content_sha256, a.status, a.effective_from, a.effective_to, a.value_cents,"
@@ -30,9 +30,18 @@ def detail(conn: Connection, agreement_id: str) -> dict | None:
         return None
     a["parties"] = conn.query(
         "SELECT p.id::text AS id, p.org_id::text AS org_id, o.legal_name, p.role, p.required, p.signed_at, p.declined_at,"
+        " p.pix_key_type, (p.pix_key IS NOT NULL) AS pix_informed, p.pix_key,"
         " p.decline_reason, p.signature_id::text AS signature_id, p.user_id::text AS user_id,"
         " user_display_name(p.user_id) AS user_name FROM signed_agreement_parties p"
         " JOIN organizations o ON o.id = p.org_id WHERE p.agreement_id = $1 ORDER BY p.invited_at", agreement_id)
+    # A chave PIX inteira só para a própria parte e para o financiador (quem paga); para os demais, mascarada.
+    from .economy import mask_pix
+    funder_ids = {p["org_id"] for p in a["parties"] if p["role"] == "funder"}
+    for p in a["parties"]:
+        full = viewer_org_id is not None and (viewer_org_id == p["org_id"] or viewer_org_id in funder_ids)
+        key = p.pop("pix_key", None)
+        p["pix_key_masked"] = mask_pix(key, p["pix_key_type"]) if key else None
+        p["pix_key"] = key if full else None
     a["milestones"] = conn.query(
         "SELECT id::text AS id, seq, title, due_on, status, note, document_id::text AS document_id, reported_at,"
         " reported_by::text AS reported_by, amount_cents, source, delivered_at, acceptance_due_on, accepted_at,"
@@ -43,8 +52,15 @@ def detail(conn: Connection, agreement_id: str) -> dict | None:
     from . import contract_rules
     a["terms"] = conn.one("SELECT version, supersedes_id::text AS supersedes_id, superseded_by_id::text AS superseded_by_id,"
                           " version_reason, platform_fee_bps, fee_payer_role, fee_mode, review_days, calendar_type, auto_accept,"
-                          " dispute_days, activated_at FROM signed_agreements WHERE id = $1", agreement_id)
+                          " dispute_days, activated_at, proponent_participation_bps, economic_rule_version FROM signed_agreements WHERE id = $1", agreement_id)
     a["obligations"] = contract_rules.obligations(conn, agreement_id)
+    from . import economy as ECO
+    a["payouts"] = ECO.payouts(conn, agreement_id, viewer_org_id=viewer_org_id)
+    a["settlement"] = ECO.settlement(conn, agreement_id)
+    a["participations"] = conn.query("SELECT p.id::text AS id, p.proponent_org_id::text AS proponent_org_id, o.legal_name AS proponent_name,"
+                                     " p.authorship_type, p.share_bps, p.status FROM proponent_participations p"
+                                     " JOIN organizations o ON o.id = p.proponent_org_id WHERE p.project_id = $1::uuid ORDER BY p.created_at",
+                                     a["project_id"]) if a.get("project_id") else []
     a["allocation"] = contract_rules.allocation(conn, agreement_id)
     a["allocation_preview"] = None if a["allocation"] else contract_rules.compute_allocation(conn, {**a, **a["terms"]}, a["parties"])
     a["versions"] = conn.query("SELECT version, content_sha256, reason, created_at FROM agreement_versions"

@@ -484,7 +484,7 @@ class TheGitleaksIgnoreIsNarrowAndExplainedTests(unittest.TestCase):
 
     def test_every_entry_is_a_single_finding_fingerprint(self):
         entradas = [l for l in self.linhas if l.strip() and not l.startswith("#")]
-        self.assertEqual(len(entradas), 15, "achado novo liberado? revise e atualize este número junto")
+        self.assertEqual(len(entradas), 16, "achado novo liberado? revise e atualize este número junto")
         for e in entradas:
             self.assertRegex(e, r"^[0-9a-f]{40}:[^:*]+:[a-z0-9-]+:\d+$",
                              f"entrada não é impressão digital de UM achado: {e}")

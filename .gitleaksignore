@@ -3,7 +3,8 @@
 # Nenhum é credencial real. Teste que exige motivo escrito para cada grupo:
 # backend/tests/test_v0230_security_gate.py (TheGitleaksIgnoreIsNarrowAndExplained).
 
-# [stripe-placeholder] literal "sk_test_placeholder" (19 caracteres; chave real tem dezenas), usado
+# [stripe-placeholder] o prefixo de chave de teste da Stripe seguido da palavra "placeholder"
+# (19 caracteres; chave real tem dezenas), usado
 # com FakeHttp — nenhuma chamada sai do processo de teste.
 668cc661c2eb6771c8c1f57e839a9601ae64dc4f:backend/tests/test_v0160_billing.py:stripe-access-token:86
 3060a9ebbbbe0b1c7b6e093f474d71b8335c14f8:backend/tests/test_v0110_monetization.py:stripe-access-token:56
@@ -33,3 +34,8 @@ d9f3077eeba153c7aa27fcf5238bbde78b667c31:backend/impacto/security/passwords.py:g
 # [texto-da-matriz] linha da matriz de homologação que DESCREVE a falta de credencial do SMTP; não
 # contém valor algum.
 9ca75f16fe212963476e8a02015759a1b5fbe838:docs/execution/INTEGRATION_HOMOLOGATION_MATRIX.csv:generic-api-key:2
+
+# [comentario-deste-arquivo] o próprio comentário acima, na primeira versão deste arquivo, citava o
+# literal do placeholder e o gitleaks o achou (como devia). O commit já está no histórico publicado;
+# reescrever `main` para apagá-lo custaria mais que esta linha.
+fa5fb05240158df150eafa844f2ff2c98e412ce2:.gitleaksignore:stripe-access-token:6

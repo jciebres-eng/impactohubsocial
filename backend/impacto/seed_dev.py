@@ -26,6 +26,9 @@ from .security import passwords
 from .services.validators import cnpj_with_check_digits
 
 DEMO_EMAILS = {"osc": "osc@demo.impacto.local", "company": "empresa@demo.impacto.local",
+               # v0.25.0 — pessoa física apoiadora (tipo `individual`). Sem ela, 4 telas do roteador
+               # restritas a "Apoiador" não eram alcançáveis por nenhuma conta de demonstração.
+               "individual": "apoiador@demo.impacto.local",
                "provider": "contador@demo.impacto.local", "government": "governo@demo.impacto.local",
                "admin": "admin@demo.impacto.local", "editor": "editor@demo.impacto.local", "reviewer": "revisor@demo.impacto.local",
                "support": "suporte@demo.impacto.local",
@@ -73,6 +76,10 @@ def seed(state, force: bool = False) -> dict:
         u_prov = user(DEMO_EMAILS["provider"], "Carla Exemplo (Contadora)", prov)
         user(DEMO_EMAILS["government"], "Davi Exemplo (Governo)", gov)
         u_admin = user(DEMO_EMAILS["admin"], "Admin Demo", plat, admin=True)
+        ind = c.scalar("INSERT INTO organizations(kind, legal_name, uf, city, ibge_code, description, causes, ods, compliance_status)"
+                       " VALUES ('individual','Elisa Exemplo (apoiadora fictícia)','MT','Lucas do Rio Verde','5105259',"
+                       " 'Pessoa física fictícia que apoia projetos culturais.','{cultura,educacao}','{4}','approved') RETURNING id::text")
+        user(DEMO_EMAILS["individual"], "Elisa Exemplo (Apoiadora)", ind)
         c.run("INSERT INTO funder_profiles(org_id, causes, ods, territories, ticket_min_cents, ticket_max_cents, required_document_types, min_org_age_months)"
               " VALUES ($1,'{educacao,cultura}','{4}','{BR-MT}', 100000, 5000000, '{estatuto_social}', 24)", comp)
         c.run("INSERT INTO provider_profiles(org_id, services, categories, territories) VALUES ($1,'{Prestação de contas,Contabilidade para OSC}',"
@@ -152,7 +159,7 @@ def _enable_internal_mfa(c, state) -> tuple[str, bool]:
     enc = state.cipher.encrypt(segredo)
     internos = c.query("SELECT DISTINCT u.id::text AS id FROM users u LEFT JOIN staff_roles sr ON sr.user_id = u.id"
                        " WHERE u.email = ANY($1::citext[]) AND (u.is_platform_admin OR sr.user_id IS NOT NULL)",
-                       [DEMO_EMAILS[k] for k in DEMO_EMAILS if k not in ("osc", "company", "provider", "government")])
+                       [DEMO_EMAILS[k] for k in DEMO_EMAILS if k not in ("osc", "company", "provider", "government", "individual")])
     for row in internos:
         c.run("UPDATE users SET mfa_secret_enc = $2, mfa_enabled_at = now(), mfa_recovery_hashes = '{}' WHERE id = $1",
               row["id"], enc)

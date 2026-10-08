@@ -1,0 +1,1597 @@
+{
+ "passos": 175,
+ "falhas": 0,
+ "por_jornada": {
+  "Preparação: contas de demonstração e plano concedido pela administração": 9,
+  "OSC: projeto → diagnóstico → impacto": 28,
+  "Financiador: edital → candidatura → aporte → validação": 29,
+  "Rede: proposta → conversa → prestação de contas": 12,
+  "Profissional: necessidade → oferta → revisão técnica": 9,
+  "Governo: edital público → necessidade do território": 19,
+  "Captação: cotas → apoios → campanha pública": 9,
+  "Documentos: montagem → acordo assinado → registro verificável": 20,
+  "Marketplace, soluções e perfis públicos": 6,
+  "Suporte e Central de Conhecimento": 10,
+  "Banco de Ideias: ideia → amadurecimento → projeto": 5,
+  "Administração: visão geral → verificação → auditoria": 7,
+  "Pendências: o que espera decisão de alguém": 12
+ },
+ "atalhos_declarados": [],
+ "detalhe": [
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "confirma a identidade (operação sensível)",
+   "metodo": "POST",
+   "rota": "/v1/auth/reauth",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "administração concede plano osc_premium (osc)",
+   "metodo": "POST",
+   "rota": "/v1/admin/organizations/01822bf4-2687-402c-823c-5aaec2b130e1/grants",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "administração concede plano company_premium (company)",
+   "metodo": "POST",
+   "rota": "/v1/admin/organizations/bb19f1d8-527c-48df-afa6-f5fffaf88bb5/grants",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "administração concede plano provider_premium (provider)",
+   "metodo": "POST",
+   "rota": "/v1/admin/organizations/8e67f229-b53a-4169-8711-ddff3a3d9860/grants",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "administração concede plano gov_institutional (government)",
+   "metodo": "POST",
+   "rota": "/v1/admin/organizations/85e9c539-7e9f-4cd2-8ac3-c36bfac9476f/grants",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "administração concede plano individual_basic (individual)",
+   "metodo": "POST",
+   "rota": "/v1/admin/organizations/3a8a2f7a-a6f4-406a-a0ed-77a25405eae1/grants",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "OSC lista seus projetos",
+   "metodo": "GET",
+   "rota": "/v1/projects",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "empresa lista seus programas",
+   "metodo": "GET",
+   "rota": "/v1/calls?mine=true&status=all",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
+   "passo": "OSC abre o projeto",
+   "metodo": "GET",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "cria projeto novo",
+   "metodo": "POST",
+   "rota": "/v1/projects",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "orça o projeto novo",
+   "metodo": "POST",
+   "rota": "/v1/projects/d8177e96-9840-4139-af7d-53c866e17e0d/budget-items",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "publica o projeto novo",
+   "metodo": "POST",
+   "rota": "/v1/projects/d8177e96-9840-4139-af7d-53c866e17e0d/publish",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "abre diagnóstico do projeto",
+   "metodo": "POST",
+   "rota": "/v1/diagnoses",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "preenche o diagnóstico",
+   "metodo": "PUT",
+   "rota": "/v1/diagnoses/a024e25b-726b-4cd6-9b7b-791f4022a8a4",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "responde a etapa de contexto do roteiro",
+   "metodo": "PUT",
+   "rota": "/v1/diagnoses/a024e25b-726b-4cd6-9b7b-791f4022a8a4/guide/context",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "aplica o diagnóstico ao projeto",
+   "metodo": "POST",
+   "rota": "/v1/diagnoses/a024e25b-726b-4cd6-9b7b-791f4022a8a4/apply",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "grava a versão 1 do diagnóstico",
+   "metodo": "POST",
+   "rota": "/v1/diagnoses/a024e25b-726b-4cd6-9b7b-791f4022a8a4/versions",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "lê a análise de prontidão (8 dimensões)",
+   "metodo": "GET",
+   "rota": "/v1/diagnoses/a024e25b-726b-4cd6-9b7b-791f4022a8a4/analysis",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "declara contexto de equidade",
+   "metodo": "PUT",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/equity/context",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "declara denominador com fonte",
+   "metodo": "POST",
+   "rota": "/v1/equity/denominators",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "alinha ODS (declarado)",
+   "metodo": "PUT",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/ods-targets",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "consulta catálogo de indicadores",
+   "metodo": "GET",
+   "rota": "/v1/indicators/catalog?ods=4",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "cria indicador com linha de base e fonte",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/indicators",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra evidência (2026-05-11)",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/evidences",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra medição 8 em 2026-05-11",
+   "metodo": "POST",
+   "rota": "/v1/project-indicators/96e2c54c-816f-40a1-8258-aaf51073f4a5/values",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra evidência (2026-06-30)",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/evidences",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra medição 17 em 2026-06-30",
+   "metodo": "POST",
+   "rota": "/v1/project-indicators/96e2c54c-816f-40a1-8258-aaf51073f4a5/values",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra evidência (2026-08-19)",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/evidences",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra medição 26 em 2026-08-19",
+   "metodo": "POST",
+   "rota": "/v1/project-indicators/96e2c54c-816f-40a1-8258-aaf51073f4a5/values",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra evidência (2026-10-03)",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/evidences",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra medição 33 em 2026-10-03",
+   "metodo": "POST",
+   "rota": "/v1/project-indicators/96e2c54c-816f-40a1-8258-aaf51073f4a5/values",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra risco",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/risks",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "grava retrato do projeto",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/snapshots",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "consulta os papéis de responsabilidade",
+   "metodo": "GET",
+   "rota": "/v1/responsibility/roles",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "designa responsável (organization)",
+   "metodo": "POST",
+   "rota": "/v1/responsibility/assignments",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "registra decisão do responsável",
+   "metodo": "POST",
+   "rota": "/v1/responsibility/decisions",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "OSC: projeto → diagnóstico → impacto",
+   "passo": "designa responsável (project)",
+   "metodo": "POST",
+   "rota": "/v1/responsibility/assignments",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "declara perfil de financiador",
+   "metodo": "PUT",
+   "rota": "/v1/org/funder-profile",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC vê o match do edital com o projeto",
+   "metodo": "GET",
+   "rota": "/v1/calls/893ea62a-4ece-4d5b-8367-3fbd35259188?project_id=d34f8a9e-5428-4882-96d7-9c3f45b2544c",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC abre candidatura",
+   "metodo": "POST",
+   "rota": "/v1/applications",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC lê os passos da candidatura",
+   "metodo": "GET",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC escreve o plano de trabalho (rascunho)",
+   "metodo": "POST",
+   "rota": "/v1/drafts",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "pede código de assinatura (draft)",
+   "metodo": "POST",
+   "rota": "/v1/signatures/challenge",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "assina (draft)",
+   "metodo": "POST",
+   "rota": "/v1/signatures",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'requirements'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/5cd2fb0c-9278-4fab-aa31-a8cb1af46cd2",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'req_plano_trabalho'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/37ed722e-74e3-4754-87d3-adbb2ae2897e",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'proposal'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/7c2f40d1-9600-4923-b8c9-2a4411cf20b9",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'budget'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/b138a531-0d5f-4959-9a9b-2ad36208acf1",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'signature'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/4fc14a6c-1790-4a68-976a-af10c58f8942",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC conclui o passo 'submission'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/steps/10308720-fdd1-4b4e-a93f-e3c634052040",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC envia a candidatura",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "avaliador move para screening",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "avaliador move para due_diligence",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "avaliador declara não ter conflito",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/conflict",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "avaliador aprova",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador registra o aporte comprometido",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/commitments",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador informa o desembolso",
+   "metodo": "POST",
+   "rota": "/v1/commitments/d9106424-4932-4a58-ba59-70f000f7e897/status",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC confirma o recebimento",
+   "metodo": "POST",
+   "rota": "/v1/commitments/d9106424-4932-4a58-ba59-70f000f7e897/status",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador registra pagamento",
+   "metodo": "POST",
+   "rota": "/v1/commitments/d9106424-4932-4a58-ba59-70f000f7e897/payments",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "pagamento aguarda confirmação",
+   "metodo": "POST",
+   "rota": "/v1/payments/9fb3af17-cddc-4643-b172-93f71a5fe037/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC confirma o pagamento",
+   "metodo": "POST",
+   "rota": "/v1/payments/9fb3af17-cddc-4643-b172-93f71a5fe037/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "OSC inicia a execução",
+   "metodo": "POST",
+   "rota": "/v1/applications/f1fffbc0-7699-4c6d-938b-1098bbdc47d3/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador valida medição",
+   "metodo": "POST",
+   "rota": "/v1/indicator-values/bac83a07-f7dd-4c28-85f7-8836d4fd8318/review",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador valida medição",
+   "metodo": "POST",
+   "rota": "/v1/indicator-values/5487dc3b-2bc0-4087-81e4-a4af965d0c3e/review",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador valida medição",
+   "metodo": "POST",
+   "rota": "/v1/indicator-values/b4bcc9f4-4541-44a8-8475-3cc7cef59830/review",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Financiador: edital → candidatura → aporte → validação",
+   "passo": "financiador vê a série do projeto (reportado × validado)",
+   "metodo": "GET",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/impact",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador propõe apoio",
+   "metodo": "POST",
+   "rota": "/v1/proposals",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador envia a proposta",
+   "metodo": "POST",
+   "rota": "/v1/proposals/7924da9f-e993-4a64-a86e-56b4d31ce922/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "OSC abre a proposta",
+   "metodo": "GET",
+   "rota": "/v1/proposals/7924da9f-e993-4a64-a86e-56b4d31ce922",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "OSC aceita a proposta",
+   "metodo": "POST",
+   "rota": "/v1/proposals/7924da9f-e993-4a64-a86e-56b4d31ce922/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador registra relação com a OSC",
+   "metodo": "POST",
+   "rota": "/v1/network/relationships",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador abre conversa sobre o projeto",
+   "metodo": "POST",
+   "rota": "/v1/conversations",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador escreve",
+   "metodo": "POST",
+   "rota": "/v1/conversations/8dad760d-99a7-46b5-94ba-eb6eb7258757/messages",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "OSC responde",
+   "metodo": "POST",
+   "rota": "/v1/conversations/8dad760d-99a7-46b5-94ba-eb6eb7258757/messages",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "financiador manda mensagem direta",
+   "metodo": "POST",
+   "rota": "/v1/messages/01822bf4-2687-402c-823c-5aaec2b130e1",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "OSC escreve relatório de impacto do período",
+   "metodo": "POST",
+   "rota": "/v1/impact-updates",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "OSC envia o relatório ao apoiador",
+   "metodo": "POST",
+   "rota": "/v1/impact-updates/c3cba206-43b0-45ca-914d-5b582e89e908/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Rede: proposta → conversa → prestação de contas",
+   "passo": "apoiador aceita o relatório",
+   "metodo": "POST",
+   "rota": "/v1/impact-updates/c3cba206-43b0-45ca-914d-5b582e89e908/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "profissional declara perfil",
+   "metodo": "PUT",
+   "rota": "/v1/org/provider-profile",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "OSC publica necessidade do projeto",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/needs",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "profissional oferece ajuda",
+   "metodo": "POST",
+   "rota": "/v1/needs/c66ee277-7cac-4943-a546-8e14f7a6db3f/offers",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "OSC aceita a oferta",
+   "metodo": "POST",
+   "rota": "/v1/offers/51a2885a-db3e-4bfd-b08b-9aed71c12672/decide",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "profissional lista suas credenciais",
+   "metodo": "GET",
+   "rota": "/v1/org/credentials",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "OSC escreve justificativa orçamentária",
+   "metodo": "POST",
+   "rota": "/v1/drafts",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "OSC pede revisão técnica ao profissional",
+   "metodo": "POST",
+   "rota": "/v1/professional-reviews",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "profissional aceita a revisão",
+   "metodo": "POST",
+   "rota": "/v1/professional-reviews/80fa918f-c6ec-4364-8bfd-467b667f941d/respond",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Profissional: necessidade → oferta → revisão técnica",
+   "passo": "profissional aprova com credencial verificada",
+   "metodo": "POST",
+   "rota": "/v1/professional-reviews/80fa918f-c6ec-4364-8bfd-467b667f941d/respond",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "governo publica chamamento",
+   "metodo": "POST",
+   "rota": "/v1/calls",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC abre candidatura",
+   "metodo": "POST",
+   "rota": "/v1/applications",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC lê os passos da candidatura",
+   "metodo": "GET",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC escreve o plano de trabalho (rascunho)",
+   "metodo": "POST",
+   "rota": "/v1/drafts",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "pede código de assinatura (draft)",
+   "metodo": "POST",
+   "rota": "/v1/signatures/challenge",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "assina (draft)",
+   "metodo": "POST",
+   "rota": "/v1/signatures",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC conclui o passo 'requirements'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/steps/214ea970-8530-47f5-a80d-ddd9747bd9d7",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC conclui o passo 'proposal'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/steps/48941688-640d-4c5b-8d8c-f811dbff40e8",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC conclui o passo 'budget'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/steps/6ca71788-16c8-4dbc-ab3b-7f1e63eedaa2",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC conclui o passo 'signature'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/steps/15356400-5cb3-4b72-b0f3-f520f371977d",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC conclui o passo 'submission'",
+   "metodo": "PATCH",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/steps/90b2b2b0-e9d7-4290-a7fc-11301fa05833",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "OSC envia a candidatura",
+   "metodo": "POST",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "governo lista as candidaturas do chamamento",
+   "metodo": "GET",
+   "rota": "/v1/calls/cdfecfa1-3038-404c-9b25-572fb20a8fa1/applications",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "avaliador move para screening",
+   "metodo": "POST",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "avaliador move para due_diligence",
+   "metodo": "POST",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "avaliador declara não ter conflito",
+   "metodo": "POST",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/conflict",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "avaliador aprova",
+   "metodo": "POST",
+   "rota": "/v1/applications/4b578d5d-7104-4e81-8607-5cb3c75f837e/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "governo acompanha a carteira",
+   "metodo": "GET",
+   "rota": "/v1/portfolio",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Governo: edital público → necessidade do território",
+   "passo": "governo registra necessidade do território com fonte",
+   "metodo": "POST",
+   "rota": "/v1/territory/needs",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "OSC cria cota de apoio",
+   "metodo": "POST",
+   "rota": "/v1/funding-quotas",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "OSC abre a cota",
+   "metodo": "PATCH",
+   "rota": "/v1/funding-quotas/cd3cd7cf-3eab-4070-b7f7-584efd7774a3",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "empresa apoia 3 cotas",
+   "metodo": "POST",
+   "rota": "/v1/funding-quotas/cd3cd7cf-3eab-4070-b7f7-584efd7774a3/pledges",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "apoiadora apoia 1 cota",
+   "metodo": "POST",
+   "rota": "/v1/funding-quotas/cd3cd7cf-3eab-4070-b7f7-584efd7774a3/pledges",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "apoiadora declara interesse e causas",
+   "metodo": "PUT",
+   "rota": "/v1/org/funder-profile",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "apoiadora manifesta interesse no projeto da horta",
+   "metodo": "POST",
+   "rota": "/v1/applications/interest",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "OSC cria campanha",
+   "metodo": "POST",
+   "rota": "/v1/campaigns",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "OSC publica a campanha",
+   "metodo": "PATCH",
+   "rota": "/v1/campaigns/d6348dbd-3d6a-47e4-840d-5ffe30640b4b",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Captação: cotas → apoios → campanha pública",
+   "passo": "visitante sem login abre a campanha",
+   "metodo": "GET",
+   "rota": "/v1/public/campaigns/orquestra-comunitaria-10e358",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "lista modelos publicados",
+   "metodo": "GET",
+   "rota": "/v1/document-templates?status=published",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "monta plano de monitoramento a partir do projeto",
+   "metodo": "POST",
+   "rota": "/v1/document-assemblies",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "lê os campos da montagem",
+   "metodo": "GET",
+   "rota": "/v1/document-assemblies/74d4f3e9-f81b-4d27-b414-68730b1dd60f",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "preenche campos e anexa evidências",
+   "metodo": "PUT",
+   "rota": "/v1/document-assemblies/74d4f3e9-f81b-4d27-b414-68730b1dd60f",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "gera o documento",
+   "metodo": "POST",
+   "rota": "/v1/document-assemblies/74d4f3e9-f81b-4d27-b414-68730b1dd60f/generate",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "envia o contrato",
+   "metodo": "POST",
+   "rota": "/v1/documents",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "cria acordo com o profissional",
+   "metodo": "POST",
+   "rota": "/v1/signed-agreements",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "inclui o profissional como parte",
+   "metodo": "POST",
+   "rota": "/v1/signed-agreements/6c04943f-3b0e-4b1f-ad50-7a93c520c928/parties",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "publica para assinatura",
+   "metodo": "POST",
+   "rota": "/v1/signed-agreements/6c04943f-3b0e-4b1f-ad50-7a93c520c928/publish",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "pede código de assinatura (agreement)",
+   "metodo": "POST",
+   "rota": "/v1/signatures/challenge",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "assina (agreement)",
+   "metodo": "POST",
+   "rota": "/v1/signed-agreements/6c04943f-3b0e-4b1f-ad50-7a93c520c928/sign",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "pede código de assinatura (agreement)",
+   "metodo": "POST",
+   "rota": "/v1/signatures/challenge",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "assina (agreement)",
+   "metodo": "POST",
+   "rota": "/v1/signed-agreements/6c04943f-3b0e-4b1f-ad50-7a93c520c928/sign",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "emite registro verificável do acordo",
+   "metodo": "POST",
+   "rota": "/v1/verifiable-records",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "visitante confere o registro sem login",
+   "metodo": "GET",
+   "rota": "/v1/public/verify/IMP-FVMN-LGST-0NG4",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "abre compra do projeto",
+   "metodo": "POST",
+   "rota": "/v1/projects/d34f8a9e-5428-4882-96d7-9c3f45b2544c/procurement",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "registra orçamento (Loja Exemplo A)",
+   "metodo": "POST",
+   "rota": "/v1/procurement/0a641c12-aa42-49a5-a1cf-cbca8674a47a/quotes",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "registra orçamento (Loja Exemplo B)",
+   "metodo": "POST",
+   "rota": "/v1/procurement/0a641c12-aa42-49a5-a1cf-cbca8674a47a/quotes",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "registra orçamento (Loja Exemplo C)",
+   "metodo": "POST",
+   "rota": "/v1/procurement/0a641c12-aa42-49a5-a1cf-cbca8674a47a/quotes",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Documentos: montagem → acordo assinado → registro verificável",
+   "passo": "decide pelo menor orçamento",
+   "metodo": "POST",
+   "rota": "/v1/procurement/0a641c12-aa42-49a5-a1cf-cbca8674a47a/decide",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "OSC anuncia o projeto no marketplace",
+   "metodo": "POST",
+   "rota": "/v1/marketplace/listings",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "OSC publica o anúncio",
+   "metodo": "POST",
+   "rota": "/v1/marketplace/listings/2e8c8054-2aa8-4e2c-a4de-aeb7dc02e2ef/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "OSC cadastra a metodologia como solução",
+   "metodo": "POST",
+   "rota": "/v1/solutions",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "OSC publica a solução",
+   "metodo": "POST",
+   "rota": "/v1/solutions/558696b1-82db-448f-94be-280439167e0f/publish",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "osc cria perfil público",
+   "metodo": "POST",
+   "rota": "/v1/profiles",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Marketplace, soluções e perfis públicos",
+   "passo": "provider cria perfil público",
+   "metodo": "POST",
+   "rota": "/v1/profiles",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC abre chamado",
+   "metodo": "POST",
+   "rota": "/v1/support/tickets",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "suporte responde o chamado",
+   "metodo": "POST",
+   "rota": "/v1/admin/support/tickets/b09586c6-8778-48b6-a72e-2fb1371b6550/messages",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC lê a resposta",
+   "metodo": "GET",
+   "rota": "/v1/support/tickets/b09586c6-8778-48b6-a72e-2fb1371b6550",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC lista cursos",
+   "metodo": "GET",
+   "rota": "/v1/help/courses",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC se inscreve no curso",
+   "metodo": "POST",
+   "rota": "/v1/help/courses/primeiros-passos-na-plataforma/enroll",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC abre o curso",
+   "metodo": "GET",
+   "rota": "/v1/help/courses/primeiros-passos-na-plataforma",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC conclui a aula 'O que é a plataforma'",
+   "metodo": "POST",
+   "rota": "/v1/help/lessons/3eb212b0-cbf5-4003-9e34-a846131ebed6/complete",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC conclui a aula 'Documentos e conformidade'",
+   "metodo": "POST",
+   "rota": "/v1/help/lessons/3b413b34-1212-4286-822d-1f200bdf2b27/complete",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC conclui a aula 'Quiz de fundamentos'",
+   "metodo": "POST",
+   "rota": "/v1/help/lessons/5593a952-75c5-4a9e-ade5-d5434b7c7368/complete",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Suporte e Central de Conhecimento",
+   "passo": "OSC emite certificado",
+   "metodo": "POST",
+   "rota": "/v1/help/courses/primeiros-passos-na-plataforma/certificate",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
+   "passo": "OSC registra ideia",
+   "metodo": "POST",
+   "rota": "/v1/ideas",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
+   "passo": "OSC amadurece a ideia (hipótese, público, impacto)",
+   "metodo": "PUT",
+   "rota": "/v1/ideas/00793dea-d0f1-4f0d-8591-818fd4683c06",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
+   "passo": "OSC abre a ideia",
+   "metodo": "GET",
+   "rota": "/v1/ideas/00793dea-d0f1-4f0d-8591-818fd4683c06",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
+   "passo": "OSC transforma a ideia em projeto",
+   "metodo": "POST",
+   "rota": "/v1/ideas/00793dea-d0f1-4f0d-8591-818fd4683c06/promote",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
+   "passo": "OSC abre o projeto criado",
+   "metodo": "GET",
+   "rota": "/v1/projects/84ff2cef-b127-4086-97af-9192511343f8",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "abre a visão geral",
+   "metodo": "GET",
+   "rota": "/v1/admin/overview",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "lista organizações",
+   "metodo": "GET",
+   "rota": "/v1/admin/organizations",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "lista usuários",
+   "metodo": "GET",
+   "rota": "/v1/admin/users",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "classifica a solução nova como autodeclarada",
+   "metodo": "POST",
+   "rota": "/v1/admin/solutions/558696b1-82db-448f-94be-280439167e0f/verify",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "confere a cadeia da auditoria",
+   "metodo": "GET",
+   "rota": "/v1/admin/audit/verify",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "confirma a identidade (operação sensível)",
+   "metodo": "POST",
+   "rota": "/v1/auth/reauth",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Administração: visão geral → verificação → auditoria",
+   "passo": "lê o estado do interruptor de emergência",
+   "metodo": "GET",
+   "rota": "/v1/admin/kill-switch",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "profissional propõe serviço à OSC",
+   "metodo": "POST",
+   "rota": "/v1/proposals",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "profissional envia (fica aguardando a OSC)",
+   "metodo": "POST",
+   "rota": "/v1/proposals/e4c9677e-66f6-42c9-a142-d64fc34109c2/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "OSC envia relatório do 2º período",
+   "metodo": "POST",
+   "rota": "/v1/impact-updates",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "relatório aguarda análise do apoiador",
+   "metodo": "POST",
+   "rota": "/v1/impact-updates/a0f558a3-c43a-4740-a36f-36e63831e94c/transition",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "OSC declara afirmação de impacto",
+   "metodo": "POST",
+   "rota": "/v1/claims",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "plataforma confere a afirmação",
+   "metodo": "POST",
+   "rota": "/v1/claims/227a6650-1ae7-4946-8f30-d56767347ca1/check",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "OSC declara afirmação de impacto",
+   "metodo": "POST",
+   "rota": "/v1/claims",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "plataforma confere a afirmação",
+   "metodo": "POST",
+   "rota": "/v1/claims/9cc6d92a-2e6d-4be5-abbe-564c4dcdae08/check",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "profissional declara experiência com a OSC (aguarda confirmação)",
+   "metodo": "POST",
+   "rota": "/v1/profile/experiences",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "profissional cadastra nova credencial (aguarda conferência)",
+   "metodo": "POST",
+   "rota": "/v1/org/credentials",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "administração procura a organização em estruturação",
+   "metodo": "GET",
+   "rota": "/v1/admin/organizations?q=Coletivo",
+   "status": 200,
+   "ok": true,
+   "erro": ""
+  },
+  {
+   "jornada": "Pendências: o que espera decisão de alguém",
+   "passo": "apoiadora denuncia dado incorreto (vai para a moderação)",
+   "metodo": "POST",
+   "rota": "/v1/reports",
+   "status": 201,
+   "ok": true,
+   "erro": ""
+  }
+ ]
+}

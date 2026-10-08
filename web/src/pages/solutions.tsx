@@ -276,7 +276,10 @@ export function Compare() {
   const [title, setTitle] = useState("");
   const { busy, run } = useAction();
   const { me } = useSession();
-  useEffect(() => { api.post("/v1/solutions/compare", { ids }).then(setRes).catch((e: any) => setErr(e.message)); /* eslint-disable-next-line */ }, [query.get("ids")]);
+  // v0.25.0: sem `?ids=` (quem abre a tela pelo endereço, ou volta para ela) a tela chamava a API
+  // com lista vazia e mostrava "Dados inválidos". A API compara de 2 a 4 — com menos, a tela explica.
+  const poucas = ids.length < 2;
+  useEffect(() => { if (poucas) return; api.post("/v1/solutions/compare", { ids }).then(setRes).catch((e: any) => setErr(e.message)); /* eslint-disable-next-line */ }, [query.get("ids")]);
   const rows: [string, (c: any) => any][] = [
     ["Situação", (c) => c.labels.primary], ["Verificação", (c) => c.labels.trust], ["Tipo", (c) => c.labels.kind], ["Território", (c) => (c.uf ? `${c.city ? c.city + "/" : ""}${c.uf}` : "—")],
     ["Orçamento", (c) => money(c.budget_cents)], ["Necessidade de captação", (c) => (c.seeking_funding ? money(c.needed_cents) : "—")],
@@ -288,7 +291,10 @@ export function Compare() {
   return (
     <>
       <PageHead title="Comparar soluções" sub="Lado a lado, com a mesma régua de verdade: o que é declarado e o que é verificado." back={<Link to="/solucoes" className="back">Biblioteca</Link>} />
-      <StateView loading={!res && !err} error={err}>
+      <StateView loading={!poucas && !res && !err} error={err}
+                 empty={poucas && <><h2>Escolha de 2 a 4 soluções para comparar</h2>
+                   <p>Na biblioteca, marque as soluções e use "Comparar".</p>
+                   <Link to="/solucoes" className="btn btn-ink">Abrir a biblioteca</Link></>}>
         {res && (<>
           <div className="table-wrap"><table className="table" aria-label="Comparação de soluções">
             <thead><tr><th scope="col">Critério</th>{res.columns.map((c: any) => <th scope="col" key={c.id}><Link to={`/solucoes/${c.id}`}>{c.title}</Link></th>)}</tr></thead>

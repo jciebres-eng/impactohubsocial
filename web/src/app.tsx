@@ -219,35 +219,38 @@ const ROUTES: R[] = [
   ["/admin/medidas", () => <Mod.EnforcementAdmin />, ["platform"]],
 
   // ------------------------------------------------------------- v0.22.0 — OPERAÇÃO INTERNA
-  // Sem a lista de `kinds`: quem entra aqui é decidido pela PERMISSÃO na rota da API, não pelo
-  // tipo da organização ativa. Alguém da controladoria pode ter a própria OSC como organização
-  // ativa e continuar sendo da controladoria; o tipo da organização nunca disse nada sobre isso.
+  // Quem entra aqui é decidido pela PERMISSÃO na rota da API, não pelo tipo da organização ativa:
+  // alguém da controladoria pode ter a própria OSC como organização ativa e continuar sendo da
+  // controladoria. O marcador `["staff"]` (v0.25.0) só diz ao roteador que a tela é da EQUIPE
+  // INTERNA: quem não tem papel interno nem é administrador vê "área não disponível" em vez da
+  // tela de erro com "Tentar novamente" que o 403 do servidor produzia. A permissão fina continua
+  // sendo decidida no servidor.
   ["/portal", () => <Portal.Portal />],
   ["/organizacao/nova", () => <Org.CreateOrg />],
-  ["/controladoria", () => <Int.Controladoria />],
-  ["/controladoria/conciliacao", () => <Int.Conciliacao />],
-  ["/aprovacoes", () => <Int.Aprovacoes />],
-  ["/financeiro", () => <Int.Financeiro />],
-  ["/financeiro/despesas", () => <Int.Despesas />],
-  ["/financeiro/instrucoes", () => <Int.Instrucoes />],
-  ["/financeiro/periodos-gratuitos", () => <Int.PeriodosGratuitos />],
-  ["/contabilidade", () => <Int.Contabilidade />],
-  ["/contabilidade/plano-de-contas", () => <Int.PlanoDeContas />],
-  ["/tesouraria", () => <Int.Tesouraria />],
-  ["/administrativo/orcamento", () => <Int.Orcamento />],
-  ["/operacoes", () => <Int.Operacoes />],
-  ["/operacoes/alertas", () => <Int.Alertas />],
-  ["/auditoria", () => <Int.AcessoPrivilegiado />],
-  ["/admin/permissoes", () => <Int.MatrizPermissoes />],
-  ["/admin/integracoes", () => <Int.Integracoes />],
+  ["/controladoria", () => <Int.Controladoria />, ["staff"]],
+  ["/controladoria/conciliacao", () => <Int.Conciliacao />, ["staff"]],
+  ["/aprovacoes", () => <Int.Aprovacoes />, ["staff"]],
+  ["/financeiro", () => <Int.Financeiro />, ["staff"]],
+  ["/financeiro/despesas", () => <Int.Despesas />, ["staff"]],
+  ["/financeiro/instrucoes", () => <Int.Instrucoes />, ["staff"]],
+  ["/financeiro/periodos-gratuitos", () => <Int.PeriodosGratuitos />, ["staff"]],
+  ["/contabilidade", () => <Int.Contabilidade />, ["staff"]],
+  ["/contabilidade/plano-de-contas", () => <Int.PlanoDeContas />, ["staff"]],
+  ["/tesouraria", () => <Int.Tesouraria />, ["staff"]],
+  ["/administrativo/orcamento", () => <Int.Orcamento />, ["staff"]],
+  ["/operacoes", () => <Int.Operacoes />, ["staff"]],
+  ["/operacoes/alertas", () => <Int.Alertas />, ["staff"]],
+  ["/auditoria", () => <Int.AcessoPrivilegiado />, ["staff"]],
+  ["/admin/permissoes", () => <Int.MatrizPermissoes />, ["staff"]],
+  ["/admin/integracoes", () => <Int.Integracoes />, ["staff"]],
   // v0.23.0 — rastreabilidade, integridade e emergência. Nenhuma destas telas tem dado de
   // exemplo: tela de auditoria com dado fictício é pior que tela ausente, porque treina quem
   // opera a confiar no que está vendo.
-  ["/admin/linha-do-tempo", () => <Trace.LinhaDoTempo />],
-  ["/admin/rastro", () => <Trace.Rastro />],
-  ["/admin/proveniencia", () => <Trace.Proveniencia />],
-  ["/admin/integridade", () => <Trace.Integridade />],
-  ["/admin/interruptor", () => <Trace.Interruptor />],
+  ["/admin/linha-do-tempo", () => <Trace.LinhaDoTempo />, ["staff"]],
+  ["/admin/rastro", () => <Trace.Rastro />, ["staff"]],
+  ["/admin/proveniencia", () => <Trace.Proveniencia />, ["staff"]],
+  ["/admin/integridade", () => <Trace.Integridade />, ["staff"]],
+  ["/admin/interruptor", () => <Trace.Interruptor />, ["staff"]],
 ];
 
 
@@ -343,7 +346,10 @@ export function App() {
     const params = match(pat, path);
     if (!params) continue;
     const staffHere = path.startsWith("/admin/central") && !!me.user.staff_roles?.length;   // papéis internos (editor/revisor/suporte)
-    if (kinds && kinds.length && !kinds.includes(kind) && !staffHere) return <Shell><NotHere /></Shell>;
+    const interna = !!kinds?.includes("staff");
+    const daEquipe = me.user.is_platform_admin || !!me.user.staff_roles?.length;
+    if (interna && !daEquipe) return <Shell><NotHere /></Shell>;
+    if (!interna && kinds && kinds.length && !kinds.includes(kind) && !staffHere) return <Shell><NotHere /></Shell>;
     if (pat === "/" && kind === "platform") return <Shell><Admin.Overview /></Shell>;
     return <Shell>{render(params)}</Shell>;
   }

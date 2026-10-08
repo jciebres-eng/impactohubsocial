@@ -372,6 +372,19 @@ export function Library() {
   );
 }
 
+
+// v0.25.0: conteúdo da Central restrito a quem entrou responde 404 ao visitante sem login (o servidor
+// não revela que existe). Quem chega por um link compartilhado via "Recurso não encontrado" e um
+// "Tentar novamente" inútil. Sem sessão, a tela convida a entrar e volta para o mesmo endereço.
+function EntreParaVer() {
+  const aqui = typeof location !== "undefined" ? location.pathname : "/ajuda";
+  return (<>
+    <h2>Entre para ver este conteúdo</h2>
+    <p>Este material da Central de Conhecimento é para quem tem conta. Se o endereço estiver certo, ele aparece depois de entrar.</p>
+    <Link to={`/entrar?proximo=${encodeURIComponent(aqui)}`} className="btn btn-ink">Entrar</Link>
+  </>);
+}
+
 export function Resource({ slug }: { slug: string }) {
   const { me } = useSession();
   const { data: r, loading, error, reload } = useLoad(`/v1/help/resources/${encodeURIComponent(slug)}`);
@@ -381,7 +394,7 @@ export function Resource({ slug }: { slug: string }) {
   const download = () => run(() => api.post(`/v1/help/resources/${r.id}/download-url`)).then((x) => { if (x?.url) window.open(x.url, "_blank", "noopener"); });
   const use = () => run(() => api.post(`/v1/help/resources/${r.id}/use-template`, { values: f.v })).then((x) => { if (x?.draft_id) navigate(`/rascunhos/${x.draft_id}`); }, );
   return (
-    <StateView loading={loading} error={error} onRetry={reload}>
+    <StateView loading={loading} error={!me && error ? null : error} onRetry={reload} empty={!me && !!error && <EntreParaVer />}>
       {r && (
         <div className="stack-lg">
           <PageHead title={r.title} sub={r.summary} back={<Link to="/ajuda/biblioteca">← Biblioteca</Link>} />
@@ -451,7 +464,7 @@ export function Course({ slug }: { slug: string }) {
   const enroll = () => run(() => api.post(`/v1/help/courses/${slug}/enroll`), "Matrícula feita").then(async (x) => { if (x) { await reload(); } });
   const cert = () => run(() => api.post(`/v1/help/courses/${slug}/certificate`)).then((x) => { if (x?.code) navigate(`/ajuda/certificado/${x.code}`); });
   return (
-    <StateView loading={loading} error={error} onRetry={reload}>
+    <StateView loading={loading} error={!me && error ? null : error} onRetry={reload} empty={!me && !!error && <EntreParaVer />}>
       {k && (
         <div className="stack-lg">
           <PageHead title={k.title} sub={k.summary} back={<Link to="/ajuda/academia">← Academia</Link>} />
@@ -571,7 +584,7 @@ export function EventPage({ slug }: { slug: string }) {
   const [score, setScore] = useState("");
   const mine = e?.my_registration;
   return (
-    <StateView loading={loading} error={error} onRetry={reload}>
+    <StateView loading={loading} error={!me && error ? null : error} onRetry={reload} empty={!me && !!error && <EntreParaVer />}>
       {e && (
         <div className="stack-lg">
           <PageHead title={e.title} sub={`${dateTime(e.starts_at)} · ${e.duration_min} min · ${label(e.modality)}`} back={<Link to="/ajuda/eventos">← Eventos</Link>} />

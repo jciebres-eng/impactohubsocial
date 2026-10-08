@@ -126,3 +126,61 @@ jobs:
       - name: Configuração de produção recusa segredos ausentes (fail-fast)
         run: |
           ! docker run --rm -e IMPACTO_ENV=production -e DATABASE_URL=postgresql://x@y/z impacto:${{ github.sha }} python3 -c "from impacto.config import load_settings; load_settings()"
+  # PILHA DO ZERO (v0.25.0). O critério de "funciona" desta versão é ponta a ponta: banco VAZIO com o
+  # desenho do Supabase (administrador sem superusuário, pgcrypto em `extensions`) → imagem do
+  # produto → bootstrap do impacto_app → migrações → seed de demonstração → aplicação como
+  # impacto_app → as 13 jornadas pela API → as 218 telas no navegador, com cada perfil → reinício da
+  # aplicação → os dados continuam lá. Nada aqui usa o servidor de teste: é o mesmo artefato que iria
+  # para um servidor. Segredos gerados na hora, mascarados, descartados com a máquina.
+  pilha-do-zero:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y libpq5
+      - run: pip install -r backend/requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Segredos descartáveis desta execução
+        run: |
+          set -euo pipefail
+          gera() { python3 -c "import secrets;print(secrets.token_urlsafe(24))"; }
+          SUPER=$(gera); ADMIN=$(gera); APP=$(gera); DEMO="Demo-$(gera)"
+          TOTP=$(python3 -c "import base64,os;print(base64.b32encode(os.urandom(20)).decode())")
+          for v in "$SUPER" "$ADMIN" "$APP" "$DEMO" "$TOTP"; do echo "::add-mask::$v"; done
+          printf 'POSTGRES_SUPERUSER_PASSWORD=%s\nIMPACTO_ADMIN_PASSWORD=%s\nIMPACTO_APP_PASSWORD=%s\nDEMO_PASSWORD=%s\nDEMO_TOTP_SECRET=%s\n' \
+            "$SUPER" "$ADMIN" "$APP" "$DEMO" "$TOTP" > infra/compose/demo/.env
+          { echo "DEMO_PASSWORD=$DEMO"; echo "DEMO_TOTP_SECRET=$TOTP"; echo "STACK_DSN=postgresql://impacto_admin:$ADMIN@127.0.0.1:5432/impacto"; } >> "$GITHUB_ENV"
+      - name: docker compose up (banco vazio → imagem → migrações → seed → aplicação)
+        run: |
+          set -euo pipefail
+          mkdir -p dist-stack/data && chmod 777 dist-stack/data
+          docker compose -f infra/compose/demo/compose.yml --env-file infra/compose/demo/.env up -d --build
+          for i in $(seq 1 120); do
+            curl -fsS http://127.0.0.1:8080/readyz >/dev/null 2>&1 && break
+            sleep 3
+          done
+          curl -fsS http://127.0.0.1:8080/readyz
+          docker compose -f infra/compose/demo/compose.yml logs app | grep "impacto-start" || true
+      - name: Jornadas (API) e 218 telas (navegador), com cada perfil de demonstração
+        run: python3 scripts/demo_stack.py --base http://127.0.0.1:8080 --outbox dist-stack/data/outbox --dsn "$STACK_DSN" --telas --saida dist-stack/out
+      - name: Persistência — reinicia a aplicação e confere que os dados continuam
+        run: |
+          set -euo pipefail
+          antes=$(python3 scripts/stack_persistence.py --base http://127.0.0.1:8080 contar)
+          docker compose -f infra/compose/demo/compose.yml restart app
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8080/readyz >/dev/null 2>&1 && break; sleep 3; done
+          depois=$(python3 scripts/stack_persistence.py --base http://127.0.0.1:8080 contar)
+          echo "antes: $antes · depois: $depois"
+          test "$antes" = "$depois"
+      - name: Evidência da pilha (relatórios de jornadas e telas)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: pilha-do-zero, path: dist-stack/out, if-no-files-found: warn }
+      - name: Registro da aplicação em caso de falha
+        if: failure()
+        run: docker compose -f infra/compose/demo/compose.yml logs --tail 200 app db
+      - name: Derruba a pilha
+        if: always()
+        run: docker compose -f infra/compose/demo/compose.yml --env-file infra/compose/demo/.env down -v

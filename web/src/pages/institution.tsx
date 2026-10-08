@@ -430,11 +430,21 @@ function StatementTab() {
 
 // ------------------------------------------------------------------------------------------------ perfil público institucional
 export function PublicOrg({ id }: { id: string }) {
-  const { data, error, loading, reload } = useLoad<any>(`/v1/institutional/orgs/${id}`);
+  // v0.25.0: o banco só mostra os fatos institucionais de OUTRA organização a financiadores, poder
+  // público, apoiadores e à administração (`org_institutional_facts`). Uma OSC ou um profissional que
+  // abria este endereço recebia o 403 cru, com "Tentar novamente". A regra continua no banco; aqui
+  // a tela só não pergunta o que já sabe que vai ser recusado, e explica.
+  const { me } = useSession();
+  const kind = me?.active_org?.kind || "";
+  const pode = id === me?.active_org?.id || ["company", "government", "platform", "individual"].includes(kind);
+  const { data, error, loading, reload } = useLoad<any>(pode ? `/v1/institutional/orgs/${id}` : null, [pode]);
   return (
     <>
       <PageHead title={data?.organization?.name || "Organização"} sub="Perfil institucional público" />
-      <StateView loading={loading} error={error} onRetry={reload}>
+      <StateView loading={loading} error={error} onRetry={reload}
+                 empty={!pode && <><h2>Perfil institucional visível a quem apoia</h2>
+                   <p>Os dados institucionais de outra organização aparecem para financiadores, poder público e apoiadores.
+                     O perfil público da organização continua aberto a todos.</p></>}>
         {data && (
           <div className="split">
             <Panel title="Identificação">

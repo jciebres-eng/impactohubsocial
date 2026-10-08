@@ -19,8 +19,8 @@
   "sem chamada direta": 60
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 57,
- "operacoes_que_nenhuma_tela_chama": 234,
+ "arquivos_do_front_varridos": 58,
+ "operacoes_que_nenhuma_tela_chama": 231,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -126,8 +126,6 @@
   "GET /v1/public/translations",
   "GET /v1/public/verify/{}/qr",
   "GET /v1/reputation/dimensions",
-  "GET /v1/responsibility/history",
-  "GET /v1/responsibility/mine",
   "GET /v1/seals/awards/{}",
   "GET /v1/seals/rules",
   "GET /v1/signatures/verify",
@@ -228,7 +226,6 @@
   "POST /v1/programs/{}/transition",
   "POST /v1/projects/{}/equity/assessments",
   "POST /v1/reputation/snapshots",
-  "POST /v1/responsibility/assignments",
   "POST /v1/responsibility/assignments/{}/end",
   "POST /v1/seals/evaluate",
   "POST /v1/signatures/{}/revoke",

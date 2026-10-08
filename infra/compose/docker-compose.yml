@@ -25,7 +25,12 @@ services:
     build: { context: ../.., dockerfile: Dockerfile }
     env_file: ../../.env
     environment:
-      DATABASE_URL: postgresql://impacto_app:${IMPACTO_APP_PASSWORD}@db:5432/impacto
+      # v0.25.0: o entrypoint (start_container.sh) MIGRA com a conexão do dono e só então troca para
+      # impacto_app (IMPACTO_APP_PASSWORD). Este arquivo passava a conexão do impacto_app direto — e o
+      # entrypoint atual recusa subir sem IMPACTO_APP_PASSWORD. Corrigido; segue NÃO testado (a pilha
+      # testada no CI é infra/compose/demo/compose.yml).
+      DATABASE_URL: postgresql://impacto_owner:${IMPACTO_OWNER_PASSWORD}@db:5432/impacto
+      IMPACTO_APP_PASSWORD: ${IMPACTO_APP_PASSWORD}
       CLAMD_HOST: clamav
     volumes: [storage:/data]
     ports: ["8080:8080"]

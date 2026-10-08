@@ -5,6 +5,7 @@ import { RouterProvider } from "./router";
 import { SessionProvider } from "./session";
 import { AccessProvider } from "./access";
 import { ToastProvider } from "./ui/kit";
+import { StepUpProvider } from "./ui/stepup";
 import { ErrorBoundary as Boundary } from "./ui/boundary";
 import { bootTheme } from "./pages/prefs";
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")!).render(
       <ToastProvider>
         <SessionProvider>
           <AccessProvider>
-            <ErrorBoundary><App /></ErrorBoundary>
+            <StepUpProvider>
+              <ErrorBoundary><App /></ErrorBoundary>
+            </StepUpProvider>
           </AccessProvider>
         </SessionProvider>
       </ToastProvider>

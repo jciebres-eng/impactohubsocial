@@ -36,14 +36,16 @@ ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "web" / "src" / "app.tsx"
 
 _COMPONENTE = re.compile(r"<([A-Z][\w.]*)")
-_MENU_LINHA = re.compile(r'^\s*(\w+):\s*\[(.+)\],?\s*$', re.MULTILINE)
+_MENU_INICIO = re.compile(r'^\s*(\w+):\s*\[', re.MULTILINE)
 _MENU_ITEM = re.compile(r'\["(/[^"]*)",\s*"([^"]*)"\]')
 _IMPORT = re.compile(r'^import \* as (\w+) from "\./(\S+)";', re.MULTILINE)
 _PRIMEIRA_STRING = re.compile(r'^\s*"(/[^"]*)"\s*,')
 
 #: Nome que o produto usa para cada tipo de organização (o mesmo `KIND_LABEL` do `app.tsx`).
 TIPOS = {"osc": "OSC", "company": "Empresa", "individual": "Apoiador",
-         "provider": "Profissional", "government": "Governo", "platform": "Administração"}
+         "provider": "Profissional", "government": "Governo", "platform": "Administração",
+         # v0.25.0: não é tipo de organização — é o marcador de tela da EQUIPE INTERNA no roteador.
+         "staff": "Equipe interna"}
 
 #: Tabela → (ordem em que o roteador tenta casar, como se entra).
 TABELAS = {"PUBLIC": (1, "sem login"), "HELP": (2, "Central de Conhecimento"),
@@ -111,9 +113,15 @@ def main() -> int:
 
     # menus: tipo → {caminho: rótulo}
     menus: dict[str, dict[str, str]] = {}
-    for tipo, corpo in _MENU_LINHA.findall(menus_src):
-        if tipo in TIPOS:
-            menus[tipo] = dict(_MENU_ITEM.findall(corpo))
+    # O menu de cada tipo ocupa VÁRIAS linhas do `NAV`. Até a v0.24.2 a expressão lia só a primeira
+    # linha de cada tipo: a OSC aparecia com 19 itens de menu quando o navegador encontra 48, e o
+    # inventário inflava as telas "só por link direto". Agora o corpo de um tipo vai do seu rótulo
+    # até o rótulo do próximo.
+    inicios = list(_MENU_INICIO.finditer(menus_src))
+    for i, m in enumerate(inicios):
+        fim = inicios[i + 1].start() if i + 1 < len(inicios) else len(menus_src)
+        if m.group(1) in TIPOS:
+            menus[m.group(1)] = dict(_MENU_ITEM.findall(menus_src[m.end():fim]))
     rotulo_de: dict[str, str] = {}
     for m in menus.values():
         rotulo_de.update(m)
@@ -129,7 +137,11 @@ def main() -> int:
             caminho, resto = m.group(1), bruta[m.end():]
             comp = _COMPONENTE.search(resto)
             componente = comp.group(1) if comp else "(desconhecido)"
-            tipos = re.findall(r'"(\w+)"', resto[resto.rindex(",") + 1:]) if resto.count(",") else []
+            # Os tipos são o ÚLTIMO elemento da entrada: um array literal de strings. Até a v0.24.2 o
+            # gerador lia só o que vinha depois da última vírgula — e, num array com vários tipos, isso
+            # é só o último tipo. `/carteira` (empresa, governo, apoiador) saía como "só Apoiador".
+            fim = re.search(r'\[\s*("\w+"(?:\s*,\s*"\w+")*)\s*\]\s*$', resto)
+            tipos = re.findall(r'"(\w+)"', fim.group(1)) if fim else []
             tipos = [t for t in tipos if t in TIPOS]
             exige_login = tabela == "ROUTES" or (tabela == "HELP" and resto.rstrip().endswith("true"))
             em_menu = sorted(t for t, mm in menus.items() if caminho in mm)

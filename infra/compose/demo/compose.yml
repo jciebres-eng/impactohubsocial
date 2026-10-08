@@ -1,0 +1,48 @@
+# PILHA DE DEMONSTRAÇÃO DO ZERO (v0.25.0) — banco novo com desenho do Supabase + imagem do produto.
+#
+#   cp infra/compose/demo/.env.example infra/compose/demo/.env   # e preencha
+#   mkdir -p dist-stack/data && chmod 777 dist-stack/data
+#   docker compose -f infra/compose/demo/compose.yml --env-file infra/compose/demo/.env up -d --build
+#
+# Sobe: banco vazio → papel impacto_app (bootstrap de banco gerenciado) → migrações → seed de
+# DEMONSTRAÇÃO → aplicação conectada como impacto_app em http://127.0.0.1:8080.
+#
+# É DEMONSTRAÇÃO, NÃO PRODUÇÃO: IMPACTO_ENV=development desliga o custo mínimo de senha, o limite de
+# tentativas sem folga e o envio real de e-mail (os e-mails ficam em dist-stack/data/outbox). Nunca
+# coloque dado pessoal real aqui. O CI (job `pilha-do-zero`) sobe exatamente este arquivo e roda as
+# jornadas e o robô das 218 telas contra ele (scripts/demo_stack.py).
+name: impacto-demo
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?defina POSTGRES_SUPERUSER_PASSWORD}
+      IMPACTO_ADMIN_PASSWORD: ${IMPACTO_ADMIN_PASSWORD:?defina IMPACTO_ADMIN_PASSWORD}
+    volumes:
+      - ./db-init-supabase-like.sh:/docker-entrypoint-initdb.d/10-supabase-like.sh:ro
+    ports: ["127.0.0.1:5432:5432"]
+    # TCP de propósito: durante a inicialização o servidor só escuta no socket local, e o
+    # pg_isready pelo socket diria "pronto" antes de o banco impacto existir.
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U impacto_admin -d impacto"], interval: 3s, retries: 60 }
+  app:
+    build: { context: ../../.., dockerfile: Dockerfile }
+    environment:
+      IMPACTO_ENV: development
+      DATABASE_URL: postgresql://impacto_admin:${IMPACTO_ADMIN_PASSWORD}@db:5432/impacto
+      IMPACTO_APP_PASSWORD: ${IMPACTO_APP_PASSWORD:?defina IMPACTO_APP_PASSWORD}
+      IMPACTO_BOOTSTRAP_EXTERNAL: "true"
+      IMPACTO_SEED_DEMO: "true"
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?defina DEMO_PASSWORD}
+      DEMO_TOTP_SECRET: ${DEMO_TOTP_SECRET:?defina DEMO_TOTP_SECRET}
+      PUBLIC_BASE_URL: http://127.0.0.1:8080
+      COOKIE_SECURE: "false"
+      MAIL_PROVIDER: console
+      AI_PROVIDER: local
+      BILLING_PROVIDER: sandbox
+      ALLOW_UNSCANNED_DOWNLOADS: "true"
+      STORAGE_LOCAL_DIR: /data/storage
+      WEB_CONCURRENCY: "2"
+    volumes:
+      - ../../../dist-stack/data:/data
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on: { db: { condition: service_healthy } }

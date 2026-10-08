@@ -74,8 +74,29 @@ export async function absorbSession(data: any) {
   }
 }
 
+// Confirmação de identidade (step-up). O servidor responde 401 `step_up_required` às operações
+// sensíveis quando a sessão não confirmou a identidade nos últimos 15 minutos. Até a v0.24.2 nenhuma
+// tela sabia pedir essa confirmação: a resposta virava erro com "Tentar novamente", e o interruptor
+// de emergência, o fechamento contábil e as aprovações financeiras eram inalcançáveis pela interface.
+// Agora o cliente pede a confirmação (quem registra o pedido é o `StepUpProvider`) e repete a chamada
+// UMA vez. Sem confirmação, o erro original segue para a tela.
+let stepUpHandler: (() => Promise<boolean>) | null = null;
+export function onStepUpRequired(fn: (() => Promise<boolean>) | null) {
+  stepUpHandler = fn;
+}
+
 export async function request<T = any>(method: string, path: string, body?: unknown, isForm = false): Promise<T> {
   let r = await raw(method, path, body, isForm);
+  if (r.status === 401 && !path.startsWith("/v1/auth/") && stepUpHandler) {
+    const peek = await r.clone().json().catch(() => null);
+    if (peek?.code === "step_up_required") {
+      if (await stepUpHandler()) r = await raw(method, path, body, isForm);
+      if (r.status === 401) {
+        const d = await r.json().catch(() => ({}));
+        throw new ApiError(401, d.code || "step_up_required", d.title || "Confirme sua identidade para continuar", d.details);
+      }
+    }
+  }
   if (r.status === 401 && !path.startsWith("/v1/auth/")) {
     // Só tenta renovar se houver indício de sessão (cookie CSRF não-httpOnly na web, ou token no app nativo).
     const hasSession = isNative() ? !!(await tokenStore.get("refresh")) : !!(readCookie("__Host-impacto_csrf") || readCookie("impacto_csrf"));

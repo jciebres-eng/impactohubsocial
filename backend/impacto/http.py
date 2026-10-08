@@ -48,8 +48,26 @@ class ApiError(Exception):
         self.status, self.code, self.message, self.details = status, code, message, details
 
 
+#: substantivos terminados em -a que são masculinos (o resto do -a, -ção, -dade, -gem é feminino)
+_MASCULINOS_EM_A = {"programa", "sistema", "esquema", "tema", "problema", "mapa", "dia", "prompt", "plano"}
+
+
+def _encontrado(what: str) -> str:
+    """Concordância de "não encontrado" com o nome do recurso (v0.25.0).
+
+    A mensagem saía "Conversa não encontrado", "Proposta não encontrado" — e, quando o chamador já
+    passava a frase pronta, "Alegação não encontrada não encontrado". O robô de telas da v0.25.0 viu
+    as duas coisas na interface.
+    """
+    if "não " in what:
+        return what
+    primeira = what.split()[0].split("/")[0].lower() if what.strip() else ""
+    feminino = primeira not in _MASCULINOS_EM_A and primeira.endswith(("a", "ção", "são", "dade", "gem", "ie"))
+    return f"{what} não encontrad{'a' if feminino else 'o'}"
+
+
 def not_found(what: str = "Recurso") -> ApiError:
-    return ApiError(404, "not_found", f"{what} não encontrado")
+    return ApiError(404, "not_found", _encontrado(what))
 
 
 def forbidden(msg: str = "Permissão insuficiente", code: str = "forbidden") -> ApiError:

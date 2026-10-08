@@ -9,16 +9,16 @@
  },
  "sem_login": 30,
  "com_parametro": 52,
- "em_algum_menu": 47,
- "so_por_link_direto": 119,
+ "em_algum_menu": 84,
+ "so_por_link_direto": 82,
  "sombreadas": [],
  "menus_por_tipo": {
-  "Empresa": 14,
-  "Governo": 16,
-  "Apoiador": 12,
-  "OSC": 19,
-  "Administração": 8,
-  "Profissional": 25
+  "Empresa": 32,
+  "Governo": 29,
+  "Apoiador": 20,
+  "OSC": 43,
+  "Administração": 32,
+  "Profissional": 28
  },
  "arquivos": [
   "web/src/pages/admin.tsx",
@@ -762,6 +762,10 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Acordos",
@@ -837,9 +841,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Auditoria",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/central",
@@ -856,9 +862,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Central de Conhecimento",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/central/analytics",
@@ -1103,9 +1111,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Chaves de cifragem",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/cobranca",
@@ -1122,9 +1132,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Cobrança por organização",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/compliance",
@@ -1162,9 +1174,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Modelos de contribuição",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/convenios",
@@ -1181,9 +1195,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Convênios",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/credenciais",
@@ -1242,9 +1258,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Denúncias",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/editais",
@@ -1261,9 +1279,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Editais curados",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/erros",
@@ -1280,9 +1300,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Erros",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/fiscal",
@@ -1299,9 +1321,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Regras fiscais",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/honorarios",
@@ -1360,9 +1384,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Institucional",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/integracoes",
@@ -1373,9 +1399,11 @@
    "componente": "Int.Integracoes",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -1390,13 +1418,17 @@
    "componente": "Trace.Integridade",
    "arquivo": "web/src/pages/traceability.tsx",
    "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
+   "tipos_declarados": [
+    "staff"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Integridade dos dados",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/interruptor",
@@ -1407,13 +1439,17 @@
    "componente": "Trace.Interruptor",
    "arquivo": "web/src/pages/traceability.tsx",
    "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
+   "tipos_declarados": [
+    "staff"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Interruptor de emergência",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/linha-do-tempo",
@@ -1424,13 +1460,17 @@
    "componente": "Trace.LinhaDoTempo",
    "arquivo": "web/src/pages/traceability.tsx",
    "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
+   "tipos_declarados": [
+    "staff"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Linha do tempo",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/medidas",
@@ -1447,9 +1487,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Medidas de moderação",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/organizacoes",
@@ -1466,9 +1508,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Organizações",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/permissoes",
@@ -1479,9 +1523,11 @@
    "componente": "Int.MatrizPermissoes",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -1496,13 +1542,17 @@
    "componente": "Trace.Proveniencia",
    "arquivo": "web/src/pages/traceability.tsx",
    "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
+   "tipos_declarados": [
+    "staff"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Proveniência",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/rastro",
@@ -1513,13 +1563,17 @@
    "componente": "Trace.Rastro",
    "arquivo": "web/src/pages/traceability.tsx",
    "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
+   "tipos_declarados": [
+    "staff"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "alcanca": [
+    "Equipe interna"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Cadeia de causa",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/risco",
@@ -1536,9 +1590,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Sinais de risco",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/solucoes",
@@ -1555,9 +1611,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Soluções (verificação)",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/usuarios",
@@ -1574,9 +1632,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Usuários",
+   "alcance": "menu"
   },
   {
    "rota": "/admin/vouchers",
@@ -1593,9 +1653,11 @@
    "alcanca": [
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Vouchers",
+   "alcance": "menu"
   },
   {
    "rota": "/administrativo/orcamento",
@@ -1606,9 +1668,11 @@
    "componente": "Int.Orcamento",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -1642,9 +1706,11 @@
    "componente": "Int.Aprovacoes",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -1717,9 +1783,11 @@
    "componente": "Int.AcessoPrivilegiado",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -1740,9 +1808,11 @@
    "alcanca": [
     "OSC"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Campanha",
+   "alcance": "menu"
   },
   {
    "rota": "/candidaturas",
@@ -1758,8 +1828,10 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
     "Governo",
-    "Apoiador"
+    "Apoiador",
+    "OSC"
    ],
    "rotulo": "Candidaturas",
    "alcance": "menu"
@@ -1791,12 +1863,17 @@
    "arquivo": "web/src/pages/projects.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "company",
+    "government",
     "individual"
    ],
    "alcanca": [
+    "Empresa",
+    "Governo",
     "Apoiador"
    ],
    "em_menu_de": [
+    "Empresa",
     "Governo",
     "Apoiador"
    ],
@@ -1832,12 +1909,17 @@
    "arquivo": "web/src/pages/network.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "osc",
+    "provider",
     "company"
    ],
    "alcanca": [
+    "OSC",
+    "Profissional",
     "Empresa"
    ],
    "em_menu_de": [
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Conquistas",
@@ -1975,9 +2057,15 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Segurança da conta",
+   "alcance": "menu"
   },
   {
    "rota": "/contabilidade",
@@ -1988,9 +2076,11 @@
    "componente": "Int.Contabilidade",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2005,9 +2095,11 @@
    "componente": "Int.PlanoDeContas",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2022,9 +2114,11 @@
    "componente": "Int.Controladoria",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2039,9 +2133,11 @@
    "componente": "Int.Conciliacao",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2102,9 +2198,11 @@
    "alcanca": [
     "OSC"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Cotas",
+   "alcance": "menu"
   },
   {
    "rota": "/cotas/:id/apoios",
@@ -2135,14 +2233,19 @@
    "arquivo": "web/src/pages/org.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "government",
     "platform"
    ],
    "alcanca": [
+    "Governo",
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Governo",
+    "Administração"
+   ],
+   "rotulo": "Dados do território",
+   "alcance": "menu"
   },
   {
    "rota": "/determinantes",
@@ -2154,14 +2257,18 @@
    "arquivo": "web/src/pages/impact.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "government",
     "platform"
    ],
    "alcanca": [
+    "Governo",
     "Administração"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Governo"
+   ],
+   "rotulo": "Determinantes sociais",
+   "alcance": "menu"
   },
   {
    "rota": "/diagnosticos",
@@ -2178,9 +2285,11 @@
    "alcanca": [
     "OSC"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Diagnóstico",
+   "alcance": "menu"
   },
   {
    "rota": "/diagnosticos/:id",
@@ -2253,6 +2362,9 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Documentos",
@@ -2272,6 +2384,9 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Modelos de documento",
@@ -2291,6 +2406,9 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Montagem de documentos",
@@ -2323,9 +2441,11 @@
    "arquivo": "web/src/pages/calls.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "company",
     "government"
    ],
    "alcanca": [
+    "Empresa",
     "Governo"
    ],
    "em_menu_de": [
@@ -2345,9 +2465,11 @@
    "arquivo": "web/src/pages/calls.tsx",
    "parametro": true,
    "tipos_declarados": [
+    "company",
     "government"
    ],
    "alcanca": [
+    "Empresa",
     "Governo"
    ],
    "em_menu_de": [],
@@ -2364,9 +2486,11 @@
    "arquivo": "web/src/pages/calls.tsx",
    "parametro": true,
    "tipos_declarados": [
+    "company",
     "government"
    ],
    "alcanca": [
+    "Empresa",
     "Governo"
    ],
    "em_menu_de": [],
@@ -2383,9 +2507,11 @@
    "arquivo": "web/src/pages/calls.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "company",
     "government"
    ],
    "alcanca": [
+    "Empresa",
     "Governo"
    ],
    "em_menu_de": [],
@@ -2402,9 +2528,11 @@
    "arquivo": "web/src/pages/projects.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "company",
     "individual"
    ],
    "alcanca": [
+    "Empresa",
     "Apoiador"
    ],
    "em_menu_de": [
@@ -2442,9 +2570,11 @@
    "componente": "Int.Financeiro",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2459,9 +2589,11 @@
    "componente": "Int.Despesas",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2476,9 +2608,11 @@
    "componente": "Int.Instrucoes",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2493,9 +2627,11 @@
    "componente": "Int.PeriodosGratuitos",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2516,9 +2652,11 @@
    "alcanca": [
     "Empresa"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa"
+   ],
+   "rotulo": "Incentivos fiscais",
+   "alcance": "menu"
   },
   {
    "rota": "/ia",
@@ -2533,9 +2671,15 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Inteligência artificial",
+   "alcance": "menu"
   },
   {
    "rota": "/ideias",
@@ -2587,15 +2731,27 @@
    "arquivo": "web/src/pages/institution.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "osc",
+    "company",
+    "government",
+    "provider",
     "individual"
    ],
    "alcanca": [
+    "OSC",
+    "Empresa",
+    "Governo",
+    "Profissional",
     "Apoiador"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC",
     "Profissional"
    ],
-   "rotulo": "Perfil institucional",
+   "rotulo": "Instituição",
    "alcance": "menu"
   },
   {
@@ -2628,9 +2784,14 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC"
+   ],
+   "rotulo": "Mapa",
+   "alcance": "menu"
   },
   {
    "rota": "/marketplace",
@@ -2721,9 +2882,14 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "OSC",
+    "Profissional"
+   ],
+   "rotulo": "Materiais",
+   "alcance": "menu"
   },
   {
    "rota": "/mensagens",
@@ -2739,6 +2905,9 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Apoiador",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Mensagens",
@@ -2771,9 +2940,11 @@
    "arquivo": "web/src/pages/trustAdmin.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "provider",
     "individual"
    ],
    "alcanca": [
+    "Profissional",
     "Apoiador"
    ],
    "em_menu_de": [
@@ -2827,9 +2998,11 @@
    "componente": "Int.Operacoes",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2844,9 +3017,11 @@
    "componente": "Int.Alertas",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -2989,14 +3164,24 @@
    "arquivo": "web/src/pages/finance.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "osc",
+    "company",
+    "individual",
     "government"
    ],
    "alcanca": [
+    "OSC",
+    "Empresa",
+    "Apoiador",
     "Governo"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Apoiador",
+    "OSC"
+   ],
+   "rotulo": "Pagamentos",
+   "alcance": "menu"
   },
   {
    "rota": "/pagamentos/:id",
@@ -3008,9 +3193,15 @@
    "arquivo": "web/src/pages/finance.tsx",
    "parametro": true,
    "tipos_declarados": [
+    "osc",
+    "company",
+    "individual",
     "government"
    ],
    "alcanca": [
+    "OSC",
+    "Empresa",
+    "Apoiador",
     "Governo"
    ],
    "em_menu_de": [],
@@ -3105,9 +3296,11 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Profissionais parceiros",
+   "alcance": "menu"
   },
   {
    "rota": "/projetos",
@@ -3433,9 +3626,11 @@
    "alcanca": [
     "OSC"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Prontidão",
+   "alcance": "menu"
   },
   {
    "rota": "/prontidao/finalidades",
@@ -3527,6 +3722,7 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Rascunhos",
@@ -3641,9 +3837,14 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "Empresa",
+    "Governo",
+    "Apoiador",
+    "OSC"
+   ],
+   "rotulo": "Relatórios",
+   "alcance": "menu"
   },
   {
    "rota": "/relatorios-impacto",
@@ -3815,8 +4016,11 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
     "Governo",
     "Apoiador",
+    "OSC",
+    "Administração",
     "Profissional"
    ],
    "rotulo": "Biblioteca de soluções",
@@ -3849,9 +4053,17 @@
    "arquivo": "web/src/pages/solutions_manage.tsx",
    "parametro": true,
    "tipos_declarados": [
+    "osc",
+    "individual",
+    "company",
+    "government",
     "provider"
    ],
    "alcanca": [
+    "OSC",
+    "Apoiador",
+    "Empresa",
+    "Governo",
     "Profissional"
    ],
    "em_menu_de": [],
@@ -3889,7 +4101,10 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "Governo",
     "Apoiador",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Minhas soluções",
@@ -3905,9 +4120,17 @@
    "arquivo": "web/src/pages/solutions_manage.tsx",
    "parametro": false,
    "tipos_declarados": [
+    "osc",
+    "individual",
+    "company",
+    "government",
     "provider"
    ],
    "alcanca": [
+    "OSC",
+    "Apoiador",
+    "Empresa",
+    "Governo",
     "Profissional"
    ],
    "em_menu_de": [],
@@ -3961,9 +4184,11 @@
    "alcanca": [
     "todos os tipos"
    ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Replicação",
+   "alcance": "menu"
   },
   {
    "rota": "/solucoes/replicacoes",
@@ -4010,9 +4235,11 @@
    "componente": "Int.Tesouraria",
    "arquivo": "web/src/pages/internal.tsx",
    "parametro": false,
-   "tipos_declarados": [],
+   "tipos_declarados": [
+    "staff"
+   ],
    "alcanca": [
-    "todos os tipos"
+    "Equipe interna"
    ],
    "em_menu_de": [],
    "rotulo": "",
@@ -4032,6 +4259,8 @@
     "todos os tipos"
    ],
    "em_menu_de": [
+    "Empresa",
+    "OSC",
     "Profissional"
    ],
    "rotulo": "Verificação pública",

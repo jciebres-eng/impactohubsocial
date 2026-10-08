@@ -10,3 +10,6 @@ data/storage/
 backups/
 *.dump
 *.dump.sha256
+
+# v0.25.0 — pilha de demonstração local (infra/compose/demo)
+dist-stack/

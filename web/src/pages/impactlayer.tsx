@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
+import { useSession } from "../session";
 import { date } from "../format";
 import { CLAIM_KIND, CLAIM_STATUS, EQUITY_DENOMINATOR, EQUITY_METHOD, EQUITY_STANDING,
          REPUTATION_BAND, SEAL_STATUS } from "../glossary";
@@ -231,14 +232,17 @@ export function Equity({ id }: { id: string }) {
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <>
-            <p className="muted small">{data.note}</p>
+            {/* v0.25.0: `methods` vem da API como OBJETO (método → resultado), não lista — a tela
+                quebrava com "map is not a function" ao abrir. Também lia `why`/`denominator`, que a
+                API chama `reason`/`denominator_kind`, e `label`, que no catálogo é `name_pt`. */}
             <Panel title="Denominadores disponíveis para este projeto">
-              {(norm.data?.methods || []).map((m: any) => (
-                <div key={m.method} className="small bordered">
-                  <strong>{EQUITY_METHOD[m.method] || m.method}</strong>
+              {Object.entries(norm.data?.methods || {}).map(([chave, m]: [string, any]) => (
+                <div key={chave} className="small bordered">
+                  <strong>{EQUITY_METHOD[chave] || m.label || chave}</strong>
                   {" — "}{m.available ? "disponível" : "indisponível"}
-                  {m.denominator && <> · base: {EQUITY_DENOMINATOR[m.denominator] || m.denominator}</>}
-                  <div className="muted">{m.why}</div>
+                  {m.denominator_kind && <> · base: {EQUITY_DENOMINATOR[m.denominator_kind] || m.denominator_kind}</>}
+                  {m.available && <> · valor: {m.value} (fonte: {m.source_name}, {date(m.source_date)})</>}
+                  {m.reason && <div className="muted">{m.reason}</div>}
                 </div>
               ))}
               <p className="small muted">{norm.data?.note}</p>
@@ -246,7 +250,7 @@ export function Equity({ id }: { id: string }) {
             <Panel title="Barreiras declaradas">
               {(data.barriers || []).map((b: any) => (
                 <div key={b.barrier_code} className="small bordered">
-                  <strong>{b.label || b.barrier_code}</strong>
+                  <strong>{b.name_pt || b.barrier_code}</strong>
                   {" "}<Pill>{EQUITY_STANDING[b.standing] || b.standing}</Pill>
                   <div className="muted">{b.note}</div>
                 </div>
@@ -255,7 +259,7 @@ export function Equity({ id }: { id: string }) {
                 <Field label="Barreira">
                   <Select value={f.v.barrier_code} onChange={f.set("barrier_code")}
                           placeholder="escolha"
-                          options={(cat.data?.barriers || []).map((b: any) => [b.code, b.label])} />
+                          options={(cat.data?.items || []).map((b: any) => [b.code, b.name_pt])} />
                 </Field>
                 <Field label="Situação" hint="Declarada, documentada ou com evidência — e a diferença importa.">
                   <Select value={f.v.standing} onChange={f.set("standing")}
@@ -321,21 +325,26 @@ export function OdsTargets({ id }: { id: string }) {
 
 // ============================================================================ 6. Responsabilidade
 export function Responsibility() {
-  const atual = useLoad<any>("/v1/responsibility/current");
+  // v0.25.0: a tela chamava `/v1/responsibility/current` SEM `scope` e `subject_id`, que a API
+  // exige — 422 para todo perfil, e a área nunca tinha mostrado uma atribuição. Também lia campos
+  // que a API não devolve (`role_label`, `person_name`). O escopo aqui é a ORGANIZAÇÃO ativa.
+  const { me } = useSession();
+  const org = me?.active_org?.id;
+  const q = org ? `?scope=organization&subject_id=${org}` : null;
+  const atual = useLoad<any>(q && `/v1/responsibility/current${q}`, [q]);
   const papeis = useLoad<any>("/v1/responsibility/roles");
-  const decisoes = useLoad<any>("/v1/responsibility/decisions");
+  const decisoes = useLoad<any>(q && `/v1/responsibility/decisions${q}`, [q]);
   return (
     <>
       <PageHead title="Responsabilidade"
-                sub="Quem responde por quê, com início e fim — e quem decidiu o que." />
+                sub="Quem responde por quê na organização, desde quando — e quem decidiu o quê." />
       <StateView loading={atual.loading} error={atual.error} onRetry={atual.reload}>
-        <Panel title="Atribuições vigentes">
+        <Panel title="Quem responde hoje">
           {(atual.data?.items || []).map((a: any) => (
-            <div key={a.id} className="small bordered">
-              <strong>{a.role_label || a.role}</strong> — {a.person_name || a.user_id}
+            <div key={a.assignment_id} className="small bordered">
+              <strong>{a.role_name}</strong> — {a.who}
               <div className="muted">
-                Desde {date(a.starts_on)}{a.ends_on ? ` até ${date(a.ends_on)}` : " (sem término declarado)"}
-                {a.scope ? ` · escopo: ${a.scope}` : ""}
+                Desde {date(a.starts_on)}{a.mandate_basis ? ` · base: ${a.mandate_basis}` : ""}
               </div>
             </div>
           ))}
@@ -346,20 +355,31 @@ export function Responsibility() {
             </p>
           )}
         </Panel>
+        {!!atual.data?.without_responsible?.length && (
+          <Panel title="Papéis sem responsável" quiet>
+            <ul className="small">{atual.data.without_responsible.map((r: any) => (
+              <li key={r.code}><strong>{r.name_pt}</strong>: {r.answers_for}</li>))}</ul>
+          </Panel>
+        )}
       </StateView>
       <Panel title="Papéis que existem" quiet>
-        <ul className="small">{(papeis.data?.items || []).map((r: any) => (
-          <li key={r.code}><strong>{r.label}</strong>: {r.description}</li>))}</ul>
+        <StateView loading={papeis.loading} error={papeis.error} onRetry={papeis.reload}>
+          <ul className="small">{(papeis.data?.items || []).map((r: any) => (
+            <li key={r.code}><strong>{r.name_pt}</strong>: {r.answers_for}
+              {r.does_not_answer_for && <span className="muted"> — não responde por: {r.does_not_answer_for}</span>}</li>))}</ul>
+        </StateView>
       </Panel>
       <Panel title="Decisões registradas">
-        {(decisoes.data?.items || []).map((d: any) => (
-          <div key={d.id} className="small bordered">
-            <strong>{d.title}</strong> <span className="muted">{date(d.decided_on)}</span>
-            <div>{d.rationale}</div>
-            {d.four_eyes && <Pill tone="good">dois responsáveis</Pill>}
-          </div>
-        ))}
-        {!decisoes.data?.items?.length && <p className="muted small">Nenhuma decisão registrada ainda.</p>}
+        <StateView loading={decisoes.loading} error={decisoes.error} onRetry={decisoes.reload}>
+          {(decisoes.data?.items || []).map((d: any) => (
+            <div key={d.id} className="small bordered">
+              <strong>{d.kind_name}</strong> <span className="muted">{date(d.taken_on)} · {d.role_name}: {d.who}</span>
+              <div>{d.statement}</div>
+              {d.requires_two && <Pill tone="good">dois responsáveis{d.second_who ? ` (${d.second_who})` : ""}</Pill>}
+            </div>
+          ))}
+          {!decisoes.data?.items?.length && <p className="muted small">Nenhuma decisão registrada ainda.</p>}
+        </StateView>
       </Panel>
     </>
   );

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { api, describeError } from "../api";
+import { api, ApiError, describeError } from "../api";
 import { label as statusLabel } from "../format";
 
 // ------------------------------------------------------------------------------------------- dados
@@ -8,13 +8,17 @@ export function useLoad<T = any>(path: string | null, deps: unknown[] = []) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(!!path);
+  const definitivo = useRef(false);
   const reload = useCallback(async () => {
     if (!path) return;
     setLoading(true);
     setError(null);
+    definitivo.current = false;
     try {
       setData(await api.get<T>(path));
     } catch (e) {
+      // 403/404/402/422 não mudam tentando de novo: a tela não oferece "Tentar novamente" (v0.25.0).
+      definitivo.current = e instanceof ApiError && [402, 403, 404, 422].includes(e.status);
       setError(describeError(e));
     } finally {
       setLoading(false);
@@ -24,6 +28,8 @@ export function useLoad<T = any>(path: string | null, deps: unknown[] = []) {
   useEffect(() => {
     reload();
   }, [reload]);
+  // A marca viaja na própria função: as ~200 telas já passam `onRetry={x.reload}` ao StateView.
+  (reload as any).definitivo = definitivo.current;
   return { data, error, loading, reload, setData };
 }
 
@@ -86,7 +92,7 @@ export function StateView({ loading, error, empty, onRetry, children }: {
   if (error) return (
     <div className="state state-error" role="alert">
       <p>{error}</p>
-      {onRetry && <Button variant="ghost" onClick={onRetry}>Tentar novamente</Button>}
+      {onRetry && !(onRetry as any).definitivo && <Button variant="ghost" onClick={onRetry}>Tentar novamente</Button>}
     </div>
   );
   if (empty) return <div className="state state-empty">{empty}</div>;

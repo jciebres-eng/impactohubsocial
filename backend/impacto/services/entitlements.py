@@ -23,7 +23,10 @@ ACTIVE_SUB = ("active", "trialing", "past_due")
 
 def effective(conn: Connection, org_id: str, org_kind: str) -> dict:
     if org_kind == "platform":
-        return {"plans": ["platform"], "plan_names": ["Administração da plataforma"], "features": ["*"], "limits": {}, "subscription": None, "grants": []}
+        # `tier`/`tier_label` também aqui (v0.25.0): `GET /v1/billing` lê as duas chaves de qualquer
+        # tipo de organização, e a administração recebia 500 (KeyError) ao abrir "Plano".
+        return {"plans": ["platform"], "plan_names": ["Administração da plataforma"], "features": ["*"], "limits": {}, "subscription": None, "grants": [],
+                "tier": "platform", "tier_label": "Administração da plataforma", "trial": None}
     plan_keys: list[str] = []
     base = BASE_PLAN.get(org_kind)
     if base:

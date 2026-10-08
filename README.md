@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.23.1
+# Plataforma Impacto — v0.24.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,19 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.24.0 (identidade oficial, demonstração provada, banco gerenciado):** a interface veste
+a identidade oficial (`web/brand/`, fonte única `tokens.json`; os nomes antigos do CSS viraram aliases
+dos tokens, então toda regra de componente mudou de uma vez nos três temas); o lockup transparente
+oficial, 48 ícones de traço, favicons, PWA e recursos Android/iOS entraram pelo pacote recebido, com os
+limites que ele mesmo declara (licença não comprovada, logo em raster, fontes não embarcadas). A
+**demonstração completa é provada por teste** no Chromium: 14 contas, 295 telas de menu, zero 5xx, com
+as 10 contas internas passando pela verificação em duas etapas de verdade — o seed cadastra o TOTP
+delas, porque administração exige MFA e isso não foi relaxado. O entrypoint do contêiner roda contra
+PostgreSQL gerenciado (migrações como administrador, aplicação como `impacto_app`), e foi executado de
+verdade contra um banco limpo. E uma correção de registro: o "defeito" anunciado na v0.23.1
+(`/entrar` chamando rota inexistente) **não existia** — a rota é crua em `app.py` e o cruzamento não
+a lia. Leia `CHANGELOG.md`, `docs/DEMO.md` e `docs/execution/TRIAGEM_PACOTE_UI_DEMO.md`.
 
 **Novo no v0.23.0 (rastreabilidade, proveniência, governança de IA e interruptor de emergência):**
 a rodada começou **auditando o que já existia** (`AI_AUDIT.md`, `PLATFORM_AUDIT_v0230.md`), e as duas

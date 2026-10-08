@@ -114,8 +114,17 @@ def entropia(s: str) -> float:
                 (s.count(c) for c in set(s)))
 
 
+#: Resumo de integridade (SRI / npm `integrity`): `sha512-<base64>`. É um hash PUBLICADO do pacote
+#: que qualquer um recalcula a partir do tarball — o oposto de segredo. A entropia é máxima por
+#: construção, e os 128 achados da v0.24.0 eram exatamente isto, um por pacote do lockfile. A regra
+#: é por VALOR, não por arquivo: um token numa URL `resolved` do mesmo lockfile continua sendo pego.
+_INTEGRIDADE = re.compile(r"^sha(256|384|512)-[A-Za-z0-9+/]+={0,2}$")
+
+
 def _e_exemplo(valor: str) -> bool:
     baixo = valor.lower()
+    if _INTEGRIDADE.match(valor):
+        return True
     if any(m.lower() in baixo for m in MARCAS_DE_EXEMPLO):
         return True
     if any(m in valor for m in REFERENCIA_DE_AMBIENTE) or valor.startswith("$"):

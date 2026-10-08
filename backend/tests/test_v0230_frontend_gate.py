@@ -508,3 +508,39 @@ class TheWrittenDocsQuoteTheGeneratedNumbersTests(unittest.TestCase):
                     # A menção é permitida só quando o texto a está NEGANDO.
                     self.assertIn("não", baixo[max(0, baixo.index(frase) - 120):baixo.index(frase)],
                                   f"{nome}.md afirma {frase!r}")
+
+
+class TheLockfileAgreesWithThePackageAndTheInstalledTreeTests(unittest.TestCase):
+    """v0.24.0 — `web/package-lock.json` chegou de fora (gerado com rede por outro agente). O que dá
+    para conferir sem registro é conferido aqui; `npm ci` continua sendo da sessão com rede (D-SUP1).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        cls.lock = json.loads((ROOT / "web" / "package-lock.json").read_text(encoding="utf-8"))
+        cls.pkg = json.loads((ROOT / "web" / "package.json").read_text(encoding="utf-8"))
+
+    def test_the_lockfile_declares_the_same_dependencies_as_package_json(self):
+        raiz = self.lock["packages"][""]
+        self.assertEqual(self.lock["lockfileVersion"], 3)
+        self.assertEqual(raiz.get("dependencies"), self.pkg.get("dependencies"))
+        self.assertEqual(raiz.get("devDependencies"), self.pkg.get("devDependencies"))
+        self.assertEqual(self.lock["version"], self.pkg["version"], "versão do lockfile ≠ package.json")
+
+    def test_every_locked_package_carries_an_integrity_hash(self):
+        sem = [k for k, v in self.lock["packages"].items() if k and not v.get("link") and "integrity" not in v]
+        self.assertEqual(sem, [], f"pacote sem integrity no lockfile: {sem[:5]}")
+
+    @unittest.skipUnless((ROOT / "web" / "node_modules").is_dir(), "node_modules ausente")
+    def test_every_installed_package_matches_the_locked_version(self):
+        import json
+        nm = ROOT / "web" / "node_modules"
+        divergentes = []
+        for pk in list(nm.glob("*/package.json")) + list(nm.glob("@*/*/package.json")):
+            nome = str(pk.parent.relative_to(nm))
+            instalada = json.loads(pk.read_text(encoding="utf-8")).get("version")
+            travada = self.lock["packages"].get(f"node_modules/{nome}", {}).get("version")
+            if travada and instalada != travada:
+                divergentes.append((nome, instalada, travada))
+        self.assertEqual(divergentes, [], f"instalado ≠ lockfile: {divergentes}")

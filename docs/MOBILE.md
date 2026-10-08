@@ -37,3 +37,13 @@ npx cap open ios                                # Xcode → Archive (macOS)
 
 ## PWA (web)
 `manifest.webmanifest`, ícones 192/512/maskable, Service Worker com precache do shell e página offline; `/v1` nunca é cacheado. Instalável em Android/iOS via navegador como alternativa imediata às lojas.
+
+
+## Identidade oficial nos recursos nativos (v0.24.0)
+
+`mobile/resources/icon.png` (1024, fundo navy) e `icon-foreground.png` (1024, transparente) são os
+ícones oficiais de `web/brand/mobile/`; `splash.png` e `splash-dark.png` são canvas navy `#16233B` com
+o ícone de 1024 px no tamanho nativo — a identidade não inclui splash, e o lockup é raster, então
+nada foi ampliado. `mobile/setup.sh` usa `#16233B` como fundo. Os mipmaps Android e o
+`AppIcon.appiconset` do iOS estão em `web/brand/mobile/` com os READMEs de origem; o `@capacitor/assets`
+continua gerando a partir de `mobile/resources/`. Nada disto foi compilado aqui (sem npm, JDK ou Xcode).

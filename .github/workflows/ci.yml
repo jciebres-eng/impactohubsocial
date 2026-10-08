@@ -34,20 +34,13 @@ jobs:
       - name: Frontend — dependências, typecheck (tipos oficiais) e build
         run: |
           cd web
-          # `npm ci` quando houver lockfile commitado; `npm install` enquanto não houver. A
-          # diferença importa: sem lockfile, `npm audit` audita uma árvore que pode não ser a de
-          # produção. A geração do lockfile exige acesso ao registro npm, que o ambiente de
-          # desenvolvimento desta rodada não tem — então o CI o GERA e o publica como artefato,
-          # para ser commitado. Ver TECHNICAL_DEBT_REGISTER.md (dívida de cadeia de suprimentos).
-          if [ -f package-lock.json ]; then npm ci --no-audit; else npm install --no-audit; fi
+          # v0.24.0: o lockfile está versionado (D-SUP1 parcialmente fechado), então é `npm ci` —
+          # instala EXATAMENTE a árvore travada, com integridade conferida, e falha se o
+          # package.json divergir do lockfile. Esta é a primeira execução que prova que o lockfile
+          # instala; o ambiente de desenvolvimento não alcança o registro.
+          npm ci --no-audit
           npx tsc -p tsconfig.json --noEmit
           node build.mjs
-      - name: Lockfile do frontend (gerar para commit, quando ausente)
-        if: ${{ hashFiles('web/package-lock.json') == '' }}
-        run: cd web && npm install --package-lock-only --no-audit
-      - uses: actions/upload-artifact@v4
-        if: ${{ hashFiles('web/package-lock.json') == '' }}
-        with: { name: package-lock-para-commitar, path: web/package-lock.json, if-no-files-found: warn }
       - run: python -m playwright install --with-deps chromium
       - name: Testes (unit, integração, segurança/RLS, OIDC, E2E navegador)
         run: cd backend && python -m unittest discover -s tests -t . -v

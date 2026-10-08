@@ -78,7 +78,7 @@ conteúdo depois de aplicada é recusada.
 **Verificação:**
 
 ```bash
-psql "$APP_URL" -tAc "SELECT count(*) FROM schema_migrations"   # 62 nesta versão
+psql "$APP_URL" -tAc "SELECT count(*) FROM schema_migrations"   # 63 nesta versão
 ```
 
 ## 5. Build e publicação
@@ -213,6 +213,41 @@ use o versionamento do bucket; se for local, inclua o volume no snapshot.
 3. **As migrações não têm volta**: são avanço-somente, sem `down`. Reverter esquema é restaurar
    backup — e primeiro em banco descartável, nunca direto em produção.
 4. Depois de restaurar, `/readyz` acusa se o banco ficou à frente ou atrás do código.
+
+## 1-A. Banco gerenciado sem acesso de superusuário (Supabase e similares) — v0.24.0
+
+Num PostgreSQL gerenciado você não roda `infra/db/bootstrap.sql`: não há `impacto_owner`, o dono do
+schema é o usuário administrativo do projeto, e o pgcrypto fica na schema `extensions`, não em
+`public`. O contêiner cobre esse caso com três variáveis:
+
+| Variável | Para quê |
+|---|---|
+| `DATABASE_URL` | a conexão **administrativa** do projeto — usada só para bootstrap e migrações |
+| `IMPACTO_APP_PASSWORD` | senha do papel `impacto_app`, **obrigatória** (≥16 caracteres). Nunca é derivada da URL administrativa: o papel separado existe para que a aplicação não carregue a credencial do administrador |
+| `IMPACTO_BOOTSTRAP_EXTERNAL=true` | cria `impacto_app` (idempotente; nunca altera senha de papel existente) antes de migrar |
+
+O entrypoint (`backend/start_container.sh`) faz, nesta ordem e com log por etapa: bootstrap →
+migrações como administrador → **troca a URL para `impacto_app`** → ASGI. A aplicação em pé nunca
+está conectada como administrador — isso é conferido em `test_v0240_container_entrypoint.py`, que
+executa o script de verdade contra um banco limpo.
+
+A migração `0063` fixa `search_path = public, extensions, pg_temp` nas nove funções que chamam
+`digest()` (cadeias de auditoria, ledger, confiança e valor; verificações; hash de documento legal).
+Sem isso, num banco gerenciado a plataforma não sobe: o primeiro INSERT em `audit_events` falha com
+"function digest(text, unknown) does not exist".
+
+**O que foi provado e o que não foi.** Provado aqui, sem Docker: migrações como administrador, troca
+de papel, seed e login. **Não provado aqui:** o comportamento com o pgcrypto efetivamente em
+`extensions` — neste ambiente ele está em `public` desde a migração 0001, então a schema
+`extensions` fica vazia e o teste só prova que nada quebrou. A prova positiva só vem do primeiro
+`readyz` contra o banco gerenciado. A construção da imagem Docker também continua sem prova aqui.
+
+**Demonstração num banco gerenciado NÃO é produção.** Para ter seed e contas de demonstração o
+contêiner tem de subir com `IMPACTO_ENV=development`, e isso desliga: custo mínimo de senha, limite
+de tentativas sem folga, e-mail real, proibição de seed. Uma instância assim, com HTTPS num domínio
+público, é um ambiente de teste e precisa dizer isso na URL e na tela — nunca receber dado pessoal
+real. A imagem desta versão sobe em `production` por padrão; quem quiser demonstração escolhe
+`development` ao subir, e assume o que isso significa.
 
 ## O que este guia não cobre
 

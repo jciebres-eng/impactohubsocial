@@ -12,7 +12,25 @@ e nenhum pode ser resolvido escrevendo código.
 
 ---
 
-## D-SUP1 — Registro npm indisponível (403)
+## D-SUP1 — Registro npm indisponível (403) — PARCIALMENTE FECHADO na v0.24.0
+
+**O que fechou:** `web/package-lock.json` está versionado. Veio no pacote recebido de fora, gerado com
+rede por outro agente: `lockfileVersion 3`, dependências e devDependencies idênticas ao
+`package.json`, 128 pacotes, todos com `integrity`, e as seis versões instaladas neste ambiente
+(react, react-dom, scheduler, typescript, esbuild, @esbuild/linux-x64) conferem com ele.
+
+**O que continua aberto:** `npm ci` **não foi executado aqui** (o registro continua 403), logo não há
+prova de que o lockfile instala limpo; `@types/react` continua não instalado, e o typecheck oficial
+pelo `tsconfig.json` continua substituído pelo `tsconfig.offline.json` com stubs. Quem desbloqueia é
+a mesma pessoa de antes: uma máquina com acesso ao registro, rodando `npm ci && npm run typecheck`.
+
+`web/INSTALLED_TREE.json` fica como registro do que produziu os builds até aqui, com a nota de que
+não é lockfile.
+
+---
+
+### Texto original do bloqueador (mantido como histórico)
+
 
 **Bloqueado:** `npm ci`, geração de `package-lock.json`, instalação de `@types/react` e
 `@types/react-dom`, e a verificação de tipos pelo `tsconfig.json` oficial.

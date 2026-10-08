@@ -28,6 +28,40 @@ Portanto, a escolha é consciente:
 | Staging | reais, inseridos à mão por quem apresenta | mostrar o produto como ele se comporta de verdade |
 | Produção | reais | não é lugar de demonstração |
 
+## 1.1 As contas de demonstração (v0.24.0)
+
+`seed-demo` cria 14 contas fictícias, todas com a senha de `DEMO_PASSWORD` (se a variável não for
+definida, o padrão escrito em `backend/impacto/seed_dev.py`, que só vale onde o seed roda):
+
+| Perfil | E-mail | Entra com |
+|---|---|---|
+| OSC | `osc@demo.impacto.local` | senha |
+| Empresa | `empresa@demo.impacto.local` | senha |
+| Profissional (contadora) | `contador@demo.impacto.local` | senha |
+| Governo | `governo@demo.impacto.local` | senha |
+| Administrador da plataforma | `admin@demo.impacto.local` | senha **+ aplicativo autenticador** |
+| Editora, Revisor, Suporte | `editor@`, `revisor@`, `suporte@demo.impacto.local` | senha **+ aplicativo autenticador** |
+| Controladoria, Financeiro, Contabilidade, Tesouraria, Operações, Auditoria | `controladoria@`, `financeiro@`, `contabilidade@`, `tesouraria@`, `operacoes@`, `auditoria@demo.impacto.local` | senha **+ aplicativo autenticador** |
+
+**O segundo fator é de verdade.** A administração exige MFA verificado na sessão, e isso não é
+relaxado para demonstração — relaxar seria desligar uma trava para a tela ficar bonita. O seed
+cadastra um TOTP nas dez contas internas com o segredo de `DEMO_TOTP_SECRET` (base32); se a variável
+não existir, gera um e o imprime na saída do `seed-demo` **uma única vez**. Quem for demonstrar
+coloca esse segredo no aplicativo autenticador (ou gera o código com qualquer TOTP padrão de 6
+dígitos/30 s) e passa pela verificação como um administrador real passaria.
+
+Até a v0.23.1 o seed criava essas contas sem segundo fator, e a área administrativa inteira
+respondia 403 na demonstração — 40 das 53 telas do menu do administrador. O produto estava certo; a
+demonstração é que estava incompleta.
+
+**A demonstração está provada por teste, não por roteiro.** `backend/tests/test_v0240_demo_completa.py`
+sobe o servidor real, semeia, e percorre no Chromium as 14 contas: 295 telas de menu abertas, zero
+5xx, zero erro de JavaScript, marca oficial renderizada em todas, temas claro e escuro, largura de
+telefone. As capturas e o relatório por persona ficam em `docs/evidence/demo_v0240/`.
+
+Os 4xx que o relatório registra são achados para o produto, não falhas da demo — estão listados em
+`TESTER_GUIDE.md`, seção 6.
+
 ## 2. Por onde navegar
 
 São **218 telas** servidas pelo roteador. O mapa delas — rota, componente, arquivo, quais tipos de
@@ -64,6 +98,10 @@ responder, e o painel permite marcá-las uma a uma.
   cadeia na hora. Adultere uma linha pelo banco e rode de novo na frente de quem assiste.
 - **Interruptor de emergência** (`/admin/interruptor`): desligar uma capacidade e ver a API recusar.
 - **A trava jurídica**, abaixo. Ela parece um defeito e é o oposto.
+- **A identidade oficial** (v0.24.0): a interface veste os tokens de `web/brand/tokens.json` —
+  amarelo de ação, navy estrutural, três temas — e o lockup transparente oficial, nos tamanhos que o
+  raster de origem permite. O que a identidade não cobre está dito em `web/brand/README.md`: licença
+  da marca não comprovada, logo master em raster, fontes não embarcadas (renderiza Inter).
 
 ## 4. O que NÃO dá para mostrar — e por quê
 

@@ -153,7 +153,11 @@ def collect() -> list[Path]:
         if rel.as_posix() in KEEP_EXACT:
             files.append(p)
             continue
-        if set(rel.parts[:-1]) & EXCLUDE_DIRS and not (rel.parts[0] == "web" and rel.parts[1] == "dist"):
+        if set(rel.parts[:-1]) & EXCLUDE_DIRS and not (rel.parts[0] == "web" and rel.parts[1] == "dist") \
+                and not rel.as_posix().startswith("web/brand/mobile/"):
+            # `android`/`ios` na lista são os PROJETOS gerados pelo Capacitor (web/android, web/ios);
+            # os ícones oficiais da identidade moram em web/brand/mobile/{android,ios} e são FONTE —
+            # a v0.24.0 descobriu que a exclusão por nome os deixava fora do pacote.
             continue
         if p.name in EXCLUDE_NAMES or p.suffix in EXCLUDE_SUFFIX:
             continue

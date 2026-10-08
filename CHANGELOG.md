@@ -1,6 +1,73 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.24.0] — 2026-10-07
+
+### Correção de registro, antes de qualquer novidade
+
+A v0.23.1 anunciou "1 defeito real: `/entrar` chama `GET /v1/meta/config`, que o backend não
+registra", em quatro documentos e num teste. **Estava errado.** A rota existe desde sempre, como
+`Route` crua em `app.py` (`_infra_routes`, junto com `/healthz`, `/readyz`, `/metrics`,
+`/v1/openapi.json` e `/v1/meta/taxonomy`), fora do registro `@route` que o cruzamento tela × backend
+lia. O instrumento ignorava seis rotas e acusou o produto. Quem desmentiu foi o teste que sobe o
+entrypoint do contêiner de verdade e recebeu a resposta completa da rota "inexistente".
+
+O cruzamento passou a ler as duas fontes (894 operações: 888 registradas + 6 cruas), os guias dizem o
+que aconteceu em vez de apagar, e a rota duplicada que esta versão chegou a criar foi removida antes
+de entrar. Fica como lição escrita: um instrumento que lê um registro parcial produz acusações
+precisas sobre a parte errada.
+
+### Identidade oficial integrada
+
+`web/brand/` é a fonte: `tokens.json` → `tokens.css` (gerado; um teste exige que seja exatamente a
+saída do gerador), `components.css`, 75 ícones com catálogo, lockups transparentes, favicons, PWA,
+Android/iOS, e os guias de origem inalterados. Os nomes que o CSS do produto sempre usou
+(`--tinta`, `--ipe`, `--papel`, `--mata`…) viraram **aliases** dos `--pi-*` — toda regra de componente
+vestiu a identidade de uma vez, nos três temas, sem reescrita regra a regra. Marca = imagem oficial
+escolhida pela superfície (`ui/brand.tsx`), nunca desenhada em CSS; 48 ícones inline
+(`ui/icon.tsx`), com **toda** rota de menu mapeada (teste). Lora saiu — a identidade não tem serifa;
+Inter continua sendo o que renderiza, porque as fontes não vêm no pacote. Zero cor literal no CSS; as
+duas ocorrências de texto branco sobre amarelo foram corrigidas, e a regra é conferida no botão
+renderizado, não só no CSS.
+
+Um defeito achado ao medir, não ao olhar: a barra lateral é flex em coluna com `overflow`, e os
+filhos encolhiam — o logo oficial ficou com 24px e vazou por cima da caixa da organização.
+
+O que a fonte declara sobre si e vale aqui sem suavizar: **licença da marca não comprovada**, **logo
+master em raster** (303×240; nada é ampliado), **fontes não embarcadas**.
+
+### A demonstração completa, provada no navegador
+
+`test_v0240_demo_completa.py`: servidor real, seed, Chromium. 14 contas entram, **295 telas de menu**
+abrem, zero 5xx, zero erro de JavaScript, marca renderizada em todas, temas claro e escuro, 390px sem
+rolagem horizontal. As 10 contas internas passam pela **verificação em duas etapas de verdade**: o
+seed cadastra TOTP nelas (segredo de `DEMO_TOTP_SECRET` ou gerado e impresso uma vez). Até aqui o
+seed as criava sem segundo fator e 40 das 53 telas do administrador respondiam 403 `mfa_required` —
+o produto estava certo, a demo é que estava incompleta. Relaxar o MFA para a demo não foi cogitado.
+
+O teste precisou de duas correções nele mesmo: contava zero telas para persona sem menu e seguia
+verde; e casava o `h1` "Entrar" ainda na tela, pulando a etapa do código. Os 4xx que sobraram
+(`/documentos/montagens` em três tipos, sub-chamadas de permissão granular em perfis internos,
+`/responsabilidade` sem período) estão no relatório de evidência e no guia do testador como achados.
+
+### Contêiner e banco gerenciado, sem desligar travas
+
+O pacote recebido trazia uma publicação no Supabase feita com o Dockerfile em `IMPACTO_ENV=development`,
+seed ligado e domínio de terceiro fixado na imagem. Nada disso entrou (`TRIAGEM_PACOTE_UI_DEMO.md`,
+item a item). Entrou, corrigido: `backend/start_container.sh` (bootstrap → migrações → troca para
+`impacto_app` → ASGI; `IMPACTO_APP_PASSWORD` obrigatória, nunca derivada da URL administrativa),
+`bootstrap_external.py`, e a migração `0063` cobrindo as **nove** funções que chamam `digest()` (a
+recebida cobria cinco). `test_v0240_container_entrypoint.py` executa o script contra um banco limpo
+criado pelo administrador: 63 migrações, `/readyz`, aplicação conectada como `impacto_app` e não
+como administrador, seed e login. O Dockerfile volta a `production`; demonstração é decisão de quem
+sobe, nunca da imagem.
+
+### Lockfile
+
+`web/package-lock.json` versionado (veio de fora, gerado com rede): coerente com `package.json`, 128
+pacotes com `integrity`, versões instaladas aqui conferem — testes. `npm ci` continua sem execução
+aqui (D-SUP1 parcialmente fechado).
+
 ## [0.23.1] — 2026-10-07
 
 ### O inventário de telas estava incompleto, e o teste que o guardava não guardava nada

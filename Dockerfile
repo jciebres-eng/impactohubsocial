@@ -4,8 +4,8 @@
 
 FROM node:22-bookworm-slim AS web
 WORKDIR /web
-COPY web/package.json web/package-lock.json* ./
-RUN npm install --no-audit --no-fund
+COPY web/package.json web/package-lock.json ./
+RUN npm ci --no-audit --no-fund
 COPY web/ ./
 RUN npx tsc -p tsconfig.json --noEmit && node build.mjs
 

@@ -102,9 +102,23 @@ escrever nessa trilha.
 
 ## v0.23.0 — cadeia de suprimentos do frontend (bloqueio externo, não decisão de projeto)
 
-### D-SUP1 · `web/package-lock.json` não existe
+### D-SUP1 · `web/package-lock.json` — PARCIALMENTE FECHADO na v0.24.0
 
-**Severidade: HIGH.** Bloqueia a publicação web? **Não.** Bloqueia o Designer? **Não.**
+**Severidade: MEDIUM (era HIGH).** Bloqueia a publicação web? **Não.** Bloqueia o Designer? **Não.**
+
+**O que fechou.** O lockfile está versionado. Veio no pacote recebido de fora, gerado com acesso ao
+registro por outro agente, e foi aceito depois de conferido — não escrito à mão: `lockfileVersion 3`,
+dependências idênticas ao `package.json`, 128 pacotes com `integrity`, e as seis versões instaladas
+neste ambiente conferem (`test_v0230_frontend_gate.py`, classe do lockfile). O CI e o Dockerfile
+passaram a usar `npm ci`.
+
+**O que continua aberto.** `npm ci` **não foi executado aqui** (o registro segue 403): não há prova
+de que o lockfile instala limpo, `@types/react` segue não instalado, e o typecheck oficial continua
+substituído pelo `tsconfig.offline.json` com stubs. Fecha de vez na primeira execução do CI com rede.
+
+O texto abaixo é o registro original, mantido como histórico da dívida.
+
+---
 
 O que isto significa, sem suavizar: a árvore de dependências do frontend **não é reprodutível**.
 Dois `npm install` em datas diferentes podem instalar versões transitivas diferentes, e

@@ -467,3 +467,41 @@ class SastIsSelectedInTheLintConfigurationTests(unittest.TestCase):
         for regra in ("S101", "S608"):
             if regra in linha_ignore:
                 self.assertIn("#", linha_ignore, f"{regra} ignorada sem motivo escrito")
+
+
+class TheGitleaksIgnoreIsNarrowAndExplainedTests(unittest.TestCase):
+    """`.gitleaksignore` só pode liberar achados UM A UM, cada grupo com motivo escrito.
+
+    v0.24.0: a primeira execução real do gitleaks no CI (a action exigia licença e nunca tinha
+    rodado) achou 15 itens no histórico; os 15 foram conferidos — senhas e segredos fictícios de
+    teste, um placeholder de Stripe, a lista de senhas que o cadastro recusa, uma linha de texto.
+    Liberar por arquivo ou por regra esconderia o próximo segredo de verdade nesses mesmos lugares.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.linhas = (ROOT / ".gitleaksignore").read_text(encoding="utf-8").splitlines()
+
+    def test_every_entry_is_a_single_finding_fingerprint(self):
+        entradas = [l for l in self.linhas if l.strip() and not l.startswith("#")]
+        self.assertEqual(len(entradas), 15, "achado novo liberado? revise e atualize este número junto")
+        for e in entradas:
+            self.assertRegex(e, r"^[0-9a-f]{40}:[^:*]+:[a-z0-9-]+:\d+$",
+                             f"entrada não é impressão digital de UM achado: {e}")
+        self.assertFalse(any("*" in e for e in entradas), "curinga em .gitleaksignore")
+
+    def test_every_group_has_a_written_reason(self):
+        grupo_tem_motivo = False
+        for l in self.linhas:
+            if l.startswith("# ["):
+                grupo_tem_motivo = True
+            elif l.strip() and not l.startswith("#"):
+                self.assertTrue(grupo_tem_motivo, f"entrada sem grupo com motivo acima: {l}")
+            elif not l.strip():
+                grupo_tem_motivo = False
+
+    def test_ci_runs_the_binary_not_the_licensed_action(self):
+        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertNotIn("uses: gitleaks/gitleaks-action", ci, "a action exige licença e derruba o CI inteiro")
+        self.assertIn("./gitleaks git", ci)
+        self.assertIn("sha256sum -c", ci, "o binário tem de ser conferido contra os checksums da release")

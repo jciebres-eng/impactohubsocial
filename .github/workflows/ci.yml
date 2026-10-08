@@ -20,9 +20,28 @@ jobs:
       # VARREDURA DE SEGREDO. Até a v0.22.0 não havia nenhuma, em lugar nenhum: nem no CI, nem em
       # pre-commit, nem na suíte. O fail-fast de `config.py` recusa subir sem segredo configurado —
       # isso protege o BOOT, não o histórico do git. Um segredo commitado por engano ficava lá.
-      - name: Varredura de segredo (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env: { GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false" }
+      #
+      # A ACTION `gitleaks/gitleaks-action` exige licença paga (GITLEAKS_LICENSE) em conta de
+      # organização, e falhava em TODO push — antes de qualquer outro passo. A suíte de testes
+      # nunca chegou a rodar no GitHub por causa disso. O BINÁRIO do gitleaks é livre (MIT): mesma
+      # varredura, sem a action. Versão fixada; o tarball é conferido contra o arquivo de checksums
+      # oficial da MESMA release (íntegro em trânsito — não protege contra release comprometida).
+      - name: Varredura de segredo (gitleaks, binário oficial fixado)
+        id: gitleaks
+        env: { GITLEAKS_VERSION: "8.30.1" }
+        run: |
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tgz="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          sums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          curl -fsSLO "$base/$tgz"
+          curl -fsSLO "$base/$sums"
+          grep " ${tgz}\$" "$sums" | sha256sum -c -
+          tar -xzf "$tgz" gitleaks
+          ./gitleaks git --redact --no-banner --report-format json --report-path "$RUNNER_TEMP/gitleaks.json" .
+      - name: Achados do gitleaks como anotação
+        if: failure() && steps.gitleaks.outcome == 'failure'
+        run: python3 scripts/ci_annotate_gitleaks.py "$RUNNER_TEMP/gitleaks.json"
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - uses: actions/setup-node@v4
@@ -46,12 +65,13 @@ jobs:
           node build.mjs
       - run: python -m playwright install --with-deps chromium
       - name: Testes (unit, integração, segurança/RLS, OIDC, E2E navegador)
+        id: testes
         run: |
           set -o pipefail
           cd backend && python -m unittest discover -s tests -t . -v 2>&1 | tee "$RUNNER_TEMP/testes.log"
       # O log bruto do Actions não é legível de fora do navegador do GitHub; anotações são (API).
       - name: Falhas da suíte como anotação
-        if: failure()
+        if: failure() && steps.testes.outcome == 'failure'
         run: python3 scripts/ci_annotate_failures.py "$RUNNER_TEMP/testes.log"
       - name: Auditoria de vulnerabilidades (dependências)
         run: |

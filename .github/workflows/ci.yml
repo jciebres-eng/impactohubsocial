@@ -73,24 +73,6 @@ jobs:
       - name: Falhas da suíte como anotação
         if: failure() && steps.testes.outcome == 'failure'
         run: python3 scripts/ci_annotate_failures.py "$RUNNER_TEMP/testes.log"
-      # Auditoria: JSON em arquivo + anotação por vulnerabilidade (o log bruto não é legível de fora).
-      # Falha o passo se qualquer uma das duas ferramentas acusar — ou não conseguir rodar.
-      - name: Auditoria de vulnerabilidades (dependências)
-        id: auditoria
-        if: always() && steps.testes.outcome != 'skipped'
-        run: |
-          set +e
-          pip-audit -r backend/requirements.txt -f json -o "$RUNNER_TEMP/pip-audit.json"; py=$?
-          (cd web && npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/npm-audit.json"); js=$?
-          python3 scripts/ci_annotate_audit.py "$RUNNER_TEMP/pip-audit.json" "$RUNNER_TEMP/npm-audit.json"
-          echo "pip-audit saiu com $py; npm audit saiu com $js"
-          [ "$py" -eq 0 ] && [ "$js" -eq 0 ]
-      # TESTE DE RESTAURAÇÃO. `scripts/restore_test.sh` é o ativo de recuperação mais forte do
-      # repositório — confere o sha256 do dump, restaura num banco descartável, verifica as cadeias
-      # de hash e prova que o restore NÃO traz estado que não deveria existir. E nada o executava:
-      # não estava no CI, no Makefile nem na suíte. É exatamente o defeito que `ops/backup.py`
-      # critica na primeira linha: "script que ninguém executa não é backup".
-      # Prova independente da auditoria: roda mesmo que ela acuse algo.
       - name: Backup e RESTAURAÇÃO conferida (ciclo completo)
         if: always() && steps.testes.outcome != 'skipped'
         env:
@@ -114,6 +96,25 @@ jobs:
             echo "FALHA: restore_test.sh aceitou um dump adulterado"; exit 1
           fi
           echo "restore_test.sh recusa dump adulterado, como deve"
+  # AUDITORIA DE VULNERABILIDADES em job próprio: resposta em ~1 min, sem esperar a suíte (~15 min),
+  # e sem ser escondida por ela. Nunca tinha rodado até a v0.24.1 — e achou vulnerabilidades reais.
+  auditoria:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - run: pip install pip-audit
+      - name: Auditoria de vulnerabilidades (pip-audit + npm audit)
+        run: |
+          set +e
+          pip-audit -r backend/requirements.txt -r backend/requirements-optional.txt -f json -o "$RUNNER_TEMP/pip-audit.json"; py=$?
+          (cd web && npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/npm-audit.json"); js=$?
+          python3 scripts/ci_annotate_audit.py "$RUNNER_TEMP/pip-audit.json" "$RUNNER_TEMP/npm-audit.json"
+          echo "pip-audit saiu com $py; npm audit saiu com $js"
+          [ "$py" -eq 0 ] && [ "$js" -eq 0 ]
   # Sem `needs: backend`: a imagem construir é uma prova independente de a suíte passar. Com a
   # dependência, qualquer teste quebrado escondia se o Dockerfile funcionava — e escondeu, em todo
   # push até a v0.24.0 (o job aparecia como "skipped").

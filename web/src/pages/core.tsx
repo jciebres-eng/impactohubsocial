@@ -562,7 +562,7 @@ function ActionRow({ diagnosisId, action, onDone }: { diagnosisId: string; actio
       </div>
       {action.status !== "done" && action.status !== "dismissed" && (
         <div>
-          <Select value={status} onChange={setStatus} options={[["open", "Aberta"], ["in_progress", "Em andamento"], ["done", "Concluída"], ["dismissed", "Descartada"]]} />
+          <Select aria-label="Situação da ação" value={status} onChange={setStatus} options={[["open", "Aberta"], ["in_progress", "Em andamento"], ["done", "Concluída"], ["dismissed", "Descartada"]]} />
           {status === "dismissed" && <Input value={reason} onChange={setReason} placeholder="Motivo do descarte" />}
           <Button busy={busy} onClick={save} disabled={status === action.status || (status === "dismissed" && reason.trim().length < 3)}>Salvar</Button>
         </div>

@@ -246,7 +246,7 @@ export function Team() {
             <tbody>{members.data?.items.map((m: any) => (
               <tr key={m.user_id}><td>{m.full_name}</td><td>{m.email}</td>
                 <td>{isAdmin && m.role !== "owner" && m.user_id !== me?.user.id ? (
-                  <Select value={m.role} onChange={(v) => run(() => api.patch(`/v1/org/members/${m.user_id}`, { role: v }), "Papel alterado").then(members.reload)} options={ROLES} />
+                  <Select aria-label="Papel do membro" value={m.role} onChange={(v) => run(() => api.patch(`/v1/org/members/${m.user_id}`, { role: v }), "Papel alterado").then(members.reload)} options={ROLES} />
                 ) : label(m.role === "owner" ? "Proprietário" : m.role)}</td>
                 <td>{m.mfa_enabled ? <Pill tone="good">ativo</Pill> : <Pill tone="muted">não</Pill>}</td>
                 {isAdmin && <td>{m.role !== "owner" && m.user_id !== me?.user.id && <Button variant="link" onClick={() => confirm(`Remover ${m.full_name}?`) && run(() => api.del(`/v1/org/members/${m.user_id}`), "Membro removido").then(members.reload)}>Remover</Button>}</td>}

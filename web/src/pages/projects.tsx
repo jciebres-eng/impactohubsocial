@@ -30,7 +30,7 @@ export function Projects() {
                   <p className="muted">{p.territory} · {n(p.beneficiaries_count)} beneficiários · {p.applications} candidatura(s)</p>
                 </div>
                 <Pill status={p.status} />
-                <div className="progress" aria-label={`${Math.round(pctFunded)}% captado`}>
+                <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pctFunded)} aria-label={`${Math.round(pctFunded)}% captado`}>
                   <span className="progress-fill" style={{ width: `${pctFunded}%` }} />
                 </div>
                 <p className="project-money">{money(p.funding.committed_cents)} de {money(p.budget_total_cents)}</p>
@@ -232,7 +232,9 @@ function Budget({ p, reload }: { p: any; reload: () => void }) {
           {p.milestones.map((m: any) => (
             <li key={m.id}>
               <div><strong>{m.title}</strong><span className="muted"> · previsão {date(m.due_on)}</span></div>
-              <div className="progress"><span className="progress-fill" style={{ width: `${m.amount_cents ? Math.min(100, (m.funded_cents / m.amount_cents) * 100) : 0}%` }} /></div>
+              <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100}
+                   aria-valuenow={Math.round(m.amount_cents ? Math.min(100, (m.funded_cents / m.amount_cents) * 100) : 0)}
+                   aria-label={`Marco ${m.seq}: captado`}><span className="progress-fill" style={{ width: `${m.amount_cents ? Math.min(100, (m.funded_cents / m.amount_cents) * 100) : 0}%` }} /></div>
               <div className="ms-foot"><span>{money(m.funded_cents)} de {money(m.amount_cents)}</span><Pill status={m.status} /></div>
             </li>
           ))}

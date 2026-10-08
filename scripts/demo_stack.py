@@ -52,6 +52,8 @@ def main() -> int:
     ap.add_argument("--saida", default="dist-stack")
     ap.add_argument("--sem-jornadas", action="store_true", help="só o robô de telas (dados já criados)")
     ap.add_argument("--axe", help="caminho do axe.min.js: roda a auditoria WCAG A/AA em cada tela (uma vez por rota)")
+    ap.add_argument("--axe-trava", action="store_true",
+                    help="violação crítica ou grave do axe reprova (sem isto, o axe só relata)")
     a = ap.parse_args()
     senha, segredo = os.getenv("DEMO_PASSWORD", ""), os.getenv("DEMO_TOTP_SECRET", "")
     if not senha or not segredo:
@@ -135,8 +137,14 @@ def main() -> int:
             ordem = {"critical": 0, "serious": 1, "moderate": 2, "minor": 3}
             for rid, r in sorted(regras.items(), key=lambda kv: (ordem.get(kv[1]["impacto"], 9), -len(kv[1]["telas"]))):
                 exemplo = ", ".join(sorted(set(r["telas"]))[:4])
-                print(f"::warning title=axe {r['impacto']}: {rid}::{len(set(r['telas']))} tela(s), {r['elementos']} elemento(s) — "
+                nivel = "error" if a.axe_trava and r["impacto"] in ("critical", "serious") else "warning"
+                print(f"::{nivel} title=axe {r['impacto']}: {rid}::{len(set(r['telas']))} tela(s), {r['elementos']} elemento(s) — "
                       f"{r['ajuda']} — ex.: {exemplo}")
+            graves = [rid for rid, r in regras.items() if r["impacto"] in ("critical", "serious")]
+            nao_rodou = [x["rota"] for x in auditadas if any(v["id"] == "axe-nao-rodou" for v in x["axe"])]
+            if a.axe_trava and (graves or nao_rodou):
+                print(f"axe: {len(graves)} regra(s) crítica(s)/grave(s); axe não rodou em {len(nao_rodou)} tela(s)")
+                falhou = True
     return 1 if falhou else 0
 
 

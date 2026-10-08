@@ -32,7 +32,8 @@ class TheDemoJourneysCloseEndToEndTests(unittest.TestCase):
         (EVID / "relatorio.json").write_text(json.dumps({
             "passos": len(cls.res["passos"]), "falhas": len(cls.res["falhas"]),
             "por_jornada": dict(por_jornada), "atalhos_declarados": cls.res["atalhos"],
-            "detalhe": [{k: p[k] for k in ("jornada", "passo", "metodo", "rota", "status", "ok", "erro")}
+            "por_perfil": dict(Counter(p["perfil"] for p in cls.res["passos"])),
+            "detalhe": [{k: p[k] for k in ("jornada", "passo", "perfil", "metodo", "rota", "status", "ok", "erro")}
                         for p in cls.res["passos"]],
         }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 

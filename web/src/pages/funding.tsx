@@ -52,7 +52,7 @@ export function Quotas() {
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length}>
         {data?.items?.map((q: any) => (
           <Panel key={q.id} title={q.label} actions={
-            <Select value={q.status} options={Q_STATUS}
+            <Select aria-label="Situação da cota" value={q.status} options={Q_STATUS}
                     onChange={(v) => run(async () => { await api.patch(`/v1/funding-quotas/${q.id}`, { status: v }); reload(); return "Situação atualizada."; })} />}>
             {q.description && <p>{q.description}</p>}
             <QuotaProgress q={q} />
@@ -129,7 +129,7 @@ export function Campaigns() {
                 actions={<Button variant="primary" onClick={() => setCreating(true)}>Criar campanha</Button>} />
       {campaign?.id && (
         <Panel title={campaign.title || "Campanha"} actions={
-          <Select value={campaign.status || "draft"} options={C_STATUS}
+          <Select aria-label="Situação da campanha" value={campaign.status || "draft"} options={C_STATUS}
                   onChange={(v) => run(async () => {
                     await api.patch(`/v1/campaigns/${campaign.id}`, { status: v });
                     setCampaign({ ...campaign, status: v });

@@ -298,7 +298,7 @@ export function OdsTargets({ id }: { id: string }) {
     <>
       <PageHead title="ODS do projeto" sub="Objetivo e META — vincular ao objetivo sem a meta diz pouco." />
       <Panel title="Escolha o objetivo">
-        <Select value={numero} onChange={setNumero} placeholder="Objetivo de Desenvolvimento Sustentável"
+        <Select aria-label="Objetivo de Desenvolvimento Sustentável" value={numero} onChange={setNumero} placeholder="Objetivo de Desenvolvimento Sustentável"
                 options={(ods.data?.items || []).map((o: any) => [String(o.number), `${o.number}. ${o.name}`])} />
       </Panel>
       {numero && (

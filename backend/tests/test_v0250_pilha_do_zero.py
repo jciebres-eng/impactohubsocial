@@ -40,6 +40,7 @@ class TheFromZeroStackIsShapedLikeSupabaseTests(unittest.TestCase):
         self.assertIn("scripts/demo_stack.py", job)
         self.assertIn("--telas", job)
         self.assertIn("--axe", job)
+        self.assertIn("--axe-trava", job, "violação crítica/grave do axe tem de reprovar")
         self.assertIn("axe-core@4.10.2", job, "versão do axe fixada")
         self.assertIn("restart app", job)
         self.assertIn('test "$antes" = "$depois"', job)

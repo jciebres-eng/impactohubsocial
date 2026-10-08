@@ -63,6 +63,31 @@ telefone. As capturas e o relatório por persona ficam em `docs/evidence/demo_v0
 Os 4xx que o relatório registra são achados para o produto, não falhas da demo — estão listados em
 `TESTER_GUIDE.md`, seção 6.
 
+## 1.2 A demonstração inteira, do zero, com Docker (v0.25.0)
+
+```bash
+cp infra/compose/demo/.env.example infra/compose/demo/.env      # preencha as cinco variáveis
+mkdir -p dist-stack/data && chmod 777 dist-stack/data
+docker compose -f infra/compose/demo/compose.yml --env-file infra/compose/demo/.env up -d --build
+# depois de /readyz responder 200, os dados das jornadas (opcional, mas é o que torna a demo rica):
+DEMO_PASSWORD=... DEMO_TOTP_SECRET=... python3 scripts/demo_stack.py \
+  --base http://127.0.0.1:8080 --outbox dist-stack/data/outbox --saida dist-stack/out
+```
+
+Sobe um banco **vazio** com o mesmo desenho do Supabase (administrador sem superusuário, pgcrypto em
+`extensions`), a imagem do produto, as migrações, o seed e a aplicação conectada como `impacto_app`.
+`scripts/demo_stack.py` executa as jornadas pela API — OSC, financiador, profissional, governo,
+apoiadora, captação, documentos, marketplace, suporte, banco de ideias, administração e pendências —
+e deixa a demonstração com projetos, diagnóstico, candidaturas aprovadas, aporte, pagamento,
+medições validadas em série, proposta, conversa, relatório de impacto, acordo assinado, registro
+verificável, campanha pública, cotas apoiadas e itens pendentes. Os e-mails ficam em
+`dist-stack/data/outbox` (é demonstração: nenhum e-mail sai).
+
+**Isto é provado a cada push** pelo job `pilha-do-zero` do CI: o mesmo arquivo, do zero, com as
+jornadas, as 218 telas no Chromium com cada perfil, o axe-core e um reinício conferindo que os dados
+continuam. O que ainda não existe é um **endereço público**: depende de conta de hospedagem em nome do
+dono do projeto (D-PUB1 em `execution/BLOCKERS.md`).
+
 ## 2. Por onde navegar
 
 São **218 telas** servidas pelo roteador. O mapa delas — rota, componente, arquivo, quais tipos de

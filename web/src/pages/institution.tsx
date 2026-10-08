@@ -527,7 +527,7 @@ function AdminQualifications() {
   const [note, setNote] = useState<Record<string, string>>({});
   const decide = (id: string, decision: string) => run(() => api.post(`/v1/admin/institutional/qualifications/${id}/decide`, { decision, note: note[id] || null }), "Decisão registrada").then(reload);
   return (
-    <Panel title="Fila de qualificações" actions={<Select value={status} onChange={setStatus} placeholder="Comprovante enviado / em análise" options={[["declared", "Declaradas"], ["verified", "Verificadas"], ["rejected", "Rejeitadas"], ["revoked", "Revogadas"]]} />}>
+    <Panel title="Fila de qualificações" actions={<Select aria-label="Filtrar a fila por estado" value={status} onChange={setStatus} placeholder="Comprovante enviado / em análise" options={[["declared", "Declaradas"], ["verified", "Verificadas"], ["rejected", "Rejeitadas"], ["revoked", "Revogadas"]]} />}>
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length ? <p>Nada na fila.</p> : false}>
         <table className="table"><thead><tr><th>Organização</th><th>Qualificação</th><th>Comprovação</th><th>Decisão</th></tr></thead>
           <tbody>{data?.items.map((q: any) => (
@@ -618,7 +618,7 @@ function AdminRules() {
   return (
     <>
       <Panel title="Regras de elegibilidade" actions={<>
-        <Select value={status} onChange={setStatus} placeholder="Todos os estados" options={Object.entries(WF_LABEL)} />
+        <Select aria-label="Filtrar por estado" value={status} onChange={setStatus} placeholder="Todos os estados" options={Object.entries(WF_LABEL)} />
         <Button variant="ghost" onClick={() => run(() => api.post("/v1/admin/institutional/rules/import-candidates"), "Candidatas importadas como rascunho").then(reload)}>Importar candidatas</Button></>}>
         <StateView loading={loading} error={error} onRetry={reload}>
           <table className="table"><thead><tr><th>Regra</th><th>Escopo e requisito</th><th>Fonte</th><th>Estado</th><th /></tr></thead>
@@ -670,7 +670,7 @@ function AdminCatalog() {
   }
   return (
     <>
-      <Panel title="Itens de catálogo" actions={<Select value={catalog} onChange={setCatalog} placeholder="Todos os catálogos" options={[["legal_nature", "Naturezas jurídicas"], ["qualification_type", "Qualificações"], ["institutional_profile", "Perfis de atuação"], ["funding_modality", "Modalidades"], ["badge", "Selos"]]} />}>
+      <Panel title="Itens de catálogo" actions={<Select aria-label="Filtrar por catálogo" value={catalog} onChange={setCatalog} placeholder="Todos os catálogos" options={[["legal_nature", "Naturezas jurídicas"], ["qualification_type", "Qualificações"], ["institutional_profile", "Perfis de atuação"], ["funding_modality", "Modalidades"], ["badge", "Selos"]]} />}>
         <StateView loading={loading} error={error} onRetry={reload}>
           <table className="table"><thead><tr><th>Item</th><th>Fonte</th><th>Estado</th><th /></tr></thead>
             <tbody>{data?.items.map((r: any) => (

@@ -84,7 +84,8 @@ class Jornadas:
         except ValueError:
             dados = None
         ok = r.status in esperado
-        self.passos.append({"jornada": jornada, "passo": descricao, "metodo": metodo,
+        perfil = next((k for k, v in self.c.items() if v is cliente), "anônimo")
+        self.passos.append({"jornada": jornada, "passo": descricao, "perfil": perfil, "metodo": metodo,
                             "rota": rota, "status": r.status, "ok": ok,
                             "erro": "" if ok else str(dados if dados is not None else r.body[:200])[:300]})
         return dados if ok else None
@@ -407,7 +408,7 @@ class Jornadas:
                 self.passo(J, "gera o documento", osc, "POST", f"/v1/document-assemblies/{a['id']}/generate", {"format": "pdf"})
         doc = osc.upload("/v1/documents", "contrato-exemplo.pdf", b"%PDF-1.4\n% contrato ficticio\n%%EOF\n",
                          {"doc_type": "contrato", "title": "Contrato de prestação de contas (exemplo)"})
-        self.passos.append({"jornada": J, "passo": "envia o contrato", "metodo": "POST", "rota": "/v1/documents",
+        self.passos.append({"jornada": J, "passo": "envia o contrato", "perfil": "osc", "metodo": "POST", "rota": "/v1/documents",
                             "status": doc.status, "ok": doc.status == 201, "erro": "" if doc.status == 201 else str(doc.json)[:300]})
         if doc.status == 201:
             ac = self.passo(J, "cria acordo com o profissional", osc, "POST", "/v1/signed-agreements", {
@@ -570,7 +571,7 @@ class Jornadas:
             try:
                 etapa()
             except Exception as exc:  # noqa: BLE001 — uma jornada quebrada não pode esconder as outras
-                self.passos.append({"jornada": etapa.__name__, "passo": "exceção no roteiro", "metodo": "", "rota": "",
+                self.passos.append({"jornada": etapa.__name__, "passo": "exceção no roteiro", "perfil": "", "metodo": "", "rota": "",
                                     "status": 0, "ok": False, "erro": repr(exc)[:300]})
         return {"passos": self.passos, "falhas": [p for p in self.passos if not p["ok"]],
                 "atalhos": self.atalhos, "ids": self.ids}

@@ -237,7 +237,7 @@ export function MyServices() {
               </span></span>
               <span>
                 <Pill tone={s.status === "published" ? "good" : "muted"}>{s.status}</Pill>{" "}
-                <Select value={s.status} options={[["draft", "Rascunho"], ["published", "Publicada"], ["paused", "Pausada"]]}
+                <Select aria-label="Situação do selo" value={s.status} options={[["draft", "Rascunho"], ["published", "Publicada"], ["paused", "Pausada"]]}
                         onChange={(v) => run(async () => { await api.patch(`/v1/professional-services/${s.id}`, { status: v }); reload(); return "Atualizada."; })} />
               </span>
             </li>

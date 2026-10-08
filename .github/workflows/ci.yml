@@ -171,7 +171,7 @@ jobs:
           cd "$RUNNER_TEMP" && npm pack axe-core@4.10.2 >/dev/null && tar -xzf axe-core-4.10.2.tgz package/axe.min.js
           echo "AXE_JS=$RUNNER_TEMP/package/axe.min.js" >> "$GITHUB_ENV"
       - name: Jornadas (API), 218 telas (navegador) e axe, com cada perfil de demonstração
-        run: python3 scripts/demo_stack.py --base http://127.0.0.1:8080 --outbox dist-stack/data/outbox --dsn "$STACK_DSN" --telas --axe "$AXE_JS" --saida dist-stack/out
+        run: python3 scripts/demo_stack.py --base http://127.0.0.1:8080 --outbox dist-stack/data/outbox --dsn "$STACK_DSN" --telas --axe "$AXE_JS" --axe-trava --saida dist-stack/out
       - name: Persistência — reinicia a aplicação e confere que os dados continuam
         run: |
           set -euo pipefail

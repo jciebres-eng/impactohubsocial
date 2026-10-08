@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.24.2
+# Plataforma Impacto — v0.25.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada

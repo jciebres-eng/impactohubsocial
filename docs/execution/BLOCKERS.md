@@ -101,7 +101,11 @@ testado. É o risco que nenhum teste local elimina.
 
 ---
 
-## D-SUP2 — Nenhuma base de vulnerabilidade alcançável (SCA)
+## D-SUP2 — Nenhuma base de vulnerabilidade alcançável (SCA) — FECHADO no CI desde a v0.24.1
+
+> **Situação atual:** o job `auditoria` do CI roda `pip-audit` e `npm audit` a cada push desde a
+> v0.24.1 (achou e levou à correção de PyJWT e pypdf). Na v0.25.0 os dois relatam 0 vulnerabilidade.
+> O ambiente de desenvolvimento continua sem rota para PyPI/OSV; o texto abaixo é o histórico.
 
 **Bloqueado:** a execução de SCA (*software composition analysis*) contra uma base de avisos viva.
 
@@ -133,3 +137,28 @@ conferido nesta rodada. É risco real e não há como reduzi-lo a zero daqui.
   texto rastreados pelo git, e tem CONTROLE NEGATIVO — um teste planta chave da AWS, token do
   GitHub, chave do Stripe e bloco PEM e exige que a varredura acuse os quatro. Sem esse controle,
   uma varredura que não acha nada é indistinguível de uma que não procura nada.
+
+---
+
+## D-PUB1 — Endereço público da demonstração exige conta de hospedagem (v0.25.0)
+
+**Bloqueado:** uma URL pública (`https://…`) onde qualquer pessoa abra a demonstração.
+
+**Causa:** publicar exige uma conta de hospedagem em nome do dono do projeto (Render, Fly.io,
+Railway, uma VM, ou similar) — cadastro, aceite de termos e, em geral, cartão. Nenhuma está
+conectada a esta sessão, e criar conta ou contratar serviço é decisão do dono, não do código.
+O ambiente de desenvolvimento roda Docker, mas não alcança registro de imagens (Docker Hub, GHCR,
+ECR e mirror.gcr.io respondem `Forbidden`).
+
+**Quem desbloqueia:** o dono do projeto, escolhendo o serviço e fornecendo acesso (ou publicando ele
+mesmo com o roteiro de `docs/PUBLICACAO.md`).
+
+**Risco de seguir sem ele:** nenhum para o código; a demonstração só não é compartilhável por link.
+
+**O que foi feito para reduzir o risco — e está provado:**
+- `infra/compose/demo/compose.yml` sobe a demonstração inteira do zero: banco vazio com o desenho do
+  Supabase, imagem do produto, migrações, seed, aplicação como `impacto_app`.
+- O job `pilha-do-zero` do CI sobe exatamente esse arquivo a cada push e roda contra ele as
+  jornadas (API), as 218 telas (Chromium) com cada perfil, o axe-core (WCAG A/AA) e um reinício com
+  conferência de persistência. A primeira execução real passou (run 37739616218).
+- A mesma imagem já subiu contra o Supabase real do projeto (`readyz` 200, run 37727468920).

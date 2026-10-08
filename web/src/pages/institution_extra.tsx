@@ -169,7 +169,7 @@ export function AdminAgreements() {
   const [note, setNote] = useState<Record<string, string>>({});
   const decide = (id: string, decision: string) => run(() => api.post(`/v1/admin/institutional/agreements/${id}/decide`, { decision, note: note[id] || "" }), "Decisão registrada").then(reload);
   return (
-    <Panel title="Fila de instrumentos" actions={<Select value={status} onChange={setStatus} options={[["document_submitted", "Comprovante enviado"], ["declared", "Declarados"], ["verified", "Verificados"], ["rejected", "Rejeitados"]]} />}>
+    <Panel title="Fila de instrumentos" actions={<Select aria-label="Filtrar instrumentos por estado" value={status} onChange={setStatus} options={[["document_submitted", "Comprovante enviado"], ["declared", "Declarados"], ["verified", "Verificados"], ["rejected", "Rejeitados"]]} />}>
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length ? <p>Nada na fila.</p> : false}>
         <table className="table"><thead><tr><th>Organização</th><th>Instrumento</th><th>Comprovação</th><th>Decisão</th></tr></thead>
           <tbody>{data?.items.map((a: any) => (
@@ -193,7 +193,7 @@ export function AdminMentoring() {
   const [note, setNote] = useState<Record<string, string>>({});
   const upd = (id: string, st: string) => run(() => api.post(`/v1/admin/institutional/mentoring/${id}/update`, { status: st, admin_note: note[id] || null }), "Atualizado").then(reload);
   return (
-    <Panel title="Pedidos de mentoria" actions={<Select value={status} onChange={setStatus} options={Object.entries(MENTORING_LABEL) as [string, string][]} />}>
+    <Panel title="Pedidos de mentoria" actions={<Select aria-label="Filtrar pedidos por estado" value={status} onChange={setStatus} options={Object.entries(MENTORING_LABEL) as [string, string][]} />}>
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length ? <p>Nada na fila.</p> : false}>
         <ul className="rows">{data?.items.map((m: any) => (
           <li key={m.id}><span><strong>{m.org_name}</strong> · {TOPICS.find((t) => t[0] === m.topic)?.[1] || m.topic} <span className="muted small">{dateTime(m.created_at)}</span><br />{m.message}</span>

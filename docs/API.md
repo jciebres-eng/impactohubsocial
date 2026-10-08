@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.24.2)
+# API REST /v1 — referência gerada do código (v0.25.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 

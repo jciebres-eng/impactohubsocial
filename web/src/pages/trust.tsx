@@ -371,7 +371,7 @@ export function AgreementDetail({ id }: { id: string }) {
                 <li key={m.id}>
                   <span>{m.title}{m.due_on && <><br /><span className="muted small">Prazo: {date(m.due_on)}</span></>}
                     {m.note && <><br /><span className="muted small">{m.note}</span></>}</span>
-                  <Select value={m.status} options={MS_STATUS}
+                  <Select aria-label="Situação do marco" value={m.status} options={MS_STATUS}
                           onChange={(v) => act(() => api.patch(`/v1/signed-agreements/${id}/milestones/${m.id}`, { status: v }),
                                                "Entrega atualizada.")} />
                 </li>

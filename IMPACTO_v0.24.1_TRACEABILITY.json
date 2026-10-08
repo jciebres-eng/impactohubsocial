@@ -1,9 +1,9 @@
 {
   "version": "0.24.1",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-08T02:18:22+00:00",
-  "files_total": 2478,
-  "size_bytes_total": 41523565,
+  "generated_at": "2026-10-08T02:34:44+00:00",
+  "files_total": 2479,
+  "size_bytes_total": 41527613,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -79,7 +79,7 @@
     },
     "integração contínua": {
       "files": 3,
-      "size_bytes": 15511
+      "size_bytes": 16253
     },
     "manifesto de versão anterior": {
       "files": 12,
@@ -98,8 +98,8 @@
       "size_bytes": 181458
     },
     "operação": {
-      "files": 35,
-      "size_bytes": 266031
+      "files": 36,
+      "size_bytes": 269337
     },
     "outro": {
       "files": 4,
@@ -137,8 +137,8 @@
     },
     {
       "file": ".github/workflows/ci.yml",
-      "sha256": "84e506e1400a9402413c464f443baf1d33344b7a9ef1c83dfdb34df3e79a7016",
-      "size_bytes": 6849,
+      "sha256": "74137a9bdd37e8dfa99830b58dc000f4eebf4fdd097a56192f9f4e9f9ca3404d",
+      "size_bytes": 7591,
       "category": "integração contínua"
     },
     {
@@ -13441,6 +13441,12 @@
       "file": "scripts/bench_solution_search.py",
       "sha256": "102d176fdcfa9b26b81d32cec604841f785d8dae7130cfd1f83cb282873a188e",
       "size_bytes": 3227,
+      "category": "operação"
+    },
+    {
+      "file": "scripts/ci_annotate_audit.py",
+      "sha256": "fde1b8044e7749ca106a82492953d61b8c32bd3ea708dd00969c34d31d248811",
+      "size_bytes": 3306,
       "category": "operação"
     },
     {

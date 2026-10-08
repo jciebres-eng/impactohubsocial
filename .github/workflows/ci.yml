@@ -73,16 +73,26 @@ jobs:
       - name: Falhas da suíte como anotação
         if: failure() && steps.testes.outcome == 'failure'
         run: python3 scripts/ci_annotate_failures.py "$RUNNER_TEMP/testes.log"
+      # Auditoria: JSON em arquivo + anotação por vulnerabilidade (o log bruto não é legível de fora).
+      # Falha o passo se qualquer uma das duas ferramentas acusar — ou não conseguir rodar.
       - name: Auditoria de vulnerabilidades (dependências)
+        id: auditoria
+        if: always() && steps.testes.outcome != 'skipped'
         run: |
-          pip-audit -r backend/requirements.txt
-          cd web && npm audit --omit=dev --audit-level=high
+          set +e
+          pip-audit -r backend/requirements.txt -f json -o "$RUNNER_TEMP/pip-audit.json"; py=$?
+          (cd web && npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/npm-audit.json"); js=$?
+          python3 scripts/ci_annotate_audit.py "$RUNNER_TEMP/pip-audit.json" "$RUNNER_TEMP/npm-audit.json"
+          echo "pip-audit saiu com $py; npm audit saiu com $js"
+          [ "$py" -eq 0 ] && [ "$js" -eq 0 ]
       # TESTE DE RESTAURAÇÃO. `scripts/restore_test.sh` é o ativo de recuperação mais forte do
       # repositório — confere o sha256 do dump, restaura num banco descartável, verifica as cadeias
       # de hash e prova que o restore NÃO traz estado que não deveria existir. E nada o executava:
       # não estava no CI, no Makefile nem na suíte. É exatamente o defeito que `ops/backup.py`
       # critica na primeira linha: "script que ninguém executa não é backup".
+      # Prova independente da auditoria: roda mesmo que ela acuse algo.
       - name: Backup e RESTAURAÇÃO conferida (ciclo completo)
+        if: always() && steps.testes.outcome != 'skipped'
         env:
           ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           DB_NAME: impacto_restore_ci

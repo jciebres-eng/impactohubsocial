@@ -342,10 +342,13 @@ def agreement_create(ctx: Ctx, body: TSch.AgreementIn):
         if doc["status"] not in usable_statuses():
             raise ApiError(409, "document_not_usable", "O documento está aguardando verificação antivírus ou foi recusado")
         aid = c.scalar("INSERT INTO signed_agreements(org_id, project_id, kind, title, summary, document_id, content_sha256,"
-                       " effective_from, effective_to, value_cents, created_by)"
-                       " VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9::date,$10,$11) RETURNING id::text",
+                       " effective_from, effective_to, value_cents, created_by, platform_fee_bps, fee_payer_role,"
+                       " fee_mode, review_days, calendar_type, auto_accept, dispute_days)"
+                       " VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9::date,$10,$11,$12,$13,coalesce($14,'additional'),"
+                       " coalesce($15,10),coalesce($16,'calendar'),coalesce($17,false),coalesce($18,5)) RETURNING id::text",
                        ctx.org_id, body.project_id, body.kind, body.title, body.summary, body.document_id, doc["sha256"],
-                       body.effective_from, body.effective_to, body.value_cents, ctx.user_id)
+                       body.effective_from, body.effective_to, body.value_cents, ctx.user_id, body.platform_fee_bps,
+                       body.fee_payer_role, body.fee_mode, body.review_days, body.calendar_type, body.auto_accept, body.dispute_days)
         c.run("INSERT INTO signed_agreement_parties(agreement_id, org_id, role, required, user_id)"
               " VALUES ($1,$2,$3,true,$4)", aid, ctx.org_id,
               "contractor" if body.kind in ("service", "funding") else "provider", ctx.user_id)
@@ -417,6 +420,9 @@ def agreement_publish(ctx: Ctx):
     with ctx.tx() as c:
         out = AG.publish(c, agreement_id=ctx.path["agreement_id"], org_id=ctx.org_id, actor_user_id=ctx.user_id)
         ctx.audit(c, "agreement.published", "agreement", ctx.path["agreement_id"], {})
+    with ctx.system_tx() as c:
+        from ..trust import contract_rules
+        contract_rules.record_version(c, agreement_id=ctx.path["agreement_id"], actor_user_id=ctx.user_id)
     return out
 
 
@@ -464,7 +470,7 @@ def agreement_sign(ctx: Ctx, body: TSch.AgreementSignIn):
         ctx.audit(c, "agreement.signed", "agreement", a["id"], {"role": party["role"]})
     with ctx.system_tx() as c:
         AG.mark_signed(c, party_id=party["id"], signature_id=sid)
-        status = AG.settle(c, agreement_id=a["id"])
+        status = AG.settle(c, agreement_id=a["id"], actor_user_id=ctx.user_id)
     return {"signature_id": sid, "agreement_status": status, "method": "platform_advanced",
             "legal_note": "Assinatura eletrônica avançada: reautenticação, código de uso único, hash da versão exata e "
                           "trilha encadeada. Para exigência de assinatura qualificada (ICP-Brasil/gov.br) use certificado "
@@ -484,28 +490,78 @@ def agreement_decline(ctx: Ctx, body: TSch.RevokeIn):
 
 
 @route("POST", "/v1/signed-agreements/{agreement_id}/milestones", body=TSch.MilestoneIn, min_role=WRITE, status=201,
-       tags=("agreements",), summary="Acrescenta uma entrega ao acompanhamento longitudinal do acordo")
+       tags=("agreements",), summary="Acrescenta um marco ao acordo (com valor e ordem; o contrato deriva as obrigações dele)")
 def agreement_milestone(ctx: Ctx, body: TSch.MilestoneIn):
     with ctx.tx() as c:
-        if not c.scalar("SELECT 1 FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"]):
+        st = c.scalar("SELECT status FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"])
+        if st is None:
             raise not_found("Acordo")
-        mid = c.scalar("INSERT INTO signed_agreement_milestones(agreement_id, org_id, title, due_on, note)"
-                       " VALUES ($1,$2,$3,$4::date,$5) RETURNING id::text",
-                       ctx.path["agreement_id"], ctx.org_id, body.title, body.due_on, body.note)
-        ctx.audit(c, "agreement.milestone_added", "agreement", ctx.path["agreement_id"], {})
+        if st in ("superseded", "canceled", "completed", "expired"):
+            raise ApiError(409, "not_editable", f"Acordo {st}: não recebe marcos novos")
+        mid = c.scalar("INSERT INTO signed_agreement_milestones(agreement_id, org_id, title, due_on, note, seq, amount_cents)"
+                       " VALUES ($1,$2,$3,$4::date,$5,$6,$7) RETURNING id::text",
+                       ctx.path["agreement_id"], ctx.org_id, body.title, body.due_on, body.note, body.seq, body.amount_cents)
+        ctx.audit(c, "agreement.milestone_added", "agreement", ctx.path["agreement_id"], {"amount_cents": body.amount_cents})
     return {"id": mid}
 
 
 @route("PATCH", "/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}", body=TSch.MilestonePatch,
-       min_role=WRITE, tags=("agreements",), summary="Reporta ou avalia uma entrega do acordo")
+       min_role=WRITE, tags=("agreements",), summary="Reporta a entrega (quem executa) ou aceita/recusa (a outra parte): o grafo e os quatro olhos são do banco")
 def agreement_milestone_patch(ctx: Ctx, body: TSch.MilestonePatch):
+    from ..trust import contract_rules
     with ctx.tx() as c:
-        m = c.one("SELECT id::text AS id, agreement_id::text AS agreement_id FROM signed_agreement_milestones"
-                  " WHERE id = $1 AND agreement_id = $2", ctx.path["milestone_id"], ctx.path["agreement_id"])
-        if not m:
-            raise not_found("Entrega")
-        c.run("UPDATE signed_agreement_milestones SET status = $2, document_id = coalesce($3, document_id),"
-              " note = coalesce($4, note), reported_by = $5, reported_at = now() WHERE id = $1",
-              m["id"], body.status, body.document_id, body.note, ctx.user_id)
-        ctx.audit(c, "agreement.milestone_updated", "agreement", m["agreement_id"], {"status": body.status})
-    return {"updated": True}
+        out = contract_rules.report_milestone(c, agreement_id=ctx.path["agreement_id"], milestone_id=ctx.path["milestone_id"],
+                                              org_id=ctx.org_id, user_id=ctx.user_id, status=body.status,
+                                              document_id=body.document_id, note=body.note)
+        ctx.audit(c, "agreement.milestone_updated", "agreement", ctx.path["agreement_id"], {"status": body.status})
+        a = c.one("SELECT project_id::text AS project_id, org_id::text AS org_id FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"])
+    if a and a["project_id"] and body.status in ("delivered", "accepted", "rejected"):
+        # O razão do projeto pertence à organização dona do acordo; a contraparte (financiador) que aceita
+        # ou recusa o marco escreve nele via contexto de sistema, com o ator real registrado.
+        from ..services.audit import ledger
+        with ctx.system_tx() as c:
+            ledger(c, project_id=a["project_id"], org_id=a["org_id"], actor=ctx.user_id, entry_type=f"milestone_{body.status}",
+                   ref_type="agreement_milestone", ref_id=ctx.path["milestone_id"],
+                   payload={"agreement_id": ctx.path["agreement_id"], "actor_org_id": ctx.org_id})
+    return {"updated": True, **out}
+
+
+@route("GET", "/v1/signed-agreements/{agreement_id}/allocation", min_role="viewer", tags=("agreements",),
+       summary="Matriz de distribuição do acordo: bruto, projeto, taxa da plataforma (cobrável ou não, e por quê), terceiros")
+def agreement_allocation(ctx: Ctx):
+    from ..trust import contract_rules
+    with ctx.tx(readonly=True) as c:
+        if not c.scalar("SELECT 1 FROM signed_agreements WHERE id = $1", ctx.path["agreement_id"]):
+            raise not_found("Acordo")
+        gravada = contract_rules.allocation(c, ctx.path["agreement_id"])
+        return {"recorded": gravada, "preview": None if gravada else contract_rules.preview(c, ctx.path["agreement_id"]),
+                "non_custodial": ("A plataforma calcula, instrui e concilia; não recebe nem repassa valor de terceiros (ADR-284). "
+                                  "A taxa da plataforma, quando cobrável, é cobrança própria ao pagador — nunca desconto em trânsito.")}
+
+
+@route("POST", "/v1/signed-agreements/{agreement_id}/new-version", body=TSch.AgreementNewVersionIn, min_role=WRITE, status=201,
+       tags=("agreements",), summary="Abre a versão seguinte do acordo (rascunho); a anterior fica substituída e suas assinaturas deixam de aprovar")
+def agreement_new_version(ctx: Ctx, body: TSch.AgreementNewVersionIn):
+    from ..trust import contract_rules
+    with ctx.tx() as c:
+        doc = c.one("SELECT sha256, status FROM documents WHERE id = $1 AND org_id = $2 AND deleted_at IS NULL", body.document_id, ctx.org_id)
+        if not doc:
+            raise not_found("Documento")
+        from ..services.documents import usable_statuses
+        if doc["status"] not in usable_statuses():
+            raise ApiError(409, "document_not_usable", "O documento está aguardando verificação antivírus ou foi recusado")
+        changes = body.model_dump(exclude_unset=True, exclude={"document_id", "reason"})
+    with ctx.system_tx() as c:
+        out = contract_rules.new_version(c, agreement_id=ctx.path["agreement_id"], org_id=ctx.org_id, actor_user_id=ctx.user_id,
+                                         document_id=body.document_id, document_sha256=doc["sha256"], reason=body.reason, changes=changes)
+    with ctx.tx() as c:
+        ctx.audit(c, "agreement.new_version", "agreement", ctx.path["agreement_id"], {"new_id": out["id"], "version": out["version"]})
+    return out
+
+
+@route("GET", "/v1/agreements/pending", min_role="viewer", tags=("agreements",),
+       summary="O que espera decisão desta organização nos acordos vigentes (entregar, aceitar, pagar)")
+def agreements_pending(ctx: Ctx):
+    from ..trust import contract_rules
+    with ctx.tx(readonly=True) as c:
+        return {"items": contract_rules.pending_for(c, ctx.org_id)}

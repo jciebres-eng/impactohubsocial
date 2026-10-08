@@ -21,6 +21,7 @@ def detail(conn: Connection, agreement_id: str) -> dict | None:
     a = conn.one(
         "SELECT a.id::text AS id, a.org_id::text AS org_id, a.project_id::text AS project_id, a.kind, a.title, a.summary,"
         " a.document_id::text AS document_id, a.content_sha256, a.status, a.effective_from, a.effective_to, a.value_cents,"
+        " a.version, a.platform_fee_bps, a.fee_payer_role, a.fee_mode, a.review_days, a.calendar_type, a.auto_accept, a.dispute_days,"
         " a.created_at, a.updated_at, o.legal_name AS owner_name,"
         " (SELECT code FROM verifiable_records r WHERE r.subject_type = 'agreement' AND r.subject_id = a.id"
         "  AND r.status = 'active' ORDER BY r.created_at DESC LIMIT 1) AS verification_code"
@@ -33,9 +34,22 @@ def detail(conn: Connection, agreement_id: str) -> dict | None:
         " user_display_name(p.user_id) AS user_name FROM signed_agreement_parties p"
         " JOIN organizations o ON o.id = p.org_id WHERE p.agreement_id = $1 ORDER BY p.invited_at", agreement_id)
     a["milestones"] = conn.query(
-        "SELECT id::text AS id, title, due_on, status, note, document_id::text AS document_id, reported_at,"
-        " reported_by::text AS reported_by FROM signed_agreement_milestones WHERE agreement_id = $1 ORDER BY due_on NULLS LAST, created_at",
+        "SELECT id::text AS id, seq, title, due_on, status, note, document_id::text AS document_id, reported_at,"
+        " reported_by::text AS reported_by, amount_cents, source, delivered_at, acceptance_due_on, accepted_at,"
+        " accepted_by_org::text AS accepted_by_org, rejection_reason"
+        " FROM signed_agreement_milestones WHERE agreement_id = $1 ORDER BY seq NULLS LAST, due_on NULLS LAST, created_at",
         agreement_id)
+    # v0.26.0 — o contrato como regra operacional: versão, termos, obrigações derivadas e matriz de distribuição
+    from . import contract_rules
+    a["terms"] = conn.one("SELECT version, supersedes_id::text AS supersedes_id, superseded_by_id::text AS superseded_by_id,"
+                          " version_reason, platform_fee_bps, fee_payer_role, fee_mode, review_days, calendar_type, auto_accept,"
+                          " dispute_days, activated_at FROM signed_agreements WHERE id = $1", agreement_id)
+    a["obligations"] = contract_rules.obligations(conn, agreement_id)
+    a["allocation"] = contract_rules.allocation(conn, agreement_id)
+    a["allocation_preview"] = None if a["allocation"] else contract_rules.compute_allocation(conn, {**a, **a["terms"]}, a["parties"])
+    a["versions"] = conn.query("SELECT version, content_sha256, reason, created_at FROM agreement_versions"
+                               " WHERE lineage_id = (SELECT coalesce((SELECT lineage_id FROM agreement_versions WHERE agreement_id = $1 LIMIT 1), $1::uuid))"
+                               " ORDER BY version", agreement_id)
     pending = [p for p in a["parties"] if p["required"] and not p["signed_at"] and not p["declined_at"]]
     a["pending_signatures"] = len(pending)
     a["all_signed"] = not pending and any(p["signed_at"] for p in a["parties"])
@@ -71,7 +85,7 @@ def publish(conn: Connection, *, agreement_id: str, org_id: str, actor_user_id: 
             body=("O conteúdo foi congelado e está aguardando assinatura. A plataforma oferece "
                   "assinatura AVANÇADA própria; ela não emite nem homologa assinatura qualificada "
                   "(ICP-Brasil ou gov.br)."),
-            link=f"/instrumentos/{agreement_id}", priority="high", min_role="admin",
+            link=f"/acordos/{agreement_id}", priority="high", min_role="admin",   # v0.26.0: o SPA não tem /instrumentos
             actor_user_id=actor_user_id if parte["org_id"] == org_id else None,
             ref_type="agreement", ref_id=agreement_id, action_label="Revisar e assinar",
             payload={"content_sha256": a["content_sha256"]},
@@ -89,7 +103,7 @@ def mark_signed(conn: Connection, *, party_id: str, signature_id: str) -> None:
     conn.run("UPDATE signed_agreement_parties SET signature_id = $2, signed_at = now() WHERE id = $1", party_id, signature_id)
 
 
-def settle(conn: Connection, *, agreement_id: str) -> str:
+def settle(conn: Connection, *, agreement_id: str, actor_user_id: str | None = None) -> str:
     """Se todas as partes obrigatórias assinaram, o acordo passa a vigente. Contexto privilegiado."""
     pending = conn.scalar("SELECT count(*) FROM signed_agreement_parties WHERE agreement_id = $1 AND required"
                           " AND signed_at IS NULL AND declined_at IS NULL", agreement_id)
@@ -100,6 +114,10 @@ def settle(conn: Connection, *, agreement_id: str) -> str:
         return "canceled"
     if pending == 0:
         conn.run("UPDATE signed_agreements SET status = 'active' WHERE id = $1 AND status = 'awaiting_signatures'", agreement_id)
+        # v0.26.0 — CONTRATO COMO REGRA OPERACIONAL: vigente, o acordo deriva obrigações e a matriz de
+        # distribuição na mesma transação (contract_rules.activate). Antes, ficar `active` não produzia nada.
+        from . import contract_rules
+        contract_rules.activate(conn, agreement_id=agreement_id, actor_user_id=actor_user_id)
         return "active"
     return "awaiting_signatures"
 

@@ -73,6 +73,14 @@ class AgreementIn(In):
     effective_from: date | None = None
     effective_to: date | None = None
     value_cents: Annotated[int | None, Field(ge=0, le=10**13)] = None
+    # v0.26.0 — termos operacionais do contrato (congelam ao publicar)
+    platform_fee_bps: Annotated[int | None, Field(ge=0, le=10000)] = None
+    fee_payer_role: Literal["funder", "contractor", "provider"] | None = None
+    fee_mode: Literal["additional", "deducted"] | None = None
+    review_days: Annotated[int | None, Field(ge=1, le=120)] = None
+    calendar_type: Literal["calendar", "business"] | None = None
+    auto_accept: bool | None = None
+    dispute_days: Annotated[int | None, Field(ge=0, le=60)] = None
 
 
 class AgreementPatch(In):
@@ -81,6 +89,14 @@ class AgreementPatch(In):
     effective_from: date | None = None
     effective_to: date | None = None
     value_cents: Annotated[int | None, Field(ge=0, le=10**13)] = None
+    # v0.26.0 — termos operacionais do contrato (congelam ao publicar)
+    platform_fee_bps: Annotated[int | None, Field(ge=0, le=10000)] = None
+    fee_payer_role: Literal["funder", "contractor", "provider"] | None = None
+    fee_mode: Literal["additional", "deducted"] | None = None
+    review_days: Annotated[int | None, Field(ge=1, le=120)] = None
+    calendar_type: Literal["calendar", "business"] | None = None
+    auto_accept: bool | None = None
+    dispute_days: Annotated[int | None, Field(ge=0, le=60)] = None
 
 
 class PartyIn(In):
@@ -100,6 +116,25 @@ class MilestoneIn(In):
     title: Annotated[str, Field(min_length=2, max_length=200)]
     due_on: date | None = None
     note: Annotated[str | None, Field(max_length=2000)] = None
+    seq: Annotated[int | None, Field(ge=1, le=500)] = None
+    amount_cents: Annotated[int | None, Field(ge=0, le=10**13)] = None
+
+
+class AgreementNewVersionIn(In):
+    document_id: Uuid
+    reason: Annotated[str, Field(min_length=10, max_length=1000)]
+    title: Annotated[str | None, Field(min_length=3, max_length=200)] = None
+    summary: Annotated[str | None, Field(max_length=4000)] = None
+    effective_from: date | None = None
+    effective_to: date | None = None
+    value_cents: Annotated[int | None, Field(ge=0, le=10**13)] = None
+    platform_fee_bps: Annotated[int | None, Field(ge=0, le=10000)] = None
+    fee_payer_role: Literal["funder", "contractor", "provider"] | None = None
+    fee_mode: Literal["additional", "deducted"] | None = None
+    review_days: Annotated[int | None, Field(ge=1, le=120)] = None
+    calendar_type: Literal["calendar", "business"] | None = None
+    auto_accept: bool | None = None
+    dispute_days: Annotated[int | None, Field(ge=0, le=60)] = None
 
 
 class MilestonePatch(In):

@@ -356,7 +356,7 @@ function AllocationMatrix({ alloc, parties, owner, preview }: { alloc: any; part
 export function AgreementDetail({ id }: { id: string }) {
   const { data, error, loading, reload } = useLoad<any>(`/v1/signed-agreements/${id}`, [id]);
   const { busy, run } = useAction();
-  const { active_org } = useSession();
+  const { me } = useSession();
   const [partyOrg, setPartyOrg] = useState("");
   const [partyRole, setPartyRole] = useState("provider");
   const [declining, setDeclining] = useState(false);
@@ -371,7 +371,7 @@ export function AgreementDetail({ id }: { id: string }) {
   const [vReason, setVReason] = useState("");
 
   const act = (fn: () => Promise<any>, msg: string) => run(async () => { await fn(); reload(); return msg; });
-  const myOrg = active_org?.id;
+  const myOrg = me?.active_org?.id;
   const isOwner = data && myOrg === data.org_id;
   const isParty = data && data.parties?.some((p: any) => p.org_id === myOrg);
   const isCounterparty = isParty && !isOwner;

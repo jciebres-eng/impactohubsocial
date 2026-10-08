@@ -54,6 +54,33 @@ def _tenta_login(url: str) -> str | None:
         c.close()
 
 
+#: Mensagem do servidor → o que a pessoa corrige. O log das Actions não é lido por quem não programa;
+#: a falha de conexão tem de aparecer no resumo da execução, com o próximo passo (v0.24.2).
+_CAUSAS = (
+    ("password authentication failed", "SENHA recusada. Confira a senha do administrador dentro de "
+     "SUPABASE_ADMIN_URL; símbolos @ : / # ? % precisam virar %40 %3A %2F %23 %3F %25."),
+    ("tenant or user not found", "USUÁRIO ou REGIÃO não reconhecidos pelo pooler. O usuário tem de ser "
+     "postgres.<ref-do-projeto> e o host o mesmo mostrado em Connect → Session pooler."),
+    ("could not translate host name", "HOST não existe. Copie de novo o endereço em Connect → Session pooler."),
+    ("timeout", "o servidor não respondeu. Confira host e porta 5432 (pooler de sessão)."),
+    ("connection refused", "porta recusada. Use a porta 5432 do pooler de sessão."),
+)
+
+
+def falha_de_conexao(erro: str) -> int:
+    """Explica a falha no resumo e nas anotações. A mensagem do libpq não contém a senha."""
+    primeira = (erro.strip().splitlines() or ["(sem mensagem)"])[0][:300]
+    dica = next((d for chave, d in _CAUSAS if chave in erro.lower()),
+                "causa não reconhecida; a mensagem do servidor está acima.")
+    diz(f"- NÃO CONECTOU: `{primeira}`\n- o que fazer: {dica}")
+    print(f"::error title=Supabase: não conectou::{primeira} — {dica}")
+    resumo = os.getenv("GITHUB_STEP_SUMMARY")
+    if resumo:
+        with open(resumo, "a", encoding="utf-8") as fh:
+            fh.write("\n".join(saida) + "\n")
+    return 1
+
+
 def main() -> int:
     url = os.getenv("DATABASE_URL", "")
     if not url:
@@ -64,7 +91,10 @@ def main() -> int:
         f"usuário `{unquote(u.username or '')}`\n")
     if (u.hostname or "").startswith("db.") and (u.hostname or "").endswith(".supabase.co"):
         alerta("conexão DIRETA do Supabase (IPv6). GitHub Actions não tem IPv6: use a do pooler de sessão.")
-    c = Connection(url)
+    try:
+        c = Connection(url)
+    except DatabaseError as exc:
+        return falha_de_conexao(str(exc))
     try:
         c.execute_script("BEGIN TRANSACTION READ ONLY;")
         diz(f"- servidor: {c.scalar('SHOW server_version')}")

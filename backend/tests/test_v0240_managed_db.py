@@ -146,6 +146,47 @@ class TheSupabaseToolingIsSafeByConstructionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             app_dsn("host=x user=y", "p")
 
+    def test_a_connection_failure_is_explained_in_the_summary_without_the_password(self):
+        """v0.24.2: a 1ª verificação real (run 37725256587) falhou ao conectar e o resumo só dizia
+        'exit code 1' — o motivo ficava no log, que quem não programa não lê. Agora a falha vira
+        anotação de erro com o próximo passo, e a senha da URL nunca aparece."""
+        import os
+        import subprocess
+        import sys
+        import tempfile
+        from tests.support import ROOT
+        segredo = "exemplo-senha-que-nao-pode-vazar"
+        casos = {
+            f"postgresql://postgres.exemplo:{segredo}@host-inexistente.invalid:5432/postgres": "HOST não existe",
+            f"postgresql://usuario_que_nao_existe_exemplo:{segredo}@127.0.0.1:1/postgres": "porta recusada",
+        }
+        for url, dica in casos.items():
+            with tempfile.NamedTemporaryFile("r", suffix=".md") as resumo:
+                env = {**os.environ, "DATABASE_URL": url, "GITHUB_STEP_SUMMARY": resumo.name}
+                env.pop("IMPACTO_APP_PASSWORD", None)
+                r = subprocess.run([sys.executable, str(ROOT / "scripts" / "supabase_check.py")],
+                                   capture_output=True, text=True, env=env, timeout=60)
+                saida = r.stdout + r.stderr + resumo.read()
+            self.assertEqual(r.returncode, 1, saida)
+            self.assertIn("::error title=Supabase: não conectou::", r.stdout)
+            self.assertIn(dica, saida)
+            self.assertIn("NÃO CONECTOU", saida, "o resumo da execução não recebeu a explicação")
+            self.assertNotIn(segredo, saida, "a senha da URL apareceu na saída")
+            self.assertNotIn("Traceback", saida)
+        from importlib import util
+        spec = util.spec_from_file_location("supabase_check", ROOT / "scripts" / "supabase_check.py")
+        mod = util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        for msg, esperado in (('FATAL:  password authentication failed for user "postgres"', "SENHA recusada"),
+                              ("FATAL:  Tenant or user not found", "USUÁRIO ou REGIÃO")):
+            with self.subTest(msg=msg):
+                from contextlib import redirect_stdout
+                from io import StringIO
+                buf = StringIO()
+                with redirect_stdout(buf):
+                    self.assertEqual(mod.falha_de_conexao(msg), 1)
+                self.assertIn(esperado, buf.getvalue())
+
     def test_the_entrypoint_uses_the_pooler_aware_rewrite(self):
         from tests.support import ROOT
         script = (ROOT / "backend" / "start_container.sh").read_text(encoding="utf-8")

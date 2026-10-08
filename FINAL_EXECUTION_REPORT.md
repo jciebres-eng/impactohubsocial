@@ -42,9 +42,15 @@ A rodada transformou a tese econômica em produto funcional, sem fintech dentro 
 
 Commits da rodada (sobre `7d2730d`): `5780a25` (backend do contrato), `de83b1e` (tela do acordo e
 jornada), `0be39bd` (torres, Ready, telas), `c132eab` (correções da regressão, motores, documentos,
-versão) e o commit final de fechamento, cujo hash é registrado em `FINAL_RELEASE_MANIFEST.json` e
-no `.sha256` do pacote (não cabe dentro do próprio commit). A tag `v0.26.0` aponta para o commit de
-fechamento.
+versão), `e69231c` (fechamento: auditoria e relatório), `ce3579e` (correção de tipo acusada pelo
+typecheck do CI) e o commit do manifesto de release, para o qual a tag `v0.26.0` aponta e cujo hash é
+registrado em `FINAL_RELEASE_MANIFEST.json` e no `.sha256` do pacote (não cabe dentro do próprio commit).
+
+**GitHub Actions** no commit `ce3579e` (run `37827919094`): `auditoria`, `docker` (com o typecheck
+oficial) e `pilha-do-zero` (banco vazio → imagem → migrações → seed → jornadas → 220 telas → axe →
+reinício) **verdes**; `backend` com 2.295 testes e apenas as 2 conferências do manifesto de
+rastreabilidade reprovadas — porque o manifesto é gerado no fechamento, depois desse commit (a run
+anterior, `37827524521`, acusou o erro de tipo `active_org`, corrigido em `ce3579e`).
 
 ## 4. Architecture Status
 

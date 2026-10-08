@@ -1,11 +1,11 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.26.0",
  "version": "0.26.0",
- "commit": "e69231c",
- "date": "2026-10-08T18:48:50+00:00",
+ "commit": "ce3579e",
+ "date": "2026-10-08T19:28:06+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 2970,
+  "tracked_total": 2971,
   "traceability": "IMPACTO_v0.26.0_TRACEABILITY.json",
   "package": "IMPACTO_TRUST_FINAL_RELEASE_0.26.0.zip"
  },

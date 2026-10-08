@@ -1,9 +1,9 @@
 {
   "version": "0.26.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-08T18:48:50+00:00",
+  "generated_at": "2026-10-08T19:28:07+00:00",
   "files_total": 2944,
-  "size_bytes_total": 50719623,
+  "size_bytes_total": 50720241,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 60,
@@ -31,7 +31,7 @@
     },
     "documentação da raiz": {
       "files": 154,
-      "size_bytes": 1725716
+      "size_bytes": 1726311
     },
     "documentação técnica": {
       "files": 58,
@@ -55,11 +55,11 @@
     },
     "frontend: build": {
       "files": 23,
-      "size_bytes": 1394968
+      "size_bytes": 1394995
     },
     "frontend: código": {
       "files": 61,
-      "size_bytes": 1083691
+      "size_bytes": 1083687
     },
     "frontend: estático": {
       "files": 18,
@@ -395,8 +395,8 @@
     },
     {
       "file": "FINAL_EXECUTION_REPORT.md",
-      "sha256": "8992dba191f39344d5ca04d640fc0995343e690d9d13ed02bbccb19de001b8a0",
-      "size_bytes": 13475,
+      "sha256": "ecfbec095abd2021aab47421d46c86f4234a9d766d7ec8217f7f04d8d87219e9",
+      "size_bytes": 14070,
       "category": "documentação da raiz"
     },
     {
@@ -449,7 +449,7 @@
     },
     {
       "file": "FINAL_RELEASE_MANIFEST.json",
-      "sha256": "13681855f43377b930774943d1837054f8e931f4db4c62e0c5d720733b56b056",
+      "sha256": "ca7a97415ec4d285f47c948e38e5a7dd5a7095c5a6e5fb6d3ae70c11d1f19ae9",
       "size_bytes": 6286,
       "category": "manifesto de versão anterior"
     },
@@ -17122,9 +17122,9 @@
       "category": "frontend"
     },
     {
-      "file": "web/dist/assets/app-IXNOCZBP.js",
-      "sha256": "fa97608c145d67f1f541233acc189491b5a75060ae5214ff6171ecff1120efa8",
-      "size_bytes": 1051439,
+      "file": "web/dist/assets/app-I3LLPHDO.js",
+      "sha256": "e391afe7ac61a279c9b99587df1203a9ea5f10f5067aa1e7a878759fa1730434",
+      "size_bytes": 1051466,
       "category": "frontend: build"
     },
     {
@@ -17177,7 +17177,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "dbe9681ec30cfe60d48b5e071cd266b2be6d82faff9460d38919ec0605d052ae",
+      "sha256": "2ba775fbd07043ee9c4a17c228c2ee4917ea452b2b116b2d9c17129ad12e46f2",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -17231,7 +17231,7 @@
     },
     {
       "file": "web/dist/index.html",
-      "sha256": "8825361cb6e5cfffa373005fba23e1f6ed763ff5263c3a0b6e64f1bbdf60da00",
+      "sha256": "e781024c950b0f92ed6b7a6883d899030c660e211543c91f725457aae3f9dbcb",
       "size_bytes": 1127,
       "category": "frontend: build"
     },
@@ -17255,7 +17255,7 @@
     },
     {
       "file": "web/dist/sw.js",
-      "sha256": "1494d326400a9553565e766f2816e9e3c72293f21f2af29663ff0a23a4c8e9df",
+      "sha256": "8b5577340b26d0697a1bdbba58cd7dd90810021001d96c0126fcee1eb676a8e2",
       "size_bytes": 1923,
       "category": "frontend: build"
     },
@@ -17657,8 +17657,8 @@
     },
     {
       "file": "web/src/pages/trust.tsx",
-      "sha256": "ef3e6fce9af914a4cb3c31b25dc8423400ca4d1fbc25fe78ce588d63f7992913",
-      "size_bytes": 37221,
+      "sha256": "ab6fce9064a22ad71e04ac3c33ddbf2a85dbf0b5800c38294ab304a2da6a9994",
+      "size_bytes": 37217,
       "category": "frontend: código"
     },
     {

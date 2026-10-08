@@ -1,0 +1,48 @@
+# Regressão completa — v0.27.0 (PostgreSQL 16 local, Chromium; nenhum build do front durante a execução)
+
+## 1ª passagem (código novo, antes das correções) — 23 falhas, 2 erros; causas e correções em FINAL_EXECUTION_AUDIT.md §7
+----------------------------------------------------------------------
+Ran 2250 tests in 1931.805s
+FAILED (failures=23, errors=2, skipped=26)
+
+ERROR: test_event_registration_and_trial_request (test_e2e_knowledge.KnowledgeE2E.test_event_registration_and_trial_request)
+ERROR: tests.test_unit (unittest.loader._FailedTest.tests.test_unit)
+FAIL: test_the_counts_in_the_document_match_the_registry (test_architecture.EngineDocumentationTests.test_the_counts_in_the_document_match_the_registry)
+FAIL: test_the_computed_contrast_meets_wcag_aa_in_dark_mode (test_e2e_v0181_accessibility.AccessibilityTests.test_the_computed_contrast_meets_wcag_aa_in_dark_mo
+FAIL: test_touch_targets_are_big_enough_on_a_phone (test_e2e_v0181_accessibility.AccessibilityTests.test_touch_targets_are_big_enough_on_a_phone)
+FAIL: test_price_comes_from_the_server_with_an_effective_period (test_v0160_invariants.NetworkInvariants.test_price_comes_from_the_server_with_an_effective_peri
+FAIL: test_classe_declarada_bate_com_a_regra_real_da_chave (test_v0190_lgpd_deletion.RetentionPolicyTests.test_classe_declarada_bate_com_a_regra_real_da_chave)
+FAIL: test_no_financial_route_is_reachable_by_anyone_below_owner (test_v0200_adversarial.RoleSweepTests.test_no_financial_route_is_reachable_by_anyone_below_own
+FAIL: test_every_declared_flag_is_read_by_some_code (test_v0200_cleanup.FlagsAndInvariantsAreRealTests.test_every_declared_flag_is_read_by_some_code)
+FAIL: test_no_module_level_function_in_the_package_is_unreachable (test_v0200_cleanup.NoDeadCodeReturnsTests.test_no_module_level_function_in_the_package_is_unr
+FAIL: test_every_action_prefix_in_the_codebase_has_a_category (test_v0230_audit_engine.TheStandardFieldsExistAndAreFilledWithoutTouchingCallersTests.test_every_
+FAIL: test_the_matrix_exists_and_covers_every_route (test_v0230_authorization_matrix.EveryOperationIsClassifiedTests.test_the_matrix_exists_and_covers_every_rou
+FAIL: test_the_matrix_is_current (test_v0230_authorization_matrix.EveryOperationIsClassifiedTests.test_the_matrix_is_current)
+FAIL: test_no_migration_drops_a_table_or_column_without_a_declared_reason (test_v0230_data_infra_gate.TheMigrationsAreForwardOnlyAndFingerprintedTests.test_no_m
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_mat
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_mat
+FAIL: test_the_authorization_matrix_covers_every_route_the_router_serves (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_the_authoriza
+FAIL: test_regenerating_the_map_reproduces_what_is_committed (test_v0230_frontend_gate.TheScreenBackendMapTellsTheTruthAboutCoverageTests.test_regenerating_the_
+FAIL: test_every_route_the_router_declares_is_in_the_inventory (test_v0230_frontend_gate.TheScreenInventoryLosesNoScreenTests.test_every_route_the_router_declar
+FAIL: test_regenerating_the_inventory_reproduces_what_is_committed (test_v0230_frontend_gate.TheScreenInventoryLosesNoScreenTests.test_regenerating_the_inventor
+FAIL: test_the_catalog_covers_every_polymorphic_column_without_a_foreign_key (test_v0230_provenance.TheOrphanCheckIsRealNowTests.test_the_catalog_covers_every_p
+FAIL: test_every_manifest_entry_is_a_real_tracked_file (test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_every_manifest_entry_is_a_real_tracke
+FAIL: test_every_tracked_file_is_either_in_the_manifest_or_excluded_with_a_reason (test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_every_trac
+FAIL: test_the_previous_version_was_snapshotted (test_v0230_release_gate.ThereIsOneVersionAndEverybodyAgreesWithItTests.test_the_previous_version_was_snapshotte
+FAIL: test_the_committed_matrix_is_what_the_evidence_produces (test_v0250_cobertura.TheCoverageMatrixMatchesTheEvidenceTests.test_the_committed_matrix_is_what_t
+
+
+## 2ª passagem (após as correções; antes do fechamento — manifesto, openapi e matrizes que citam módulos de teste são gerados depois)
+----------------------------------------------------------------------
+Ran 2285 tests in 1890.687s
+FAILED (failures=4, skipped=29)
+
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_matrix_reproduces_what_is_committed) [ENGIN
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_matrix_reproduces_what_is_committed) [INTEG
+FAIL: test_the_manifest_exists_for_this_version (test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_the_openapi_document_carries_the_same_version (test_v0230_release_gate.ThereIsOneVersionAndEverybodyAgreesWithItTests.test_the_openapi_document_carries_the_same_version)
+
+# As 4 falhas da 2ª passagem são de fechamento: ENGINE_VALIDATION_MATRIX.csv e INTEGRATION_HOMOLOGATION_MATRIX.csv citam os módulos
+# de teste por nome e não conheciam tests/test_v0270_release_docs.py (criado após o início da execução); o manifesto
+# e o openapi são gerados no fechamento. Regenerados em seguida; portões reexecutados abaixo.
+

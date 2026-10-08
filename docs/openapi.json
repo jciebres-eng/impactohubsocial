@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -5141,7 +5141,7 @@
   },
   "/v1/plans": {
    "get": {
-    "summary": "Catálogo público de planos (tier, preços mensal/anual; preço null = sob consulta)",
+    "summary": "Catálogo público de pacotes de capacidades (sem preço: não há assinatura) e as vias de acesso",
     "operationId": "get_billing_routes_plans",
     "tags": [
      "billing"
@@ -5157,115 +5157,9 @@
     }
    }
   },
-  "/v1/plans/price": {
-   "get": {
-    "summary": "Preço vigente de um plano: entrada, preço regular, equivalente mensal, total e imposto",
-    "operationId": "get_billing_routes_billing_price",
-    "tags": [
-     "billing"
-    ],
-    "security": [],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "parameters": [
-     {
-      "name": "plan_key",
-      "in": "query",
-      "required": true,
-      "schema": {
-       "pattern": "^[a-z0-9_]{3,40}$",
-       "title": "Plan Key",
-       "type": "string"
-      }
-     },
-     {
-      "name": "interval",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "default": "month",
-       "enum": [
-        "month",
-        "year"
-       ],
-       "title": "Interval",
-       "type": "string"
-      }
-     }
-    ]
-   }
-  },
-  "/v1/billing/price-history": {
-   "get": {
-    "summary": "Histórico de preço da organização e avisos de reajuste recebidos",
-    "operationId": "get_billing_routes_billing_price_history",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/price-notices/{notice_id}/ack": {
-   "post": {
-    "summary": "Registra que a organização viu o aviso de reajuste",
-    "operationId": "post_billing_routes_ack_price_notice",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner",
-    "parameters": [
-     {
-      "name": "notice_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ]
-   }
-  },
   "/v1/billing": {
    "get": {
-    "summary": "Estado de cobrança da organização: plano, status, trial, próxima cobrança, avisos, faturas",
+    "summary": "Acesso e concessões da organização: de onde vem o direito, concessões, convênios, contratos e faturas",
     "operationId": "get_billing_routes_billing_state",
     "tags": [
      "billing"
@@ -5289,214 +5183,9 @@
     "description": "Requer organização ativa · Papel mínimo: viewer"
    }
   },
-  "/v1/billing/quote": {
-   "post": {
-    "summary": "Simulação do valor FINAL calculada no servidor (preço, desconto, trial, primeira cobrança). Não cobra nada.",
-    "operationId": "post_billing_routes_quote",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: viewer",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/QuoteIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/billing/checkout": {
-   "post": {
-    "summary": "Inicia contratação (Stripe Checkout) com trial quando houver. Sem gateway configurado, responde 503 de forma explícita.",
-    "operationId": "post_billing_routes_checkout",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 20/3600s por IP",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/CheckoutIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/billing/cancel": {
-   "post": {
-    "summary": "Cancela a assinatura ou o trial (sem cobrança; acesso mantido até o fim do período)",
-    "operationId": "post_billing_routes_cancel",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/reactivate": {
-   "post": {
-    "summary": "Desfaz um cancelamento em andamento",
-    "operationId": "post_billing_routes_reactivate",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/change-plan": {
-   "post": {
-    "summary": "Upgrade/downgrade (sincronizado com o provedor)",
-    "operationId": "post_billing_routes_change_plan",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 20/3600s por IP",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/ChangePlanIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/billing/portal": {
-   "post": {
-    "summary": "Portal de pagamento do provedor (método de pagamento, faturas)",
-    "operationId": "post_billing_routes_portal",
-    "tags": [
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner"
-   }
-  },
-  "/v1/billing/webhooks/stripe": {
-   "post": {
-    "summary": "Webhook do Stripe (assinatura verificada, idempotente)",
-    "operationId": "post_billing_routes_stripe_webhook",
-    "tags": [
-     "billing"
-    ],
-    "security": [],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Rate limit: 600/60s por IP"
-   }
-  },
   "/v1/vouchers/redeem": {
    "post": {
-    "summary": "Resgata voucher (transação atômica; resposta genérica para códigos inválidos). Descontos ficam pendentes até o checkout.",
+    "summary": "Resgata voucher de concessão (transação atômica; resposta genérica para códigos inválidos; vouchers de desconto aposentados)",
     "operationId": "post_billing_routes_redeem",
     "tags": [
      "billing"
@@ -6495,10 +6184,10 @@
     }
    }
   },
-  "/v1/admin/organizations/{org_id}/manual-subscription": {
+  "/v1/admin/organizations/{org_id}/license": {
    "post": {
-    "summary": "Ativa assinatura sob contrato (Enterprise/Governo) com referência do contrato",
-    "operationId": "post_admin_routes_manual_sub",
+    "summary": "Concede licença de pacote sob contrato (Enterprise/Governo) com referência e prazo — não é assinatura (ADR-341)",
+    "operationId": "post_admin_routes_manual_license",
     "tags": [
      "admin"
     ],
@@ -6534,7 +6223,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/ManualSubIn"
+        "$ref": "#/components/schemas/LicenseIn"
        }
       }
      }
@@ -15990,7 +15679,7 @@
   },
   "/v1/admin/billing/organizations/{org_id}": {
    "get": {
-    "summary": "Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização",
+    "summary": "Visão de suporte: acesso, licenças, convênios, contratos, vouchers e faturas da organização",
     "operationId": "get_monetization_routes_org_billing",
     "tags": [
      "admin",
@@ -16023,53 +15712,6 @@
       }
      }
     ]
-   }
-  },
-  "/v1/admin/organizations/{org_id}/trial": {
-   "post": {
-    "summary": "Concede trial a uma organização que ainda não o teve (motivo obrigatório)",
-    "operationId": "post_monetization_routes_grant_trial",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "201": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "org_id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/TrialGrantIn"
-       }
-      }
-     }
-    }
    }
   },
   "/v1/admin/grants/{grant_id}/revoke": {
@@ -16113,53 +15755,6 @@
       "application/json": {
        "schema": {
         "$ref": "#/components/schemas/RevokeIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/plans/{plan_key}/price": {
-   "put": {
-    "summary": "Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide)",
-    "operationId": "put_monetization_routes_set_price",
-    "tags": [
-     "admin",
-     "billing"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "plan_key",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/PriceIn"
        }
       }
      }
@@ -18057,66 +17652,6 @@
       }
      }
     ]
-   }
-  },
-  "/v1/help/trial-requests": {
-   "post": {
-    "summary": "Solicita teste de módulos/ambiente. Não concede acesso: a equipe decide (com motivo) e usa o mecanismo de trial existente.",
-    "operationId": "post_knowledge_routes_trial_request",
-    "tags": [
-     "trial"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "201": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 10/3600s por IP",
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/TrialRequestIn"
-       }
-      }
-     }
-    }
-   },
-   "get": {
-    "summary": "trial requests mine",
-    "operationId": "get_knowledge_routes_trial_requests_mine",
-    "tags": [
-     "trial"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Requer organização ativa · Papel mínimo: viewer"
    }
   },
   "/v1/help/partnerships": {
@@ -20760,169 +20295,6 @@
       }
      }
     }
-   }
-  },
-  "/v1/admin/hub/trial-requests": {
-   "get": {
-    "summary": "trial req list",
-    "operationId": "get_content_admin_routes_trial_req_list",
-    "tags": [
-     "admin",
-     "content"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "limit",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "default": 25,
-       "maximum": 100,
-       "minimum": 1,
-       "title": "Limit",
-       "type": "integer"
-      }
-     },
-     {
-      "name": "offset",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "default": 0,
-       "maximum": 100000,
-       "minimum": 0,
-       "title": "Offset",
-       "type": "integer"
-      }
-     },
-     {
-      "name": "status",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "anyOf": [
-        {
-         "maxLength": 30,
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ],
-       "default": null,
-       "title": "Status"
-      }
-     },
-     {
-      "name": "q",
-      "in": "query",
-      "required": false,
-      "schema": {
-       "anyOf": [
-        {
-         "maxLength": 100,
-         "type": "string"
-        },
-        {
-         "type": "null"
-        }
-       ],
-       "default": null,
-       "title": "Q"
-      }
-     }
-    ]
-   }
-  },
-  "/v1/admin/hub/trial-requests/{id}/decide": {
-   "post": {
-    "summary": "Decide a solicitação de teste (motivo obrigatório): inicia/estende o trial existente ou recusa; nunca automático",
-    "operationId": "post_content_admin_routes_trial_req_decide",
-    "tags": [
-     "admin",
-     "content"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA",
-    "parameters": [
-     {
-      "name": "id",
-      "in": "path",
-      "required": true,
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "required": true,
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/DecisionIn"
-       }
-      }
-     }
-    }
-   }
-  },
-  "/v1/admin/hub/trials": {
-   "get": {
-    "summary": "Painel de testes: solicitações, ativos, vencendo, conversão e uso por organização",
-    "operationId": "get_content_admin_routes_trials_dash",
-    "tags": [
-     "admin",
-     "content"
-    ],
-    "security": [
-     {
-      "bearer": []
-     },
-     {
-      "cookie": []
-     }
-    ],
-    "responses": {
-     "200": {
-      "description": "OK"
-     },
-     "4XX": {
-      "description": "Erro (application/problem+json)"
-     }
-    },
-    "description": "Administração da plataforma com MFA"
    }
   },
   "/v1/admin/hub/analytics": {
@@ -23685,6 +23057,52 @@
     }
    }
   },
+  "/v1/signed-agreements/{agreement_id}/cancel": {
+   "post": {
+    "summary": "Cancela um acordo VIGENTE (dona ou financiador, motivo obrigatório): obrigações dispensadas, repasses não confirmados cancelados com estorno",
+    "operationId": "post_trust_routes_agreement_cancel",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/signed-agreements/{agreement_id}/decline": {
    "post": {
     "summary": "Recusa o acordo como parte (motivo obrigatório; o acordo é cancelado)",
@@ -23919,6 +23337,604 @@
     "operationId": "get_trust_routes_agreements_pending",
     "tags": [
      "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix": {
+   "put": {
+    "summary": "A própria parte informa a chave PIX que receberá os repasses deste acordo (formato conferido pelo banco)",
+    "operationId": "put_trust_routes_party_set_pix",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "party_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PartyPixIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/payouts": {
+   "get": {
+    "summary": "Instruções de repasse da matriz: quem paga a quem, quanto, por qual chave, e o estado (instruída → pendente → confirmada → conciliada)",
+    "operationId": "get_trust_routes_agreement_payouts",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/value": {
+   "get": {
+    "summary": "O que o IMPACTO fez nesta operação — por registro, não por slogan (base do Value Capture)",
+    "operationId": "get_trust_routes_agreement_value",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/payouts/{payout_id}/transfers": {
+   "post": {
+    "summary": "Quem paga registra uma transferência feita (a qualquer momento, inclusive parcial); a mesma referência é idempotente",
+    "operationId": "post_trust_routes_payout_register_transfer",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "payout_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TransferIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/payout-transfers/{transfer_id}/confirm": {
+   "post": {
+    "summary": "Quem RECEBE confirma o recebimento; com o valor inteiro confirmado o repasse fica confirmado e o evento econômico nasce",
+    "operationId": "post_trust_routes_transfer_confirm",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "transfer_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/payout-transfers/{transfer_id}/reject": {
+   "post": {
+    "summary": "Quem recebe recusa uma transferência registrada (não chegou, valor errado): o repasse fica em disputa",
+    "operationId": "post_trust_routes_transfer_reject",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "transfer_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/payouts/{payout_id}/reconcile": {
+   "post": {
+    "summary": "Quem recebe concilia o repasse confirmado com o extrato (nota obrigatória)",
+    "operationId": "post_trust_routes_payout_reconcile",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "payout_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/payout-transfers/{transfer_id}/confirm": {
+   "post": {
+    "summary": "Equipe financeira da plataforma confirma o recebimento da linha 'infraestrutura e inteligência'",
+    "operationId": "post_trust_routes_admin_transfer_confirm",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "transfer_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/payouts/{payout_id}/reconcile": {
+   "post": {
+    "summary": "Equipe financeira concilia a linha da plataforma",
+    "operationId": "post_trust_routes_admin_payout_reconcile",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "payout_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/participations": {
+   "post": {
+    "summary": "A executora propõe participação de autoria/desenvolvimento da ideia a quem a propôs; só vale com o aceite do proponente",
+    "operationId": "post_trust_routes_participation_propose",
+    "tags": [
+     "participations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ParticipationIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/participations": {
+   "get": {
+    "summary": "Participações de autoria em que a organização é executora ou proponente",
+    "operationId": "get_trust_routes_participations_mine",
+    "tags": [
+     "participations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/participations/{participation_id}": {
+   "get": {
+    "summary": "Detalhe da participação",
+    "operationId": "get_trust_routes_participation_get",
+    "tags": [
+     "participations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "participation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/participations/{participation_id}/accept": {
+   "post": {
+    "summary": "O proponente aceita a participação (confirma a autoria e o combinado)",
+    "operationId": "post_trust_routes_participation_accept",
+    "tags": [
+     "participations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "participation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/participations/{participation_id}/cancel": {
+   "post": {
+    "summary": "Executora ou proponente cancela a participação (motivo obrigatório)",
+    "operationId": "post_trust_routes_participation_cancel",
+    "tags": [
+     "participations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: owner",
+    "parameters": [
+     {
+      "name": "participation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RevokeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/economic-rules": {
+   "get": {
+    "summary": "Catálogo versionado da camada econômica (percentuais por versão de preços) — o que o contrato congela",
+    "operationId": "get_trust_routes_economic_rules",
+    "tags": [
+     "participations"
     ],
     "security": [
      {
@@ -27483,7 +27499,7 @@
   },
   "/v1/commercial/state": {
    "get": {
-    "summary": "Estado comercial da conta: FREE_PERIOD_END, estado e se a cobrança foi autorizada",
+    "summary": "Estado comercial da conta: de onde vem o acesso (FREE_ACCESS/FREE_GRANT/GRANT_EXPIRING/CONTRACTED), fim da concessão e se há cobrança autorizada",
     "operationId": "get_commercial_routes_state",
     "tags": [
      "commercial"
@@ -27531,9 +27547,11 @@
      }
     },
     "description": "Requer organização ativa"
-   },
+   }
+  },
+  "/v1/admin/commercial/offers": {
    "post": {
-    "summary": "Monta uma oferta a partir do catálogo (valor nunca vem do cliente)",
+    "summary": "Proposta de contrato para uma organização (avulso ou parcelado): valor e motivo de quem tem alçada, auditado",
     "operationId": "post_commercial_routes_create_offer",
     "tags": [
      "commercial"
@@ -27554,7 +27572,7 @@
       "description": "Erro (application/problem+json)"
      }
     },
-    "description": "Requer organização ativa · Rate limit: 60/3600s por IP",
+    "description": "Administração da plataforma com MFA · Rate limit: 60/3600s por IP",
     "requestBody": {
      "required": true,
      "content": {
@@ -27783,7 +27801,7 @@
   },
   "/v1/commercial/usage": {
    "get": {
-    "summary": "Consumo do período por métrica, com percentual e limite do plano",
+    "summary": "Consumo do período por métrica, com percentual e limite do pacote",
     "operationId": "get_commercial_routes_usage",
     "tags": [
      "commercial"
@@ -37162,6 +37180,31 @@
     ]
    }
   },
+  "/v1/me/today": {
+   "get": {
+    "summary": "Para você hoje: cartões (pendências, decisões, repasses, participações, recomendações, trajetória) e contadores do menu, derivados de registros reais",
+    "operationId": "get_firstrun_routes_me_today",
+    "tags": [
+     "inicio"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
   "/v1/reports/vocabulary": {
    "get": {
     "summary": "Os quatro níveis (denúncia, suspeita, infração comprovada, consequência jurídica)",
@@ -37691,6 +37734,32 @@
       }
      }
     ]
+   }
+  },
+  "/v1/control-tower/master": {
+   "get": {
+    "summary": "Torre MASTER/financeira do proprietário: GMV × camada da plataforma (registrado/devido/pago), participação, marketplace sem percentual, uso de IA/API, contratos, a receber, banco NÃO CONECTADO, captura de valor",
+    "operationId": "get_tower_routes_master_tower",
+    "tags": [
+     "torre"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
    }
   }
  },
@@ -41162,114 +41231,6 @@
     "title": "AiBudgetIn",
     "type": "object"
    },
-   "QuoteIn": {
-    "additionalProperties": false,
-    "properties": {
-     "plan_key": {
-      "pattern": "^[a-z0-9_]{2,60}$",
-      "title": "Plan Key",
-      "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     }
-    },
-    "required": [
-     "plan_key"
-    ],
-    "title": "QuoteIn",
-    "type": "object"
-   },
-   "CheckoutIn": {
-    "additionalProperties": false,
-    "description": "O cliente escolhe plano e periodicidade. Preço, desconto, trial e valor final são sempre calculados no servidor.",
-    "properties": {
-     "plan_key": {
-      "pattern": "^[a-z0-9_]{2,60}$",
-      "title": "Plan Key",
-      "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     },
-     "voucher": {
-      "anyOf": [
-       {
-        "maxLength": 40,
-        "minLength": 6,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Voucher"
-     }
-    },
-    "required": [
-     "plan_key"
-    ],
-    "title": "CheckoutIn",
-    "type": "object"
-   },
-   "ChangePlanIn": {
-    "additionalProperties": false,
-    "properties": {
-     "plan_key": {
-      "pattern": "^[a-z0-9_]{2,60}$",
-      "title": "Plan Key",
-      "type": "string"
-     },
-     "interval": {
-      "anyOf": [
-       {
-        "enum": [
-         "month",
-         "year"
-        ],
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Interval"
-     }
-    },
-    "required": [
-     "plan_key"
-    ],
-    "title": "ChangePlanIn",
-    "type": "object"
-   },
    "VoucherRedeemIn": {
     "additionalProperties": false,
     "properties": {
@@ -41750,9 +41711,7 @@
       "enum": [
        "grant_plan",
        "grant_feature",
-       "free_period",
-       "percent_off",
-       "amount_off"
+       "free_period"
       ],
       "title": "Type",
       "type": "string"
@@ -41796,58 +41755,6 @@
       ],
       "default": null,
       "title": "Duration Days"
-     },
-     "percent": {
-      "anyOf": [
-       {
-        "maximum": 100,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Percent"
-     },
-     "amount_cents": {
-      "anyOf": [
-       {
-        "maximum": 100000000,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Amount Cents"
-     },
-     "discount_duration": {
-      "default": "once",
-      "enum": [
-       "once",
-       "repeating",
-       "forever"
-      ],
-      "title": "Discount Duration",
-      "type": "string"
-     },
-     "discount_months": {
-      "anyOf": [
-       {
-        "maximum": 36,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Discount Months"
      },
      "organization_id": {
       "anyOf": [
@@ -41941,7 +41848,7 @@
     "title": "BatchActionIn",
     "type": "object"
    },
-   "ManualSubIn": {
+   "LicenseIn": {
     "additionalProperties": false,
     "properties": {
      "plan_key": {
@@ -41967,7 +41874,7 @@
      "months",
      "reference"
     ],
-    "title": "ManualSubIn",
+    "title": "LicenseIn",
     "type": "object"
    },
    "InvoiceIn": {
@@ -47887,29 +47794,6 @@
     "title": "AgreementJoinIn",
     "type": "object"
    },
-   "TrialGrantIn": {
-    "additionalProperties": false,
-    "properties": {
-     "days": {
-      "default": 14,
-      "maximum": 90,
-      "minimum": 1,
-      "title": "Days",
-      "type": "integer"
-     },
-     "reason": {
-      "maxLength": 500,
-      "minLength": 5,
-      "title": "Reason",
-      "type": "string"
-     }
-    },
-    "required": [
-     "reason"
-    ],
-    "title": "TrialGrantIn",
-    "type": "object"
-   },
    "RevokeIn": {
     "additionalProperties": false,
     "properties": {
@@ -47924,45 +47808,6 @@
      "reason"
     ],
     "title": "RevokeIn",
-    "type": "object"
-   },
-   "PriceIn": {
-    "additionalProperties": false,
-    "properties": {
-     "interval": {
-      "enum": [
-       "month",
-       "year"
-      ],
-      "title": "Interval",
-      "type": "string"
-     },
-     "amount_cents": {
-      "anyOf": [
-       {
-        "maximum": 1000000000000,
-        "minimum": 0,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Amount Cents"
-     },
-     "reason": {
-      "maxLength": 500,
-      "minLength": 5,
-      "title": "Reason",
-      "type": "string"
-     }
-    },
-    "required": [
-     "interval",
-     "reason"
-    ],
-    "title": "PriceIn",
     "type": "object"
    },
    "AgreementActionIn": {
@@ -48249,53 +48094,6 @@
      "score"
     ],
     "title": "TicketRateIn",
-    "type": "object"
-   },
-   "TrialRequestIn": {
-    "additionalProperties": false,
-    "properties": {
-     "users_count": {
-      "maximum": 10000,
-      "minimum": 1,
-      "title": "Users Count",
-      "type": "integer"
-     },
-     "purpose": {
-      "maxLength": 2000,
-      "minLength": 10,
-      "title": "Purpose",
-      "type": "string"
-     },
-     "modules": {
-      "default": [],
-      "items": {
-       "maxLength": 60,
-       "type": "string"
-      },
-      "maxItems": 20,
-      "title": "Modules",
-      "type": "array"
-     },
-     "period_days": {
-      "default": 14,
-      "maximum": 60,
-      "minimum": 7,
-      "title": "Period Days",
-      "type": "integer"
-     },
-     "responsible": {
-      "maxLength": 200,
-      "minLength": 2,
-      "title": "Responsible",
-      "type": "string"
-     }
-    },
-    "required": [
-     "users_count",
-     "purpose",
-     "responsible"
-    ],
-    "title": "TrialRequestIn",
     "type": "object"
    },
    "PartnershipIn": {
@@ -51059,114 +50857,6 @@
     "title": "DemoHandleIn",
     "type": "object"
    },
-   "DecisionIn": {
-    "additionalProperties": false,
-    "properties": {
-     "assignment_id": {
-      "pattern": "^[0-9a-fA-F-]{36}$",
-      "title": "Assignment Id",
-      "type": "string"
-     },
-     "kind": {
-      "pattern": "^[a-z][a-z0-9_]{2,40}$",
-      "title": "Kind",
-      "type": "string"
-     },
-     "statement": {
-      "maxLength": 4000,
-      "minLength": 20,
-      "title": "Statement",
-      "type": "string"
-     },
-     "document_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Document Id"
-     },
-     "document_version": {
-      "anyOf": [
-       {
-        "maximum": 9999,
-        "minimum": 1,
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Document Version"
-     },
-     "signature_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Signature Id"
-     },
-     "second_assignment_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Second Assignment Id"
-     },
-     "second_statement": {
-      "anyOf": [
-       {
-        "maxLength": 4000,
-        "minLength": 20,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Second Statement"
-     },
-     "taken_on": {
-      "anyOf": [
-       {
-        "format": "date",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Taken On"
-     }
-    },
-    "required": [
-     "assignment_id",
-     "kind",
-     "statement"
-    ],
-    "title": "DecisionIn",
-    "type": "object"
-   },
    "ConnectionIn": {
     "additionalProperties": false,
     "properties": {
@@ -51866,6 +51556,114 @@
     "title": "IdentityDocumentIn",
     "type": "object"
    },
+   "DecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "assignment_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Assignment Id",
+      "type": "string"
+     },
+     "kind": {
+      "pattern": "^[a-z][a-z0-9_]{2,40}$",
+      "title": "Kind",
+      "type": "string"
+     },
+     "statement": {
+      "maxLength": 4000,
+      "minLength": 20,
+      "title": "Statement",
+      "type": "string"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     },
+     "document_version": {
+      "anyOf": [
+       {
+        "maximum": 9999,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Version"
+     },
+     "signature_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Signature Id"
+     },
+     "second_assignment_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Second Assignment Id"
+     },
+     "second_statement": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Second Statement"
+     },
+     "taken_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Taken On"
+     }
+    },
+    "required": [
+     "assignment_id",
+     "kind",
+     "statement"
+    ],
+    "title": "DecisionIn",
+    "type": "object"
+   },
    "CredentialDecisionIn": {
     "additionalProperties": false,
     "properties": {
@@ -52001,7 +51799,8 @@
        "funder",
        "professional",
        "witness",
-       "beneficiary_rep"
+       "beneficiary_rep",
+       "proponent"
       ],
       "title": "Role",
       "type": "string"
@@ -52300,6 +52099,152 @@
      "reason"
     ],
     "title": "AgreementNewVersionIn",
+    "type": "object"
+   },
+   "PartyPixIn": {
+    "additionalProperties": false,
+    "properties": {
+     "pix_key": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Pix Key",
+      "type": "string"
+     },
+     "pix_key_type": {
+      "enum": [
+       "cpf",
+       "cnpj",
+       "email",
+       "phone",
+       "evp"
+      ],
+      "title": "Pix Key Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "pix_key",
+     "pix_key_type"
+    ],
+    "title": "PartyPixIn",
+    "type": "object"
+   },
+   "TransferIn": {
+    "additionalProperties": false,
+    "properties": {
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 10000000000000,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "reference": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Reference",
+      "type": "string"
+     },
+     "paid_on": {
+      "format": "date",
+      "title": "Paid On",
+      "type": "string"
+     },
+     "method": {
+      "default": "pix",
+      "enum": [
+       "pix",
+       "bank_transfer",
+       "other"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
+     }
+    },
+    "required": [
+     "amount_cents",
+     "reference",
+     "paid_on"
+    ],
+    "title": "TransferIn",
+    "type": "object"
+   },
+   "ParticipationIn": {
+    "additionalProperties": false,
+    "properties": {
+     "proponent_org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Proponent Org Id",
+      "type": "string"
+     },
+     "proponent_user_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Proponent User Id"
+     },
+     "idea_ref_type": {
+      "enum": [
+       "solution",
+       "idea"
+      ],
+      "title": "Idea Ref Type",
+      "type": "string"
+     },
+     "idea_ref_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Idea Ref Id",
+      "type": "string"
+     },
+     "authorship_type": {
+      "default": "author",
+      "enum": [
+       "author",
+       "coauthor"
+      ],
+      "title": "Authorship Type",
+      "type": "string"
+     },
+     "share_bps": {
+      "default": 10000,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Share Bps",
+      "type": "integer"
+     },
+     "contribution": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Contribution",
+      "type": "string"
+     }
+    },
+    "required": [
+     "proponent_org_id",
+     "idea_ref_type",
+     "idea_ref_id",
+     "contribution"
+    ],
+    "title": "ParticipationIn",
     "type": "object"
    },
    "TagIn": {
@@ -54360,35 +54305,55 @@
    },
    "CommercialOfferIn": {
     "additionalProperties": false,
-    "description": "Pedido de oferta. O VALOR não vem daqui: ele é lido do catálogo pelo plano e intervalo.\n\nAceitar `amount_cents` do cliente permitiria uma oferta com preço que não existe em\n`plan_price_versions` — e o catálogo deixaria de ser a fonte única exatamente onde importa.",
+    "description": "Proposta de CONTRATO (rota administrativa, alçada financeira). v0.27.0: sem recorrência.\n\nO valor vem de quem tem alçada, com motivo auditado — nunca da organização que paga e nunca de um\ncatálogo de mensalidades (não existe mais, ADR-341).",
     "properties": {
+     "org_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Org Id",
+      "type": "string"
+     },
      "plan_key": {
       "maxLength": 40,
       "minLength": 2,
       "title": "Plan Key",
       "type": "string"
      },
-     "interval": {
-      "default": "month",
-      "enum": [
-       "month",
-       "year"
-      ],
-      "title": "Interval",
+     "amount_cents": {
+      "maximum": 100000000000,
+      "minimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "amount_reason": {
+      "maxLength": 500,
+      "minLength": 5,
+      "title": "Amount Reason",
       "type": "string"
      },
+     "contract_ref": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Contract Ref"
+     },
      "billing_frequency": {
-      "default": "recurring",
+      "default": "one_time",
       "enum": [
        "one_time",
-       "installment",
-       "recurring"
+       "installment"
       ],
       "title": "Billing Frequency",
       "type": "string"
      },
      "payment_method": {
-      "default": "card",
+      "default": "pix",
       "enum": [
        "card",
        "boleto",
@@ -54428,7 +54393,10 @@
      }
     },
     "required": [
-     "plan_key"
+     "org_id",
+     "plan_key",
+     "amount_cents",
+     "amount_reason"
     ],
     "title": "CommercialOfferIn",
     "type": "object"
@@ -58161,7 +58129,6 @@
     "properties": {
      "kind": {
       "enum": [
-       "subscription",
        "one_off",
        "installment_plan",
        "operation"
@@ -58190,19 +58157,6 @@
       "pattern": "^[A-Z]{3}$",
       "title": "Currency",
       "type": "string"
-     },
-     "subscription_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Subscription Id"
      },
      "invoice_id": {
       "anyOf": [

@@ -58,7 +58,8 @@ na administração; `/ajuda/teste` e `/admin/central/testes` removidos; namespac
 
 **Testes:** `test_v0270_no_subscription.py` (nenhuma assinatura em lugar nenhum; torre master; cartões
 do dia), `test_v0270_economy.py` (anti-bypass A–O), `test_v0270_financial_model.py` (documento =
-gerador; percentuais = catálogo; aritmética), `test_v0160_billing.py` removido com o módulo; 20
+gerador; percentuais = catálogo; aritmética), `test_v0270_release_docs.py` (matriz de motores = gerador;
+28 seções do relatório; auditoria sem FAIL; integrações externas nunca declaradas ativas), `test_v0160_billing.py` removido com o módulo; 20
 módulos reescritos para o modelo sem assinatura (ADR-340: contagens fixadas atualizadas com a razão
 escrita ao lado — 895 operações, 220 de plataforma, 85 com permissão, 221 telas, 48 motores, 15 tipos
 de evento de valor). Jornada `caminho_dourado` nas jornadas de demonstração.

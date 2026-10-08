@@ -133,7 +133,14 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "scripts/gen_legal_registry.py",
             "docs/evidence/test_run_v0.17.0.log", "docs/evidence/ruff_v0.17.0.log",
             "docs/evidence/perf_v0.17.0.log", "docs/evidence/db_integrity_v0.17.0.txt",
-            "history/v0.16.0/VERSION"]
+            "history/v0.16.0/VERSION",
+            # v0.27.0 — saídas exigidas pelo PROMPT MASTER (ADR-341)
+            "FINAL_EXECUTION_AUDIT.md", "FINAL_EXECUTION_REPORT.md", "MOTOR_COVERAGE_MATRIX.md", "EXTERNAL_INTEGRATIONS.md",
+            "24_MONTH_FINANCIAL_MODEL.md", "docs/ECONOMIC_MODEL.md", "docs/execution/SUBSCRIPTION_INVENTORY.md",
+            "config/economic_model.json", "backend/migrations/0067_v0270_no_subscription.sql",
+            "backend/tests/test_v0270_no_subscription.py", "backend/tests/test_v0270_economy.py",
+            "backend/tests/test_v0270_financial_model.py", "backend/tests/test_v0270_release_docs.py",
+            "docs/evidence/test_run_v0.27.0.log", "history/v0.26.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

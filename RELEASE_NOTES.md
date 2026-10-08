@@ -1,3 +1,45 @@
+# Notas da versão — v0.27.0 (não existem mais assinaturas)
+
+**Uma decisão:** o IMPACTO deixa de ser um SaaS por mensalidade (ADR-341). Não há plano pago, trial,
+checkout, reajuste, paywall nem cobrança recorrente. O valor de estar na plataforma é alcançar
+recursos, demonstrar e comprovar evidência; a receita da plataforma nasce da **operação financiada**,
+não do acesso.
+
+**O que isso virou em software:**
+
+1. **Inventário antes de apagar** — cada ocorrência de assinatura/trial/preço/plano/checkout/paywall
+   classificada KEEP / MIGRATE / DEPRECATE / DELETE (`docs/execution/SUBSCRIPTION_INVENTORY.md`);
+   tudo o que caiu foi arquivado em `legacy_subscription_archive` antes do DROP.
+2. **Pacotes de capacidades** — planos sem preço nem periodicidade, obtidos por concessão, convênio,
+   voucher de concessão, licença da administração ou contrato avulso/parcelado (`/conta/acesso`).
+3. **Camada econômica da operação** — 5% do valor financiado = 3,5% taxa de serviço da plataforma +
+   1,5% participação de autoria do proponente, só quando contratualmente elegível, nunca automática.
+   Percentuais do catálogo versionado (Pricing Version 2027.02), congelados no acordo, recusados se
+   vierem do cliente.
+4. **Um aporte só, direcionado** — a matriz de distribuição diz quem recebe, quanto e para qual
+   chave PIX informada no contrato; transferência registrada por quem paga, confirmada por quem
+   recebe; instrução ≠ custódia (ADR-343); livro econômico append-only com estorno obrigatório.
+5. **Reconhecimento só na quitação** — entregas aceitas + repasses confirmados; trajetória pública
+   cumulativa em contagens e datas, nunca valores; nada se ganha por pagar a plataforma.
+6. **Torre MASTER** (`/controladoria/torre`) — GMV × camada registrada/devida/paga, participação,
+   marketplace sem percentual, uso, contratos, a receber, banco "DADO FINANCEIRO NÃO CONECTADO",
+   captura de valor "NÃO MEDIDO" sem denominador. GMV ≠ receita.
+7. **Cartões do dia, selos e trajetória** na página inicial e no perfil público; simulação de 24
+   meses derivada de hipóteses declaradas (`24_MONTH_FINANCIAL_MODEL.md`), conferida por teste.
+
+**Números:** 895 operações, 221 telas, 48 motores (VERDE 35 · AMARELO 13 · VERMELHO 0), 67 migrações,
+324 tabelas (323 com RLS, 675 políticas, 0 FORCE), 10 regras de monetização (0 ativas; 5 recusadas),
+15 jornadas / 244 passos / 0 falha, 805 visitas de tela / 221 rotas / 0 falha. Regressão completa:
+`FINAL_EXECUTION_REPORT.md` §24. **Receita real desta instalação: R$ 0,00.**
+
+**O que esta versão NÃO entrega**, com nome: cobrança real da taxa (regra desligada até parecer
+jurídico/contábil); chave PIX real da plataforma (`PLATFORM_PIX_KEY` vazia → "NÃO CONFIGURADA");
+banco/provedor de pagamento (conciliação manual); nota fiscal; preço de contrato (negociado); tag
+enviada ao GitHub (proxy). Detalhes em `FINAL_EXECUTION_REPORT.md` §25–26, `FINAL_EXECUTION_AUDIT.md`
+e `EXTERNAL_INTEGRATIONS.md`.
+
+---
+
 # Notas da versão — v0.26.0 (a tese econômica virou produto)
 
 **Uma tese:** o IMPACTO é infraestrutura de confiança, inteligência e execução do ecossistema de

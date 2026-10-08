@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.26.0)
+# API REST /v1 — referência gerada do código (v0.27.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (894)
+## Operações (895)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -29,13 +29,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/audit/timeline` | admin da plataforma + MFA | — | Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização |
 | GET | `/v1/admin/audit/trail` | admin da plataforma + MFA | — | Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id |
 | GET | `/v1/admin/audit/verify` | admin da plataforma + MFA | — | Verifica a cadeia de hashes da trilha de auditoria |
-| GET | `/v1/admin/billing/organizations/{org_id}` | admin da plataforma + MFA | — | Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização |
+| GET | `/v1/admin/billing/organizations/{org_id}` | admin da plataforma + MFA | — | Visão de suporte: acesso, licenças, convênios, contratos, vouchers e faturas da organização |
 | GET | `/v1/admin/call-sources` | admin da plataforma + MFA | — | list sources |
 | POST | `/v1/admin/call-sources` | admin da plataforma + MFA | — | Cadastra fonte de importação (exige registro da verificação de termos de uso/licença da fonte) |
 | POST | `/v1/admin/call-sources/{source_id}/run` | admin da plataforma + MFA | — | Importa agora (feed configurado) |
 | POST | `/v1/admin/calls` | admin da plataforma + MFA | — | Cadastra edital/fundo externo curado (com URL da fonte oficial) |
 | POST | `/v1/admin/calls/{call_id}/status` | admin da plataforma + MFA | — | call status |
 | POST | `/v1/admin/calls/{call_id}/verify` | admin da plataforma + MFA | — | Registra conferência do edital na fonte oficial (data/responsável) |
+| POST | `/v1/admin/commercial/offers` | admin da plataforma + MFA | limite 60/3600s | Proposta de contrato para uma organização (avulso ou parcelado): valor e motivo de quem tem alçada, auditado |
 | GET | `/v1/admin/compliance-reviews` | admin da plataforma + MFA | — | compliance queue |
 | POST | `/v1/admin/compliance-reviews/{review_id}/decide` | admin da plataforma + MFA | — | compliance decide |
 | POST | `/v1/admin/content/article-versions/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
@@ -109,9 +110,6 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/hub/partnerships/{id}` | admin da plataforma + MFA | — | partnership get |
 | POST | `/v1/admin/hub/partnerships/{id}/move` | admin da plataforma + MFA | — | Move no pipeline (histórico) e define responsável; 'ativa' cria o registro de parceria |
 | POST | `/v1/admin/hub/partnerships/{id}/notes` | admin da plataforma + MFA | — | partnership note |
-| GET | `/v1/admin/hub/trial-requests` | admin da plataforma + MFA | — | trial req list |
-| POST | `/v1/admin/hub/trial-requests/{id}/decide` | admin da plataforma + MFA | — | Decide a solicitação de teste (motivo obrigatório): inicia/estende o trial existente ou recusa; nunca automático |
-| GET | `/v1/admin/hub/trials` | admin da plataforma + MFA | — | Painel de testes: solicitações, ativos, vencendo, conversão e uso por organização |
 | GET | `/v1/admin/institutional/agreements` | admin da plataforma + MFA | — | Fila de verificação de instrumentos (padrão: comprovante enviado) |
 | POST | `/v1/admin/institutional/agreements/{agreement_id}/decide` | admin da plataforma + MFA | — | Verifica ou rejeita o instrumento. Verificar exige número, documento VALIDADO ou URL oficial, e nota. |
 | GET | `/v1/admin/institutional/catalog` | admin da plataforma + MFA | — | Itens de catálogo em qualquer estado do fluxo editorial |
@@ -156,14 +154,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/organizations` | admin da plataforma + MFA | — | orgs |
 | POST | `/v1/admin/organizations/{org_id}/compliance-checks` | admin da plataforma + MFA | — | Executa verificações automáticas de compliance |
 | POST | `/v1/admin/organizations/{org_id}/grants` | admin da plataforma + MFA | — | grant |
-| POST | `/v1/admin/organizations/{org_id}/manual-subscription` | admin da plataforma + MFA | — | Ativa assinatura sob contrato (Enterprise/Governo) com referência do contrato |
+| POST | `/v1/admin/organizations/{org_id}/license` | admin da plataforma + MFA | — | Concede licença de pacote sob contrato (Enterprise/Governo) com referência e prazo — não é assinatura (ADR-341) |
 | POST | `/v1/admin/organizations/{org_id}/status` | admin da plataforma + MFA | — | org status |
-| POST | `/v1/admin/organizations/{org_id}/trial` | admin da plataforma + MFA | — | Concede trial a uma organização que ainda não o teve (motivo obrigatório) |
 | GET | `/v1/admin/overview` | admin da plataforma + MFA | — | Métricas operacionais da plataforma |
 | GET | `/v1/admin/payments/reconciliation` | admin da plataforma + MFA | — | Onde o provedor e a plataforma discordam: cobrança parada e evento sem assinatura |
 | GET | `/v1/admin/payments/revenue` | admin da plataforma + MFA | — | Receita apurada, com o simulado em colunas próprias e nunca somado ao real |
+| POST | `/v1/admin/payout-transfers/{transfer_id}/confirm` | admin da plataforma + MFA | — | Equipe financeira da plataforma confirma o recebimento da linha 'infraestrutura e inteligência' |
+| POST | `/v1/admin/payouts/{payout_id}/reconcile` | admin da plataforma + MFA | — | Equipe financeira concilia a linha da plataforma |
 | GET | `/v1/admin/permissions` | admin da plataforma + MFA | — | Matriz papel → permissão, como está no banco |
-| PUT | `/v1/admin/plans/{plan_key}/price` | admin da plataforma + MFA | — | Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide) |
 | GET | `/v1/admin/price-benchmark` | admin da plataforma + MFA | — | Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido |
 | GET | `/v1/admin/privileged-access` | admin da plataforma + MFA | — | Quem entrou com papel interno, quando, em qual rota e com qual permissão |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
@@ -259,16 +257,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | DELETE | `/v1/auth/sessions/{session_id}` | usuário autenticado | — | Revoga uma sessão |
 | POST | `/v1/auth/verify-email` | pública | limite 30/900s | verify email |
 | GET | `/v1/badges` | membro da organização ativa | papel ≥ viewer | Conquistas organizacionais verificáveis (privadas; sem pontos, ranking ou comparação) |
-| GET | `/v1/billing` | membro da organização ativa | papel ≥ viewer | Estado de cobrança da organização: plano, status, trial, próxima cobrança, avisos, faturas |
-| POST | `/v1/billing/cancel` | membro da organização ativa | papel ≥ owner | Cancela a assinatura ou o trial (sem cobrança; acesso mantido até o fim do período) |
-| POST | `/v1/billing/change-plan` | membro da organização ativa | papel ≥ owner; limite 20/3600s | Upgrade/downgrade (sincronizado com o provedor) |
-| POST | `/v1/billing/checkout` | membro da organização ativa | papel ≥ owner; limite 20/3600s | Inicia contratação (Stripe Checkout) com trial quando houver. Sem gateway configurado, responde 503 de forma explícita. |
-| POST | `/v1/billing/portal` | membro da organização ativa | papel ≥ owner | Portal de pagamento do provedor (método de pagamento, faturas) |
-| GET | `/v1/billing/price-history` | membro da organização ativa | papel ≥ owner | Histórico de preço da organização e avisos de reajuste recebidos |
-| POST | `/v1/billing/price-notices/{notice_id}/ack` | membro da organização ativa | papel ≥ owner | Registra que a organização viu o aviso de reajuste |
-| POST | `/v1/billing/quote` | membro da organização ativa | papel ≥ viewer | Simulação do valor FINAL calculada no servidor (preço, desconto, trial, primeira cobrança). Não cobra nada. |
-| POST | `/v1/billing/reactivate` | membro da organização ativa | papel ≥ owner | Desfaz um cancelamento em andamento |
-| POST | `/v1/billing/webhooks/stripe` | pública | limite 600/60s | Webhook do Stripe (assinatura verificada, idempotente) |
+| GET | `/v1/billing` | membro da organização ativa | papel ≥ viewer | Acesso e concessões da organização: de onde vem o direito, concessões, convênios, contratos e faturas |
 | GET | `/v1/calls` | membro da organização ativa | papel ≥ viewer | Busca no banco de oportunidades. Para OSC, cada item traz a compatibilidade resumida. |
 | POST | `/v1/calls` | membro da organização ativa | tipos: company, government; papel ≥ manager | Cria programa/chamada própria (empresa) ou edital público (governo) |
 | GET | `/v1/calls/recommended` | membro da organização ativa | tipos: osc; papel ≥ viewer | Editais abertos ranqueados por compatibilidade com a OSC (elegíveis primeiro, depois score) |
@@ -290,11 +279,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/commercial/acceptances` | membro da organização ativa | — | Histórico de aceites desta organização |
 | POST | `/v1/commercial/consent/revoke` | membro da organização ativa | — | Revoga a autorização de cobrança (o aceite permanece registrado) |
 | GET | `/v1/commercial/offers` | membro da organização ativa | — | Ofertas desta organização |
-| POST | `/v1/commercial/offers` | membro da organização ativa | limite 60/3600s | Monta uma oferta a partir do catálogo (valor nunca vem do cliente) |
 | POST | `/v1/commercial/offers/{offer_id}/accept` | membro da organização ativa | limite 60/3600s | Aceita a oferta — acesso gratuito OU autorização de cobrança |
 | PUT | `/v1/commercial/spend-limit` | membro da organização ativa | — | Define o teto de gasto mensal e o que fazer ao atingi-lo (avisar ou parar) |
-| GET | `/v1/commercial/state` | membro da organização ativa | — | Estado comercial da conta: FREE_PERIOD_END, estado e se a cobrança foi autorizada |
-| GET | `/v1/commercial/usage` | membro da organização ativa | — | Consumo do período por métrica, com percentual e limite do plano |
+| GET | `/v1/commercial/state` | membro da organização ativa | — | Estado comercial da conta: de onde vem o acesso (FREE_ACCESS/FREE_GRANT/GRANT_EXPIRING/CONTRACTED), fim da concessão e se há cobrança autorizada |
+| GET | `/v1/commercial/usage` | membro da organização ativa | — | Consumo do período por métrica, com percentual e limite do pacote |
 | POST | `/v1/commitments/{commitment_id}/payments` | membro da organização ativa | tipos: company, government, individual; papel ≥ manager | Registra um pagamento (parcela) do aporte — declarado pelo financiador; a plataforma não movimenta dinheiro |
 | POST | `/v1/commitments/{commitment_id}/status` | membro da organização ativa | papel ≥ manager | Financiador informa desembolso/cancelamento; OSC confirma o recebimento |
 | GET | `/v1/compliance` | membro da organização ativa | papel ≥ viewer | Status de compliance/KYB da organização e verificações |
@@ -312,6 +300,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/contribution-models/{model_id}/submit` | membro da organização ativa | tipos: osc; papel ≥ manager | Envia o modelo à revisão jurídica da administração |
 | GET | `/v1/control-tower/funder` | membro da organização ativa | tipos: company, individual; papel ≥ viewer | Torre do financiador: meu capital → onde está → para quem → finalidade → executado → evidência → mudou → atrasos → riscos → decisões |
 | GET | `/v1/control-tower/government` | membro da organização ativa | tipos: government, platform; papel ≥ viewer | Torre territorial do governo: território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados → atrasos → lacunas |
+| GET | `/v1/control-tower/master` | admin da plataforma + MFA | — | Torre MASTER/financeira do proprietário: GMV × camada da plataforma (registrado/devido/pago), participação, marketplace sem percentual, uso de IA/API, contratos, a receber, banco NÃO CONECTADO, captura de valor |
 | GET | `/v1/controladoria/reconciliation` | admin da plataforma + MFA | — | Conciliação: o que foi esperado × o que aconteceu. APONTA, não corrige |
 | GET | `/v1/controladoria/summary` | admin da plataforma + MFA | — | Painel executivo: MRR, ARR, receita, caixa, despesa, GMV, resultado e autonomia |
 | GET | `/v1/conversations` | membro da organização ativa | papel ≥ viewer | list conversations |
@@ -369,6 +358,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/drafts/{draft_id}/export` | membro da organização ativa | papel ≥ member | Gera o rascunho em PDF, DOCX ou ODT e guarda no cofre; opcionalmente imprime o QR de verificação pública |
 | POST | `/v1/drafts/{draft_id}/export-pdf` | membro da organização ativa | papel ≥ member | Gera PDF do rascunho e guarda no cofre (documento hasheado, pronto para assinatura) |
 | POST | `/v1/drafts/{draft_id}/new-version` | membro da organização ativa | papel ≥ member | new version |
+| GET | `/v1/economic-rules` | membro da organização ativa | papel ≥ viewer | Catálogo versionado da camada econômica (percentuais por versão de preços) — o que o contrato congela |
 | GET | `/v1/engines` | usuário autenticado | — | Os motores operacionais: natureza, versão, o que produzem e o que nunca decidem |
 | GET | `/v1/engines/coverage` | usuário autenticado | — | Cobertura por motor: implementado, integrado, testado, E2E, segurança, observabilidade — tudo DERIVADO do código, nada declarado |
 | GET | `/v1/equity/catalog` | usuário autenticado | — | Barreiras, escadas de prova, tipos de denominador e métodos de normalização |
@@ -445,8 +435,6 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/help/search` | pública | limite 600/3600s | Busca híbrida (texto + similaridade + vocabulário de tópicos + perfil + tela). Pública para conteúdo público; autenticada amplia por perfil. Sem embeddings. |
 | GET | `/v1/help/sitemap` | pública | limite 600/3600s | Sitemap do conteúdo PÚBLICO indexável (exemplos/DEMO e conteúdo privado ficam de fora) |
 | GET | `/v1/help/start` | membro da organização ativa | papel ≥ viewer | Comece aqui: jornada por tipo de organização com % de prontidão calculado por dados reais |
-| GET | `/v1/help/trial-requests` | membro da organização ativa | papel ≥ viewer | trial requests mine |
-| POST | `/v1/help/trial-requests` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Solicita teste de módulos/ambiente. Não concede acesso: a equipe decide (com motivo) e usa o mecanismo de trial existente. |
 | GET | `/v1/ideas` | membro da organização ativa | papel ≥ viewer | Ideias da organização |
 | POST | `/v1/ideas` | membro da organização ativa | papel ≥ member | Registra uma ideia (ainda não é projeto, e não consome cota de projeto) |
 | GET | `/v1/ideas/{idea_id}` | membro da organização ativa | papel ≥ viewer | get idea |
@@ -564,6 +552,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PUT | `/v1/me/preferences` | usuário autenticado | — | Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso) |
 | GET | `/v1/me/security` | usuário autenticado | — | Centro de segurança da conta: sessões, dispositivos, MFA, eventos e alterações de permissão |
 | POST | `/v1/me/switch-org` | usuário autenticado | — | switch org |
+| GET | `/v1/me/today` | usuário autenticado | — | Para você hoje: cartões (pendências, decisões, repasses, participações, recomendações, trajetória) e contadores do menu, derivados de registros reais |
 | GET | `/v1/messages/conversations` | membro da organização ativa | papel ≥ viewer | conversations |
 | GET | `/v1/messages/conversations/{conversation_id}` | membro da organização ativa | papel ≥ viewer | get conversation |
 | POST | `/v1/messages/{org_id}` | membro da organização ativa | papel ≥ member; limite 120/3600s | Envia mensagem a outra organização (exige relação prévia; limites por hora; bloqueio respeitado) |
@@ -624,6 +613,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/organizations/{org_id}/reputation` | usuário autenticado | — | Perfil de reputação por dimensão (ou de governança, se for órgão público) |
 | GET | `/v1/organizations/{org_id}/reputation/timeline` | usuário autenticado | — | Evolução registrada, com a versão do motor de cada ponto |
 | POST | `/v1/orgs` | usuário autenticado | — | Cria organização adicional |
+| GET | `/v1/participations` | membro da organização ativa | papel ≥ viewer | Participações de autoria em que a organização é executora ou proponente |
+| GET | `/v1/participations/{participation_id}` | membro da organização ativa | papel ≥ viewer | Detalhe da participação |
+| POST | `/v1/participations/{participation_id}/accept` | membro da organização ativa | papel ≥ owner | O proponente aceita a participação (confirma a autoria e o combinado) |
+| POST | `/v1/participations/{participation_id}/cancel` | membro da organização ativa | papel ≥ owner | Executora ou proponente cancela a participação (motivo obrigatório) |
 | GET | `/v1/payments` | membro da organização ativa | papel ≥ viewer | Pagamentos da organização (como financiador ou OSC) |
 | GET | `/v1/payments/charges` | membro da organização ativa | papel ≥ viewer | As cobranças da organização, com o aviso em cada simulada |
 | POST | `/v1/payments/charges` | membro da organização ativa | papel ≥ owner | Abre uma cobrança (nada é cobrado: é a intenção de cobrar) |
@@ -636,8 +629,11 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/payments/{payment_id}/reconcile-manual` | membro da organização ativa | tipos: osc; papel ≥ manager | Pareamento manual de uma linha do extrato com um pagamento (registrado em auditoria) |
 | POST | `/v1/payments/{payment_id}/refunds` | membro da organização ativa | papel ≥ manager | Solicita estorno total ou parcial (a outra parte decide) |
 | POST | `/v1/payments/{payment_id}/transition` | membro da organização ativa | papel ≥ manager | Muda o estado (financiador: declara/cancela; OSC: confirma/recusa; ambos: abrem disputa). O banco recusa transições inválidas |
-| GET | `/v1/plans` | pública | — | Catálogo público de planos (tier, preços mensal/anual; preço null = sob consulta) |
-| GET | `/v1/plans/price` | pública | — | Preço vigente de um plano: entrada, preço regular, equivalente mensal, total e imposto |
+| POST | `/v1/payout-transfers/{transfer_id}/confirm` | membro da organização ativa | papel ≥ owner | Quem RECEBE confirma o recebimento; com o valor inteiro confirmado o repasse fica confirmado e o evento econômico nasce |
+| POST | `/v1/payout-transfers/{transfer_id}/reject` | membro da organização ativa | papel ≥ owner | Quem recebe recusa uma transferência registrada (não chegou, valor errado): o repasse fica em disputa |
+| POST | `/v1/payouts/{payout_id}/reconcile` | membro da organização ativa | papel ≥ owner | Quem recebe concilia o repasse confirmado com o extrato (nota obrigatória) |
+| POST | `/v1/payouts/{payout_id}/transfers` | membro da organização ativa | papel ≥ owner | Quem paga registra uma transferência feita (a qualquer momento, inclusive parcial); a mesma referência é idempotente |
+| GET | `/v1/plans` | pública | — | Catálogo público de pacotes de capacidades (sem preço: não há assinatura) e as vias de acesso |
 | GET | `/v1/portfolio` | membro da organização ativa | tipos: company, government, individual; papel ≥ viewer | Carteira do financiador: recurso comprometido → desembolsado → gasto comprovado → evidências e resultados |
 | POST | `/v1/privacy/consents` | usuário autenticado | — | Registra/revoga consentimento opcional (ex.: comunicações) |
 | POST | `/v1/privacy/delete-account` | usuário autenticado | limite 5/3600s | Elimina a conta: anonimiza dados pessoais e revoga sessões. Registros financeiros/auditoria são mantidos pseudonimizados (obrigação legal). |
@@ -723,6 +719,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/projects/{project_id}/needs` | membro da organização ativa | papel ≥ viewer | list needs |
 | POST | `/v1/projects/{project_id}/needs` | membro da organização ativa | tipos: osc; papel ≥ member | Publica uma necessidade de profissional (ex.: contador, jurídico, avaliador de impacto) vinculada ao projeto |
 | PUT | `/v1/projects/{project_id}/ods-targets` | membro da organização ativa | tipos: osc; papel ≥ member | Define o alinhamento do projeto a ODS/metas (declarado; sobe de nível com evidência validada e revisão profissional) |
+| POST | `/v1/projects/{project_id}/participations` | membro da organização ativa | tipos: osc; papel ≥ manager | A executora propõe participação de autoria/desenvolvimento da ideia a quem a propôs; só vale com o aceite do proponente |
 | GET | `/v1/projects/{project_id}/procurement` | membro da organização ativa | papel ≥ viewer | Pedidos de compra do projeto (OSC dona ou financiador) |
 | POST | `/v1/projects/{project_id}/procurement` | membro da organização ativa | tipos: osc; papel ≥ member | create request |
 | POST | `/v1/projects/{project_id}/publish` | membro da organização ativa | tipos: osc; papel ≥ manager | Publica o projeto no feed de financiadores (exige dados mínimos e e-mail confirmado) |
@@ -809,13 +806,17 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/signed-agreements/{agreement_id}` | membro da organização ativa | papel ≥ viewer | Acordo com partes, estado das assinaturas e acompanhamento |
 | PATCH | `/v1/signed-agreements/{agreement_id}` | membro da organização ativa | papel ≥ manager | Altera um acordo ainda em rascunho (hash e documento são imutáveis) |
 | GET | `/v1/signed-agreements/{agreement_id}/allocation` | membro da organização ativa | papel ≥ viewer | Matriz de distribuição do acordo: bruto, projeto, taxa da plataforma (cobrável ou não, e por quê), terceiros |
+| POST | `/v1/signed-agreements/{agreement_id}/cancel` | membro da organização ativa | papel ≥ owner | Cancela um acordo VIGENTE (dona ou financiador, motivo obrigatório): obrigações dispensadas, repasses não confirmados cancelados com estorno |
 | POST | `/v1/signed-agreements/{agreement_id}/decline` | membro da organização ativa | papel ≥ owner | Recusa o acordo como parte (motivo obrigatório; o acordo é cancelado) |
 | POST | `/v1/signed-agreements/{agreement_id}/milestones` | membro da organização ativa | papel ≥ manager | Acrescenta um marco ao acordo (com valor e ordem; o contrato deriva as obrigações dele) |
 | PATCH | `/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}` | membro da organização ativa | papel ≥ manager | Reporta a entrega (quem executa) ou aceita/recusa (a outra parte): o grafo e os quatro olhos são do banco |
 | POST | `/v1/signed-agreements/{agreement_id}/new-version` | membro da organização ativa | papel ≥ manager | Abre a versão seguinte do acordo (rascunho); a anterior fica substituída e suas assinaturas deixam de aprovar |
 | POST | `/v1/signed-agreements/{agreement_id}/parties` | membro da organização ativa | papel ≥ manager | Acrescenta uma parte ao acordo em rascunho |
+| PUT | `/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix` | membro da organização ativa | papel ≥ owner | A própria parte informa a chave PIX que receberá os repasses deste acordo (formato conferido pelo banco) |
+| GET | `/v1/signed-agreements/{agreement_id}/payouts` | membro da organização ativa | papel ≥ viewer | Instruções de repasse da matriz: quem paga a quem, quanto, por qual chave, e o estado (instruída → pendente → confirmada → conciliada) |
 | POST | `/v1/signed-agreements/{agreement_id}/publish` | membro da organização ativa | papel ≥ manager | Envia o acordo para assinatura (exige pelo menos duas partes obrigatórias) |
 | POST | `/v1/signed-agreements/{agreement_id}/sign` | membro da organização ativa | papel ≥ owner; limite 30/3600s | Assina o acordo como parte (duas camadas: senha e código de uso único ligado ao hash) |
+| GET | `/v1/signed-agreements/{agreement_id}/value` | membro da organização ativa | papel ≥ viewer | O que o IMPACTO fez nesta operação — por registro, não por slogan (base do Value Capture) |
 | GET | `/v1/solution-intents/mine` | membro da organização ativa | papel ≥ viewer | Meu funil: soluções em que declarei interesse |
 | POST | `/v1/solution-intents/{intent_id}/stage` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ admin | O autor confirma uma etapa avançada (negociando … concluído); exige pedido aceito do financiador |
 | GET | `/v1/solution-replications/mine` | membro da organização ativa | papel ≥ viewer | Replicações da minha organização (como replicadora) e das minhas soluções (como autora) |
@@ -903,7 +904,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/verifiable-records/{record_id}/qr` | membro da organização ativa | papel ≥ viewer | QR Code (SVG) que aponta para a página pública de verificação |
 | POST | `/v1/verifiable-records/{record_id}/revoke` | membro da organização ativa | papel ≥ owner | Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data) |
 | POST | `/v1/verifiable-records/{record_id}/timestamp` | membro da organização ativa | papel ≥ manager | Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível) |
-| POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher (transação atômica; resposta genérica para códigos inválidos). Descontos ficam pendentes até o checkout. |
+| POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher de concessão (transação atômica; resposta genérica para códigos inválidos; vouchers de desconto aposentados) |
 | GET | `/v1/workspace` | membro da organização ativa | papel ≥ viewer | WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem |
 | GET | `/v1/workspace/personas` | usuário autenticado | — | Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano) |
 | POST | `/v1/workspace/personas` | membro da organização ativa | papel ≥ admin | declare persona |

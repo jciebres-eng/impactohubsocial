@@ -1,5 +1,5 @@
 {
- "passos": 244,
+ "passos": 238,
  "falhas": 0,
  "por_jornada": {
   "Preparação: contas de demonstração e plano concedido pela administração": 9,
@@ -13,7 +13,7 @@
   "Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão": 35,
   "Marketplace, soluções e perfis públicos": 6,
   "Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre": 28,
-  "Suporte e Central de Conhecimento": 10,
+  "Suporte e Central de Conhecimento": 4,
   "Banco de Ideias: ideia → amadurecimento → projeto": 5,
   "Administração: visão geral → verificação → auditoria": 7,
   "Pendências: o que espera decisão de alguém": 12
@@ -21,7 +21,7 @@
  "atalhos_declarados": [],
  "por_perfil": {
   "admin": 17,
-  "osc": 149,
+  "osc": 143,
   "company": 44,
   "provider": 12,
   "government": 9,
@@ -45,7 +45,7 @@
    "passo": "administração concede plano osc_premium (osc)",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/144eba64-0b78-4061-b847-ce6bbb79c631/grants",
+   "rota": "/v1/admin/organizations/a3954409-9a6d-4ad1-8eca-b8aac031dc86/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -55,7 +55,7 @@
    "passo": "administração concede plano company_premium (company)",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/6e4cd330-9976-4d15-9a1a-d4e3877571b8/grants",
+   "rota": "/v1/admin/organizations/189f46da-b429-4fd3-9fc6-f74f1fe35b23/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -65,7 +65,7 @@
    "passo": "administração concede plano provider_premium (provider)",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/7a438db3-0f18-4bae-9577-ca25b1796af9/grants",
+   "rota": "/v1/admin/organizations/e73b99f6-f6d9-49c5-b1be-c13267a69d47/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -75,7 +75,7 @@
    "passo": "administração concede plano gov_institutional (government)",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/656a9cf7-c12d-4c10-8158-014c4deda35b/grants",
+   "rota": "/v1/admin/organizations/0574830b-6609-4057-8e54-c769f2ffeff1/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -85,7 +85,7 @@
    "passo": "administração concede plano individual_basic (individual)",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/04e65795-d7ab-4459-a17f-a8862d30e71c/grants",
+   "rota": "/v1/admin/organizations/0eba6c1f-a4fe-461c-9d6c-585860c115cc/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -115,7 +115,7 @@
    "passo": "OSC abre o projeto",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -135,7 +135,7 @@
    "passo": "orça o projeto novo",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/e37a8aca-2ade-4c6a-9566-46f07895177c/budget-items",
+   "rota": "/v1/projects/c7a7122b-5600-4090-be8e-47dd8759f110/budget-items",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -145,7 +145,7 @@
    "passo": "publica o projeto novo",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/e37a8aca-2ade-4c6a-9566-46f07895177c/publish",
+   "rota": "/v1/projects/c7a7122b-5600-4090-be8e-47dd8759f110/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -165,7 +165,7 @@
    "passo": "preenche o diagnóstico",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/diagnoses/7f99522f-0e04-4b04-a974-bb62a1503bfa",
+   "rota": "/v1/diagnoses/84f85175-d8b4-485d-a95e-050ad17efea8",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -175,7 +175,7 @@
    "passo": "responde a etapa de contexto do roteiro",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/diagnoses/7f99522f-0e04-4b04-a974-bb62a1503bfa/guide/context",
+   "rota": "/v1/diagnoses/84f85175-d8b4-485d-a95e-050ad17efea8/guide/context",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -185,7 +185,7 @@
    "passo": "aplica o diagnóstico ao projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/diagnoses/7f99522f-0e04-4b04-a974-bb62a1503bfa/apply",
+   "rota": "/v1/diagnoses/84f85175-d8b4-485d-a95e-050ad17efea8/apply",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -195,7 +195,7 @@
    "passo": "grava a versão 1 do diagnóstico",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/diagnoses/7f99522f-0e04-4b04-a974-bb62a1503bfa/versions",
+   "rota": "/v1/diagnoses/84f85175-d8b4-485d-a95e-050ad17efea8/versions",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -205,7 +205,7 @@
    "passo": "lê a análise de prontidão (8 dimensões)",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/diagnoses/7f99522f-0e04-4b04-a974-bb62a1503bfa/analysis",
+   "rota": "/v1/diagnoses/84f85175-d8b4-485d-a95e-050ad17efea8/analysis",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -215,7 +215,7 @@
    "passo": "declara contexto de equidade",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/equity/context",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/equity/context",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -235,7 +235,7 @@
    "passo": "alinha ODS (declarado)",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/ods-targets",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/ods-targets",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -255,7 +255,7 @@
    "passo": "cria indicador com linha de base e fonte",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/indicators",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/indicators",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -265,7 +265,7 @@
    "passo": "registra evidência (2026-05-11)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/evidences",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -275,7 +275,7 @@
    "passo": "registra medição 8 em 2026-05-11",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/cd8e430e-6b91-4929-85a7-39edaad9cec8/values",
+   "rota": "/v1/project-indicators/a331234f-e1ed-4150-aa0c-8cecad8d88ea/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -285,7 +285,7 @@
    "passo": "registra evidência (2026-06-30)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/evidences",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -295,7 +295,7 @@
    "passo": "registra medição 17 em 2026-06-30",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/cd8e430e-6b91-4929-85a7-39edaad9cec8/values",
+   "rota": "/v1/project-indicators/a331234f-e1ed-4150-aa0c-8cecad8d88ea/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -305,7 +305,7 @@
    "passo": "registra evidência (2026-08-19)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/evidences",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -315,7 +315,7 @@
    "passo": "registra medição 26 em 2026-08-19",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/cd8e430e-6b91-4929-85a7-39edaad9cec8/values",
+   "rota": "/v1/project-indicators/a331234f-e1ed-4150-aa0c-8cecad8d88ea/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -325,7 +325,7 @@
    "passo": "registra evidência (2026-10-03)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/evidences",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -335,7 +335,7 @@
    "passo": "registra medição 33 em 2026-10-03",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/cd8e430e-6b91-4929-85a7-39edaad9cec8/values",
+   "rota": "/v1/project-indicators/a331234f-e1ed-4150-aa0c-8cecad8d88ea/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -345,7 +345,7 @@
    "passo": "registra risco",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/risks",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/risks",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -355,7 +355,7 @@
    "passo": "grava retrato do projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/snapshots",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/snapshots",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -415,7 +415,7 @@
    "passo": "OSC vê o match do edital com o projeto",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/calls/8a4c71e8-a808-4e62-947f-0f12eab77675?project_id=f1f7efcb-87f9-449e-a701-014bf0ab8faf",
+   "rota": "/v1/calls/a81775b1-90c9-4ec9-9427-07cf70a49c9e?project_id=408a9548-919a-4e0b-8ef1-988cf2094ea7",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -435,7 +435,7 @@
    "passo": "OSC lê os passos da candidatura",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -475,7 +475,7 @@
    "passo": "OSC conclui o passo 'requirements'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/bcaa5d9a-427c-4209-955b-ceab0e1403b6",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/31ac27a0-f387-4b7d-9f7f-2469d496a6a9",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -485,7 +485,7 @@
    "passo": "OSC conclui o passo 'req_plano_trabalho'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/42c06579-d42d-4975-9418-de0e85a92fff",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/b5513211-ab66-4136-9c34-62096d1daa51",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -495,7 +495,7 @@
    "passo": "OSC conclui o passo 'proposal'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/68b02386-0ed2-44c2-9589-6a995c386dbf",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/a6c59ac7-2177-462c-8d56-d9ecd4a5ee87",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -505,7 +505,7 @@
    "passo": "OSC conclui o passo 'budget'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/a294e714-b1c1-4191-914e-8aac4e3313f0",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/87e0b340-8661-4acc-8f50-d3c21181490b",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -515,7 +515,7 @@
    "passo": "OSC conclui o passo 'signature'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/2315f1ef-2839-43f3-af40-f63885c6fdc3",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/bbfc5627-0e44-4807-9f86-bc1fa74ae605",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -525,7 +525,7 @@
    "passo": "OSC conclui o passo 'submission'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/steps/fa1cd5dd-c3be-4279-b7ae-cfed4c2c0a17",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/steps/74a6a102-fd7e-415c-ad58-d82af8f2d373",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -535,7 +535,7 @@
    "passo": "OSC envia a candidatura",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/transition",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -545,7 +545,7 @@
    "passo": "avaliador move para screening",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/transition",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -555,7 +555,7 @@
    "passo": "avaliador move para due_diligence",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/transition",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -565,7 +565,7 @@
    "passo": "avaliador declara não ter conflito",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/conflict",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/conflict",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -575,7 +575,7 @@
    "passo": "avaliador aprova",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/transition",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -585,7 +585,7 @@
    "passo": "financiador registra o aporte comprometido",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/commitments",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/commitments",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -595,7 +595,7 @@
    "passo": "financiador informa o desembolso",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/commitments/f6555f4d-3083-4b46-9a62-c8a63d683c03/status",
+   "rota": "/v1/commitments/16521176-d5df-44ef-8e11-fdbb60761bce/status",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -605,7 +605,7 @@
    "passo": "OSC confirma o recebimento",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/commitments/f6555f4d-3083-4b46-9a62-c8a63d683c03/status",
+   "rota": "/v1/commitments/16521176-d5df-44ef-8e11-fdbb60761bce/status",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -615,7 +615,7 @@
    "passo": "financiador registra pagamento",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/commitments/f6555f4d-3083-4b46-9a62-c8a63d683c03/payments",
+   "rota": "/v1/commitments/16521176-d5df-44ef-8e11-fdbb60761bce/payments",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -625,7 +625,7 @@
    "passo": "pagamento aguarda confirmação",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payments/fba7e9a3-1718-4e26-8a56-3905981a86e9/transition",
+   "rota": "/v1/payments/770f3675-dda1-49c0-a8ed-ff808ce92384/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -635,7 +635,7 @@
    "passo": "OSC confirma o pagamento",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/payments/fba7e9a3-1718-4e26-8a56-3905981a86e9/transition",
+   "rota": "/v1/payments/770f3675-dda1-49c0-a8ed-ff808ce92384/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -645,7 +645,7 @@
    "passo": "OSC inicia a execução",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/6db71109-aa30-4d27-b92e-2d3528ff04ce/transition",
+   "rota": "/v1/applications/d80573b4-4612-4aea-b535-599eb436ecc9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -655,7 +655,7 @@
    "passo": "financiador valida medição",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/5f35a31e-2463-4f27-b6d1-6cd66ac42e3d/review",
+   "rota": "/v1/indicator-values/968ce6a3-ee52-431f-bf93-ed5a2bbf5299/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -665,7 +665,7 @@
    "passo": "financiador valida medição",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/6c3801bd-b4cc-4ff9-83c1-c62cf1157a02/review",
+   "rota": "/v1/indicator-values/0c120c24-01f5-4a4a-94bd-5f98dbb6dcbe/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -675,7 +675,7 @@
    "passo": "financiador valida medição",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/f96b193c-cf09-468d-b2d8-c8e1cba28af2/review",
+   "rota": "/v1/indicator-values/812ab121-7616-483e-8666-0ab629818fc5/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -685,7 +685,7 @@
    "passo": "financiador vê a série do projeto (reportado × validado)",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/impact",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/impact",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -705,7 +705,7 @@
    "passo": "financiador envia a proposta",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/proposals/84fe9bea-2d26-4cfa-bad5-c8be24800a82/transition",
+   "rota": "/v1/proposals/2fb1fc72-8a79-411f-9ce1-319ff5969447/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -715,7 +715,7 @@
    "passo": "OSC abre a proposta",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/proposals/84fe9bea-2d26-4cfa-bad5-c8be24800a82",
+   "rota": "/v1/proposals/2fb1fc72-8a79-411f-9ce1-319ff5969447",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -725,7 +725,7 @@
    "passo": "OSC aceita a proposta",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/proposals/84fe9bea-2d26-4cfa-bad5-c8be24800a82/transition",
+   "rota": "/v1/proposals/2fb1fc72-8a79-411f-9ce1-319ff5969447/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -755,7 +755,7 @@
    "passo": "financiador escreve",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/conversations/59518f61-7150-4d64-bfeb-6aaca4508096/messages",
+   "rota": "/v1/conversations/16e677f8-c5ac-489e-ba98-24496e97786a/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -765,7 +765,7 @@
    "passo": "OSC responde",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/conversations/59518f61-7150-4d64-bfeb-6aaca4508096/messages",
+   "rota": "/v1/conversations/16e677f8-c5ac-489e-ba98-24496e97786a/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -775,7 +775,7 @@
    "passo": "financiador manda mensagem direta",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/messages/144eba64-0b78-4061-b847-ce6bbb79c631",
+   "rota": "/v1/messages/a3954409-9a6d-4ad1-8eca-b8aac031dc86",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -795,7 +795,7 @@
    "passo": "OSC envia o relatório ao apoiador",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/eafe1f5e-029c-42b0-b825-366359074b95/transition",
+   "rota": "/v1/impact-updates/c6c06820-d78d-4861-8d0e-2234388f74c0/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -805,7 +805,7 @@
    "passo": "apoiador aceita o relatório",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/eafe1f5e-029c-42b0-b825-366359074b95/transition",
+   "rota": "/v1/impact-updates/c6c06820-d78d-4861-8d0e-2234388f74c0/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -825,7 +825,7 @@
    "passo": "OSC publica necessidade do projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/needs",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/needs",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -835,7 +835,7 @@
    "passo": "profissional oferece ajuda",
    "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/needs/de3612b0-8fec-4081-ba92-d78a182e5849/offers",
+   "rota": "/v1/needs/161fe231-252f-4a71-97c5-27eef27a25c4/offers",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -845,7 +845,7 @@
    "passo": "OSC aceita a oferta",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/offers/866e5941-762b-405e-a680-26aafc13a9e8/decide",
+   "rota": "/v1/offers/ae8fde2a-7c93-41b7-82fb-1bfe7ecc2d2f/decide",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -885,7 +885,7 @@
    "passo": "profissional aceita a revisão",
    "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/professional-reviews/4609b5a9-dd5f-49a5-93ed-7006ebfd7c0b/respond",
+   "rota": "/v1/professional-reviews/511113b3-cec1-4721-bbbe-fe8e48985250/respond",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -895,7 +895,7 @@
    "passo": "profissional aprova com credencial verificada",
    "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/professional-reviews/4609b5a9-dd5f-49a5-93ed-7006ebfd7c0b/respond",
+   "rota": "/v1/professional-reviews/511113b3-cec1-4721-bbbe-fe8e48985250/respond",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -925,7 +925,7 @@
    "passo": "OSC lê os passos da candidatura",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -965,7 +965,7 @@
    "passo": "OSC conclui o passo 'requirements'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/steps/6edc2356-453d-4e33-8a1f-574bf0b9dc2f",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/steps/6f20a525-b1d3-4f4a-9b6c-31f2d67ce82b",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -975,7 +975,7 @@
    "passo": "OSC conclui o passo 'proposal'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/steps/85365b9a-2b84-4923-b22d-2f78a5421dd0",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/steps/e834545b-2927-4673-97ee-5752c9f99e3f",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -985,7 +985,7 @@
    "passo": "OSC conclui o passo 'budget'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/steps/96967bd1-e86b-4f07-8f09-ec9dfd283a9c",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/steps/301f51eb-769a-4fb9-ac2e-794ba8085e0a",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -995,7 +995,7 @@
    "passo": "OSC conclui o passo 'signature'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/steps/d266fb09-5cf4-4446-b53c-f33fcf7227c8",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/steps/681672ff-ef7c-4018-9b1d-557f9408a5fd",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1005,7 +1005,7 @@
    "passo": "OSC conclui o passo 'submission'",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/steps/643b0e7d-0d92-4876-8a93-2aec269318f6",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/steps/c429758c-39f3-4c58-b71c-d7a3998d89d7",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1015,7 +1015,7 @@
    "passo": "OSC envia a candidatura",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/transition",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1025,7 +1025,7 @@
    "passo": "governo lista as candidaturas do chamamento",
    "perfil": "government",
    "metodo": "GET",
-   "rota": "/v1/calls/f0a9ceeb-0557-47e9-87d1-d8fc3018c67f/applications",
+   "rota": "/v1/calls/c526a533-7a43-473a-88fe-2460a5317882/applications",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1035,7 +1035,7 @@
    "passo": "avaliador move para screening",
    "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/transition",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1045,7 +1045,7 @@
    "passo": "avaliador move para due_diligence",
    "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/transition",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1055,7 +1055,7 @@
    "passo": "avaliador declara não ter conflito",
    "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/conflict",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/conflict",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1065,7 +1065,7 @@
    "passo": "avaliador aprova",
    "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/bcdc9333-7aac-4450-9c22-1711183d834e/transition",
+   "rota": "/v1/applications/37123d02-2b22-47dc-9842-5e4737f3c217/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1095,7 +1095,7 @@
    "passo": "orça o terceiro projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/65ee5e9c-3267-477f-98f4-9deed9958d08/budget-items",
+   "rota": "/v1/projects/5adcebf7-7e52-46dd-b69e-302b54e9115a/budget-items",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1105,7 +1105,7 @@
    "passo": "publica o terceiro projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/65ee5e9c-3267-477f-98f4-9deed9958d08/publish",
+   "rota": "/v1/projects/5adcebf7-7e52-46dd-b69e-302b54e9115a/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1135,7 +1135,7 @@
    "passo": "financiador confere o estado IMPACTO Ready do projeto apoiado",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/ready",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/ready",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1165,7 +1165,7 @@
    "passo": "OSC abre a cota",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/funding-quotas/3f039a1c-a8d9-44ee-aa0c-b84c12b44d5d",
+   "rota": "/v1/funding-quotas/84988bea-6033-45eb-8db8-5c3d1a87a7fe",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1175,7 +1175,7 @@
    "passo": "empresa apoia 3 cotas",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/funding-quotas/3f039a1c-a8d9-44ee-aa0c-b84c12b44d5d/pledges",
+   "rota": "/v1/funding-quotas/84988bea-6033-45eb-8db8-5c3d1a87a7fe/pledges",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1185,7 +1185,7 @@
    "passo": "apoiadora apoia 1 cota",
    "perfil": "individual",
    "metodo": "POST",
-   "rota": "/v1/funding-quotas/3f039a1c-a8d9-44ee-aa0c-b84c12b44d5d/pledges",
+   "rota": "/v1/funding-quotas/84988bea-6033-45eb-8db8-5c3d1a87a7fe/pledges",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1225,7 +1225,7 @@
    "passo": "OSC publica a campanha",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/campaigns/e583cf2c-5062-4a19-9cce-9c0ed990bcc0",
+   "rota": "/v1/campaigns/5ccd1e30-82fb-43fd-ad5e-bcd19e9d566f",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1235,7 +1235,7 @@
    "passo": "visitante sem login abre a campanha",
    "perfil": "anônimo",
    "metodo": "GET",
-   "rota": "/v1/public/campaigns/orquestra-comunitaria-b8766e",
+   "rota": "/v1/public/campaigns/orquestra-comunitaria-f622ec",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1265,7 +1265,7 @@
    "passo": "lê os campos da montagem",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/document-assemblies/0beb1726-ff4d-4287-ab07-591596858f0a",
+   "rota": "/v1/document-assemblies/d455c95c-06dc-4085-a1e5-a2c19aaff6b4",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1275,7 +1275,7 @@
    "passo": "preenche campos e anexa evidências",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/document-assemblies/0beb1726-ff4d-4287-ab07-591596858f0a",
+   "rota": "/v1/document-assemblies/d455c95c-06dc-4085-a1e5-a2c19aaff6b4",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1285,7 +1285,7 @@
    "passo": "gera o documento",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/document-assemblies/0beb1726-ff4d-4287-ab07-591596858f0a/generate",
+   "rota": "/v1/document-assemblies/d455c95c-06dc-4085-a1e5-a2c19aaff6b4/generate",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1315,7 +1315,7 @@
    "passo": "inclui o profissional como parte",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/60ad3a3d-cf58-4da9-949f-0106ee6bf8c4/parties",
+   "rota": "/v1/signed-agreements/ede75eaa-c38f-4faa-aefd-2bdda45850cc/parties",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1325,7 +1325,7 @@
    "passo": "publica para assinatura",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/60ad3a3d-cf58-4da9-949f-0106ee6bf8c4/publish",
+   "rota": "/v1/signed-agreements/ede75eaa-c38f-4faa-aefd-2bdda45850cc/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1345,7 +1345,7 @@
    "passo": "assina (agreement)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/60ad3a3d-cf58-4da9-949f-0106ee6bf8c4/sign",
+   "rota": "/v1/signed-agreements/ede75eaa-c38f-4faa-aefd-2bdda45850cc/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1365,7 +1365,7 @@
    "passo": "assina (agreement)",
    "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/60ad3a3d-cf58-4da9-949f-0106ee6bf8c4/sign",
+   "rota": "/v1/signed-agreements/ede75eaa-c38f-4faa-aefd-2bdda45850cc/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1385,7 +1385,7 @@
    "passo": "visitante confere o registro sem login",
    "perfil": "anônimo",
    "metodo": "GET",
-   "rota": "/v1/public/verify/IMP-C6W0-JRSQ-4C68",
+   "rota": "/v1/public/verify/IMP-NHV4-E9XA-8RS5",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1395,7 +1395,7 @@
    "passo": "abre compra do projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/procurement",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/procurement",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1405,7 +1405,7 @@
    "passo": "registra orçamento (Loja Exemplo A)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/842fa47e-bdd0-4e0b-96f3-51a1d16d0c2f/quotes",
+   "rota": "/v1/procurement/316c1e9d-e423-43f7-8958-7fe3adb22797/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1415,7 +1415,7 @@
    "passo": "registra orçamento (Loja Exemplo B)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/842fa47e-bdd0-4e0b-96f3-51a1d16d0c2f/quotes",
+   "rota": "/v1/procurement/316c1e9d-e423-43f7-8958-7fe3adb22797/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1425,7 +1425,7 @@
    "passo": "registra orçamento (Loja Exemplo C)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/842fa47e-bdd0-4e0b-96f3-51a1d16d0c2f/quotes",
+   "rota": "/v1/procurement/316c1e9d-e423-43f7-8958-7fe3adb22797/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1435,7 +1435,7 @@
    "passo": "decide pelo menor orçamento",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/842fa47e-bdd0-4e0b-96f3-51a1d16d0c2f/decide",
+   "rota": "/v1/procurement/316c1e9d-e423-43f7-8958-7fe3adb22797/decide",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1455,7 +1455,7 @@
    "passo": "apoiadora publica a ideia",
    "perfil": "individual",
    "metodo": "POST",
-   "rota": "/v1/solutions/6771557e-cb8a-41cf-a74d-c35ec9a360cf/publish",
+   "rota": "/v1/solutions/5921f6d7-91c9-4a9f-8beb-14b1d6d701af/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1465,7 +1465,7 @@
    "passo": "OSC propõe participação de autoria à apoiadora (1,5% quando elegível; nunca automática)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/participations",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/participations",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1475,7 +1475,7 @@
    "passo": "apoiadora aceita a participação (projeto já publicado → consolidada)",
    "perfil": "individual",
    "metodo": "POST",
-   "rota": "/v1/participations/a669a59c-2534-42e2-82cb-4955647e8738/accept",
+   "rota": "/v1/participations/f90d09b4-ff33-47d7-9931-0ee6deb293a8/accept",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1505,7 +1505,7 @@
    "passo": "inclui a empresa como financiadora",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/parties",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/parties",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1515,7 +1515,7 @@
    "passo": "quem recebe informa a própria chave PIX no contrato",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/parties/7f6aae22-074a-4065-bbb1-9a5f7c295683/pix",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/parties/5d09b1c6-b6b1-478e-9c44-a044f17935a1/pix",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1525,7 +1525,7 @@
    "passo": "inclui a apoiadora como proponente (parte opcional)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/parties",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/parties",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1535,7 +1535,7 @@
    "passo": "apoiadora informa a própria chave PIX",
    "perfil": "individual",
    "metodo": "PUT",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/parties/ece140da-6c21-4559-902e-04dc4e17e3e6/pix",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/parties/f74cfdab-bade-4628-af28-134022118d47/pix",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1545,7 +1545,7 @@
    "passo": "define o marco 1: Compra dos instrumentos",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1555,7 +1555,7 @@
    "passo": "define o marco 2: Primeiro semestre de aulas",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1565,7 +1565,7 @@
    "passo": "publica para assinatura (versão 1 congelada)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/publish",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1575,7 +1575,7 @@
    "passo": "financiador vê a PRÉVIA da distribuição antes de assinar (95.000 projeto / 3.500 plataforma / 1.500 autoria, nada gravado)",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/allocation",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/allocation",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1595,7 +1595,7 @@
    "passo": "assina (agreement)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/sign",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1615,7 +1615,7 @@
    "passo": "assina (agreement)",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/sign",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1625,7 +1625,7 @@
    "passo": "acordo vigente: matriz gravada, obrigações derivadas, taxa registrada e NÃO cobrada (regra desligada)",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1635,7 +1635,7 @@
    "passo": "financiador abre as instruções de repasse (quem, quanto, por qual chave)",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/payouts",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/payouts",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1645,7 +1645,7 @@
    "passo": "financiador registra a transferência PIX feita ao projeto (a qualquer momento)",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payouts/1cba3726-f5a2-4881-b5c9-99576f7ece2f/transfers",
+   "rota": "/v1/payouts/2b8825d7-94a8-484c-a2f2-00a8c8e1bee7/transfers",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1655,7 +1655,7 @@
    "passo": "OSC (quem recebe) confirma o recebimento — quem paga nunca confirma",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/payout-transfers/3331ff07-f5e1-4a55-99db-827b4062c0d9/confirm",
+   "rota": "/v1/payout-transfers/c550bd27-7f47-4c43-8d48-ae4ca2d8aa25/confirm",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1665,7 +1665,7 @@
    "passo": "financiador tenta confirmar o que ele mesmo pagou → recusado",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payout-transfers/3331ff07-f5e1-4a55-99db-827b4062c0d9/confirm",
+   "rota": "/v1/payout-transfers/c550bd27-7f47-4c43-8d48-ae4ca2d8aa25/confirm",
    "status": 403,
    "ok": true,
    "erro": ""
@@ -1675,7 +1675,7 @@
    "passo": "financiador registra a transferência da participação de autoria à apoiadora",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payouts/a5544a67-48e4-49bc-931f-ee2a7efda447/transfers",
+   "rota": "/v1/payouts/01099fba-21d6-4611-82a8-c2b04139102b/transfers",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1685,7 +1685,7 @@
    "passo": "apoiadora confirma o recebimento da participação",
    "perfil": "individual",
    "metodo": "POST",
-   "rota": "/v1/payout-transfers/95282d46-ca90-4dad-84a1-588130ea7a4b/confirm",
+   "rota": "/v1/payout-transfers/201cfc19-7871-4222-addc-ae91067b5243/confirm",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1695,7 +1695,7 @@
    "passo": "o que o IMPACTO fez nesta operação (por registro)",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/value",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/value",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1705,7 +1705,7 @@
    "passo": "OSC registra a entrega do marco 1",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones/09b1d023-d221-4539-8bf0-1308d8c89e1d",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones/a28368a4-d230-4823-903c-856fa1424dc7",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1715,7 +1715,7 @@
    "passo": "OSC tenta aceitar a própria entrega → recusado (quatro olhos)",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones/09b1d023-d221-4539-8bf0-1308d8c89e1d",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones/a28368a4-d230-4823-903c-856fa1424dc7",
    "status": 403,
    "ok": true,
    "erro": ""
@@ -1735,7 +1735,7 @@
    "passo": "financiador aceita a entrega do marco 1 → obrigação de pagar nasce com prazo",
    "perfil": "company",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones/09b1d023-d221-4539-8bf0-1308d8c89e1d",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones/a28368a4-d230-4823-903c-856fa1424dc7",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1745,7 +1745,7 @@
    "passo": "OSC registra a entrega do marco 2",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones/4d712d05-3fcc-4115-b0ee-c0de61d0c350",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones/ba35afea-ba5f-489f-a261-015c0d4348ee",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1755,7 +1755,7 @@
    "passo": "financiador recusa o marco 2 com motivo (volta para quem executa)",
    "perfil": "company",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/milestones/4d712d05-3fcc-4115-b0ee-c0de61d0c350",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/milestones/ba35afea-ba5f-489f-a261-015c0d4348ee",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1765,7 +1765,7 @@
    "passo": "razão do projeto registra ativação, alocação, entrega e aceite em cadeia",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/projects/f1f7efcb-87f9-449e-a701-014bf0ab8faf/ledger",
+   "rota": "/v1/projects/408a9548-919a-4e0b-8ef1-988cf2094ea7/ledger",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1775,7 +1775,7 @@
    "passo": "mudança no contrato → nova versão em rascunho; a anterior fica substituída e exige nova assinatura",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/new-version",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/new-version",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1785,7 +1785,7 @@
    "passo": "versão antiga não recebe assinatura (substituída)",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/48d0e999-27ab-45bc-804d-f19100f32b7b/sign",
+   "rota": "/v1/signed-agreements/f5ba2b0e-4ebc-4f48-a6d3-ed11207a4f11/sign",
    "status": 409,
    "ok": true,
    "erro": ""
@@ -1805,7 +1805,7 @@
    "passo": "OSC publica o anúncio",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/marketplace/listings/cb616a49-ec80-4a5c-83e1-85834116f310/transition",
+   "rota": "/v1/marketplace/listings/58802b5e-86ee-4500-bfb1-4a801c4e8d4a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1825,7 +1825,7 @@
    "passo": "OSC publica a solução",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/solutions/fac53290-db1f-42cf-b4e3-88321615e53d/publish",
+   "rota": "/v1/solutions/e55af881-5a86-457c-9bf9-aebca58c6e28/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1865,7 +1865,7 @@
    "passo": "inclui a empresa como financiadora",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/parties",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/parties",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1875,7 +1875,7 @@
    "passo": "OSC informa a chave PIX no contrato",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/parties/0fb0dd46-909b-444e-a00b-16f5d13f70c7/pix",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/parties/f52cfc6d-87aa-4e32-a742-13247ca56e45/pix",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1885,7 +1885,7 @@
    "passo": "define o único marco",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/milestones",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/milestones",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1895,7 +1895,7 @@
    "passo": "publica para assinatura",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/publish",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1915,7 +1915,7 @@
    "passo": "assina (agreement)",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/sign",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1935,7 +1935,7 @@
    "passo": "assina (agreement)",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/sign",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1945,7 +1945,7 @@
    "passo": "instruções de repasse: projeto (19.000) e plataforma (700, aguardando regra)",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/payouts",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/payouts",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1955,7 +1955,7 @@
    "passo": "financiador registra o aporte ao projeto",
    "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payouts/84957079-ee9c-4e52-a025-af6070a1b023/transfers",
+   "rota": "/v1/payouts/9b320e9b-dd54-45d1-ba04-717b2ae4f81e/transfers",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1965,7 +1965,7 @@
    "passo": "OSC confirma o recebimento",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/payout-transfers/91f384f3-9ed5-40f1-b627-1256e3d2fa00/confirm",
+   "rota": "/v1/payout-transfers/4df72fa0-7702-46c5-b780-883cd3fd1bcf/confirm",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1975,7 +1975,7 @@
    "passo": "OSC concilia o repasse com nota",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/payouts/84957079-ee9c-4e52-a025-af6070a1b023/reconcile",
+   "rota": "/v1/payouts/9b320e9b-dd54-45d1-ba04-717b2ae4f81e/reconcile",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1985,7 +1985,7 @@
    "passo": "OSC registra a entrega",
    "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/milestones/54f91da1-1936-4a77-927c-f91faab34240",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/milestones/47d4a631-df76-4a05-9467-f20d2cea79ea",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1995,7 +1995,7 @@
    "passo": "financiador aceita a entrega → operação QUITADA (todo repasse devido confirmado)",
    "perfil": "company",
    "metodo": "PATCH",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/milestones/54f91da1-1936-4a77-927c-f91faab34240",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/milestones/47d4a631-df76-4a05-9467-f20d2cea79ea",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2005,7 +2005,7 @@
    "passo": "acordo concluído: quitação derivada dos repasses",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2045,7 +2045,7 @@
    "passo": "o que o IMPACTO fez nesta operação",
    "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/signed-agreements/3089daea-9f5e-4791-87eb-b41ecd53807d/value",
+   "rota": "/v1/signed-agreements/e8423b73-5b33-457c-b28a-cc1034b7bfd4/value",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2115,7 +2115,7 @@
    "passo": "OSC aceita com autorização de cobrança → pacote concedido pelo contrato",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/commercial/offers/d854f525-9af0-464e-8387-443d0726c0b4/accept",
+   "rota": "/v1/commercial/offers/7706337e-2f1b-4661-bbe3-29940ddd7c1a/accept",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2145,7 +2145,7 @@
    "passo": "suporte responde o chamado",
    "perfil": "support",
    "metodo": "POST",
-   "rota": "/v1/admin/support/tickets/4a769180-3760-45b1-bfa0-6a3de737efd6/messages",
+   "rota": "/v1/admin/support/tickets/7801f805-d5ec-4d5f-a584-34aa92942dc2/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -2155,7 +2155,7 @@
    "passo": "OSC lê a resposta",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/support/tickets/4a769180-3760-45b1-bfa0-6a3de737efd6",
+   "rota": "/v1/support/tickets/7801f805-d5ec-4d5f-a584-34aa92942dc2",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2167,66 +2167,6 @@
    "metodo": "GET",
    "rota": "/v1/help/courses",
    "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC se inscreve no curso",
-   "perfil": "osc",
-   "metodo": "POST",
-   "rota": "/v1/help/courses/primeiros-passos-na-plataforma/enroll",
-   "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC abre o curso",
-   "perfil": "osc",
-   "metodo": "GET",
-   "rota": "/v1/help/courses/primeiros-passos-na-plataforma",
-   "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC conclui a aula 'O que é a plataforma'",
-   "perfil": "osc",
-   "metodo": "POST",
-   "rota": "/v1/help/lessons/6faf71a9-4b2e-49ec-b365-96f2b46ca791/complete",
-   "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC conclui a aula 'Documentos e conformidade'",
-   "perfil": "osc",
-   "metodo": "POST",
-   "rota": "/v1/help/lessons/c781941f-5df5-4cb3-9a70-43c1ed7a7f7e/complete",
-   "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC conclui a aula 'Quiz de fundamentos'",
-   "perfil": "osc",
-   "metodo": "POST",
-   "rota": "/v1/help/lessons/c6f2d570-2d73-4f49-aa3b-e7f441e5905b/complete",
-   "status": 200,
-   "ok": true,
-   "erro": ""
-  },
-  {
-   "jornada": "Suporte e Central de Conhecimento",
-   "passo": "OSC emite certificado",
-   "perfil": "osc",
-   "metodo": "POST",
-   "rota": "/v1/help/courses/primeiros-passos-na-plataforma/certificate",
-   "status": 201,
    "ok": true,
    "erro": ""
   },
@@ -2245,7 +2185,7 @@
    "passo": "OSC amadurece a ideia (hipótese, público, impacto)",
    "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/ideas/fdc29f6a-7953-42fe-9414-f71aba5363d6",
+   "rota": "/v1/ideas/4704c959-c724-4e6b-98d0-f0e30b164d71",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2255,7 +2195,7 @@
    "passo": "OSC abre a ideia",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/ideas/fdc29f6a-7953-42fe-9414-f71aba5363d6",
+   "rota": "/v1/ideas/4704c959-c724-4e6b-98d0-f0e30b164d71",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2265,7 +2205,7 @@
    "passo": "OSC transforma a ideia em projeto",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/ideas/fdc29f6a-7953-42fe-9414-f71aba5363d6/promote",
+   "rota": "/v1/ideas/4704c959-c724-4e6b-98d0-f0e30b164d71/promote",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -2275,7 +2215,7 @@
    "passo": "OSC abre o projeto criado",
    "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/projects/106807bb-58e4-4692-804d-b43198e91f53",
+   "rota": "/v1/projects/b5c3ed1a-a471-40b7-b0ba-671a9d6a4ca8",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2315,7 +2255,7 @@
    "passo": "classifica a solução nova como autodeclarada",
    "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/solutions/fac53290-db1f-42cf-b4e3-88321615e53d/verify",
+   "rota": "/v1/admin/solutions/e55af881-5a86-457c-9bf9-aebca58c6e28/verify",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2365,7 +2305,7 @@
    "passo": "profissional envia (fica aguardando a OSC)",
    "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/proposals/49dabfd4-d286-4c98-a7ca-0c9655432f9a/transition",
+   "rota": "/v1/proposals/43eca7a7-783b-4246-86ee-d96e0dacfac9/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2385,7 +2325,7 @@
    "passo": "relatório aguarda análise do apoiador",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/40ea6e50-53c7-4ca8-b43c-b3a9a092c244/transition",
+   "rota": "/v1/impact-updates/39b46135-859b-43b6-b166-2859526e39e3/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -2405,7 +2345,7 @@
    "passo": "plataforma confere a afirmação",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/claims/7982250a-7c75-4d09-a9fe-bb9df9be92c8/check",
+   "rota": "/v1/claims/05e486f3-91c3-412a-b5fc-83fb4774f544/check",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -2425,7 +2365,7 @@
    "passo": "plataforma confere a afirmação",
    "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/claims/7f063404-1f28-45c9-bbc6-314323445bed/check",
+   "rota": "/v1/claims/d8fed035-63a6-4bb5-ba30-d8d87f18f2fc/check",
    "status": 201,
    "ok": true,
    "erro": ""

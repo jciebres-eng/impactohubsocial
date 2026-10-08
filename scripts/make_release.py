@@ -33,6 +33,15 @@ KEEP_EXACT = {"docs/evidence/test_run_v0.17.0.log", "docs/evidence/ruff_v0.17.0.
               "docs/evidence/perf_v0.16.0.log", "history/v0.15.0/test_run_v0.15.0.log",
               "history/v0.15.0/VERSION",
               "docs/evidence/test_run_v0.15.0.log", "docs/evidence/ruff_v0.15.0.log", "docs/evidence/perf_v0.15.0.log", "history/v0.14.0/test_run_v0.14.0.log", "history/v0.14.0/VERSION", "docs/evidence/test_run_v0.14.0.log", "docs/evidence/ruff_v0.14.0.log", "history/v0.13.0/test_run_v0.13.0.log", "history/v0.13.0/VERSION", "docs/evidence/test_run_v0.13.0.log", "docs/evidence/ruff_v0.13.0.log", "history/v0.12.1/test_run_v0.12.1.log", "history/v0.12.1/VERSION", "docs/evidence/test_run_v0.12.1.log", "docs/evidence/ruff_v0.12.1.log", "history/v0.12.0/test_run_v0.12.0.log", "history/v0.12.0/VERSION", "docs/evidence/test_run_v0.12.0.log", "docs/evidence/ruff_v0.12.0.log", "history/v0.11.0/test_run_v0.11.0.log", "history/v0.11.0/VERSION", "docs/evidence/test_run_v0.7.0.log", "docs/evidence/test_run_v0.8.0.log", "docs/evidence/test_run_v0.9.0.log", "docs/evidence/test_run_v0.10.0.log", "docs/evidence/test_run_v0.10.1.log", "docs/evidence/test_run_v0.11.0.log", "docs/billing.md", "history/v0.10.1/VERSION", "history/v0.10.0/test_run_v0.10.0.log", "history/v0.10.1/test_run_v0.10.1.log", "history/v0.9.0/test_run_v0.9.0.log", "history/v0.8.0/test_run_v0.8.0.log", "history/v0.7.0/test_run_v0.7.0.log"}
+
+
+def _tracked_evidence_log(rel) -> bool:
+    """v0.27.0: toda evidência `.log` versionada em docs/evidence/ ou history/ faz parte do release — a lista
+    fixa acima parou na v0.17.0 e os logs de regressão das versões seguintes ficavam fora do pacote."""
+    return rel.suffix == ".log" and rel.parts[0] in ("docs", "history") and "evidence" in rel.parts or \
+        (rel.suffix == ".log" and rel.parts[0] == "history")
+
+
 SECRET_PATTERNS = [re.compile(p) for p in (
     r"-----BEGIN (RSA |EC |OPENSSH |)PRIVATE KEY-----", r"AKIA[0-9A-Z]{16}", r"sk_live_[0-9a-zA-Z]{16,}", r"xox[baprs]-[0-9A-Za-z-]{10,}",
     r"ghp_[0-9A-Za-z]{30,}", r"sk-ant-[0-9A-Za-z_-]{20,}")]
@@ -103,7 +112,7 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "backend/impacto/api/network_schemas.py", "backend/impacto/api/network_core_routes.py",
             "backend/impacto/api/network_hub_routes.py",
             "backend/tests/test_v0160_network.py", "backend/tests/test_v0160_invariants.py",
-            "backend/tests/test_v0160_billing.py", "backend/tests/test_e2e_v0160_journeys.py",
+            "backend/tests/test_e2e_v0160_journeys.py",   # v0.27.0 (ADR-341): test_v0160_billing.py saiu com services/billing.py
             "scripts/sql_prepare_check.py",
             "web/src/pages/workspace.tsx", "web/src/pages/net.tsx", "web/src/pages/market.tsx",
             "web/src/pages/talk.tsx", "web/src/pages/impactreport.tsx", "web/src/pages/publicprofile.tsx",
@@ -157,7 +166,7 @@ def collect() -> list[Path]:
         if p.is_symlink() or not p.is_file():
             continue
         rel = p.relative_to(ROOT)
-        if rel.as_posix() in KEEP_EXACT:
+        if rel.as_posix() in KEEP_EXACT or _tracked_evidence_log(rel):
             files.append(p)
             continue
         if set(rel.parts[:-1]) & EXCLUDE_DIRS and not (rel.parts[0] == "web" and rel.parts[1] == "dist") \

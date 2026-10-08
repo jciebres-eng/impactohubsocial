@@ -46,3 +46,9 @@ FAIL: test_the_openapi_document_carries_the_same_version (test_v0230_release_gat
 # de teste por nome e não conheciam tests/test_v0270_release_docs.py (criado após o início da execução); o manifesto
 # e o openapi são gerados no fechamento. Regenerados em seguida; portões reexecutados abaixo.
 
+
+## Portões de fechamento reexecutados após regenerar matrizes, openapi, manifestos e matriz de cobertura
+## (release_gate, release_docs, execution_matrices, authorization_matrix, frontend_gate, cobertura, financial_model, architecture)
+----------------------------------------------------------------------
+Ran 128 tests in 23.003s
+OK

@@ -23,9 +23,11 @@ def main() -> int:
     files = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
     migrations = sorted(p.name for p in (ROOT / "backend" / "migrations").glob("*.sql"))
     texto = log.read_text(encoding="utf-8", errors="replace") if log.exists() else ""
-    # a ÚLTIMA execução do log é a que vale (o log guarda a 1ª passagem, com as falhas corrigidas, e a 2ª)
+    # a execução COMPLETA mais recente do log é a que vale: o log guarda a 1ª passagem (com as falhas depois
+    # corrigidas), a 2ª passagem completa e, ao fim, a reexecução só dos portões de fechamento (poucos testes).
     ms = re.findall(r"Ran (\d+) tests in ([\d.]+)s\s+(OK|FAILED)(?: \(([^)]*)\))?", texto)
-    m = ms[-1] if ms else None
+    completas = [x for x in ms if int(x[0]) >= 1000]
+    m = (completas or ms)[-1] if ms else None
     testes = {"total": int(m[0]), "seconds": float(m[1]), "result": m[2], "detail": m[3] or "", "runs_in_log": len(ms)} if m else None
     with (ROOT / "docs" / "execution" / "INTEGRATION_HOMOLOGATION_MATRIX.csv").open(encoding="utf-8") as fh:
         integ = [{"provider": r["provider"], "capability": r["capability"], "state": r["state"], "credentials": r["credentials"]}
@@ -40,15 +42,17 @@ def main() -> int:
         "release_status": status,
         "files": {"tracked_total": len(files), "traceability": f"IMPACTO_v{version}_TRACEABILITY.json",
                   "package": f"IMPACTO_TRUST_FINAL_RELEASE_{version}.zip"},
-        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if "v0260" in x]},
+        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if "v0270" in x]},
         "tests": testes,
-        "new_test_modules": ["backend/tests/test_v0260_contract_rules.py", "backend/tests/test_v0260_control_towers.py"],
+        "new_test_modules": ["backend/tests/test_v0270_no_subscription.py", "backend/tests/test_v0270_economy.py",
+                             "backend/tests/test_v0270_financial_model.py", "backend/tests/test_v0270_release_docs.py"],
         "integrations": integ,
         "external_dependencies": secao(25),
         "known_limitations": secao(26),
         "decision": secao(27),
         "documents": ["FINAL_EXECUTION_REPORT.md", "FINAL_EXECUTION_AUDIT.md", "RELEASE_NOTES.md",
-                      "docs/execution/TECHNICAL_BASELINE_BEFORE_EXECUTION.md", "docs/execution/SYSTEM_INTEGRATION_MATRIX.md"],
+                      "MOTOR_COVERAGE_MATRIX.md", "EXTERNAL_INTEGRATIONS.md", "docs/ECONOMIC_MODEL.md",
+                      "docs/execution/SUBSCRIPTION_INVENTORY.md", "24_MONTH_FINANCIAL_MODEL.md"],
     }
     (ROOT / "FINAL_RELEASE_MANIFEST.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"FINAL_RELEASE_MANIFEST.json: {version} @ {commit[:7]} — {status}; testes: {testes}")

@@ -1,32 +1,34 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.26.0",
- "version": "0.26.0",
- "commit": "ce3579e",
- "date": "2026-10-08T19:28:06+00:00",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.27.0",
+ "version": "0.27.0",
+ "commit": "0a44b31",
+ "date": "2026-10-08T23:40:07+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 2971,
-  "traceability": "IMPACTO_v0.26.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.26.0.zip"
+  "tracked_total": 3150,
+  "traceability": "IMPACTO_v0.27.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.27.0.zip"
  },
  "migrations": {
-  "total": 65,
-  "last": "0065_v0260_control_towers_ready.sql",
+  "total": 67,
+  "last": "0067_v0270_no_subscription.sql",
   "new_in_this_version": [
-   "0064_v0260_contract_operating_rules.sql",
-   "0065_v0260_control_towers_ready.sql"
+   "0066_v0270_economic_layer.sql",
+   "0067_v0270_no_subscription.sql"
   ]
  },
  "tests": {
-  "total": 2295,
-  "seconds": 1900.124,
+  "total": 2285,
+  "seconds": 1890.687,
   "result": "FAILED",
-  "detail": "failures=1, skipped=29",
-  "runs_in_log": 2
+  "detail": "failures=4, skipped=29",
+  "runs_in_log": 3
  },
  "new_test_modules": [
-  "backend/tests/test_v0260_contract_rules.py",
-  "backend/tests/test_v0260_control_towers.py"
+  "backend/tests/test_v0270_no_subscription.py",
+  "backend/tests/test_v0270_economy.py",
+  "backend/tests/test_v0270_financial_model.py",
+  "backend/tests/test_v0270_release_docs.py"
  ],
  "integrations": [
   {
@@ -49,7 +51,7 @@
   },
   {
    "provider": "stripe",
-   "capability": "Cobrança (Stripe)",
+   "capability": "Cobrança própria (Stripe) — contratos avulsos/parcelados; sem assinatura (ADR-341)",
    "state": "contract_tested",
    "credentials": "ausentes"
   },
@@ -114,14 +116,17 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige:\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da taxa de serviço contratada | advogado(a) e contador(a): arranjo de pagamento (Lei 12.865/2013), ISS, cláusula, nota fiscal | regra desligada; taxa registrada e não cobrada |\n| Pagamento real (projeto e taxa) | conta Stripe aprovada / meio escolhido pelas partes | cobrança própria simulada e declarada |\n| Nota fiscal | provedor fiscal | não emitida |\n| Assinatura qualificada, gov.br, ICP-Brasil, biometria, KYC, SMS/WhatsApp | credenciais e contratos | não simulados; a interface diz \"não ligado\" |\n| Aceite de termos | 11 minutas por advogado(a) | cadastro em produção bloqueado (503) |\n| Endereço público | conta de hospedagem do dono (D-PUB1) | pilha do zero provada no CI, sem URL |\n| Tag `v0.26.0` no GitHub | o proxy deste ambiente recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
- "known_limitations": "- `obligation_overdue` é calculado na leitura; não há varredura que o grave no razão.\n- Sem snapshot histórico do estado Ready (é recalculado a cada leitura).\n- O Ready não alimenta o match (decisão).\n- Nível de identidade é por usuário; o critério usa o melhor nível entre donos/admins.\n- A torre do financiador mostra risco de projeto como contagem (o registro é da OSC).\n- A torre do governo não agrega por programa (`program_financials` existe na API).\n- Defeitos pré-existentes encontrados na leitura da base e **não corrigidos** (fora do escopo, registrados):\n  `review_inbox` filtra situações inexistentes de candidatura; `exec.progress` da prontidão por\n  finalidade conta estados de marco inexistentes (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4).\n- Motores de leitura (10, incluindo torres e Ready) sem rastro durável — por desenho.\n- Typecheck oficial do front só no CI (registro npm indisponível aqui).",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: integridade financeira (100k → 97k/3k rastreável,\nGMV ≠ receita, idempotência, isolamento de tenant, desconhecido ≠ zero), autorização, tenancy,\npersistência e fluxo de negócio completo têm teste executado e verde na segunda regressão. As\ncondições são todas externas (§25): parecer da taxa, pagamento real, nota fiscal, minutas, hospedagem,\ntag no GitHub. Nenhuma falha crítica foi convertida em \"condição\".",
+ "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da taxa de serviço (3,5%) | advogado(a) e contador(a): arranjo de pagamento (Lei 12.865/2013), ISS, cláusula, NFS-e | regra desligada; camada registrada e instruída, **nada devido, nada cobrado** |\n| Chave PIX real da plataforma | pessoa jurídica titular | `PLATFORM_PIX_KEY` vazia → instrução \"NÃO CONFIGURADA\" |\n| Banco / provedor de pagamento | integração bancária ou provedor homologado | conciliação manual, registrada e confirmada pelas partes; torre diz \"DADO FINANCEIRO NÃO CONECTADO\" |\n| Nota fiscal | provedor fiscal | não emitida |\n| Assinatura qualificada, gov.br, ICP-Brasil, biometria, KYC, SMS/WhatsApp | credenciais e contratos | não simulados; a interface diz \"não ligado\" |\n| Aceite de termos | minutas por advogado(a) | cadastro em produção bloqueado (503) |\n| Endereço público | conta de hospedagem do dono | pilha do zero provada no CI, sem URL |\n| Tag `v0.27.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
+ "known_limitations": "- Receita real R$ 0,00 por construção até a regra `contract.platform_service_fee` ficar ativa.\n- Conciliação bancária manual; `value_capture_ratio` NÃO MEDIDO sem recursos de projeto confirmados.\n- Preço de contrato avulso/parcelado é negociado (piso publicado não é preço); nenhuma tabela.\n- `economic_rules` 2027.01 não tem `effective_until` fechado (CHECK impede data futura); a vigente é\n  escolhida pela maior versão com `effective_from <= now()`.\n- Documentos de assinatura permanecem no repositório marcados SUPERADO (histórico), e em `history/`.\n- Motores de leitura (13) sem rastro durável — por desenho.\n- Typecheck oficial do front só no CI (registro npm indisponível aqui).\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: nenhuma assinatura; integridade econômica (3,5 +\n1,5 do catálogo, distribuição fechada, instrução ≠ custódia, confirmação por quem recebe, GMV ≠\nreceita, reconhecimento só na quitação), autorização, tenancy, persistência e fluxo de negócio\ncompleto têm teste executado e verde na segunda regressão. As condições são todas externas (§25):\nparecer da taxa, chave PIX real, banco/provedor, nota fiscal, minutas, hospedagem, tag no GitHub.\nNenhuma falha crítica foi convertida em \"condição\".",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
   "RELEASE_NOTES.md",
-  "docs/execution/TECHNICAL_BASELINE_BEFORE_EXECUTION.md",
-  "docs/execution/SYSTEM_INTEGRATION_MATRIX.md"
+  "MOTOR_COVERAGE_MATRIX.md",
+  "EXTERNAL_INTEGRATIONS.md",
+  "docs/ECONOMIC_MODEL.md",
+  "docs/execution/SUBSCRIPTION_INVENTORY.md",
+  "24_MONTH_FINANCIAL_MODEL.md"
  ]
 }

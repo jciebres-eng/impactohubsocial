@@ -57,12 +57,14 @@ def merged(doc: dict, i18n: dict) -> dict:
 
 
 def markdown(doc: dict) -> str:
-    from datetime import date
+    # Sem data de geração: arquivo gerado tem de ser função só da fonte. A versão anterior escrevia
+    # `date.today()` aqui, e o `--check` passava a acusar "fora de sincronia" a cada virada de dia —
+    # no CI, que roda em UTC, isso aconteceu à noite no Brasil (v0.24.1). A versão do glossário, no
+    # título, é o que identifica o conteúdo.
     out = [f"# Glossário oficial — Impacto Trust v{doc['version']}", "",
            "> Gerado por `scripts/sync_glossary.py` a partir de `config/glossary.json`. Não edite à mão.", "",
            doc["note"], "",
-           f"Idioma de origem: **{doc['source_locale']}** · Idiomas: {', '.join(doc['locales'])} · "
-           f"Gerado em {date.today().isoformat()}", "",
+           f"Idioma de origem: **{doc['source_locale']}** · Idiomas: {', '.join(doc['locales'])}", "",
            "## Como ler", "",
            "| Coluna | O que é |", "| --- | --- |",
            "| chave | o valor que a API devolve e o banco guarda |",

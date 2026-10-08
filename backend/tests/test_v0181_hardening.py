@@ -237,16 +237,26 @@ class DependencyControlTests(unittest.TestCase):
         self.assertEqual(problemas, [], f"fixação de dependência web inconsistente: {problemas}")
 
     def test_what_was_never_installed_is_declared_as_not_verified(self):
+        """Toda dependência declarada está no lockfile com a MESMA versão exata; o que não estiver
+        instalado no ambiente que roda o teste está no inventário.
+
+        Até a v0.24.0 este teste exigia que houvesse algo NÃO instalado ("o cenário mudou: tudo está
+        instalado, reveja este teste") — uma armadilha de propósito, para forçar revisão no dia em que
+        o registry voltasse. O dia chegou no CI do GitHub (v0.24.1), onde `npm ci` instala tudo pelo
+        lockfile. Revisto: a regra que vale em qualquer máquina é a do lockfile, mais estrita que a
+        anterior; a parte "não instalado aqui ⇒ declarado no inventário" continua valendo onde couber.
+        """
         pkg = json.loads((RAIZ / "web" / "package.json").read_text(encoding="utf-8"))
+        lock = json.loads((RAIZ / "web" / "package-lock.json").read_text(encoding="utf-8"))["packages"]
         declaradas = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+        fora_do_lock = {n: v for n, v in declaradas.items()
+                        if lock.get(f"node_modules/{n}", {}).get("version") != v}
+        self.assertEqual(fora_do_lock, {}, "declarada com versão diferente da travada no lockfile")
         doc = (RAIZ / "THIRD_PARTY_DEPENDENCIES.md").read_text(encoding="utf-8")
         ausentes = [n for n in declaradas
                     if not (RAIZ / "web" / "node_modules" / n / "package.json").exists()]
-        self.assertTrue(ausentes, "o cenário mudou: tudo está instalado, reveja este teste")
-        self.assertIn("NOT VERIFIED", doc)
         for nome in ausentes:
-            raiz_pacote = nome.split("/")[0]
-            self.assertIn(raiz_pacote, doc,
+            self.assertIn(nome.split("/")[0], doc,
                           f"{nome} está declarado no package.json e não aparece no inventário")
 
     def test_the_inventory_declares_every_runtime_dependency(self):

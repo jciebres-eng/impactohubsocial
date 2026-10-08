@@ -1,9 +1,9 @@
 {
   "version": "0.24.1",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-08T02:03:05+00:00",
+  "generated_at": "2026-10-08T02:18:22+00:00",
   "files_total": 2478,
-  "size_bytes_total": 41518892,
+  "size_bytes_total": 41523565,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
@@ -11,7 +11,7 @@
     },
     "backend": {
       "files": 100,
-      "size_bytes": 708328
+      "size_bytes": 708446
     },
     "banco: acesso": {
       "files": 6,
@@ -31,7 +31,7 @@
     },
     "documentação da raiz": {
       "files": 151,
-      "size_bytes": 1660476
+      "size_bytes": 1662241
     },
     "documentação técnica": {
       "files": 54,
@@ -51,7 +51,7 @@
     },
     "frontend": {
       "files": 126,
-      "size_bytes": 761882
+      "size_bytes": 761868
     },
     "frontend: build": {
       "files": 23,
@@ -99,7 +99,7 @@
     },
     "operação": {
       "files": 35,
-      "size_bytes": 265756
+      "size_bytes": 266031
     },
     "outro": {
       "files": 4,
@@ -119,7 +119,7 @@
     },
     "teste": {
       "files": 111,
-      "size_bytes": 2173068
+      "size_bytes": 2175597
     }
   },
   "files": [
@@ -233,8 +233,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "2f298368d122118383e999754396a823f0d6a4d31d0876b5c7cdef665d2ed2fc",
-      "size_bytes": 132791,
+      "sha256": "0c6b671a49a57174558c02316f10a8ea316ea02f35fa4346f8d629e26bf3fc62",
+      "size_bytes": 134253,
       "category": "documentação da raiz"
     },
     {
@@ -497,8 +497,8 @@
     },
     {
       "file": "GLOSSARY.md",
-      "sha256": "b60695074991538565104a2bf39ae743b20b89de967ed479353c21ae4e4830a1",
-      "size_bytes": 28093,
+      "sha256": "979b80e0b9eb7f1b320591d2b0950859baa9518d9d500870af696d7d8b3f056e",
+      "size_bytes": 28069,
       "category": "documentação da raiz"
     },
     {
@@ -1043,8 +1043,8 @@
     },
     {
       "file": "THIRD_PARTY_DEPENDENCIES.md",
-      "sha256": "d20b013baaf000c5a3855842a2675800ffc8841f838d55576db5d0897f7cfdec",
-      "size_bytes": 4818,
+      "sha256": "83cadbd78a2a1d06a8ac35e41caa40bd283d561191e54435ed2bec1368ab9c32",
+      "size_bytes": 5145,
       "category": "documentação da raiz"
     },
     {
@@ -3203,8 +3203,8 @@
     },
     {
       "file": "backend/requirements-dev.txt",
-      "sha256": "0558487e45f85afa7f4f9fd2bc45c756faef2490756bcbb3edfbc3add0a513fc",
-      "size_bytes": 93,
+      "sha256": "671d0e8ea1a9c6b39987eed770cc39ed97d357c6fbfc1f40bc2f6f4c55bbf06c",
+      "size_bytes": 211,
       "category": "backend"
     },
     {
@@ -3593,8 +3593,8 @@
     },
     {
       "file": "backend/tests/test_v0181_hardening.py",
-      "sha256": "ea1a25a62904c08f7a852af0233db221094e8af2bf1b9e26473a31e9e7fc8d94",
-      "size_bytes": 18245,
+      "sha256": "cf90758bac04ef5a478b9de6cb4c4638d9da37c44b3f82e65764595a984425a3",
+      "size_bytes": 19124,
       "category": "teste"
     },
     {
@@ -3797,8 +3797,8 @@
     },
     {
       "file": "backend/tests/test_v0230_frontend_gate.py",
-      "sha256": "67fabea694d008dbb669f1cc0b73d77bff0cf29e28a57a83f4069fd9d38fe550",
-      "size_bytes": 30030,
+      "sha256": "1715186a4144f1736f4db3927ac3435a64e5a6db2e997014c2018040fa0056d6",
+      "size_bytes": 31680,
       "category": "teste"
     },
     {
@@ -13613,8 +13613,8 @@
     },
     {
       "file": "scripts/sync_glossary.py",
-      "sha256": "08152e4d1939baf2167b89a039398af97cc90e0a697a086af90915438ae917c4",
-      "size_bytes": 8578,
+      "sha256": "e64e3605efda3c99526fca2efa72162c3aa88ff8675e5f2d040492a640bb9337",
+      "size_bytes": 8853,
       "category": "operação"
     },
     {
@@ -14489,14 +14489,14 @@
     },
     {
       "file": "web/package-lock.json",
-      "sha256": "7f94ce1216b68003944799d50f91fb305344efbb6167c68d46a74a23982d653c",
-      "size_bytes": 58126,
+      "sha256": "cdd719be6ad93fa97890611bc5aa0d13acc1929dbb0678d163f0d69ae220b619",
+      "size_bytes": 58119,
       "category": "frontend"
     },
     {
       "file": "web/package.json",
-      "sha256": "b6f89f6f9e574123b26da3101527124305a3745b662338d22365c2c73fb2a72b",
-      "size_bytes": 836,
+      "sha256": "b3bc1b4934a577dfd1e3b92c777fc046fe4c402599087eec85b0457bb1046906",
+      "size_bytes": 829,
       "category": "frontend"
     },
     {

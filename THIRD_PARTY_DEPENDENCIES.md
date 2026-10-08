@@ -38,20 +38,21 @@ Nenhuma biblioteca de roteamento, estado, UI kit, ícones ou gráficos de tercei
 | react, react-dom, scheduler | sim | 19.2.8 | **VERIFIED** (lido de `node_modules/*/package.json`) |
 | esbuild | sim | 0.28.2 | **VERIFIED** |
 | typescript | sim | 6.0.3 | **VERIFIED** |
-| @types/react, @types/react-dom | **não** | — | **NOT VERIFIED** — declarado em faixa (`^19.2`) e nunca instalado aqui; o `tsc` roda com `tsconfig.offline.json` |
-| @capacitor/cli, /core, /android, /ios, /preferences | **não** | — | **NOT VERIFIED** — faixa `^7.0`; o empacotamento mobile não foi executado neste ambiente |
+| @types/react, @types/react-dom | no CI | 19.3.0 | **VERIFIED (v0.24.1)** — fixado na versão do lockfile; instalado por `npm ci` e usado no typecheck oficial no GitHub Actions |
+| @capacitor/cli, /core, /android, /ios | no CI | 7.6.9 | **VERIFIED (v0.24.1)** — fixado na versão do lockfile, instalado por `npm ci` no CI; o empacotamento mobile em si continua não executado |
+| @capacitor/preferences | no CI | 7.0.4 | **VERIFIED (v0.24.1)** — idem |
 
-Pacote declarado em **faixa aberta** (`^`, `~`, `>=`) e não instalado significa que *o que foi
-testado não é necessariamente o que vai ser instalado*. Está escrito assim de propósito: fixar uma
-versão exata que nunca foi baixada seria inventar a verificação. Quem tiver registry disponível
-fixa com `npm i --package-lock-only` e guarda o `package-lock.json` no repositório.
+Até a v0.24.0 estes sete estavam em **faixa aberta** e nunca tinham sido instalados, e foram
+mantidos assim de propósito: fixar uma versão que ninguém baixou seria inventar a verificação. O
+`web/package-lock.json` (versionado na v0.24.0, instalado limpo por `npm ci` no CI) passou a dizer a
+versão exata de cada um, e é dela que vem o número fixado — não de escolha.
 
 ## Fontes e ativos
 | Ativo | Licença | Observação |
 |---|---|---|
-| Lora (variável) | SIL OFL 1.1 | `web/public/fonts/lora-variable.ttf`; texto da licença em `OFL-1.1.txt` |
 | Inter (subset WOFF) | SIL OFL 1.1 | `inter-Regular/SemiBold.woff` |
-| Ícones, favicon, splash, ícone do app | **PRÓPRIO** | gerados programaticamente para este projeto (geometria simples); **marca/logo definitiva e busca de anterioridade no INPI pendentes** |
+| Logo, ícones de interface, favicons, ícones PWA/Android/iOS (v0.24.0) | **NÃO COMPROVADA** | vêm do pacote `IMPACTO_DESIGN_SYSTEM_FULL_CORRETO_v2.3` (`web/brand/`); o próprio pacote declara que a licença da marca não foi comprovada e que o logo master é raster. Ver `web/brand/ASSET_LICENSE_REGISTER.md`. **Titularidade, vetor oficial e busca de anterioridade no INPI pendentes** |
+| Splash do app nativo | derivado | canvas navy com o ícone oficial de 1024 px, sem ampliação (`mobile/resources/`) |
 | Imagens/fotografias | nenhuma | |
 | Mapas / SDKs de mapa | nenhum | |
 | Datasets / modelos de IA | nenhum embarcado | modelos de terceiros só via API, se o proprietário ativar |

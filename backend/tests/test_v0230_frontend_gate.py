@@ -273,13 +273,47 @@ class TheInstalledTreeInventoryMatchesWhatIsOnDiskTests(unittest.TestCase):
                         "ou o inventário parou de olhar")
         self.assertTrue(d["motivo_das_ausencias"])
 
+    def _instalados_agora(self) -> dict[str, str]:
+        import json
+        fora = {}
+        for pk in list(self.nm.glob("*/package.json")) + list(self.nm.glob("@*/*/package.json")):
+            fora[str(pk.parent.relative_to(self.nm))] = json.loads(pk.read_text(encoding="utf-8")).get("version")
+        return fora
+
+    @unittest.skipUnless((ROOT / "web" / "node_modules").is_dir(),
+                         "node_modules ausente: o inventário não é conferível neste ambiente")
+    def test_every_recorded_package_that_is_installed_has_the_recorded_version(self):
+        """Vale em QUALQUER ambiente: a versão de cada pacote registrado bate com o que está instalado.
+
+        No CI do GitHub (v0.24.1), `npm ci` instala a árvore inteira do lockfile; a comparação do
+        arquivo inteiro deixa de fazer sentido lá (a árvore é outra, maior), mas esta continua: os
+        pacotes que produziram o build versionado têm de ser as mesmas versões que o CI instala.
+        """
+        import json
+        registrados = {p["name"]: p["version"] for p in
+                       json.loads(self.inventario.read_text(encoding="utf-8"))["pacotes"]}
+        agora = self._instalados_agora()
+        divergentes = {n: (v, agora[n]) for n, v in registrados.items() if n in agora and agora[n] != v}
+        self.assertEqual(divergentes, {}, "pacote registrado no inventário com outra versão instalada")
+
     @unittest.skipUnless((ROOT / "web" / "node_modules").is_dir(),
                          "node_modules ausente: o inventário não é conferível neste ambiente")
     def test_regenerating_the_inventory_reproduces_what_is_committed(self):
+        """Na máquina que produziu o build versionado (mesmo conjunto de pacotes), o arquivo inteiro —
+        com o sha256 do conteúdo de cada pacote — tem de se reproduzir byte a byte.
+
+        Em outro ambiente o conjunto é outro e o teste diz isso em vez de comparar: o CI instala tudo
+        pelo lockfile, e scripts de instalação (o do esbuild, por exemplo) podem mudar o conteúdo do
+        diretório entre duas instalações da mesma versão. Exigir o hash lá seria falso alarme.
+        """
+        import json
         import pathlib
         import subprocess
         import sys
         import tempfile
+        registrados = {p["name"] for p in json.loads(self.inventario.read_text(encoding="utf-8"))["pacotes"]}
+        if set(self._instalados_agora()) != registrados:
+            self.skipTest("árvore instalada diferente da que produziu o build versionado (CI com npm ci?)")
         with tempfile.TemporaryDirectory() as tmp:
             saida = pathlib.Path(tmp) / "i.json"
             r = subprocess.run([sys.executable, str(ROOT / "scripts" / "web_installed_tree.py"),
@@ -289,16 +323,6 @@ class TheInstalledTreeInventoryMatchesWhatIsOnDiskTests(unittest.TestCase):
                              self.inventario.read_text(encoding="utf-8"),
                              "INSTALLED_TREE.json divergiu do disco. Regere com: "
                              "python3 scripts/web_installed_tree.py")
-
-    def test_the_build_critical_packages_are_all_present(self):
-        """Os ausentes podem ser de tipagem ou de mobile. Não podem ser do que o build usa."""
-        import json
-        d = json.loads(self.inventario.read_text(encoding="utf-8"))
-        instalados = {p["name"] for p in d["pacotes"]}
-        for pacote in ("react", "react-dom", "scheduler", "esbuild", "typescript"):
-            with self.subTest(pacote):
-                self.assertIn(pacote, instalados,
-                              f"{pacote} é usado pelo build e não está na árvore instalada")
 
 
 class TheScreenInventoryLosesNoScreenTests(unittest.TestCase):

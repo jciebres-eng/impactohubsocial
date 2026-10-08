@@ -3,3 +3,4 @@
 playwright==1.56.0
 pip-audit>=2.7
 ruff>=0.6
+PyYAML==6.0.3        # os portões que leem os workflows do CI (test_v0230_observability_gate, test_v0240_managed_db)

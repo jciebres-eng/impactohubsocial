@@ -67,6 +67,25 @@ de sessão, por um workflow manual com a senha em segredo do repositório:
   e `audit_verify` falham com o erro exato da publicação no Supabase. O modo `aplicar` foi ensaiado
   aqui sem Docker, em `staging` endurecido: `readyz` pronto, só `impacto_app` conectado.
 
+### A segunda execução real: 6 problemas, todos de ambiente
+
+- **PyYAML não estava em `requirements-dev.txt`**: o portão que lê os workflows nunca tinha sido
+  importado no CI. Fixado em 6.0.3, a versão instalada aqui.
+- **Os sete pacotes em faixa (`^`) foram fixados nas versões do lockfile** (`@types/react` 19.3.0,
+  `@capacitor/*` 7.6.9 e 7.0.4). Antes isso seria inventar versão; o lockfile instalado por `npm ci`
+  no CI é a fonte. O teste que tinha uma armadilha ("tudo está instalado, reveja este teste") foi
+  revisto: agora exige que toda dependência declarada esteja no lockfile com a mesma versão exata,
+  em qualquer máquina.
+- **`GLOSSARY.md` embutia a data de hoje** e "saía de sincronia" a cada virada de dia — no CI, em UTC,
+  isso acontece à noite no Brasil. O arquivo gerado passou a ser função só da fonte.
+- **O inventário `web/INSTALLED_TREE.json`** registra a árvore que compila o build versionado aqui;
+  no CI a árvore é outra (completa). A versão de cada pacote registrado é conferida em qualquer
+  ambiente; o arquivo inteiro, com os hashes, só onde o conjunto de pacotes é o mesmo — o script de
+  instalação do esbuild pode mudar o conteúdo entre duas instalações da mesma versão.
+- `THIRD_PARTY_DEPENDENCIES.md` ainda listava a fonte Lora (removida na v0.24.0) e dizia que os
+  ícones eram "próprios, gerados programaticamente"; agora diz de onde vêm e que a licença não está
+  comprovada.
+
 ### Um gerador que perdia evidência
 
 A matriz de personas buscava evidência por trecho só quando não havia casamento exato — e meu teste

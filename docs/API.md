@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.25.0)
+# API REST /v1 — referência gerada do código (v0.26.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (888)
+## Operações (894)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -218,6 +218,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/voucher-batches/{batch_id}/redemptions` | admin da plataforma + MFA | — | Utilizações de um lote de vouchers (quem usou e quando; código só pelo final) |
 | GET | `/v1/administrativo/orcamento` | admin da plataforma + MFA | — | Orçado × comprometido × realizado, por conta e centro de custo |
 | POST | `/v1/agreements/join` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos. |
+| GET | `/v1/agreements/pending` | membro da organização ativa | papel ≥ viewer | O que espera decisão desta organização nos acordos vigentes (entregar, aceitar, pagar) |
 | PUT | `/v1/ai/budget` | membro da organização ativa | papel ≥ admin | Define o orçamento de IA da organização para o mês corrente |
 | POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member; limite 60/3600s | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
 | GET | `/v1/ai/credits` | membro da organização ativa | papel ≥ viewer | Extrato de crédito de IA: concessão, consumo e devolução, em ordem |
@@ -309,6 +310,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/contabilidade/summary` | admin da plataforma + MFA | — | Balancete da competência, plano de contas e situação do período |
 | POST | `/v1/contribution-models/{model_id}/retire` | membro da organização ativa | tipos: osc; papel ≥ manager | retire model |
 | POST | `/v1/contribution-models/{model_id}/submit` | membro da organização ativa | tipos: osc; papel ≥ manager | Envia o modelo à revisão jurídica da administração |
+| GET | `/v1/control-tower/funder` | membro da organização ativa | tipos: company, individual; papel ≥ viewer | Torre do financiador: meu capital → onde está → para quem → finalidade → executado → evidência → mudou → atrasos → riscos → decisões |
+| GET | `/v1/control-tower/government` | membro da organização ativa | tipos: government, platform; papel ≥ viewer | Torre territorial do governo: território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados → atrasos → lacunas |
 | GET | `/v1/controladoria/reconciliation` | admin da plataforma + MFA | — | Conciliação: o que foi esperado × o que aconteceu. APONTA, não corrige |
 | GET | `/v1/controladoria/summary` | admin da plataforma + MFA | — | Painel executivo: MRR, ARR, receita, caixa, despesa, GMV, resultado e autonomia |
 | GET | `/v1/conversations` | membro da organização ativa | papel ≥ viewer | list conversations |
@@ -723,6 +726,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/projects/{project_id}/procurement` | membro da organização ativa | papel ≥ viewer | Pedidos de compra do projeto (OSC dona ou financiador) |
 | POST | `/v1/projects/{project_id}/procurement` | membro da organização ativa | tipos: osc; papel ≥ member | create request |
 | POST | `/v1/projects/{project_id}/publish` | membro da organização ativa | tipos: osc; papel ≥ manager | Publica o projeto no feed de financiadores (exige dados mínimos e e-mail confirmado) |
+| GET | `/v1/projects/{project_id}/ready` | membro da organização ativa | papel ≥ viewer | Estado verificável 'Projeto IMPACTO Ready': critérios com a evidência (tabela e contagem) de cada um; desconhecido ≠ zero |
 | GET | `/v1/projects/{project_id}/report` | membro da organização ativa | papel ≥ viewer | Relatório consolidado do projeto (dados para gráficos: orçamento × captado × gasto, evidências, indicadores) |
 | GET | `/v1/projects/{project_id}/result-chain` | membro da organização ativa | papel ≥ viewer | Cadeia de resultado do projeto, com a força declarada de cada elo |
 | GET | `/v1/projects/{project_id}/risks` | membro da organização ativa | papel ≥ viewer | list risks |
@@ -804,9 +808,11 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/signed-agreements` | membro da organização ativa | papel ≥ manager | Cria um acordo em rascunho a partir de um documento do cofre (o hash do documento é congelado ao publicar) |
 | GET | `/v1/signed-agreements/{agreement_id}` | membro da organização ativa | papel ≥ viewer | Acordo com partes, estado das assinaturas e acompanhamento |
 | PATCH | `/v1/signed-agreements/{agreement_id}` | membro da organização ativa | papel ≥ manager | Altera um acordo ainda em rascunho (hash e documento são imutáveis) |
+| GET | `/v1/signed-agreements/{agreement_id}/allocation` | membro da organização ativa | papel ≥ viewer | Matriz de distribuição do acordo: bruto, projeto, taxa da plataforma (cobrável ou não, e por quê), terceiros |
 | POST | `/v1/signed-agreements/{agreement_id}/decline` | membro da organização ativa | papel ≥ owner | Recusa o acordo como parte (motivo obrigatório; o acordo é cancelado) |
-| POST | `/v1/signed-agreements/{agreement_id}/milestones` | membro da organização ativa | papel ≥ manager | Acrescenta uma entrega ao acompanhamento longitudinal do acordo |
-| PATCH | `/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}` | membro da organização ativa | papel ≥ manager | Reporta ou avalia uma entrega do acordo |
+| POST | `/v1/signed-agreements/{agreement_id}/milestones` | membro da organização ativa | papel ≥ manager | Acrescenta um marco ao acordo (com valor e ordem; o contrato deriva as obrigações dele) |
+| PATCH | `/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}` | membro da organização ativa | papel ≥ manager | Reporta a entrega (quem executa) ou aceita/recusa (a outra parte): o grafo e os quatro olhos são do banco |
+| POST | `/v1/signed-agreements/{agreement_id}/new-version` | membro da organização ativa | papel ≥ manager | Abre a versão seguinte do acordo (rascunho); a anterior fica substituída e suas assinaturas deixam de aprovar |
 | POST | `/v1/signed-agreements/{agreement_id}/parties` | membro da organização ativa | papel ≥ manager | Acrescenta uma parte ao acordo em rascunho |
 | POST | `/v1/signed-agreements/{agreement_id}/publish` | membro da organização ativa | papel ≥ manager | Envia o acordo para assinatura (exige pelo menos duas partes obrigatórias) |
 | POST | `/v1/signed-agreements/{agreement_id}/sign` | membro da organização ativa | papel ≥ owner; limite 30/3600s | Assina o acordo como parte (duas camadas: senha e código de uso único ligado ao hash) |

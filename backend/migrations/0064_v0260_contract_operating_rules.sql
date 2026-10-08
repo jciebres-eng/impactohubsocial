@@ -84,7 +84,6 @@ CREATE TRIGGER trg_append_only BEFORE UPDATE OR DELETE ON agreement_versions FOR
   WHEN (current_user::text = 'impacto_app') EXECUTE FUNCTION forbid_mutation();
 CREATE INDEX ix_agreement_versions_agreement ON agreement_versions(agreement_id);
 ALTER TABLE agreement_versions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE agreement_versions FORCE ROW LEVEL SECURITY;
 CREATE POLICY agver_read ON agreement_versions FOR SELECT
   USING (app_priv() OR agreement_owner_org(agreement_id) = app_org() OR agreement_has_party(agreement_id, app_org()));
 CREATE POLICY agver_insert ON agreement_versions FOR INSERT
@@ -169,7 +168,6 @@ CREATE TABLE agreement_obligations (
 CREATE INDEX ix_obligations_agreement ON agreement_obligations(agreement_id);
 CREATE INDEX ix_obligations_obligor ON agreement_obligations(obligor_org_id, status, due_on);
 ALTER TABLE agreement_obligations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE agreement_obligations FORCE ROW LEVEL SECURITY;
 CREATE POLICY obl_read ON agreement_obligations FOR SELECT
   USING (app_priv() OR obligor_org_id = app_org() OR agreement_owner_org(agreement_id) = app_org()
          OR agreement_has_party(agreement_id, app_org()));
@@ -209,7 +207,6 @@ CREATE TABLE agreement_allocations (
 );
 CREATE INDEX ix_allocations_agreement ON agreement_allocations(agreement_id, computed_at DESC);
 ALTER TABLE agreement_allocations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE agreement_allocations FORCE ROW LEVEL SECURITY;
 CREATE POLICY alloc_read ON agreement_allocations FOR SELECT
   USING (app_priv() OR agreement_owner_org(agreement_id) = app_org() OR agreement_has_party(agreement_id, app_org()));
 CREATE POLICY alloc_insert ON agreement_allocations FOR INSERT WITH CHECK (app_priv());
@@ -274,7 +271,9 @@ ALTER TABLE ledger_entries ADD CONSTRAINT ledger_entries_entry_type_check CHECK 
   'project_archived','relationship_created','relationship_ended','proposal_sent','proposal_viewed',
   'proposal_accepted','proposal_declined','proposal_changes_requested','proposal_withdrawn',
   'listing_published','listing_paused','investment_intent','investment_committed',
-  'impact_update_submitted','impact_update_accepted','impact_update_changes_requested','correction',
+  'impact_update_submitted','impact_update_accepted','impact_update_changes_requested','impact_update_published',
+  'conversation_started','enforcement_applied','experience_confirmed','team_member_added','team_member_removed','correction',
+  -- v0.26.0
   'agreement_activated','allocation_computed','milestone_delivered','milestone_accepted','milestone_rejected',
   'obligation_overdue'));
 

@@ -45,7 +45,7 @@ def gerar() -> str:
     fone = {k: v["telas_do_menu"] for k, v in resp["por_perfil"].items()}
     fone_falha = {k: len(v["com_rolagem_lateral"]) for k, v in resp["por_perfil"].items()}
 
-    out = ["# Matriz de cobertura — v0.25.0", "",
+    out = ["# Matriz de cobertura — v0.26.0", "",
            "> Gerada por `scripts/make_coverage_matrix.py` a partir das evidências dos testes. Não edite à mão.", "",
            "Três provas independentes, todas executadas (não planejadas):", "",
            f"- **Jornadas pela API** — {jor['passos']} passos em {len(jor['por_jornada'])} jornadas, "

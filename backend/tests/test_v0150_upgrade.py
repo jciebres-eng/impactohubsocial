@@ -216,7 +216,8 @@ class UpgradePathTests(unittest.TestCase):
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM legal_documents"
                                           " WHERE status = 'approved'"), 0,
                          "nenhuma minuta pode chegar aprovada por atualização")
-        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules"), 9)
+        # v0.26.0 acrescentou a décima regra (contract.platform_service_fee), também nascida desligada
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules"), 10)
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules WHERE active"), 0,
                          "nenhuma regra de receita pode chegar ativa por atualização")
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_legal_cards"

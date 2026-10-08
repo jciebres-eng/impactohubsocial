@@ -305,7 +305,7 @@ if __name__ == "__main__":
 
 # ================================================================================================ FASE 6
 class LegalAuditTests(MonBase):
-    """A auditoria legal da FASE 6: nove cartas, nenhuma verde, todas com fonte oficial e data."""
+    """A auditoria legal da FASE 6: dez cartas (nove até a v0.25.0, mais a taxa de serviço contratada da v0.26.0), nenhuma verde, todas com fonte oficial e data."""
 
     def test_every_rule_has_a_legal_card_with_an_official_source_and_a_date(self):
         cards = {c["rule_key"]: c for c in

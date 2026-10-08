@@ -278,6 +278,41 @@ ENGINES: tuple[Engine, ...] = (
         never="Não estima tempo economizado sem linha de base declarada com fonte, data e método: "
               "a tabela de linhas de base **nasce vazia** e o evento fica 'sem linha de base'."),
 
+    # ------------------------------------------------------------------ contrato e torres (v0.26.0)
+    Engine(
+        key="contract_rules", name="Contrato como regra de operação",
+        module="impacto.trust.contract_rules", entrypoint="compute_allocation", kind="deterministic",
+        version=None, group="econômico",
+        routes=("/v1/signed-agreements/{agreement_id}/allocation", "/v1/signed-agreements/{agreement_id}/new-version",
+                "/v1/agreements/pending"),
+        produces="Do acordo assinado: versão imutável, obrigações derivadas (entregar, aceitar, pagar) com prazo "
+                 "pela política de aceite, e a matriz de distribuição (bruto, projeto, taxa da plataforma, terceiros) "
+                 "com hash — a taxa calculada na origem e paga por quem o contrato indica, em cobrança própria.",
+        never="Não custodia nem movimenta dinheiro (ADR-284): calcula, instrui e concilia. Não desconta taxa de "
+              "dinheiro em trânsito. Não cobra a taxa com a regra comercial desligada (sem carta legal verde): "
+              "registra 'não cobrável' e o motivo. Nenhuma parte aceita a própria entrega."),
+    Engine(
+        key="control_tower", name="Torres de controle (financiador e governo)",
+        module="impacto.network.control_tower", entrypoint="funder", kind="deterministic",
+        version=None, group="econômico",
+        routes=("/v1/control-tower/funder", "/v1/control-tower/government"),
+        produces="Financiador: meu capital → onde está → para quem → finalidade → executado → evidência → mudou → "
+                 "atrasos → riscos → decisões, a partir dos registros existentes. Governo: território → programas → "
+                 "editais → OSCs → projetos → recursos → indicadores declarados × validados → atrasos → lacunas.",
+        never="Não decide nada: aponta para a tela do registro. Não mostra saldo (não existe). Governo só vê "
+              "projetos publicados e nunca linha a linha abaixo de 3 projetos (k-anonimato); risco de projeto "
+              "sai como contagem, o registro é da OSC."),
+    Engine(
+        key="impacto_ready", name="Estado verificável 'Projeto IMPACTO Ready'",
+        module="impacto.network.control_tower", entrypoint="ready", kind="deterministic",
+        version="impacto-ready@1.0.0", version_attr="READY_ENGINE", group="prontidão",
+        routes=("/v1/projects/{project_id}/ready",),
+        produces="Quinze critérios (identidade, organização, documentos, diagnóstico, orçamento, necessidades, ODS, "
+                 "indicadores, evidências, responsáveis, riscos, profissionais, governança, histórico, prestação de "
+                 "contas), cada um com a tabela e a contagem que o sustenta, e o hash da avaliação.",
+        never="Não é selo pago nem nota. Desconhecido não é zero: critério não legível fica 'unknown' e o estado "
+              "'ready' exige todos atendidos. Quem não enxerga o projeto recebe 404, não um estado."),
+
     # ------------------------------------------------------------------ IA (os três pontos)
     Engine(
         key="ai_structure_need", name="Estruturação de necessidade (IA)",

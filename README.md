@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.25.0
+# Plataforma Impacto — v0.26.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,22 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.26.0 (a tese econômica virou produto):** o **contrato é regra de operação** — o acordo
+assinado traz as cláusulas (taxa, quem paga, modo, prazo de aceite em dias úteis, contestação), ganha
+versão imutável, deriva obrigações (entregar, aceitar, pagar) com prazo, exige aceite a quatro olhos e,
+ao mudar, vira versão nova que invalida a aprovação anterior. A **matriz de distribuição** é calculada
+na origem (R$ 100.000 com 3% → R$ 100.000 ao projeto + R$ 3.000 de taxa, ou 97.000/3.000 no modo
+descontado), gravada com hash, e a taxa é **cobrança própria da plataforma ao financiador** — nunca
+descontada de dinheiro em trânsito, nunca custodiada (ADR-284), e **só cobrável com a regra
+`contract.platform_service_fee` ativa**, que nasce desligada com carta legal amarela. Duas **torres de
+controle**: do financiador (`/torre`: meu capital → onde está → para quem → para quê → executado →
+evidência → mudou → atrasos → riscos → o que preciso decidir) e do governo (`/torre-territorial`:
+território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados →
+atrasos → territórios descobertos, com k-anonimato). E o estado verificável **"Projeto IMPACTO
+Ready"** na ficha do projeto: 15 critérios, cada um com a tabela e a contagem que o sustenta,
+desconhecido ≠ zero, mesmo resultado para dono e financiador. 220 telas, 894 operações, 45 motores.
+Relatório em `FINAL_EXECUTION_REPORT.md`; auditoria em `FINAL_EXECUTION_AUDIT.md`.
 
 **Novo no v0.25.0 (validação operacional de baixo para cima):** as 218 telas do roteador abertas no
 Chromium com os 6 perfis de demonstração e registros reais (`docs/execution/ROUTE_RUNTIME_MATRIX.csv`),

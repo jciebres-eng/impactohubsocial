@@ -1,23 +1,23 @@
-# Matriz de cobertura — v0.25.0
+# Matriz de cobertura — v0.26.0
 
 > Gerada por `scripts/make_coverage_matrix.py` a partir das evidências dos testes. Não edite à mão.
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 169 passos em 13 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
-- **Telas no navegador (Chromium)** — 790 visitas às 218 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
-- **Telefone (390 px)** — 230 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
+- **Jornadas pela API** — 195 passos em 14 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Telas no navegador (Chromium)** — 796 visitas às 220 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
+- **Telefone (390 px)** — 233 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
 ## Por perfil
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 12 | 106 | 0 | 149 | 132 | 10 | 5 | 2 | 0 | 48 | 0 |
-| Empresa (financiador) | 4 | 22 | 0 | 97 | 73 | 18 | 0 | 6 | 0 | 37 | 0 |
+| OSC | 13 | 122 | 0 | 150 | 132 | 10 | 6 | 2 | 0 | 48 | 0 |
+| Empresa (financiador) | 6 | 31 | 0 | 98 | 76 | 17 | 0 | 5 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 92 | 60 | 23 | 1 | 8 | 0 | 33 | 0 |
-| Governo | 1 | 8 | 0 | 179 | 60 | 25 | 77 | 17 | 0 | 34 | 0 |
-| Apoiadora (pessoa física) | 2 | 4 | 0 | 92 | 55 | 26 | 0 | 11 | 0 | 25 | 0 |
-| Administração | 3 | 14 | 0 | 142 | 107 | 25 | 0 | 10 | 0 | 53 | 0 |
+| Governo | 1 | 9 | 0 | 181 | 61 | 25 | 78 | 17 | 0 | 35 | 0 |
+| Apoiadora (pessoa física) | 2 | 4 | 0 | 93 | 56 | 26 | 0 | 11 | 0 | 26 | 0 |
+| Administração | 3 | 14 | 0 | 143 | 108 | 25 | 0 | 10 | 0 | 53 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
@@ -38,9 +38,10 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Financiador: edital → candidatura → aporte → validação | 29 | 0 |
 | Rede: proposta → conversa → prestação de contas | 12 | 0 |
 | Profissional: necessidade → oferta → revisão técnica | 9 | 0 |
-| Governo: edital público → necessidade do território | 19 | 0 |
+| Governo: edital público → necessidade do território | 25 | 0 |
 | Captação: cotas → apoios → campanha pública | 9 | 0 |
 | Documentos: montagem → acordo assinado → registro verificável | 20 | 0 |
+| Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão | 20 | 0 |
 | Marketplace, soluções e perfis públicos | 6 | 0 |
 | Suporte e Central de Conhecimento | 4 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |
@@ -56,8 +57,8 @@ URL, chamadas de API e tempo, está no CSV).
 | --- | ---: | --- |
 | `/` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/@:handle` | 2 | anônimo: ok, osc: ok |
-| `/acordos` | 6 | osc: ok, company: vazia, provider: ok, government: vazia, individual: vazia, admin: vazia |
-| `/acordos/:id` | 6 | osc: ok, company: s/registro, provider: ok, government: s/registro, individual: s/registro, admin: s/registro |
+| `/acordos` | 6 | osc: ok, company: ok, provider: ok, government: vazia, individual: vazia, admin: vazia |
+| `/acordos/:id` | 6 | osc: ok, company: ok, provider: ok, government: s/registro, individual: s/registro, admin: s/registro |
 | `/acordos/novo` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/admin` | 2 | admin: ok, government: recusa |
 | `/admin/auditoria` | 2 | admin: ok, government: recusa |
@@ -267,6 +268,8 @@ URL, chamadas de API e tempo, está no CSV).
 | `/solucoes/replicacoes` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: vazia |
 | `/territorio/necessidades` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/tesouraria` | 2 | admin: ok, government: recusa |
+| `/torre` | 3 | company: ok, individual: ok, government: recusa |
+| `/torre-territorial` | 3 | government: ok, admin: ok, osc: recusa |
 | `/verificacoes` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: vazia |
 | `/verificar` | 2 | anônimo: ok, osc: ok |
 | `/verificar-email` | 1 | anônimo: ok |

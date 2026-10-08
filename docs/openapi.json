@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.25.0",
+  "version": "0.26.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -23733,7 +23733,7 @@
   },
   "/v1/signed-agreements/{agreement_id}/milestones": {
    "post": {
-    "summary": "Acrescenta uma entrega ao acompanhamento longitudinal do acordo",
+    "summary": "Acrescenta um marco ao acordo (com valor e ordem; o contrato deriva as obrigações dele)",
     "operationId": "post_trust_routes_agreement_milestone",
     "tags": [
      "agreements"
@@ -23779,7 +23779,7 @@
   },
   "/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}": {
    "patch": {
-    "summary": "Reporta ou avalia uma entrega do acordo",
+    "summary": "Reporta a entrega (quem executa) ou aceita/recusa (a outra parte): o grafo e os quatro olhos são do banco",
     "operationId": "patch_trust_routes_agreement_milestone_patch",
     "tags": [
      "agreements"
@@ -23829,6 +23829,114 @@
       }
      }
     }
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/allocation": {
+   "get": {
+    "summary": "Matriz de distribuição do acordo: bruto, projeto, taxa da plataforma (cobrável ou não, e por quê), terceiros",
+    "operationId": "get_trust_routes_agreement_allocation",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/signed-agreements/{agreement_id}/new-version": {
+   "post": {
+    "summary": "Abre a versão seguinte do acordo (rascunho); a anterior fica substituída e suas assinaturas deixam de aprovar",
+    "operationId": "post_trust_routes_agreement_new_version",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AgreementNewVersionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/agreements/pending": {
+   "get": {
+    "summary": "O que espera decisão desta organização nos acordos vigentes (entregar, aceitar, pagar)",
+    "operationId": "get_trust_routes_agreements_pending",
+    "tags": [
+     "agreements"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
    }
   },
   "/v1/impact-taxonomy": {
@@ -37476,6 +37584,114 @@
      }
     }
    }
+  },
+  "/v1/control-tower/funder": {
+   "get": {
+    "summary": "Torre do financiador: meu capital → onde está → para quem → finalidade → executado → evidência → mudou → atrasos → riscos → decisões",
+    "operationId": "get_tower_routes_funder_tower",
+    "tags": [
+     "torre"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: company, individual · Papel mínimo: viewer"
+   }
+  },
+  "/v1/control-tower/government": {
+   "get": {
+    "summary": "Torre territorial do governo: território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados → atrasos → lacunas",
+    "operationId": "get_tower_routes_government_tower",
+    "tags": [
+     "torre"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: government, platform · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "territory",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "pattern": "^(INT|[A-Z]{2}(-[A-Z]{2}(-[0-9]{7})?)?)$",
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Territory"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/ready": {
+   "get": {
+    "summary": "Estado verificável 'Projeto IMPACTO Ready': critérios com a evidência (tabela e contagem) de cada um; desconhecido ≠ zero",
+    "operationId": "get_tower_routes_project_ready",
+    "tags": [
+     "torre"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -39780,6 +39996,34 @@
       ],
       "default": null,
       "title": "Note"
+     },
+     "seq": {
+      "anyOf": [
+       {
+        "maximum": 500,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Seq"
+     },
+     "amount_cents": {
+      "anyOf": [
+       {
+        "maximum": 10000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Cents"
      }
     },
     "required": [
@@ -47216,6 +47460,109 @@
       ],
       "default": null,
       "title": "Value Cents"
+     },
+     "platform_fee_bps": {
+      "anyOf": [
+       {
+        "maximum": 10000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Platform Fee Bps"
+     },
+     "fee_payer_role": {
+      "anyOf": [
+       {
+        "enum": [
+         "funder",
+         "contractor",
+         "provider"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Payer Role"
+     },
+     "fee_mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "additional",
+         "deducted"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Mode"
+     },
+     "review_days": {
+      "anyOf": [
+       {
+        "maximum": 120,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Days"
+     },
+     "calendar_type": {
+      "anyOf": [
+       {
+        "enum": [
+         "calendar",
+         "business"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Calendar Type"
+     },
+     "auto_accept": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Auto Accept"
+     },
+     "dispute_days": {
+      "anyOf": [
+       {
+        "maximum": 60,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Dispute Days"
      }
     },
     "required": [
@@ -47295,6 +47642,109 @@
       ],
       "default": null,
       "title": "Value Cents"
+     },
+     "platform_fee_bps": {
+      "anyOf": [
+       {
+        "maximum": 10000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Platform Fee Bps"
+     },
+     "fee_payer_role": {
+      "anyOf": [
+       {
+        "enum": [
+         "funder",
+         "contractor",
+         "provider"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Payer Role"
+     },
+     "fee_mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "additional",
+         "deducted"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Mode"
+     },
+     "review_days": {
+      "anyOf": [
+       {
+        "maximum": 120,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Days"
+     },
+     "calendar_type": {
+      "anyOf": [
+       {
+        "enum": [
+         "calendar",
+         "business"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Calendar Type"
+     },
+     "auto_accept": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Auto Accept"
+     },
+     "dispute_days": {
+      "anyOf": [
+       {
+        "maximum": 60,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Dispute Days"
      }
     },
     "title": "AgreementPatch",
@@ -51658,6 +52108,198 @@
      "status"
     ],
     "title": "MilestonePatch",
+    "type": "object"
+   },
+   "AgreementNewVersionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "document_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Document Id",
+      "type": "string"
+     },
+     "reason": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "minLength": 3,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Title"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Summary"
+     },
+     "effective_from": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective From"
+     },
+     "effective_to": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective To"
+     },
+     "value_cents": {
+      "anyOf": [
+       {
+        "maximum": 10000000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Value Cents"
+     },
+     "platform_fee_bps": {
+      "anyOf": [
+       {
+        "maximum": 10000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Platform Fee Bps"
+     },
+     "fee_payer_role": {
+      "anyOf": [
+       {
+        "enum": [
+         "funder",
+         "contractor",
+         "provider"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Payer Role"
+     },
+     "fee_mode": {
+      "anyOf": [
+       {
+        "enum": [
+         "additional",
+         "deducted"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Mode"
+     },
+     "review_days": {
+      "anyOf": [
+       {
+        "maximum": 120,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Days"
+     },
+     "calendar_type": {
+      "anyOf": [
+       {
+        "enum": [
+         "calendar",
+         "business"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Calendar Type"
+     },
+     "auto_accept": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Auto Accept"
+     },
+     "dispute_days": {
+      "anyOf": [
+       {
+        "maximum": 60,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Dispute Days"
+     }
+    },
+    "required": [
+     "document_id",
+     "reason"
+    ],
+    "title": "AgreementNewVersionIn",
     "type": "object"
    },
    "TagIn": {

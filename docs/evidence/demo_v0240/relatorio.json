@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-10-08T08:15:35.211390+00:00",
+ "gerado_em": "2026-10-08T17:46:47.682719+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
@@ -63,10 +63,11 @@
   "company": {
    "email": "empresa@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 37,
+   "telas_do_menu": 38,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
+    "/torre",
     "/area",
     "/reputacao",
     "/selos",
@@ -111,10 +112,11 @@
   "individual": {
    "email": "apoiador@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 25,
+   "telas_do_menu": 26,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
+    "/torre",
     "/area",
     "/marketplace",
     "/propostas",
@@ -191,10 +193,11 @@
   "government": {
    "email": "governo@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 34,
+   "telas_do_menu": 35,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
+    "/torre-territorial",
     "/area",
     "/reputacao",
     "/selos",
@@ -536,5 +539,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 320
+ "total_telas_de_menu_visitadas": 323
 }

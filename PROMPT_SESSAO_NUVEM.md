@@ -85,8 +85,8 @@ alcançam, menu, alcance) e `docs/execution/screen_backend_map.json` (operaçõe
 chama, cruzadas com as 888 registradas). Painel navegável: `scripts/make_screen_panel.py`.
 
 O que o cruzamento achou: 157 telas chamam operação registrada · 60 não chamam a API diretamente ·
-231 das 888 operações sem referência no front · **1 defeito real** (`/entrar` chama
-`GET /v1/meta/config`, que o backend não registra). Tudo travado por teste em
+234 das 894 operações sem referência no front · **0 telas sem backend** (a v0.23.1 acusou
+`/entrar` → `GET /v1/meta/config`; era falso: a rota é crua em `app.py` e o cruzamento não a lia). Tudo travado por teste em
 `backend/tests/test_v0230_frontend_gate.py`.
 
 `DEMO.md`, `TESTER_GUIDE.md` e `TROUBLESHOOTING.md` **já estão escritos** (v0.23.1), em `docs/`, com

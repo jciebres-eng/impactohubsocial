@@ -23,9 +23,13 @@ COPY docs/legal/ docs/legal/
 COPY infra/db/ infra/db/
 COPY backend/impacto/ backend/impacto/
 COPY backend/migrations/ backend/migrations/
+COPY backend/start_container.sh /app/start_container.sh
 COPY --from=web /web/dist web/dist
 USER impacto
 WORKDIR /app/backend
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD python3 -c "import urllib.request,os;urllib.request.urlopen(f'http://127.0.0.1:{os.environ.get(\"PORT\",\"8080\")}/healthz',timeout=4)"
-CMD ["sh", "-c", "exec python3 -m uvicorn impacto.main:app --host 0.0.0.0 --port ${PORT} --proxy-headers --forwarded-allow-ips='*' --no-server-header --workers ${WEB_CONCURRENCY:-2}"]
+# Entrypoint com etapas nomeadas (migrações → troca para impacto_app → ASGI). IMPACTO_ENV continua
+# production: demonstração é decisão de quem sobe o contêiner (IMPACTO_ENV=development), nunca da
+# imagem — a imagem recebida de fora fixava development, seed e um domínio de terceiro aqui.
+CMD ["sh", "/app/start_container.sh"]

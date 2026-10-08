@@ -1,21 +1,26 @@
 {
- "o_que_e": "cruzamento das telas com as 888 operações registradas por impacto.http.ROUTES; as chamadas vêm da leitura do corpo de cada componente exportado",
+ "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 888,
+ "operacoes_no_backend": 894,
+ "operacoes_registradas": 888,
+ "rotas_cruas_de_app_py": [
+  "GET /healthz",
+  "GET /metrics",
+  "GET /readyz",
+  "GET /v1/meta/config",
+  "GET /v1/meta/taxonomy",
+  "GET /v1/openapi.json"
+ ],
  "telas": 218,
  "estados": {
-  "backend presente": 157,
-  "endpoint ausente": 1,
+  "backend presente": 158,
+  "endpoint ausente": 0,
   "chamada dinâmica": 0,
   "sem chamada direta": 60
  },
- "interface_sem_backend": {
-  "/entrar": [
-   "GET /v1/meta/config"
-  ]
- },
- "arquivos_do_front_varridos": 54,
- "operacoes_que_nenhuma_tela_chama": 231,
+ "interface_sem_backend": {},
+ "arquivos_do_front_varridos": 57,
+ "operacoes_que_nenhuma_tela_chama": 234,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -29,6 +34,9 @@
   "DELETE /v1/projects/{}/indicators/{}",
   "DELETE /v1/projects/{}/milestones/{}",
   "DELETE /v1/workspace/personas/{}",
+  "GET /healthz",
+  "GET /metrics",
+  "GET /readyz",
   "GET /v1/admin/agreements/{}/members",
   "GET /v1/admin/ai",
   "GET /v1/admin/ai/cost",
@@ -342,10 +350,8 @@
     "POST /v1/auth/login",
     "POST /v1/auth/mfa/verify"
    ],
-   "ausentes": [
-    "GET /v1/meta/config"
-   ],
-   "estado": "endpoint ausente"
+   "ausentes": [],
+   "estado": "backend presente"
   },
   {
    "rota": "/esqueci-senha",

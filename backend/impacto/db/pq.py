@@ -306,6 +306,13 @@ class Connection:
                 _lib.PQfinish(self._conn)
             self._conn = None
             raise OperationalError(f"Falha ao conectar no PostgreSQL: {msg.strip()}")
+        # Banco gerenciado (Supabase) instala pgcrypto na schema `extensions`. As funções do produto
+        # que chamam digest() fixam o próprio search_path (migração 0063); isto aqui cobre o que roda
+        # FORA delas na mesma sessão — SQL de migração com digest() inline, consulta ad hoc. Só entra
+        # na lista se a schema existir: `public` continua primeiro, e num PostgreSQL comum a sessão
+        # fica exatamente como era. A versão recebida de fora fazia o SET incondicional.
+        self.execute("SELECT set_config('search_path', CASE WHEN EXISTS (SELECT 1 FROM pg_namespace"
+                     " WHERE nspname = 'extensions') THEN 'public, extensions' ELSE 'public' END, false)")
 
     # -- ciclo de vida -------------------------------------------------------------------------
     @property

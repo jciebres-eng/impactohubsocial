@@ -21,7 +21,7 @@ desperdício. O que falta é específico, e está na seção final.
 | **04** Docker / virtualização | **PARCIAL — gap real** | `Dockerfile` e `infra/compose/docker-compose.yml` existem e **nunca foram construídos**: não há daemon Docker no ambiente onde foram escritos |
 | **05** Banco + migrations + seed | **FEITA** | 62 migrações aplicadas do zero; 322 tabelas; 321 com RLS; 667 políticas; `seed-demo` cria 14 usuários de 14 perfis |
 | **06** Perfis + RBAC | **FEITA** | 888 operações classificadas em 7 classes; **221 chamadas HTTP reais** de organização-cliente contra a porta da plataforma, todas 403; 83 rotas com permissão nomeada recusando papel sem ela, com contraprova |
-| **07** Todas as telas | **FEITO na v0.23.1** | **218** telas (não 232: havia três tabelas de rota e só uma era lida), inventariadas em `screen_inventory.json` e cruzadas com as 888 operações em `screen_backend_map.json`; 1 defeito real encontrado |
+| **07** Todas as telas | **FEITO na v0.23.1** | **218** telas (não 232: havia três tabelas de rota e só uma era lida), inventariadas em `screen_inventory.json` e cruzadas com as 894 operações em `screen_backend_map.json`; nenhuma tela sem backend (o "defeito" da v0.23.1 era do instrumento) |
 | **08** Fluxos | **FEITA** | 49 passos em 7 jornadas e 5 personas — `PERSONA_E2E_MATRIX.csv` |
 | **09** E2E | **FEITA** | 91 testes de ponta a ponta com Chromium real (Playwright) |
 | **10** Multi-tenancy | **FEITA** | `test_security_tenancy.py` (25 testes): IDOR/BOLA de leitura, escrita, remoção e listagem recusados **pela parede (RLS)**, não só pela porta; atribuição em massa de `org_id` recusada |

@@ -386,8 +386,13 @@ class TheScreenBackendMapTellsTheTruthAboutCoverageTests(unittest.TestCase):
     produto deve exigir atualizar o que foi dito publicamente sobre ele.
     """
 
-    #: Única divergência real conhecida. Não é lista de exceções: é o que o produto tem hoje.
-    AUSENTES = {"/entrar": ["GET /v1/meta/config"]}
+    #: Divergências conhecidas: nenhuma. A v0.23.1 anunciou UMA — `/entrar` → `GET /v1/meta/config`,
+    #: "chamada desde a v0.10.0 sem rota por trás" — e estava ERRADA: a rota sempre existiu, como
+    #: `Route` crua em `app.py` (`_infra_routes`), fora do registro `@route` que o cruzamento lia.
+    #: O instrumento ignorava seis rotas e acusou o produto. Corrigido em
+    #: `scripts/make_screen_backend_map.py`, que agora lê as duas fontes. Vazio aqui é afirmação
+    #: forte: nenhuma tela chama operação que o backend não serve.
+    AUSENTES: dict = {}
 
     @classmethod
     def setUpClass(cls):
@@ -405,7 +410,7 @@ class TheScreenBackendMapTellsTheTruthAboutCoverageTests(unittest.TestCase):
         inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
                          .read_text(encoding="utf-8"))
         self.assertEqual({t["rota"] for t in self.mapa["lista"]}, {t["rota"] for t in inv["lista"]})
-        self.assertEqual(self.mapa["operacoes_no_backend"], 888)
+        self.assertEqual(self.mapa["operacoes_no_backend"], 888 + 6)
 
     def test_most_screens_resolve_to_a_registered_operation(self):
         """Contraprova do defeito do `useLoad`: com ele fora, só 138 das 218 'chamavam o backend'."""

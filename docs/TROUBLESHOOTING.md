@@ -132,10 +132,14 @@ Teto de gasto da organização atingido. É limite de produto, não falha.
 
 ### Botão de SSO não aparece em `/entrar`
 
-**Defeito conhecido e medido.** A tela chama `GET /v1/meta/config`, que o backend não registra — só
-existe `GET /v1/meta/platform-status`. A chamada está dentro de um `.catch(() => {})`, então falha em
-silêncio e o botão nunca aparece. Está travado por teste em
-`backend/tests/test_v0230_frontend_gate.py`.
+Não é defeito: `GET /v1/meta/config` (rota crua em `app.py`, fora do registro `@route`) devolve
+`sso_enabled: false` enquanto `OIDC_ISSUER`, `OIDC_CLIENT_ID` e `OIDC_REDIRECT_URI` não estiverem
+configurados, e a tela esconde o botão. Configure os três (com `https`) e ele aparece.
+
+**Correção de registro.** A v0.23.1 anunciou isto como "defeito conhecido: o backend não registra a
+rota". Estava errado. O cruzamento tela × backend lia só `impacto.http.ROUTES` e ignorava as seis
+rotas Starlette cruas de `app.py`; a rota existe desde sempre. Quem apontou foi o teste que sobe o
+entrypoint do contêiner de verdade (`test_v0240_container_entrypoint.py`) e viu a resposta completa.
 
 ### Tela abre vazia e nada acontece
 

@@ -161,6 +161,16 @@ def main() -> int:
     api.load_all()
     from impacto.http import ROUTES
     backend = {f"{r.method} {_normaliza(r.path)}" for r in ROUTES}
+    # O registro `@route` NÃO é o backend inteiro: `app.py` monta seis rotas Starlette cruas em
+    # `_infra_routes` (/healthz, /readyz, /metrics, /v1/openapi.json, /v1/meta/taxonomy e
+    # /v1/meta/config). A primeira versão deste cruzamento lia só o registro e acusou `/entrar` de
+    # chamar `GET /v1/meta/config` "sem rota por trás" — defeito publicado na v0.23.1 que NÃO existia.
+    # As rotas cruas são GET (padrão do `Route`) e entram lidas do código-fonte, que é a única fonte
+    # delas sem subir a aplicação inteira.
+    fonte_app = (ROOT / "backend" / "impacto" / "app.py").read_text(encoding="utf-8")
+    cruas = {f"GET {_normaliza(c)}" for c in re.findall(r'Route\("(/[^"]+)"', fonte_app)
+             if not c.startswith("/{")}   # `/{path:path}` é o fallback da SPA, não uma operação
+    backend |= cruas
 
     inv = json.loads(INVENTARIO.read_text(encoding="utf-8"))
     cache: dict[str, dict[str, str]] = {}
@@ -202,12 +212,15 @@ def main() -> int:
                               for ch in mencionados for v in _variantes(ch)))
 
     saida = {
-        "o_que_e": ("cruzamento das telas com as 888 operações registradas por impacto.http.ROUTES;"
+        "o_que_e": ("cruzamento das telas com as operações do backend — as registradas por"
+                    " impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes);"
                     " as chamadas vêm da leitura do corpo de cada componente exportado"),
         "o_que_nao_prova": ("'backend presente' quer dizer que a operação existe e está registrada."
                             " Não quer dizer que a tela funciona: só execução contra banco com dados"
                             " prova isso."),
         "operacoes_no_backend": len(backend),
+        "operacoes_registradas": len(ROUTES),
+        "rotas_cruas_de_app_py": sorted(cruas),
         "telas": len(telas),
         "estados": {e: sum(1 for t in telas if t["estado"] == e) for e in
                     ("backend presente", "endpoint ausente", "chamada dinâmica", "sem chamada direta")},

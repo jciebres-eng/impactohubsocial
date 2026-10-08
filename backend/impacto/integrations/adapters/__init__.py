@@ -1,4 +1,4 @@
-"""Adapters registrados. Identidade (OIDC em services/oidc.py), pagamento (services/billing.py) e e-mail (adapters/mail.py)
+"""Adapters registrados. Identidade (OIDC em services/oidc.py), pagamento (economics/payments.py — cobrança própria, sem assinatura) e e-mail (adapters/mail.py)
 já tinham abstração própria por provedor e são REFERENCIADOS no catálogo (não reimplementados aqui)."""
 from .bi import BiExportAdapter
 from .erp import SeniorSapiensAdapter, TotvsAdapter

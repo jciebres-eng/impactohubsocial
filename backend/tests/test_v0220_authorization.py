@@ -21,6 +21,13 @@ import uuid
 from tests.support import PASSWORD, db_system, make_admin, make_staff, new_account, reauth
 
 
+# v0.27.0 (ADR-341): a rota representativa de `finance.approve` deixou de ser o preço de plano (não há assinatura) e
+# passou a ser a PROPOSTA DE CONTRATO — valor com motivo, de quem tem alçada. O org_id é fictício de propósito:
+# permissão e step-up são decididos antes de o corpo ser usado; quando passam, a resposta é 404 (organização), nunca 401/403.
+PROPOSTA = {"org_id": "00000000-0000-4000-8000-000000000001", "plan_key": "osc_premium", "amount_cents": 120000,
+            "amount_reason": "Proposta de contrato (arranjo de teste)", "billing_frequency": "one_time", "payment_method": "pix"}
+
+
 class PermissionMatrixIsDataTests(unittest.TestCase):
     """A matriz é tabela, não dicionário em Python — para que a auditoria possa consultá-la."""
 
@@ -165,7 +172,7 @@ class MoneyIsSeparatedFromContentTests(unittest.TestCase):
         """Contabilidade registra; aprovar mudança comercial é de controladoria."""
         cont = make_staff("accounting")
         self.assertEqual(cont.get("/v1/admin/payments/revenue").status, 200)  # finance.read
-        r = cont.put("/v1/admin/plans/osc_plus/price", {"amount_cents": 1, "reason": "teste"})
+        r = cont.post("/v1/admin/commercial/offers", PROPOSTA)
         self.assertEqual(r.status, 403)
         self.assertEqual(r.json["details"]["required_permission"], "finance.approve")
 
@@ -238,7 +245,7 @@ class StepUpTests(unittest.TestCase):
     def test_a_step_up_permission_is_refused_without_fresh_reauth(self):
         ctl = make_staff("controller")
         # `finance.approve` está em STEP_UP_PERMISSIONS.
-        r = ctl.put("/v1/admin/plans/osc_plus/price", {"amount_cents": 29900, "reason": "teste"})
+        r = ctl.post("/v1/admin/commercial/offers", PROPOSTA)
         self.assertEqual(r.status, 401, r.body)
         self.assertEqual(r.json["code"], "step_up_required")
         self.assertTrue(r.json["details"]["step_up_required"])
@@ -246,7 +253,7 @@ class StepUpTests(unittest.TestCase):
     def test_after_reauth_the_same_operation_is_allowed(self):
         ctl = make_staff("controller")
         reauth(ctl)
-        r = ctl.put("/v1/admin/plans/osc_plus/price", {"amount_cents": 29900, "reason": "teste"})
+        r = ctl.post("/v1/admin/commercial/offers", PROPOSTA)
         self.assertNotEqual(r.status, 401, f"reautenticação não foi reconhecida: {r.body}")
         self.assertNotEqual(r.status, 403, f"permissão recusada após reautenticar: {r.body}")
 
@@ -413,7 +420,7 @@ class StepUpBlocksEvenAnAdministratorTests(unittest.TestCase):
     def test_an_administrator_without_fresh_reauth_cannot_approve_a_price(self):
         from tests.support import make_admin_without_reauth
         adm = make_admin_without_reauth()
-        r = adm.put("/v1/admin/plans/osc_plus/price", {"amount_cents": 29900, "reason": "teste"})
+        r = adm.post("/v1/admin/commercial/offers", PROPOSTA)
         self.assertEqual(r.status, 401, f"a exigência de reautenticação desapareceu: {r.body}")
         self.assertEqual(r.json["code"], "step_up_required")
 

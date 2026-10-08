@@ -44,8 +44,8 @@ class AppState:
         _docs.ACCEPT_UNSCANNED = settings.allow_unscanned_downloads
         from .engines.ai.gateway import AiGateway
         self.ai = AiGateway(settings)
-        from .services.billing import make_billing_provider
-        self.billing = make_billing_provider(settings)
+        # v0.27.0 (ADR-341): não há provedor de assinatura. O que existe é o estado do provedor de
+        # cobrança própria (economics/payments.status), lido onde é preciso.
         # Toda tentativa de envio passa a deixar registro em email_events. Fica aqui, e não nos oito
         # pontos que enviam e-mail, para que nenhum deles possa esquecer.
         self.mailer.on_event = self._record_email_event
@@ -176,7 +176,8 @@ def _infra_routes(state: AppState) -> list[Route]:
             return JSONResponse({"status": "unavailable", "pending_migrations": pending}, status_code=503)
         return JSONResponse({"status": "ready", "database": "ok", "storage": state.storage.kind,
                              "antivirus": state.antivirus.name, "ai": state.ai.provider_name,
-                             "billing": state.billing.name, "mail": s.mail_provider})
+                             "billing": "none-subscription", "payments": "stripe" if s.stripe_secret_key else "simulated",
+                             "mail": s.mail_provider})
 
     async def metrics(request: Request):
         if s.metrics_token:
@@ -198,7 +199,7 @@ def _infra_routes(state: AppState) -> list[Route]:
 
     async def public_config(request: Request):
         from .services.oidc import enabled as oidc_enabled
-        return JSONResponse({"sso_enabled": oidc_enabled(s), "billing_provider": state.billing.name, "env": s.env,
+        return JSONResponse({"sso_enabled": oidc_enabled(s), "billing_provider": "none", "subscription": False, "env": s.env,
                              "terms_version": s.terms_version, "privacy_version": s.privacy_version, "version": s.version},
                             headers={"Cache-Control": "public, max-age=300"})
 

@@ -21,9 +21,11 @@ separados e o módulo não oferece nenhuma função que os junte.
 
 O QUE ESTE MÓDULO RECUSA FAZER
 
-Devolver número onde não há dado. `churn`, `ltv` e `cac` exigem histórico de assinatura paga que a
-plataforma ainda não tem — ela nunca cobrou. Eles saem com `available: false` e o motivo, em vez de
-zero. Zero significaria "nenhum cliente saiu"; a verdade é "nenhum cliente entrou ainda".
+Devolver número onde não há dado. `ltv` e `cac` exigem histórico que a plataforma ainda não tem.
+Eles saem com `available: false` e o motivo, em vez de zero.
+
+v0.27.0 (ADR-341): NÃO HÁ MRR/ARR/CHURN DE ASSINATURA — não existe assinatura. A receita da plataforma
+é a camada econômica da operação financiada (`operation_revenue`), lida do livro `economic_events`.
 """
 from __future__ import annotations
 
@@ -54,39 +56,43 @@ def _metric(value, *, source: str, calculation: str, period: str, available: boo
     return d
 
 
-def recurring_revenue(c) -> dict:
-    """MRR e ARR a partir das assinaturas ATIVAS, com o anual diluído em doze.
+def operation_revenue(c) -> dict:
+    """Receita da CAMADA ECONÔMICA da operação financiada, a partir do livro `economic_events`.
 
-    Diluir o anual é o que torna o número comparável mês a mês. Somar o anual inteiro no mês do
-    faturamento faria o MRR de janeiro parecer cinco vezes o de fevereiro — e alguém tomaria uma
-    decisão com base nisso.
+    v0.27.0 (ADR-341): não existe MRR/ARR porque não existe assinatura. O que a plataforma ganha vem de
+    operações: a taxa de serviço contratada (3,5%) é REGISTRADA na ativação do acordo, fica DEVIDA
+    quando a regra comercial está ativa e PAGA quando a plataforma confirma o repasse. Os três números
+    saem separados — registrado não é receita, e devido não é caixa. Reversões abatem o registrado.
     """
     row = c.one(
-        # `amount_cents / 12` é divisão INTEIRA no PostgreSQL: uma anual de R$ 999,95 entrava como
-        # R$ 83,32 em vez de R$ 83,33, truncando para menos a cada assinatura anual. `::numeric`
-        # com `round` mantém o centavo e arredonda uma vez, no fim.
-        "SELECT coalesce(round(sum(CASE WHEN s.interval = 'year' THEN s.amount_cents::numeric / 12"
-        "                               ELSE s.amount_cents END)), 0) AS mrr_cents,"
-        " count(*) AS subscriptions,"
-        " count(*) FILTER (WHERE s.interval = 'year') AS annual"
-        " FROM subscriptions s"
-        " WHERE s.status = 'active' AND s.amount_cents IS NOT NULL"
-        # Assinatura em sandbox não é receita. Incluí-la faria um ambiente de testes inflar o MRR.
-        "   AND s.provider <> 'sandbox'")
-    mrr = int(row["mrr_cents"] or 0)
+        "SELECT coalesce(sum(amount_cents) FILTER (WHERE kind = 'platform_service_registered'), 0)"
+        "     - coalesce(sum(amount_cents) FILTER (WHERE kind = 'reversal' AND rule_key = 'contract.platform_service_fee'), 0) AS registered,"
+        " coalesce(sum(amount_cents) FILTER (WHERE kind = 'platform_service_due'), 0) AS due,"
+        " coalesce(sum(amount_cents) FILTER (WHERE kind = 'platform_service_paid'), 0) AS paid,"
+        " coalesce(sum(amount_cents) FILTER (WHERE kind = 'proponent_participation_accrued'), 0) AS participation_accrued,"
+        " coalesce(sum(amount_cents) FILTER (WHERE kind = 'proponent_participation_paid'), 0) AS participation_paid,"
+        " count(DISTINCT agreement_id) FILTER (WHERE kind = 'platform_service_registered') AS operations"
+        " FROM economic_events")
     return {
-        "mrr": _metric(mrr,
-                       source="subscriptions (status=active, provider<>sandbox)",
-                       calculation=("soma do valor mensal; assinatura anual dividida por 12 em"
-                                    " numérico e arredondada uma vez no fim; assinatura com"
-                                    " provider=sandbox excluída"),
-                       period="instantâneo"),
-        "arr": _metric(mrr * 12,
-                       source="mrr × 12",
-                       calculation="MRR × 12; não é receita contratada, é a anualização do mês",
-                       period="instantâneo"),
-        "subscriptions": int(row["subscriptions"] or 0),
-        "annual_subscriptions": int(row["annual"] or 0),
+        "platform_layer_registered": _metric(int(row["registered"] or 0),
+                                             source="economic_events (platform_service_registered − reversal)",
+                                             calculation="3,5% do valor financiado, congelado na matriz do acordo na ativação; abatido por reversão (nova versão/cancelamento)",
+                                             period="acumulado"),
+        "platform_layer_due": _metric(int(row["due"] or 0), source="economic_events (platform_service_due)",
+                                      calculation="parcela registrada cuja regra comercial estava ATIVA (cobrança própria aberta)",
+                                      period="acumulado"),
+        "platform_layer_paid": _metric(int(row["paid"] or 0), source="economic_events (platform_service_paid)",
+                                       calculation="repasse à plataforma confirmado pela própria plataforma (caixa, não competência)",
+                                       period="acumulado"),
+        "participation_accrued": _metric(int(row["participation_accrued"] or 0), source="economic_events (proponent_participation_accrued)",
+                                         calculation="1,5% de participação de autoria na matriz — NÃO é receita da plataforma", period="acumulado"),
+        "participation_paid": _metric(int(row["participation_paid"] or 0), source="economic_events (proponent_participation_paid)",
+                                      calculation="participação confirmada pelo proponente — NÃO é receita da plataforma", period="acumulado"),
+        "operations": int(row["operations"] or 0),
+        "mrr": _metric(None, currency=None, source="—", calculation="—", period="—", available=False,
+                       unavailable_reason="Não existe assinatura (ADR-341): receita recorrente de mensalidade não é um conceito desta plataforma."),
+        "arr": _metric(None, currency=None, source="—", calculation="—", period="—", available=False,
+                       unavailable_reason="Não existe assinatura (ADR-341)."),
     }
 
 
@@ -225,32 +231,33 @@ def gmv(c, *, period) -> dict:
 
 
 def conversion(c) -> dict:
-    """Conversão de gratuito para pago, e o que ainda não há como medir."""
+    """Conversão de cadastro em OPERAÇÃO FINANCIADA (não há 'pago' por assinatura), e o que ainda não há como medir."""
     row = c.one(
         "SELECT (SELECT count(*) FROM organizations WHERE status = 'active') AS orgs,"
-        " (SELECT count(*) FROM subscriptions WHERE status = 'active'"
-        "    AND provider <> 'sandbox') AS pagas,"
+        " (SELECT count(DISTINCT org_id) FROM economic_events WHERE kind = 'platform_service_registered') AS operando,"
+        " (SELECT count(*) FROM offer_acceptances WHERE consent_status = 'authorized' AND revoked_at IS NULL) AS contratos,"
         " (SELECT count(*) FROM free_periods WHERE status = 'active' AND ends_at > now()) AS gratuitas")
-    orgs, pagas = int(row["orgs"] or 0), int(row["pagas"] or 0)
+    orgs, operando = int(row["orgs"] or 0), int(row["operando"] or 0)
     return {
         "active_organizations": orgs,
-        "paying": pagas,
+        "with_funded_operation": operando,
+        "with_contract": int(row["contratos"] or 0),
         "in_free_period": int(row["gratuitas"] or 0),
-        "free_to_paid": _metric(
-            round(pagas * 100 / orgs, 2) if orgs else None, currency=None,
-            source="subscriptions ativas ÷ organizações ativas",
-            calculation="percentual de organizações com assinatura paga",
+        "signup_to_operation": _metric(
+            round(operando * 100 / orgs, 2) if orgs else None, currency=None,
+            source="organizações com camada econômica registrada ÷ organizações ativas",
+            calculation="percentual de organizações com ao menos uma operação financiada ativada",
             period="instantâneo", available=bool(orgs),
             unavailable_reason=None if orgs else
             "Não há organização ativa: a divisão não tem denominador. Zero por cento diria "
             "'ninguém converteu'; a verdade é 'não há ninguém para converter'."),
         "churn": _metric(
-            None, currency=None, source="subscriptions",
-            calculation="(cancelamentos no mês) ÷ (assinaturas ativas no início do mês)",
-            period="mensal", available=False,
-            unavailable_reason="Não há histórico de assinatura paga: a plataforma nunca cobrou. "
-                               "Zero significaria 'nenhum cliente saiu'; a verdade é 'nenhum "
-                               "cliente entrou ainda'."),
+            None, currency=None, source="—",
+            calculation="não se aplica: não há assinatura para cancelar (ADR-341)",
+            period="—", available=False,
+            unavailable_reason="Não existe assinatura; o conceito de churn de mensalidade não se aplica. "
+                               "Retenção de operação (organizações que voltam a operar) exige histórico "
+                               "de mais de um ciclo."),
         "ltv": _metric(None, currency=None, source="—",
                        calculation="(receita média por cliente × margem bruta) ÷ churn",
                        period="—", available=False,
@@ -307,7 +314,7 @@ def summary(c, *, period) -> dict:
     out = {
         "period": str(period),
         "as_of": now().isoformat(),
-        "recurring": recurring_revenue(c),
+        "operation_layer": operation_revenue(c),
         "revenue": revenue_recognized(c, period=period),
         "cash": cash_flow(c, period=period),
         "expenses": expenses(c, period=period),

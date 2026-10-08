@@ -100,16 +100,14 @@ class Settings:
     clamd_host: str = "127.0.0.1"
     clamd_port: int = 3310
     allow_unscanned_downloads: bool = False
-    billing_provider: str = "none"        # none | sandbox | stripe | manual
+    # v0.27.0 (ADR-341): não há assinatura nem provedor de cobrança recorrente. As chaves do Stripe ficam
+    # apenas para `economics/payments.py` dizer se há provedor REAL configurado (sem chave = simulado).
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     # v0.27.0 — chave PIX da própria plataforma para a linha "infraestrutura e inteligência" das instruções de repasse.
     # Vazia = "NÃO CONFIGURADA": a instrução sai sem chave e diz isso. Nunca é usada para mover dinheiro.
     platform_pix_key: str = ""
     platform_pix_key_type: str = ""
-    stripe_prices: dict[str, str] = field(default_factory=dict)   # chaves: <plan_key> (mensal), <plan_key>_month, <plan_key>_year
-    trial_auto_start: bool = True
-    trial_days: int = 14
     ai_provider: str = "local"            # local | anthropic | openai_compatible | disabled
     ai_base_url: str = ""
     ai_api_key: str = ""
@@ -141,10 +139,6 @@ def load_settings() -> Settings:
     if env not in ("development", "test", "staging", "production"):
         raise ConfigError(f"IMPACTO_ENV inválido: {env}")
     hardened = env in ("staging", "production")
-    prices = {}
-    for k, v in os.environ.items():
-        if k.startswith("STRIPE_PRICE_") and v:
-            prices[k.removeprefix("STRIPE_PRICE_").lower()] = v
     s = Settings(
         env=env,
         port=_int("PORT", 8080),
@@ -192,14 +186,10 @@ def load_settings() -> Settings:
         clamd_host=_env("CLAMD_HOST", "127.0.0.1"),
         clamd_port=_int("CLAMD_PORT", 3310),
         allow_unscanned_downloads=_bool("ALLOW_UNSCANNED_DOWNLOADS", not hardened),
-        billing_provider=_env("BILLING_PROVIDER", "sandbox" if not hardened else "none"),
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
         platform_pix_key=_env("PLATFORM_PIX_KEY", "") or "",
         platform_pix_key_type=_env("PLATFORM_PIX_KEY_TYPE", "") or "",
-        stripe_prices=prices,
-        trial_auto_start=_bool("TRIAL_AUTO_START", True),
-        trial_days=_int("TRIAL_DAYS", 14),
         ai_provider=_env("AI_PROVIDER", "local"),
         ai_base_url=_env("AI_BASE_URL", "") or "",
         ai_api_key=_env("AI_API_KEY", "") or "",
@@ -239,8 +229,6 @@ def validate(s: Settings) -> None:
             errors.append("IMPACTO_SEED_DEMO não é permitido em staging/production")
         if s.mail_provider == "console":
             errors.append("MAIL_PROVIDER=console não é permitido em staging/production (use smtp)")
-        if s.billing_provider == "sandbox" and s.is_production:
-            errors.append("BILLING_PROVIDER=sandbox não é permitido em production")
         if int(os.getenv("RATE_LIMIT_MULTIPLIER", "1")) != 1:
             errors.append("RATE_LIMIT_MULTIPLIER deve ser 1 em staging/production")
         if int(os.getenv("PASSWORD_SCRYPT_N", str(2 ** 17))) < 2 ** 17:
@@ -253,8 +241,8 @@ def validate(s: Settings) -> None:
             errors.append("PUBLIC_BASE_URL deve usar https em staging/production")
     if s.storage_provider == "s3" and not (s.s3_bucket and s.s3_access_key_id and s.s3_secret_access_key):
         errors.append("STORAGE_PROVIDER=s3 exige S3_BUCKET, S3_ACCESS_KEY_ID e S3_SECRET_ACCESS_KEY")
-    if s.billing_provider == "stripe" and not (s.stripe_secret_key and s.stripe_webhook_secret):
-        errors.append("BILLING_PROVIDER=stripe exige STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET")
+    if bool(s.stripe_secret_key) != bool(s.stripe_webhook_secret):
+        errors.append("STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET vêm juntas ou nenhuma")
     if s.ai_provider in ("anthropic", "openai_compatible") and not (s.ai_api_key and s.ai_model):
         errors.append("AI_PROVIDER externo exige AI_API_KEY e AI_MODEL")
     if s.mail_provider == "smtp" and not s.smtp_host:

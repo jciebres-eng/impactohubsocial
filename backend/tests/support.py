@@ -59,71 +59,7 @@ def _create_db() -> None:
     _psql("-c", f"ALTER ROLE impacto_owner PASSWORD '{OWNER_PW}'; ALTER ROLE impacto_app PASSWORD '{APP_PW}';")
     from impacto.db.migrate import migrate
     migrate(OWNER_DSN, log=lambda *_: None)
-    _declare_test_prices()
-
-
-#: A v0.17.0 APOSENTOU a regra comercial em dólar da v0.16.0 e **não** fixou preço institucional: as
-#: faixas são hipóteses declaradas, e sem preço a plataforma recusa contratação online. Isso é o
-#: comportamento certo do produto, mas deixa a suíte sem nada para exercitar na camada de cobrança.
-#:
-#: Então o AMBIENTE DE TESTE declara uma regra comercial própria, em BRL, como faria o proprietário ao
-#: publicar preço. Os valores abaixo existem só aqui: não estão em `config/plans.json`, não vão para
-#: produção, e o `reason` de cada versão diz isso em letras.
-#: Marcador do `reason` das versões de preço criadas pelo ambiente. Existe para que um cenário de
-#: teste consiga REABRIR exatamente estas — e não qualquer versão fechada do mesmo plano, que é o que
-#: produzia violação de `ux_price_current`.
-TEST_PRICE_REASON = "Preço declarado pelo AMBIENTE DE TESTE."
-TEST_PRICES = (
-    # (plano, intervalo, centavos, entrada, períodos de entrada, dias de teste)
-    ("osc_premium", "month", 9900, 1900, 3, 14),
-    ("osc_premium", "year", 99000, None, None, 14),
-    ("provider_premium", "month", 4900, None, None, 14),
-    ("company_premium", "month", 29900, None, None, 14),
-)
-
-
-def _declare_test_prices() -> None:
-    """Publica a tabela do ambiente de teste POR CIMA da tabela real, pelo caminho legítimo.
-
-    Até a v0.20.0 o catálogo real estava vazio e bastava inserir. A v0.21.0 publicou a Pricing
-    Version 2027.01, e aí a inserção direta passou a violar `ux_price_current` — o índice que
-    garante UMA versão vigente por (plano, intervalo, moeda). Isso não é um estorvo do teste: é o
-    índice fazendo exatamente o trabalho dele.
-
-    Então o ambiente faz o que o proprietário faria para republicar um preço: FECHA a vigência da
-    versão atual e abre a sua. O histórico fica, o caminho exercitado é o de produção, e os valores
-    de teste continuam existindo só aqui.
-    """
-    from impacto.db.pq import Connection
-    c = Connection(OWNER_DSN)
-    try:
-        for plan, interval, cents, intro, periods, trial in TEST_PRICES:
-            c.run("UPDATE plan_price_versions SET effective_until = now()"
-                  " WHERE plan_key = $1 AND interval = $2 AND currency = 'BRL'"
-                  " AND effective_until IS NULL", plan, interval)
-            # IDEMPOTENTE: se esta mesma versão do ambiente já existe fechada, REABRE em vez de
-            # inserir outra. Sem isto, cada chamada empilhava uma versão de teste a mais, e o
-            # `tearDownClass` de test_v0110 — que reabre TODAS as fechadas com este `reason` —
-            # passava a abrir duas ao mesmo tempo e violava `ux_price_current`.
-            #
-            # A função é chamada mais de uma vez de propósito: `test_v0170` roda
-            # `sync_reference_data`, que reaplica a tabela de produção, e precisa devolver o
-            # ambiente como encontrou.
-            if c.run("UPDATE plan_price_versions SET effective_until = NULL"
-                     " WHERE id = (SELECT id FROM plan_price_versions"
-                     "             WHERE plan_key = $1 AND interval = $2 AND currency = 'BRL'"
-                     "               AND amount_cents = $3 AND reason LIKE $4"
-                     "             ORDER BY effective_from DESC LIMIT 1)",
-                     plan, interval, cents, TEST_PRICE_REASON + "%"):
-                continue
-            c.run("INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents,"
-                  " intro_amount_cents, intro_periods, trial_days, tax_behavior, provider, reason)"
-                  " VALUES ($1,$2,'BRL',$3,$4,$5,$6,'exclusive','stripe',$7)",
-                  plan, interval, cents, intro, periods, trial,
-                  TEST_PRICE_REASON + " A v0.17.0 não fixa preço institucional; este valor existe "
-                  "apenas para exercitar a camada de cobrança.")
-    finally:
-        c.close()
+    # v0.27.0 (ADR-341): não há tabela de preços de assinatura para o ambiente publicar — não existe assinatura.
 
 
 def _drop_db() -> None:
@@ -140,7 +76,7 @@ def test_env() -> dict:
     return {
         "IMPACTO_ENV": "test", "DATABASE_URL": APP_DSN, "SECRET_KEY": "test-secret-key-" + "x" * 32,
         "VOUCHER_HMAC_KEY": "test-voucher-key-" + "y" * 32, "STORAGE_LOCAL_DIR": str(TMP / "storage"),
-        "PUBLIC_BASE_URL": "http://testserver.local", "COOKIE_SECURE": "false", "BILLING_PROVIDER": "sandbox", "TRIAL_AUTO_START": "false",
+        "PUBLIC_BASE_URL": "http://testserver.local", "COOKIE_SECURE": "false", 
         "AI_PROVIDER": "local", "MAIL_PROVIDER": "console", "LOG_LEVEL": "WARNING", "ALLOW_UNSCANNED_DOWNLOADS": "true", "RATE_LIMIT_MULTIPLIER": "1000",
     }
 

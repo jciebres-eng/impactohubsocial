@@ -32,7 +32,7 @@ def me_context(ctx: Ctx):
                   "read_only": ac.is_read_only_staff},
         "organization": ({"id": ac.org_id, "kind": ac.org_kind, "name": ac.org_name,
                           "role": ac.role} if ac.org_id else None),
-        "commercial": {"plans": list(ac.plans), "subscription_status": ac.subscription_status,
+        "commercial": {"plans": list(ac.plans), "subscription": None,
                        "state": ac.commercial_state, "free_period_end": ac.free_period_end,
                        "charge_authorized": ac.charge_authorized},
         "entitlements": {"features": sorted(ac.features), "limits": ac.limits},
@@ -53,6 +53,8 @@ def me_context(ctx: Ctx):
 STAFF_MENU: tuple[tuple[str, str, str, str | None], ...] = (
     ("/controladoria", "Painel executivo", "Controladoria", "metrics.read"),
     ("/controladoria/conciliacao", "Conciliação", "Controladoria", "finance.read"),
+    # v0.27.0 — torre MASTER: GMV × camada da plataforma, sem saldo inventado (ADR-341)
+    ("/controladoria/torre", "Torre financeira (master)", "Controladoria", "finance.read"),
     ("/aprovacoes", "Aprovações", "Controladoria", "finance.read"),
     ("/financeiro", "Recebíveis e pagáveis", "Financeiro", "finance.read"),
     ("/financeiro/despesas", "Despesas da plataforma", "Financeiro", "finance.read"),

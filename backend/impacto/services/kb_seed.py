@@ -66,10 +66,10 @@ ARTICLES = [
       ("Acompanhe a validação", "Quem apoia o projeto pode aceitar ou pedir mais informações.")],
      ["Despesas registradas", "Comprovantes anexados", "Evidências enviadas"], ["Despesa sem comprovante", "Evidência sem data"], ("Ir para execução", "/projetos"),
      ["execution.accountability", "execution.expense"], ["prestação de contas", "despesas", "evidências", "execução"], 10, ["checklist-prestacao-contas"]),
-    ("como-funciona-o-periodo-de-teste", "how_it_works", "assinatura-trial", [], "public", "Como funciona o período de teste",
-     "Durante o teste você tem acesso completo e não é cobrada; a cobrança só começa se contratar um plano.",
-     [("Veja o tempo restante", "Em Conta > Plano."), ("Escolha continuar ou cancelar", "Cancele quando quiser antes do fim do teste."), ("Peça mais tempo", "Se precisar, solicite um teste em Central > Teste.")],
-     [], ["Esperar o último dia para decidir"], ("Ver meu plano", "/conta/plano"), ["billing.plan"], ["teste", "plano", "assinatura"], 4, []),
+    ("como-funciona-o-acesso", "how_it_works", "assinatura-trial", [], "public", "Como funciona o acesso: não existe assinatura",
+     "O núcleo do IMPACTO é gratuito por desenho, sem prazo. Capacidades além dele vêm de concessão, convênio, voucher ou contrato — nunca de mensalidade.",
+     [("Veja de onde vem o seu acesso", "Em Conta > Acesso e concessões."), ("Use um voucher ou convênio", "Códigos de concessão liberam pacotes por prazo."), ("Entenda a camada econômica", "Quem financia um projeto na plataforma paga 3,5% de taxa de serviço contratada no acordo; a OSC nunca desembolsa para pagar a plataforma.")],
+     [], ["Esperar uma cobrança de mensalidade: ela não existe"], ("Ver meu acesso", "/conta/acesso"), ["billing.plan"], ["acesso", "concessão", "contrato", "assinatura"], 4, []),
     ("como-abrir-chamado", "procedure", "primeiros-passos", [], "public", "Como abrir um chamado de suporte",
      "Escolha a categoria, descreva o problema e anexe um arquivo se ajudar.",
      [("Abra a Central", "Menu Ajuda."), ("Descreva o problema", "Diga o que tentou e o que aconteceu."), ("Anexe se precisar", "Use arquivos já enviados em Documentos."), ("Acompanhe", "Você é avisada a cada resposta.")],
@@ -85,9 +85,9 @@ ARTICLES = [
 ]
 
 FAQS = [
-    ("Preciso pagar para pedir ajuda?", "Não. O suporte e o conteúdo da Central estão disponíveis para todas as contas, inclusive no plano gratuito.", "assinatura-trial", ["help.faq"], []),
-    ("Quanto custa o plano pago?", "Os valores aparecem na tela de planos. Quando um plano está sem preço definido, a contratação online fica indisponível e a equipe atende sob consulta.", "assinatura-trial", ["billing.plan"], []),
-    ("Posso cancelar o período de teste?", "Sim, a qualquer momento em Conta > Plano. Você não é cobrada durante o teste.", "assinatura-trial", ["billing.plan"], []),
+    ("Preciso pagar para pedir ajuda?", "Não. O suporte e o conteúdo da Central estão disponíveis para todas as contas. O núcleo da plataforma é gratuito por desenho.", "assinatura-trial", ["help.faq"], []),
+    ("Existe assinatura ou mensalidade?", "Não. O IMPACTO não cobra assinatura. Pacotes além do núcleo vêm de contrato, concessão, convênio ou voucher; a plataforma é remunerada pela camada econômica da operação financiada (3,5% de taxa de serviço contratada no acordo) e por contratos avulsos.", "assinatura-trial", ["billing.plan"], []),
+    ("Como consigo um pacote com mais capacidades?", "Por concessão administrativa, convênio (código), voucher de concessão ou contrato avulso/parcelado com proposta da equipe comercial. Em Conta > Acesso e concessões você vê o que vale para a sua organização.", "assinatura-trial", ["billing.plan"], []),
     ("O certificado dos cursos vale como diploma?", "Não. É um certificado de conclusão da plataforma, verificável por código, sem validade como diploma ou certificação oficial.", "primeiros-passos", [], []),
     ("O assistente da Central usa inteligência artificial?", "Não. Ele monta a resposta a partir de conteúdo já publicado e sempre mostra a fonte. Se não houver base suficiente, avisa e oferece abrir um chamado.", "primeiros-passos", ["help.assistant"], []),
     ("Quem aprova o conteúdo oficial?", "Todo conteúdo é revisado e aprovado por uma pessoa diferente de quem escreveu, e traz a data da última revisão.", "primeiros-passos", [], []),

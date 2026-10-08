@@ -127,88 +127,6 @@ def sync_translations(conn: Connection, log=print) -> int:
     return n
 
 
-def _sync_price_versions(conn: Connection, plans: dict) -> int:
-    """Sincroniza `plan_price_versions` a partir de `config/plans.json`.
-
-    REGRA QUE ESTA FUNÇÃO IMPÕE: preço não se sobrescreve. Quando o valor do arquivo difere do vigente, a versão
-    vigente tem a vigência FECHADA (`effective_until = now()`) e uma nova entra. É isso que permite responder "quanto
-    esta organização contratou em março?" depois de um reajuste — e é por isso que `plan_price_versions` tem
-    `guard_columns` nas colunas de valor: nem a administração reescreve uma versão vigente.
-
-    Quando o valor é igual, nada acontece (idempotente): rodar a migração dez vezes não cria dez versões.
-    """
-    cfg = plans.get("price_versions") or {}
-    items = cfg.get("items") or []
-    if not items:
-        return 0
-    n = 0
-    for it in items:
-        tier = it.get("applies_to_tier")
-        # APOSENTAR um preço é diferente de mudá-lo. A v0.17.0 retirou a regra comercial em dólar da
-        # v0.16.0 por decisão do proprietário, e retirar não podia ser "apagar a linha do arquivo":
-        # isso deixaria a versão vigente no banco para sempre. Um item com `retire: true` fecha a
-        # vigência e **não** abre nenhuma nova — o histórico fica, e a plataforma volta a recusar
-        # contratação online daquele plano naquela moeda.
-        if it.get("retire"):
-            for plan_key in ([it["plan_key"]] if it.get("plan_key") else
-                             [k for k, pl in plans["plans"].items()
-                              if (tier is None or pl.get("tier") == tier) and pl.get("interval") != "custom"]):
-                closed = conn.execute(
-                    "UPDATE plan_price_versions SET effective_until = greatest(now(), effective_from + interval '1 microsecond')"
-                    " WHERE plan_key = $1 AND interval = $2 AND currency = $3 AND effective_until IS NULL",
-                    (plan_key, it["interval"], it["currency"].upper())).rowcount
-                n += int(closed or 0)
-            continue
-        if it.get("plan_key"):
-            targets = [it["plan_key"]]
-        else:
-            # Plano `interval: custom` é SOB CONTRATO (company_enterprise): não se contrata por autosserviço, então
-            # receber preço de tabela faria a plataforma oferecer checkout para algo que exige proposta comercial.
-            targets = [k for k, pl in plans["plans"].items()
-                       if (tier is None or pl.get("tier") == tier) and pl.get("interval") != "custom"]
-        for plan_key in targets:
-            cur = conn.execute(
-                "SELECT id, amount_cents, intro_amount_cents, intro_periods, trial_days, tax_behavior,"
-                " provider, provider_price_id, provider_intro_price_id FROM plan_price_versions"
-                " WHERE plan_key = $1 AND interval = $2 AND currency = $3 AND effective_until IS NULL",
-                (plan_key, it["interval"], it["currency"].upper())).rows
-            same = bool(cur) and (
-                int(cur[0]["amount_cents"]) == int(it["amount_cents"])
-                and cur[0]["intro_amount_cents"] == it.get("intro_amount_cents")
-                and cur[0]["intro_periods"] == it.get("intro_periods")
-                and cur[0]["tax_behavior"] == it.get("tax_behavior", "unspecified"))
-            if same:
-                # o identificador no provedor PODE ser preenchido depois, sem criar versão nova: ele não é preço
-                if it.get("provider_price_id") and not cur[0]["provider_price_id"]:
-                    conn.execute("UPDATE plan_price_versions SET provider_price_id = $2,"
-                                 " provider_intro_price_id = $3 WHERE id = $1",
-                                 (cur[0]["id"], it["provider_price_id"], it.get("provider_intro_price_id")))
-                continue
-            if cur:
-                # A expressão, e não `now()`: uma versão com vigência AGENDADA para o futuro
-                # (reajuste anunciado) tem `effective_from > now()`, e fechá-la em `now()` viola
-                # `effective_order` (effective_until > effective_from) — a migração morria ao
-                # encontrar um reajuste agendado. Fechar uma versão que ainda não começou significa
-                # que ela nunca vigorou; a janela fica vazia em vez de negativa.
-                #
-                # Escrita inline, e não como função de banco: o sincronizador roda em TODA versão
-                # do schema, inclusive nas antigas que o teste de atualização percorre. Depender de
-                # uma função criada na 0044 faria a migração a partir da v0.17.0 falhar.
-                conn.execute("UPDATE plan_price_versions SET effective_until ="
-                             " greatest(now(), effective_from + interval '1 microsecond')"
-                             " WHERE id = $1", (cur[0]["id"],))
-            conn.execute(
-                "INSERT INTO plan_price_versions(plan_key, interval, currency, amount_cents, intro_amount_cents,"
-                " intro_periods, trial_days, tax_behavior, provider, provider_price_id, provider_intro_price_id,"
-                " reason) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",
-                (plan_key, it["interval"], it["currency"].upper(), it["amount_cents"],
-                 it.get("intro_amount_cents"), it.get("intro_periods"), it.get("trial_days"),
-                 it.get("tax_behavior", "unspecified"), it.get("provider"), it.get("provider_price_id"),
-                 it.get("provider_intro_price_id"), it["reason"]))
-            n += 1
-    return n
-
-
 def sync_reference_data(conn: Connection, log=print) -> None:
     plans = json.loads((CONFIG_DIR / "plans.json").read_text(encoding="utf-8"))
     conn.execute_script("BEGIN;")
@@ -217,21 +135,16 @@ def sync_reference_data(conn: Connection, log=print) -> None:
         for key, p in plans["plans"].items():
             keys.append(key)
             conn.execute(
-                "INSERT INTO plans(plan_key, version, role, name, price_cents, interval, limits, features, requires_flag, public, active, tier)"
-                " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::text[],$9,$10,true,$11)"
+                # v0.27.0 (ADR-341): plano = pacote de capacidades, sem preço e sem periodicidade.
+                "INSERT INTO plans(plan_key, version, role, name, limits, features, requires_flag, public, active, tier)"
+                " VALUES ($1,$2,$3,$4,$5::jsonb,$6::text[],$7,$8,true,$9)"
                 " ON CONFLICT (plan_key) DO UPDATE SET version=EXCLUDED.version, role=EXCLUDED.role, name=EXCLUDED.name, tier=EXCLUDED.tier,"
-                " price_cents=EXCLUDED.price_cents, interval=EXCLUDED.interval, limits=EXCLUDED.limits,"
+                " limits=EXCLUDED.limits,"
                 " features=EXCLUDED.features, requires_flag=EXCLUDED.requires_flag, public=EXCLUDED.public, active=true",
-                (key, plans["version"], p["role"], p["name"], p.get("price_cents"), p.get("interval", "month"),
+                (key, plans["version"], p["role"], p["name"],
                  Json(p.get("limits", {})), p.get("features", []), p.get("requires_flag"), p.get("public", True), p.get("tier", "free")),
             )
-            for interval, amount in (p.get("prices") or {}).items():
-                # valor da configuração só sobrescreve quando definido (null = não definido; o proprietário pode ter preenchido no banco)
-                conn.execute("INSERT INTO plan_prices(plan_key, interval, amount_cents) VALUES ($1,$2,$3)"
-                             " ON CONFLICT (plan_key, interval) DO UPDATE SET amount_cents = coalesce(EXCLUDED.amount_cents, plan_prices.amount_cents)",
-                             (key, interval, amount))
         conn.execute("UPDATE plans SET active = false WHERE NOT (plan_key = ANY($1::text[]))", (keys,))
-        n_prices = _sync_price_versions(conn, plans)
         for flag, cfg in plans.get("flags", {}).items():
             conn.execute(
                 "INSERT INTO feature_flags(key, enabled, description) VALUES ($1,$2,$3) ON CONFLICT (key) DO NOTHING",
@@ -254,7 +167,7 @@ def sync_reference_data(conn: Connection, log=print) -> None:
         n_prov = sync_integration_providers(conn, log=log)
         n_tr = sync_translations(conn, log=log)
         conn.execute_script("COMMIT;")
-        log(f"dados de referência sincronizados: {len(keys)} planos, {n_prices} versão(ões) de preço nova(s),"
+        log(f"dados de referência sincronizados: {len(keys)} pacotes de capacidades (sem preço — ADR-341),"
             f" {n_prov} provedores de integração, {n_tr} traduções")
     except Exception:  # noqa: BLE001 - dado de referência é tudo-ou-nada; desfaz e RELANÇA
         conn.execute_script("ROLLBACK;")

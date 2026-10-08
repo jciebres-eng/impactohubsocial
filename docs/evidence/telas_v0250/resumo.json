@@ -1,13 +1,3716 @@
 {
- "visitas": 796,
+ "visitas": 803,
  "rotas": 220,
- "rotas_abertas_com_sucesso": 220,
- "persona_sem_registro_proprio": 53,
+ "rotas_abertas_com_sucesso": 137,
+ "persona_sem_registro_proprio": 51,
  "estados": {
-  "OK": 520,
-  "VAZIA": 129,
-  "RECUSA_CORRETA": 94,
-  "SEM_REGISTRO": 53
+  "CHAMADA_RECUSADA": 365,
+  "OK": 238,
+  "RECUSA_CORRETA": 93,
+  "VAZIA": 51,
+  "SEM_REGISTRO": 51,
+  "ERRO_NA_TELA": 5
  },
- "falhas": []
+ "falhas": [
+  {
+   "rota": "/identidade",
+   "persona": "individual",
+   "url": "/identidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/identidade",
+   "persona": "admin",
+   "url": "/identidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicao",
+   "persona": "osc",
+   "url": "/instituicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicao",
+   "persona": "company",
+   "url": "/instituicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicao",
+   "persona": "government",
+   "url": "/instituicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicao",
+   "persona": "provider",
+   "url": "/instituicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicao",
+   "persona": "individual",
+   "url": "/instituicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "osc",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "company",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "provider",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "government",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "individual",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/instituicoes/:id",
+   "persona": "admin",
+   "url": "/instituicoes/b1765802-3331-4ed2-9913-19bfb963dbad",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "osc",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "company",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "provider",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "government",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "individual",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mapa",
+   "persona": "admin",
+   "url": "/mapa",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "osc",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "company",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "provider",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "government",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "individual",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace",
+   "persona": "admin",
+   "url": "/marketplace",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "osc",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "company",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "provider",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "government",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "individual",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/:id",
+   "persona": "admin",
+   "url": "/marketplace/f542d375-c895-4ea6-a334-c7f2872ef1a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "osc",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "company",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "provider",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "government",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "individual",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/meus",
+   "persona": "admin",
+   "url": "/marketplace/meus",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "osc",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "company",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "provider",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "government",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "individual",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/marketplace/novo",
+   "persona": "admin",
+   "url": "/marketplace/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "osc",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "company",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "provider",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "government",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "individual",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/materiais",
+   "persona": "admin",
+   "url": "/materiais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "osc",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "company",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "provider",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "government",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "individual",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens",
+   "persona": "admin",
+   "url": "/mensagens",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens/:id",
+   "persona": "osc",
+   "url": "/mensagens/5dcf277b-1db8-44f8-ac48-112701f904f0",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/mensagens/:id",
+   "persona": "company",
+   "url": "/mensagens/5dcf277b-1db8-44f8-ac48-112701f904f0",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/minhas-atividades",
+   "persona": "provider",
+   "url": "/minhas-atividades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/minhas-atividades",
+   "persona": "individual",
+   "url": "/minhas-atividades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/necessidades/:id",
+   "persona": "osc",
+   "url": "/necessidades/16d97344-da1f-4f2c-95a8-634381bfd6ab",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "osc",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "company",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "provider",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "government",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "individual",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/notificacoes",
+   "persona": "admin",
+   "url": "/notificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/operacoes",
+   "persona": "admin",
+   "url": "/operacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/operacoes/alertas",
+   "persona": "admin",
+   "url": "/operacoes/alertas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades",
+   "persona": "osc",
+   "url": "/oportunidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades-profissionais",
+   "persona": "provider",
+   "url": "/oportunidades-profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "osc",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "company",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "provider",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "government",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "individual",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/oportunidades/:id",
+   "persona": "admin",
+   "url": "/oportunidades/09bfdd65-e91a-4888-8f10-8fb1a5303ecf",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "osc",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "company",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "provider",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "government",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "individual",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao",
+   "persona": "admin",
+   "url": "/organizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "osc",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "company",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "provider",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "government",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "individual",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/compliance",
+   "persona": "admin",
+   "url": "/organizacao/compliance",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "osc",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "company",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "provider",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "government",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "individual",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/equipe",
+   "persona": "admin",
+   "url": "/organizacao/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "osc",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "company",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "provider",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "government",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "individual",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/organizacao/nova",
+   "persona": "admin",
+   "url": "/organizacao/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos",
+   "persona": "osc",
+   "url": "/pagamentos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos",
+   "persona": "company",
+   "url": "/pagamentos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos",
+   "persona": "individual",
+   "url": "/pagamentos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos",
+   "persona": "government",
+   "url": "/pagamentos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos/:id",
+   "persona": "osc",
+   "url": "/pagamentos/a5f69f49-68b9-49f3-aab0-369929ce5ffd",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/pagamentos/:id",
+   "persona": "company",
+   "url": "/pagamentos/a5f69f49-68b9-49f3-aab0-369929ce5ffd",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/participacoes",
+   "persona": "osc",
+   "url": "/participacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/participacoes",
+   "persona": "individual",
+   "url": "/participacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/participacoes",
+   "persona": "provider",
+   "url": "/participacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/participacoes",
+   "persona": "company",
+   "url": "/participacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "osc",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "company",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "provider",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "government",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "individual",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico",
+   "persona": "admin",
+   "url": "/perfil-publico",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/:id/identificadores",
+   "persona": "osc",
+   "url": "/perfil-publico/8032cafb-0637-41b7-8a01-bf68ea38037d/identificadores",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/:id/identificadores",
+   "persona": "provider",
+   "url": "/perfil-publico/25497164-f9b6-4190-80bd-9a29d8a81ac0/identificadores",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "osc",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "company",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "provider",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "government",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "individual",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/perfil-publico/experiencias",
+   "persona": "admin",
+   "url": "/perfil-publico/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "osc",
+   "url": "/portal",
+   "estado": "ERRO_NA_TELA",
+   "detalhe": "Rota de API inexistente",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "company",
+   "url": "/portal",
+   "estado": "ERRO_NA_TELA",
+   "detalhe": "Rota de API inexistente",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "provider",
+   "url": "/portal",
+   "estado": "ERRO_NA_TELA",
+   "detalhe": "Rota de API inexistente",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "government",
+   "url": "/portal",
+   "estado": "ERRO_NA_TELA",
+   "detalhe": "Rota de API inexistente",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "individual",
+   "url": "/portal",
+   "estado": "ERRO_NA_TELA",
+   "detalhe": "Rota de API inexistente",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/portal",
+   "persona": "admin",
+   "url": "/portal",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "osc",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "company",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "provider",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "government",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "individual",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/profissionais",
+   "persona": "admin",
+   "url": "/profissionais",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos",
+   "persona": "osc",
+   "url": "/projetos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/apoio-profissional",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/apoio-profissional",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/compras",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/compras",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/contribuicao",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/contribuicao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equidade",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/equipe",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/equipe",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/grafo",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/impacto",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/linha-do-tempo",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/linha-do-tempo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/localizacao",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/localizacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/ods",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/ods",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "company",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "provider",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "government",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "individual",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/relatorios",
+   "persona": "admin",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/retratos",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/retratos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/riscos",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/riscos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/:id/situacao",
+   "persona": "osc",
+   "url": "/projetos/34499702-02c9-47c6-b5d0-55ad455ba92f/situacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/projetos/novo",
+   "persona": "osc",
+   "url": "/projetos/novo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao",
+   "persona": "osc",
+   "url": "/prontidao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "osc",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "company",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "provider",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "government",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "individual",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/prontidao/finalidades",
+   "persona": "admin",
+   "url": "/prontidao/finalidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "osc",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "company",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "provider",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "government",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "individual",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas",
+   "persona": "admin",
+   "url": "/propostas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/:id",
+   "persona": "osc",
+   "url": "/propostas/086216cd-5d50-42dd-8196-26bfedf6f026",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/:id",
+   "persona": "company",
+   "url": "/propostas/086216cd-5d50-42dd-8196-26bfedf6f026",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/:id",
+   "persona": "provider",
+   "url": "/propostas/4397d593-73a6-44bb-a25d-ace3c9d08a18",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "osc",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "company",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "provider",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "government",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "individual",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/propostas/nova",
+   "persona": "admin",
+   "url": "/propostas/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "osc",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "company",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "provider",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "government",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "individual",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos",
+   "persona": "admin",
+   "url": "/rascunhos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rascunhos/:id",
+   "persona": "osc",
+   "url": "/rascunhos/b42f84fc-beb6-4b11-8c35-3e49fcab3e60",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "osc",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "company",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "provider",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "government",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "individual",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/atividade",
+   "persona": "admin",
+   "url": "/rede/atividade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "osc",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "company",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "provider",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "government",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "individual",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/experiencias",
+   "persona": "admin",
+   "url": "/rede/experiencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "osc",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "company",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "provider",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "government",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "individual",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/grafo",
+   "persona": "admin",
+   "url": "/rede/grafo",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "osc",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "company",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "provider",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "government",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "individual",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/rede/relacoes",
+   "persona": "admin",
+   "url": "/rede/relacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "osc",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "company",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "provider",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "government",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "individual",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios",
+   "persona": "admin",
+   "url": "/relatorios",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "osc",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "company",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "provider",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "government",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "individual",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto",
+   "persona": "admin",
+   "url": "/relatorios-impacto",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto/:id",
+   "persona": "osc",
+   "url": "/relatorios-impacto/a8f1ca38-e8d6-4771-89eb-6d81c772b2a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/relatorios-impacto/:id",
+   "persona": "company",
+   "url": "/relatorios-impacto/a8f1ca38-e8d6-4771-89eb-6d81c772b2a9",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "osc",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "company",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "provider",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "government",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "individual",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/reputacao",
+   "persona": "admin",
+   "url": "/reputacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "osc",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "company",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "provider",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "government",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "individual",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/responsabilidade",
+   "persona": "admin",
+   "url": "/responsabilidade",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "osc",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "company",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "provider",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "government",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "individual",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes",
+   "persona": "admin",
+   "url": "/revisoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes/:id",
+   "persona": "osc",
+   "url": "/revisoes/403bffe1-59a2-4f47-a446-71f097291188",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/revisoes/:id",
+   "persona": "provider",
+   "url": "/revisoes/403bffe1-59a2-4f47-a446-71f097291188",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "osc",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "company",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "provider",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "government",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "individual",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/selos",
+   "persona": "admin",
+   "url": "/selos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "osc",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "company",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "provider",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "government",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "individual",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/settings/billing",
+   "persona": "admin",
+   "url": "/settings/billing",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "osc",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "company",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "provider",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "government",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "individual",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes",
+   "persona": "admin",
+   "url": "/solucoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "osc",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "company",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "provider",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "government",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "individual",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id",
+   "persona": "admin",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id/editar",
+   "persona": "osc",
+   "url": "/solucoes/8462efaa-4ab0-4691-ac00-56eecffad869/editar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/:id/editar",
+   "persona": "individual",
+   "url": "/solucoes/87137e62-7a40-48a5-88cd-31fd4e47670a/editar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "osc",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "company",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "provider",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "government",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "individual",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/comparar",
+   "persona": "admin",
+   "url": "/solucoes/comparar",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "osc",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "company",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "provider",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "government",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "individual",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/minhas",
+   "persona": "admin",
+   "url": "/solucoes/minhas",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/nova",
+   "persona": "osc",
+   "url": "/solucoes/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/nova",
+   "persona": "individual",
+   "url": "/solucoes/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/nova",
+   "persona": "company",
+   "url": "/solucoes/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/nova",
+   "persona": "government",
+   "url": "/solucoes/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/nova",
+   "persona": "provider",
+   "url": "/solucoes/nova",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "osc",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "company",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "provider",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "government",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "individual",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/pedidos",
+   "persona": "admin",
+   "url": "/solucoes/pedidos",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "osc",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "company",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "provider",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "government",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "individual",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/preferencias",
+   "persona": "admin",
+   "url": "/solucoes/preferencias",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "osc",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "company",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "provider",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "government",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "individual",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacao",
+   "persona": "admin",
+   "url": "/solucoes/replicacao",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "osc",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "company",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "provider",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "government",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "individual",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/solucoes/replicacoes",
+   "persona": "admin",
+   "url": "/solucoes/replicacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "osc",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "company",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "provider",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "government",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "individual",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/territorio/necessidades",
+   "persona": "admin",
+   "url": "/territorio/necessidades",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/tesouraria",
+   "persona": "admin",
+   "url": "/tesouraria",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/torre",
+   "persona": "company",
+   "url": "/torre",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/torre",
+   "persona": "individual",
+   "url": "/torre",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/torre-territorial",
+   "persona": "government",
+   "url": "/torre-territorial",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/torre-territorial",
+   "persona": "admin",
+   "url": "/torre-territorial",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "osc",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "company",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "provider",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "government",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "individual",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/verificacoes",
+   "persona": "admin",
+   "url": "/verificacoes",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "osc",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "company",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "provider",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "government",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "individual",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  },
+  {
+   "rota": "/vocabulario",
+   "persona": "admin",
+   "url": "/vocabulario",
+   "estado": "CHAMADA_RECUSADA",
+   "detalhe": "404 /v1/me/today",
+   "api_4xx": [
+    "404 /v1/me/today"
+   ]
+  }
+ ]
 }

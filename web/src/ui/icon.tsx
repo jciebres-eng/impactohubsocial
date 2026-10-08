@@ -96,7 +96,7 @@ export const ICONE_DA_ROTA: Record<string, NomeIcone> = {
   "/determinantes": "impact/ods", "/conquistas": "status/verified", "/campanha-gestao": "finance/funding",
   "/acordos": "documents/document", "/profissionais": "nav/users", "/revisoes": "compliance/audit",
   "/minhas-atividades": "nav/analytics", "/identidade": "admin/permissions", "/ia": "match/recommendation",
-  "/conta/seguranca": "nav/lock", "/conta": "system/user", "/conta/plano": "nav/finance",
+  "/conta/seguranca": "nav/lock", "/conta": "system/user", "/conta/plano": "nav/finance", "/conta/acesso": "nav/finance",
   "/notificacoes": "system/bell", "/ajuda": "nav/support", "/admin/central": "nav/support",
   "/admin/compliance": "nav/compliance", "/admin/identidade": "admin/permissions", "/admin/credenciais": "admin/permissions",
   "/admin/credenciais-profissionais": "admin/permissions", "/admin/honorarios": "nav/finance", "/admin/editais": "nav/opportunities",

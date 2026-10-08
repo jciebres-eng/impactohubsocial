@@ -86,7 +86,7 @@ class UpgradePathTests(unittest.TestCase):
         for table in ("ideas", "project_transitions", "diagnosis_versions", "document_assemblies",
                       "signature_providers", "encryption_keys",
                       "relationships", "proposals", "marketplace_listings", "impact_updates",
-                      "public_profiles", "plan_price_versions"):
+                      "public_profiles", "economic_rules"):
             self.assertIsNone(self.conn.one("SELECT 1 FROM pg_tables WHERE tablename = $1", table),
                               f"{table} não deveria existir na v0.12.1")
         self.assertIsNotNone(self.conn.one("SELECT 1 FROM pg_tables WHERE tablename = 'ods_goals'"))
@@ -151,7 +151,9 @@ class UpgradePathTests(unittest.TestCase):
                       "taxonomy_terms", "public_profiles", "handle_history", "professional_experiences",
                       "enforcement_actions", "territory_needs", "investment_intents", "recommendations",
                       "readiness_snapshots", "domain_events", "network_status_graph",
-                      "plan_price_versions", "subscription_prices", "price_change_notices",
+                      # v0.27.0 (ADR-341): plan_price_versions, subscription_prices e price_change_notices foram
+                      # REMOVIDAS pela 0067 — a atualização passa por elas e as retira; o que chega é a camada econômica.
+                      "economic_rules", "proponent_participations", "allocation_payouts", "payout_transfers", "economic_events",
                       # v0.17.0 — a camada econômica, legal e de pagamento
                       "programs", "program_status_graph", "program_calls", "program_projects",
                       "program_indicators", "program_needs", "value_event_types", "value_baselines",

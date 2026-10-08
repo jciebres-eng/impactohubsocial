@@ -14,7 +14,6 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
 from tests.support import Client, db_system, make_admin, new_account, server
-from tests.test_v0110_monetization import stripe_mode
 from tests.test_v0120_knowledge import staff, uniq
 
 PLACEHOLDER = {"token": "x" * 44, "code": "ABCDEFGHJKMN", "doc": "termos", "priority": "normal",
@@ -112,11 +111,9 @@ class CrossTenantIdor(unittest.TestCase):
         msgs = self.a.get(f"/v1/support/tickets/{self.ticket}").json["messages"]
         self.assertEqual([m["body"] for m in msgs], ["Mensagem privada da A."], "escrita cruzada vazou para o chamado")
 
-    def test_trial_and_demo_requests_are_scoped_to_the_organization(self):
-        r = self.a.post("/v1/help/trial-requests", {"users_count": 3, "purpose": "Avaliar o módulo de captação com a equipe.", "responsible": "Resp A"})
-        self.assertEqual(r.status, 201, r)
-        self.assertEqual([x["id"] for x in self.b.get("/v1/help/trial-requests").json["items"]], [])
-        self.assertIn(r.json["id"], [x["id"] for x in self.a.get("/v1/help/trial-requests").json["items"]])
+    def test_trial_requests_no_longer_exist(self):
+        # v0.27.0 (ADR-341): a solicitação de teste saiu com a assinatura.
+        self.assertIn(self.a.post("/v1/help/trial-requests", {"users_count": 3, "purpose": "Avaliar o módulo de captação com a equipe.", "responsible": "Resp A"}).status, (404, 405))
 
     def test_checklist_progress_and_feedback_are_per_user(self):
         scope = f"article:{uniq('scope')}"
@@ -188,7 +185,7 @@ class Concurrency(unittest.TestCase):
         adm1, s1 = make_admin()
         adm2, s2 = make_admin()
         b = adm1.post("/v1/admin/voucher-batches", {"campaign": "Corrida " + uuid.uuid4().hex[:5], "quantity": 1,
-                                                    "type": "percent_off", "percent": 10, "plan_key": "osc_premium", "max_redemptions": 1})
+                                                    "type": "grant_plan", "plan_key": "osc_premium", "duration_days": 30, "max_redemptions": 1})
         self.assertEqual(b.status, 201, b)
         self.assertEqual(adm2.post(f"/v1/admin/voucher-batches/{b.json['batch_id']}/action", {"action": "approve"}).status, 200)
         code = b.json["codes"][0]
@@ -201,10 +198,11 @@ class Concurrency(unittest.TestCase):
             self.assertEqual(d.scalar("SELECT count(*) FROM voucher_redemptions r JOIN vouchers v ON v.id = r.voucher_id WHERE v.batch_id = $1", b.json["batch_id"]), 1)
             self.assertEqual(d.scalar("SELECT redeemed_count FROM vouchers WHERE batch_id = $1", b.json["batch_id"]), 1)
 
-    def test_duplicate_webhook_delivered_concurrently_is_processed_once(self):
-        """Idempotência sob concorrência: o mesmo event.id entregue 4x em paralelo grava UMA linha (garantia do banco)."""
+    def test_the_subscription_webhook_no_longer_exists_and_records_nothing(self):
+        """v0.27.0 (ADR-341): o webhook de assinatura do Stripe saiu com a assinatura. Entregas — assinadas ou
+        não, em paralelo ou não — não encontram rota e não gravam nada em `billing_events`."""
         event = {"id": f"evt_{uuid.uuid4().hex[:14]}", "type": "customer.subscription.updated", "created": int(time.time()),
-                 "data": {"object": {"id": f"sub_{uuid.uuid4().hex[:10]}", "status": "active", "customer": f"cus_{uuid.uuid4().hex[:8]}"}}}
+                 "data": {"object": {"id": f"sub_{uuid.uuid4().hex[:10]}", "status": "active"}}}
         payload = json.dumps(event).encode()
 
         def deliver(_):
@@ -213,41 +211,25 @@ class Concurrency(unittest.TestCase):
             return Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json",
                                     headers={"Stripe-Signature": f"t={t},v1={sig}"})
 
-        with stripe_mode():
-            with ThreadPoolExecutor(max_workers=4) as pool:
-                results = list(pool.map(deliver, range(4)))
-        self.assertTrue(all(r.status == 200 for r in results), [(r.status, r.body[:80]) for r in results])
-        outcomes = sorted((r.json or {}).get("status", "?") for r in results)
-        self.assertEqual(outcomes.count("duplicate_ignored"), 3, outcomes)
-        with db_system() as d:
-            stored = d.scalar("SELECT count(*) FROM billing_events WHERE event_id = $1", event["id"])
-            processed = d.scalar("SELECT count(*) FROM billing_events WHERE event_id = $1 AND processed_at IS NOT NULL", event["id"])
-        self.assertEqual(stored, 1, "webhook duplicado concorrente gravou o evento mais de uma vez")
-        self.assertEqual(processed, 1)
-
-    def test_webhook_without_valid_signature_is_never_recorded(self):
-        event = {"id": f"evt_{uuid.uuid4().hex[:14]}", "type": "customer.subscription.updated", "created": int(time.time()),
-                 "data": {"object": {"id": f"sub_{uuid.uuid4().hex[:10]}", "status": "active"}}}
-        payload = json.dumps(event).encode()
-        with stripe_mode():
-            r = Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json",
-                                 headers={"Stripe-Signature": "t=1,v1=deadbeef"})
-        self.assertIn(r.status, (400, 403), r)
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            results = list(pool.map(deliver, range(4)))
+        self.assertTrue(all(r.status in (404, 405) for r in results), [(r.status, r.body[:80]) for r in results])
         with db_system() as d:
             self.assertEqual(d.scalar("SELECT count(*) FROM billing_events WHERE event_id = $1", event["id"]), 0)
 
-    def test_concurrent_trial_decision_is_applied_once(self):
+    def test_concurrent_license_grants_do_not_duplicate_the_audit(self):
+        """v0.27.0: no lugar da decisão de trial concorrente, a concessão administrativa concorrente —
+        cada chamada é um grant distinto e auditado; nenhum é perdido nem duplicado em silêncio."""
         org = new_account("osc")
-        req = org.post("/v1/help/trial-requests", {"users_count": 2, "purpose": "Avaliar com a equipe de projetos.", "responsible": "Resp"})
-        self.assertEqual(req.status, 201, req)
         adm, _ = make_admin()
         with ThreadPoolExecutor(max_workers=3) as pool:
-            results = list(pool.map(lambda _: adm.post(f"/v1/admin/hub/trial-requests/{req.json['id']}/decide",
-                                                       {"approve": True, "reason": "aprovado para piloto"}), range(3)))
+            results = list(pool.map(lambda i: adm.post(f"/v1/admin/organizations/{org.org_id}/license",
+                                                       {"plan_key": "osc_premium", "months": 1, "reference": f"CT-{i}"}), range(3)))
         ok = [r for r in results if r.status == 200]
-        self.assertEqual(len(ok), 1, f"decisão aplicada {len(ok)}x: {[r.status for r in results]}")
+        self.assertEqual(len(ok), 3, [r.status for r in results])
         with db_system() as d:
-            self.assertEqual(d.scalar("SELECT count(*) FROM org_trials WHERE org_id = $1", org.org_id), 1)
+            self.assertEqual(d.scalar("SELECT count(*) FROM entitlement_grants WHERE org_id = $1 AND source = 'license'", org.org_id), 3)
+            self.assertEqual(d.scalar("SELECT count(*) FROM audit_events WHERE action = 'billing.license_granted' AND org_id = $1", org.org_id), 3)
 
 
 # ------------------------------------------------------------------------------------------------ higiene de erros
@@ -374,7 +356,7 @@ class MailDelivery(unittest.TestCase):
         org = new_account("osc")
         with db_system() as d:
             d.scalar("SELECT app_notify($1,$2,'billing.notice',$3,$4,$5)", org.org_id, org.user["id"],
-                     "Aviso de cobrança de teste", "Corpo do aviso.", "/conta/plano")
+                     "Aviso de concessão de teste", "Corpo do aviso.", "/conta/acesso")
             # v0.21.0 — ESTE TESTE ERA DEPENDENTE DA HORA, e não sabia.
             #
             # A v0.20.0 criou a janela de silêncio (22:00–07:00): o gatilho `notification_fill`
@@ -439,52 +421,24 @@ class MoneyAndTime(unittest.TestCase):
     def setUpClass(cls):
         server()
 
-    def test_discount_is_always_integer_cents_within_bounds(self):
-        from impacto.services.monetization import _discount_amount
-        for base in (0, 1, 99, 9900, 123457, 10 ** 9):
-            for pct in (0, 1, 7, 33, 50, 99, 100, 150):
-                d = _discount_amount(base, "percent", pct)
-                self.assertIsInstance(d, int)
-                self.assertGreaterEqual(d, 0)
-                self.assertLessEqual(d, base, f"desconto maior que a base ({base}, {pct}%)")
-            self.assertEqual(_discount_amount(base, "amount", base + 1000), base, "desconto fixo não foi limitado à base")
-            self.assertEqual(_discount_amount(base, "amount", -50), 0)
+    def test_the_economic_layer_is_integer_cents_and_closes_to_the_cent(self):
+        """v0.27.0 (ADR-341): no lugar do desconto de assinatura, a aritmética da camada econômica —
+        inteiros em centavos, sem perda, para qualquer valor financiado."""
+        from impacto.trust.contract_rules import _bps
+        for gross in (1, 33_333, 999_999, 1_234_567, 10_000_000, 123_456_789):
+            fee = _bps(gross, 350)
+            part = _bps(gross, 150)
+            self.assertIsInstance(fee, int)
+            self.assertGreaterEqual(fee, 0)
+            self.assertLessEqual(fee + part, gross)
+            self.assertEqual(_bps(gross, 0), 0)
+            self.assertEqual(_bps(gross, None), 0)
+        self.assertEqual(_bps(10_000_000, 350) + _bps(10_000_000, 150), 500_000)
 
-    def test_annual_savings_is_never_invented(self):
-        from impacto.services.monetization import annual_savings
-        self.assertIsNone(annual_savings(None, 10000))
-        self.assertIsNone(annual_savings(1000, None))
-        self.assertIsNone(annual_savings(1000, 12000), "sem economia real não se anuncia economia")
-        self.assertEqual(annual_savings(1000, 10000), {"cents": 2000, "percent": 17})
-
-    def test_reserved_voucher_discount_is_visible_to_the_organization(self):
-        """Regressão: `pending_discounts` vinha SEMPRE vazio (JOIN com `vouchers`, invisível à organização por RLS),
-        então a página Plano não mostrava o desconto reservado mesmo após aplicar o voucher."""
-        adm1, _ = make_admin()
-        adm2, _ = make_admin()
-        b = adm1.post("/v1/admin/voucher-batches", {"campaign": "Visível " + uuid.uuid4().hex[:5], "quantity": 1,
-                                                    "type": "percent_off", "percent": 15, "plan_key": "osc_premium", "max_redemptions": 2})
-        self.assertEqual(b.status, 201, b)
-        self.assertEqual(adm2.post(f"/v1/admin/voucher-batches/{b.json['batch_id']}/action", {"action": "approve"}).status, 200)
-        org = new_account("osc")
-        self.assertTrue(org.post("/v1/vouchers/redeem", {"code": b.json["codes"][0]}).json["pending_discount"])
-        state = org.get("/v1/billing").json
-        self.assertEqual(len(state["pending_discounts"]), 1, "desconto reservado não aparece para a organização")
-        d = state["pending_discounts"][0]
-        self.assertEqual((d["type"], d["value"]["percent"], d["plan_key"]), ("percent_off", 15, "osc_premium"))
-        self.assertNotIn("code", str(state["pending_discounts"]).lower(), "código/hash do voucher não deve sair na resposta")
-        other = new_account("osc")
-        self.assertEqual(other.get("/v1/billing").json["pending_discounts"], [], "desconto de outra organização vazou")
-
-    def test_quote_refuses_to_sell_a_plan_without_price(self):
+    def test_there_is_no_quote_route_because_there_is_no_price(self):
         c = new_account("osc")
         r = c.post("/v1/billing/quote", {"plan_key": "osc_premium", "interval": "month"})
-        self.assertIn(r.status, (409, 200), r)
-        if r.status == 409:
-            self.assertEqual(r.json["code"], "price_not_defined")
-        else:
-            self.assertIsInstance(r.json["final_cents"], int)
-            self.assertGreaterEqual(r.json["final_cents"], 0)
+        self.assertIn(r.status, (404, 405), r)
 
     def test_timestamps_are_timezone_aware_iso_8601(self):
         c = new_account("osc")

@@ -120,13 +120,15 @@ class CommercialScreensMatchTheApiTests(unittest.TestCase):
         self.assertEqual(por_chave["gov_institutional"]["quote_floor_cents"], 350000)
         self.assertIsNone(por_chave["osc_basic"]["quote_floor_cents"],
                           "plano gratuito não tem piso de proposta")
-        self.assertEqual(r.json["pricing_version"], "2027.01")
+        self.assertEqual(r.json["pricing_version"], "2027.02")
+        self.assertIsNone(r.json["subscription"])
 
 
 class CommercialI18nTests(unittest.TestCase):
 
-    NAMESPACES = ("billing", "pricing", "subscription", "free_period", "commercial",
-                  "checkout", "invoice", "payment", "cancellation", "usage")
+    NAMESPACES = ("billing", "pricing", "free_period", "commercial", "invoice", "payment", "usage")
+    # v0.27.0 (ADR-341): `subscription`, `checkout` e `cancellation` saíram com a assinatura.
+    RETIRED = ("subscription", "checkout", "cancellation")
 
     def setUp(self):
         import json
@@ -137,6 +139,11 @@ class CommercialI18nTests(unittest.TestCase):
             for ns in self.NAMESPACES:
                 self.assertIn(ns, self.i18n["locales"][loc],
                               f"namespace {ns} não existe em {loc}")
+
+    def test_the_retired_namespaces_are_gone_in_every_language(self):
+        for loc in ("pt-BR", "en", "es"):
+            for ns in self.RETIRED:
+                self.assertNotIn(ns, self.i18n["locales"][loc], f"namespace de assinatura {ns} ainda existe em {loc}")
 
     def test_the_three_languages_have_exactly_the_same_keys(self):
         for ns in self.NAMESPACES:

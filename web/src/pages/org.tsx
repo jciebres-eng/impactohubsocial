@@ -348,154 +348,71 @@ const FEATURE: Record<string, string> = { "catalog.search": "Banco de oportunida
   "territory.analytics": "Análise territorial", sso: "Login corporativo (SSO)", "audit.export": "Exportação de auditoria", "api.access": "Acesso à API",
   "directory.listing": "Presença no diretório", "reviews.receive": "Receber solicitações", "signatures.sign": "Assinar com credencial", "calls.publish": "Publicar editais",
   "materials.publish": "Publicar materiais", "gov.data": "Dados do território" };
-const PAYMENT_ISSUE: Record<string, string> = { payment_failed: "Não conseguimos processar seu pagamento. Atualize o método de pagamento para manter o plano.", action_required: "Seu banco pede uma confirmação adicional para concluir o pagamento." };
-
-/** Preço do plano, com tudo o que precisa estar escrito ANTES de alguém pagar.
- *
- * Três coisas aqui são decisão de produto, não de estilo:
- *   · no anual, o equivalente mensal aparece SEMPRE junto do total à vista — mostrar só "US$ 14,99/mês" e cobrar
- *     US$ 179,88 de uma vez é o padrão escuro clássico;
- *   · o preço de entrada vem com a duração e com o preço de depois, na mesma frase;
- *   · a moeda vem do servidor. Formatar dólar como real seria o mesmo número com a moeda errada.
- */
-function PlanPrice({ plan, interval, free }: { plan: any; interval: "month" | "year"; free: boolean }) {
-  const q = plan.price_quotes?.[interval];
-  const cents = plan.prices?.[interval];
-  if (free) return <p className="plan-price">Gratuito</p>;
-  if (cents == null) return <p className="plan-price">Preço não divulgado</p>;
-  const cur = q?.currency || plan.currency || "BRL";
-  return (
-    <>
-      <p className="plan-price">
-        {interval === "year" && q?.monthly_equivalent_cents != null
-          ? <>{money(q.monthly_equivalent_cents, cur)} / mês</>
-          : <>{money(cents, cur)} / {interval === "year" ? "ano" : "mês"}</>}
-      </p>
-      {interval === "year" && <p className="muted">{q?.total_note || `Total de ${money(cents, cur)} por ano.`}</p>}
-      {q?.intro && <p className="muted">{q.intro.summary}</p>}
-      {q?.tax_note && <p className="muted small">{q.tax_note}</p>}
-      {q?.trial_days ? <p className="muted small">{q.trial_days} dias de teste com o produto completo.</p> : null}
-      {interval === "year" && plan.annual_savings && (
-        <p className="muted">Economia de {money(plan.annual_savings.cents, cur)} por ano ({plan.annual_savings.percent}%) em relação ao mensal.</p>
-      )}
-    </>
-  );
-}
-
-/** Plano e cobrança (/conta/plano e /settings/billing). Preço, desconto e trial são sempre calculados no servidor; aqui só exibimos e pedimos a ação. */
+/** Acesso e concessões (/conta/acesso). v0.27.0 (ADR-341): NÃO EXISTE ASSINATURA. A tela mostra de onde vem o
+ * direito da organização (núcleo gratuito por desenho, concessão, convênio, voucher, contrato), o que cada pacote
+ * libera e por qual via se obtém — e nunca um preço mensal, um checkout ou um cancelamento. */
 export function Plan() {
   const { me, reload: reloadMe } = useSession();
   const plans = useLoad<any>("/v1/plans");
   const billing = useLoad<any>("/v1/billing");
-  const [interval, setInterval_] = useState<"month" | "year">("month");
-  const [voucher, setVoucher] = useState("");
   const [code, setCode] = useState("");
   const [agr, setAgr] = useState("");
-  const [quote, setQuote] = useState<any>(null);
-  const [cancelOpen, setCancelOpen] = useState(false);
   const { busy, run } = useAction();
   const kind = me?.active_org?.kind;
-  const isOwner = me?.active_org?.role === "owner";
   const b = billing.data;
-  const sub = b?.subscription;
-  const trial = b?.trial;
   const refresh = async () => { await reloadMe(); billing.reload(); };
-  const doQuote = (planKey: string) => run(() => api.post("/v1/billing/quote", { plan_key: planKey, interval, voucher: undefined })).then((q: any) => q && setQuote(q));
-  const checkout = (planKey: string) => run(() => api.post("/v1/billing/checkout", { plan_key: planKey, interval, voucher: voucher || undefined }))
-    .then(async (r: any) => { if (r?.url) location.href = r.url; else if (r) { setQuote(null); await refresh(); } });
-  const hasPrice = (p: any) => p.prices && p.prices[interval] != null;
   const current = new Set<string>(me?.entitlements?.plans || []);
+  const PATH_LABEL: Record<string, string> = { core: "Núcleo — gratuito por desenho", contract_or_grant: "Por contrato, concessão, convênio ou voucher" };
   return (
     <>
-      <PageHead title="Plano e cobrança" sub={b ? `${b.tier_label}${me?.entitlements?.plan_names?.length ? " · " + me.entitlements.plan_names.join(" + ") : ""}` : undefined} />
+      <PageHead title="Acesso e concessões" sub={b ? `${b.tier_label}${me?.entitlements?.plan_names?.length ? " · " + me.entitlements.plan_names.join(" + ") : ""}` : undefined} />
       {/* A faixa lê `free_period_end` do servidor; esta tela não calcula prazo. */}
       <FreePeriodBanner />
-      {plans.data && !plans.data.billing_live && <p className="banner">Cobrança online em modo {plans.data.billing_provider === "sandbox" ? "de testes (nenhuma cobrança real)" : "não configurado"}. Contratações podem ser feitas por proposta comercial ou voucher.</p>}
-      {b?.notices?.map((n: any) => <p key={n.code} className={`banner banner-${n.level}`} role={n.level === "warning" ? "alert" : "status"}>{n.text}</p>)}
-      {sub?.payment_issue && <p className="banner banner-warning" role="alert">{PAYMENT_ISSUE[sub.payment_issue]} <Button variant="link" busy={busy} onClick={() => run(() => api.post("/v1/billing/portal")).then((r: any) => r?.url && (location.href = r.url))}>Atualizar pagamento</Button></p>}
+      {b?.notices?.map((n: any) => <p key={n.code} className={`banner banner-${n.level}`} role={n.level === "warn" ? "alert" : "status"}>{n.text}</p>)}
       <StateView loading={billing.loading} error={billing.error} onRetry={billing.reload}>
-        <Panel title="Sua assinatura">
+        <Panel title="De onde vem o seu acesso">
           <KeyValue items={[
             ["Nível de acesso", b?.tier_label],
-            ["Situação", sub ? <Pill status={sub.status} /> : trial?.active ? <Pill tone="good">Teste gratuito{trial.canceled ? " (cancelado)" : ""}</Pill> : <Pill tone="muted">Sem assinatura paga</Pill>],
-            trial?.active ? ["Teste até", `${date(trial.trial_end)} (${trial.days_left} ${trial.days_left === 1 ? "dia" : "dias"})`] : null,
-            sub?.interval ? ["Cobrança", sub.interval === "year" ? "Anual" : "Mensal"] : null,
-            sub?.amount_cents != null ? ["Valor", money(sub.amount_cents, sub.currency)] : null,
-            b?.next_charge ? ["Próxima cobrança", `${date(b.next_charge.at)}${b.next_charge.amount_cents != null ? " · " + money(b.next_charge.amount_cents, b.next_charge.currency) : ""}`] : null,
-            sub?.cancel_at_period_end ? ["Acesso até", date(sub.current_period_end)] : null,
+            ["Situação", b?.access ? <Pill tone={b.access.state === "GRANT_EXPIRING" ? "warn" : "good"}>{b.access.label}</Pill> : null],
+            b?.access?.free_period_end ? ["Concessão até", `${date(b.access.free_period_end)}${b.access.days_remaining != null ? ` (${b.access.days_remaining} ${b.access.days_remaining === 1 ? "dia" : "dias"})` : ""}`] : null,
+            ["Assinatura", "Não existe. O IMPACTO não cobra mensalidade."],
           ].filter(Boolean) as any} />
-          {b?.payment_method && <p className="muted">{b.payment_method}</p>}
-          <div className="actions">
-            {sub?.has_payment_customer && <Button variant="ghost" busy={busy} onClick={() => run(() => api.post("/v1/billing/portal")).then((r: any) => r?.url && (location.href = r.url))}>Método de pagamento e faturas</Button>}
-            {isOwner && ((sub && !sub.cancel_at_period_end) || (trial?.active && !trial.canceled && !sub)) && <Button variant="link" onClick={() => setCancelOpen(true)}>Cancelar</Button>}
-            {isOwner && (sub?.cancel_at_period_end || (trial?.canceled && trial.active)) && <Button variant="ink" busy={busy} onClick={() => run(() => api.post("/v1/billing/reactivate"), "Cancelamento desfeito").then(refresh)}>Manter minha assinatura</Button>}
-          </div>
-          {(b?.licenses?.length > 0 || b?.agreements?.length > 0 || b?.pending_discounts?.length > 0) && (
+          <p className="muted small">{b?.no_subscription}</p>
+          {(b?.licenses?.length > 0 || b?.agreements?.length > 0 || b?.contracts?.length > 0) && (
             <ul className="rows">
-              {b.licenses.map((l: any, i: number) => <li key={"l" + i}><span>Licença {label(l.source)}{l.plan_key ? ` · ${l.plan_key}` : ""}</span><span>{l.ends_at ? `até ${date(l.ends_at)}` : "sem prazo"}</span></li>)}
-              {b.agreements.map((a: any, i: number) => <li key={"a" + i}><span>Convênio: {a.name}</span><span>{a.discount_percent ? `${a.discount_percent}% de desconto` : "licença"} <Pill status={a.status} /></span></li>)}
-              {b.pending_discounts.map((d: any, i: number) => <li key={"d" + i}><span>Desconto de voucher aguardando a contratação</span><span>{d.type === "percent_off" ? `${d.value?.percent}%` : money(d.value?.amount_cents)}</span></li>)}
+              {b.licenses.map((l: any, i: number) => <li key={"l" + i}><span>Concessão {label(l.source)}{l.plan_key ? ` · ${l.plan_key}` : ""}{l.feature_key ? ` · ${FEATURE[l.feature_key] || l.feature_key}` : ""}</span><span>{l.ends_at ? `até ${date(l.ends_at)}` : "sem prazo"}</span></li>)}
+              {b.agreements.map((a: any, i: number) => <li key={"a" + i}><span>Convênio: {a.name}</span><span>{a.plan_key || "licença"} <Pill status={a.status} /></span></li>)}
+              {b.contracts.map((c: any) => <li key={c.id}><span>Contrato {c.plan_key} · {c.billing_frequency === "installment" ? `${c.installments}x` : "à vista"} · {money(c.amount_cents, c.currency)}{c.contract_ref ? ` · ${c.contract_ref}` : ""}</span><span>{c.revoked_at ? <Pill tone="muted">encerrado</Pill> : c.consent_status === "authorized" ? <Pill tone="good">cobrança autorizada</Pill> : <Pill tone="muted">acesso gratuito</Pill>}</span></li>)}
             </ul>
           )}
         </Panel>
       </StateView>
-      <div className="seg" role="group" aria-label="Periodicidade">
-        <button type="button" className={interval === "month" ? "on" : ""} aria-pressed={interval === "month"} onClick={() => { setInterval_("month"); setQuote(null); }}>Mensal</button>
-        <button type="button" className={interval === "year" ? "on" : ""} aria-pressed={interval === "year"} onClick={() => { setInterval_("year"); setQuote(null); }}>Anual</button>
-      </div>
+      <Panel title="Como se obtém acesso no IMPACTO" quiet>
+        <ul className="rows">{(b?.access_paths || plans.data?.access_paths || []).map((a: any) => (
+          <li key={a.key}><span><strong>{a.label}</strong><br /><span className="muted small">{a.how}</span></span></li>
+        ))}</ul>
+      </Panel>
       <StateView loading={plans.loading} error={plans.error} onRetry={plans.reload}>
         <div className="plans">
           {plans.data?.items.filter((p: any) => p.role === kind).map((p: any) => {
-            const cur = current.has(p.plan_key) || sub?.plan_key === p.plan_key;
-            const free = p.tier === "free" || p.price_cents === 0;
+            const cur = current.has(p.plan_key);
             return (
               <article key={p.plan_key} className={`plan${cur ? " plan-current" : ""}`}>
                 <h2>{p.name}</h2>
                 <p className="muted">{p.tier_label}</p>
-                <PlanPrice plan={p} interval={interval} free={free} />
+                <p className="plan-price">{p.tier === "free" ? "Gratuito, sem prazo" : p.quote_floor_cents ? `a partir de ${money(p.quote_floor_cents)} — sob proposta de contrato` : "Por contrato, concessão ou convênio"}</p>
+                <p className="muted small">{PATH_LABEL[p.obtained_by] || p.obtained_by}</p>
                 <ul>{p.features.map((f: string) => <li key={f}>{FEATURE[f] || f}</li>)}</ul>
                 <p className="muted">{Object.entries(p.limits).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v === null ? "ilimitado" : v}`).join(" · ")}</p>
-                {cur ? <Pill tone="good">Plano atual</Pill> : free ? null : p.tier === "gov" ? <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a> :
-                  <Button variant="primary" busy={busy} disabled={!p.available || !isOwner || !hasPrice(p)} onClick={() => sub ? run(() => api.post("/v1/billing/change-plan", { plan_key: p.plan_key, interval }), "Plano alterado").then(refresh) : doQuote(p.plan_key)}>{sub ? "Mudar para este plano" : "Assinar"}</Button>}
+                {cur ? <Pill tone="good">Pacote atual</Pill> : p.tier === "free" ? null : <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a>}
               </article>
             );
           })}
         </div>
       </StateView>
-      <Modal open={!!quote} title="Confirme sua assinatura" onClose={() => setQuote(null)} footer={<Button variant="primary" busy={busy} onClick={() => checkout(quote.plan_key)}>{quote?.trial?.active ? "Continuar para o pagamento" : "Ir para o pagamento"}</Button>}>
-        {quote && <>
-          <KeyValue items={[
-            ["Plano", `${quote.plan_name} · ${quote.interval === "year" ? "anual" : "mensal"}`],
-            ["Preço do plano", `${money(quote.base_cents, quote.currency)} por ${quote.interval === "year" ? "ano" : "mês"}`],
-            quote.interval === "year" && quote.price?.monthly_equivalent_cents
-              ? ["Equivalente mensal", money(quote.price.monthly_equivalent_cents, quote.currency)] : null,
-            quote.discount ? ["Desconto do voucher", quote.discount.kind === "percent" ? `${quote.discount.value}%` : money(quote.discount.value, quote.currency)] : null,
-            // A PRIMEIRA fatura e o preço do plano são linhas SEPARADAS: é o que impede a tela de mostrar
-            // "US$ 1,99" e a cobrança seguinte surpreender.
-            ["Primeira fatura", money(quote.first_cents ?? quote.final_cents, quote.currency)],
-            quote.price?.intro ? ["Depois do período de entrada", `${money(quote.price.intro.then_amount_cents, quote.currency)} por ${quote.interval === "year" ? "ano" : "mês"}`] : null,
-            ["Quando", quote.charge_now ? "ao confirmar o pagamento" : date(quote.first_charge_at)],
-            quote.price?.tax_note ? ["Imposto", quote.price.tax_note] : null,
-          ].filter(Boolean) as any} />
-          {quote.note && <p className="muted">{quote.note}</p>}
-          {quote.trial?.active && <p>Você continua no teste gratuito. Nenhuma cobrança será feita antes de {date(quote.first_charge_at)}, e você pode cancelar antes dessa data.</p>}
-          {quote.price && !quote.provider_configured && (
-            <p className="banner banner-warning" role="alert">
-              Este preço ainda não está publicado no provedor de pagamento, então a contratação online pode não
-              concluir. Fale com a equipe se isso acontecer.
-            </p>
-          )}
-          <Field label="Tenho um voucher"><Input value={voucher} onChange={(v) => setVoucher(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
-          <p className="muted">Você pode cancelar quando quiser. Os dados do cartão são tratados pelo provedor de pagamento; a plataforma não os armazena.</p>
-        </>}
-      </Modal>
-      <Modal open={cancelOpen} title="Cancelar assinatura" onClose={() => setCancelOpen(false)} footer={<><Button variant="ghost" onClick={() => setCancelOpen(false)}>Voltar</Button><Button variant="danger" busy={busy} onClick={() => run(() => api.post("/v1/billing/cancel"), "Cancelamento confirmado").then((r) => { if (r) { setCancelOpen(false); refresh(); } })}>Confirmar cancelamento</Button></>}>
-        {trial?.active && !sub ? <p>Você continuará com acesso FULL até {date(trial.trial_end)}. Nenhuma cobrança será realizada. Depois disso, sua conta passa para o plano gratuito.</p>
-          : <p>Você continuará tendo acesso até {date(sub?.current_period_end)}. Depois disso, sua conta passa para o plano gratuito. Seus dados e seu histórico financeiro não serão apagados.</p>}
-      </Modal>
       <div className="split">
         <Panel title="Tenho um voucher">
-          <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/vouchers/redeem", { code }), "Voucher aplicado").then(async (r) => { if (r) { setCode(""); await refresh(); } }); }}>
+          <form className="inline-form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/vouchers/redeem", { code }), "Concessão aplicada").then(async (r) => { if (r) { setCode(""); await refresh(); } }); }}>
             <Field label="Código"><Input value={code} onChange={(v) => setCode(v.toUpperCase())} placeholder="XXXX-XXXX-XXXX" /></Field>
             <Button type="submit" variant="ink" busy={busy}>Aplicar</Button>
           </form>
@@ -507,9 +424,9 @@ export function Plan() {
           </form>
         </Panel>
       </div>
-      <Panel title="Histórico de faturas">
-        <ul className="rows">{b?.invoices.map((i: any) => <li key={i.id}><span>{i.description || "Assinatura"} · {date(i.created_at)}</span><span>{money(i.amount_cents)} <Pill status={i.status} />{i.hosted_url && <> <a href={i.hosted_url} target="_blank" rel="noopener noreferrer">Ver fatura</a></>}</span></li>)}
-          {b?.invoices.length === 0 && <li className="muted">Nenhuma fatura.</li>}</ul>
+      <Panel title="Faturas de contrato">
+        <ul className="rows">{b?.invoices.map((i: any) => <li key={i.id}><span>{i.description || "Contrato"} · {date(i.created_at)}</span><span>{money(i.amount_cents)} <Pill status={i.status} />{i.hosted_url && <> <a href={i.hosted_url} target="_blank" rel="noopener noreferrer">Ver fatura</a></>}</span></li>)}
+          {b?.invoices.length === 0 && <li className="muted">Nenhuma fatura. Não existe assinatura: faturas nascem só de contrato avulso ou parcelado.</li>}</ul>
       </Panel>
     </>
   );
@@ -534,7 +451,7 @@ export function Fiscal() {
           <Button type="submit" variant="ink" busy={busy}>Salvar</Button>
         </form>
       </Panel>
-      {!can("fiscal.estimates") ? <Panel title="Estimativas"><p>Disponível no plano Empresa Impacto ou superior.</p><Button variant="primary" onClick={() => navigate("/conta/plano")}>Ver planos</Button></Panel> : (
+      {!can("fiscal.estimates") ? <Panel title="Estimativas"><p>Disponível por concessão, convênio ou contrato (pacote Empresa Impacto ou superior). Não existe assinatura.</p><Button variant="primary" onClick={() => navigate("/conta/acesso")}>Ver acesso e concessões</Button></Panel> : (
         <StateView loading={est.loading} error={est.error} onRetry={est.reload}>
           {est.data && (
             <>

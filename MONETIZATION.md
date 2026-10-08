@@ -16,7 +16,7 @@ fundamenta.
 
 | # | Chave | Motor | Situação |
 |---|---|---|---|
-| 1 | `saas.institutional.funder` | `saas_institutional` | ⚠️ `review_required` |
+| 1 | `saas.institutional.funder` | `saas_institutional` | ⛔ `refused` (v0.27.0, ADR-341: não existe assinatura) |
 | 2 | `b2g.territorial_governance` | `b2g` | ⛔ `refused` |
 | 3 | `enterprise.esg_portfolio` | `enterprise` | ⚠️ `review_required` |
 | 4 | `implementation.setup` | `implementation` | ⚠️ `review_required` |
@@ -27,8 +27,9 @@ fundamenta.
 | 8 | `data.territorial_intelligence` | `data_intelligence` | ⛔ `refused` |
 | 3 | `contract.platform_service_fee` | `enterprise` | ⚠️ `review_required` (v0.26.0) |
 
-**Zero verdes, e nenhuma ativa** (`active = false` nas dez). Seis amarelas (falta parecer), quatro
-vermelhas (recusadas). O cartão legal de cada uma, com texto literal de fonte oficial e data de consulta,
+**Zero verdes, e nenhuma ativa** (`active = false` nas dez). Cinco amarelas (falta parecer), cinco
+vermelhas (recusadas — a quinta, `saas.institutional.funder`, por decisão comercial do proprietário na
+v0.27.0: a assinatura saiu do modelo econômico, ADR-341). O cartão legal de cada uma, com texto literal de fonte oficial e data de consulta,
 está em `MONETIZATION_LEGAL_MATRIX.md`.
 
 Dois campos são **NOT NULL** e decidem se a regra entra no banco:
@@ -39,7 +40,7 @@ Dois campos são **NOT NULL** e decidem se a regra entra no banco:
 "Não venda 20 funcionalidades por R$ 99. Venda um problema caro resolvido" deixou de ser conselho e
 passou a ser restrição de esquema.
 
-## 3. As quatro recusas, e por que são recusas e não pendências
+## 3. As cinco recusas, e por que são recusas e não pendências (a quinta, a assinatura, está no §9)
 
 ### `success_fee` e `marketplace_take_rate` — recusa de arquitetura
 
@@ -117,9 +118,11 @@ recusa do motor `b2g` no §3.
 
 ## 7. Preço
 
-Nenhum preço de regra de monetização está declarado no sistema, e nenhum está embutido no código. O
-preço de plano vive em `plan_price_versions` com vigência e motivo; o preço institucional é decisão
-comercial do proprietário.
+Nenhum preço de regra de monetização está declarado no sistema, e nenhum está embutido no código.
+v0.27.0 (ADR-341): **não há preço de plano** — não existe assinatura. Os percentuais da camada econômica
+(3,5% + 1,5%) vivem em `economic_rules`, versionados (Pricing Version 2027.02) e congelados em cada
+acordo; o valor de um contrato avulso/parcelado é decidido por quem tem alçada (`finance.approve`), com
+motivo e auditoria, nunca pelo cliente.
 
 `set_rule()` preserva a mensagem do portão: `InsufficientPrivilege` e `IntegrityError` viram
 `ApiError(422, "monetization_gate", ...)` com a primeira linha da exceção, porque o tratador global
@@ -151,3 +154,17 @@ substitui 403 por uma mensagem genérica — e a mensagem genérica esconderia j
 A prova: `backend/tests/test_v0260_contract_rules.py` (R$ 100.000 com 3% → R$ 100.000 ao projeto e
 R$ 3.000 de taxa registrada; no modo descontado 97.000 / 3.000; cobrança própria ao financiador só com
 a regra ativa; mudança de contrato gera versão nova e invalida a aprovação anterior).
+
+## 9. O que a v0.27.0 mudou (ADR-341): não existe mais assinatura
+
+A primeira regra do catálogo, `saas.institutional.funder` (SaaS institucional para quem financia, por
+mensalidade), foi **recusada** com carta vermelha — não por impedimento jurídico, mas por decisão de
+produto: o IMPACTO não vende acesso. O núcleo é gratuito por desenho; pacotes além dele vêm de contrato,
+concessão, convênio ou voucher; a receita da plataforma nasce da **camada econômica da operação
+financiada** (§8 — agora com percentual do catálogo `economic_rules`, 350 bps, congelado no acordo, e
+mais 150 bps de participação de autoria ao proponente quando elegível) e de **contratos avulsos ou
+parcelados**. A arquitetura de assinatura (tabelas, rotas, job, telas, textos) foi inventariada
+ocorrência a ocorrência e removida, migrada ou aposentada — `docs/execution/SUBSCRIPTION_INVENTORY.md`.
+O que a v0.26.0 provava com 3% fixado no contrato continua valendo com 3,5% vindo do catálogo:
+`test_v0260_contract_rules.py` (atualizado) e `test_v0270_economy.py`.
+

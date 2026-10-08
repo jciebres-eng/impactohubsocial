@@ -30,8 +30,10 @@ CATALOG = {
     "PROJECT.PUBLISHED": "project", "APPLICATION.SUBMITTED": "application", "APPLICATION.DECIDED": "application",
     "COURSE.COMPLETED": "course", "CERTIFICATE.ISSUED": "certificate", "CERTIFICATE.REVOKED": "certificate",
     "EVENT.REGISTRATION.CREATED": "event", "SUPPORT.TICKET.CREATED": "support_ticket",
-    "SUBSCRIPTION.CREATED": "subscription", "SUBSCRIPTION.CANCELED": "subscription",
-    "TRIAL.STARTED": "trial", "TRIAL.ENDED": "trial",
+    # v0.27.0 (ADR-341): SUBSCRIPTION.* e TRIAL.* saíram do catálogo — não existe assinatura. No lugar,
+    # os fatos da camada econômica da operação financiada.
+    "OPERATION.ACTIVATED": "signed_agreement", "OPERATION.SETTLED": "signed_agreement",
+    "PAYOUT.CONFIRMED": "payout",
     "PAYMENT.CONFIRMED": "payment", "PAYMENT.FAILED": "payment",
     "LICENSE.GRANTED": "license", "LICENSE.REVOKED": "license",
     "INTEGRATION.JOB.FAILED": "integration_job", "INTEGRATION.TEST": "integration_test",

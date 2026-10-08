@@ -1,5 +1,6 @@
-"""v0.11.0 — convênios (entrada por código), trial/licenças administrativas, preços de planos e visão de cobrança por organização.
-Toda intervenção administrativa exige MOTIVO e gera auditoria. O cliente nunca define plano, preço, desconto ou direito."""
+"""Convênios (entrada por código), licenças administrativas e visão de acesso por organização.
+Toda intervenção administrativa exige MOTIVO e gera auditoria. O cliente nunca define pacote, valor ou direito.
+v0.27.0 (ADR-341): saíram o trial administrativo e o preço de plano — não existe assinatura."""
 from __future__ import annotations
 
 import secrets
@@ -30,12 +31,12 @@ def join(ctx: Ctx, body: S.AgreementJoinIn):
     with ctx.system_tx() as c:
         res = mon.join_agreement(c, code_hash=code_hash(ctx.settings.voucher_hmac_key, "agr:" + body.code), org_id=ctx.org_id, user_id=ctx.user_id,
                                  user_email=p.email, email_verified=p.email_verified, org_kind=p.org_kind)
-        ctx.audit(c, "agreement.joined", "agreement", res["agreement_id"], {"plan": res["plan_key"], "discount": res["discount_percent"]})
-    return {"joined": True, **res, "note": "Licença e/ou desconto do convênio aplicados. Convênios não alteram compatibilidade, ranking ou posição no diretório."}
+        ctx.audit(c, "agreement.joined", "agreement", res["agreement_id"], {"plan": res["plan_key"]})
+    return {"joined": True, **res, "note": "Licença do convênio aplicada. Convênios não alteram compatibilidade, ranking ou posição no diretório."}
 
 
 # ------------------------------------------------------------------------------------------------ administração: visão de cobrança
-@A("GET", "/v1/admin/billing/organizations/{org_id}", permission="billing.read", summary="Visão de suporte: assinatura, trial, licenças, descontos, faturas e eventos da organização")
+@A("GET", "/v1/admin/billing/organizations/{org_id}", permission="billing.read", summary="Visão de suporte: acesso, licenças, convênios, contratos, vouchers e faturas da organização")
 def org_billing(ctx: Ctx):
     oid = ctx.path["org_id"]
     with ctx.tx(readonly=True) as c:
@@ -43,33 +44,16 @@ def org_billing(ctx: Ctx):
         if not org:
             raise not_found("Organização")
         ent = __import__("impacto.services.entitlements", fromlist=["effective"]).effective(c, oid, org["kind"])
+        from ..services import free_period as FP
         return {"organization": org, "entitlements": ent,
-                "subscriptions": c.query("SELECT id::text AS id, plan_key, status, provider, interval, amount_cents, discount, trial_end, current_period_end, cancel_at_period_end,"
-                                         " canceled_at, payment_issue, origin, created_at FROM subscriptions WHERE org_id = $1 ORDER BY created_at DESC", oid),
-                "trial": c.one("SELECT plan_key, source, status, trial_start, trial_end, canceled_at FROM org_trials WHERE org_id = $1", oid),
+                "access": FP.state(c, oid),
+                "contracts": c.query("SELECT a.id::text AS id, a.plan_key, a.billing_frequency, a.payment_method, a.consent_status, a.accepted_at, a.revoked_at,"
+                                     " o.amount_cents, o.currency, o.installments, o.contract_ref FROM offer_acceptances a JOIN commercial_offers o ON o.id = a.offer_id"
+                                     " WHERE a.org_id = $1 ORDER BY a.accepted_at DESC", oid),
                 "grants": c.query("SELECT id::text AS id, plan_key, feature_key, source, reason, starts_at, ends_at, revoked_at, revoke_reason FROM entitlement_grants WHERE org_id = $1 ORDER BY created_at DESC", oid),
                 "voucher_redemptions": c.query("SELECT r.status, r.redeemed_at, v.type, v.code_hint FROM voucher_redemptions r JOIN vouchers v ON v.id = r.voucher_id WHERE r.org_id = $1 ORDER BY r.redeemed_at DESC", oid),
                 "agreements": c.query("SELECT a.id::text AS id, a.name, m.status, m.joined_at FROM agreement_members m JOIN agreements a ON a.id = m.agreement_id WHERE m.org_id = $1", oid),
                 "invoices": c.query("SELECT id::text AS id, amount_cents, status, paid_at, created_at FROM invoices WHERE org_id = $1 ORDER BY created_at DESC LIMIT 50", oid)}
-
-
-class TrialGrantIn(S.In):
-    days: Annotated[int, Field(ge=1, le=90)] = 14
-    reason: Annotated[str, Field(min_length=5, max_length=500)]
-
-
-@A("POST", "/v1/admin/organizations/{org_id}/trial", permission="billing.write", body=TrialGrantIn, status=201, summary="Concede trial a uma organização que ainda não o teve (motivo obrigatório)")
-def grant_trial(ctx: Ctx, body: TrialGrantIn):
-    oid = ctx.path["org_id"]
-    with ctx.tx() as c:
-        org = c.one("SELECT kind FROM organizations WHERE id = $1", oid)
-        if not org:
-            raise not_found("Organização")
-        res = mon.start_trial(c, ctx.settings, org_id=oid, org_kind=org["kind"], email=None, cnpj=None, user_id=ctx.user_id, source="admin", days=body.days, force=True)
-        if not res["started"]:
-            raise ApiError(409, res["reason"], "Não foi possível conceder o trial (já utilizado ou sem plano de trial para este tipo de organização)")
-        ctx.audit(c, "billing.admin_trial", "organization", oid, {"days": body.days, "reason": body.reason}, org_id=oid)
-    return res
 
 
 class RevokeIn(S.In):
@@ -89,28 +73,6 @@ def revoke_grant(ctx: Ctx, body: RevokeIn):
     return {"id": g["id"], "revoked": True}
 
 
-class PriceIn(S.In):
-    interval: Literal["month", "year"]
-    amount_cents: S.Cents | None = None       # null = voltar a "não definido"
-    reason: Annotated[str, Field(min_length=5, max_length=500)]
-
-
-@A("PUT", "/v1/admin/plans/{plan_key}/price", permission="finance.approve", body=PriceIn, summary="Define/limpa o preço mensal ou anual de um plano (auditado; nada é inventado — o proprietário decide)")
-def set_price(ctx: Ctx, body: PriceIn):
-    pk = ctx.path["plan_key"]
-    with ctx.tx() as c:
-        plan = c.one("SELECT tier, interval FROM plans WHERE plan_key = $1", pk)
-        if not plan:
-            raise not_found("Plano")
-        if plan["tier"] in ("free", "gov") or plan["interval"] == "custom":
-            raise ApiError(409, "not_priceable", "Plano gratuito ou sob contrato não tem preço de tabela")
-        c.run("INSERT INTO plan_prices(plan_key, interval, amount_cents) VALUES ($1,$2,$3) ON CONFLICT (plan_key, interval) DO UPDATE SET amount_cents = EXCLUDED.amount_cents, updated_at = now()",
-              pk, body.interval, body.amount_cents)
-        ctx.audit(c, "billing.price_set", "plan", pk, {"interval": body.interval, "amount_cents": body.amount_cents, "reason": body.reason}, org_id=None)
-    return {"plan_key": pk, "interval": body.interval, "amount_cents": body.amount_cents,
-            "note": "Preços já cobrados em assinaturas existentes não mudam; o ID de preço do provedor (STRIPE_PRICE_*) precisa corresponder."}
-
-
 # ------------------------------------------------------------------------------------------------ administração: convênios
 class AgreementIn(S.In):
     name: Annotated[str, Field(min_length=2, max_length=200)]
@@ -128,8 +90,10 @@ class AgreementIn(S.In):
 @A("POST", "/v1/admin/agreements", body=AgreementIn, status=201,
    summary="Cria convênio (rascunho). O código é exibido UMA vez; a ativação exige outro administrador.")
 def create_agreement(ctx: Ctx, body: AgreementIn):
-    if not (body.plan_key or body.discount_percent):
-        raise ApiError(422, "validation_error", "Informe plan_key (licença) e/ou discount_percent (desconto)")
+    if not body.plan_key:
+        raise ApiError(422, "validation_error", "Informe plan_key (licença). Desconto de convênio foi aposentado: não há assinatura para descontar (ADR-341)")
+    if body.discount_percent:
+        raise ApiError(422, "discount_retired", "Desconto percentual de convênio foi aposentado: não existe assinatura (ADR-341)")
     raw = "".join(secrets.choice(ALPHABET) for _ in range(12))
     code = f"{raw[:4]}-{raw[4:8]}-{raw[8:]}"
     with ctx.tx() as c:

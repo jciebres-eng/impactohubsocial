@@ -302,6 +302,41 @@ ENGINES: tuple[Engine, ...] = (
         never="Não decide nada: aponta para a tela do registro. Não mostra saldo (não existe). Governo só vê "
               "projetos publicados e nunca linha a linha abaixo de 3 projetos (k-anonimato); risco de projeto "
               "sai como contagem, o registro é da OSC."),
+    # ------------------------------------------------------------------ camada econômica (v0.27.0, ADR-341)
+    Engine(
+        key="economic_layer", name="Camada econômica da operação (matriz, repasses, participação, quitação)",
+        module="impacto.trust.economy", entrypoint="instruct_payouts", kind="deterministic",
+        version=None, group="econômico",
+        routes=("/v1/signed-agreements/{agreement_id}/payouts", "/v1/payouts/{payout_id}/transfers",
+                "/v1/payout-transfers/{transfer_id}/confirm", "/v1/payout-transfers/{transfer_id}/reject",
+                "/v1/payouts/{payout_id}/reconcile", "/v1/projects/{project_id}/participations",
+                "/v1/participations", "/v1/participations/{participation_id}/accept", "/v1/economic-rules",
+                "/v1/signed-agreements/{agreement_id}/value"),
+        produces="Do acordo de financiamento vigente: uma instrução de repasse por linha da matriz (projeto, plataforma 3,5%, "
+                 "proponente 1,5%) com a chave PIX informada no contrato; registro da transferência por quem paga, confirmação "
+                 "por quem recebe, conciliação com nota; participação de autoria com estados e aceite pelo proponente; "
+                 "operação quitada quando toda entrega está aceita e todo repasse devido confirmado; livro econômico "
+                 "append-only (quem → pagou → quem → quanto → por quê → regra → versão).",
+        never="Não custodia nem move dinheiro: o aporte é único e direcionado pelo financiador (ADR-284). Nada vira pago por "
+              "existir registro — só quem recebe confirma. Percentual nunca em código: catálogo versionado congelado no acordo. "
+              "Participação nunca automática. Reconhecimento nunca por pagar a plataforma."),
+    Engine(
+        key="master_tower", name="Torre MASTER / financeira do proprietário",
+        module="impacto.economics.master_tower", entrypoint="master", kind="deterministic",
+        version=None, group="econômico",
+        routes=("/v1/control-tower/master",),
+        produces="GMV × camada da plataforma (registrado, devido, pago) por mês; participação; marketplace sem percentual; "
+                 "uso de IA/API; contratos avulsos; a receber; banco; captura de valor (razão medida ou NÃO MEDIDO).",
+        never="Não inventa saldo: banco é 'DADO FINANCEIRO NÃO CONECTADO'; GMV nunca se soma à receita; razão de captura "
+              "sem denominador é NÃO MEDIDO, não zero; não há MRR porque não há assinatura."),
+    Engine(
+        key="today_cards", name="Para você hoje (cartões e contadores do menu)",
+        module="impacto.network.today", entrypoint="today", kind="deterministic",
+        version=None, group="rede",
+        routes=("/v1/me/today",),
+        produces="Cartões derivados de registros reais (pendências, obrigações de acordo, participações a aceitar, repasses a "
+                 "confirmar, transferências a registrar, recomendações, trajetória) e contadores por tela para o menu dinâmico.",
+        never="Não cria estado novo. Não vende nada: nenhum cartão de plano, assinatura ou upgrade. Não conta no navegador."),
     Engine(
         key="impacto_ready", name="Estado verificável 'Projeto IMPACTO Ready'",
         module="impacto.network.control_tower", entrypoint="ready", kind="deterministic",

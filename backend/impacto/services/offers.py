@@ -15,22 +15,21 @@ Enquanto for um aceite só, o fim da gratuidade vira cobrança por omissão. Aqu
 E a invariante mora no banco (gatilho `charge_requires_authorization`, migração 0043), não aqui:
 um módulo pode ser contornado por outro caminho de escrita; um gatilho, não.
 
-PARCELAMENTO NÃO É RECORRÊNCIA
-
-São três `billing_frequency` distintos e nenhum é sinônimo do outro:
+PARCELAMENTO NÃO É RECORRÊNCIA — E RECORRÊNCIA NÃO EXISTE MAIS (v0.27.0, ADR-341)
 
     one_time     cobrança única;
-    installment  UMA dívida dividida em N parcelas — acaba quando a última cai;
-    recurring    cobrança que se repete enquanto a assinatura existir — não acaba sozinha.
+    installment  UMA dívida dividida em N parcelas — acaba quando a última cai.
 
-Confundir os dois últimos é o que faz alguém achar que comprou em 12x e descobrir que assinou
-12 meses.
+`recurring` foi retirado do modelo: o IMPACTO não vende assinatura. A oferta comercial passou a ser a
+proposta de um CONTRATO (implantação, integração, módulo institucional, inteligência territorial) cujo
+valor é decidido por quem tem alçada financeira, com motivo e auditoria — nunca lido de um catálogo de
+mensalidades (que não existe) e nunca enviado pela organização que vai pagar.
 """
 from __future__ import annotations
 
 from ..http import ApiError
 
-FREQUENCIES = ("one_time", "installment", "recurring")
+FREQUENCIES = ("one_time", "installment")
 METHODS = ("card", "boleto", "pix", "manual")
 CONSENT = ("free_access", "authorized")
 
@@ -76,48 +75,34 @@ def validate_payment_terms(c, *, org_id: str, payment_method: str, billing_frequ
                            "cadastrado. Para pessoa física, use cartão ou boleto à vista.")
     elif installments is not None:
         raise ApiError(422, "installments_not_applicable",
-                       "Número de parcelas só se aplica a parcelamento. Recorrência não é "
-                       "parcelamento: ela se repete em vez de terminar.")
-
-    if billing_frequency == "recurring" and payment_method == "boleto":
-        # Boleto não debita sozinho — alguém precisa pagar cada um. Chamar isso de recorrência
-        # faria a plataforma prometer um automatismo que o meio de pagamento não tem.
-        raise ApiError(422, "boleto_not_recurring",
-                       "Boleto não tem débito automático. Para cobrança recorrente use cartão; "
-                       "para pagar em boleto, escolha cobrança única ou parcelamento.")
+                       "Número de parcelas só se aplica a parcelamento.")
 
 
-def create(c, *, org_id: str, plan_key: str, interval: str | None, billing_frequency: str,
-           payment_method: str, installments: int | None = None,
-           free_period_months: int | None = None, created_by: str | None = None,
-           expires_at=None) -> dict:
-    """Monta uma oferta a partir do CATÁLOGO. O valor nunca vem do chamador.
+def create(c, *, org_id: str, plan_key: str, amount_cents: int, amount_reason: str, billing_frequency: str,
+           payment_method: str, installments: int | None = None, free_period_months: int | None = None,
+           created_by: str | None = None, expires_at=None, contract_ref: str | None = None,
+           currency: str = "BRL") -> dict:
+    """Monta a proposta de CONTRATO para uma organização. O valor vem de quem tem alçada, com motivo.
 
-    Receber `amount_cents` como argumento seria abrir a porta para uma oferta com preço que não
-    existe em `plan_price_versions` — e aí o catálogo deixaria de ser a fonte única no exato
-    momento em que ele mais importa, que é quando alguém vai pagar.
+    A organização que vai pagar nunca chama esta função (a rota é administrativa, permissão
+    `finance.approve`): aceitar `amount_cents` do cliente seria deixar o cliente escrever o próprio
+    preço. O pacote (`plan_key`) diz QUAIS capacidades o contrato libera ao ser aceito.
     """
     validate_payment_terms(c, org_id=org_id, payment_method=payment_method,
                            billing_frequency=billing_frequency, installments=installments)
-    iv = interval or "month"
-    preco = c.one(
-        "SELECT id::text AS id, amount_cents, currency FROM plan_price_versions"
-        " WHERE plan_key = $1 AND interval = $2 AND effective_until IS NULL", plan_key, iv)
-    if not preco:
-        raise ApiError(409, "price_not_defined",
-                       "Este plano não tem preço de tabela para contratação online. "
-                       "Solicite proposta comercial.")
+    if amount_cents is None or amount_cents < 0:
+        raise ApiError(422, "amount_required", "Informe o valor do contrato (centavos, >= 0).")
+    if not c.one("SELECT 1 FROM plans WHERE plan_key = $1 AND active", plan_key):
+        raise ApiError(404, "plan_not_found", "Pacote de capacidades não encontrado.")
     row = c.one(
-        "INSERT INTO commercial_offers(org_id, pricing_version, plan_key, price_version_id,"
-        " currency, amount_cents, billing_frequency, interval, installments, payment_method,"
+        "INSERT INTO commercial_offers(org_id, pricing_version, plan_key,"
+        " currency, amount_cents, amount_reason, contract_ref, billing_frequency, installments, payment_method,"
         " free_period_months, created_by, expires_at)"
         " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)"
         " RETURNING id::text, amount_cents, currency, billing_frequency, payment_method,"
-        "           installments, free_period_months, pricing_version",
-        org_id, _pricing_version(), plan_key, preco["id"], preco["currency"],
-        preco["amount_cents"], billing_frequency,
-        iv if billing_frequency == "recurring" else None,
-        installments, payment_method, free_period_months, created_by, expires_at)
+        "           installments, free_period_months, pricing_version, contract_ref",
+        org_id, _pricing_version(), plan_key, currency, amount_cents, amount_reason, contract_ref,
+        billing_frequency, installments, payment_method, free_period_months, created_by, expires_at)
     return dict(row)
 
 
@@ -139,7 +124,7 @@ def accept(c, settings, *, offer_id: str, org_id: str, user_id: str, consent_sta
                        "O aceite é de acesso gratuito (free_access) ou de autorização de "
                        "cobrança (authorized).")
     of = c.one(
-        "SELECT id::text AS id, org_id::text AS org_id, plan_key, price_version_id::text AS pv,"
+        "SELECT id::text AS id, org_id::text AS org_id, plan_key,"
         " free_period_id::text AS fp, billing_frequency, payment_method, pricing_version, status,"
         " expires_at FROM commercial_offers WHERE id = $1", offer_id)
     if not of or of["org_id"] != org_id:
@@ -160,15 +145,34 @@ def accept(c, settings, *, offer_id: str, org_id: str, user_id: str, consent_sta
 
     row = c.one(
         "INSERT INTO offer_acceptances(offer_id, org_id, pricing_version, plan_key,"
-        " price_version_id, free_period_id, billing_frequency, payment_method, terms_version,"
+        " free_period_id, billing_frequency, payment_method, terms_version,"
         " privacy_version, commercial_terms_version, accepted_by, ip, user_agent, consent_status)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)"
         " RETURNING id::text, accepted_at, consent_status",
-        offer_id, org_id, of["pricing_version"], of["plan_key"], of["pv"], of["fp"],
+        offer_id, org_id, of["pricing_version"], of["plan_key"], of["fp"],
         of["billing_frequency"], of["payment_method"], settings.terms_version,
         settings.privacy_version, of["pricing_version"], user_id, ip, user_agent, consent_status)
     c.run("UPDATE commercial_offers SET status = 'accepted' WHERE id = $1", offer_id)
-    return dict(row)
+    out = dict(row)
+    out["plan_key"] = of["plan_key"]
+    out["billing_frequency"] = of["billing_frequency"]
+    return out
+
+
+def grant_for_acceptance(c, *, org_id: str, plan_key: str, acceptance_id: str, billing_frequency: str) -> None:
+    """A concessão nasce do CONTRATO aceito com autorização — e morre com a revogação (`revoke_contract_grants`).
+
+    Chamar em contexto de sistema: `entitlement_grants` só aceita escrita privilegiada (gatilho
+    `trg_grants_guard`), o que é correto — a organização não escreve o próprio direito.
+    """
+    c.run("INSERT INTO entitlement_grants(org_id, plan_key, source, source_ref, reason)"
+          " VALUES ($1,$2,'contract',$3,$4)", org_id, plan_key, acceptance_id,
+          f"Contrato aceito ({billing_frequency}) — aceite {acceptance_id[:8]}")
+
+
+def revoke_contract_grants(c, *, org_id: str, user_id: str, reason: str) -> int:
+    return c.run("UPDATE entitlement_grants SET revoked_at = now(), revoked_by = $2, revoke_reason = $3"
+                 " WHERE org_id = $1 AND source = 'contract' AND revoked_at IS NULL", org_id, user_id, reason[:500])
 
 
 def revoke(c, *, org_id: str, user_id: str, reason: str) -> bool:

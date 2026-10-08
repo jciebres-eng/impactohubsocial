@@ -113,8 +113,8 @@ function SavedSearches() {
   const { busy, run } = useAction();
   if (!can("alerts.saved_search")) return (
     <Panel title="Rastreio automático de editais">
-      <p>Salve buscas e receba alertas no app e por e-mail quando surgir um edital compatível. Disponível nos planos pagos ou por voucher.</p>
-      <Button variant="primary" onClick={() => navigate("/conta/plano")}>Ver planos</Button>
+      <p>Salve buscas e receba alertas no app e por e-mail quando surgir um edital compatível. Disponível por concessão, convênio, voucher ou contrato — não existe assinatura.</p>
+      <Button variant="primary" onClick={() => navigate("/conta/acesso")}>Ver acesso e concessões</Button>
     </Panel>
   );
   async function create(e: any) {

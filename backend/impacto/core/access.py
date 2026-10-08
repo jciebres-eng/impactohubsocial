@@ -157,8 +157,7 @@ class AccessContext:
     plans: tuple[str, ...] = ()
     features: frozenset[str] = frozenset()
     limits: dict = field(default_factory=dict)
-    subscription_status: str | None = None
-    commercial_state: str | None = None
+    commercial_state: str | None = None     # v0.27.0: FREE_ACCESS | FREE_GRANT | GRANT_EXPIRING | CONTRACTED (sem assinatura)
     free_period_end: object | None = None
     charge_authorized: bool = False
 
@@ -227,16 +226,18 @@ class AccessContext:
 
 
 def _cheapest_plan_with(feature: str) -> str | None:
-    """Qual o plano mais barato que inclui este recurso — para a mensagem dizer o que fazer.
+    """Qual o pacote de MENOR nível que inclui este recurso — para a mensagem dizer o que fazer.
 
     Lê a configuração, não o banco: a mensagem é informativa, e uma consulta a mais em todo 402 de
-    plano sairia caro justamente no caminho que já está sendo recusado.
+    pacote sairia caro justamente no caminho que já está sendo recusado. v0.27.0: sem preço (ADR-341),
+    a ordem é a do tier (free < plus < premium < gov).
     """
     import json
     from pathlib import Path
     cfg = json.loads((Path(__file__).resolve().parents[3] / "config" / "plans.json")
                      .read_text(encoding="utf-8"))
-    candidatos = [(p.get("price_cents") if p.get("price_cents") is not None else 1 << 40, k)
+    ordem = {"free": 0, "plus": 1, "premium": 2, "gov": 3}
+    candidatos = [(ordem.get(p.get("tier", "free"), 9), k)
                   for k, p in cfg["plans"].items() if feature in (p.get("features") or [])]
     return min(candidatos)[1] if candidatos else None
 
@@ -272,8 +273,6 @@ def build(ctx) -> AccessContext:
             ac.plans = tuple(ent.get("plans") or ())
             ac.features = frozenset(ent.get("features") or ())
             ac.limits = dict(ent.get("limits") or {})
-            sub = ent.get("subscription") or {}
-            ac.subscription_status = sub.get("status") if isinstance(sub, dict) else None
             row = c.one(
                 "SELECT org_commercial_state($1) AS state, free_period_end($1) AS ends_at,"
                 " EXISTS (SELECT 1 FROM offer_acceptances WHERE org_id = $1"

@@ -42,7 +42,7 @@ class ContractRulesTests(unittest.TestCase):
         cls.project = pr.json["id"]
 
     # ---------------------------------------------------------------- apoio
-    # v0.27.0: no acordo de FINANCIAMENTO o percentual vem do catálogo versionado (3,5% em 2027.01), nunca do pedido.
+    # v0.27.0: no acordo de FINANCIAMENTO o percentual vem do catálogo versionado (3,5% na versão de preço vigente — 2027.02 desde a v0.27.0, ADR-341), nunca do pedido.
     # Os testes desta rodada passaram a conferir 3,5%; o modo (deducted/additional) continua cláusula do contrato.
     FEE_BPS = 350
 
@@ -89,7 +89,7 @@ class ContractRulesTests(unittest.TestCase):
         self.assertFalse(al["fee_chargeable"], "a regra comercial nasce DESLIGADA: sem parecer, a taxa fica registrada e não é cobrada")
         self.assertIn("parecer", al["fee_reason"])
         self.assertIsNone(al["platform_charge_id"], "sem regra ativa, nenhuma cobrança é aberta")
-        self.assertEqual(al["pricing_version"], "2027.01")
+        self.assertEqual(al["pricing_version"], "2027.02")     # v0.27.0: versão sem assinatura (ADR-341)
         self.assertEqual(len(al["allocation_hash"]), 64)
         linhas = {ln["kind"]: ln for ln in al["lines"]}
         self.assertEqual(linhas["project"]["cents"], 10_000_000)

@@ -251,6 +251,16 @@ def rebuild_projection(conn: Connection, *, profile_id: str) -> dict:
                 " WHERE user_id = $1 AND state = 'confirmed' AND visibility = 'public'"
                 " ORDER BY started_on DESC LIMIT 12", p["user_id"])
 
+    # v0.27.0 — TRAJETÓRIA: reconhecimentos cumulativos (operação quitada, aporte integralmente confirmado, entrega
+    # aceita, participação de autoria paga, medição validada). Só CONTAGEM e data do último: valor financeiro de
+    # operação não é público. Nascem de conclusão e quitação — nunca de pagamento à plataforma, plano ou voucher.
+    if p["org_id"]:
+        traj = conn.query("SELECT kind, count(*) AS count, max(granted_at) AS last_at FROM recognitions WHERE org_id = $1 GROUP BY kind ORDER BY kind",
+                          p["org_id"])
+        proj["trajectory"] = {"recognitions": {r["kind"]: {"count": int(r["count"]), "last_at": r["last_at"]} for r in traj},
+                              "total": sum(int(r["count"]) for r in traj),
+                              "note": "Reconhecimentos nascem só de entrega aceita, repasse confirmado por quem recebe e operação quitada."}
+
     # Rede de confiança: só relação de visibilidade pública. O filtro é por `visibility`, nunca por "existe relação".
     subject = ("org", p["org_id"]) if p["org_id"] else ("user", p["user_id"])
     proj["public_relationships"] = conn.query(

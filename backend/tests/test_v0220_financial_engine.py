@@ -20,6 +20,7 @@ a mesma permissão duas vezes) e a HONESTIDADE DAS MÉTRICAS (indicador sem font
 """
 from __future__ import annotations
 
+import re
 import unittest
 import uuid
 from datetime import date, timedelta
@@ -383,6 +384,14 @@ class AnInstructionIsADocumentNotATransferTests(unittest.TestCase):
                                       " WHERE id = $1", instrucao["id"]),
                              "comprovante-banco-2026-10-06.pdf")
 
+    # v0.27.0 (ADR-341/ADR-284): a camada econômica tem DUAS tabelas cujo nome contém "payout" e que
+    # NÃO custodiam nada — `allocation_payouts` é a INSTRUÇÃO (quem paga → quem recebe → quanto → chave
+    # PIX informada no contrato) e `payout_transfers` é o REGISTRO da transferência que o próprio pagador
+    # fez fora da plataforma, confirmada por quem recebe. A heurística por nome continua para toda
+    # tabela nova; estas duas são conferidas pela ESTRUTURA: nenhuma coluna de saldo, nenhuma coluna
+    # que diga que a plataforma "segura" valor, e o pagador é sempre uma organização, nunca a plataforma.
+    INSTRUCAO_SEM_CUSTODIA = ("allocation_payouts", "payout_transfers")
+
     def test_the_platform_has_no_table_that_holds_third_party_money(self):
         """A prova estrutural da regra: nenhuma tabela de saldo, carteira, repasse ou custódia."""
         with db_system() as c:
@@ -390,7 +399,18 @@ class AnInstructionIsADocumentNotATransferTests(unittest.TestCase):
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
                 "   AND (table_name ~ 'wallet|payout|split|escrow|custod|repasse'"
                 "        OR table_name ~ '_balances?$')")
-        self.assertEqual([r["table_name"] for r in suspeitas], [])
+            colunas = {t: [r["column_name"] for r in c.query(
+                "SELECT column_name FROM information_schema.columns WHERE table_name = $1", t)]
+                for t in self.INSTRUCAO_SEM_CUSTODIA}
+        self.assertEqual(sorted(r["table_name"] for r in suspeitas), sorted(self.INSTRUCAO_SEM_CUSTODIA))
+        for t, cols in colunas.items():
+            self.assertFalse([col for col in cols if re.search(r"balance|saldo|held|custod|wallet|escrow", col)],
+                             f"{t} tem coluna de saldo/custódia: {cols}")
+        self.assertIn("payer_org_id", colunas["allocation_payouts"])
+        self.assertIn("recipient_org_id", colunas["allocation_payouts"])
+        self.assertIn("pix_key_snapshot", colunas["allocation_payouts"])     # o destino é a chave do contrato, não a plataforma
+        self.assertIn("registered_by_org", colunas["payout_transfers"])
+        self.assertIn("confirmed_by_org", colunas["payout_transfers"])       # quem RECEBE confirma; a plataforma não "libera"
 
 
 class ExpenseSeparationOfDutiesTests(unittest.TestCase):
@@ -506,43 +526,38 @@ class MetricsAnswerWithTheirSourceOrWithTheirAbsenceTests(unittest.TestCase):
                          "módulo que grava lançamento contábil e lê compromissos: "
                          + ", ".join(culpados))
 
-    def test_mrr_excludes_a_sandbox_subscription_that_really_exists(self):
-        """Cria a assinatura em sandbox e confere que o MRR NÃO a conta.
+    def test_there_is_no_mrr_and_the_operation_layer_is_read_from_the_ledger(self):
+        """v0.27.0 (ADR-341): não existe assinatura, logo não existe MRR. O painel diz isso com motivo,
+        e a receita da plataforma vem da CAMADA ECONÔMICA da operação, lida de `economic_events`."""
+        from impacto.economics import metrics as MET
+        with db_system() as c:
+            op = MET.operation_revenue(c)
+            self.assertFalse(op["mrr"]["available"])
+            self.assertIn("ADR-341", op["mrr"]["unavailable_reason"])
+            self.assertFalse(op["arr"]["available"])
+            for k in ("platform_layer_registered", "platform_layer_due", "platform_layer_paid"):
+                self.assertTrue(op[k]["available"], k)
+                self.assertIn("economic_events", op[k]["source"])
+            # Participação de autoria NÃO é receita da plataforma — e o painel diz isso.
+            self.assertIn("NÃO é receita", op["participation_accrued"]["calculation"])
+            self.assertFalse(c.one("SELECT 1 FROM information_schema.tables WHERE table_name = 'subscriptions'"))
 
-        A primeira versão conferia a FRASE do campo `calculation`: apagar
-        `AND s.provider <> 'sandbox'` do SQL e deixar o texto deixaria o teste verde e o MRR
-        inflado por um ambiente de testes.
-        """
+    def test_registered_layer_follows_the_ledger_and_reversals_subtract(self):
+        """Um evento de registro soma; uma reversão da mesma regra abate. Nada é inventado."""
         from impacto.economics import metrics as MET
         conta = new_account("osc")
         with db_system() as c:
-            antes = MET.recurring_revenue(c)["mrr"]["value"]
-            c.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, amount_cents,"
-                  " interval, current_period_end)"
-                  " VALUES ($1,'osc_plus','active','sandbox', 500000, 'month', now() + interval '30 days')",
-                  conta.org_id)
-            depois = MET.recurring_revenue(c)["mrr"]["value"]
-            self.assertEqual(depois, antes,
-                             "assinatura em sandbox entrou no MRR: um ambiente de testes passaria "
-                             "a inflar a receita apurada")
-
-    def test_an_annual_subscription_enters_the_mrr_without_losing_a_cent(self):
-        """Divisão por 12 em numérico, não inteira.
-
-        `amount_cents / 12` é divisão INTEIRA no PostgreSQL: uma anual de R$ 999,95 entrava como
-        R$ 83,32 em vez de R$ 83,33 — truncando para menos a cada assinatura anual, com o campo
-        `calculation` dizendo apenas "dividida por 12". Encontrado por auditoria independente.
-        """
-        from impacto.economics import metrics as MET
-        conta = new_account("osc")
-        with db_system() as c:
-            antes = MET.recurring_revenue(c)["mrr"]["value"]
-            c.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, amount_cents,"
-                  " interval, current_period_end)"
-                  " VALUES ($1,'osc_plus','active','manual', 99995, 'year', now() + interval '365 days')",
-                  conta.org_id)
-            depois = MET.recurring_revenue(c)["mrr"]["value"]
-        self.assertEqual(depois - antes, 8333, "99995 ÷ 12 = 8332,92 → 8333, não 8332")
+            antes = MET.operation_revenue(c)["platform_layer_registered"]["value"]
+            seq = c.scalar("INSERT INTO economic_events(kind, org_id, rule_key, bps, base_cents, amount_cents, idempotency_key)"
+                           " VALUES ('platform_service_registered', $1, 'contract.platform_service_fee', 350, 10000000, 350000, $2) RETURNING seq",
+                           conta.org_id, "t-reg-" + conta.org_id)
+            meio = MET.operation_revenue(c)["platform_layer_registered"]["value"]
+            c.run("INSERT INTO economic_events(kind, org_id, rule_key, bps, base_cents, amount_cents, idempotency_key, reverses_seq)"
+                  " VALUES ('reversal', $1, 'contract.platform_service_fee', 350, 10000000, 350000, $2, $3)",
+                  conta.org_id, "t-rev-" + conta.org_id, seq)
+            depois = MET.operation_revenue(c)["platform_layer_registered"]["value"]
+        self.assertEqual(meio - antes, 350000)
+        self.assertEqual(depois, antes)
 
     def test_runway_is_absent_when_there_is_no_burn(self):
         from impacto.economics import metrics as MET
@@ -854,7 +869,7 @@ class EveryMetricCarriesItsProvenanceTests(unittest.TestCase):
         with db_system() as c:
             resumo = MET.summary(c, period=COMP)
         vistos = 0
-        for bloco in ("recurring", "revenue", "cash", "expenses", "gmv", "conversion", "result"):
+        for bloco in ("operation_layer", "revenue", "cash", "expenses", "gmv", "conversion", "result"):
             for chave, valor in resumo[bloco].items():
                 if isinstance(valor, dict) and "source" in valor:
                     self.assertIn("last_updated", valor, f"{bloco}.{chave}")

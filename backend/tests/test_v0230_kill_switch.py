@@ -155,7 +155,7 @@ class TheAuditTrailIsNeverBlockedTests(unittest.TestCase):
         """A isenção é para investigar, não para escapar. Nenhum prefixo isento cobre rota de produto."""
         from impacto.core.killswitch import is_exempt
         for caminho in ("/v1/projects", "/v1/documents", "/v1/organizations", "/v1/applications",
-                        "/v1/indicators", "/v1/billing/quote"):
+                        "/v1/indicators", "/v1/payments/charges"):
             with self.subTest(caminho=caminho):
                 self.assertFalse(is_exempt(caminho), f"{caminho} escapa do interruptor")
 

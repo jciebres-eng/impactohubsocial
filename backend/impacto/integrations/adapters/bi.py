@@ -16,7 +16,7 @@ DATASETS = {
                      "SELECT id::text AS id, status, created_at, updated_at FROM applications WHERE osc_org_id = $1 OR funder_org_id = $1 ORDER BY created_at"),
     "documents": ("Documentos (metadados, sem conteúdo)",
                   "SELECT id::text AS id, kind, filename, status, validation_status, valid_until, created_at FROM documents WHERE org_id = $1 AND deleted_at IS NULL ORDER BY created_at"),
-    "invoices": ("Faturas de assinatura",
+    "invoices": ("Faturas de contrato (sem assinatura — ADR-341)",
                  "SELECT id::text AS id, description, amount_cents, currency, status, due_on, paid_at, created_at FROM invoices WHERE org_id = $1 ORDER BY created_at"),
     "support_tickets": ("Chamados de suporte (sem conteúdo das mensagens)",
                         "SELECT id::text AS id, number, category, priority, status, created_at, resolved_at FROM support_tickets WHERE org_id = $1 ORDER BY created_at"),

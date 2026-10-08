@@ -108,7 +108,7 @@ a tese do produto melhor que qualquer slide:
 | Apoiador | 21 | apoiar → carteira → prestação de contas recebida |
 | Administração | 32 | compliance, auditoria, integridade, interruptor |
 
-**82 das 220 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
+**81 das 220 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
 inventário lia só a primeira linha de cada menu e dizia 119; corrigido na v0.25.0). Em boa parte é correto
 (detalhe de item, formulário de edição), mas é a primeira pergunta que o Designer vai querer
 responder, e o painel permite marcá-las uma a uma.

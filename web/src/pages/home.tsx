@@ -9,6 +9,49 @@ function countOf(rows: any[] | undefined, status: string) {
   return rows?.find((r) => r.status === status)?.n ?? 0;
 }
 
+/** v0.27.0 — "Para você hoje": cartões flutuantes derivados de registros reais (pendência, decisão, repasse,
+ * participação, recomendação, trajetória). Cada cartão diz por que existe e para onde leva; dispensar um cartão
+ * é conveniência local (localStorage, por pessoa e por navegador) — o registro de origem continua lá. */
+const CARD_KIND: Record<string, string> = {
+  onboarding: "Primeiros passos", compliance: "Conformidade", document: "Documento", grant: "Concessão", support: "Suporte",
+  event: "Evento", course: "Curso", obligation: "Decisão no acordo", participation: "Participação de autoria",
+  payout_confirm: "Repasse a confirmar", payout_register: "Transferência a registrar", recommendation: "Próxima ação", trajectory: "Trajetória",
+};
+export function TodayCards() {
+  const { data, loading, error, reload } = useLoad<any>("/v1/me/today");
+  const [dismissed, setDismissed] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem("hoje.dispensados") || "[]"); } catch { return []; } });
+  const [flipped, setFlipped] = useState<string | null>(null);
+  const key = (c: any) => `${c.kind}:${c.title}`;
+  const cards = (data?.cards || []).filter((c: any) => !dismissed.includes(key(c)));
+  const dismiss = (c: any) => { const next = [...dismissed, key(c)]; setDismissed(next); try { localStorage.setItem("hoje.dispensados", JSON.stringify(next)); } catch { /* sem armazenamento: só nesta visita */ } };
+  if (loading || error || !data) return error ? <StateView loading={false} error={error} onRetry={reload} /> : null;
+  if (!cards.length) return null;
+  return (
+    <section className="deck" aria-label="Para você hoje">
+      <div className="deck-head"><h2>Para você hoje</h2><span className="muted small">{cards.length} cartão(ões) · derivados de registros reais</span></div>
+      <ul className="deck-cards">
+        {cards.map((c: any) => {
+          const k = key(c); const aberto = flipped === k;
+          return (
+            <li key={k} className={`deck-card deck-${c.severity}${aberto ? " deck-open" : ""}`}>
+              <button type="button" className="deck-face" aria-expanded={aberto} onClick={() => setFlipped(aberto ? null : k)}>
+                <span className="deck-kind">{CARD_KIND[c.kind] || c.kind}</span>
+                <strong>{c.title}</strong>
+                {aberto && c.why && <span className="deck-why">{c.why}</span>}
+                {aberto && c.due_on && <span className="deck-why">até {date(c.due_on)}</span>}
+              </button>
+              <div className="deck-actions">
+                {c.link && <Link to={c.link} className="btn btn-ink btn-sm">Abrir</Link>}
+                <button type="button" className="linklike small" onClick={() => dismiss(c)}>Dispensar</button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function Dashboard() {
   const { me } = useSession();
   const { data, error, loading, reload } = useLoad<any>("/v1/dashboard");
@@ -17,6 +60,7 @@ export function Dashboard() {
   return (
     <>
       <PageHead title={`Olá, ${name}`} sub={me?.active_org?.legal_name} />
+      <TodayCards />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data?.kind === "osc" && <OscHome d={data} />}
         {(data?.kind === "company" || data?.kind === "government" || data?.kind === "individual") && <FunderHome d={data} tax={tax} />}

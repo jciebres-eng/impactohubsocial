@@ -36,3 +36,11 @@ def project_ready(ctx: Ctx):
     if out is None:
         raise not_found("Projeto")
     return out
+
+
+@route("GET", "/v1/control-tower/master", auth="admin", permission="finance.read", tags=("torre",),
+       summary="Torre MASTER/financeira do proprietário: GMV × camada da plataforma (registrado/devido/pago), participação, marketplace sem percentual, uso de IA/API, contratos, a receber, banco NÃO CONECTADO, captura de valor")
+def master_tower(ctx: Ctx):
+    from ..economics import master_tower as MT
+    with ctx.tx(readonly=True) as c:
+        return MT.master(c, settings=ctx.settings)

@@ -1,0 +1,17 @@
+{
+  "_note": "HIPÓTESES DECLARADAS da simulação de 24 meses (v0.27.0, ADR-341). Nada aqui é dado apurado: volume de clientes, ticket médio e ritmo de quitação são premissas do proprietário a substituir. Os percentuais (bps) espelham o catálogo `economic_rules` da pricing_version vigente — o BANCO é a autoridade e `backend/tests/test_v0270_financial_model.py` confere a igualdade.",
+  "pricing_version": "2027.02",
+  "platform_service_bps": 350,
+  "proponent_participation_bps": 150,
+  "horizon_months": 24,
+  "new_funding_clients_per_month": 3,
+  "_clients_note": "Premissa do prompt (§REDEFINIÇÃO ECONÔMICA): 3 novos clientes financiadores por mês em todos os cenários; o que muda entre cenários é o ticket médio por operação, as operações por cliente por ano e a fração que chega à quitação (só a camada PAGA é receita).",
+  "scenarios": {
+    "conservador": {"label": "Conservador", "avg_operation_cents": 5000000, "operations_per_client_per_year": 1, "settled_share": 0.6, "months_to_settle": 6, "ramp_months": 6},
+    "base":        {"label": "Base",        "avg_operation_cents": 15000000, "operations_per_client_per_year": 2, "settled_share": 0.75, "months_to_settle": 5, "ramp_months": 4},
+    "agressivo":   {"label": "Agressivo",   "avg_operation_cents": 50000000, "operations_per_client_per_year": 3, "settled_share": 0.85, "months_to_settle": 4, "ramp_months": 3}
+  },
+  "sensitivity_operations_cents": [5000000, 10000000, 50000000, 100000000, 500000000, 1000000000],
+  "revenue_targets_cents": [100000000, 500000000, 1000000000],
+  "_targets_note": "GMV necessário para que a camada PAGA da plataforma alcance R$ 1 milhão, R$ 5 milhões e R$ 10 milhões no horizonte — só aritmética sobre o percentual; não é meta nem previsão."
+}

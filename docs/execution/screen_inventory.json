@@ -4,19 +4,19 @@
  "telas": 220,
  "por_tabela": {
   "PUBLIC": 9,
-  "HELP": 30,
-  "ROUTES": 181
+  "HELP": 29,
+  "ROUTES": 182
  },
  "sem_login": 30,
  "com_parametro": 52,
- "em_algum_menu": 86,
- "so_por_link_direto": 82,
+ "em_algum_menu": 87,
+ "so_por_link_direto": 81,
  "sombreadas": [],
  "menus_por_tipo": {
   "Empresa": 33,
   "Governo": 30,
-  "Apoiador": 21,
-  "OSC": 43,
+  "Apoiador": 22,
+  "OSC": 44,
   "Administração": 32,
   "Profissional": 28
  },
@@ -44,6 +44,7 @@
   "web/src/pages/network.tsx",
   "web/src/pages/ops.tsx",
   "web/src/pages/org.tsx",
+  "web/src/pages/participations.tsx",
   "web/src/pages/portal.tsx",
   "web/src/pages/prefs.tsx",
   "web/src/pages/projects.tsx",
@@ -659,23 +660,6 @@
    "alcance": "link direto"
   },
   {
-   "rota": "/ajuda/teste",
-   "tabela": "HELP",
-   "ordem_de_casamento": 2,
-   "entrada": "Central de Conhecimento",
-   "exige_login": true,
-   "componente": "Help.TrialRequest",
-   "arquivo": "web/src/pages/help.tsx",
-   "parametro": false,
-   "tipos_declarados": [],
-   "alcanca": [
-    "todos os tipos"
-   ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
-  },
-  {
    "rota": "/campanha/:slug",
    "tabela": "HELP",
    "ordem_de_casamento": 2,
@@ -1077,25 +1061,6 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "parâmetro"
-  },
-  {
-   "rota": "/admin/central/testes",
-   "tabela": "ROUTES",
-   "ordem_de_casamento": 3,
-   "entrada": "dentro da aplicação",
-   "exige_login": true,
-   "componente": "HelpA.Trials",
-   "arquivo": "web/src/pages/helpAdmin.tsx",
-   "parametro": false,
-   "tipos_declarados": [
-    "platform"
-   ],
-   "alcanca": [
-    "Administração"
-   ],
-   "em_menu_de": [],
-   "rotulo": "",
-   "alcance": "link direto"
   },
   {
    "rota": "/admin/chaves",
@@ -1933,6 +1898,23 @@
    "entrada": "dentro da aplicação",
    "exige_login": true,
    "componente": "Org.Account",
+   "arquivo": "web/src/pages/org.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
+  },
+  {
+   "rota": "/conta/acesso",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Org.Plan",
    "arquivo": "web/src/pages/org.tsx",
    "parametro": false,
    "tipos_declarados": [],
@@ -3208,6 +3190,34 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "parâmetro"
+  },
+  {
+   "rota": "/participacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Part.Participations",
+   "arquivo": "web/src/pages/participations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc",
+    "individual",
+    "provider",
+    "company"
+   ],
+   "alcanca": [
+    "OSC",
+    "Apoiador",
+    "Profissional",
+    "Empresa"
+   ],
+   "em_menu_de": [
+    "Apoiador",
+    "OSC"
+   ],
+   "rotulo": "Participação de autoria",
+   "alcance": "menu"
   },
   {
    "rota": "/perfil-publico",

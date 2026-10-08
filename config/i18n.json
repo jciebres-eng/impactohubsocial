@@ -284,38 +284,29 @@
         "not_applicable": "não se aplica"
       },
       "billing": {
-        "title": "Cobrança",
-        "subscription": "Assinatura",
-        "invoices": "Faturas",
+        "title": "Acesso e concessões",
+        "subscription": "Sem assinatura: o núcleo é gratuito por desenho",
+        "invoices": "Faturas de contrato",
         "payment_method": "Forma de pagamento",
         "no_charge_yet": "Nenhuma cobrança foi feita",
         "sandbox_notice": "Cobrança em modo de testes: nenhuma cobrança real acontece.",
         "history": "Histórico de cobrança"
       },
       "pricing": {
-        "title": "Planos e preços",
-        "per_month": "por mês",
-        "per_year": "por ano",
-        "monthly": "Mensal",
-        "yearly": "Anual",
+        "title": "Pacotes e vias de acesso",
+        "per_month": "por operação",
+        "per_year": "por contrato",
+        "monthly": "Operação financiada",
+        "yearly": "Contrato",
         "from": "a partir de",
-        "on_request": "Sob proposta comercial",
+        "on_request": "Sob proposta de contrato",
         "request_quote": "Solicitar proposta",
-        "not_published": "Preço não divulgado",
+        "not_published": "Sem mensalidade: não existe assinatura",
         "tax_unspecified": "Tributos ainda não definidos para este valor.",
-        "annual_saving": "Economia no plano anual",
-        "current_plan": "Seu plano atual",
+        "annual_saving": "Camada econômica da operação: 3,5% + 1,5%",
+        "current_plan": "Seu pacote atual",
         "free_forever": "Gratuito, sem prazo",
-        "never_sold": "Nenhum plano compra reputação, selo, evidência ou posição em ranking."
-      },
-      "subscription": {
-        "active": "Assinatura ativa",
-        "none": "Sem assinatura paga",
-        "cancel": "Cancelar assinatura",
-        "reactivate": "Reativar",
-        "cancels_at": "Cancela em",
-        "renews_at": "Renova em",
-        "change_plan": "Mudar de plano"
+        "never_sold": "Nenhum pacote compra reputação, selo, evidência ou posição em ranking."
       },
       "free_period": {
         "title": "Período gratuito",
@@ -339,18 +330,6 @@
         "terms_version": "Versão dos termos aceitos",
         "accepted_at": "Aceito em"
       },
-      "checkout": {
-        "title": "Confirme sua contratação",
-        "today_you_pay": "Hoje você paga",
-        "first_charge_on": "Primeira cobrança em",
-        "plan_price": "Preço do plano",
-        "confirm": "Confirmar",
-        "one_time": "Pagamento único",
-        "installment": "Parcelado",
-        "recurring": "Recorrente",
-        "installments_note": "Parcelamento divide uma única cobrança. Não é assinatura.",
-        "boleto_cnpj_only": "Boleto parcelado é exclusivo para pessoa jurídica com CNPJ."
-      },
       "invoice": {
         "status_paid": "Paga",
         "status_open": "Em aberto",
@@ -366,12 +345,6 @@
         "manual": "Pagamento combinado",
         "failed": "Pagamento não concluído",
         "retry": "Tentar novamente"
-      },
-      "cancellation": {
-        "title": "Cancelar assinatura",
-        "keeps_access": "O acesso continua até o fim do período já pago.",
-        "no_penalty": "Sem multa e sem perda de dados.",
-        "confirm": "Confirmar cancelamento"
       },
       "usage": {
         "title": "Consumo",
@@ -667,38 +640,29 @@
         "not_applicable": "not applicable"
       },
       "billing": {
-        "title": "Billing",
-        "subscription": "Subscription",
-        "invoices": "Invoices",
+        "title": "Access and grants",
+        "subscription": "No subscription: the core is free by design",
+        "invoices": "Contract invoices",
         "payment_method": "Payment method",
         "no_charge_yet": "No charge has been made",
         "sandbox_notice": "Billing in test mode: no real charge happens.",
         "history": "Billing history"
       },
       "pricing": {
-        "title": "Plans and pricing",
-        "per_month": "per month",
-        "per_year": "per year",
-        "monthly": "Monthly",
-        "yearly": "Yearly",
+        "title": "Bundles and access paths",
+        "per_month": "per operation",
+        "per_year": "per contract",
+        "monthly": "Funded operation",
+        "yearly": "Contract",
         "from": "from",
-        "on_request": "By commercial proposal",
-        "request_quote": "Request a quote",
-        "not_published": "Price not published",
+        "on_request": "Under contract proposal",
+        "request_quote": "Request a proposal",
+        "not_published": "No monthly fee: there is no subscription",
         "tax_unspecified": "Taxes not yet defined for this amount.",
-        "annual_saving": "Annual plan saving",
-        "current_plan": "Your current plan",
-        "free_forever": "Free, with no time limit",
-        "never_sold": "No plan buys reputation, verification, evidence or ranking position."
-      },
-      "subscription": {
-        "active": "Active subscription",
-        "none": "No paid subscription",
-        "cancel": "Cancel subscription",
-        "reactivate": "Reactivate",
-        "cancels_at": "Cancels on",
-        "renews_at": "Renews on",
-        "change_plan": "Change plan"
+        "annual_saving": "Operation economic layer: 3.5% + 1.5%",
+        "current_plan": "Your current bundle",
+        "free_forever": "Free, no time limit",
+        "never_sold": "No bundle buys reputation, seals, evidence or ranking position."
       },
       "free_period": {
         "title": "Free period",
@@ -722,18 +686,6 @@
         "terms_version": "Accepted terms version",
         "accepted_at": "Accepted on"
       },
-      "checkout": {
-        "title": "Confirm your purchase",
-        "today_you_pay": "Today you pay",
-        "first_charge_on": "First charge on",
-        "plan_price": "Plan price",
-        "confirm": "Confirm",
-        "one_time": "One-time payment",
-        "installment": "In installments",
-        "recurring": "Recurring",
-        "installments_note": "Installments split a single charge. It is not a subscription.",
-        "boleto_cnpj_only": "Instalment bank slips are available only to companies with a CNPJ."
-      },
       "invoice": {
         "status_paid": "Paid",
         "status_open": "Open",
@@ -749,12 +701,6 @@
         "manual": "Arranged payment",
         "failed": "Payment not completed",
         "retry": "Try again"
-      },
-      "cancellation": {
-        "title": "Cancel subscription",
-        "keeps_access": "Access continues until the end of the period already paid for.",
-        "no_penalty": "No penalty and no data loss.",
-        "confirm": "Confirm cancellation"
       },
       "usage": {
         "title": "Usage",
@@ -1050,38 +996,29 @@
         "not_applicable": "no aplica"
       },
       "billing": {
-        "title": "Facturación",
-        "subscription": "Suscripción",
-        "invoices": "Facturas",
+        "title": "Acceso y concesiones",
+        "subscription": "Sin suscripción: el núcleo es gratuito por diseño",
+        "invoices": "Facturas de contrato",
         "payment_method": "Forma de pago",
-        "no_charge_yet": "No se ha realizado ningún cargo",
-        "sandbox_notice": "Facturación en modo de prueba: no se realiza ningún cargo real.",
-        "history": "Historial de facturación"
+        "no_charge_yet": "No se ha realizado ningún cobro",
+        "sandbox_notice": "Cobro en modo de pruebas: no ocurre ningún cobro real.",
+        "history": "Historial de cobros"
       },
       "pricing": {
-        "title": "Planes y precios",
-        "per_month": "por mes",
-        "per_year": "por año",
-        "monthly": "Mensual",
-        "yearly": "Anual",
-        "from": "desde",
-        "on_request": "Bajo propuesta comercial",
+        "title": "Paquetes y vías de acceso",
+        "per_month": "por operación",
+        "per_year": "por contrato",
+        "monthly": "Operación financiada",
+        "yearly": "Contrato",
+        "from": "a partir de",
+        "on_request": "Bajo propuesta de contrato",
         "request_quote": "Solicitar propuesta",
-        "not_published": "Precio no publicado",
-        "tax_unspecified": "Impuestos aún no definidos para este importe.",
-        "annual_saving": "Ahorro en el plan anual",
-        "current_plan": "Tu plan actual",
-        "free_forever": "Gratis, sin plazo",
-        "never_sold": "Ningún plan compra reputación, sello, evidencia ni posición en el ranking."
-      },
-      "subscription": {
-        "active": "Suscripción activa",
-        "none": "Sin suscripción de pago",
-        "cancel": "Cancelar suscripción",
-        "reactivate": "Reactivar",
-        "cancels_at": "Cancela el",
-        "renews_at": "Renueva el",
-        "change_plan": "Cambiar de plan"
+        "not_published": "Sin mensualidad: no existe suscripción",
+        "tax_unspecified": "Impuestos aún no definidos para este valor.",
+        "annual_saving": "Capa económica de la operación: 3,5% + 1,5%",
+        "current_plan": "Tu paquete actual",
+        "free_forever": "Gratuito, sin plazo",
+        "never_sold": "Ningún paquete compra reputación, sello, evidencia ni posición en el ranking."
       },
       "free_period": {
         "title": "Período gratuito",
@@ -1105,18 +1042,6 @@
         "terms_version": "Versión de los términos aceptados",
         "accepted_at": "Aceptado el"
       },
-      "checkout": {
-        "title": "Confirma tu contratación",
-        "today_you_pay": "Hoy pagas",
-        "first_charge_on": "Primer cobro el",
-        "plan_price": "Precio del plan",
-        "confirm": "Confirmar",
-        "one_time": "Pago único",
-        "installment": "En cuotas",
-        "recurring": "Recurrente",
-        "installments_note": "Las cuotas dividen un único cobro. No es una suscripción.",
-        "boleto_cnpj_only": "El boleto en cuotas es exclusivo para personas jurídicas con CNPJ."
-      },
       "invoice": {
         "status_paid": "Pagada",
         "status_open": "Abierta",
@@ -1132,12 +1057,6 @@
         "manual": "Pago acordado",
         "failed": "Pago no completado",
         "retry": "Intentar de nuevo"
-      },
-      "cancellation": {
-        "title": "Cancelar suscripción",
-        "keeps_access": "El acceso continúa hasta el final del período ya pagado.",
-        "no_penalty": "Sin multa y sin pérdida de datos.",
-        "confirm": "Confirmar cancelación"
       },
       "usage": {
         "title": "Consumo",

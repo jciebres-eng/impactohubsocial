@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { api } from "./api";
 import { Link, match, navigate, useLocation } from "./router";
 import { useSession } from "./session";
-import { Button, StateView, useAction } from "./ui/kit";
+import { Button, StateView, useAction, useLoad } from "./ui/kit";
 import * as Pub from "./pages/public";
 import * as Com from "./pages/commercial";
 import * as Home from "./pages/home";
@@ -114,6 +114,8 @@ const ROUTES: R[] = [
   ["/admin/identidade", () => <TrustA.IdentityQueue />, ["platform"]],
   ["/admin/credenciais-profissionais", () => <TrustA.CredentialQueue />, ["platform"]],
   ["/admin/honorarios", () => <TrustA.FeeTables />, ["platform"]],
+  // v0.27.0 (ADR-341): "/conta/plano" virou "/conta/acesso" — não existe assinatura. A rota antiga redireciona.
+  ["/conta/acesso", () => <Org.Plan />],
   ["/conta/plano", () => <Org.Plan />],
   ["/conta/comercial", () => <Com.Commercial />], ["/conta/consumo", () => <Com.Usage />],
   ["/settings/billing", () => <Org.Plan />],
@@ -177,7 +179,6 @@ const ROUTES: R[] = [
   ["/admin/central/suporte", () => <HelpA.SupportQueue />, ["platform"]],
   ["/admin/central/suporte/:id", (p) => <HelpA.SupportTicket id={p.id} />, ["platform"]],
   ["/admin/central/parcerias", () => <HelpA.Partnerships />, ["platform"]],
-  ["/admin/central/testes", () => <HelpA.Trials />, ["platform"]],
   ["/admin/central/analytics", () => <HelpA.Analytics />, ["platform"]],
   ["/admin/central/equipe", () => <HelpA.StaffRoles />, ["platform"]],
   ["/admin", () => <Admin.Overview />, ["platform"]],
@@ -235,6 +236,7 @@ const ROUTES: R[] = [
   ["/organizacao/nova", () => <Org.CreateOrg />],
   ["/controladoria", () => <Int.Controladoria />, ["staff"]],
   ["/controladoria/conciliacao", () => <Int.Conciliacao />, ["staff"]],
+  ["/controladoria/torre", () => <Int.TorreMaster />, ["staff"]],
   ["/aprovacoes", () => <Int.Aprovacoes />, ["staff"]],
   ["/financeiro", () => <Int.Financeiro />, ["staff"]],
   ["/financeiro/despesas", () => <Int.Despesas />, ["staff"]],
@@ -291,7 +293,6 @@ const HELP: HR[] = [
   ["/ajuda/suporte/:id", (p) => <Help.Ticket id={p.id} />, true],
   ["/ajuda/parcerias", () => <Help.PartnershipForm />],
   ["/ajuda/demonstracao", () => <Help.DemoForm />],
-  ["/ajuda/teste", () => <Help.TrialRequest />, true],
   ["/ajuda/boletim", () => <Help.Newsletter />],
   ["/ajuda/boletim/confirmar", () => <Help.NewsletterToken mode="confirm" />],
   ["/ajuda/boletim/cancelar", () => <Help.NewsletterToken mode="unsubscribe" />],
@@ -379,6 +380,10 @@ function Shell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { run } = useAction();
   useEffect(() => setOpen(false), [path]);
+  // v0.27.0 — MENU DINÂMICO: contadores por tela vêm do servidor (`GET /v1/me/today`), derivados de registros
+  // reais (obrigações, participações a aceitar, repasses a confirmar, notificações). A barra não conta nada sozinha.
+  // O hook fica ANTES do retorno antecipado: a ordem dos hooks não pode depender de haver sessão.
+  const hoje = useLoad<any>(me ? "/v1/me/today" : null, [path, !!me]);
   if (!me) return null;
   const kind = me.active_org?.kind || "osc";
   const active = (to: string) => (to === "/" ? path === "/" : path === to || path.startsWith(to + "/"));
@@ -398,6 +403,8 @@ function Shell({ children }: { children: ReactNode }) {
   const nav = kind === "platform"
     ? (ctx?.staff.is_platform_admin ? NAV.platform.filter(([to]) => !noMenuDoServidor.has(to)) : [])
     : (NAV[kind] || NAV.osc);
+  const badges: Record<string, number> = hoje.data?.badges || {};
+  const Badge = ({ to }: { to: string }) => (badges[to] ? <span className="notif-count" aria-label={`${badges[to]} pendente(s)`}>{badges[to]}</span> : null);
   return (
     <div className="shell">
       <a className="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -423,7 +430,7 @@ function Shell({ children }: { children: ReactNode }) {
         )}
         <ul>
           {nav.map(([to, label]) => (
-            <li key={to}><Link to={to} className={active(to) ? "on" : ""} aria-current={active(to) ? "page" : undefined}><IconeDaRota to={to} />{label}</Link></li>
+            <li key={to}><Link to={to} className={active(to) ? "on" : ""} aria-current={active(to) ? "page" : undefined}><IconeDaRota to={to} />{label}<Badge to={to} /></Link></li>
           ))}
         </ul>
         {grupos.map((g) => (
@@ -441,7 +448,7 @@ function Shell({ children }: { children: ReactNode }) {
           {kind !== "platform" && !!me.user.staff_roles?.length && <li><Link to="/admin/central" className={active("/admin/central") ? "on" : ""}><IconeDaRota to="/admin/central" />Central (equipe)</Link></li>}
           <li><Link to="/notificacoes" className={active("/notificacoes") ? "on" : ""}><IconeDaRota to="/notificacoes" />Notificações {me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}</Link></li>
           {kind !== "platform" && <li><Link to="/organizacao" className={active("/organizacao") ? "on" : ""}><IconeDaRota to="/organizacao" />Organização</Link></li>}
-          {kind !== "platform" && <li><Link to="/conta/plano" className={active("/conta/plano") ? "on" : ""}><IconeDaRota to="/conta/plano" />Plano</Link></li>}
+          {kind !== "platform" && <li><Link to="/conta/acesso" className={active("/conta/acesso") || active("/conta/plano") ? "on" : ""}><IconeDaRota to="/conta/acesso" />Acesso</Link></li>}
           {me.organizations.length > 1 && <li><Link to="/portal?escolher=1" className={path === "/portal" ? "on" : ""}>Trocar de contexto</Link></li>}
           <li><Link to="/conta" className={path === "/conta" ? "on" : ""}><IconeDaRota to="/conta" />Minha conta</Link></li>
           <li><button className="rail-logout" onClick={async () => { await logout(); navigate("/entrar"); }}>Sair</button></li>

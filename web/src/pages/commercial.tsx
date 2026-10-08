@@ -9,16 +9,11 @@ import { Button, Field, Input, PageHead, Select, StateView, useAction, useLoad }
  * A lista espelha `free_period.STATES` no servidor. Um estado novo que chegue aqui sem rótulo
  * aparece pelo código, e não como texto vazio — ver `rotulo()` abaixo. */
 const ESTADO: Record<string, string> = {
-  FREE: "Gratuito",
-  FREE_EXPIRING: "Gratuito — terminando",
-  PAYMENT_METHOD_REQUIRED: "Gratuito — falta autorizar cobrança",
-  COMMERCIAL_TERM_PENDING: "Termo comercial pendente",
-  PAID_ACTIVE: "Assinatura ativa",
-  CANCELLED: "Cancelada",
-  SUSPENDED: "Suspensa",
-  PAST_DUE: "Pagamento em atraso",
-  GRACE_PERIOD: "Período de carência",
-  TERMINATED: "Encerrada",
+  // v0.27.0 (ADR-341): não existe assinatura. A pergunta passou a ser "de onde vem o acesso?".
+  FREE_ACCESS: "Acesso livre ao núcleo",
+  FREE_GRANT: "Concessão vigente",
+  GRANT_EXPIRING: "Concessão — terminando",
+  CONTRACTED: "Contrato aceito",
 };
 
 const rotulo = (estado: string) => ESTADO[estado] ?? estado;
@@ -26,7 +21,7 @@ const rotulo = (estado: string) => ESTADO[estado] ?? estado;
 const dataLonga = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }) : "—";
 
-/** Contagem regressiva do período gratuito.
+/** Contagem regressiva da concessão vigente.
  *
  * O número de dias e a data vêm PRONTOS do backend (`free_period_end`, `days_remaining`). A tela
  * não subtrai datas: o fuso comercial é America/Sao_Paulo, o navegador está em qualquer lugar, e
@@ -38,51 +33,50 @@ export function FreePeriodBanner() {
   const urgente = s.days_remaining != null && s.days_remaining <= 30;
   return (
     <div className={urgente ? "banner banner-warning" : "banner"}>
-      <strong>Período gratuito até {dataLonga(s.free_period_end)}</strong>
+      <strong>Concessão até {dataLonga(s.free_period_end)}</strong>
       {s.days_remaining != null && <> · faltam {s.days_remaining} dia{s.days_remaining === 1 ? "" : "s"}</>}
       <p className="muted">{s.on_expiry}</p>
       {!s.charge_authorized && (
         <p className="muted small">
-          Você não precisa fazer nada: sem autorização de cobrança, a conta volta ao plano gratuito e nenhum dado é apagado.
+          Você não precisa fazer nada: não existe assinatura. Ao terminar, a conta segue com o acesso livre ao núcleo e nenhum dado é apagado.
         </p>
       )}
     </div>
   );
 }
 
-/** Página pública de preços. Lê o catálogo do servidor; nenhum valor mora nesta tela. */
+/** Página pública de pacotes e vias de acesso. Lê o catálogo do servidor; nenhum valor mora nesta tela.
+ * v0.27.0 (ADR-341): NÃO HÁ ASSINATURA — a página diz como o acesso se obtém e de onde vem a receita da plataforma. */
 export function Pricing() {
   const plans = useLoad<any>("/v1/plans");
-  const [interval, setInterval_] = useState<"month" | "year">("month");
   return (
     <div className="public-page">
-      <PageHead title="Planos e preços" sub="O núcleo da plataforma é gratuito. O que se paga é capacidade, automação e suporte." />
-      <div className="row">
-        <Button variant={interval === "month" ? "ink" : "ghost"} onClick={() => setInterval_("month")}>Mensal</Button>
-        <Button variant={interval === "year" ? "ink" : "ghost"} onClick={() => setInterval_("year")}>Anual</Button>
-      </div>
+      <PageHead title="Como o IMPACTO se sustenta" sub="O núcleo da plataforma é gratuito por desenho, sem prazo. Não existe assinatura: a plataforma é remunerada pela camada econômica de cada operação financiada e por contratos avulsos." />
       <StateView loading={plans.loading} error={plans.error} onRetry={plans.reload}>
+        <section className="plan-note">
+          <h2>Vias de acesso</h2>
+          <ul className="rows">{(plans.data?.access_paths || []).map((a: any) => (
+            <li key={a.key}><span><strong>{a.label}</strong><br /><span className="muted small">{a.how}</span></span></li>
+          ))}</ul>
+          <p className="muted small">{plans.data?.pricing_note}</p>
+        </section>
         <div className="plan-grid">
           {(plans.data?.items || []).filter((p: any) => p.available !== false).map((p: any) => {
-            const cents = p.prices?.[interval];
             const piso = p.quote_floor_cents;
             return (
               <article key={p.plan_key} className="plan-card">
                 <h3>{p.name}</h3>
                 {p.tier === "free" ? (
                   <p className="plan-price">Gratuito<span className="muted small"> — sem prazo</span></p>
-                ) : cents != null ? (
-                  <p className="plan-price">{money(cents, "BRL")} / {interval === "year" ? "ano" : "mês"}</p>
                 ) : piso != null ? (
-                  <p className="plan-price">a partir de {money(piso, "BRL")} / mês<span className="muted small"> — sob proposta</span></p>
+                  <p className="plan-price">a partir de {money(piso, "BRL")}<span className="muted small"> — sob proposta de contrato</span></p>
                 ) : (
-                  <p className="plan-price muted">Preço não divulgado</p>
+                  <p className="plan-price muted">Por contrato, concessão ou convênio</p>
                 )}
-                {cents != null && <p className="muted small">Tributos ainda não definidos para este valor.</p>}
                 <ul className="plan-features">
                   {(p.features || []).slice(0, 8).map((f: string) => <li key={f}>{f}</li>)}
                 </ul>
-                {cents == null && piso != null
+                {p.tier !== "free"
                   ? <a className="btn btn-ghost" href="mailto:comercial@impacto.app">Solicitar proposta</a>
                   : <Link to="/cadastro" className="btn btn-ink">Começar gratuitamente</Link>}
               </article>
@@ -92,10 +86,10 @@ export function Pricing() {
       </StateView>
       {/* A frase mais importante desta página, e a que mais custa dizer: o que o dinheiro NÃO compra. */}
       <section className="plan-note">
-        <h2>O que nenhum plano compra</h2>
+        <h2>O que nenhum pacote compra</h2>
         <p>
           Reputação, selo de verificação, impacto, evidência, elegibilidade a edital e qualidade de match não estão à
-          venda em nenhum plano. Pagar aumenta capacidade, volume, automação e suporte — e nada além disso.
+          venda em nenhum pacote. Contrato, concessão e convênio aumentam capacidade, volume, automação e suporte — e nada além disso.
         </p>
       </section>
     </div>
@@ -116,7 +110,7 @@ export function Usage() {
     })).then(() => uso.reload());
   return (
     <>
-      <PageHead title="Consumo" sub="Quanto do seu plano você já usou neste mês." />
+      <PageHead title="Consumo" sub="Quanto do seu pacote você já usou neste mês." />
       <StateView loading={uso.loading} error={uso.error} onRetry={uso.reload}>
         <p className="banner">{u?.overage_policy}</p>
         <table className="table">

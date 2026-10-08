@@ -27,7 +27,8 @@ Detalhe completo em `SIGNATURE_VALIDATION_MATRIX.md`.
 | **SMTP** | `MAIL_PROVIDER=smtp` + `SMTP_*` | `console` (escreve no diretório `outbox/`) | confirmação de e-mail, convite, código de assinatura e aviso não saem | **sim** — a validação de configuração **recusa** `console` em staging/produção |
 | **Armazenamento S3** | `STORAGE_PROVIDER=s3` + `S3_*` | `local` (disco) | funciona em uma máquina só; não serve a mais de uma instância | recomendado; a validação exige bucket e credencial quando `s3` |
 | **Antivírus (clamd)** | `ANTIVIRUS_PROVIDER=clamd` | `none` | documento fica `pending_scan` e **não é promovido a `clean`** | recomendado; sem ele, `ALLOW_UNSCANNED_DOWNLOADS` controla se o arquivo pode ser baixado |
-| **Stripe** | `BILLING_PROVIDER=stripe` + `STRIPE_*` | `sandbox` | sem cobrança real; o modo `sandbox` é **recusado** em produção pela validação | só se houver cobrança |
+| **Stripe** (cobrança PRÓPRIA: contratos avulsos/parcelados — não há assinatura, ADR-341) | `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` | vazias → provedor **simulado** (toda cobrança nasce `is_simulated`) | sem cobrança real; o simulado nunca entra na receita real | só se houver cobrança própria |
+| **Chave PIX da plataforma** (linha "infraestrutura e inteligência" das instruções de repasse) | `PLATFORM_PIX_KEY` + `PLATFORM_PIX_KEY_TYPE` | vazias → a instrução sai como "NÃO CONFIGURADA" | o financiador não tem para onde transferir a camada da plataforma; a linha fica instruída sem chave | sim, quando a regra comercial for ativada |
 | **Provedor de IA** | `AI_PROVIDER` + `AI_API_KEY` + `AI_MODEL` | `local` (motor próprio, sem rede) | o assistente usa o motor local, mais simples, e diz que é assistência | opcional |
 | **OIDC** | `OIDC_*` | desligado | login só por senha + segundo fator | opcional |
 

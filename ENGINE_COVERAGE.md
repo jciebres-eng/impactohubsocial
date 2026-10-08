@@ -15,7 +15,7 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 
 `n/a` = motor sem rota própria: herda a barreira de quem o chama. Não é falha.
 
-**45 motores.** implemented: 45 sim / 0 não · integrated: 45 sim / 0 não · tested: 45 sim / 0 não · e2e: 40 sim / 2 não / 3 n/a · security: 42 sim / 0 não / 3 n/a · observability: 35 sim / 10 não
+**48 motores.** implemented: 48 sim / 0 não · integrated: 48 sim / 0 não · tested: 48 sim / 0 não · e2e: 43 sim / 2 não / 3 n/a · security: 45 sim / 0 não / 3 n/a · observability: 36 sim / 12 não
 
 ## busca
 
@@ -64,6 +64,8 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `contract_rules` — Contrato como regra de operação | deterministic | — | sim | sim | sim | sim | sim | sim |
 | `control_tower` — Torres de controle (financiador e governo) | deterministic | — | sim | sim | sim | sim | sim | **NÃO** |
+| `economic_layer` — Camada econômica da operação (matriz, repasses, participação, quitação) | deterministic | — | sim | sim | sim | sim | sim | sim |
+| `master_tower` — Torre MASTER / financeira do proprietário | deterministic | — | sim | sim | sim | sim | sim | **NÃO** |
 | `result_chain` — Cadeia de resultado | deterministic | — | sim | sim | sim | sim | sim | sim |
 | `territorial_gap` — Lacuna territorial da carteira | deterministic | — | sim | sim | sim | sim | sim | sim |
 | `value_ledger` — Registro de valor entregue | deterministic | — | sim | sim | sim | sim | sim | sim |
@@ -126,6 +128,12 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 | `funding_readiness` — Prontidão de captação de uma solução | deterministic | — | sim | sim | sim | sim | sim | **NÃO** |
 | `impacto_ready` — Estado verificável 'Projeto IMPACTO Ready' | deterministic | impacto-ready@1.0.0 | sim | sim | sim | sim | sim | **NÃO** |
 | `readiness` — Prontidão da organização e do projeto | deterministic | readiness@1.0.0 | sim | sim | sim | sim | sim | sim |
+
+## rede
+
+| motor | natureza | versão | implemented | integrated | tested | E2E | security | observability |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `today_cards` — Para você hoje (cartões e contadores do menu) | deterministic | — | sim | sim | sim | sim | sim | **NÃO** |
 
 ## soluções
 

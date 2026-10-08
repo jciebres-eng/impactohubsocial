@@ -38,7 +38,6 @@ services:
       COOKIE_SECURE: "false"
       MAIL_PROVIDER: console
       AI_PROVIDER: local
-      BILLING_PROVIDER: sandbox
       ALLOW_UNSCANNED_DOWNLOADS: "true"
       STORAGE_LOCAL_DIR: /data/storage
       WEB_CONCURRENCY: "2"

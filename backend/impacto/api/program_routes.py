@@ -309,8 +309,7 @@ def charge_create(ctx: Ctx, body: E.ChargeIn):
     with ctx.tx() as c:
         out = PAY.create(c, org_id=ctx.org_id, actor=ctx.user_id, provider=st["provider"],
                          kind=body.kind, method=body.method, amount_cents=body.amount_cents,
-                         currency=body.currency, subscription_id=body.subscription_id,
-                         invoice_id=body.invoice_id, billable_event_id=body.billable_event_seq,
+                         currency=body.currency, invoice_id=body.invoice_id, billable_event_id=body.billable_event_seq,
                          installments=body.installments, instrument_id=body.instrument_id,
                          due_on=body.due_on)
     return {**out, "provider_status": st}

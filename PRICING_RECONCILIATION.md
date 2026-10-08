@@ -136,6 +136,15 @@ rodada.
 
 ---
 
+## C-bis. RECONCILIAÇÃO v0.27.0 — A ASSINATURA SAIU (ADR-341)
+
+| # | REGRA COMERCIAL | LOCALIZAÇÃO NO CÓDIGO | STATUS | GAP | IMPLEMENTAÇÃO NECESSÁRIA | TESTE |
+| --- | --- | --- | --- | --- | --- | --- |
+| R-40 | Não existe assinatura: nenhuma mensalidade, trial, checkout, reajuste ou cancelamento | migração `0067`; `services/entitlements.py`, `services/monetization.py`, `api/billing_routes.py`; `config/plans.json` (`plans@4.0`) | FEITO | — | — | `test_v0210_pricing_catalog` (estrutura ausente), `test_v0110_monetization` (rotas ausentes), `test_api_features` |
+| R-41 | Receita da plataforma = camada econômica da operação (3,5%) + contratos avulsos; GMV ≠ receita | `economic_rules` 2027.02, `trust/economy.py`, `economics/metrics.py::operation_revenue` | FEITO (registro e instrução); cobrança própria só com carta verde | regra `contract.platform_service_fee` continua amarela | parecer jurídico/contábil (externo) | `test_v0270_economy`, `test_v0220_financial_engine` |
+| R-42 | Contrato avulso/parcelado: valor de quem tem alçada, com motivo; aceite com autorização concede pacote | `api/commercial_routes.py`, `services/offers.py` | FEITO | — | — | `test_v0210_offer` |
+| R-43 | Regra de assinatura `saas.institutional.funder` RECUSADA com carta vermelha | migração `0067` §7 | FEITO | — | — | `test_v0210_pricing_catalog` |
+
 ## D. O QUE NÃO SERÁ FEITO NESTA RODADA, E POR QUÊ
 
 | Pedido | Decisão | Motivo |

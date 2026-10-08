@@ -568,10 +568,10 @@ class OutboundWebhooks(unittest.TestCase):
     def test_failing_endpoint_retries_then_dead_letters_and_can_be_replayed(self):
         t = FakeTransport()
         t.set("parceiro-ruim.exemplo.org", [(500, b"erro")])
-        sid, _ = self.subscription(events=("TRIAL.STARTED",), url="https://parceiro-ruim.exemplo.org/hook")
+        sid, _ = self.subscription(events=("OPERATION.ACTIVATED",), url="https://parceiro-ruim.exemplo.org/hook")
         from impacto.integrations import events as EV
         with db_system() as d:
-            EV.emit(d, org_id=self.org.org_id, event_type="TRIAL.STARTED", entity_id=None, payload={"days": 14})
+            EV.emit(d, org_id=self.org.org_id, event_type="OPERATION.ACTIVATED", entity_id=None, payload={"gross_cents": 1})
         for _ in range(7):
             run_worker(transport=t)
             with db_system() as d:      # antecipa o reagendamento (o backoff real é de minutos)

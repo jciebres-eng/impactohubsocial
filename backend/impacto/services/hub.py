@@ -86,11 +86,11 @@ def pending_center(c, *, user_id: str, org_id: str | None, org_kind: str | None)
         for d in c.query("SELECT title, valid_until FROM documents WHERE org_id = $1 AND deleted_at IS NULL AND valid_until IS NOT NULL AND valid_until < current_date + 30 ORDER BY valid_until LIMIT 5", org_id):
             vencido = d["valid_until"] < datetime.now(UTC).date()
             items.append({"kind": "document", "severity": "high" if vencido else "medium", "title": f"Documento {'vencido' if vencido else 'vencendo'}: {d['title']}", "why": f"Validade: {d['valid_until']}", "link": "/documentos"})
-        tr = c.one("SELECT trial_end, status FROM org_trials WHERE org_id = $1", org_id)
-        if tr and tr["status"] == "active":
-            left = (tr["trial_end"] - datetime.now(UTC)).days
-            if 0 <= left <= 3:
-                items.append({"kind": "trial", "severity": "medium", "title": "Seu período de teste termina em breve", "why": f"Restam {left} dia(s)", "link": "/conta/plano"})
+        fp = c.one("SELECT free_period_end($1) AS fim", org_id)
+        if fp and fp["fim"]:
+            left = (fp["fim"] - datetime.now(UTC)).days
+            if 0 <= left <= 7:
+                items.append({"kind": "grant", "severity": "medium", "title": "Sua concessão termina em breve", "why": f"Restam {left} dia(s); nada será cobrado", "link": "/conta/acesso"})
     for t in c.query("SELECT id::text AS id, number, subject FROM support_tickets WHERE user_id = $1 AND status = 'waiting_user' ORDER BY updated_at DESC LIMIT 5", user_id):
         items.append({"kind": "support", "severity": "high", "title": f"Chamado #{t['number']} aguarda sua resposta", "why": t["subject"], "link": f"/ajuda/suporte/{t['id']}"})
     for e in c.query("SELECT e.slug, e.title, e.starts_at FROM hub_event_registrations g JOIN hub_events e ON e.id = g.event_id WHERE g.user_id = $1 AND g.status = 'registered' AND e.status = 'published'"
@@ -111,7 +111,6 @@ def my_activities(c, *, user_id: str, org_id: str | None) -> dict:
                            " (SELECT count(*) FROM course_lessons l WHERE l.course_id = e.course_id) AS lessons_total FROM course_enrollments e JOIN courses k ON k.id = e.course_id WHERE e.user_id = $1 ORDER BY e.started_at DESC LIMIT 10", user_id),
         "events": c.query("SELECT e.slug, e.title, e.starts_at, g.status FROM hub_event_registrations g JOIN hub_events e ON e.id = g.event_id WHERE g.user_id = $1 AND g.status IN ('registered','waitlist') AND e.starts_at > now() - interval '1 day' ORDER BY e.starts_at LIMIT 10", user_id),
         "certificates": c.query("SELECT code, course_title, hours, issued_at, revoked_at FROM course_certificates WHERE user_id = $1 ORDER BY issued_at DESC LIMIT 20", user_id),
-        "trial_requests": c.query("SELECT id::text AS id, status, period_days, created_at, decision_reason FROM trial_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5", user_id),
         "partnership_requests": c.query("SELECT id::text AS id, org_name, kind, status, created_at FROM partnership_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5", user_id),
         "demo_requests": c.query("SELECT id::text AS id, status, scheduled_at, meeting_url FROM demo_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 5", user_id),
     }
@@ -393,48 +392,6 @@ def certificate_verify(c, code: str) -> dict:
     return {"valid": r["revoked_at"] is None, "code": r["code"], "course_title": r["course_title"], "holder_name": r["holder_name"], "hours": r["hours"], "issued_at": r["issued_at"],
             "revoked": r["revoked_at"] is not None, "official": False,
             "notice": "Certificado de conclusão emitido pela plataforma para fins educacionais. Não é diploma nem certificação reconhecida oficialmente."}
-
-
-# ------------------------------------------------------------------------------------------------ teste (solicitação → decisão administrativa)
-def trial_request_decide(c, settings, request_id: str, *, admin_id: str, approve: bool, reason: str) -> dict:
-    from . import monetization as mon
-    r = c.one("SELECT id::text AS id, org_id::text AS org_id, org_kind, period_days, status, user_id::text AS user_id FROM trial_requests WHERE id = $1 FOR UPDATE", request_id)
-    if not r:
-        raise not_found("Solicitação")
-    if r["status"] != "requested":
-        raise ApiError(409, "already_decided", "Solicitação já decidida")
-    outcome = "not_applicable"
-    if approve:
-        cur = c.one("SELECT status, trial_end FROM org_trials WHERE org_id = $1", r["org_id"])
-        if not cur:
-            res = mon.start_trial(c, settings, org_id=r["org_id"], org_kind=r["org_kind"], email=None, cnpj=None, user_id=admin_id, source="admin", days=r["period_days"], force=True)
-            if not res.get("started"):
-                raise ApiError(409, "trial_unavailable", f"Não foi possível iniciar o teste ({res.get('reason')})")
-            outcome = "trial_started"
-        elif cur["status"] == "active" and cur["trial_end"] > datetime.now(UTC):
-            c.run("UPDATE org_trials SET trial_end = trial_end + make_interval(days => $2), updated_at = now() WHERE org_id = $1", r["org_id"], r["period_days"])
-            outcome = "trial_extended"
-        else:
-            raise ApiError(409, "trial_used", "Esta organização já usou o período de teste; ofereça licença/convênio ou plano pago")
-    c.run("UPDATE trial_requests SET status = $2, decided_by = $3, decided_at = now(), decision_reason = $4, outcome = $5 WHERE id = $1", request_id, "approved" if approve else "rejected", admin_id, reason, outcome)
-    notify_user(c, r["user_id"], r["org_id"], "billing", "Solicitação de teste " + ("aprovada" if approve else "analisada"), reason[:300], "/conta/plano")
-    return {"id": request_id, "status": "approved" if approve else "rejected", "outcome": outcome}
-
-
-def trial_dashboard(c) -> dict:
-    return {
-        "requests": c.query("SELECT status, count(*) AS n FROM trial_requests GROUP BY status"),
-        "active": c.scalar("SELECT count(*) FROM org_trials WHERE status = 'active' AND trial_end > now()"),
-        "ending_7d": c.scalar("SELECT count(*) FROM org_trials WHERE status = 'active' AND trial_end BETWEEN now() AND now() + interval '7 days'"),
-        "converted": c.scalar("SELECT count(*) FROM org_trials WHERE status = 'converted'"),
-        "ended": c.scalar("SELECT count(*) FROM org_trials WHERE status = 'ended'"),
-        "by_plan": c.query("SELECT plan_key, count(*) AS n FROM org_trials GROUP BY plan_key ORDER BY n DESC"),
-        "usage": c.query("SELECT t.org_id::text AS org_id, o.legal_name, t.trial_end, (SELECT count(*) FROM projects p WHERE p.org_id = t.org_id) AS projects,"
-                         " (SELECT count(*) FROM documents d WHERE d.org_id = t.org_id AND d.deleted_at IS NULL) AS documents,"
-                         " (SELECT count(*) FROM applications a WHERE a.osc_org_id = t.org_id OR a.funder_org_id = t.org_id) AS applications"
-                         " FROM org_trials t JOIN organizations o ON o.id = t.org_id WHERE t.status = 'active' ORDER BY t.trial_end LIMIT 50"),
-        "note": "Uso derivado das tabelas reais; conversão = assinatura paga confirmada pelo provedor.",
-    }
 
 
 # ------------------------------------------------------------------------------------------------ boletim

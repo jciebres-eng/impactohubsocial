@@ -35,3 +35,11 @@ def context_return(ctx: Ctx):
         if not c.scalar("SELECT 1 FROM projects WHERE id = $1", project_id):
             raise not_found("Projeto")
         return FR.context_return(c, project_id=project_id, org_id=ctx.org_id)
+
+
+@route("GET", "/v1/me/today", auth="user", tags=("inicio",),
+       summary="Para você hoje: cartões (pendências, decisões, repasses, participações, recomendações, trajetória) e contadores do menu, derivados de registros reais")
+def me_today(ctx: Ctx):
+    from ..network import today as TODAY
+    with ctx.tx(readonly=True) as c:
+        return TODAY.today(c, user_id=ctx.user_id, org_id=ctx.principal.org_id, org_kind=ctx.principal.org_kind)

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../api";
 import { date } from "../format";
+import { TrajectoryCard } from "./participations";
 import { Link, navigate, useLocation } from "../router";
 import { Button, Field, Input, PageHead, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
@@ -32,6 +33,8 @@ export function PublicProfilePage({ handle: fromRoute }: { handle?: string } = {
       </Panel>
       {p.bio && <Panel title="Sobre"><p>{p.bio}</p></Panel>}
       {p.mission && <Panel title="Missão"><p>{p.mission}</p></Panel>}
+      {/* v0.27.0 — trajetória cumulativa (contagens e datas; nunca valores): nasce de conclusão e quitação */}
+      {p.trajectory && <TrajectoryCard trajectory={p.trajectory} />}
 
       {!!p.projects?.length && (
         <Panel title={`Projetos publicados (${p.projects_count ?? p.projects.length})`}>

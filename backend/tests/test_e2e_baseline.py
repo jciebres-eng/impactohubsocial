@@ -1,6 +1,6 @@
 """E2E de navegador — jornadas da baseline técnica que faltavam no navegador: cadastro→login→SAIR,
 área bloqueada por tipo de organização, página de Plano (teste/cancelamento/voucher) e área administrativa com MFA real.
-Até aqui a cobrança/trial era provada só na API; estas jornadas provam a INTERFACE. Pulado se Playwright ou o build faltarem."""
+Até aqui o acesso/concessão era provado só na API; estas jornadas provam a INTERFACE. Pulado se Playwright ou o build faltarem."""
 import re
 import unittest
 import uuid
@@ -88,39 +88,28 @@ class BaselineE2E(unittest.TestCase):
         p.get_by_text("Página não encontrada").wait_for()
         self.assertEqual(p.errors, [])
 
-    # Jornada: Plano e cobrança — estado do teste, voucher aplicado na interface e cancelamento que mantém o acesso
-    def test_plan_page_shows_trial_applies_voucher_and_cancels_keeping_access(self):
+    # Jornada: Acesso e concessões — sem assinatura; voucher de concessão aplicado na interface libera o pacote
+    def test_access_page_has_no_subscription_and_applies_a_grant_voucher(self):
         adm1, _ = make_admin()
         adm2, _ = make_admin()
         batch = adm1.post("/v1/admin/voucher-batches", {"campaign": "E2E " + uuid.uuid4().hex[:5], "quantity": 1,
-                                                        "type": "percent_off", "percent": 15, "plan_key": "osc_premium", "max_redemptions": 2})
+                                                        "type": "grant_plan", "plan_key": "osc_premium", "duration_days": 30, "max_redemptions": 2})
         self.assertEqual(batch.status, 201, batch)
         self.assertEqual(adm2.post(f"/v1/admin/voucher-batches/{batch.json['batch_id']}/action", {"action": "approve"}).status, 200)
         code = batch.json["codes"][0]
-        old = self.state.settings.trial_auto_start
-        self.state.settings.trial_auto_start = True
-        try:
-            osc = new_account("osc")
-        finally:
-            self.state.settings.trial_auto_start = old
+        osc = new_account("osc")
         p = self.page()
         self.login(p, osc)
-        p.goto(self.base + "/conta/plano")
-        p.get_by_role("heading", name="Plano e cobrança").wait_for()
-        p.get_by_text("Teste até").first.wait_for()
+        p.goto(self.base + "/conta/acesso")
+        p.get_by_role("heading", name="Acesso e concessões").wait_for()
+        p.get_by_text("não cobra assinatura").first.wait_for()
         p.get_by_label("Código", exact=True).fill(code)
         p.get_by_role("button", name="Aplicar").click()
-        p.get_by_text("Voucher aplicado").wait_for()
-        p.get_by_text("Desconto de voucher aguardando a contratação").wait_for()
-        p.get_by_role("button", name="Cancelar", exact=True).click()
-        p.get_by_text("Nenhuma cobrança será realizada").wait_for()
-        p.get_by_role("button", name="Confirmar cancelamento").click()
-        p.get_by_text("Cancelamento confirmado").wait_for()
+        p.get_by_text("Concessão aplicada").wait_for()
         with db_system() as d:
-            t = d.one("SELECT status, canceled_at, trial_end > now() AS ainda_vale FROM org_trials WHERE org_id = $1", osc.org_id)
-        self.assertIsNotNone(t["canceled_at"], "cancelamento não foi registrado")
-        self.assertTrue(t["ainda_vale"], "cancelar encurtou o acesso já concedido")
-        self.assertTrue(osc.get("/v1/me").json["entitlements"]["features"], "acesso caiu imediatamente após cancelar")
+            g = d.one("SELECT source, ends_at > now() AS vale FROM entitlement_grants WHERE org_id = $1 AND source = 'voucher'", osc.org_id)
+        self.assertEqual((g["source"], g["vale"]), ("voucher", True))
+        self.assertIn("ai.assist.advanced", osc.get("/v1/me").json["entitlements"]["features"])
         self.assertEqual(p.errors, [])
 
     # Jornada: administração com MFA real (TOTP) → visão geral e auditoria

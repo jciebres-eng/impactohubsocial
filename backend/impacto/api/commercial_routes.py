@@ -1,9 +1,12 @@
-"""Oferta comercial, aceite, período gratuito e estado comercial da conta.
+"""Contrato comercial (proposta e aceite), período de concessão e estado comercial da conta.
 
-Estas rotas existem para que a interface NUNCA calcule data de fim de gratuidade nem deduza se a
-conta pode ser cobrada. Ela lê `GET /v1/commercial/state` e mostra o que vier. Toda a classe de
-defeito em que a tela anuncia um prazo e a cobrança usa outro nasce de duas camadas fazendo a
-mesma conta — então só uma faz.
+v0.27.0 (ADR-341): não há assinatura. A "oferta" é a proposta de um CONTRATO avulso ou parcelado
+(implantação, integração, módulo institucional, inteligência territorial), montada pela administração
+com alçada financeira, valor e motivo — nunca pela organização que paga. O aceite com autorização de
+cobrança concede o pacote de capacidades; revogar a autorização revoga a concessão.
+
+Estas rotas existem para que a interface NUNCA calcule data de fim de concessão nem deduza se a
+conta pode ser cobrada. Ela lê `GET /v1/commercial/state` e mostra o que vier.
 """
 from __future__ import annotations
 
@@ -17,16 +20,17 @@ T = ("commercial",)
 
 
 @route("GET", "/v1/commercial/state", tags=T,
-       summary="Estado comercial da conta: FREE_PERIOD_END, estado e se a cobrança foi autorizada")
+       summary="Estado comercial da conta: de onde vem o acesso (FREE_ACCESS/FREE_GRANT/GRANT_EXPIRING/CONTRACTED), fim da concessão e se há cobrança autorizada")
 def state(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         out = FP.state(c, ctx.org_id)
     # Dito em texto, e não só em código de estado: a tela mostra isto literalmente, e é a frase que
     # evita a pergunta "então vou ser cobrado?" chegar ao suporte.
     out["will_be_charged"] = bool(out["charge_authorized"])
-    out["on_expiry"] = ("A assinatura segue e a primeira fatura sai no fim do período gratuito."
+    out["on_expiry"] = ("Há contrato aceito com autorização de cobrança: as parcelas seguem o contrato."
                         if out["charge_authorized"] else
-                        "Nenhuma cobrança será feita. A conta volta ao plano gratuito, sem perder dados.")
+                        "Nenhuma cobrança será feita. O acesso ao núcleo continua gratuito, sem perder dados.")
+    out["no_subscription"] = "O IMPACTO não cobra assinatura. A receita vem da camada econômica da operação financiada e de contratos avulsos."
     return out
 
 
@@ -34,23 +38,28 @@ def state(ctx: Ctx):
 def list_offers(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
         return {"items": [dict(r) for r in c.query(
-            "SELECT id::text AS id, plan_key, pricing_version, currency, amount_cents,"
-            " billing_frequency, interval, installments, payment_method, free_period_months,"
+            "SELECT id::text AS id, plan_key, pricing_version, currency, amount_cents, amount_reason, contract_ref,"
+            " billing_frequency, installments, payment_method, free_period_months,"
             " status, expires_at, created_at FROM commercial_offers"
             " WHERE org_id = $1 ORDER BY created_at DESC LIMIT 50", ctx.org_id)]}
 
 
-@route("POST", "/v1/commercial/offers", body=S.CommercialOfferIn, status=201, tags=T, rate=("commercial_offer", 60, 3600),
-       summary="Monta uma oferta a partir do catálogo (valor nunca vem do cliente)")
+@route("POST", "/v1/admin/commercial/offers", body=S.CommercialOfferIn, status=201, auth="admin", permission="finance.approve",
+       tags=T, rate=("commercial_offer", 60, 3600),
+       summary="Proposta de contrato para uma organização (avulso ou parcelado): valor e motivo de quem tem alçada, auditado")
 def create_offer(ctx: Ctx, body: S.CommercialOfferIn):
     with ctx.tx() as c:
-        out = OF.create(c, org_id=ctx.org_id, plan_key=body.plan_key, interval=body.interval,
+        if not c.one("SELECT 1 FROM organizations WHERE id = $1", body.org_id):
+            raise not_found("Organização")
+        out = OF.create(c, org_id=body.org_id, plan_key=body.plan_key, amount_cents=body.amount_cents,
+                        amount_reason=body.amount_reason, contract_ref=body.contract_ref,
                         billing_frequency=body.billing_frequency,
                         payment_method=body.payment_method, installments=body.installments,
                         free_period_months=body.free_period_months, created_by=ctx.user_id)
         ctx.audit(c, "commercial.offer_created", "offer", out["id"],
-                  {"plan_key": body.plan_key, "billing_frequency": body.billing_frequency,
-                   "payment_method": body.payment_method, "installments": body.installments})
+                  {"plan_key": body.plan_key, "amount_cents": body.amount_cents, "reason": body.amount_reason,
+                   "billing_frequency": body.billing_frequency, "payment_method": body.payment_method,
+                   "installments": body.installments}, org_id=body.org_id)
     return out
 
 
@@ -63,6 +72,10 @@ def accept_offer(ctx: Ctx, body: S.CommercialAcceptIn):
                         ip=ctx.ip, user_agent=ctx.user_agent)
         ctx.audit(c, "commercial.offer_accepted", "offer", ctx.path["offer_id"],
                   {"consent_status": body.consent_status})
+    if body.consent_status == "authorized":
+        with ctx.system_tx() as c:       # a concessão é escrita pela plataforma, nunca pela organização
+            OF.grant_for_acceptance(c, org_id=ctx.org_id, plan_key=out["plan_key"], acceptance_id=out["id"],
+                                    billing_frequency=out["billing_frequency"])
     return out
 
 
@@ -74,8 +87,10 @@ def revoke_consent(ctx: Ctx, body: S.ConsentRevokeIn):
             raise ApiError(409, "no_authorization", "Não há autorização de cobrança vigente.")
         ctx.audit(c, "commercial.consent_revoked", "organization", ctx.org_id,
                   {"reason": body.reason})
+    with ctx.system_tx() as c:
+        OF.revoke_contract_grants(c, org_id=ctx.org_id, user_id=ctx.user_id, reason=body.reason)
     return {"revoked": True,
-            "message": "Autorização revogada. Nenhuma cobrança nova será feita."}
+            "message": "Autorização revogada. Nenhuma cobrança nova será feita e o pacote do contrato deixa de valer; nenhum dado é apagado."}
 
 
 @route("GET", "/v1/commercial/acceptances", tags=T, summary="Histórico de aceites desta organização")
@@ -141,7 +156,7 @@ def list_free_periods(ctx: Ctx):
 # --- uso e teto de gasto ------------------------------------------------------------------------
 
 @route("GET", "/v1/commercial/usage", tags=T,
-       summary="Consumo do período por métrica, com percentual e limite do plano")
+       summary="Consumo do período por métrica, com percentual e limite do pacote")
 def usage(ctx: Ctx):
     from ..services import usage as U
     # Contexto de SISTEMA porque esta leitura ESCREVE: ela sincroniza o contador do período. O
@@ -156,7 +171,7 @@ def usage(ctx: Ctx):
             "spend_limit": teto, "spent_cents": gasto,
             # Dito explicitamente porque é a pergunta que o número de consumo levanta: passar do
             # limite do plano não gera fatura — interrompe o excedente.
-            "overage_policy": "Exceder o limite do plano não gera cobrança adicional: o excedente "
+            "overage_policy": "Exceder o limite do pacote não gera cobrança adicional: o excedente "
                               "é interrompido. Não há cobrança por excedente sem preço publicado "
                               "e sem autorização."}
 

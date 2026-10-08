@@ -146,8 +146,8 @@ class StateMachineTests(PayBase):
 
 # ================================================================================================ meios
 class MethodTests(PayBase):
-    def test_installments_are_modelled_apart_from_subscription(self):
-        """Parcelamento tem número fixo de parcelas e não renova — por isso não é assinatura."""
+    def test_installments_have_a_fixed_number_and_never_renew(self):
+        """Parcelamento tem número fixo de parcelas e não renova — e não existe assinatura (ADR-341)."""
         c = self.charge(kind="installment_plan", installments=3, amount_cents=30_000)
         self.assertEqual(c["state"], "created")
         r = self.org.put(f"/v1/payments/charges/{c['id']}/installments", {"schedule": [
@@ -337,12 +337,14 @@ class PaymentJobTests(unittest.TestCase):
 
 # ================================================================================================ receita
 class RevenueShapeTests(PayBase):
-    def test_subscription_revenue_is_reported_apart_from_charges(self):
-        """Duas tabelas escrevendo o mesmo dinheiro dariam dois números para a mesma pergunta."""
+    def test_invoice_revenue_is_reported_apart_from_charges(self):
+        """Duas tabelas escrevendo o mesmo dinheiro dariam dois números para a mesma pergunta.
+        v0.27.0: o bloco chamava-se `subscriptions`; não há assinatura, então são as faturas (manuais/históricas)."""
         rev = self.admin.get("/v1/admin/payments/revenue").json
-        self.assertIn("subscriptions", rev)
-        self.assertIn("items", rev["subscriptions"])
-        self.assertIn("separado", rev["subscriptions"]["note"].lower())
+        self.assertNotIn("subscriptions", rev)
+        self.assertIn("invoices", rev)
+        self.assertIn("items", rev["invoices"])
+        self.assertIn("separado", rev["invoices"]["note"].lower())
 
     def test_a_paid_invoice_with_a_real_provider_name_is_still_not_real_money(self):
         """A lição mais cara desta fase.
@@ -361,7 +363,7 @@ class RevenueShapeTests(PayBase):
         rev = self.admin.get("/v1/admin/payments/revenue").json
         self.assertFalse(rev["provider_configured"])
         self.assertEqual(rev["total_real_paid_cents_by_currency"].get("BRL", 0), 0)
-        brl = next(i for i in rev["subscriptions"]["items"] if i["currency"] == "BRL")
+        brl = next(i for i in rev["invoices"]["items"] if i["currency"] == "BRL")
         self.assertEqual(brl["real_paid_cents"], 0)
         self.assertGreaterEqual(brl["simulated_cents"], 777700,
                                 "a fatura tem de aparecer, do lado simulado")

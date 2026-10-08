@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import unittest
 
-from tests.support import db_system, new_account
+from tests.support import db_system, make_admin, new_account, server
 
 
 def scalar(sql, *a):
@@ -273,9 +273,9 @@ class SpendLimitTests(unittest.TestCase):
                 ids[rotulo] = c.scalar(
                     "INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                     " currency)"
-                    " VALUES ($1,'subscription','card',$2,500000,'BRL') RETURNING id::text",
+                    " VALUES ($1,'one_off','card',$2,500000,'BRL') RETURNING id::text",
                     cli.org_id, provedor)
-                # O caminho real do grafo: a pessoa inicia o checkout, a cobrança fica pendente e
+                # O caminho real do grafo: a cobrança abre no provedor, fica pendente e
                 # o provedor confirma. As duas últimas são de origem `webhook` (org_id nulo) —
                 # inventar um atalho aqui testaria um caminho que produção não tem.
                 PAY.transition(c, charge_id=ids[rotulo], to_state="checkout_started",
@@ -292,12 +292,22 @@ class SpendLimitTests(unittest.TestCase):
         self.assertIsNone(outra.get("/v1/commercial/usage").json["spend_limit"]["limit_cents"])
 
 
+_ADM = {}
+
+
 def _autorizada():
-    """Conta com autorização de cobrança vigente — exigida pelo gatilho antes de qualquer cobrança."""
+    """Conta com autorização de cobrança vigente — exigida pelo gatilho antes de qualquer cobrança.
+
+    v0.27.0 (ADR-341): a proposta de contrato é da administração (valor + motivo); a organização aceita."""
+    if "c" not in _ADM:
+        server()
+        _ADM["c"], _ = make_admin()
     cli = new_account("osc")
-    r = cli.post("/v1/commercial/offers",
-                 {"plan_key": "osc_premium", "interval": "month",
-                  "billing_frequency": "recurring", "payment_method": "card"})
+    r = _ADM["c"].post("/v1/admin/commercial/offers",
+                       {"org_id": cli.org_id, "plan_key": "osc_premium", "amount_cents": 120000,
+                        "amount_reason": "Contrato de implantação (arranjo de teste)",
+                        "billing_frequency": "one_time", "payment_method": "card"})
+    assert r.status == 201, r.body
     cli.post(f"/v1/commercial/offers/{r.json['id']}/accept", {"consent_status": "authorized"})
     return cli
 
@@ -309,13 +319,13 @@ class IdempotencyKeyTests(unittest.TestCase):
         with db_system() as c:
             c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                   " currency, idempotency_key)"
-                  " VALUES ($1,'subscription','card','sandbox',79900,'BRL','pedido-abc-123')",
+                  " VALUES ($1,'one_off','card','sandbox',120000,'BRL','pedido-abc-123')",
                   cli.org_id)
         with self.assertRaises(Exception) as e:
             with db_system() as c:
                 c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                       " currency, idempotency_key)"
-                      " VALUES ($1,'subscription','card','sandbox',79900,'BRL','pedido-abc-123')",
+                      " VALUES ($1,'one_off','card','sandbox',120000,'BRL','pedido-abc-123')",
                       cli.org_id)
         self.assertIn("ux_charge_idempotency", str(e.exception))
         self.assertEqual(scalar("SELECT count(*) FROM platform_charges WHERE org_id = $1",
@@ -329,6 +339,6 @@ class IdempotencyKeyTests(unittest.TestCase):
             for org in (a.org_id, b.org_id):
                 c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                       " currency, idempotency_key)"
-                      " VALUES ($1,'subscription','card','sandbox',79900,'BRL','fatura-1')", org)
+                      " VALUES ($1,'one_off','card','sandbox',120000,'BRL','fatura-1')", org)
         self.assertEqual(scalar("SELECT count(*) FROM platform_charges"
                                 " WHERE idempotency_key = 'fatura-1'"), 2)

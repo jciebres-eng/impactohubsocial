@@ -1,7 +1,21 @@
 # PRICING BIBLE — IMPACTO TRUST
 
-**Pricing Version:** `2027.01`
+**Pricing Version:** `2027.02` (v0.27.0) — a `2027.01` está **superada** no ponto da assinatura.
 **Status do documento:** fonte de verdade COMERCIAL, fornecida pelo proprietário.
+
+> ⚠️ **ADR-341 (v0.27.0, 08/10/2026): NÃO EXISTE MAIS ASSINATURA.** A Pricing Version 2027.01 publicou
+> mensalidades (§3), três meses para assinatura nova (§4.2) e reajuste com aviso (§8). O proprietário
+> retirou a assinatura do modelo econômico: o IMPACTO é infraestrutura de inteligência e operação de
+> impacto, remunerada pela **camada econômica da operação financiada** — 5% do valor financiado, sendo
+> **3,5% taxa de serviço contratada da plataforma** e **1,5% participação de autoria do proponente** quando
+> contratualmente elegível — e por **contratos avulsos/parcelados** (implantação, módulo institucional,
+> inteligência territorial, API). Os percentuais vivem em `economic_rules` (Pricing Version 2027.02) e são
+> congelados em cada acordo; nunca em código. O que continua valendo desta Bíblia: §1 (núcleo gratuito por
+> desenho), §2 (o que o pagamento nunca compra), §4.1 (FULL FREE 2026, agora como concessão), §4.4 (acesso
+> gratuito ≠ autorização de cobrança), §5 (regras transacionais desligadas), §6, §7, §9 e §10. Os §3, §4.2,
+> §4.3 (origem `2027_NEW_SUBSCRIPTION`) e §8 ficam como HISTÓRICO. Inventário completo:
+> `docs/execution/SUBSCRIPTION_INVENTORY.md`.
+
 **Status dos valores:** referência inicial de uma versão de preço — **não é verdade eterna**.
 **Validação pendente:** jurídica, fiscal e operacional antes da publicação comercial definitiva.
 

@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 900,
- "operacoes_registradas": 894,
+ "operacoes_no_backend": 899,
+ "operacoes_registradas": 893,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -19,8 +19,8 @@
   "sem chamada direta": 62
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 60,
- "operacoes_que_nenhuma_tela_chama": 236,
+ "arquivos_do_front_varridos": 61,
+ "operacoes_que_nenhuma_tela_chama": 235,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -59,7 +59,6 @@
   "GET /v1/ai/credits",
   "GET /v1/ai/estimate",
   "GET /v1/auth/oidc/callback",
-  "GET /v1/billing/price-history",
   "GET /v1/claims/review-requests",
   "GET /v1/claims/{}",
   "GET /v1/data-quality/vocabulary",
@@ -109,8 +108,8 @@
   "GET /v1/organizations/{}/compliance",
   "GET /v1/organizations/{}/reputation",
   "GET /v1/organizations/{}/reputation/timeline",
+  "GET /v1/participations/{}",
   "GET /v1/payments/charges/{}",
-  "GET /v1/plans/price",
   "GET /v1/privacy/retention",
   "GET /v1/programs/feed",
   "GET /v1/programs/status-graph",
@@ -133,6 +132,7 @@
   "GET /v1/seals/rules",
   "GET /v1/signatures/verify",
   "GET /v1/signed-agreements/{}/allocation",
+  "GET /v1/signed-agreements/{}/payouts",
   "GET /v1/solutions/{}/adaptations",
   "GET /v1/solutions/{}/versions",
   "GET /v1/territories/catalog-status",
@@ -155,6 +155,7 @@
   "POST /v1/admin/audit/export",
   "POST /v1/admin/calls/{}/status",
   "POST /v1/admin/calls/{}/verify",
+  "POST /v1/admin/commercial/offers",
   "POST /v1/admin/content/events/{}/recording-to-resource",
   "POST /v1/admin/content/resources/{}/new-version",
   "POST /v1/admin/datasets",
@@ -175,7 +176,8 @@
   "POST /v1/admin/messages/{}/remove",
   "POST /v1/admin/monetization/legal-cards",
   "POST /v1/admin/monetization/pipeline/{}/waive",
-  "POST /v1/admin/organizations/{}/manual-subscription",
+  "POST /v1/admin/payout-transfers/{}/confirm",
+  "POST /v1/admin/payouts/{}/reconcile",
   "POST /v1/admin/reputation/disputes/{}/resolution",
   "POST /v1/admin/seals/awards",
   "POST /v1/admin/seals/awards/{}/revoke",
@@ -190,8 +192,6 @@
   "POST /v1/ai/classify-document/{}",
   "POST /v1/ai/summarize-project",
   "POST /v1/auth/mfa/disable",
-  "POST /v1/billing/price-notices/{}/ack",
-  "POST /v1/billing/webhooks/stripe",
   "POST /v1/claims/{}/review",
   "POST /v1/claims/{}/review-requests",
   "POST /v1/claims/{}/withdraw",
@@ -246,7 +246,6 @@
   "PUT /v1/admin/content/faqs/{}",
   "PUT /v1/admin/content/resources/{}",
   "PUT /v1/admin/flags/{}",
-  "PUT /v1/admin/plans/{}/price",
   "PUT /v1/admin/signature-providers/{}",
   "PUT /v1/admin/support/sla/{}",
   "PUT /v1/conversations/{}/status",
@@ -687,17 +686,6 @@
    "estado": "backend presente"
   },
   {
-   "rota": "/ajuda/teste",
-   "componente": "Help.TrialRequest",
-   "arquivo": "web/src/pages/help.tsx",
-   "operacoes": [
-    "GET /v1/help/trial-requests",
-    "POST /v1/help/trial-requests"
-   ],
-   "ausentes": [],
-   "estado": "backend presente"
-  },
-  {
    "rota": "/campanha/:slug",
    "componente": "Funding.PublicCampaign",
    "arquivo": "web/src/pages/funding.tsx",
@@ -745,12 +733,18 @@
    "arquivo": "web/src/pages/trust.tsx",
    "operacoes": [
     "PATCH /v1/signed-agreements/{}/milestones/{}",
+    "POST /v1/payout-transfers/{}/confirm",
+    "POST /v1/payout-transfers/{}/reject",
+    "POST /v1/payouts/{}/reconcile",
+    "POST /v1/payouts/{}/transfers",
+    "POST /v1/signed-agreements/{}/cancel",
     "POST /v1/signed-agreements/{}/decline",
     "POST /v1/signed-agreements/{}/milestones",
     "POST /v1/signed-agreements/{}/new-version",
     "POST /v1/signed-agreements/{}/parties",
     "POST /v1/signed-agreements/{}/publish",
-    "POST /v1/verifiable-records"
+    "POST /v1/verifiable-records",
+    "PUT /v1/signed-agreements/{}/parties/{}/pix"
    ],
    "ausentes": [],
    "estado": "backend presente"
@@ -873,6 +867,7 @@
    "arquivo": "web/src/pages/helpAdmin.tsx",
    "operacoes": [
     "GET /v1/admin/hub/partnerships{}",
+    "POST /v1/admin/hub/demo-requests/{}/handle",
     "POST /v1/admin/hub/partnerships/{}/move",
     "POST /v1/admin/hub/partnerships/{}/notes"
    ],
@@ -911,20 +906,6 @@
    "estado": "backend presente"
   },
   {
-   "rota": "/admin/central/testes",
-   "componente": "HelpA.Trials",
-   "arquivo": "web/src/pages/helpAdmin.tsx",
-   "operacoes": [
-    "GET /v1/admin/hub/demo-requests",
-    "GET /v1/admin/hub/trial-requests",
-    "GET /v1/admin/hub/trials",
-    "POST /v1/admin/hub/demo-requests/{}/handle",
-    "POST /v1/admin/hub/trial-requests/{}/decide"
-   ],
-   "ausentes": [],
-   "estado": "backend presente"
-  },
-  {
    "rota": "/admin/chaves",
    "componente": "Core.EncryptionKeys",
    "arquivo": "web/src/pages/core.tsx",
@@ -943,7 +924,7 @@
     "GET /v1/admin/billing/organizations/{}",
     "POST /v1/admin/grants/{}/revoke",
     "POST /v1/admin/organizations/{}/grants",
-    "POST /v1/admin/organizations/{}/trial"
+    "POST /v1/admin/organizations/{}/license"
    ],
    "ausentes": [],
    "estado": "backend presente"
@@ -1351,6 +1332,17 @@
    "estado": "backend presente"
   },
   {
+   "rota": "/conta/acesso",
+   "componente": "Org.Plan",
+   "arquivo": "web/src/pages/org.tsx",
+   "operacoes": [
+    "POST /v1/agreements/join",
+    "POST /v1/vouchers/redeem"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
    "rota": "/conta/comercial",
    "componente": "Com.Commercial",
    "arquivo": "web/src/pages/commercial.tsx",
@@ -1397,12 +1389,6 @@
    "arquivo": "web/src/pages/org.tsx",
    "operacoes": [
     "POST /v1/agreements/join",
-    "POST /v1/billing/cancel",
-    "POST /v1/billing/change-plan",
-    "POST /v1/billing/checkout",
-    "POST /v1/billing/portal",
-    "POST /v1/billing/quote",
-    "POST /v1/billing/reactivate",
     "POST /v1/vouchers/redeem"
    ],
    "ausentes": [],
@@ -1987,6 +1973,17 @@
    "estado": "backend presente"
   },
   {
+   "rota": "/participacoes",
+   "componente": "Part.Participations",
+   "arquivo": "web/src/pages/participations.tsx",
+   "operacoes": [
+    "POST /v1/participations/{}/accept",
+    "POST /v1/participations/{}/cancel"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
    "rota": "/perfil-publico",
    "componente": "PP.MyPublicProfile",
    "arquivo": "web/src/pages/publicprofile.tsx",
@@ -2405,12 +2402,6 @@
    "arquivo": "web/src/pages/org.tsx",
    "operacoes": [
     "POST /v1/agreements/join",
-    "POST /v1/billing/cancel",
-    "POST /v1/billing/change-plan",
-    "POST /v1/billing/checkout",
-    "POST /v1/billing/portal",
-    "POST /v1/billing/quote",
-    "POST /v1/billing/reactivate",
     "POST /v1/vouchers/redeem"
    ],
    "ausentes": [],

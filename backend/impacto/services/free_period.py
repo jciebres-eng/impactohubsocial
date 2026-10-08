@@ -1,23 +1,18 @@
-"""Período gratuito por conta: FULL FREE 2026 e os 3 meses das assinaturas novas de 2027.
+"""Período de concessão por conta: FULL FREE 2026 e concessões temporais (promoção, parceria, exceção).
 
-POR QUE A GRATUIDADE É UM REGISTRO, E NÃO UMA DATA NO CÓDIGO
+v0.27.0 (ADR-341): NÃO EXISTE ASSINATURA. O acesso ao núcleo é gratuito por desenho, não por prazo. Um
+período de concessão responde outra pergunta: "esta conta tem, por tempo determinado, capacidades que
+normalmente viriam de um contrato?" — e até quando, por quê, concedido por quem. A origem
+`2027_NEW_SUBSCRIPTION` (3 meses de assinatura nova) foi aposentada junto com a assinatura.
 
-A regra comercial cabe numa frase — "tudo grátis até 31/12/2026, e toda assinatura nova a partir
-de 2027 ganha 3 meses" — e é justamente por isso que a implementação óbvia está errada. Uma
-constante comparada com `now()` responde "estamos antes de 2027?". Ninguém faz essa pergunta. As
-perguntas reais são: *esta conta* está gratuita? até quando? por quê? quem concedeu? o que ela
-aceitou? E uma constante não sabe nada sobre uma conta.
+POR QUE A CONCESSÃO É UM REGISTRO, E NÃO UMA DATA NO CÓDIGO
 
-Então cada conta tem a sua linha em `free_periods`, com origem, motivo, versão de preço e autor.
-A campanha de 2026 é o que CONCEDE essas linhas — não o que as substitui.
+Uma constante comparada com `now()` responde "estamos antes de 2027?". Ninguém faz essa pergunta. As
+perguntas reais são: *esta conta* tem concessão? até quando? por quê? quem concedeu? E uma constante
+não sabe nada sobre uma conta. Então cada conta tem a sua linha em `free_periods`, com origem, motivo,
+versão de preço e autor. A campanha de 2026 é o que CONCEDE essas linhas — não o que as substitui.
 
-MESES DE CALENDÁRIO, NÃO 90 DIAS
-
-"3 meses" aqui significa 3 meses de calendário (ver `FULL_FREE_2026.md` §3 e ADR-268). Quem assina
-dia 15 espera que acabe dia 15. Noventa dias quebram essa expectativa em todo trimestre que
-contenha um mês de 31 dias — e quebram para menos, o que o cliente percebe.
-
-`ends_at` É EXCLUSIVO: o período é [started_at, ends_at).
+MESES DE CALENDÁRIO, NÃO 90 DIAS (ADR-268). `ends_at` É EXCLUSIVO: o período é [started_at, ends_at).
 """
 from __future__ import annotations
 
@@ -26,17 +21,16 @@ from pathlib import Path
 
 CONFIG = Path(__file__).resolve().parents[3] / "config" / "plans.json"
 
-SOURCES = ("2026_CAMPAIGN", "2027_NEW_SUBSCRIPTION", "PROMOTION", "GRANT", "PARTNERSHIP",
-           "MANUAL_EXCEPTION")
+SOURCES = ("2026_CAMPAIGN", "PROMOTION", "GRANT", "PARTNERSHIP", "MANUAL_EXCEPTION")
 
-# Quantos meses de calendário uma assinatura nova recebe a partir de 2027.
-NEW_SUBSCRIPTION_MONTHS = 3
-
-# Estados comerciais que `org_commercial_state()` devolve. A lista vive aqui para que a API e a
-# interface tenham um lugar só para conferir, e para que acrescentar um estado novo sem avisar
-# ninguém quebre o teste em vez de aparecer como rótulo vazio na tela.
-STATES = ("FREE", "FREE_EXPIRING", "PAYMENT_METHOD_REQUIRED", "COMMERCIAL_TERM_PENDING",
-          "PAID_ACTIVE", "CANCELLED", "SUSPENDED", "PAST_DUE", "GRACE_PERIOD", "TERMINATED")
+# Estados comerciais que `org_commercial_state()` devolve (v0.27.0): a pergunta é "de onde vem o acesso?".
+# A lista vive aqui para que a API e a interface tenham um lugar só para conferir, e para que acrescentar
+# um estado novo sem avisar ninguém quebre o teste em vez de aparecer como rótulo vazio na tela.
+STATES = ("FREE_ACCESS", "FREE_GRANT", "GRANT_EXPIRING", "CONTRACTED")
+STATE_LABEL = {"FREE_ACCESS": "Acesso livre ao núcleo (gratuito por desenho)",
+               "FREE_GRANT": "Concessão temporal vigente",
+               "GRANT_EXPIRING": "Concessão termina em até 30 dias (aviso, nunca cobrança)",
+               "CONTRACTED": "Contrato comercial aceito com autorização de cobrança"}
 
 
 def pricing_version() -> str:
@@ -54,7 +48,7 @@ def campaign_2026_open(c) -> bool:
 
 
 def grant(c, *, org_id: str, source: str, reason: str, months: int | None = None,
-          ends_at=None, subscription_id: str | None = None, plan_key: str | None = None,
+          ends_at=None, plan_key: str | None = None,
           granted_by: str | None = None, starts_at=None) -> dict | None:
     """Concede um período gratuito. Devolve o registro, ou None se a conta já tinha aquele.
 
@@ -67,18 +61,18 @@ def grant(c, *, org_id: str, source: str, reason: str, months: int | None = None
         raise ValueError("informe meses de calendário OU uma data de fim, nunca ambos")
 
     row = c.one(
-        "INSERT INTO free_periods(org_id, subscription_id, source, reason, pricing_version,"
+        "INSERT INTO free_periods(org_id, source, reason, pricing_version,"
         " plan_key, months, started_at, ends_at, granted_by, status)"
-        # Os casts não são decoração: `$7` entra como smallint na coluna `months` e como integer
+        # Os casts não são decoração: `$6` entra como smallint na coluna `months` e como integer
         # no argumento de `add_calendar_months`, e o servidor recusa deduzir dois tipos para o
         # mesmo parâmetro. Dizer o tipo é mais barato do que descobrir isso em produção.
-        " VALUES ($1,$2,$3,$4,$5,$6,$7::smallint, coalesce($8::timestamptz, now()),"
-        "         coalesce($9::timestamptz,"
-        "                  add_calendar_months(coalesce($8::timestamptz, now()), $7::int)),"
-        "         $10, 'active')"
+        " VALUES ($1,$2,$3,$4,$5,$6::smallint, coalesce($7::timestamptz, now()),"
+        "         coalesce($8::timestamptz,"
+        "                  add_calendar_months(coalesce($7::timestamptz, now()), $6::int)),"
+        "         $9, 'active')"
         " ON CONFLICT DO NOTHING"
         " RETURNING id::text, started_at, ends_at, source, months",
-        org_id, subscription_id, source, reason, pricing_version(), plan_key, months,
+        org_id, source, reason, pricing_version(), plan_key, months,
         starts_at, ends_at, granted_by)
     return dict(row) if row else None
 
@@ -96,24 +90,6 @@ def grant_campaign_2026(c, *, org_id: str) -> dict | None:
         reason="FULL FREE 2026 — produto integralmente gratuito até 31/12/2026 "
                "(America/Sao_Paulo), por decisão do proprietário registrada em PRICING_BIBLE.md §4.1.",
         ends_at=c.scalar("SELECT full_free_2026_ends_at()"))
-
-
-def grant_new_subscription(c, *, org_id: str, subscription_id: str,
-                           plan_key: str | None = None) -> dict | None:
-    """Concede os 3 meses de calendário de uma assinatura nova.
-
-    Só a partir de 2027: enquanto a campanha de 2026 estiver valendo, a conta JÁ está gratuita, e
-    empilhar três meses em cima disso daria ao cliente que assinou em dezembro quase quinze meses
-    de graça enquanto quem assinou em janeiro teria três. O benefício começa quando a gratuidade
-    geral termina.
-    """
-    if campaign_2026_open(c):
-        return None
-    return grant(
-        c, org_id=org_id, source="2027_NEW_SUBSCRIPTION", subscription_id=subscription_id,
-        plan_key=plan_key, months=NEW_SUBSCRIPTION_MONTHS,
-        reason=f"{NEW_SUBSCRIPTION_MONTHS} meses de calendário gratuitos para assinatura nova, "
-               f"conforme PRICING_BIBLE.md §4.2.")
 
 
 def state(c, org_id: str) -> dict:
@@ -161,23 +137,22 @@ WINDOWS = (90, 60, 30, 7, 1)
 WEEKLY_FROM = 30     # a partir de quantos dias restantes entra também o lembrete semanal
 
 _TITLES = {
-    90: "Seu período gratuito termina em 90 dias",
-    60: "Seu período gratuito termina em 60 dias",
-    30: "Seu período gratuito termina em 30 dias",
-    7:  "Seu período gratuito termina em 7 dias",
-    1:  "Seu período gratuito termina amanhã",
+    90: "Sua concessão termina em 90 dias",
+    60: "Sua concessão termina em 60 dias",
+    30: "Sua concessão termina em 30 dias",
+    7:  "Sua concessão termina em 7 dias",
+    1:  "Sua concessão termina amanhã",
 }
 
 
 def _body(dias: int, autorizado: bool) -> str:
     if autorizado:
-        return (f"Faltam {dias} dia(s). Como você já autorizou a cobrança, a assinatura segue "
-                "automaticamente e a primeira fatura sai no fim do período gratuito. "
-                "Você pode cancelar antes disso, sem custo.")
+        return (f"Faltam {dias} dia(s) de concessão. Como há contrato aceito com autorização de cobrança, "
+                "as capacidades do contrato continuam após o fim da concessão, conforme o contrato.")
     # A frase que mais importa do arquivo inteiro: não fazer nada é uma opção segura.
-    return (f"Faltam {dias} dia(s). Você NÃO será cobrado: nenhuma cobrança foi autorizada. "
-            "Se não fizer nada, sua conta continua no plano gratuito, sem perder dados. "
-            "Para continuar com os recursos pagos, autorize a cobrança antes do fim do período.")
+    return (f"Faltam {dias} dia(s) de concessão. Você NÃO será cobrado: não existe assinatura. "
+            "Se não fizer nada, sua conta continua com o acesso livre ao núcleo, sem perder dados. "
+            "Capacidades contratuais seguem por concessão, convênio ou contrato.")
 
 
 def notify_windows(c) -> dict:
@@ -206,7 +181,7 @@ def notify_windows(c) -> dict:
                 enviados += 1
         elif dias <= WEEKLY_FROM and dias % 7 == 0:
             if notify_once(c, r["org_id"], "free_period_ending", f"{r['id']}:w{dias}",
-                           f"Seu período gratuito termina em {dias} dias",
+                           f"Sua concessão termina em {dias} dias",
                            _body(dias, r["auth"])):
                 enviados += 1
     return {"notified": enviados}
@@ -215,7 +190,7 @@ def notify_windows(c) -> dict:
 def sweep(c) -> dict:
     """Marca como expirados os períodos que terminaram. Não cobra, não suspende, não apaga.
 
-    O fim de um período gratuito devolve a conta ao plano gratuito permanente. É a única coisa que
+    O fim de uma concessão devolve a conta ao acesso livre do núcleo. É a única coisa que
     acontece — e dizer isso em código é mais barato do que explicar depois por que a conta de
     alguém foi suspensa.
     """
@@ -230,10 +205,9 @@ def sweep(c) -> dict:
         if not c.one("SELECT 1 FROM free_periods WHERE org_id = $1 AND status = 'active'"
                      " AND ends_at > now()", r["org_id"]):
             notify_once(c, r["org_id"], "free_period_ended", r["id"],
-                        "Seu período gratuito terminou",
-                        "Sua conta voltou ao plano gratuito. Nenhuma cobrança foi feita e nenhum "
-                        "dado foi apagado. Os recursos pagos ficam disponíveis assim que você "
-                        "autorizar a cobrança.")
+                        "Sua concessão terminou",
+                        "Sua conta segue com o acesso livre ao núcleo. Nenhuma cobrança foi feita e nenhum "
+                        "dado foi apagado. Capacidades contratuais voltam por concessão, convênio ou contrato.")
     out = {"expired": len(encerrados)}
     out.update(notify_windows(c))
     return out

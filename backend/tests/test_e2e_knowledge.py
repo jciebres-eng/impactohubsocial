@@ -187,13 +187,9 @@ class KnowledgeE2E(unittest.TestCase):
         pb.goto(f"{self.base}/ajuda/eventos/{slug}")
         pb.get_by_role("button", name="Entrar na lista de espera").click()
         pb.get_by_text("Na lista de espera").wait_for()
-        # pedido de teste: fica "Solicitada" até o administrador decidir
+        # v0.27.0 (ADR-341): o pedido de teste saiu com a assinatura; a rota antiga responde "não encontrada".
         pb.goto(self.base + "/ajuda/teste")
-        pb.get_by_label("Para que você quer testar?").fill("Avaliar o fluxo de captação com a equipe de projetos.")
-        pb.get_by_role("button", name="Enviar pedido").click()
-        pb.get_by_text("Solicitada").wait_for()
-        pend = b.get("/v1/help/trial-requests").json["items"]
-        self.assertEqual(pend[0]["status"], "requested")
+        pb.get_by_text("Página não encontrada").wait_for()
         self.assertEqual(Client().get(f"/v1/help/events/{slug}").json["demo_label"] is not None, True)
         self.assertEqual(pa.errors + pb.errors, [])
 

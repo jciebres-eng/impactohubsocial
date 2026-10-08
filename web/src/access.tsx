@@ -16,7 +16,7 @@ export type AccessContextData = {
   user: { id: string; email: string; mfa_enabled: boolean; mfa_verified: boolean; email_verified: boolean };
   staff: { is_platform_admin: boolean; roles: string[]; permissions: string[]; read_only: boolean };
   organization: { id: string; kind: string; name: string; role: string } | null;
-  commercial: { plans: string[]; subscription_status: string | null; state: string | null; free_period_end: string | null; charge_authorized: boolean };
+  commercial: { plans: string[]; subscription: null; state: string | null; free_period_end: string | null; charge_authorized: boolean };
   entitlements: { features: string[]; limits: Record<string, number | null> };
   dashboard: string;
   menu: MenuGroup[];

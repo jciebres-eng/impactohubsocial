@@ -411,7 +411,7 @@ class Onboarding(unittest.TestCase):
         self.assertTrue(p["items"])
         self.assertEqual(p["items"][0]["kind"], "onboarding")
         a = c.get("/v1/help/activities").json
-        self.assertEqual(set(a), {"tickets", "courses", "events", "certificates", "trial_requests", "partnership_requests", "demo_requests"})
+        self.assertEqual(set(a), {"tickets", "courses", "events", "certificates", "partnership_requests", "demo_requests"})
         self.assertEqual(c.get("/v1/help/recommendations").status, 200)
 
     def test_requires_auth(self):
@@ -811,62 +811,16 @@ class Captation(unittest.TestCase):
             self.assertEqual(hub.bulletin_dispatch(server()["state"], d)["sent"], 0)       # não repete no mesmo período
 
 
-class TrialRequests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        server()
-        cls.adm, _ = make_admin()
+class TrialRequestsRetired(unittest.TestCase):
+    """v0.27.0 (ADR-341): a solicitação de teste saiu com a assinatura. Quem quer conhecer módulos pede
+    demonstração (`/v1/help/demo-requests`); concessão de pacote é licença administrativa com motivo."""
 
-    body = {"users_count": 5, "purpose": "Avaliar a plataforma com nossa equipe de projetos.", "modules": ["projetos", "match"], "period_days": 14, "responsible": "Ana Responsável"}
-
-    def test_request_never_grants_access_and_admin_decision_starts_trial(self):
+    def test_the_trial_request_routes_are_gone(self):
         o = new_account("osc")
-        r = o.post("/v1/help/trial-requests", self.body)
-        self.assertEqual(r.status, 201, r)
-        self.assertEqual(o.post("/v1/help/trial-requests", self.body).status, 409)           # já em análise
+        self.assertIn(o.post("/v1/help/trial-requests", {"users_count": 5, "purpose": "Avaliar a plataforma com nossa equipe.", "responsible": "Ana"}).status, (404, 405))
+        self.assertIn(o.get("/v1/help/trial-requests").status, (404, 405))
         with db_system() as d:
-            self.assertIsNone(d.one("SELECT 1 FROM org_trials WHERE org_id = $1", o.org_id))   # nada concedido
-        ent_before = o.get("/v1/me").json["entitlements"]["plans"]
-        self.assertEqual(self.adm.post(f"/v1/admin/hub/trial-requests/{r.json['id']}/decide", {"approve": True}).status, 422)   # motivo obrigatório
-        d = self.adm.post(f"/v1/admin/hub/trial-requests/{r.json['id']}/decide", {"approve": True, "reason": "Perfil adequado e uso institucional"})
-        self.assertEqual((d.status, d.json["outcome"]), (200, "trial_started"), d)
-        with db_system() as db:
-            tr = db.one("SELECT source, status, round(extract(epoch FROM trial_end - trial_start) / 86400) AS days FROM org_trials WHERE org_id = $1", o.org_id)
-        self.assertEqual((tr["source"], tr["status"], int(tr["days"])), ("admin", "active", 14))
-        self.assertNotEqual(o.get("/v1/me").json["entitlements"]["plans"], ent_before)
-        self.assertEqual(self.adm.post(f"/v1/admin/hub/trial-requests/{r.json['id']}/decide", {"approve": False, "reason": "duplicada"}).status, 409)
-        self.assertTrue([n for n in o.get("/v1/notifications").json["items"] if "Solicitação de teste" in n["title"]])
-
-    def test_active_trial_is_extended_and_used_trial_is_refused(self):
-        o = new_account("osc")
-        with db_system() as d:
-            d.run("INSERT INTO org_trials(org_id, plan_key, source, trial_end) VALUES ($1,'osc_premium','signup', now() + interval '2 days')", o.org_id)
-        r = o.post("/v1/help/trial-requests", {**self.body, "period_days": 7})
-        d = self.adm.post(f"/v1/admin/hub/trial-requests/{r.json['id']}/decide", {"approve": True, "reason": "Mais uma semana para concluir a avaliação"})
-        self.assertEqual(d.json["outcome"], "trial_extended")
-        u = new_account("osc")
-        with db_system() as db:
-            db.run("INSERT INTO org_trials(org_id, plan_key, source, trial_start, trial_end, status) VALUES ($1,'osc_premium','signup', now() - interval '30 days', now() - interval '16 days', 'ended')", u.org_id)
-        r2 = u.post("/v1/help/trial-requests", self.body)
-        d2 = self.adm.post(f"/v1/admin/hub/trial-requests/{r2.json['id']}/decide", {"approve": True, "reason": "Tentativa de novo teste"})
-        self.assertEqual((d2.status, d2.json["code"]), (409, "trial_used"))
-        rej = self.adm.post(f"/v1/admin/hub/trial-requests/{r2.json['id']}/decide", {"approve": False, "reason": "Teste já utilizado; oferecer convênio"})
-        self.assertEqual(rej.json["status"], "rejected")
-
-    def test_only_owner_requests_and_only_admin_decides(self):
-        o = new_account("osc")
-        r = o.post("/v1/help/trial-requests", self.body)
-        self.assertEqual(o.post(f"/v1/admin/hub/trial-requests/{r.json['id']}/decide", {"approve": True, "reason": "me aprovando"}).status, 403)
-        self.assertEqual(Client().post("/v1/help/trial-requests", self.body).status, 401)
-        self.assertEqual(o.post("/v1/help/trial-requests", {**self.body, "period_days": 90}).status, 422)
-        other = new_account("osc")
-        self.assertEqual(other.get("/v1/help/trial-requests").json["items"], [])
-
-    def test_dashboard_has_derived_usage(self):
-        d = self.adm.get("/v1/admin/hub/trials").json
-        self.assertIn("requests", d)
-        self.assertIn("usage", d)
-        self.assertIn("derivado", d["note"])
+            self.assertIsNone(d.one("SELECT 1 FROM information_schema.tables WHERE table_name IN ('trial_requests', 'org_trials')"))
 
 
 class AnalyticsAndGovernance(unittest.TestCase):

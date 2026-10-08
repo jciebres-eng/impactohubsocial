@@ -607,3 +607,22 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 /* v0.27.0 — botão que parece link (ações pequenas dentro de texto) */
 .linklike { background: none; border: 0; padding: 0; color: var(--tinta); text-decoration: underline; cursor: pointer; font: inherit; }
 .linklike:focus-visible { outline: 2px solid var(--foco, var(--tinta)); outline-offset: 2px; }
+
+/* v0.27.0 — "Para você hoje": baralho de cartões flutuantes. Um cartão = uma coisa que espera a pessoa. */
+.deck { margin: 0 0 18px; }
+.deck-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.deck-head h2 { font-size: 16px; margin: 0; }
+.deck-cards { list-style: none; margin: 0; padding: 4px 0 8px; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity; }
+.deck-card { flex: 0 0 min(280px, 86vw); scroll-snap-align: start; background: var(--folha); border: 1px solid var(--linha); border-left: 4px solid var(--linha-2); border-radius: var(--raio-l); box-shadow: var(--sombra); display: flex; flex-direction: column; }
+.deck-high { border-left-color: var(--barro); }
+.deck-medium { border-left-color: var(--ipe); }
+.deck-info { border-left-color: var(--tinta-3); }
+.deck-face { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 10px; min-height: 86px; }
+.deck-face:focus-visible { outline: 2px solid var(--ipe); outline-offset: -2px; border-radius: var(--raio-l); }
+.deck-kind { font-size: 12px; color: var(--texto-2); }
+.deck-face strong { font-size: 14.5px; line-height: 1.35; }
+.deck-why { font-size: 13px; color: var(--texto-2); }
+.deck-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 16px 12px; }
+.btn-sm { padding: 4px 10px; font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { .deck-card { transition: transform .15s ease; } .deck-card.deck-open { transform: translateY(-2px); } }
+

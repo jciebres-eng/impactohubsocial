@@ -62,7 +62,7 @@ class TheContainerEntrypointBringsTheProductUpOnACleanDatabaseTests(unittest.Tes
             "PORT": str(cls.port), "WEB_CONCURRENCY": "1",
             "SECRET_KEY": "entry-secret-key-" + "x" * 32, "VOUCHER_HMAC_KEY": "entry-voucher-" + "y" * 32,
             "STORAGE_LOCAL_DIR": str(ROOT / "backend" / ".tmp_entry_storage"), "PUBLIC_BASE_URL": f"http://127.0.0.1:{cls.port}",
-            "COOKIE_SECURE": "false", "BILLING_PROVIDER": "sandbox", "AI_PROVIDER": "local", "MAIL_PROVIDER": "console",
+            "COOKIE_SECURE": "false", "AI_PROVIDER": "local", "MAIL_PROVIDER": "console",
             "LOG_LEVEL": "ERROR", "PASSWORD_SCRYPT_N": "16384", "RATE_LIMIT_MULTIPLIER": "1000", "ALLOW_UNSCANNED_DOWNLOADS": "true",
         }
         cls.proc = subprocess.Popen(["sh", str(SCRIPT)], cwd=ROOT / "backend", env=cls.env,

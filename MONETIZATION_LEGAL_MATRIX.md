@@ -22,7 +22,7 @@ As cartas vivem no banco (`monetization_legal_cards`, append-only) e são legív
 
 | # | Receita | Pagador | Carta | Situação da regra | Risco central |
 |---|---|---|---|---|---|
-| 1 | SaaS institucional | fundação, instituto, financiador | 🟡 | revisão necessária | tributário (alíquota, município, nota fiscal) |
+| 1 | SaaS institucional (assinatura) | fundação, instituto, financiador | 🔴 | **recusada na v0.27.0 (ADR-341): não existe assinatura** | nenhuma — modalidade encerrada por decisão de produto |
 | 2 | B2G — governança territorial | órgão público | 🔴 | **recusada** | contratação pública exige licitação como regra |
 | 3 | Enterprise / ESG | empresa | 🟡 | revisão necessária | responsabilidade por afirmação de impacto |
 | 4 | Implantação e integração | organização contratante | 🟡 | revisão necessária | enquadramento varia com o escopo |
@@ -58,7 +58,7 @@ Texto literal conferido em **2026-10-06**, direto da fonte oficial:
 |---|---|---|---|---|---|---|
 | Organização que propõe (OSC) | entrada: cadastro, perfil, projeto, descoberta, rede, prontidão básica | — | **Não se cobra** | decisão de produto | — | ✅ gratuito por desenho, sem prazo |
 | Organização que propõe | prontidão avançada, preparação de documento | operação entregue | **Provavelmente sim**, como serviço de software | LC 116/2003 itens 1.03/1.05 | médio | 🟡 revisar arrependimento e nota por operação |
-| Fundação, instituto, financiador | SaaS institucional | assinatura vigente | **Provavelmente sim** | LC 116/2003 + ADI 1945/5659 | baixo/médio | 🟡 definir alíquota, município e nota |
+| Fundação, instituto, financiador | Taxa de serviço contratada no acordo (3,5%) — substitui o SaaS por assinatura (v0.27.0) | acordo de financiamento assinado com a cláusula | **Provavelmente sim** | LC 116/2003 + ADI 1945/5659; Lei 12.865/2013 (parecer pendente) | baixo/médio | 🟡 parecer sobre não configuração de arranjo de pagamento; alíquota, município e nota |
 | Empresa / ESG | portfólio e comprovação | contrato vigente | **Provavelmente sim** | idem | médio | 🟡 responsabilidade por afirmação de impacto |
 | Órgão público | plataforma de governança | contrato administrativo | **Não por autosserviço** | Lei 14.133/2021 art. 2º, VII | **alto** | 🔴 exige licitação ou enquadramento em dispensa/inexigibilidade |
 | Prestador / contratante | comissão de marketplace | contratação concluída | **Não assumir** | Lei 12.865/2013 arts. 6º e 9º | **alto** | 🔴 bloqueada pela ADR-022 |
@@ -67,7 +67,15 @@ Texto literal conferido em **2026-10-06**, direto da fonte oficial:
 
 ---
 
-## As quatro recusas, e por quê
+## As cinco recusas, e por quê
+
+### 🔴 SaaS por assinatura — recusa de PRODUTO, não jurídica (v0.27.0, ADR-341)
+
+O proprietário retirou a assinatura do modelo econômico: o IMPACTO não vende acesso. A regra
+`saas.institutional.funder` fica no catálogo como `refused`, com carta vermelha cuja base é a própria
+decisão (DECISIONS.md, ADR-341). Nada a validar; o que havia de pendência tributária migra para a taxa de
+serviço contratada no acordo (`contract.platform_service_fee`, amarela).
+
 
 ### 🔴 Taxa de êxito — o risco mais alto do produto
 
@@ -126,11 +134,10 @@ agregado, e produzir **RIPD** — com DPO nomeado, que o projeto ainda não tem.
 
 ---
 
-## As seis amarelas, e o que falta em cada
+## As cinco amarelas, e o que falta em cada
 
 | Receita | O que está razoavelmente claro | O que falta |
 |---|---|---|
-| SaaS institucional | é prestação de serviço de software, sem custódia de recurso de terceiro; enquadramento provável em ISS | alíquota, município competente, regime tributário, emissão de nota fiscal, aplicabilidade do CDC entre pessoas jurídicas, redação final dos Termos |
 | Enterprise / ESG | mesmo enquadramento tributário | responsabilidade da plataforma sobre afirmação de impacto que a empresa publique; acordo de tratamento de dados; regras de divulgação aplicáveis ao cliente |
 | Implantação | é serviço técnico | **o item da lista de serviços varia com o escopo** (1.04 elaboração, 1.07 suporte); forma de contratação de quem executa, com risco trabalhista |
 | Premium — prontidão | serviço de software por operação | direito de arrependimento (CDC art. 49) em serviço digital de execução imediata; nota fiscal por operação de valor pequeno e volume alto; se a OSC pode lançar como despesa de projeto |

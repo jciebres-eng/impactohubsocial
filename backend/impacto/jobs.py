@@ -284,17 +284,11 @@ def risk_scan(app) -> dict:
         return risk.scan(c)
 
 
-def billing_lifecycle(app) -> dict:
-    from .services import monetization
-    return monetization.lifecycle_job(app)
-
-
 def commercial_sweep(app) -> dict:
-    """Período gratuito: encerra o que venceu e avisa 90/60/30/7/1 dia antes, mais o semanal.
+    """Período de concessão: encerra o que venceu e avisa 90/60/30/7/1 dia antes, mais o semanal.
 
-    Separado de `billing_lifecycle` de propósito: aquele cuida do trial de 14 dias, que é um
-    mecanismo de AQUISIÇÃO; este cuida da gratuidade temporal, que é uma decisão COMERCIAL. Os dois
-    coexistem numa mesma conta, e misturá-los faria um cancelar o aviso do outro.
+    v0.27.0 (ADR-341): `billing_lifecycle` (trial de 14 dias e ciclo de assinatura) foi removido com a
+    assinatura. Nenhum job cobra nada: este só avisa e devolve a conta ao acesso livre do núcleo.
     """
     from .services import free_period as FP
     with app.pool.tx(DbContext(system=True)) as c:
@@ -447,7 +441,7 @@ def deadline_sweep(app) -> dict:
 
 
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
-        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("billing_lifecycle", billing_lifecycle), ("commercial_sweep", commercial_sweep), ("usage_alerts", usage_alerts), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
+        ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("commercial_sweep", commercial_sweep), ("usage_alerts", usage_alerts), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
         # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
         ("backup", backup_job), ("email_canary", email_canary_job),
         ("enforcement_expiry", enforcement_expiry),

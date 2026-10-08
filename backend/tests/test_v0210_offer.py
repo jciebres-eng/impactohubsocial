@@ -1,4 +1,9 @@
-"""Oferta comercial e aceite: ACESSO GRATUITO não é AUTORIZAÇÃO DE COBRANÇA.
+"""Contrato comercial (proposta e aceite): ACESSO GRATUITO não é AUTORIZAÇÃO DE COBRANÇA.
+
+v0.27.0 (ADR-341): a oferta é a proposta de um CONTRATO avulso ou parcelado, montada pela administração
+com alçada financeira (valor + motivo, auditado). `recurring` não existe mais; a organização que paga
+não cria a própria oferta. Os testes de "o valor vem do catálogo de mensalidades" foram substituídos por
+"o valor vem de quem tem alçada, nunca do cliente".
 
 O QUE ESTES TESTES PROTEGEM
 
@@ -15,7 +20,16 @@ from __future__ import annotations
 
 import unittest
 
-from tests.support import db_system, new_account
+from tests.support import db_system, make_admin, new_account, server
+
+_ADM = {}
+
+
+def _adm():
+    if "c" not in _ADM:
+        server()
+        _ADM["c"], _ = make_admin()
+    return _ADM["c"]
 
 
 def scalar(sql, *a):
@@ -23,50 +37,67 @@ def scalar(sql, *a):
         return c.scalar(sql, *a)
 
 
-def _oferta(cli, **kw) -> dict:
-    corpo = {"plan_key": "osc_premium", "interval": "month", "billing_frequency": "recurring",
-             "payment_method": "card"}
+def _proposta(cli, **kw):
+    """A administração propõe o contrato para a organização `cli` (valor + motivo); devolve a resposta crua."""
+    corpo = {"org_id": cli.org_id, "plan_key": "osc_premium", "amount_cents": 120000,
+             "amount_reason": "Implantação assistida — proposta comercial de teste",
+             "billing_frequency": "one_time", "payment_method": "pix"}
     corpo.update(kw)
-    r = cli.post("/v1/commercial/offers", corpo)
+    return _adm().post("/v1/admin/commercial/offers", corpo)
+
+
+def _oferta(cli, **kw) -> dict:
+    r = _proposta(cli, **kw)
     assert r.status == 201, r.body
     return r.json
 
 
-class OfferComesFromTheCatalogTests(unittest.TestCase):
+class OfferComesFromWhoHasAuthorityTests(unittest.TestCase):
 
-    def test_a_caller_supplied_price_is_rejected_outright(self):
-        # O schema não ignora o campo em silêncio: recusa o pedido inteiro. Ignorar seria aceitar a
-        # requisição e devolver outro valor, deixando quem integra achando que mandou um preço
-        # válido — o tipo de ambiguidade que vira disputa de fatura.
+    def test_the_paying_organization_cannot_write_its_own_offer(self):
         cli = new_account("osc")
-        r = cli.post("/v1/commercial/offers",
-                     {"plan_key": "osc_premium", "interval": "month",
-                      "billing_frequency": "recurring", "payment_method": "card",
-                      "amount_cents": 1})
+        r = cli.post("/v1/commercial/offers", {"plan_key": "osc_premium", "billing_frequency": "one_time",
+                                               "payment_method": "pix", "amount_cents": 1, "amount_reason": "eu mesma"})
+        self.assertIn(r.status, (404, 405), r.body)      # a rota de criação não existe para a organização
+        r = cli.post("/v1/admin/commercial/offers", {"org_id": cli.org_id, "plan_key": "osc_premium", "amount_cents": 1,
+                                                     "amount_reason": "eu mesma", "billing_frequency": "one_time", "payment_method": "pix"})
+        self.assertEqual(r.status, 403, r.body)
+        self.assertEqual(scalar("SELECT count(*) FROM commercial_offers WHERE org_id = $1", cli.org_id), 0)
+
+    def test_the_amount_needs_a_reason_and_is_audited(self):
+        cli = new_account("osc")
+        r = _proposta(cli, amount_reason="x")
         self.assertEqual(r.status, 422, r.body)
-        self.assertEqual(r.json["details"][0]["field"], "amount_cents")
-        self.assertEqual(scalar("SELECT count(*) FROM commercial_offers WHERE org_id = $1",
-                                cli.org_id), 0)
+        of = _oferta(cli, amount_cents=250000)
+        self.assertEqual(of["amount_cents"], 250000)
+        self.assertEqual(scalar("SELECT amount_reason FROM commercial_offers WHERE id = $1", of["id"]),
+                         "Implantação assistida — proposta comercial de teste")
+        self.assertEqual(scalar("SELECT count(*) FROM audit_events WHERE action = 'commercial.offer_created' AND object_id::text = $1", of["id"]), 1)
 
-    def test_the_amount_comes_from_the_catalog(self):
+    def test_recurring_is_not_a_billing_frequency_anymore(self):
         cli = new_account("osc")
-        oferta = _oferta(cli)
-        catalogo = scalar("SELECT amount_cents FROM plan_price_versions WHERE plan_key = 'osc_premium'"
-                          " AND interval = 'month' AND effective_until IS NULL")
-        self.assertEqual(oferta["amount_cents"], catalogo)
-
-    def test_a_plan_without_a_published_price_is_refused_instead_of_invented(self):
-        cli = new_account("company")
-        r = cli.post("/v1/commercial/offers",
-                     {"plan_key": "company_enterprise", "interval": "month",
-                      "billing_frequency": "recurring", "payment_method": "card"})
-        self.assertEqual(r.status, 409, r.body)
-        self.assertEqual(r.json["code"], "price_not_defined")
+        r = _proposta(cli, billing_frequency="recurring")
+        self.assertEqual(r.status, 422, r.body)
+        with self.assertRaises(Exception):
+            with db_system() as c:
+                c.run("INSERT INTO commercial_offers(org_id, pricing_version, plan_key, currency, amount_cents, billing_frequency, payment_method)"
+                      " VALUES ($1,'t','osc_premium','BRL',1000,'recurring','card')", cli.org_id)
 
     def test_the_offer_records_the_pricing_version_in_force(self):
         from impacto.services import free_period as FP
         cli = new_account("osc")
         self.assertEqual(_oferta(cli)["pricing_version"], FP.pricing_version())
+
+    def test_accepting_with_authorization_grants_the_bundle_and_revoking_removes_it(self):
+        cli = new_account("osc")
+        of = _oferta(cli, plan_key="osc_premium")
+        self.assertNotIn("ai.assist.advanced", cli.get("/v1/me").json["entitlements"]["features"])
+        cli.post(f"/v1/commercial/offers/{of['id']}/accept", {"consent_status": "authorized"})
+        self.assertIn("ai.assist.advanced", cli.get("/v1/me").json["entitlements"]["features"])
+        self.assertEqual(cli.get("/v1/billing").json["access"]["state"], "CONTRACTED")
+        cli.post("/v1/commercial/consent/revoke", {"reason": "encerrando o contrato"})
+        self.assertNotIn("ai.assist.advanced", cli.get("/v1/me").json["entitlements"]["features"])
+        self.assertEqual(scalar("SELECT source FROM entitlement_grants WHERE org_id = $1 AND revoked_at IS NOT NULL", cli.org_id), "contract")
 
 
 class FreeAccessIsNotAuthorizationTests(unittest.TestCase):
@@ -90,15 +121,16 @@ class FreeAccessIsNotAuthorizationTests(unittest.TestCase):
         self.assertEqual(r.status, 200, r.body)
         estado = cli.get("/v1/commercial/state").json
         self.assertTrue(estado["charge_authorized"])
-        self.assertIn("primeira fatura", estado["on_expiry"])
+        self.assertIn("contrato", estado["on_expiry"])
+        self.assertEqual(estado["state"], "CONTRACTED")
 
     def test_the_acceptance_records_the_fourteen_fields_a_dispute_needs(self):
         cli = new_account("osc")
-        of = _oferta(cli, payment_method="card", billing_frequency="recurring")
+        of = _oferta(cli, payment_method="card", billing_frequency="installment", installments=3)
         cli.post(f"/v1/commercial/offers/{of['id']}/accept", {"consent_status": "authorized"})
         with db_system() as c:
             row = c.one("SELECT * FROM offer_acceptances WHERE org_id = $1", cli.org_id)
-        for campo in ("offer_id", "pricing_version", "plan_key", "price_version_id",
+        for campo in ("offer_id", "pricing_version", "plan_key",
                       "billing_frequency", "payment_method", "terms_version", "privacy_version",
                       "commercial_terms_version", "accepted_at", "accepted_by", "consent_status"):
             self.assertIsNotNone(row[campo], f"o aceite não gravou {campo}")
@@ -157,7 +189,7 @@ class NoChargeWithoutAuthorizationTests(unittest.TestCase):
             with db_system() as c:
                 c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                       " currency, is_simulated)"
-                      " VALUES ($1,'subscription','card','stripe',79900,'BRL',false)",
+                      " VALUES ($1,'one_off','card','stripe',120000,'BRL',false)",
                       cli.org_id)
         self.assertIn("sem autorização", str(e.exception))
 
@@ -168,7 +200,7 @@ class NoChargeWithoutAuthorizationTests(unittest.TestCase):
         with db_system() as c:
             c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                   " currency, is_simulated)"
-                  " VALUES ($1,'subscription','card','stripe',79900,'BRL',false)", cli.org_id)
+                  " VALUES ($1,'one_off','card','stripe',120000,'BRL',false)", cli.org_id)
         self.assertEqual(scalar("SELECT count(*) FROM platform_charges WHERE org_id = $1",
                                 cli.org_id), 1)
 
@@ -181,7 +213,7 @@ class NoChargeWithoutAuthorizationTests(unittest.TestCase):
             with db_system() as c:
                 c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                       " currency, is_simulated)"
-                      " VALUES ($1,'subscription','card','stripe',79900,'BRL',false)",
+                      " VALUES ($1,'one_off','card','stripe',120000,'BRL',false)",
                       cli.org_id)
         self.assertIn("sem autorização", str(e.exception))
 
@@ -198,7 +230,7 @@ class NoChargeWithoutAuthorizationTests(unittest.TestCase):
             with db_system() as c:
                 c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                       " currency, is_simulated)"
-                      " VALUES ($1,'subscription','card','stripe',79900,'BRL',true)", cli.org_id)
+                      " VALUES ($1,'one_off','card','stripe',120000,'BRL',true)", cli.org_id)
         self.assertIn("sem autorização", str(e.exception))
         self.assertEqual(scalar("SELECT count(*) FROM platform_charges WHERE org_id = $1",
                                 cli.org_id), 0)
@@ -208,7 +240,7 @@ class NoChargeWithoutAuthorizationTests(unittest.TestCase):
         with db_system() as c:
             c.run("INSERT INTO platform_charges(org_id, kind, method, provider, amount_cents,"
                   " currency, is_simulated)"
-                  " VALUES ($1,'subscription','card','sandbox',79900,'BRL',true)", cli.org_id)
+                  " VALUES ($1,'one_off','card','sandbox',120000,'BRL',true)", cli.org_id)
         self.assertEqual(scalar("SELECT count(*) FROM platform_charges WHERE org_id = $1",
                                 cli.org_id), 1)
 
@@ -219,65 +251,38 @@ class PaymentTermsTests(unittest.TestCase):
     def test_boleto_installments_require_a_cnpj(self):
         # `provider` é cadastrado sem CNPJ pelo arranjo de teste: é a pessoa física.
         pf = new_account("provider")
-        r = pf.post("/v1/commercial/offers",
-                    {"plan_key": "provider_premium", "interval": "month",
-                     "billing_frequency": "installment", "payment_method": "boleto",
-                     "installments": 6})
+        r = _proposta(pf, plan_key="provider_premium", billing_frequency="installment", payment_method="boleto", installments=6)
         self.assertEqual(r.status, 422, r.body)
         self.assertEqual(r.json["code"], "boleto_installments_require_cnpj")
         self.assertIn("pessoa jurídica", r.json["title"])
 
     def test_boleto_installments_are_accepted_for_a_cnpj(self):
         pj = new_account("osc")          # cadastrado com CNPJ
-        r = pj.post("/v1/commercial/offers",
-                    {"plan_key": "osc_premium", "interval": "month",
-                     "billing_frequency": "installment", "payment_method": "boleto",
-                     "installments": 6})
+        r = _proposta(pj, billing_frequency="installment", payment_method="boleto", installments=6)
         self.assertEqual(r.status, 201, r.body)
         self.assertEqual(r.json["installments"], 6)
         self.assertEqual(r.json["billing_frequency"], "installment")
 
     def test_card_installments_do_not_require_a_cnpj(self):
         pf = new_account("provider")
-        r = pf.post("/v1/commercial/offers",
-                    {"plan_key": "provider_premium", "interval": "month",
-                     "billing_frequency": "installment", "payment_method": "card",
-                     "installments": 6})
+        r = _proposta(pf, plan_key="provider_premium", billing_frequency="installment", payment_method="card", installments=6)
         self.assertEqual(r.status, 201, r.body)
 
-    def test_installments_are_not_recurrence(self):
+    def test_installments_do_not_apply_to_a_one_time_charge(self):
         cli = new_account("osc")
-        # Recorrência não aceita número de parcelas: são conceitos diferentes, e deixar os dois
-        # juntos é o que faz alguém achar que comprou em 12x e descobrir que assinou 12 meses.
-        r = cli.post("/v1/commercial/offers",
-                     {"plan_key": "osc_premium", "interval": "month",
-                      "billing_frequency": "recurring", "payment_method": "card",
-                      "installments": 12})
+        r = _proposta(cli, billing_frequency="one_time", payment_method="card", installments=12)
         self.assertEqual(r.status, 422, r.body)
         self.assertEqual(r.json["code"], "installments_not_applicable")
 
     def test_installment_without_a_number_of_installments_is_refused(self):
         cli = new_account("osc")
-        r = cli.post("/v1/commercial/offers",
-                     {"plan_key": "osc_premium", "interval": "month",
-                      "billing_frequency": "installment", "payment_method": "card"})
+        r = _proposta(cli, billing_frequency="installment", payment_method="card")
         self.assertEqual(r.status, 422, r.body)
         self.assertEqual(r.json["code"], "installments_required")
 
-    def test_boleto_is_not_offered_as_recurring_because_it_has_no_direct_debit(self):
-        cli = new_account("osc")
-        r = cli.post("/v1/commercial/offers",
-                     {"plan_key": "osc_premium", "interval": "month",
-                      "billing_frequency": "recurring", "payment_method": "boleto"})
-        self.assertEqual(r.status, 422, r.body)
-        self.assertEqual(r.json["code"], "boleto_not_recurring")
-
     def test_boleto_installments_stop_at_twelve(self):
         pj = new_account("osc")
-        r = pj.post("/v1/commercial/offers",
-                    {"plan_key": "osc_premium", "interval": "month",
-                     "billing_frequency": "installment", "payment_method": "boleto",
-                     "installments": 24})
+        r = _proposta(pj, billing_frequency="installment", payment_method="boleto", installments=24)
         self.assertEqual(r.status, 422, r.body)
         self.assertEqual(r.json["code"], "installments_above_limit")
 

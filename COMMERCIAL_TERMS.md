@@ -1,5 +1,14 @@
 # TERMOS COMERCIAIS — v0.21.0
 
+> ⚠️ **SUPERADO EM PARTE — v0.27.0 (ADR-341): NÃO EXISTE MAIS ASSINATURA.** Tudo o que este documento diz
+> sobre mensalidade, plano pago, trial, checkout, reajuste, portal e cancelamento descreve um modelo que o
+> proprietário retirou do IMPACTO em 08/10/2026. O que continua valendo: núcleo gratuito por desenho, o que
+> o dinheiro nunca compra, acesso gratuito ≠ autorização de cobrança, regras transacionais desligadas. O
+> modelo vigente está em `docs/ECONOMIC_MODEL.md` e `MONETIZATION.md`; o inventário do que foi mantido,
+> migrado, aposentado e removido está em `docs/execution/SUBSCRIPTION_INVENTORY.md`. O texto abaixo fica
+> como histórico — ele explica contratos e decisões anteriores — e NÃO deve ser lido como regra atual.
+
+
 **Pricing Version:** 2027.01
 **Situação jurídica:** ⚠️ **as 11 minutas estão em `draft`.** Nenhuma foi aprovada, nenhuma está
 vigente, e enquanto assim for o banco **recusa** registrar aceite legal (gatilho `acceptance_stamp`).

@@ -209,7 +209,7 @@ class TheSixNamedIntegrationsAreCoveredAndInertTests(unittest.TestCase):
         ("storage_provider", "local", "arquivo fica em disco local, nenhum bucket de terceiro"),
         ("antivirus_provider", "none", "sem ClamAV configurado; o download de não escaneado é "
                                        "governado por allow_unscanned_downloads"),
-        ("billing_provider", "none", "nenhuma cobrança real é possível"),
+        ("stripe_secret_key", "", "nenhuma cobrança real é possível (v0.27.0: sem assinatura; provedor derivado da chave)"),
         ("ai_provider", "local", "nenhuma chamada a modelo de terceiro"),
     )
 

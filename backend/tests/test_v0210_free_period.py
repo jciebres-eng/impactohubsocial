@@ -73,9 +73,12 @@ class CalendarMonthsTests(unittest.TestCase):
             self.assertEqual(self._noventa(inicio), noventa)
             self.assertNotEqual(self._noventa(inicio), meses)
 
-    def test_the_declared_number_of_months_is_three(self):
+    def test_the_subscription_grant_was_retired_with_the_subscription(self):
+        """v0.27.0 (ADR-341): não há '3 meses de assinatura nova' porque não há assinatura."""
         from impacto.services import free_period as FP
-        self.assertEqual(FP.NEW_SUBSCRIPTION_MONTHS, 3)
+        self.assertFalse(hasattr(FP, "NEW_SUBSCRIPTION_MONTHS"))
+        self.assertFalse(hasattr(FP, "grant_new_subscription"))
+        self.assertNotIn("2027_NEW_SUBSCRIPTION", FP.SOURCES)
 
 
 class CampaignBoundaryTests(unittest.TestCase):
@@ -120,10 +123,10 @@ class CampaignBoundaryTests(unittest.TestCase):
         self.assertFalse(scalar("SELECT '2027-01-01 03:00:00+00'::timestamptz < full_free_2026_ends_at()"))
 
 
-class SubscriptionDateTests(unittest.TestCase):
-    """As cinco datas de assinatura exigidas, com três meses de calendário cada."""
+class CalendarGrantDateTests(unittest.TestCase):
+    """Cinco datas de concessão de três meses de calendário (a aritmética continua valendo para concessões)."""
 
-    def test_the_five_requested_subscription_dates(self):
+    def test_the_five_requested_grant_dates(self):
         casos = [("2027-01-01", "2027-04-01"),
                  ("2027-02-01", "2027-05-01"),
                  ("2027-02-15", "2027-05-15"),
@@ -133,7 +136,7 @@ class SubscriptionDateTests(unittest.TestCase):
             got = scalar("SELECT to_char(add_calendar_months(($1 || ' 10:00')::timestamp"
                          " AT TIME ZONE commercial_tz(), 3) AT TIME ZONE commercial_tz(),"
                          " 'YYYY-MM-DD')", inicio)
-            self.assertEqual(got, fim, f"assinatura em {inicio} deveria terminar em {fim}")
+            self.assertEqual(got, fim, f"concessão em {inicio} deveria terminar em {fim}")
 
 
 class SignupGrantsTheCampaignTests(unittest.TestCase):
@@ -152,7 +155,7 @@ class SignupGrantsTheCampaignTests(unittest.TestCase):
         # aceitou: aceite mora em `offer_acceptances`, e esta conta não aceitou nada.
         from impacto.services import free_period as FP
         self.assertEqual(row["pricing_version"], FP.pricing_version())
-        self.assertEqual(row["pricing_version"], "2027.01")
+        self.assertEqual(row["pricing_version"], "2027.02")
         self.assertIsNone(row["months"], "campanha tem data fixa, não contagem de meses")
 
     def test_the_campaign_is_granted_once_per_account(self):
@@ -169,7 +172,7 @@ class SignupGrantsTheCampaignTests(unittest.TestCase):
         r = cli.get("/v1/commercial/state")
         self.assertEqual(r.status, 200, r.body)
         self.assertIsNotNone(r.json["free_period_end"], "FREE_PERIOD_END não foi publicado")
-        self.assertIn(r.json["state"], ("FREE", "FREE_EXPIRING", "PAYMENT_METHOD_REQUIRED"))
+        self.assertIn(r.json["state"], ("FREE_GRANT", "GRANT_EXPIRING"))
         self.assertFalse(r.json["charge_authorized"])
         self.assertFalse(r.json["will_be_charged"])
         self.assertIn("Nenhuma cobrança", r.json["on_expiry"])
@@ -333,7 +336,7 @@ class NotificationWindowTests(unittest.TestCase):
         corpo = scalar("SELECT body FROM notifications WHERE org_id = $1"
                        " AND kind = 'billing.free_period_ending'", cli.org_id)
         self.assertIn("NÃO será cobrado", corpo)
-        self.assertIn("plano gratuito", corpo)
+        self.assertIn("não existe assinatura", corpo)
 
     def test_a_day_that_is_not_a_window_says_nothing(self):
         cli = self._conta_com_periodo(45)      # 45 não é janela e não é múltiplo de 7 abaixo de 30

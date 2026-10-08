@@ -116,7 +116,7 @@ class EconomicIntegrityTests(EconomyBase):
         self.assertEqual(al["fee_bps"], 350)
         self.assertEqual(al["proponent_bps"], 150)
         self.assertEqual(al["fee_mode"], "deducted", "aporte ÚNICO do financiador, direcionado a cada destinatário")
-        self.assertEqual(d["terms"]["economic_rule_version"], "2027.01")
+        self.assertEqual(d["terms"]["economic_rule_version"], "2027.02")     # v0.27.0: versão sem assinatura (ADR-341)
         kinds = {line["kind"]: line for line in al["lines"]}
         self.assertEqual(set(kinds), {"project", "platform_fee", "proponent"})
         self.assertEqual(kinds["proponent"]["to_org_id"], self.proponent.org_id)

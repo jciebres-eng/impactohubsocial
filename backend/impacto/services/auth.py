@@ -203,8 +203,6 @@ def register(ctx: Ctx, body) -> dict:
                 c.run("INSERT INTO funder_profiles(org_id) VALUES ($1)", org_id)
             if org.kind == "provider":
                 c.run("INSERT INTO provider_profiles(org_id) VALUES ($1)", org_id)
-            from . import monetization
-            monetization.start_trial(c, ctx.settings, org_id=org_id, org_kind=org.kind, email=email, cnpj=cnpj, user_id=uid, source="signup")
             # GRATUIDADE TEMPORAL. Concedida por conta, no cadastro, e não deduzida de uma data no
             # código: é a linha em `free_periods` que responde "esta conta está gratuita até
             # quando, e por quê" — e é dela que a tela, o aviso e a cobrança leem.
@@ -553,7 +551,7 @@ def me(ctx: Ctx) -> dict:
                      "staff_roles": list(p.staff_roles)},
             "active_org": next((o for o in orgs if o["id"] == p.org_id), None), "organizations": orgs,
             "entitlements": ent and {k: ent[k] for k in ("plans", "plan_names", "features", "limits")},
-            "subscription": ent and ent["subscription"], "unread_notifications": unread,
+            "subscription": None, "tier": ent and ent.get("tier"), "unread_notifications": unread,     # v0.27.0: não há assinatura (ADR-341)
             "csrf_token": csrf_for_session(ctx.settings.secret_key, p.session_id) if p.via == "cookie" else None}
 
 

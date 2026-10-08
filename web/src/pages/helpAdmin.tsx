@@ -8,7 +8,7 @@ import { Bars, Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Pag
 
 const TABS: [string, string][] = [["/admin/central", "Visão geral"], ["/admin/central/artigos", "Guias"], ["/admin/central/recursos", "Biblioteca"], ["/admin/central/faqs", "FAQ"],
   ["/admin/central/cursos", "Cursos"], ["/admin/central/eventos", "Eventos"], ["/admin/central/suporte", "Suporte"], ["/admin/central/parcerias", "Parcerias"],
-  ["/admin/central/testes", "Testes e demonstrações"], ["/admin/central/analytics", "Indicadores"], ["/admin/central/equipe", "Equipe editorial"]];
+  ["/admin/central/analytics", "Indicadores"], ["/admin/central/equipe", "Equipe editorial"]];
 
 function Frame({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
   const { path } = useLocation();
@@ -363,41 +363,6 @@ export function Partnerships() {
 }
 
 // ----------------------------------------------------------------------------------------- testes e demonstrações
-export function Trials() {
-  const dash = useLoad("/v1/admin/hub/trials");
-  const reqs = useLoad("/v1/admin/hub/trial-requests?status=requested");
-  const demos = useLoad("/v1/admin/hub/demo-requests");
-  const [dec, setDec] = useState<{ id: string; approve: boolean } | null>(null);
-  const [reason, setReason] = useState("");
-  const { run, busy } = useAction();
-  return (
-    <Frame title="Testes e demonstrações">
-      <Panel title="Pedidos de teste aguardando decisão">
-        <StateView loading={reqs.loading} error={reqs.error} empty={reqs.data && !reqs.data.items.length && "Nenhum pedido pendente."}>
-          <ul className="rows">{(reqs.data?.items || []).map((r: any) => (
-            <li key={r.id}><div><strong>{r.legal_name}</strong><p className="muted">{r.users_count} pessoas · {r.period_days} dias · {r.purpose}</p></div>
-              <span className="row-actions"><Button variant="primary" onClick={() => setDec({ id: r.id, approve: true })}>Aprovar</Button><Button variant="danger" onClick={() => setDec({ id: r.id, approve: false })}>Recusar</Button></span></li>
-          ))}</ul>
-        </StateView>
-      </Panel>
-      <Panel title="Painel de testes">
-        <StateView loading={dash.loading} error={dash.error}>
-          {dash.data && <KeyValue items={[["Ativos", String(dash.data.active)], ["Convertidos", String(dash.data.converted)], ["Encerrados", String(dash.data.ended)], ["Pedidos", (dash.data.requests || []).map((r: any) => `${label(r.status)} ${r.n}`).join(", ") || "—"]]} />}
-          <ul className="rows">{(dash.data?.usage || []).map((u: any) => <li key={u.org_id}><span>{u.legal_name}</span><span className="muted">até {date(u.trial_end)} · {u.projects} projetos · {u.documents} documentos · {u.applications} candidaturas</span></li>)}</ul>
-          <p className="fineprint">{dash.data?.note}</p>
-        </StateView>
-      </Panel>
-      <Panel title="Demonstrações">
-        <StateView loading={demos.loading} error={demos.error} empty={demos.data && !demos.data.items.length && "Nenhum pedido."}>
-          <ul className="rows">{(demos.data?.items || []).map((d: any) => <DemoRow key={d.id} d={d} onDone={demos.reload} />)}</ul>
-        </StateView>
-      </Panel>
-      <Modal open={!!dec} title={dec?.approve ? "Aprovar teste" : "Recusar teste"} onClose={() => setDec(null)} footer={<Button variant="primary" busy={busy} disabled={reason.trim().length < 5} onClick={() => run(() => api.post(`/v1/admin/hub/trial-requests/${dec!.id}/decide`, { approve: dec!.approve, reason }), "Decisão registrada").then(() => { setDec(null); setReason(""); reqs.reload(); dash.reload(); })}>Confirmar</Button>}>
-        <Field label="Motivo (obrigatório, fica no registro)"><TextArea rows={3} value={reason} onChange={setReason} /></Field>
-      </Modal>
-    </Frame>
-  );
-}
 
 function DemoRow({ d, onDone }: { d: any; onDone: () => void }) {
   const [when, setWhen] = useState("");

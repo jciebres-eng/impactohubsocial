@@ -239,7 +239,7 @@ class WaiveIn(In):
 
 
 # ---------------------------------------------------------------- pagamento
-ChargeKind = Literal["subscription", "one_off", "installment_plan", "operation"]
+ChargeKind = Literal["one_off", "installment_plan", "operation"]     # v0.27.0: sem "subscription" (ADR-341)
 ChargeMethod = Literal["card", "pix", "boleto", "manual"]
 ChargeState = Literal["created", "checkout_started", "pending", "authorized", "paid", "settled",
                       "failed", "expired", "cancelled", "refunded", "partially_refunded",
@@ -256,7 +256,6 @@ class ChargeIn(In):
     method: ChargeMethod
     amount_cents: Annotated[int, Field(gt=0, le=10_000_000_000_00)]
     currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")] = "BRL"
-    subscription_id: Uuid | None = None
     invoice_id: Uuid | None = None
     #: Liga a cobrança ao candidato que a originou, fechando valor → candidato → cobrança.
     billable_event_seq: Annotated[int, Field(ge=1)] | None = None

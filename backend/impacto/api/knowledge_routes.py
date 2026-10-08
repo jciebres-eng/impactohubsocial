@@ -1,5 +1,5 @@
 """Central de Conhecimento (v0.12.0): ajuda pública/autenticada, busca, guias, biblioteca, FAQ, academia, eventos, suporte, parcerias, demonstração,
-solicitação de teste, boletim e preferências. Reutiliza notificações, documentos (anexos/arquivos) e org_trials; não duplica `materials`.
+boletim e preferências. Reutiliza notificações e documentos (anexos/arquivos); não duplica `materials`. v0.27.0: a solicitação de teste saiu com a assinatura (ADR-341) — quem quer conhecer módulos pede demonstração.
 Conteúdo oficial só aparece publicado e aprovado por outra pessoa; visibilidade é aplicada pelo banco (RLS + kb_visible)."""
 from __future__ import annotations
 
@@ -398,25 +398,6 @@ def ticket_close(ctx: Ctx):
             raise ApiError(409, "not_resolved", "Só é possível encerrar um chamado resolvido")
         c.run("UPDATE support_tickets SET status = 'closed' WHERE id = $1", ctx.path["ticket_id"])
     return {"closed": True}
-
-
-# ------------------------------------------------------------------------------------------------ solicitação de teste
-@route("POST", "/v1/help/trial-requests", body=H.TrialRequestIn, min_role="owner", status=201, rate=("trial_req_ip", 10, 3600), tags=("trial",),
-       summary="Solicita teste de módulos/ambiente. Não concede acesso: a equipe decide (com motivo) e usa o mecanismo de trial existente.")
-def trial_request(ctx: Ctx, body: H.TrialRequestIn):
-    with ctx.tx() as c:
-        if c.one("SELECT 1 FROM trial_requests WHERE org_id = $1 AND status = 'requested'", ctx.org_id):
-            raise ApiError(409, "request_open", "Já existe uma solicitação em análise para esta organização")
-        rid = c.scalar("INSERT INTO trial_requests(user_id, org_id, org_kind, users_count, purpose, modules, period_days, responsible) VALUES ($1,$2,$3,$4,$5,$6::text[],$7,$8) RETURNING id::text",
-                       ctx.user_id, ctx.org_id, ctx.principal.org_kind, body.users_count, body.purpose, body.modules, body.period_days, body.responsible)
-        ctx.audit(c, "trial.requested", "trial_request", rid, {"days": body.period_days})
-    return {"id": rid, "status": "requested", "note": "Solicitação recebida. Nenhum acesso é liberado automaticamente; você será avisada da decisão."}
-
-
-@route("GET", "/v1/help/trial-requests", min_role="viewer", tags=("trial",))
-def trial_requests_mine(ctx: Ctx):
-    with ctx.tx(readonly=True) as c:
-        return {"items": c.query("SELECT id::text AS id, status, period_days, users_count, modules, created_at, decided_at, decision_reason, outcome FROM trial_requests WHERE org_id = $1 ORDER BY created_at DESC LIMIT 20", ctx.org_id)}
 
 
 # ------------------------------------------------------------------------------------------------ públicos de captação (consentimento obrigatório)

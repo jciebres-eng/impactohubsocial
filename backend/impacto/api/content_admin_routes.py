@@ -2,7 +2,7 @@
 
 Papéis internos (tabela staff_roles, sempre com MFA): editor (cria/edita rascunhos e envia para revisão), reviewer (aprova/publica; NUNCA o próprio texto —
 quatro olhos também no banco), support (fila de chamados). Administradores da plataforma podem tudo, mas a regra dos quatro olhos vale para eles também.
-Cada handler toca apenas as tabelas do seu domínio (kb_*, courses, hub_*, support_*, partnership_*, demo_*, trial_requests, newsletter_*)."""
+Cada handler toca apenas as tabelas do seu domínio (kb_*, courses, hub_*, support_*, partnership_*, demo_*, newsletter_*)."""
 from __future__ import annotations
 
 import json
@@ -643,29 +643,6 @@ def demo_handle(ctx: Ctx, body: H.DemoHandleIn):
         hub.send_mail(ctx.app, None, to=d["email"], subject="[Impacto] Demonstração agendada",
                       text=f"Olá, {d['contact_name']}! Sua demonstração foi agendada para {body.scheduled_at:%d/%m/%Y %H:%M}." + (f"\nLink: {body.meeting_url}" if body.meeting_url else "") + "\n")
     return {"updated": True}
-
-
-@A("GET", "/v1/admin/hub/trial-requests", query=H.AdminListQ)
-def trial_req_list(ctx: Ctx, q: H.AdminListQ):
-    with ctx.tx(readonly=True) as c:
-        rows = c.query("SELECT r.id::text AS id, r.org_id::text AS org_id, o.legal_name, r.org_kind, r.users_count, r.purpose, r.modules, r.period_days, r.responsible, r.status, r.created_at,"
-                       " r.decision_reason, r.outcome, (SELECT status FROM org_trials t WHERE t.org_id = r.org_id) AS current_trial FROM trial_requests r JOIN organizations o ON o.id = r.org_id"
-                       " WHERE ($1::text IS NULL OR r.status = $1) ORDER BY r.created_at DESC LIMIT $2 OFFSET $3", q.status, q.limit + 1, q.offset)
-    return page(rows, q.limit, q.offset)
-
-
-@A("POST", "/v1/admin/hub/trial-requests/{id}/decide", body=H.DecisionIn, summary="Decide a solicitação de teste (motivo obrigatório): inicia/estende o trial existente ou recusa; nunca automático")
-def trial_req_decide(ctx: Ctx, body: H.DecisionIn):
-    with ctx.system_tx() as c:
-        out = hub.trial_request_decide(c, ctx.settings, ctx.path["id"], admin_id=ctx.user_id, approve=body.approve, reason=body.reason)
-        ctx.audit(c, "trial.request_decided", "trial_request", ctx.path["id"], {"approve": body.approve, "outcome": out["outcome"]})
-    return out
-
-
-@A("GET", "/v1/admin/hub/trials", summary="Painel de testes: solicitações, ativos, vencendo, conversão e uso por organização")
-def trials_dash(ctx: Ctx):
-    with ctx.tx(readonly=True) as c:
-        return hub.trial_dashboard(c)
 
 
 @A("GET", "/v1/admin/hub/analytics", staff=EDIT + SUPPORT, summary="Analytics da Central: buscas, lacunas, utilidade, chamados, academia, eventos, parcerias")

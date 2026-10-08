@@ -58,10 +58,12 @@ class MonetizationDocTests(unittest.TestCase):
         active = [r["key"] for r in self.rules if r["active"]]
         self.assertEqual(active, [], f"regra ativa sem o documento dizer: {active}")
 
-    def test_the_refused_ones_are_the_four_the_documents_name(self):
+    def test_the_refused_ones_are_the_five_the_documents_name(self):
+        # v0.27.0 (ADR-341): a quinta recusa é a assinatura — decisão de produto, carta vermelha.
         refused = {r["key"] for r in self.rules if r["legal_status"] == "refused"}
         self.assertEqual(refused, {"b2g.territorial_governance", "marketplace.take_rate",
-                                   "success_fee.funding", "data.territorial_intelligence"})
+                                   "success_fee.funding", "data.territorial_intelligence",
+                                   "saas.institutional.funder"})
         for key in refused:
             self.assertIn(key, doc("MONETIZATION.md"),
                           f"receita recusada ausente do documento: {key}")

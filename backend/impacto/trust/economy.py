@@ -438,6 +438,13 @@ def _recognize(conn: Connection, *, org_id: str, kind: str, ref_type: str, ref_i
         from ..services.audit import ledger
         ledger(conn, project_id=project_id, org_id=org_id, actor=None, entry_type="recognition_granted", amount_cents=amount_cents,
                ref_type="recognition", ref_id=rid, payload={"kind": kind, "ref_type": ref_type, "ref_id": ref_id})
+    if rid:
+        # v0.27.0 — a trajetória pública é cumulativa: o perfil público da organização é reprojetado na hora em que o
+        # reconhecimento nasce (contagens e datas; nunca valores). Sem perfil público, nada a reprojetar.
+        from ..network import profiles as PRO
+        pid = conn.scalar("SELECT id::text FROM public_profiles WHERE org_id = $1", org_id)
+        if pid:
+            PRO.rebuild_projection(conn, profile_id=pid)
     return bool(rid)
 
 

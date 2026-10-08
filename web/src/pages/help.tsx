@@ -766,33 +766,6 @@ export function DemoForm() {
   );
 }
 
-export function TrialRequest() {
-  const { me } = useSession();
-  const list = useLoad("/v1/help/trial-requests");
-  const f = useForm({ users_count: "1", purpose: "", responsible: me?.user.full_name || "", period_days: "14" });
-  const { run, busy } = useAction();
-  const pending = (list.data?.items || []).some((r: any) => r.status === "requested");
-  return (
-    <div className="stack-lg">
-      <PageHead title="Solicitar período de teste" sub="A equipe analisa cada pedido. O teste só começa depois da aprovação." back={<Link to="/conta/plano">← Plano</Link>} />
-      <StateView loading={list.loading} error={list.error} onRetry={list.reload}>
-        {(list.data?.items || []).length > 0 && (
-          <Panel title="Seus pedidos"><ul className="rows">{list.data.items.map((r: any) => <li key={r.id}><span>{dateTime(r.created_at)} · {r.period_days} dias</span><span><Pill status={r.status} />{r.decision_reason && <span className="muted"> {r.decision_reason}</span>}</span></li>)}</ul></Panel>
-        )}
-        {pending ? <p className="muted">Há um pedido em análise.</p> : (
-          <form className="form form-wide" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/help/trial-requests", { ...f.v, users_count: Number(f.v.users_count), period_days: Number(f.v.period_days) }), "Pedido enviado").then(list.reload); }}>
-            <Field label="Responsável"><Input value={f.v.responsible} onChange={f.set("responsible")} required /></Field>
-            <Field label="Pessoas que usarão"><Input type="number" min={1} value={f.v.users_count} onChange={f.set("users_count")} required /></Field>
-            <Field label="Duração desejada (dias)"><Input type="number" min={7} max={60} value={f.v.period_days} onChange={f.set("period_days")} /></Field>
-            <Field label="Para que você quer testar?" wide><TextArea value={f.v.purpose} onChange={f.set("purpose")} minLength={10} maxLength={2000} required /></Field>
-            <div className="form-actions"><Button type="submit" variant="primary" busy={busy}>Enviar pedido</Button></div>
-          </form>
-        )}
-      </StateView>
-    </div>
-  );
-}
-
 // ----------------------------------------------------------------------------------------- boletim
 export function Newsletter() {
   const f = useForm({ email: "", frequency: "monthly", consent: false, website: "" });
@@ -887,7 +860,6 @@ export function Activities() {
             {sec("Cursos", data.courses, (c) => <li key={c.slug}><Link to={`/ajuda/academia/${c.slug}`}>{c.title}</Link><span className="muted">{c.completed_at ? "Concluído" : `${c.lessons_done} aulas feitas`}</span></li>)}
             {sec("Eventos", data.events, (e) => <li key={e.slug}><Link to={`/ajuda/eventos/${e.slug}`}>{e.title}</Link><span className="muted">{dateTime(e.starts_at)} · {e.status === "waitlist" ? "lista de espera" : "inscrita"}</span></li>)}
             {sec("Certificados", data.certificates, (c) => <li key={c.code}><Link to={`/ajuda/certificado/${c.code}`}>{c.course_title}</Link><span className="muted">{c.revoked_at ? "Revogado" : date(c.issued_at)}</span></li>)}
-            {sec("Pedidos de teste", data.trial_requests, (r) => <li key={r.id}><span>{dateTime(r.created_at)}</span><Pill status={r.status} /></li>)}
             {sec("Propostas de parceria", data.partnership_requests, (r) => <li key={r.id}><span>{r.org_name}</span><Pill tone="muted">{label(r.status)}</Pill></li>)}
             {sec("Demonstrações", data.demo_requests, (r) => <li key={r.id}><span>{r.scheduled_at ? dateTime(r.scheduled_at) : "Aguardando horário"}</span><Pill tone="muted">{label(r.status)}</Pill></li>)}
           </>

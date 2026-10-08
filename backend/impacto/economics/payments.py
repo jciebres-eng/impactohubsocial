@@ -41,7 +41,7 @@ from ..http import forbidden, not_found, unprocessable
 #: A versão permissiva ("todos menos sandbox") faria um dublê novo nascer marcado como real.
 REAL_PROVIDERS = ("stripe",)
 METHODS = ("card", "pix", "boleto", "manual")
-KINDS = ("subscription", "one_off", "installment_plan", "operation")
+KINDS = ("one_off", "installment_plan", "operation")     # v0.27.0: "subscription" aposentado (ADR-341)
 STATES = ("created", "checkout_started", "pending", "authorized", "paid", "settled", "failed",
           "expired", "cancelled", "refunded", "partially_refunded", "disputed", "chargeback")
 OPEN_STATES = ("created", "checkout_started", "pending", "authorized")
@@ -59,9 +59,10 @@ NOT_CONFIGURED = "PRODUCTION PAYMENT NOT CONFIGURED"
 
 def status(settings: Any) -> dict:
     """O que está e o que não está configurado. Chamado por toda resposta que fala de pagamento."""
-    provider = getattr(settings, "billing_provider", None) or "none"
-    real = provider in REAL_PROVIDERS
+    # v0.27.0: o provedor é DERIVADO da chave (ADR-341 retirou BILLING_PROVIDER junto com a assinatura).
     has_key = bool(getattr(settings, "stripe_secret_key", None))
+    provider = "stripe" if has_key else "none"
+    real = provider in REAL_PROVIDERS
     return {
         "provider": provider,
         "is_real_provider": real,
@@ -86,7 +87,7 @@ def graph(conn: Connection) -> list[dict]:
 # ---------------------------------------------------------------------------- criar
 def create(conn: Connection, *, org_id: str, actor: str | None, kind: str, method: str,
            amount_cents: int, currency: str, provider: str,
-           subscription_id: str | None = None, invoice_id: str | None = None,
+           invoice_id: str | None = None,
            billable_event_id: int | None = None, installments: int | None = None,
            instrument_id: str | None = None, due_on: Any = None,
            expires_at: Any = None) -> dict:
@@ -100,11 +101,11 @@ def create(conn: Connection, *, org_id: str, actor: str | None, kind: str, metho
     if installments and method != "card":
         raise unprocessable("Parcelamento só existe em cartão", {"campo": "method"})
     row = conn.one(
-        "INSERT INTO platform_charges(org_id, subscription_id, invoice_id, billable_event_id, kind,"
+        "INSERT INTO platform_charges(org_id, invoice_id, billable_event_id, kind,"
         " method, amount_cents, currency, installments, instrument_id, provider, due_on, expires_at,"
-        " created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)"
+        " created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)"
         " RETURNING id::text AS id, state, is_simulated, created_at",
-        org_id, subscription_id, invoice_id, billable_event_id, kind, method, amount_cents,
+        org_id, invoice_id, billable_event_id, kind, method, amount_cents,
         currency.upper(), installments, instrument_id, provider, due_on, expires_at, actor)
     return _decorate(row)
 
@@ -215,7 +216,7 @@ def get(conn: Connection, *, charge_id: str, org_id: str | None) -> dict:
         "SELECT id::text AS id, org_id::text AS org_id, kind, method, amount_cents, currency, state,"
         " installments, provider, provider_charge_id, is_simulated, due_on, expires_at, paid_at,"
         " settled_at, refunded_cents, failure_code, failure_message, created_at, updated_at,"
-        " subscription_id::text AS subscription_id, invoice_id::text AS invoice_id,"
+        " invoice_id::text AS invoice_id,"
         " billable_event_id FROM platform_charges WHERE id = $1", charge_id)
     if not c:
         raise not_found("Cobrança")
@@ -273,10 +274,10 @@ def revenue(conn: Connection, *, since: Any = None, until: Any = None,
         since, until, list(REAL_PROVIDERS) if provider_configured else [])
     return {
         "items": rows,
-        "subscriptions": {
+        "invoices": {
             "items": subs,
-            "note": ("Assinatura é apurada em `invoices` e fica em bloco separado de propósito: "
-                     "`platform_charges` cobre avulso, parcelado, PIX e boleto."
+            "note": ("Faturas manuais/históricas são apuradas em `invoices` e ficam em bloco separado de propósito: "
+                     "`platform_charges` cobre avulso, parcelado, operação, PIX e boleto. v0.27.0: não há assinatura (ADR-341)."
                      + (f" Provedor real: {', '.join(REAL_PROVIDERS)}; fatura em provedor de teste "
                         "conta como simulada." if provider_configured else
                         " SEM provedor configurado nesta instalação, NENHUMA fatura conta como "

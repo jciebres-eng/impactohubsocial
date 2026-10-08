@@ -159,7 +159,7 @@ class ArchitectureTests(unittest.TestCase):
         expected_public = {"/v1/public/verify/{code}", "/v1/public/verify/{code}/qr", "/v1/public/campaigns/{slug}",
                            "/v1/public/locales", "/v1/public/translations", "/v1/public/glossary", "/v1/auth/register", "/v1/auth/login", "/v1/auth/mfa/verify", "/v1/auth/refresh", "/v1/auth/verify-email",
                            "/v1/auth/forgot-password", "/v1/auth/reset-password", "/v1/plans", "/v1/files/{token}",
-                           "/v1/billing/webhooks/stripe", "/v1/legal/{doc}",
+                           "/v1/legal/{doc}",
                            "/v1/auth/oidc/start", "/v1/auth/oidc/callback",
                            "/v1/help/search", "/v1/help/context", "/v1/help/categories", "/v1/help/articles", "/v1/help/articles/{slug}", "/v1/help/faqs",
                            "/v1/help/resources", "/v1/help/resources/{slug}", "/v1/help/assistant", "/v1/help/events", "/v1/help/events/{slug}",
@@ -172,8 +172,7 @@ class ArchitectureTests(unittest.TestCase):
                            "/v1/public/profiles/{handle}", "/v1/public/profiles/{handle}/open-graph",
                            "/v1/public/relationships/{subject_type}/{subject_id}",
                            "/v1/public/projects/{project_id}/impact",
-                           # tabela de preços: é pública por natureza, e o valor vem do servidor (nunca do cliente)
-                           "/v1/plans/price",
+                           # v0.27.0 (ADR-341): `/v1/plans/price` saiu — não há preço de assinatura a publicar
                            # v0.17.0 — programa que a dona escolheu publicar. `programs_read` exige
                            # visibility='public' AND published_at IS NOT NULL AND status<>'suspended', e
                            # programs.public_feed() repete o filtro num único lugar.
@@ -331,7 +330,7 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual(offenders, [], f"Aviso fora de network.notify: {offenders}")
 
     def test_prices_are_not_hard_coded(self):
-        """Preço mora no banco (`plan_price_versions`, `monetization_rules`), nunca em código.
+        """Preço mora no banco (`economic_rules`, `monetization_rules`), nunca em código.
 
         A primeira versão deste teste lia os valores declarados em `config/plans.json` e procurava por
         eles no código. Deixou de valer na v0.17.0: o produto passou a NÃO declarar preço nenhum (as
@@ -360,15 +359,23 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual(offenders, [], "preço fixado em código:\n" + "\n".join(offenders))
 
     def test_the_commercial_rule_is_declared_in_configuration(self):
-        """A regra comercial é dado versionado em git, não decisão espalhada pelo código."""
+        """A regra comercial é dado versionado em git, não decisão espalhada pelo código.
+
+        v0.27.0 (ADR-341): o bloco `price_versions` (mensalidades) saiu com a assinatura. O que fica
+        escrito é a REGRA vigente (`_rule`), a versão de preço (`pricing_version`) e a aposentadoria
+        explícita das regras anteriores — e os percentuais da camada econômica vivem em `economic_rules`.
+        """
         import json
         cfg = json.loads((ROOT / "config" / "plans.json").read_text(encoding="utf-8"))
-        self.assertIn("price_versions", cfg, "o bloco de regra comercial não pode desaparecer")
-        self.assertTrue(cfg["price_versions"].get("_rule"),
-                        "a regra vigente tem de estar escrita, para que mudá-la seja um ato explícito")
-        # E a aposentadoria da regra anterior fica registrada, em vez de a linha simplesmente sumir.
-        self.assertTrue(any(i.get("retire") for i in cfg["price_versions"]["items"]),
-                        "aposentar um preço é um item com `retire`, não a remoção silenciosa da linha")
+        self.assertNotIn("price_versions", cfg, "a tabela de mensalidades voltou: não existe assinatura")
+        self.assertTrue(cfg.get("_rule"), "a regra vigente tem de estar escrita, para que mudá-la seja um ato explícito")
+        self.assertIn("APOSENTADA", cfg["_rule"], "aposentar a regra anterior é dito em letras, não removido em silêncio")
+        self.assertEqual(cfg["pricing_version"], "2027.02")
+        from tests.support import db_system
+        with db_system() as c:
+            regras = {r["key"]: r["bps"] for r in c.query("SELECT key, bps FROM economic_rules WHERE pricing_version = $1", cfg["pricing_version"])}
+        self.assertEqual(regras.get("funding.platform_service"), 350)
+        self.assertEqual(regras.get("funding.proponent_participation"), 150)
 
     def test_no_string_formatted_sql_with_user_input(self):
         """Só nomes de tabela/coluna de listas fixas podem ser interpolados em SQL (f-strings revisadas)."""

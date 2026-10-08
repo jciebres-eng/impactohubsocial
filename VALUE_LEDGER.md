@@ -16,7 +16,7 @@ Separados, dá para responder duas perguntas diferentes com dois dados diferente
 
 E dá para responder uma terceira, que é a interessante: **o que foi entregue e NÃO foi cobrado?**
 
-## 2. Os onze tipos de evento
+## 2. Os 15 tipos de evento (onze até a v0.26.0; a v0.27.0 acrescentou os quatro da camada econômica)
 
 Cada tipo em `value_event_types` tem um campo `what_counts` dizendo, em português, o que conta e o que
 não conta:
@@ -34,6 +34,10 @@ não conta:
 | `territorial_gap.computed` | lacuna territorial calculada |
 | `risk.scan_completed` | varredura de risco concluída |
 | `ai.analysis_completed` | análise assistida por IA concluída |
+| `contract.activated` | acordo de financiamento entrou em vigor com matriz de distribuição congelada (v0.27.0) |
+| `allocation.instructed` | instruções de repasse emitidas, uma por linha da matriz, com a chave PIX do contrato (v0.27.0) |
+| `payout.confirmed` | repasse confirmado por quem recebe (v0.27.0) |
+| `operation.settled` | operação quitada: toda entrega aceita e todo repasse devido confirmado (v0.27.0) |
 
 `document.blocked_incomplete` merece nota: **a recusa é valor entregue**. Quando a Plataforma se nega a
 gerar uma prestação de contas incompleta, ela impediu um problema — e isso é registrado antes de a
@@ -112,7 +116,7 @@ a ausência dele.
 
 | Rota | Para quê |
 |---|---|
-| `GET /v1/value/types` | os onze tipos, com `what_counts` |
+| `GET /v1/value/types` | os 15 tipos, com `what_counts` |
 | `GET /v1/value/summary` | o que foi entregue, por tipo, com `events_without_baseline` |
 | `GET /v1/value/events` | o extrato |
 | `POST /v1/admin/value/baselines` | declarar uma linha de base (exige fonte) |

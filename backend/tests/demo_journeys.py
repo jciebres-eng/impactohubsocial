@@ -490,7 +490,7 @@ class Jornadas:
                 self.ids["participacao"] = part["id"]
                 self.passo(J, "apoiadora aceita a participação (projeto já publicado → consolidada)", apo, "POST", f"/v1/participations/{part['id']}/accept")
                 self.passo(J, "apoiadora acompanha as próprias participações", apo, "GET", "/v1/participations")
-        ac = self.passo(J, "OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.01: 3,5% plataforma + 1,5% autoria, aporte único direcionado)", osc, "POST",
+        ac = self.passo(J, "OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.02: 3,5% plataforma + 1,5% autoria, aporte único direcionado)", osc, "POST",
                         "/v1/signed-agreements", {
                             "kind": "funding", "title": "Financiamento — Orquestra na escola (exemplo)",
                             "summary": "R$ 100.000 em 2 marcos; o financiador faz um aporte único direcionado a cada destinatário pela chave PIX do contrato.",

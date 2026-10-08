@@ -469,29 +469,6 @@ class AiSummarizeIn(In):
 
 
 # ---------------------------------------------------------------- billing
-class PriceQ(In):
-    """Consulta de preço. O cliente diz O QUE quer, nunca QUANTO — valor, moeda e imposto vêm do servidor."""
-    plan_key: Annotated[str, StringConstraints(pattern=r"^[a-z0-9_]{3,40}$")]
-    interval: Literal["month", "year"] = "month"
-
-
-class CheckoutIn(In):
-    """O cliente escolhe plano e periodicidade. Preço, desconto, trial e valor final são sempre calculados no servidor."""
-    plan_key: Slug
-    interval: Literal["month", "year"] | None = None
-    voucher: Annotated[str | None, Field(min_length=6, max_length=40)] = None
-
-
-class QuoteIn(In):
-    plan_key: Slug
-    interval: Literal["month", "year"] | None = None
-
-
-class ChangePlanIn(In):
-    plan_key: Slug
-    interval: Literal["month", "year"] | None = None
-
-
 class AgreementJoinIn(In):
     code: Annotated[str, Field(min_length=6, max_length=40)]
 
@@ -1239,15 +1216,18 @@ class AdminDocQ(Pagination):
 # --- v0.21.0 — oferta comercial e período gratuito ---------------------------------------------
 
 class CommercialOfferIn(In):
-    """Pedido de oferta. O VALOR não vem daqui: ele é lido do catálogo pelo plano e intervalo.
+    """Proposta de CONTRATO (rota administrativa, alçada financeira). v0.27.0: sem recorrência.
 
-    Aceitar `amount_cents` do cliente permitiria uma oferta com preço que não existe em
-    `plan_price_versions` — e o catálogo deixaria de ser a fonte única exatamente onde importa.
+    O valor vem de quem tem alçada, com motivo auditado — nunca da organização que paga e nunca de um
+    catálogo de mensalidades (não existe mais, ADR-341).
     """
+    org_id: Uuid
     plan_key: Annotated[str, StringConstraints(min_length=2, max_length=40)]
-    interval: Literal["month", "year"] = "month"
-    billing_frequency: Literal["one_time", "installment", "recurring"] = "recurring"
-    payment_method: Literal["card", "boleto", "pix", "manual"] = "card"
+    amount_cents: Annotated[int, Field(ge=0, le=10**11)]
+    amount_reason: Annotated[str, StringConstraints(min_length=5, max_length=500)]
+    contract_ref: Annotated[str | None, StringConstraints(max_length=200)] = None
+    billing_frequency: Literal["one_time", "installment"] = "one_time"
+    payment_method: Literal["card", "boleto", "pix", "manual"] = "pix"
     installments: int | None = Field(default=None, ge=2, le=24)
     free_period_months: int | None = Field(default=None, ge=1, le=60)
 

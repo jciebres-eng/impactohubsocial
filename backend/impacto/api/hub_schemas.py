@@ -146,14 +146,6 @@ class DemoIn(In):
     website: Annotated[str | None, Field(max_length=100)] = None
 
 
-class TrialRequestIn(In):
-    users_count: Annotated[int, Field(ge=1, le=10000)]
-    purpose: Annotated[str, Field(min_length=10, max_length=2000)]
-    modules: Annotated[list[Annotated[str, Field(max_length=60)]], Field(max_length=20)] = []
-    period_days: Annotated[int, Field(ge=7, le=60)] = 14
-    responsible: Annotated[str, Field(min_length=2, max_length=200)]
-
-
 class DecisionIn(In):
     approve: bool
     reason: Annotated[str, Field(min_length=5, max_length=1000)]

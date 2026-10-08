@@ -1,4 +1,4 @@
-"""Billing (sandbox), vouchers (dupla aprovação, concorrência), invariância do match a plano, alertas de editais,
+"""Acesso e concessões (sem assinatura — ADR-341), vouchers (dupla aprovação, concorrência), invariância do match a pacote, alertas de editais,
 regras fiscais com dupla aprovação, LGPD, governo, administração, IA, jobs e contrato OpenAPI."""
 import threading
 import unittest
@@ -20,53 +20,28 @@ class BillingAndVoucherTests(unittest.TestCase):
         r = Client().get("/v1/plans").json
         keys = {p["plan_key"] for p in r["items"]}
         self.assertTrue({"osc_basic", "osc_premium", "company_premium", "government_basic"} <= keys)
-        self.assertEqual(r["billing_provider"], "sandbox")
+        self.assertIsNone(r["subscription"])
+        self.assertNotIn("billing_provider", r)
 
-    def test_sandbox_checkout_unlocks_paid_features(self):
+    def test_a_license_unlocks_paid_features_and_its_end_never_deletes_data(self):
+        """v0.27.0: no lugar do checkout em sandbox, a licença sob contrato. Perder a concessão cessa o
+        acesso ao recurso e NÃO apaga dado (invariante `downgrade_never_deletes_data`)."""
         osc = new_account("osc")
         r = osc.post("/v1/saved-searches", {"name": "Editais de cultura", "filters": {"cause": "cultura"}})
         self.assertEqual((r.status, r.json["code"]), (402, "feature_not_in_plan"))
-        self.assertEqual(osc.post("/v1/billing/checkout", {"plan_key": "company_premium"}).status, 404)  # plano de outro papel
-        # A v0.17.0 APOSENTOU a regra comercial em dólar da v0.16.0 e não fixa preço institucional em
-        # `config/plans.json`. Quem declara o preço exercitado aqui é o AMBIENTE DE TESTE
-        # (`support.TEST_PRICES`), então o teste lê o valor de lá em vez de fixá-lo — fixar aqui seria
-        # repetir em teste exatamente o que o produto deixou de fazer.
-        # O que continua valendo é que nada é fictício: no provedor de teste a resposta diz, em letras,
-        # que nenhuma cobrança real aconteceu.
-        r = osc.post("/v1/billing/checkout", {"plan_key": "osc_premium"})
-        self.assertEqual(r.status, 200, r)
-        self.assertIn("SANDBOX", r.json["warning"])
+        self.assertIn(osc.post("/v1/billing/checkout", {"plan_key": "osc_premium"}).status, (404, 405))   # não existe mais
+        lic = self.adm1.post(f"/v1/admin/organizations/{osc.org_id}/license", {"plan_key": "osc_premium", "months": 1, "reference": "CT-teste"})
+        self.assertEqual(lic.status, 200, lic)
         self.assertIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
-        # e o preço que ela aceitou ficou congelado, com a moeda e a promoção de entrada da regra vigente
-        acc = osc.get("/v1/billing/price-history").json["accepted"]
-        self.assertEqual(len(acc), 1)
-        from tests.support import TEST_PRICES
-        cents, intro = next((c, i) for p, iv, c, i, _, _ in TEST_PRICES
-                            if p == "osc_premium" and iv == "month")
-        self.assertEqual((acc[0]["currency"], acc[0]["amount_cents"], acc[0]["intro_amount_cents"]),
-                         ("BRL", cents, intro))
-
-    def test_paid_plan_with_price_via_sandbox(self):
+        self.assertEqual(osc.post("/v1/saved-searches", {"name": "Cultura", "filters": {"cause": "cultura"}}).status, 201)
         with db_system() as d:
-            d.run("UPDATE plans SET price_cents = 9900 WHERE plan_key = 'osc_premium'")
-        try:
-            osc = new_account("osc")
-            r = osc.post("/v1/billing/checkout", {"plan_key": "osc_premium"})
-            self.assertEqual(r.status, 200, r)
-            self.assertIn("SANDBOX", r.json["warning"])
-            self.assertIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
-            self.assertEqual(osc.post("/v1/saved-searches", {"name": "Cultura", "filters": {"cause": "cultura"}}).status, 201)
-            self.assertEqual(osc.post("/v1/billing/cancel").status, 200)
-            # v0.11.0: cancelar NÃO corta o acesso já pago — vale até o fim do período; só então volta ao FREE
-            self.assertIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
-            with db_system() as d:
-                d.run("UPDATE subscriptions SET current_period_end = now() - interval '8 days' WHERE org_id = $1", osc.org_id)
-            self.assertNotIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
-            # rebaixamento não apaga dados
-            self.assertEqual(len(osc.get("/v1/saved-searches").json["items"]), 1)
-        finally:
-            with db_system() as d:
-                d.run("UPDATE plans SET price_cents = NULL WHERE plan_key = 'osc_premium'")
+            d.run("UPDATE entitlement_grants SET ends_at = now() - interval '1 day' WHERE id = $1", lic.json["id"])
+        self.assertNotIn("alerts.saved_search", osc.get("/v1/me").json["entitlements"]["features"])
+        # perder a concessão não apaga dados
+        self.assertEqual(len(osc.get("/v1/saved-searches").json["items"]), 1)
+        b = osc.get("/v1/billing").json
+        self.assertIsNone(b["subscription"])
+        self.assertIn("não cobra assinatura", b["no_subscription"])
 
     def test_voucher_dual_approval_and_single_use(self):
         r = self.adm1.post("/v1/admin/voucher-batches", {"campaign": "Piloto MT", "type": "grant_plan", "plan_key": "osc_premium",
@@ -100,41 +75,10 @@ class BillingAndVoucherTests(unittest.TestCase):
         with db_system() as d:
             self.assertEqual(d.scalar("SELECT redeemed_count FROM vouchers WHERE batch_id = $1", bid), 1)
 
-    def test_stripe_webhook_signature_and_idempotency(self):
-        import hashlib
-        import hmac
-        import json
-        import time
-        st = server()["state"]
-        old = (st.settings.billing_provider, st.settings.stripe_webhook_secret)
-        st.settings.billing_provider, st.settings.stripe_webhook_secret = "stripe", "whsec_test"
-        try:
-            osc = new_account("osc")
-            with db_system() as d:
-                d.run("INSERT INTO subscriptions(org_id, plan_key, status, provider, provider_checkout_id) VALUES ($1,'osc_premium','incomplete','stripe','cs_test_1')",
-                      osc.org_id)
-            ev = {"id": "evt_1", "type": "checkout.session.completed", "data": {"object": {"id": "cs_test_1", "customer": "cus_1",
-                  "subscription": "sub_1", "metadata": {"org_id": osc.org_id, "plan_key": "osc_premium"}}}}
-            payload = json.dumps(ev).encode()
-            t = int(time.time())
-            sig = hmac.new(b"whsec_test", f"{t}.".encode() + payload, hashlib.sha256).hexdigest()
-            self.assertEqual(Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json",
-                                              headers={"Stripe-Signature": f"t={t},v1=deadbeef"}).status, 400)
-            self.assertEqual(Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json",
-                                              headers={"Stripe-Signature": f"t={t - 3600},v1={sig}"}).status, 400)  # replay antigo
-            ok = Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json", headers={"Stripe-Signature": f"t={t},v1={sig}"})
-            self.assertEqual((ok.status, ok.json["status"]), (200, "processed"))
-            dup = Client().request("POST", "/v1/billing/webhooks/stripe", raw=payload, ctype="application/json", headers={"Stripe-Signature": f"t={t},v1={sig}"})
-            self.assertEqual(dup.json["status"], "duplicate_ignored")
-            self.assertIn("osc_premium", osc.get("/v1/me").json["entitlements"]["plans"])
-            # pagamento falho → past_due
-            ev2 = {"id": "evt_2", "type": "invoice.payment_failed", "data": {"object": {"id": "in_1", "subscription": "sub_1", "amount_due": 9900, "currency": "brl"}}}
-            p2 = json.dumps(ev2).encode()
-            s2 = hmac.new(b"whsec_test", f"{t}.".encode() + p2, hashlib.sha256).hexdigest()
-            Client().request("POST", "/v1/billing/webhooks/stripe", raw=p2, ctype="application/json", headers={"Stripe-Signature": f"t={t},v1={s2}"})
-            self.assertEqual(osc.get("/v1/billing").json["invoices"][0]["status"], "open")
-        finally:
-            st.settings.billing_provider, st.settings.stripe_webhook_secret = old
+    def test_the_subscription_webhook_is_gone(self):
+        """v0.27.0 (ADR-341): o webhook de assinatura do Stripe saiu com a assinatura."""
+        self.assertIn(Client().request("POST", "/v1/billing/webhooks/stripe", raw=b"{}", ctype="application/json",
+                                       headers={"Stripe-Signature": "t=1,v1=deadbeef"}).status, (404, 405))
 
 
 class MatchInvarianceTests(unittest.TestCase):

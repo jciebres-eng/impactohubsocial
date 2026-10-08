@@ -20,7 +20,7 @@ import { useState } from "react";
 import { api } from "../api";
 import { date, dateTime, money } from "../format";
 import { Link } from "../router";
-import { Button, Field, Input, PageHead, Panel, Pill, Select, StateView, useAction, useLoad } from "../ui/kit";
+import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, useAction, useLoad } from "../ui/kit";
 import { useAccess } from "../access";
 
 const hoje = () => new Date().toISOString().slice(0, 7);
@@ -64,11 +64,13 @@ export function Controladoria() {
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <div className="stack-lg">
-            <Panel title="Receita recorrente">
+            <Panel title="Camada econômica da operação (sem assinatura — ADR-341)">
               <div className="metrics">
-                <Indicator title="MRR" m={data.recurring?.mrr} />
-                <Indicator title="ARR" m={data.recurring?.arr} />
-                <div className="metric"><span className="metric-label">Assinaturas ativas</span><strong className="metric-value">{data.recurring?.subscriptions ?? 0}</strong><span className="metric-why">subscriptions status=active, provider&lt;&gt;sandbox</span></div>
+                <Indicator title="Registrado (3,5%)" m={data.operation_layer?.platform_layer_registered} />
+                <Indicator title="Devido" m={data.operation_layer?.platform_layer_due} />
+                <Indicator title="Pago à plataforma" m={data.operation_layer?.platform_layer_paid} />
+                <div className="metric"><span className="metric-label">Operações com camada registrada</span><strong className="metric-value">{data.operation_layer?.operations ?? 0}</strong><span className="metric-why">economic_events · platform_service_registered</span></div>
+                <Indicator title="MRR" m={data.operation_layer?.mrr} />
               </div>
             </Panel>
             <Panel title="Competência" actions={<Link to="/contabilidade">Abrir contabilidade</Link>}>
@@ -522,7 +524,7 @@ export function Tesouraria() {
               <ul className="bullets">
                 <li>Não há carteira, saldo de cliente, repasse nem custódia nesta plataforma — nem tabela que os comportasse.</li>
                 <li>Doação, patrocínio e pagamento de serviço acontecem FORA da plataforma, entre as partes; aqui ficam o registro, o contrato, a instrução e a evidência.</li>
-                <li>A plataforma fatura o que é dela: assinatura, uso e serviço próprio.</li>
+                <li>A plataforma fatura o que é dela: a taxa de serviço contratada na operação financiada (3,5%), uso e contratos avulsos. Não existe assinatura.</li>
               </ul>
             </Panel>
           </div>
@@ -804,6 +806,122 @@ export function PeriodosGratuitos() {
                 </table>
               )}
               <p className="note-honesty">Cancelar não apaga: o registro permanece com motivo e autor, porque é ele que explica por que a organização parou de ser gratuita.</p>
+            </Panel>
+          </div>
+        )}
+      </StateView>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------------------------- TORRE MASTER (v0.27.0)
+/** A visão do proprietário: GMV × camada da plataforma, sem saldo inventado. Banco "NÃO CONECTADO" é dito em letras. */
+export function TorreMaster() {
+  const { data, error, loading, reload } = useLoad<any>("/v1/control-tower/master");
+  const d = data;
+  const pct = (bps: number) => `${(bps / 100).toFixed(2).replace(".", ",")}%`;
+  return (
+    <>
+      <PageHead title="Torre financeira (master)" sub="O que passa pelo ecossistema e o que fica com a plataforma, em blocos separados que nunca se somam. Nenhum número aqui é saldo: a plataforma não custodia." />
+      <StateView loading={loading} error={error} onRetry={reload}>
+        {d && (
+          <div className="stack-lg">
+            <ul className="bullets">{d.honesty.map((h: string) => <li key={h}>{h}</li>)}</ul>
+            <Panel title="Assinatura">
+              <p><strong>Não existe.</strong> {d.subscription.note}</p>
+            </Panel>
+            <div className="split">
+              <Panel title="GMV — o que passa pelo ecossistema (não é receita)">
+                <KeyValue items={[
+                  ["Acordos de financiamento vigentes", String(d.gmv.funding_agreements_active)],
+                  ["Valor contratado (bruto)", money(d.gmv.gross_contracted_cents)],
+                  ["Recursos de projeto instruídos", money(d.gmv.project_funds_instructed_cents)],
+                  ["Recursos de projeto confirmados", money(d.gmv.project_funds_confirmed_cents)],
+                  ["Operações quitadas", String(d.gmv.operations_settled)],
+                  ["Aportes registrados / confirmados", `${money(d.gmv.commitments_registered_cents)} / ${money(d.gmv.commitments_confirmed_cents)}`],
+                ]} />
+                <Honesty note={d.gmv.warning} />
+              </Panel>
+              <Panel title={`Camada da plataforma — ${d.platform_layer.pricing.rules.find((r: any) => r.key === "funding.platform_service") ? pct(d.platform_layer.pricing.rules.find((r: any) => r.key === "funding.platform_service").bps) : "—"} (versão ${d.platform_layer.pricing.pricing_version})`}>
+                <div className="metrics">
+                  <Indicator title="Registrado" m={d.platform_layer.registered} />
+                  <Indicator title="Devido" m={d.platform_layer.due} />
+                  <Indicator title="Pago" m={d.platform_layer.paid} />
+                  <div className="metric"><span className="metric-label">Operações</span><strong className="metric-value">{d.platform_layer.operations}</strong><span className="metric-why">acordos com camada registrada</span></div>
+                </div>
+                <p className="muted small">Regra comercial <code className="small">{d.platform_layer.rule.key}</code>: <Pill tone={d.platform_layer.rule.active ? "good" : "warn"}>{d.platform_layer.rule.active ? "ativa" : `inativa · ${d.platform_layer.rule.legal_status}`}</Pill> <Link to={d.links.rules}>abrir regras</Link></p>
+                <Honesty note={d.platform_layer.note} />
+                {d.platform_layer.by_month.length > 0 && (
+                  <table className="table"><thead><tr><th>Mês</th><th>GMV confirmado</th><th>Registrado</th><th>Devido</th><th>Pago</th></tr></thead>
+                    <tbody>{d.platform_layer.by_month.map((m: any) => <tr key={m.month}><td>{m.month}</td><td>{money(m.gmv_confirmed_cents)}</td><td>{money(m.registered_cents)}</td><td>{money(m.due_cents)}</td><td>{money(m.paid_cents)}</td></tr>)}</tbody></table>
+                )}
+              </Panel>
+            </div>
+            <div className="split">
+              <Panel title="Participação de autoria — 1,5% (não é receita da plataforma)">
+                <div className="metrics">
+                  <Indicator title="Na matriz" m={d.participation.accrued} />
+                  <Indicator title="Paga ao proponente" m={d.participation.paid} />
+                </div>
+                <ul className="rows">{d.participation.participations.map((p: any) => <li key={p.status}><span>{p.status}</span><strong>{p.n}</strong></li>)}</ul>
+                <Honesty note={d.participation.note} />
+              </Panel>
+              <Panel title="Captura de valor">
+                <KeyValue items={[
+                  ["Eventos de valor registrados", String(d.value_capture.value_events)],
+                  ["Organizações com eventos", String(d.value_capture.organizations_with_value_events)],
+                  ["Value Capture Ratio", d.value_capture.value_capture_ratio == null ? d.value_capture.value_capture_ratio_status : `${(d.value_capture.value_capture_ratio * 100).toFixed(2)}%`],
+                  ["Fórmula", d.value_capture.formula],
+                ]} />
+                <Honesty note={d.value_capture.note} />
+              </Panel>
+            </div>
+            <div className="split">
+              <Panel title="Marketplace — sem percentual">
+                <KeyValue items={[["Anúncios", `${d.marketplace.listings} (${d.marketplace.listings_active} publicados)`], ["Comissão", `nenhuma · ${d.marketplace.take_rate.status || "—"}`], ["Receita", money(d.marketplace.revenue_cents)]]} />
+                <Honesty note={d.marketplace.note} />
+              </Panel>
+              <Panel title="IA e API — uso medido, receita zero">
+                <KeyValue items={[
+                  ["Chamadas de IA (30 dias)", String(d.usage.ai_calls_30d)],
+                  ["Custo estimado de IA (30 dias)", d.usage.ai_cost_cents_estimate_30d == null ? "sem tabela de preço" : money(Math.round(d.usage.ai_cost_cents_estimate_30d))],
+                  ["Chamadas sem tabela de preço", String(d.usage.ai_calls_without_price_table)],
+                  ["Credenciais de integração", String(d.usage.api_credentials)],
+                  ["Webhooks ativos / entregas (30 dias)", `${d.usage.webhook_subscriptions_active} / ${d.usage.webhook_deliveries_30d}`],
+                  ["Receita por uso", money(d.usage.revenue_cents)],
+                ]} />
+                <Honesty note={d.usage.note} />
+              </Panel>
+            </div>
+            <div className="split">
+              <Panel title="Contratos avulsos e parcelados (enterprise, governo)">
+                <KeyValue items={[
+                  ["Contratos com cobrança autorizada", `${d.contracts.authorized} · ${money(d.contracts.authorized_value_cents)}`],
+                  ["Aceites de acesso gratuito", String(d.contracts.free_access_acceptances)],
+                  ["Propostas em aberto", String(d.contracts.open_offers)],
+                  ["Licenças vigentes", String(d.contracts.licenses_active)],
+                ]} />
+                <Honesty note={d.contracts.note} />
+              </Panel>
+              <Panel title="A receber — cobranças próprias">
+                <KeyValue items={[
+                  ["Cobranças abertas (reais / simuladas)", `${money(d.receivables.charges_open_real_cents)} / ${money(d.receivables.charges_open_simulated_cents)}`],
+                  ["Cobranças pagas (reais / simuladas)", `${money(d.receivables.charges_paid_real_cents)} / ${money(d.receivables.charges_paid_simulated_cents)}`],
+                  ["Faturas abertas", `${d.receivables.invoices_open} · ${money(d.receivables.invoices_open_cents)}`],
+                  ["Linha da plataforma aguardando regra", `${d.receivables.platform_fee_instructions_awaiting_rule} · ${money(d.receivables.platform_fee_awaiting_rule_cents)}`],
+                  ["Linha da plataforma instruída / confirmada", `${money(d.receivables.platform_fee_open_cents)} / ${money(d.receivables.platform_fee_confirmed_cents)}`],
+                  ["Provedor de pagamento", d.receivables.payment_provider.configured ? d.receivables.payment_provider.provider : `${d.receivables.payment_provider.provider} (simulado)`],
+                ]} />
+                <Honesty note={d.receivables.note} />
+              </Panel>
+            </div>
+            <Panel title="Banco">
+              <p className="big-figure">{d.bank.status}</p>
+              <Honesty note={d.bank.note} />
+            </Panel>
+            <Panel title="Regras de monetização">
+              <ul className="rows">{d.rules.map((r: any) => <li key={r.key}><span>{r.label_pt}<br /><code className="small">{r.key}</code></span><span><Pill tone={r.active ? "good" : r.legal_status === "refused" ? "bad" : "warn"}>{r.active ? "ativa" : r.legal_status}</Pill></span></li>)}</ul>
+              <p className="muted small">Simulação de 24 meses (hipóteses declaradas): <code className="small">{d.links.model}</code></p>
             </Panel>
           </div>
         )}

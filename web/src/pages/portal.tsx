@@ -21,10 +21,11 @@ import { useSession } from "../session";
 
 const PERFIL: Record<string, string> = { osc: "Organização da sociedade civil", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração da plataforma" };
 const FUNCAO: Record<string, string> = { owner: "Proprietária", admin: "Administração", manager: "Gestão", analyst: "Análise", member: "Participação", viewer: "Leitura" };
+// v0.27.0 (ADR-341): não existe assinatura — o estado diz de onde vem o acesso.
 const ESTADO_COMERCIAL: Record<string, [string, string]> = {
-  free_period: ["Período gratuito", "good"], trial: ["Em teste", "good"], active: ["Assinatura ativa", "good"],
-  pending_authorization: ["Aguardando autorização de cobrança", "warn"], past_due: ["Pagamento em atraso", "bad"],
-  suspended: ["Suspensa", "bad"], none: ["Sem contratação", "muted"],
+  FREE_ACCESS: ["Acesso livre ao núcleo", "good"], FREE_GRANT: ["Concessão vigente", "good"],
+  GRANT_EXPIRING: ["Concessão terminando (nada será cobrado)", "warn"], CONTRACTED: ["Contrato aceito", "good"],
+  none: ["Acesso livre ao núcleo", "muted"],
 };
 
 export function Portal() {

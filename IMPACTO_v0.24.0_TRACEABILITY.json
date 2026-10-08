@@ -1,17 +1,17 @@
 {
   "version": "0.24.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-08T00:42:37+00:00",
-  "files_total": 2298,
-  "size_bytes_total": 39298686,
+  "generated_at": "2026-10-08T00:58:40+00:00",
+  "files_total": 2302,
+  "size_bytes_total": 39299192,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 59,
       "size_bytes": 1077647
     },
     "backend": {
-      "files": 80,
-      "size_bytes": 707790
+      "files": 84,
+      "size_bytes": 707970
     },
     "banco: acesso": {
       "files": 5,
@@ -79,7 +79,7 @@
     },
     "integração contínua": {
       "files": 2,
-      "size_bytes": 5804
+      "size_bytes": 6130
     },
     "manifesto de versão anterior": {
       "files": 12,
@@ -137,8 +137,8 @@
     },
     {
       "file": ".github/workflows/ci.yml",
-      "sha256": "e39ff51485304948b249ec357163381aa360921e4405851993e4f29d99604255",
-      "size_bytes": 4683,
+      "sha256": "75783029fcc68a8c7f8cee50b3f7040b125201551c257189ba7faa47b7c3f792",
+      "size_bytes": 5009,
       "category": "integração contínua"
     },
     {
@@ -1205,6 +1205,30 @@
     },
     {
       "file": "backend/.tmp_entry_storage/5c8234e4-aff0-4ea9-ad80-c0a7a4000771/4a65979705874d74b5b3cb781611dadd",
+      "sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff",
+      "size_bytes": 45,
+      "category": "backend"
+    },
+    {
+      "file": "backend/.tmp_entry_storage/7477506d-6bb5-4481-87ae-b8fa4580a564/2565f93c950740c79b85d08919d49c46",
+      "sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff",
+      "size_bytes": 45,
+      "category": "backend"
+    },
+    {
+      "file": "backend/.tmp_entry_storage/7477506d-6bb5-4481-87ae-b8fa4580a564/7068a7801e364d749341c70ca86d4572",
+      "sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff",
+      "size_bytes": 45,
+      "category": "backend"
+    },
+    {
+      "file": "backend/.tmp_entry_storage/7477506d-6bb5-4481-87ae-b8fa4580a564/86856555a8874452aae89e130e4abd56",
+      "sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff",
+      "size_bytes": 45,
+      "category": "backend"
+    },
+    {
+      "file": "backend/.tmp_entry_storage/7477506d-6bb5-4481-87ae-b8fa4580a564/a867e959f3ad41d291401a2329deb582",
       "sha256": "5a838678058f6de375e8635b5f2fea47a4e5f07cb1a882a44b10f39abc6f34ff",
       "size_bytes": 45,
       "category": "backend"
@@ -4103,7 +4127,7 @@
     },
     {
       "file": "docs/evidence/demo_v0240/relatorio.json",
-      "sha256": "9780008c3a63ff7db9291e1cb1b93242ae23262b847873cf0fee3caf2224ba24",
+      "sha256": "958fd794439d68ca2cbe317fae12a0aecafad30ee23a226980282f5886e5533a",
       "size_bytes": 10492,
       "category": "evidência de execução"
     },

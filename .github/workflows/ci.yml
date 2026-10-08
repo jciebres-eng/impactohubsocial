@@ -38,6 +38,9 @@ jobs:
           # instala EXATAMENTE a árvore travada, com integridade conferida, e falha se o
           # package.json divergir do lockfile. Esta é a primeira execução que prova que o lockfile
           # instala; o ambiente de desenvolvimento não alcança o registro.
+          # Sem lockfile, `npm ci` falharia de qualquer jeito; o teste explícito diz POR QUÊ, e
+          # garante que o `npm audit` mais abaixo audita a mesma árvore que foi construída.
+          test -f package-lock.json || { echo "web/package-lock.json ausente: a árvore auditada não seria a construída"; exit 1; }
           npm ci --no-audit
           npx tsc -p tsconfig.json --noEmit
           node build.mjs

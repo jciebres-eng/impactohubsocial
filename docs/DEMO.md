@@ -84,13 +84,13 @@ verificável, campanha pública, cotas apoiadas e itens pendentes. Os e-mails fi
 `dist-stack/data/outbox` (é demonstração: nenhum e-mail sai).
 
 **Isto é provado a cada push** pelo job `pilha-do-zero` do CI: o mesmo arquivo, do zero, com as
-jornadas, as 218 telas no Chromium com cada perfil, o axe-core e um reinício conferindo que os dados
+jornadas, as 220 telas no Chromium com cada perfil, o axe-core e um reinício conferindo que os dados
 continuam. O que ainda não existe é um **endereço público**: depende de conta de hospedagem em nome do
 dono do projeto (D-PUB1 em `execution/BLOCKERS.md`).
 
 ## 2. Por onde navegar
 
-São **218 telas** servidas pelo roteador. O mapa delas — rota, componente, arquivo, quais tipos de
+São **220 telas** servidas pelo roteador. O mapa delas — rota, componente, arquivo, quais tipos de
 organização alcançam, se está em menu e quais operações de API cada uma chama — está em
 [`execution/screen_inventory.json`](execution/screen_inventory.json) e
 [`execution/screen_backend_map.json`](execution/screen_backend_map.json), e em forma navegável no
@@ -102,13 +102,13 @@ a tese do produto melhor que qualquer slide:
 | Tipo | Itens de menu | Onde a demonstração costuma render |
 |---|---|---|
 | OSC | 43 | diagnóstico → prontidão → projeto → candidatura → prestação de contas |
-| Empresa | 32 | explorar projetos → carteira → relatórios recebidos |
-| Governo | 29 | necessidades do território → edital → execução |
+| Empresa | 33 | explorar projetos → carteira → relatórios recebidos |
+| Governo | 30 | necessidades do território → edital → execução |
 | Profissional | 28 | marketplace → proposta → acordo → validação |
-| Apoiador | 20 | apoiar → carteira → prestação de contas recebida |
+| Apoiador | 21 | apoiar → carteira → prestação de contas recebida |
 | Administração | 32 | compliance, auditoria, integridade, interruptor |
 
-**82 das 218 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
+**82 das 220 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
 inventário lia só a primeira linha de cada menu e dizia 119; corrigido na v0.25.0). Em boa parte é correto
 (detalhe de item, formulário de edição), mas é a primeira pergunta que o Designer vai querer
 responder, e o painel permite marcá-las uma a uma.

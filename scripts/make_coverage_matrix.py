@@ -6,7 +6,7 @@
 
 Nenhum número aqui é digitado: vem de
   - docs/evidence/jornadas_v0250/relatorio.json   (test_v0250_jornadas — jornadas pela API)
-  - docs/execution/ROUTE_RUNTIME_MATRIX.csv       (test_v0250_todas_as_telas — 218 telas no navegador)
+  - docs/execution/ROUTE_RUNTIME_MATRIX.csv       (test_v0250_todas_as_telas — 220 telas no navegador)
   - docs/evidence/responsivo_v0250/resumo.json    (test_v0250_responsivo — telefone, 390 px)
 """
 from __future__ import annotations

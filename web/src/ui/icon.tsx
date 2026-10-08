@@ -82,7 +82,7 @@ export const ICONE_DA_ROTA: Record<string, NomeIcone> = {
   "/projetos": "nav/projects", "/candidaturas": "projects/draft", "/ideias": "nav/ideas",
   "/documentos": "nav/documents", "/documentos/montagens": "documents/document", "/documentos/modelos": "documents/document",
   "/rascunhos": "projects/draft", "/materiais": "documents/evidence",
-  "/pagamentos": "nav/finance", "/carteira": "finance/funding", "/cotas": "finance/funding", "/fiscal": "fiscal/tax",
+  "/pagamentos": "nav/finance", "/carteira": "finance/funding", "/torre": "finance/funding", "/torre-territorial": "impact/territory", "/cotas": "finance/funding", "/fiscal": "fiscal/tax",
   "/relatorios": "nav/reports", "/relatorios-impacto": "nav/reports", "/afirmacoes": "impact/target",
   "/reputacao": "status/verified", "/selos": "status/verified", "/verificacoes": "status/check",
   "/responsabilidade": "esg/governance", "/prontidao": "impact/target", "/prontidao/finalidades": "impact/target",

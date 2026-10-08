@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 894,
- "operacoes_registradas": 888,
+ "operacoes_no_backend": 900,
+ "operacoes_registradas": 894,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,16 +11,16 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 218,
+ "telas": 220,
  "estados": {
   "backend presente": 158,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
-  "sem chamada direta": 60
+  "sem chamada direta": 62
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 59,
- "operacoes_que_nenhuma_tela_chama": 234,
+ "arquivos_do_front_varridos": 60,
+ "operacoes_que_nenhuma_tela_chama": 236,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -55,6 +55,7 @@
   "GET /v1/admin/reports",
   "GET /v1/admin/risk-levels",
   "GET /v1/admin/voucher-batches/{}/redemptions",
+  "GET /v1/agreements/pending",
   "GET /v1/ai/credits",
   "GET /v1/ai/estimate",
   "GET /v1/auth/oidc/callback",
@@ -131,6 +132,7 @@
   "GET /v1/seals/awards/{}",
   "GET /v1/seals/rules",
   "GET /v1/signatures/verify",
+  "GET /v1/signed-agreements/{}/allocation",
   "GET /v1/solutions/{}/adaptations",
   "GET /v1/solutions/{}/versions",
   "GET /v1/territories/catalog-status",
@@ -317,6 +319,8 @@
   "/selos",
   "/solucoes/replicacao",
   "/tesouraria",
+  "/torre",
+  "/torre-territorial",
   "/vocabulario"
  ],
  "telas_com_chamada_dinamica": [],
@@ -743,6 +747,7 @@
     "PATCH /v1/signed-agreements/{}/milestones/{}",
     "POST /v1/signed-agreements/{}/decline",
     "POST /v1/signed-agreements/{}/milestones",
+    "POST /v1/signed-agreements/{}/new-version",
     "POST /v1/signed-agreements/{}/parties",
     "POST /v1/signed-agreements/{}/publish",
     "POST /v1/verifiable-records"
@@ -2551,6 +2556,22 @@
    "rota": "/tesouraria",
    "componente": "Int.Tesouraria",
    "arquivo": "web/src/pages/internal.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/torre",
+   "componente": "Tower.FunderTower",
+   "arquivo": "web/src/pages/tower.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
+  },
+  {
+   "rota": "/torre-territorial",
+   "componente": "Tower.GovernmentTower",
+   "arquivo": "web/src/pages/tower.tsx",
    "operacoes": [],
    "ausentes": [],
    "estado": "sem chamada direta"

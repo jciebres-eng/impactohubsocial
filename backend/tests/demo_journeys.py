@@ -351,6 +351,24 @@ class Jornadas:
                 self.passo(J, "governo lista as candidaturas do chamamento", gov, "GET", f"/v1/calls/{c['id']}/applications")
                 self.avaliar(J, gov, aid)
         self.passo(J, "governo acompanha a carteira", gov, "GET", "/v1/portfolio")
+        # v0.26.0 — a torre territorial só mostra linha a linha com 3+ projetos publicados no território (k-anonimato):
+        # a OSC publica um terceiro projeto em MT, e a torre passa a responder território → OSCs → projetos → recursos.
+        p3 = self.passo(J, "OSC publica um terceiro projeto no território", self.c["osc"], "POST", "/v1/projects", {
+            "title": "Biblioteca Itinerante (exemplo)", "summary": "Acervo e mediação de leitura em 4 bairros (dados fictícios).",
+            "problem": "Bairros sem biblioteca pública nem acesso a acervo infantil (exemplo).",
+            "objectives": "Atender 300 crianças com rodas de leitura semanais.", "territory": "BR-MT-5105259",
+            "causes": ["educacao", "cultura"], "ods": [4], "beneficiaries_count": 300, "starts_on": _d(-60), "ends_on": _d(300)})
+        if p3:
+            self.ids["projeto3"] = p3["id"]
+            self.passo(J, "orça o terceiro projeto", self.c["osc"], "POST", f"/v1/projects/{p3['id']}/budget-items",
+                       {"description": "Acervo e veículo adaptado", "quantity": 1, "unit_cost_cents": 2_400_000})
+            self.passo(J, "publica o terceiro projeto", self.c["osc"], "POST", f"/v1/projects/{p3['id']}/publish")
+        self.passo(J, "governo abre a torre territorial (território → programas → OSCs → projetos → indicadores → lacunas)", gov, "GET",
+                   "/v1/control-tower/government")
+        self.passo(J, "empresa abre a torre de controle (meu capital → ... → o que preciso decidir)", self.c["company"], "GET",
+                   "/v1/control-tower/funder")
+        self.passo(J, "financiador confere o estado IMPACTO Ready do projeto apoiado", self.c["company"], "GET",
+                   f"/v1/projects/{self.ids['projeto']}/ready")
         self.passo(J, "governo registra necessidade do território com fonte", gov, "POST", "/v1/territory/needs", {
             "territory": "BR-MT-5105259", "title": "Vagas de contraturno cultural na região leste (exemplo)",
             "description": "Falta de oferta cultural no contraturno para crianças da região leste (exemplo).",

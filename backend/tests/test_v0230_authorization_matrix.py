@@ -1,4 +1,4 @@
-"""Matriz de autorização das 888 operações: classificação completa + chokepoint exaustivo.
+"""Matriz de autorização das 894 operações (888 na v0.23.0; +6 na v0.26.0): classificação completa + chokepoint exaustivo.
 
 O QUE ESTE ARQUIVO AFIRMA, E O QUE NÃO AFIRMA
 
@@ -103,7 +103,7 @@ class EveryOperationIsClassifiedTests(unittest.TestCase):
 
     def test_the_counts_match_what_the_report_states(self):
         """Número citado em relatório que ninguém confere é número que envelhece."""
-        self.assertEqual(888, len(self.linhas))
+        self.assertEqual(894, len(self.linhas))   # v0.26.0: +3 acordo (allocation, new-version, pending) +3 torres (funder, government, ready)
         self.assertEqual(221, sum(1 for l in self.linhas if l["class"].startswith("plataforma")))
         self.assertEqual(83, sum(1 for l in self.linhas if l["permission"]))
         self.assertEqual(52, sum(1 for l in self.linhas if l["class"] == "publica"))

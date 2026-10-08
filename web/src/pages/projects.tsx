@@ -9,6 +9,7 @@ import { ImpactTags } from "./taxonomy";
 import { ContextHelp } from "./help";
 import { MatchVerdict } from "../ui/trail";
 import { UploadButton } from "./documents";
+import { ReadyPanel } from "./tower";
 
 export function Projects() {
   const [offset, setOffset] = useState(0);
@@ -174,6 +175,7 @@ function Overview({ p }: { p: any }) {
             <li><Link to={`/projetos/${p.id}/localizacao`}>Localização pública</Link></li></>}
           </ul>
         </Panel>
+        <ReadyPanel projectId={p.id} />
         {p.match && <MatchVerdict m={p.match} />}
         {p.match?.match_run_id && <MatchFeedbackBox matchRunId={p.match.match_run_id} />}
         <Panel title="O projeto">

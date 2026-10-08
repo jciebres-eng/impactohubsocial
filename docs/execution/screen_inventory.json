@@ -1,21 +1,21 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 218,
+ "telas": 220,
  "por_tabela": {
   "PUBLIC": 9,
   "HELP": 30,
-  "ROUTES": 179
+  "ROUTES": 181
  },
  "sem_login": 30,
  "com_parametro": 52,
- "em_algum_menu": 84,
+ "em_algum_menu": 86,
  "so_por_link_direto": 82,
  "sombreadas": [],
  "menus_por_tipo": {
-  "Empresa": 32,
-  "Governo": 29,
-  "Apoiador": 20,
+  "Empresa": 33,
+  "Governo": 30,
+  "Apoiador": 21,
   "OSC": 43,
   "Administração": 32,
   "Profissional": 28
@@ -55,6 +55,7 @@
   "web/src/pages/solutions_manage.tsx",
   "web/src/pages/talk.tsx",
   "web/src/pages/territory.tsx",
+  "web/src/pages/tower.tsx",
   "web/src/pages/traceability.tsx",
   "web/src/pages/trust.tsx",
   "web/src/pages/trustAdmin.tsx",
@@ -4244,6 +4245,53 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "link direto"
+  },
+  {
+   "rota": "/torre",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Tower.FunderTower",
+   "arquivo": "web/src/pages/tower.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "company",
+    "individual"
+   ],
+   "alcanca": [
+    "Empresa",
+    "Apoiador"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Apoiador"
+   ],
+   "rotulo": "Torre de controle",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/torre-territorial",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Tower.GovernmentTower",
+   "arquivo": "web/src/pages/tower.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "government",
+    "platform"
+   ],
+   "alcanca": [
+    "Governo",
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Governo"
+   ],
+   "rotulo": "Torre territorial",
+   "alcance": "menu"
   },
   {
    "rota": "/verificacoes",

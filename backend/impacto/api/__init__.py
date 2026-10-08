@@ -21,7 +21,9 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            "firstrun_routes",
            # v0.20.0 — denúncia com os quatro níveis separados (a Central de Relatórios
            # continua em report_routes, que já estava na lista desde a v0.10.0)
-           "complaint_routes"]
+           "complaint_routes",
+           # v0.26.0 — torres de controle (financiador, governo) e o estado "Projeto IMPACTO Ready"
+           "tower_routes"]
 _loaded = False
 
 

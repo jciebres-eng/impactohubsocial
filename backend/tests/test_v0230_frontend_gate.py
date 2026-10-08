@@ -434,7 +434,7 @@ class TheScreenBackendMapTellsTheTruthAboutCoverageTests(unittest.TestCase):
         inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
                          .read_text(encoding="utf-8"))
         self.assertEqual({t["rota"] for t in self.mapa["lista"]}, {t["rota"] for t in inv["lista"]})
-        self.assertEqual(self.mapa["operacoes_no_backend"], 888 + 6)
+        self.assertEqual(self.mapa["operacoes_no_backend"], 894 + 6)   # v0.26.0: 894 operações registradas
 
     def test_most_screens_resolve_to_a_registered_operation(self):
         """Contraprova do defeito do `useLoad`: com ele fora, só 138 das 218 'chamavam o backend'."""

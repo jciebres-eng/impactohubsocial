@@ -12,6 +12,17 @@ permissão frouxa.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
 
+**Novo no v0.25.0 (validação operacional de baixo para cima):** as 218 telas do roteador abertas no
+Chromium com os 6 perfis de demonstração e registros reais (`docs/execution/ROUTE_RUNTIME_MATRIX.csv`),
+13 jornadas pela API real sem nenhuma escrita direta no banco, telas de menu em largura de telefone, e
+uma **pilha do zero** com Docker (`infra/compose/demo/`) — banco vazio com o desenho do Supabase,
+migrações, seed, aplicação como `impacto_app` — que o CI sobe a cada push e contra a qual roda as
+jornadas, as 218 telas, o axe-core (WCAG A/AA, agora trava) e um reinício conferindo persistência.
+Essas provas acharam e levaram à correção de um 500, uma tela que quebrava, a confirmação de
+identidade que não existia na interface, chamadas recusadas escondidas e um inventário de telas que
+contava errado. Ainda não há endereço público: depende de conta de hospedagem (D-PUB1). Matriz por
+perfil em `docs/execution/COVERAGE_MATRIX.md`; relatório em `RELEASE_REPORT_v0.25.0.md`.
+
 **Novo no v0.24.2 (Supabase aplicado):** o fluxo `supabase` do GitHub rodou contra o banco real
 (PostgreSQL 17.11): migração pendente aplicada, `impacto_app` rotacionado, e a imagem Docker subiu
 contra o banco em `staging` com `readyz` 200 (run 37727468920). Nenhuma instância pública do IMPACTO

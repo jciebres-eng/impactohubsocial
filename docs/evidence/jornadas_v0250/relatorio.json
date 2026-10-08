@@ -17,10 +17,21 @@
   "Pendências: o que espera decisão de alguém": 12
  },
  "atalhos_declarados": [],
+ "por_perfil": {
+  "admin": 14,
+  "osc": 106,
+  "company": 22,
+  "provider": 12,
+  "government": 8,
+  "individual": 4,
+  "anônimo": 2,
+  "support": 1
+ },
  "detalhe": [
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "confirma a identidade (operação sensível)",
+   "perfil": "admin",
    "metodo": "POST",
    "rota": "/v1/auth/reauth",
    "status": 200,
@@ -30,8 +41,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "administração concede plano osc_premium (osc)",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/9cd6320f-6912-4bc4-87bc-c958f2c61c71/grants",
+   "rota": "/v1/admin/organizations/d3e33003-88a3-4cd3-a012-e333ec694a66/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -39,8 +51,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "administração concede plano company_premium (company)",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/60c0daf0-8f6b-4ca2-9673-1b62a9589906/grants",
+   "rota": "/v1/admin/organizations/74d8b857-3703-4754-a6dc-16d75c00b625/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -48,8 +61,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "administração concede plano provider_premium (provider)",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/d9fe8d30-af9c-46ed-8247-7e79172ffed4/grants",
+   "rota": "/v1/admin/organizations/d0712488-e527-453c-a1c5-8c5aa75bb577/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -57,8 +71,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "administração concede plano gov_institutional (government)",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/2e76bf45-a8e5-45b8-9edb-fcc615d1470e/grants",
+   "rota": "/v1/admin/organizations/d31f4d95-3082-4399-9d03-a3b1ab2aef62/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -66,8 +81,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "administração concede plano individual_basic (individual)",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/organizations/43986a1a-309f-4320-a56b-bf709266b84e/grants",
+   "rota": "/v1/admin/organizations/de8c7191-cf55-47b8-be55-84e9c19958ba/grants",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -75,6 +91,7 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "OSC lista seus projetos",
+   "perfil": "osc",
    "metodo": "GET",
    "rota": "/v1/projects",
    "status": 200,
@@ -84,6 +101,7 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "empresa lista seus programas",
+   "perfil": "company",
    "metodo": "GET",
    "rota": "/v1/calls?mine=true&status=all",
    "status": 200,
@@ -93,8 +111,9 @@
   {
    "jornada": "Preparação: contas de demonstração e plano concedido pela administração",
    "passo": "OSC abre o projeto",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -102,6 +121,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "cria projeto novo",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/projects",
    "status": 201,
@@ -111,8 +131,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "orça o projeto novo",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/32f59199-3b7e-4a9a-85b1-d1730854be04/budget-items",
+   "rota": "/v1/projects/e0502814-d7cf-47be-b49b-d740415089ac/budget-items",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -120,8 +141,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "publica o projeto novo",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/32f59199-3b7e-4a9a-85b1-d1730854be04/publish",
+   "rota": "/v1/projects/e0502814-d7cf-47be-b49b-d740415089ac/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -129,6 +151,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "abre diagnóstico do projeto",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/diagnoses",
    "status": 201,
@@ -138,8 +161,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "preenche o diagnóstico",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/diagnoses/ce155054-becf-4c8e-9d5b-d47adeb768b0",
+   "rota": "/v1/diagnoses/6cefabb4-addd-495f-af54-c65233f7eca4",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -147,8 +171,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "responde a etapa de contexto do roteiro",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/diagnoses/ce155054-becf-4c8e-9d5b-d47adeb768b0/guide/context",
+   "rota": "/v1/diagnoses/6cefabb4-addd-495f-af54-c65233f7eca4/guide/context",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -156,8 +181,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "aplica o diagnóstico ao projeto",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/diagnoses/ce155054-becf-4c8e-9d5b-d47adeb768b0/apply",
+   "rota": "/v1/diagnoses/6cefabb4-addd-495f-af54-c65233f7eca4/apply",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -165,8 +191,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "grava a versão 1 do diagnóstico",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/diagnoses/ce155054-becf-4c8e-9d5b-d47adeb768b0/versions",
+   "rota": "/v1/diagnoses/6cefabb4-addd-495f-af54-c65233f7eca4/versions",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -174,8 +201,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "lê a análise de prontidão (8 dimensões)",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/diagnoses/ce155054-becf-4c8e-9d5b-d47adeb768b0/analysis",
+   "rota": "/v1/diagnoses/6cefabb4-addd-495f-af54-c65233f7eca4/analysis",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -183,8 +211,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "declara contexto de equidade",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/equity/context",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/equity/context",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -192,6 +221,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "declara denominador com fonte",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/equity/denominators",
    "status": 201,
@@ -201,8 +231,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "alinha ODS (declarado)",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/ods-targets",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/ods-targets",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -210,6 +241,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "consulta catálogo de indicadores",
+   "perfil": "osc",
    "metodo": "GET",
    "rota": "/v1/indicators/catalog?ods=4",
    "status": 200,
@@ -219,8 +251,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "cria indicador com linha de base e fonte",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/indicators",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/indicators",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -228,8 +261,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra evidência (2026-05-11)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/evidences",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -237,8 +271,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra medição 8 em 2026-05-11",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/f73d3d15-689b-40be-834f-a43be28ecf2d/values",
+   "rota": "/v1/project-indicators/b4302e45-0a60-44dd-8a04-cd690d8c14c3/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -246,8 +281,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra evidência (2026-06-30)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/evidences",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -255,8 +291,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra medição 17 em 2026-06-30",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/f73d3d15-689b-40be-834f-a43be28ecf2d/values",
+   "rota": "/v1/project-indicators/b4302e45-0a60-44dd-8a04-cd690d8c14c3/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -264,8 +301,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra evidência (2026-08-19)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/evidences",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -273,8 +311,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra medição 26 em 2026-08-19",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/f73d3d15-689b-40be-834f-a43be28ecf2d/values",
+   "rota": "/v1/project-indicators/b4302e45-0a60-44dd-8a04-cd690d8c14c3/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -282,8 +321,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra evidência (2026-10-03)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/evidences",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/evidences",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -291,8 +331,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra medição 33 em 2026-10-03",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/project-indicators/f73d3d15-689b-40be-834f-a43be28ecf2d/values",
+   "rota": "/v1/project-indicators/b4302e45-0a60-44dd-8a04-cd690d8c14c3/values",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -300,8 +341,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra risco",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/risks",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/risks",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -309,8 +351,9 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "grava retrato do projeto",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/snapshots",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/snapshots",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -318,6 +361,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "consulta os papéis de responsabilidade",
+   "perfil": "osc",
    "metodo": "GET",
    "rota": "/v1/responsibility/roles",
    "status": 200,
@@ -327,6 +371,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "designa responsável (organization)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/responsibility/assignments",
    "status": 201,
@@ -336,6 +381,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "registra decisão do responsável",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/responsibility/decisions",
    "status": 201,
@@ -345,6 +391,7 @@
   {
    "jornada": "OSC: projeto → diagnóstico → impacto",
    "passo": "designa responsável (project)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/responsibility/assignments",
    "status": 201,
@@ -354,6 +401,7 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "declara perfil de financiador",
+   "perfil": "company",
    "metodo": "PUT",
    "rota": "/v1/org/funder-profile",
    "status": 200,
@@ -363,8 +411,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC vê o match do edital com o projeto",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/calls/51f73ce1-6c5b-4b6d-81cb-9b4e3b5d17bf?project_id=7743fdce-6937-49ff-8f37-b2970dc8850f",
+   "rota": "/v1/calls/140d57ad-84ca-4357-95df-565d7e966467?project_id=9122c4ad-2a9a-4586-8c40-922420f3257b",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -372,6 +421,7 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC abre candidatura",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/applications",
    "status": 201,
@@ -381,8 +431,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC lê os passos da candidatura",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -390,6 +441,7 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC escreve o plano de trabalho (rascunho)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/drafts",
    "status": 201,
@@ -399,6 +451,7 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "pede código de assinatura (draft)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signatures/challenge",
    "status": 201,
@@ -408,6 +461,7 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "assina (draft)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signatures",
    "status": 201,
@@ -417,8 +471,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'requirements'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/f5264083-d8c8-4a52-afec-710993e784f8",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/b0d7e685-5a37-49d2-8400-df3be6cc5101",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -426,8 +481,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'req_plano_trabalho'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/8c2c673f-6427-4b08-9eb6-902cf2ebe407",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/e278540d-6faa-4bb6-96e2-88930922a968",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -435,8 +491,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'proposal'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/b6562d3c-f826-4d3e-913a-f975d2545b3e",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/03ccfbe9-a825-4153-9913-a04979b57125",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -444,8 +501,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'budget'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/05dea4fb-7d66-4d62-9ed6-65e72edbc5db",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/5281b156-055c-440e-aa4b-52f2183aa1ce",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -453,8 +511,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'signature'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/db51c289-562b-46b5-b01d-9498772eb47f",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/e4e8f472-ae75-4d2c-9dd8-ac0f36c10c82",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -462,8 +521,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC conclui o passo 'submission'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/steps/c7c632be-5258-4d2c-a0ad-43c4f1df6702",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/steps/c419f64d-ad57-4cc5-ba47-ae54eae7d20a",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -471,8 +531,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC envia a candidatura",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/transition",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -480,8 +541,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "avaliador move para screening",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/transition",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -489,8 +551,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "avaliador move para due_diligence",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/transition",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -498,8 +561,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "avaliador declara não ter conflito",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/conflict",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/conflict",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -507,8 +571,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "avaliador aprova",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/transition",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -516,8 +581,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador registra o aporte comprometido",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/commitments",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/commitments",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -525,8 +591,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador informa o desembolso",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/commitments/9c28b7e3-b490-4bef-bfda-d25da021da6f/status",
+   "rota": "/v1/commitments/a5a067c6-b279-4502-99c6-d3bd245750dc/status",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -534,8 +601,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC confirma o recebimento",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/commitments/9c28b7e3-b490-4bef-bfda-d25da021da6f/status",
+   "rota": "/v1/commitments/a5a067c6-b279-4502-99c6-d3bd245750dc/status",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -543,8 +611,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador registra pagamento",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/commitments/9c28b7e3-b490-4bef-bfda-d25da021da6f/payments",
+   "rota": "/v1/commitments/a5a067c6-b279-4502-99c6-d3bd245750dc/payments",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -552,8 +621,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "pagamento aguarda confirmação",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/payments/1bfdd51b-9a47-483d-9ee5-04e8e4b54938/transition",
+   "rota": "/v1/payments/c106062a-beb9-46e6-b678-75cf802cd446/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -561,8 +631,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC confirma o pagamento",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/payments/1bfdd51b-9a47-483d-9ee5-04e8e4b54938/transition",
+   "rota": "/v1/payments/c106062a-beb9-46e6-b678-75cf802cd446/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -570,8 +641,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "OSC inicia a execução",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/39f925ca-a4dc-45f7-9e87-b074ee13d99f/transition",
+   "rota": "/v1/applications/6e1bb774-98de-405a-944a-5028fc7d853a/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -579,8 +651,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador valida medição",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/2a071033-8f74-49aa-8a55-2394f741bd97/review",
+   "rota": "/v1/indicator-values/2d27a806-bf34-4dfe-9d6e-052701170506/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -588,8 +661,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador valida medição",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/e0acbd0b-5989-4c33-9fe7-9eb55fc47df6/review",
+   "rota": "/v1/indicator-values/bdfe6d59-d3f9-45bb-8fff-1aec12e82872/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -597,8 +671,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador valida medição",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/indicator-values/43da4268-1ad5-4f3a-8fe8-274256404adc/review",
+   "rota": "/v1/indicator-values/bf8295bf-ad12-4fd3-aca1-e684c4993f0f/review",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -606,8 +681,9 @@
   {
    "jornada": "Financiador: edital → candidatura → aporte → validação",
    "passo": "financiador vê a série do projeto (reportado × validado)",
+   "perfil": "company",
    "metodo": "GET",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/impact",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/impact",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -615,6 +691,7 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador propõe apoio",
+   "perfil": "company",
    "metodo": "POST",
    "rota": "/v1/proposals",
    "status": 201,
@@ -624,8 +701,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador envia a proposta",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/proposals/3ef3fb6b-fa7d-4d6f-8a33-210851b1ba8d/transition",
+   "rota": "/v1/proposals/46d3ca83-833e-4a81-87e5-1dee442b95b4/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -633,8 +711,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "OSC abre a proposta",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/proposals/3ef3fb6b-fa7d-4d6f-8a33-210851b1ba8d",
+   "rota": "/v1/proposals/46d3ca83-833e-4a81-87e5-1dee442b95b4",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -642,8 +721,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "OSC aceita a proposta",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/proposals/3ef3fb6b-fa7d-4d6f-8a33-210851b1ba8d/transition",
+   "rota": "/v1/proposals/46d3ca83-833e-4a81-87e5-1dee442b95b4/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -651,6 +731,7 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador registra relação com a OSC",
+   "perfil": "company",
    "metodo": "POST",
    "rota": "/v1/network/relationships",
    "status": 201,
@@ -660,6 +741,7 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador abre conversa sobre o projeto",
+   "perfil": "company",
    "metodo": "POST",
    "rota": "/v1/conversations",
    "status": 201,
@@ -669,8 +751,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador escreve",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/conversations/8f72a4b5-22e4-4e97-909b-ad6c1a7e2769/messages",
+   "rota": "/v1/conversations/68d398ca-3840-4597-bd90-611ab22c5d53/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -678,8 +761,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "OSC responde",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/conversations/8f72a4b5-22e4-4e97-909b-ad6c1a7e2769/messages",
+   "rota": "/v1/conversations/68d398ca-3840-4597-bd90-611ab22c5d53/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -687,8 +771,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "financiador manda mensagem direta",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/messages/9cd6320f-6912-4bc4-87bc-c958f2c61c71",
+   "rota": "/v1/messages/d3e33003-88a3-4cd3-a012-e333ec694a66",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -696,6 +781,7 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "OSC escreve relatório de impacto do período",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/impact-updates",
    "status": 201,
@@ -705,8 +791,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "OSC envia o relatório ao apoiador",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/ec8b90d3-0bc0-4f19-8b0b-3d8f9e146612/transition",
+   "rota": "/v1/impact-updates/73eff68b-53d2-4e59-9b94-10d6028cb496/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -714,8 +801,9 @@
   {
    "jornada": "Rede: proposta → conversa → prestação de contas",
    "passo": "apoiador aceita o relatório",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/ec8b90d3-0bc0-4f19-8b0b-3d8f9e146612/transition",
+   "rota": "/v1/impact-updates/73eff68b-53d2-4e59-9b94-10d6028cb496/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -723,6 +811,7 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "profissional declara perfil",
+   "perfil": "provider",
    "metodo": "PUT",
    "rota": "/v1/org/provider-profile",
    "status": 200,
@@ -732,8 +821,9 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "OSC publica necessidade do projeto",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/needs",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/needs",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -741,8 +831,9 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "profissional oferece ajuda",
+   "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/needs/c096f616-d287-4c8d-bcf0-eb9f26d63c8e/offers",
+   "rota": "/v1/needs/a5f935ed-86a7-48bf-be3c-a2a331e9433b/offers",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -750,8 +841,9 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "OSC aceita a oferta",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/offers/9b2c6bd5-f824-4424-8c0b-af3714383ec5/decide",
+   "rota": "/v1/offers/180ea80e-19b1-4dad-b13e-43693e7af3d3/decide",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -759,6 +851,7 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "profissional lista suas credenciais",
+   "perfil": "provider",
    "metodo": "GET",
    "rota": "/v1/org/credentials",
    "status": 200,
@@ -768,6 +861,7 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "OSC escreve justificativa orçamentária",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/drafts",
    "status": 201,
@@ -777,6 +871,7 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "OSC pede revisão técnica ao profissional",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/professional-reviews",
    "status": 201,
@@ -786,8 +881,9 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "profissional aceita a revisão",
+   "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/professional-reviews/2352ce35-3e75-447c-852d-532c8c9042bf/respond",
+   "rota": "/v1/professional-reviews/9207504b-c63a-44c7-a5df-94709e366bf3/respond",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -795,8 +891,9 @@
   {
    "jornada": "Profissional: necessidade → oferta → revisão técnica",
    "passo": "profissional aprova com credencial verificada",
+   "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/professional-reviews/2352ce35-3e75-447c-852d-532c8c9042bf/respond",
+   "rota": "/v1/professional-reviews/9207504b-c63a-44c7-a5df-94709e366bf3/respond",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -804,6 +901,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "governo publica chamamento",
+   "perfil": "government",
    "metodo": "POST",
    "rota": "/v1/calls",
    "status": 201,
@@ -813,6 +911,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC abre candidatura",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/applications",
    "status": 201,
@@ -822,8 +921,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC lê os passos da candidatura",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -831,6 +931,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC escreve o plano de trabalho (rascunho)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/drafts",
    "status": 201,
@@ -840,6 +941,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "pede código de assinatura (draft)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signatures/challenge",
    "status": 201,
@@ -849,6 +951,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "assina (draft)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signatures",
    "status": 201,
@@ -858,8 +961,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC conclui o passo 'requirements'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/steps/e12c639c-4abc-42d0-8fae-01a6330e5401",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/steps/d93b57c6-54e5-4942-8a63-d788d11b32de",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -867,8 +971,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC conclui o passo 'proposal'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/steps/a47f87ca-ef74-442a-a7c6-d740a4c58135",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/steps/971d8c2e-0c0c-42e3-bcd5-d08483287a18",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -876,8 +981,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC conclui o passo 'budget'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/steps/f0d8f6c8-d6b3-4b0f-9e0a-e1eb4cad56fd",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/steps/75ebb95a-0cc2-4a93-96d4-f04c86d6f7ae",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -885,8 +991,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC conclui o passo 'signature'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/steps/ed9ebf9a-b071-406e-814d-6bdbc0435bf2",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/steps/bece3091-6b99-4390-aa91-f0cc60d41802",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -894,8 +1001,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC conclui o passo 'submission'",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/steps/6624e4c5-c73a-40aa-903e-67aa5e984a70",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/steps/4079f689-8e15-4bb4-b31c-dcbc3972ac7b",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -903,8 +1011,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "OSC envia a candidatura",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/transition",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -912,8 +1021,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "governo lista as candidaturas do chamamento",
+   "perfil": "government",
    "metodo": "GET",
-   "rota": "/v1/calls/7095c17f-a813-4f82-9bf6-27be3af2227a/applications",
+   "rota": "/v1/calls/da674f9b-6ca4-49f2-a1a0-1330d130e24d/applications",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -921,8 +1031,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "avaliador move para screening",
+   "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/transition",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -930,8 +1041,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "avaliador move para due_diligence",
+   "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/transition",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -939,8 +1051,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "avaliador declara não ter conflito",
+   "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/conflict",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/conflict",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -948,8 +1061,9 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "avaliador aprova",
+   "perfil": "government",
    "metodo": "POST",
-   "rota": "/v1/applications/c76462d4-99ad-423b-9062-f64f27ea7b2e/transition",
+   "rota": "/v1/applications/6e381955-7f38-4cb3-be8d-8e5de74829d2/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -957,6 +1071,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "governo acompanha a carteira",
+   "perfil": "government",
    "metodo": "GET",
    "rota": "/v1/portfolio",
    "status": 200,
@@ -966,6 +1081,7 @@
   {
    "jornada": "Governo: edital público → necessidade do território",
    "passo": "governo registra necessidade do território com fonte",
+   "perfil": "government",
    "metodo": "POST",
    "rota": "/v1/territory/needs",
    "status": 201,
@@ -975,6 +1091,7 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "OSC cria cota de apoio",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/funding-quotas",
    "status": 201,
@@ -984,8 +1101,9 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "OSC abre a cota",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/funding-quotas/910668f0-d065-4779-955d-36d5e5312fed",
+   "rota": "/v1/funding-quotas/ec5d5554-92af-441b-8721-93de1923b8fe",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -993,8 +1111,9 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "empresa apoia 3 cotas",
+   "perfil": "company",
    "metodo": "POST",
-   "rota": "/v1/funding-quotas/910668f0-d065-4779-955d-36d5e5312fed/pledges",
+   "rota": "/v1/funding-quotas/ec5d5554-92af-441b-8721-93de1923b8fe/pledges",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1002,8 +1121,9 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "apoiadora apoia 1 cota",
+   "perfil": "individual",
    "metodo": "POST",
-   "rota": "/v1/funding-quotas/910668f0-d065-4779-955d-36d5e5312fed/pledges",
+   "rota": "/v1/funding-quotas/ec5d5554-92af-441b-8721-93de1923b8fe/pledges",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1011,6 +1131,7 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "apoiadora declara interesse e causas",
+   "perfil": "individual",
    "metodo": "PUT",
    "rota": "/v1/org/funder-profile",
    "status": 200,
@@ -1020,6 +1141,7 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "apoiadora manifesta interesse no projeto da horta",
+   "perfil": "individual",
    "metodo": "POST",
    "rota": "/v1/applications/interest",
    "status": 201,
@@ -1029,6 +1151,7 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "OSC cria campanha",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/campaigns",
    "status": 201,
@@ -1038,8 +1161,9 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "OSC publica a campanha",
+   "perfil": "osc",
    "metodo": "PATCH",
-   "rota": "/v1/campaigns/3e9a70b2-e50a-4567-9a67-775c9b53d718",
+   "rota": "/v1/campaigns/43a36e7e-ad59-4803-a962-17a095f272ac",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1047,8 +1171,9 @@
   {
    "jornada": "Captação: cotas → apoios → campanha pública",
    "passo": "visitante sem login abre a campanha",
+   "perfil": "anônimo",
    "metodo": "GET",
-   "rota": "/v1/public/campaigns/orquestra-comunitaria-4c5873",
+   "rota": "/v1/public/campaigns/orquestra-comunitaria-c055df",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1056,6 +1181,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "lista modelos publicados",
+   "perfil": "osc",
    "metodo": "GET",
    "rota": "/v1/document-templates?status=published",
    "status": 200,
@@ -1065,6 +1191,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "monta plano de monitoramento a partir do projeto",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/document-assemblies",
    "status": 201,
@@ -1074,8 +1201,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "lê os campos da montagem",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/document-assemblies/677ffc87-b98c-4e9f-862a-dce46f8c9edc",
+   "rota": "/v1/document-assemblies/cd222f56-40d9-499b-a32f-6137ee340883",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1083,8 +1211,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "preenche campos e anexa evidências",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/document-assemblies/677ffc87-b98c-4e9f-862a-dce46f8c9edc",
+   "rota": "/v1/document-assemblies/cd222f56-40d9-499b-a32f-6137ee340883",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1092,8 +1221,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "gera o documento",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/document-assemblies/677ffc87-b98c-4e9f-862a-dce46f8c9edc/generate",
+   "rota": "/v1/document-assemblies/cd222f56-40d9-499b-a32f-6137ee340883/generate",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1101,6 +1231,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "envia o contrato",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/documents",
    "status": 201,
@@ -1110,6 +1241,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "cria acordo com o profissional",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signed-agreements",
    "status": 201,
@@ -1119,8 +1251,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "inclui o profissional como parte",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/bf2079c9-77ac-40ea-becc-0bdaa7aedd66/parties",
+   "rota": "/v1/signed-agreements/9853040f-b51e-42d1-b20e-00043f8ebf38/parties",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1128,8 +1261,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "publica para assinatura",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/bf2079c9-77ac-40ea-becc-0bdaa7aedd66/publish",
+   "rota": "/v1/signed-agreements/9853040f-b51e-42d1-b20e-00043f8ebf38/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1137,6 +1271,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "pede código de assinatura (agreement)",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/signatures/challenge",
    "status": 201,
@@ -1146,8 +1281,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "assina (agreement)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/bf2079c9-77ac-40ea-becc-0bdaa7aedd66/sign",
+   "rota": "/v1/signed-agreements/9853040f-b51e-42d1-b20e-00043f8ebf38/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1155,6 +1291,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "pede código de assinatura (agreement)",
+   "perfil": "provider",
    "metodo": "POST",
    "rota": "/v1/signatures/challenge",
    "status": 201,
@@ -1164,8 +1301,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "assina (agreement)",
+   "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/signed-agreements/bf2079c9-77ac-40ea-becc-0bdaa7aedd66/sign",
+   "rota": "/v1/signed-agreements/9853040f-b51e-42d1-b20e-00043f8ebf38/sign",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1173,6 +1311,7 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "emite registro verificável do acordo",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/verifiable-records",
    "status": 201,
@@ -1182,8 +1321,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "visitante confere o registro sem login",
+   "perfil": "anônimo",
    "metodo": "GET",
-   "rota": "/v1/public/verify/IMP-8F1J-VGE2-VN6S",
+   "rota": "/v1/public/verify/IMP-QGVX-6K9B-ZLYJ",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1191,8 +1331,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "abre compra do projeto",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/projects/7743fdce-6937-49ff-8f37-b2970dc8850f/procurement",
+   "rota": "/v1/projects/9122c4ad-2a9a-4586-8c40-922420f3257b/procurement",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1200,8 +1341,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "registra orçamento (Loja Exemplo A)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/e5461e82-5807-47d0-9bac-7bc7e1c0ad55/quotes",
+   "rota": "/v1/procurement/f3155c49-62dc-45bb-991b-6b2400b36380/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1209,8 +1351,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "registra orçamento (Loja Exemplo B)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/e5461e82-5807-47d0-9bac-7bc7e1c0ad55/quotes",
+   "rota": "/v1/procurement/f3155c49-62dc-45bb-991b-6b2400b36380/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1218,8 +1361,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "registra orçamento (Loja Exemplo C)",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/e5461e82-5807-47d0-9bac-7bc7e1c0ad55/quotes",
+   "rota": "/v1/procurement/f3155c49-62dc-45bb-991b-6b2400b36380/quotes",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1227,8 +1371,9 @@
   {
    "jornada": "Documentos: montagem → acordo assinado → registro verificável",
    "passo": "decide pelo menor orçamento",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/procurement/e5461e82-5807-47d0-9bac-7bc7e1c0ad55/decide",
+   "rota": "/v1/procurement/f3155c49-62dc-45bb-991b-6b2400b36380/decide",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1236,6 +1381,7 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "OSC anuncia o projeto no marketplace",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/marketplace/listings",
    "status": 201,
@@ -1245,8 +1391,9 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "OSC publica o anúncio",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/marketplace/listings/3323eaa6-53e1-4da0-8efa-39433dc65250/transition",
+   "rota": "/v1/marketplace/listings/6d52c190-9b6e-4cce-952c-6cc9e8f09c2f/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1254,6 +1401,7 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "OSC cadastra a metodologia como solução",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/solutions",
    "status": 201,
@@ -1263,8 +1411,9 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "OSC publica a solução",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/solutions/73ab2385-da62-4a95-82fc-96350d5ad3c7/publish",
+   "rota": "/v1/solutions/90835956-5ea8-4ecd-96c8-3d7f46d976ce/publish",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1272,6 +1421,7 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "osc cria perfil público",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/profiles",
    "status": 201,
@@ -1281,6 +1431,7 @@
   {
    "jornada": "Marketplace, soluções e perfis públicos",
    "passo": "provider cria perfil público",
+   "perfil": "provider",
    "metodo": "POST",
    "rota": "/v1/profiles",
    "status": 201,
@@ -1290,6 +1441,7 @@
   {
    "jornada": "Suporte e Central de Conhecimento",
    "passo": "OSC abre chamado",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/support/tickets",
    "status": 201,
@@ -1299,8 +1451,9 @@
   {
    "jornada": "Suporte e Central de Conhecimento",
    "passo": "suporte responde o chamado",
+   "perfil": "support",
    "metodo": "POST",
-   "rota": "/v1/admin/support/tickets/df62d1d1-a3d9-48c8-8df6-cf1fc5c70ecc/messages",
+   "rota": "/v1/admin/support/tickets/1c388996-2f17-4176-a81e-14782d174be1/messages",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1308,8 +1461,9 @@
   {
    "jornada": "Suporte e Central de Conhecimento",
    "passo": "OSC lê a resposta",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/support/tickets/df62d1d1-a3d9-48c8-8df6-cf1fc5c70ecc",
+   "rota": "/v1/support/tickets/1c388996-2f17-4176-a81e-14782d174be1",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1317,6 +1471,7 @@
   {
    "jornada": "Suporte e Central de Conhecimento",
    "passo": "OSC lista cursos",
+   "perfil": "osc",
    "metodo": "GET",
    "rota": "/v1/help/courses",
    "status": 200,
@@ -1326,6 +1481,7 @@
   {
    "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
    "passo": "OSC registra ideia",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/ideas",
    "status": 201,
@@ -1335,8 +1491,9 @@
   {
    "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
    "passo": "OSC amadurece a ideia (hipótese, público, impacto)",
+   "perfil": "osc",
    "metodo": "PUT",
-   "rota": "/v1/ideas/d150615b-c471-438b-bd8b-33f0bdc15f85",
+   "rota": "/v1/ideas/44602620-e843-469f-857d-7fab65de1679",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1344,8 +1501,9 @@
   {
    "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
    "passo": "OSC abre a ideia",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/ideas/d150615b-c471-438b-bd8b-33f0bdc15f85",
+   "rota": "/v1/ideas/44602620-e843-469f-857d-7fab65de1679",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1353,8 +1511,9 @@
   {
    "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
    "passo": "OSC transforma a ideia em projeto",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/ideas/d150615b-c471-438b-bd8b-33f0bdc15f85/promote",
+   "rota": "/v1/ideas/44602620-e843-469f-857d-7fab65de1679/promote",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1362,8 +1521,9 @@
   {
    "jornada": "Banco de Ideias: ideia → amadurecimento → projeto",
    "passo": "OSC abre o projeto criado",
+   "perfil": "osc",
    "metodo": "GET",
-   "rota": "/v1/projects/2cc803cc-c702-4d68-b461-7f1f776ca820",
+   "rota": "/v1/projects/ab2c3cd0-31c0-4351-9051-d361c75b6c1c",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1371,6 +1531,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "abre a visão geral",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/overview",
    "status": 200,
@@ -1380,6 +1541,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "lista organizações",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/organizations",
    "status": 200,
@@ -1389,6 +1551,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "lista usuários",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/users",
    "status": 200,
@@ -1398,8 +1561,9 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "classifica a solução nova como autodeclarada",
+   "perfil": "admin",
    "metodo": "POST",
-   "rota": "/v1/admin/solutions/73ab2385-da62-4a95-82fc-96350d5ad3c7/verify",
+   "rota": "/v1/admin/solutions/90835956-5ea8-4ecd-96c8-3d7f46d976ce/verify",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1407,6 +1571,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "confere a cadeia da auditoria",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/audit/verify",
    "status": 200,
@@ -1416,6 +1581,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "confirma a identidade (operação sensível)",
+   "perfil": "admin",
    "metodo": "POST",
    "rota": "/v1/auth/reauth",
    "status": 200,
@@ -1425,6 +1591,7 @@
   {
    "jornada": "Administração: visão geral → verificação → auditoria",
    "passo": "lê o estado do interruptor de emergência",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/kill-switch",
    "status": 200,
@@ -1434,6 +1601,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "profissional propõe serviço à OSC",
+   "perfil": "provider",
    "metodo": "POST",
    "rota": "/v1/proposals",
    "status": 201,
@@ -1443,8 +1611,9 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "profissional envia (fica aguardando a OSC)",
+   "perfil": "provider",
    "metodo": "POST",
-   "rota": "/v1/proposals/9f1fb005-0821-40a9-bdc4-2cd1348b1b27/transition",
+   "rota": "/v1/proposals/e844abb6-197a-4277-b1c5-664cc6488f84/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1452,6 +1621,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "OSC envia relatório do 2º período",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/impact-updates",
    "status": 201,
@@ -1461,8 +1631,9 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "relatório aguarda análise do apoiador",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/impact-updates/47d3e8e4-b411-4475-8a45-4d959280ecfc/transition",
+   "rota": "/v1/impact-updates/e0fc6ceb-5f73-446d-8ce2-f6fe79bb3819/transition",
    "status": 200,
    "ok": true,
    "erro": ""
@@ -1470,6 +1641,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "OSC declara afirmação de impacto",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/claims",
    "status": 201,
@@ -1479,8 +1651,9 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "plataforma confere a afirmação",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/claims/2ca5841a-0ccc-423c-9c1a-2ded862555f9/check",
+   "rota": "/v1/claims/6a2c756d-cd6c-428b-b03c-da274bc37909/check",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1488,6 +1661,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "OSC declara afirmação de impacto",
+   "perfil": "osc",
    "metodo": "POST",
    "rota": "/v1/claims",
    "status": 201,
@@ -1497,8 +1671,9 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "plataforma confere a afirmação",
+   "perfil": "osc",
    "metodo": "POST",
-   "rota": "/v1/claims/ad8fecc7-c189-40f4-9b85-723b813f5804/check",
+   "rota": "/v1/claims/c21e1104-f960-480b-bc42-203a078a0fb8/check",
    "status": 201,
    "ok": true,
    "erro": ""
@@ -1506,6 +1681,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "profissional declara experiência com a OSC (aguarda confirmação)",
+   "perfil": "provider",
    "metodo": "POST",
    "rota": "/v1/profile/experiences",
    "status": 201,
@@ -1515,6 +1691,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "profissional cadastra nova credencial (aguarda conferência)",
+   "perfil": "provider",
    "metodo": "POST",
    "rota": "/v1/org/credentials",
    "status": 201,
@@ -1524,6 +1701,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "administração procura a organização em estruturação",
+   "perfil": "admin",
    "metodo": "GET",
    "rota": "/v1/admin/organizations?q=Coletivo",
    "status": 200,
@@ -1533,6 +1711,7 @@
   {
    "jornada": "Pendências: o que espera decisão de alguém",
    "passo": "apoiadora denuncia dado incorreto (vai para a moderação)",
+   "perfil": "individual",
    "metodo": "POST",
    "rota": "/v1/reports",
    "status": 201,

@@ -1,4 +1,7 @@
-# MASTER EXECUTION STATUS — IMPACTO v0.23.0
+# MASTER EXECUTION STATUS — IMPACTO v0.25.0
+
+> Portões 0–10 abaixo: rodada v0.23.0 (mantidos). Portões 11–15: rodada v0.25.0 (validação operacional
+> de baixo para cima). Números da v0.25.0 vêm de `COVERAGE_MATRIX.md`, gerada das evidências.
 
 **Branch:** `audit/v0.23.0-completion` · **Base:** `chore/v0.19.0-vocabulary-firstrun-ops`
 **Vocabulário de estado:** `TODO` `IN_PROGRESS` `BLOCKED` `FAILED` `FIXED` `PASS` `REGRESSION` `DONE` `WAIVED`
@@ -28,6 +31,11 @@ escrita em `BLOCKERS.md`.
 | **8** | Frente | **DONE** (6 pendências de acessibilidade declaradas) | `FRONTEND_GATE.md`, typecheck + build + 91 E2E |
 | **9** | Jornadas por persona | **DONE** | `PERSONA_E2E_MATRIX.csv`, 49 passos em 7 jornadas, 5 personas; 20 navegador + 29 travessia (v0.24.1: o gerador deixou de perder evidência por casamento exato acidental) |
 | **10** | Release | **DONE** | regressão completa, Git limpo, relatórios, ZIPs |
+| **11** | Todas as telas no navegador (v0.25.0) | **DONE** | 218/218 rotas abertas com dado real; 790 visitas, 6 perfis + anônimo; 0 erro JS, 0 5xx, 0 chamada recusada escondida, 0 botão sem ação; `ROUTE_RUNTIME_MATRIX.csv` |
+| **12** | Jornadas pela API (v0.25.0) | **DONE** | 13 jornadas, 0 falha, nenhuma escrita direta no banco; `evidence/jornadas_v0250/` |
+| **13** | Pilha do zero com Docker (v0.25.0) | **DONE** | job `pilha-do-zero`: banco vazio desenho Supabase → imagem → migrações → seed → jornadas → 218 telas → axe → reinício com persistência |
+| **14** | Acessibilidade automática (v0.25.0) | **DONE** (leitor de tela real: fora de alcance) | axe-core 4.10.2 WCAG A/AA em cada rota, trava em crítica/grave; 3 regras achadas e corrigidas |
+| **15** | Responsividade (v0.25.0) | **DONE** | 230 telas de menu em 390 px, 0 rolagem lateral; `evidence/responsivo_v0250/` |
 
 ---
 

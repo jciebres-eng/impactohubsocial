@@ -1,6 +1,68 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.25.0] — 2026-10-08
+
+### Validação operacional de baixo para cima: banco → API → tela → jornada → resultado
+
+Pedido: não basta "a rota abre". Provar, perfil por perfil, que o produto funciona do banco vazio
+até o resultado da jornada, com Docker como teste de reprodutibilidade e o Supabase como modelo.
+
+**O que passou a existir (e roda no CI):**
+- **Robô das 218 telas** (`tests/screen_crawler.py`, `test_v0250_todas_as_telas.py`). Abre no Chromium
+  todas as rotas do roteador, inclusive as que só abrem por link e as 52 com `:id` (usando registro
+  real do qual o perfil participa), com os 6 perfis de demonstração e sem login. Toda tela restrita é
+  aberta também por um perfil que não deve vê-la. Acusa erro de JavaScript, 5xx, "não encontrada",
+  recusa indevida ou ausente, **chamada recusada escondida** por trás de tela que parece vazia, e
+  **botão ou link sem ação** (com controle positivo: o detector acusa um botão morto plantado).
+  Matriz: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
+- **13 jornadas pela API real** (`tests/demo_journeys.py`, `test_v0250_jornadas.py`): OSC (projeto →
+  diagnóstico → equidade → indicador → 4 medições), financiador (edital → candidatura assinada →
+  aprovação → aporte → pagamento → validação das medições), rede (proposta, conversa, relatório de
+  impacto aceito), profissional (necessidade → oferta → revisão técnica aprovada), governo
+  (chamamento → candidatura avaliada → necessidade do território), captação (cotas, apoios, campanha
+  pública), documentos (montagem → acordo assinado pelas duas partes → registro verificável →
+  compra com 3 orçamentos), marketplace, suporte e curso com certificado, banco de ideias (ideia →
+  projeto), administração (com confirmação de identidade) e pendências. **Nenhuma escrita direta no
+  banco** — até o plano das contas de demonstração vem da administração pela API.
+- **Pilha do zero** (`infra/compose/demo/`, job `pilha-do-zero`): banco VAZIO com o desenho do
+  Supabase (administrador sem superusuário, pgcrypto em `extensions`), PostgreSQL 17, imagem do
+  produto, bootstrap do `impacto_app`, migrações, seed, aplicação como `impacto_app`; contra ela, as
+  jornadas, as 218 telas, o **axe-core 4.10.2** (WCAG A/AA) e um reinício conferindo persistência.
+- **Telefone** (`test_v0250_responsivo.py`): telas de menu dos 6 perfis em 390 px, sem rolagem
+  lateral da página (com controle positivo).
+
+**Defeitos que essas provas acharam, e que foram corrigidos:**
+- `GET /v1/billing` respondia **500** para a administração (KeyError `tier`).
+- `/projetos/:id/equidade` **quebrava** ao abrir (`methods` é objeto, a tela tratava como lista) e lia
+  campos que a API não devolve.
+- `/responsabilidade` chamava a API **sem os parâmetros obrigatórios** (422 para todo perfil) e lia
+  campos inexistentes.
+- **Confirmação de identidade (step-up) não existia na interface**: o servidor exigia, nenhuma tela
+  pedia — interruptor de emergência, fechamento contábil e aprovações financeiras inalcançáveis
+  pela tela. Agora o cliente da API abre a confirmação e repete a chamada (`ui/stepup.tsx`).
+- 21 telas internas sem marcador de equipe mostravam erro com "Tentar novamente" a quem não é da
+  equipe; agora mostram "área não disponível" (a permissão fina continua no servidor).
+- 4 telas pediam a lista de projetos a quem não é OSC e levavam 403 escondido.
+- `/solucoes/comparar` sem itens mostrava "Dados inválidos"; `/instituicoes/:id` mostrava o 403 cru
+  a OSC e profissional; páginas de link de e-mail sem token mostravam 422.
+- "Tentar novamente" em erro que não muda tentando (403/404/402/422) — removido.
+- Concordância: "Conversa não encontrado", e frases já prontas viravam "não encontrada não encontrado".
+- Central de Conhecimento: visitante sem login em conteúdo restrito via "não encontrado"; agora é
+  convidado a entrar.
+- **Acessibilidade (axe-core no CI):** 13 seletores sem nome acessível, barra de progresso sem papel,
+  áreas com rolagem fora do alcance do teclado.
+- **Inventário de telas errado:** o gerador lia só o ÚLTIMO tipo de cada rota e só a PRIMEIRA linha
+  de cada menu. "119 telas só por link" eram 82; "OSC tem 19 itens de menu" eram 43.
+- `infra/compose/docker-compose.yml` (homologação, não testado) passava ao entrypoint a conexão
+  errada; corrigido e ainda declarado não testado.
+
+**Demonstração:** nova persona Apoiadora (pessoa física, tipo `individual`) — sem ela, telas restritas
+a "Apoiador" não eram alcançáveis por conta nenhuma.
+
+**O que continua fora (AMARELO):** endereço público da demonstração (D-PUB1: exige conta de
+hospedagem do dono); leitor de tela real; homologação das 14 integrações (credenciais de fornecedor).
+
 ## [0.24.2] — 2026-10-08
 
 ### Supabase verificado e aplicado de verdade, pelo GitHub

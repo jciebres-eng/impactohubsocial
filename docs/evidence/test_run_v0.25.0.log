@@ -1,0 +1,15 @@
+# Regressão final completa — v0.25.0 (PostgreSQL 16 local, Chromium; nenhum build do front durante a execução)
+----------------------------------------------------------------------
+Ran 2277 tests in 1713.997s
+
+FAILED (failures=2, skipped=29)
+
+# As 2 falhas eram de fechamento:
+FAIL: test_regenerating_the_map_reproduces_what_is_committed (tests.test_v0230_frontend_gate.TheScreenBackendMapTellsTheTruthAboutCoverageTests.test_regenerating_the_map_reproduces_what_is_committed)
+FAIL: test_the_manifest_exists_for_this_version (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+# Corrigidas (mapa tela→API regenerado; manifesto IMPACTO_v0.25.0_TRACEABILITY.json gerado) e reconferidas:
+Ran 64 tests (test_v0230_release_gate, test_v0230_frontend_gate, test_v0250_cobertura, test_v0250_pilha_do_zero, test_v0200_screens)
+OK
+
+# GitHub Actions: pilha-do-zero com trava do axe — run 37747523510 (f17cddc): sucesso.
+# A run do commit da tag v0.25.0 é a conferência independente final.

@@ -1,0 +1,16 @@
+# Regressão completa — v0.26.0 (PostgreSQL 16 local, Chromium; nenhum build do front durante a execução)
+
+## 1ª passagem (código novo, antes das correções) — 11 falhas, 3 erros; causas e correções em FINAL_EXECUTION_AUDIT.md §6
+----------------------------------------------------------------------
+Ran 2295 tests in 1861.920s
+FAILED (failures=11, errors=3, skipped=26)
+
+
+## 2ª passagem (após as correções; antes do manifesto de release, gerado no fechamento)
+----------------------------------------------------------------------
+Ran 2295 tests in 1900.124s
+FAILED (failures=1, skipped=29)
+
+
+# A única falha da 2ª passagem é test_the_manifest_exists_for_this_version: o manifesto IMPACTO_v0.26.0_TRACEABILITY.json
+# é gerado no fechamento, depois desta execução; o portão de release é reexecutado em seguida (ver abaixo).

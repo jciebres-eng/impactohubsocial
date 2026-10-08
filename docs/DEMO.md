@@ -115,7 +115,7 @@ responder, e o painel permite marcá-las uma a uma.
 
 ## 3. O que a demonstração mostra de verdade
 
-- **Isolamento entre organizações.** 321 das 322 tabelas têm RLS, com 667 políticas. Entrar com duas
+- **Isolamento entre organizações.** 324 das 325 tabelas têm RLS, com 677 políticas (v0.26.0). Entrar com duas
   organizações lado a lado e tentar alcançar o dado da outra é a demonstração mais convincente que
   esta plataforma tem, porque o banco recusa, não a aplicação.
 - **Proveniência de um número de impacto.** `GET /v1/indicator-values/{id}/provenance` devolve a

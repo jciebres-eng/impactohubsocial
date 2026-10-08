@@ -1,3 +1,41 @@
+# Notas da versão — v0.26.0 (a tese econômica virou produto)
+
+**Uma tese:** o IMPACTO é infraestrutura de confiança, inteligência e execução do ecossistema de
+impacto; a monetização é consequência do valor gerado, não cobrança por acesso. Utilidade real, não
+dependência artificial.
+
+**O que isso virou em software:**
+
+1. **Contrato como regra de operação** — cláusulas no acordo assinado (taxa, quem paga, modo, prazo
+   de aceite em dias úteis, contestação), congeladas após o rascunho; versão imutável; obrigações
+   derivadas (entregar, aceitar, pagar) com prazo; aceite a quatro olhos no banco; mudar o contrato
+   cria versão nova e invalida a aprovação anterior.
+2. **Matriz de distribuição sem custódia** — calculada na origem e gravada com hash: R$ 100.000 com
+   3% → R$ 100.000 ao projeto + R$ 3.000 de taxa (ou 97.000/3.000 no modo descontado). A taxa é
+   cobrança própria da plataforma ao financiador, nunca descontada de dinheiro em trânsito, e só
+   cobrável com a regra `contract.platform_service_fee` ativa — que nasce desligada, sem percentual
+   fixo (o percentual é do contrato) e com carta legal amarela. GMV ≠ receita.
+3. **Torre de controle do financiador** (`/torre`) — meu capital → onde está → para quem → para quê
+   → executado → evidência → o que mudou → atrasos → riscos → o que preciso decidir (com o link da
+   tela onde se decide).
+4. **Torre territorial do governo** (`/torre-territorial`) — território → programas → editais → OSCs
+   → projetos → recursos → indicadores declarados × validados → atrasos → territórios descobertos;
+   só projetos publicados, k-anonimato ≥ 3.
+5. **"Projeto IMPACTO Ready"** — estado verificável, não selo: 15 critérios com a tabela e a
+   contagem que sustentam cada um, desconhecido ≠ zero, hash reproduzível, mesmo resultado para dono
+   e financiador.
+
+**Números:** 894 operações, 220 telas, 45 motores, 65 migrações, 325 tabelas (324 com RLS, 677
+políticas), 10 regras de monetização (0 ativas), 14 jornadas / 195 passos / 0 falha, 796 visitas de
+tela / 0 falha. Regressão completa: ver `FINAL_EXECUTION_REPORT.md` §24.
+
+**O que esta versão NÃO entrega**, com nome: cobrança real da taxa (parecer pendente); nota fiscal;
+varredura que grave obrigação vencida no razão; snapshot histórico do Ready; Ready como entrada do
+match; nível de identidade por organização; tag enviada ao GitHub (proxy). Detalhes em
+`FINAL_EXECUTION_REPORT.md` §25–26 e `FINAL_EXECUTION_AUDIT.md`.
+
+---
+
 # Notas da versão — v0.18.0 (impacto contextualizado)
 
 **Uma tese:** impacto não é quantidade; impacto é resultado contextualizado. "50 pessoas numa comunidade indígena

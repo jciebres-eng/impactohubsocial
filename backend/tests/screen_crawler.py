@@ -20,6 +20,7 @@ O QUE ELE NÃO PROVA
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -55,7 +56,8 @@ RESOLVE: dict[str, str] = {
     "/verificar/:code": "SELECT code FROM verifiable_records ORDER BY created_at LIMIT 1",
     "/acordos/:id": "SELECT a.id::text FROM signed_agreements a WHERE a.org_id = {org}"
                     " OR EXISTS (SELECT 1 FROM signed_agreement_parties p WHERE p.agreement_id = a.id AND p.org_id = {org})"
-                    " ORDER BY a.created_at LIMIT 1",
+                    # o acordo mais rico primeiro: vigente com matriz de distribuição e obrigações (v0.26.0)
+                    " ORDER BY (a.status = 'active') DESC, (a.platform_fee_bps IS NOT NULL) DESC, a.created_at LIMIT 1",
     "/admin/central/artigos/:slug": "SELECT slug FROM kb_articles ORDER BY created_at LIMIT 1",
     "/admin/central/suporte/:id": "SELECT id::text FROM support_tickets ORDER BY created_at LIMIT 1",
     "/candidaturas/:id": "SELECT id::text FROM applications WHERE {org} IN (osc_org_id, funder_org_id) ORDER BY created_at LIMIT 1",
@@ -310,6 +312,14 @@ class Robo:
                 axe = p.evaluate(AXE_RUN_JS)
             except Exception as exc:  # noqa: BLE001 — falha do axe é registrada, não escondida
                 axe = [{"id": "axe-nao-rodou", "impact": "?", "help": str(exc)[:120], "nodes": 0, "exemplo": ""}]
+        pasta = os.getenv("TELAS_PRINT_DIR")   # evidência visual opcional (página inteira, por persona)
+        if pasta:
+            try:
+                nome = re.sub(r"[^a-z0-9]+", "-", (persona or "anonimo") + rota.lower()).strip("-")[:120]
+                Path(pasta).mkdir(parents=True, exist_ok=True)
+                p.screenshot(path=str(Path(pasta) / f"{nome}.png"), full_page=True)
+            except Exception:  # noqa: BLE001 — a evidência é extra, nunca o veredito
+                pass
         return {"estado": estado, "detalhe": detalhe, "ms": int((time.monotonic() - t0) * 1000), "axe": axe,
                 "chamadas_api": p.ev["api"], "api_4xx": sorted({f"{s} {u}" for s, u in p.ev["4xx"]})[:4]}
 

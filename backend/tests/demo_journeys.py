@@ -441,6 +441,67 @@ class Jornadas:
             if len(cot) == 3:
                 self.passo(J, "decide pelo menor orçamento", osc, "POST", f"/v1/procurement/{pr['id']}/decide", {"quotation_id": cot[1]})
 
+    def contrato_como_regra(self):
+        """Tese v0.26.0: o contrato vira regra de operação — versões, obrigações, aceite a quatro olhos e matriz de distribuição."""
+        J, osc, emp, pid = "Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão", self.c["osc"], self.c["company"], self.ids["projeto"]
+        doc = osc.upload("/v1/documents", "acordo-financiamento.pdf", b"%PDF-1.4\n% acordo de financiamento ficticio v1\n%%EOF\n",
+                         {"doc_type": "contrato", "title": "Acordo de financiamento (exemplo)"})
+        if doc.status != 201:
+            self.passos.append({"jornada": J, "passo": "envia o acordo", "perfil": "osc", "metodo": "POST", "rota": "/v1/documents",
+                                "status": doc.status, "ok": False, "erro": str(doc.json)[:300]})
+            return
+        ac = self.passo(J, "OSC cria acordo de financiamento com taxa de serviço contratada (3%, paga pelo financiador)", osc, "POST",
+                        "/v1/signed-agreements", {
+                            "kind": "funding", "title": "Financiamento — Orquestra na escola (exemplo)",
+                            "summary": "R$ 100.000 em 2 marcos; taxa de serviço da plataforma de 3% paga pelo financiador, adicional ao valor.",
+                            "document_id": doc.json["id"], "project_id": pid, "value_cents": 10_000_000,
+                            "platform_fee_bps": 300, "fee_payer_role": "funder", "fee_mode": "additional",
+                            "review_days": 10, "calendar_type": "business", "dispute_days": 5})
+        if not ac:
+            return
+        aid = self.ids["acordo_financiamento"] = ac["id"]
+        self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        marcos = []
+        for seq, (titulo, valor, dias) in enumerate((("Compra dos instrumentos", 5_000_000, 30), ("Primeiro semestre de aulas", 5_000_000, 200)), 1):
+            m = self.passo(J, f"define o marco {seq}: {titulo}", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",
+                           {"title": titulo, "due_on": _d(dias), "seq": seq, "amount_cents": valor})
+            if m:
+                marcos.append(m["id"])
+        self.passo(J, "publica para assinatura (versão 1 congelada)", osc, "POST", f"/v1/signed-agreements/{aid}/publish")
+        prev = self.passo(J, "financiador vê a PRÉVIA da distribuição antes de assinar (97.000 / 3.000, nada gravado)", emp, "GET",
+                          f"/v1/signed-agreements/{aid}/allocation") or {}
+        self.ids["alocacao_previa"] = (prev.get("preview") or {}).get("platform_fee_cents")
+        for c in (osc, emp):
+            self.assinar(J, c, "agreement", aid, f"/v1/signed-agreements/{aid}/sign",
+                         {"statement": "Assino este acordo e me responsabilizo pelo combinado."})
+        d = self.passo(J, "acordo vigente: matriz gravada, obrigações derivadas, taxa registrada e NÃO cobrada (regra desligada)", osc, "GET",
+                       f"/v1/signed-agreements/{aid}") or {}
+        self.ids["alocacao"] = {k: (d.get("allocation") or {}).get(k) for k in ("gross_cents", "project_cents", "platform_fee_cents", "fee_chargeable", "platform_charge_id")}
+        self.ids["obrigacoes"] = len(d.get("obligations") or [])
+        if marcos:
+            self.passo(J, "OSC registra a entrega do marco 1", osc, "PATCH", f"/v1/signed-agreements/{aid}/milestones/{marcos[0]}", {"status": "delivered"})
+            self.passo(J, "OSC tenta aceitar a própria entrega → recusado (quatro olhos)", osc, "PATCH",
+                       f"/v1/signed-agreements/{aid}/milestones/{marcos[0]}", {"status": "accepted"}, esperado=(403, 409, 422))
+            self.passo(J, "financiador vê o que precisa da sua decisão", emp, "GET", "/v1/agreements/pending")
+            self.passo(J, "financiador aceita a entrega do marco 1 → obrigação de pagar nasce com prazo", emp, "PATCH",
+                       f"/v1/signed-agreements/{aid}/milestones/{marcos[0]}", {"status": "accepted"})
+        if len(marcos) > 1:
+            self.passo(J, "OSC registra a entrega do marco 2", osc, "PATCH", f"/v1/signed-agreements/{aid}/milestones/{marcos[1]}", {"status": "delivered"})
+            self.passo(J, "financiador recusa o marco 2 com motivo (volta para quem executa)", emp, "PATCH",
+                       f"/v1/signed-agreements/{aid}/milestones/{marcos[1]}", {"status": "rejected", "note": "Faltou a lista de presença assinada das aulas."})
+        self.passo(J, "razão do projeto registra ativação, alocação, entrega e aceite em cadeia", osc, "GET", f"/v1/projects/{pid}/ledger")
+        doc2 = osc.upload("/v1/documents", "acordo-financiamento-v2.pdf", b"%PDF-1.4\n% acordo de financiamento ficticio v2\n%%EOF\n",
+                          {"doc_type": "contrato", "title": "Acordo de financiamento v2 (exemplo)"})
+        if doc2.status == 201:
+            v2 = self.passo(J, "mudança no contrato → nova versão em rascunho; a anterior fica substituída e exige nova assinatura", osc, "POST",
+                            f"/v1/signed-agreements/{aid}/new-version",
+                            {"document_id": doc2.json["id"], "reason": "Prazo do segundo marco prorrogado em 60 dias a pedido da escola."})
+            if v2:
+                self.ids["acordo_financiamento_v2"] = v2["id"]
+                self.passo(J, "versão antiga não recebe assinatura (substituída)", emp, "POST", f"/v1/signed-agreements/{aid}/sign",
+                           {"statement": "Assino este acordo e me responsabilizo pelo combinado.", "password": self.senha, "code": "000000"},
+                           esperado=(409,))
+
     def mercado_e_perfis(self):
         J, osc, pro, pid = "Marketplace, soluções e perfis públicos", self.c["osc"], self.c["provider"], self.ids["projeto"]
         lst = self.passo(J, "OSC anuncia o projeto no marketplace", osc, "POST", "/v1/marketplace/listings", {
@@ -566,7 +627,7 @@ class Jornadas:
     def run(self) -> dict:
         self.preparar()
         for etapa in (self.osc_projeto_e_diagnostico, self.financiador, self.rede, self.profissional, self.governo,
-                      self.captacao, self.documentos, self.mercado_e_perfis, self.suporte_e_conhecimento,
+                      self.captacao, self.documentos, self.contrato_como_regra, self.mercado_e_perfis, self.suporte_e_conhecimento,
                       self.banco_de_ideias, self.administracao, self.pendencias):
             try:
                 etapa()

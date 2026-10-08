@@ -30,6 +30,11 @@ from ..http import ApiError
 FEE_RULE_KEY = "contract.platform_service_fee"
 
 
+def _brl(cents: int) -> str:
+    inteiro, cent = divmod(int(cents), 100)
+    return f"R$ {inteiro:,}".replace(",", ".") + f",{cent:02d}"
+
+
 def _bps(valor: int, bps: int | None) -> int:
     return (valor * (bps or 0) + 5000) // 10000   # arredondamento comercial em centavos
 
@@ -84,7 +89,9 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
     project = gross - fee if deducted and fee else gross
     rule = fee_rule(conn)
     payer = next((p for p in parties if p["role"] == a["fee_payer_role"]), None) if a["fee_payer_role"] else None
-    receiver = next((p for p in parties if p["role"] in ("contractor", "provider", "professional")), None)
+    # Quem recebe o valor: a parte executora; sem uma, a organização dona do acordo (a OSC que executa).
+    receiver = next((p for p in parties if p["role"] in ("contractor", "provider", "professional")), None) \
+        or {"org_id": a["org_id"], "role": "owner"}
     if not bps:
         chargeable, reason = False, "o acordo não prevê taxa de serviço da plataforma"
     elif payer is None:
@@ -96,12 +103,12 @@ def compute_allocation(conn: Connection, a: dict, parties: list[dict]) -> dict:
         chargeable, reason = True, "regra comercial ativa com carta legal validada; taxa instruída ao pagador em cobrança própria da plataforma"
     from ..services.monetization import pricing_version_name
     pricing = pricing_version_name()
-    lines = [{"kind": "project", "to_org_id": receiver["org_id"] if receiver else None, "role": receiver["role"] if receiver else None,
+    lines = [{"kind": "project", "to_org_id": receiver["org_id"], "role": receiver["role"],
               "cents": project, "basis": "valor contratado" + (" menos a taxa (modo deducted)" if deducted and fee else ""),
               "paid_by": "quem financia, diretamente ao executor (commitments → payment_records)"}]
     if bps:
         lines.append({"kind": "platform_fee", "to_org_id": None, "role": "platform", "cents": fee,
-                      "basis": f"{bps / 100:.2f}% de {gross} centavos ({'descontada do bruto' if deducted else 'adicional ao bruto'})",
+                      "basis": f"{bps / 100:.2f}% sobre {_brl(gross)} ({'descontada do valor' if deducted else 'adicional ao valor'})",
                       "paid_by": (payer["role"] if payer else "?") + " → plataforma, em cobrança separada; nunca descontada em trânsito",
                       "chargeable": chargeable, "reason": reason, "rule_key": FEE_RULE_KEY})
     material = "|".join([a["id"], str(a["version"]), a["content_sha256"], a["fee_mode"], str(gross), str(project), str(fee),
@@ -153,7 +160,7 @@ def activate(conn: Connection, *, agreement_id: str, actor_user_id: str | None) 
             if m["amount_cents"]:
                 conn.run("INSERT INTO agreement_obligations(agreement_id, milestone_id, obligor_org_id, kind, title, due_on, amount_cents)"
                          " VALUES ($1,$2,$3,'pay',$4,NULL,$5)", agreement_id, m["id"], acceptor["org_id"],
-                         f"Pagar {m['amount_cents'] / 100:.2f} após o aceite: {m['title']}", m["amount_cents"])
+                         f"Pagar {_brl(m['amount_cents'])} após o aceite: {m['title']}", m["amount_cents"])
                 n += 1
     alloc = compute_allocation(conn, a, parties)
     # A cobrança própria da plataforma nasce ANTES da alocação (que é imutável e já aponta para ela).

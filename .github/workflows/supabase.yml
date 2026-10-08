@@ -7,7 +7,7 @@ name: supabase
 #
 # SEGREDOS (Settings → Secrets and variables → Actions):
 #   SUPABASE_ADMIN_URL    string do POOLER DE SESSÃO (Supabase → Connect → Session pooler):
-#                         postgresql://postgres.<ref>:<senha>@aws-0-<região>.pooler.supabase.com:5432/postgres
+#                         postgresql://postgres.<ref>:<senha>@aws-N-<região>.pooler.supabase.com:5432/postgres
 #                         A conexão direta db.<ref>.supabase.co é IPv6, e o GitHub Actions não tem IPv6.
 #   IMPACTO_APP_PASSWORD  senha do papel impacto_app (≥16 caracteres, DIFERENTE da do administrador).
 #

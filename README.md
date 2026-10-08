@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.24.1
+# Plataforma Impacto — v0.24.2
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,12 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.24.2 (Supabase aplicado):** o fluxo `supabase` do GitHub rodou contra o banco real
+(PostgreSQL 17.11): migração pendente aplicada, `impacto_app` rotacionado, e a imagem Docker subiu
+contra o banco em `staging` com `readyz` 200 (run 37727468920). Nenhuma instância pública do IMPACTO
+está no ar — a imagem roda numa máquina descartável e é removida. A instância do terceiro, que usava
+a senha antiga, parou de conectar. Detalhe em `docs/PUBLICACAO.md` §1-B.
 
 **Novo no v0.24.1 (o CI passou a existir de verdade; Supabase pronto para verificar):** até aqui a suíte
 NUNCA tinha rodado no GitHub — a action do gitleaks exigia licença e derrubava o primeiro passo de todo

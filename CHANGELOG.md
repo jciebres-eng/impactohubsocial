@@ -1,6 +1,31 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.24.2] — 2026-10-08
+
+### Supabase verificado e aplicado de verdade, pelo GitHub
+
+O dono do projeto cadastrou os segredos e rodou o fluxo `supabase` (detalhe e números de execução em
+`docs/PUBLICACAO.md` §1-B). Resultado do `aplicar` (run 37727468920): migração `0063_v0240_…`
+aplicada, `impacto_app` rotacionado e com uso de `extensions`, e a **imagem Docker subiu contra o
+banco real** em `staging` endurecido — `readyz` 200, entrypoint completo, sonda das cadeias de hash
+válida. Primeira prova de compatibilidade com **PostgreSQL 17.11** (a suíte roda na 16).
+
+### O diagnóstico não dizia por que não conectava
+
+As duas primeiras verificações falharam e o resumo só mostrava "exit code 1"; o motivo ficava no log.
+- `scripts/supabase_check.py`: falha de conexão vira anotação de erro + resumo, com a causa provável
+  (senha, usuário/região, host, porta) e o próximo passo. A mensagem do libpq não contém a senha.
+- Segredo que não começa com `postgresql://` é recusado **antes** de conectar, sem repetir nada do
+  conteúdo — na 1ª tentativa o rótulo "Valor:" do passo a passo foi colado junto e o libpq ecoou um
+  pedaço do texto.
+- Teste novo em `test_v0240_managed_db.py` (três URLs ruins; a senha nunca aparece; sem traceback).
+
+### Consequência registrada
+
+A instância publicada pelo terceiro parou de conectar: a senha do administrador foi trocada e a do
+`impacto_app` rotacionada, por decisão do dono. O banco tem 1 usuário que não é de demonstração.
+
 ## [0.24.1] — 2026-10-07
 
 ### A suíte de testes nunca tinha rodado no GitHub

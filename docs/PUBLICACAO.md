@@ -258,7 +258,10 @@ O ambiente de desenvolvimento não tem rota até o Supabase; o GitHub Actions te
 nem log.
 
 1. **Pegue a string do POOLER DE SESSÃO**, não a direta: Supabase → *Connect* → *Session pooler*.
-   Formato `postgresql://postgres.<ref>:<senha>@aws-0-<região>.pooler.supabase.com:5432/postgres`.
+   Formato `postgresql://postgres.<ref>:<senha>@aws-N-<região>.pooler.supabase.com:5432/postgres`
+   (`aws-0` ou `aws-1`, conforme o projeto). Cole **só** o endereço no segredo — sem rótulo, aspas ou
+   espaço; símbolos da senha (`@ : / # ? %`) viram `%40 %3A %2F %23 %3F %25`. O mais simples é uma
+   senha só com letras e números.
    A direta (`db.<ref>.supabase.co`) é IPv6, e o GitHub Actions não tem IPv6.
 2. **Cadastre dois segredos** em *Settings → Secrets and variables → Actions*:
    `SUPABASE_ADMIN_URL` (a string acima) e `IMPACTO_APP_PASSWORD` (≥16 caracteres, **diferente** da
@@ -278,6 +281,23 @@ corrige isso, e **derruba aquela instância** na próxima conexão, porque ela a
 URL administrativa. A migração `0063_v0231_…` que ela aplicou fica registrada como "desconhecida
 aqui" e não atrapalha: as versões são chaveadas pelo nome do arquivo, e a `0063_v0240_…` deste
 repositório é idempotente sobre ela.
+
+**Execução real — 08/10/2026, projeto `efhhwjhrlbbmtuwjsbkk` (us-west-2, PostgreSQL 17.11), commit
+`d7f4615`:**
+
+| run | modo | resultado |
+| --- | --- | --- |
+| 37726289105, 37726466280 | verificar | não conectou: segredo com o rótulo "Valor:" colado junto; depois, senha recusada. O diagnóstico passou a dizer a causa no resumo |
+| 37727218378 | verificar | conectou. 63 migrações aplicadas, 1 pendente (`0063_v0240_…`), 1 desconhecida (`0063_v0231_…`, do terceiro); `impacto_app` seguro mas sem uso de `extensions` e com senha diferente do segredo; 16 usuários, **1 não é de demonstração**; sonda das cadeias válida |
+| 37727468920 | aplicar + `rotacionar_senha_app` | migração aplicada (64, 0 pendentes); `impacto_app` usa `extensions`; login de `impacto_app` com o segredo OK; **imagem contra o banco: `readyz` 200, env `staging`, entrypoint completo**; sonda válida depois |
+
+Consequências: a senha do administrador foi trocada no painel do Supabase pelo dono do projeto e a do
+`impacto_app` foi rotacionada — a instância publicada pelo terceiro, que usava a senha antiga, **parou
+de conectar**, por decisão do dono. Os 16 usuários e 7 organizações continuam no banco: o `aplicar`
+não apaga nem altera dados, e não semeia demonstração. O que NÃO foi feito: nenhuma instância pública
+do IMPACTO está no ar contra esse banco — o `aplicar` sobe a imagem numa máquina descartável do
+GitHub, confere e a remove. Publicar de fato (domínio, HTTPS, SMTP real, chaves definitivas) continua
+nas seções 2–10.
 
 **Demonstração num banco gerenciado NÃO é produção.** Para ter seed e contas de demonstração o
 contêiner tem de subir com `IMPACTO_ENV=development`, e isso desliga: custo mínimo de senha, limite

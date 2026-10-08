@@ -1,6 +1,6 @@
 {
   "name": "impacto-web",
-  "version": "0.24.1",
+  "version": "0.24.2",
   "private": true,
   "type": "module",
   "description": "Plataforma Impacto — aplicação web/PWA (React + TypeScript, empacotada com esbuild)",

@@ -1,0 +1,12 @@
+----------------------------------------------------------------------
+Ran 2265 tests in 776.412s
+
+FAILED (failures=1, skipped=29)
+
+# Ambiente: PostgreSQL 16 local (autenticação trust). Única falha: test_the_manifest_exists_for_this_version —
+# o manifesto IMPACTO_v0.24.2_TRACEABILITY.json é gerado no fechamento da versão; o teste foi rodado de novo depois dele (abaixo).
+Ran 25 tests (test_v0230_release_gate + test_v0240_managed_db) depois do manifesto
+
+OK
+
+# GitHub Actions: ver execução do CI do commit desta versão (CHANGELOG [0.24.2]).

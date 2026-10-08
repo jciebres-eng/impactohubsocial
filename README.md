@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.24.0
+# Plataforma Impacto — v0.24.1
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,16 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.24.1 (o CI passou a existir de verdade; Supabase pronto para verificar):** até aqui a suíte
+NUNCA tinha rodado no GitHub — a action do gitleaks exigia licença e derrubava o primeiro passo de todo
+push. Corrigido, a primeira execução real expôs 105 erros que este ambiente escondia (testes trocando a
+senha de papéis da instância; aqui a autenticação local aceitava qualquer senha) e uma corrida no
+auxiliar de TOTP; os dois foram corrigidos e reproduzidos aqui com autenticação por senha. A imagem
+Docker constrói no CI, e `npm ci` + typecheck oficial passaram (D-SUP1 fechado). Para o Supabase:
+`.github/workflows/supabase.yml` (manual; `verificar` é somente leitura, `aplicar` exige confirmação), a
+troca de usuário que entende o pooler (`impacto_app.<ref>`), e o layout do Supabase (pgcrypto em
+`extensions`) reproduzido em teste, com contraprova. Leia `docs/PUBLICACAO.md` §1-A e §1-B.
 
 **Novo no v0.24.0 (identidade oficial, demonstração provada, banco gerenciado):** a interface veste
 a identidade oficial (`web/brand/`, fonte única `tokens.json`; os nomes antigos do CSS viraram aliases

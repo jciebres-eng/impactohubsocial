@@ -26,7 +26,7 @@ escrita em `BLOCKERS.md`.
 | **6** | Dados / Infra | **DONE** | `DATA_INFRA_GATE.md`, ciclo completo executado contra PostgreSQL real |
 | **7** | Integrações | **DONE** (14 BLOCKED declarados) | `FRONTEND_GATE.md`, 129 testes; homologação exige credencial de fornecedor (D-INT1..14) |
 | **8** | Frente | **DONE** (6 pendências de acessibilidade declaradas) | `FRONTEND_GATE.md`, typecheck + build + 91 E2E |
-| **9** | Jornadas por persona | **DONE** | `PERSONA_E2E_MATRIX.csv`, 49 passos em 7 jornadas, 5 personas; 19 navegador + 30 travessia |
+| **9** | Jornadas por persona | **DONE** | `PERSONA_E2E_MATRIX.csv`, 49 passos em 7 jornadas, 5 personas; 20 navegador + 29 travessia (v0.24.1: o gerador deixou de perder evidência por casamento exato acidental) |
 | **10** | Release | **DONE** | regressão completa, Git limpo, relatórios, ZIPs |
 
 ---

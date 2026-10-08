@@ -33,6 +33,18 @@ def ensure_app_role(conn: Connection, password: str) -> bool:
     return True
 
 
+def rotate_app_password(conn: Connection, password: str) -> None:
+    """Troca a senha de `impacto_app`. Só com IMPACTO_APP_ROTATE_PASSWORD=true, e por um motivo concreto:
+
+    o bootstrap da publicação feita por terceiro no Supabase criou `impacto_app` com a MESMA senha da
+    conexão administrativa. Enquanto for assim, a aplicação carrega a credencial do administrador. A
+    rotação desfaz isso — e derruba quem ainda conecte como `impacto_app` com a senha antiga.
+    """
+    if not conn.scalar("SELECT 1 FROM pg_roles WHERE rolname = 'impacto_app'"):
+        raise SystemExit("impacto_app não existe: nada a rotacionar")
+    conn.execute_script("ALTER ROLE impacto_app PASSWORD " + _literal(password))
+
+
 def main() -> int:
     dsn = os.getenv("DATABASE_URL", "")
     senha = os.getenv("IMPACTO_APP_PASSWORD", "")
@@ -43,9 +55,17 @@ def main() -> int:
     conn = Connection(dsn)
     try:
         criado = ensure_app_role(conn, senha)
+        rotacionar = os.getenv("IMPACTO_APP_ROTATE_PASSWORD", "false") == "true"
+        if rotacionar and not criado:
+            rotate_app_password(conn, senha)
     finally:
         conn.close()
-    print("papel impacto_app criado" if criado else "papel impacto_app já existia (senha não alterada)")
+    if criado:
+        print("papel impacto_app criado")
+    elif rotacionar:
+        print("papel impacto_app já existia: senha ROTACIONADA para IMPACTO_APP_PASSWORD")
+    else:
+        print("papel impacto_app já existia (senha não alterada; IMPACTO_APP_ROTATE_PASSWORD=true troca)")
     return 0
 
 

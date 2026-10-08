@@ -1,0 +1,8 @@
+----------------------------------------------------------------------
+Ran 2264 tests in 741.038s
+
+OK (skipped=26)
+
+# Ambiente: PostgreSQL 16 local com autenticação scram-sha-256 nas conexões TCP (como o serviço do CI),
+# TEST_ADMIN_DATABASE_URL=postgresql://postgres:<senha>@127.0.0.1:5432/postgres. Antes da correção desta versão,
+# a mesma suíte nessas condições dava 105 erros 'password authentication failed' (e o CI do GitHub também).

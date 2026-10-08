@@ -215,9 +215,13 @@ def main() -> int:
             for passo, procuradas in passos:
                 achados: list[str] = []
                 for marca in procuradas:
+                    # Exato E por trecho, sempre. A versão anterior só buscava por trecho quando NÃO havia
+                    # casamento exato — e um teste sem relação nenhuma que contivesse a string exata
+                    # (o nome de um job, "verificar") desligava a busca que achava a evidência real
+                    # ("/verificar" num teste de navegador). Evidência de uma persona não pode depender
+                    # de que string outro arquivo de teste por acaso contém.
                     achados += idx.get(marca, [])
-                    if marca not in idx:  # marca como prefixo/substring de outra
-                        achados += [o for m in marcas if marca in m for o in idx[m]]
+                    achados += [o for m in marcas if marca in m and m != marca for o in idx[m]]
                 achados = sorted(dict.fromkeys(achados))
                 cobertura = "nenhuma"
                 escolhidos: list[str] = []

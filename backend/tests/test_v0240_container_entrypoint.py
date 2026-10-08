@@ -23,9 +23,8 @@ import time
 import unittest
 import urllib.error
 import urllib.request
-import uuid
 
-from tests.support import ADMIN_URL, ROOT, _psql
+from tests.support import ADMIN_URL, APP_PW, ROOT, _psql
 
 SCRIPT = ROOT / "backend" / "start_container.sh"
 
@@ -41,7 +40,9 @@ class TheContainerEntrypointBringsTheProductUpOnACleanDatabaseTests(unittest.Tes
     @classmethod
     def setUpClass(cls):
         cls.db = f"impacto_entry_{os.getpid()}"
-        cls.app_pw = "entry_app_pw_" + uuid.uuid4().hex
+        # A senha do processo (support.APP_PW), nunca uma nova: o papel é da instância, e trocar a
+        # senha dele derrubava, no CI, todo teste que rodasse depois deste.
+        cls.app_pw = APP_PW
         _psql("-c", f'DROP DATABASE IF EXISTS "{cls.db}" WITH (FORCE)')
         _psql("-c", f'CREATE DATABASE "{cls.db}"')
         # O papel é da instância (cluster), não do banco: o harness já o criou com outra senha, e o

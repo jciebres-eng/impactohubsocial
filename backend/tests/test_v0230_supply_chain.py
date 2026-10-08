@@ -101,7 +101,7 @@ class TheMissingLockfileIsDeclaredNotHiddenTests(unittest.TestCase):
                       "dívida sem o comando que a fecha vira dívida permanente")
 
     def test_the_lockfile_claim_matches_reality(self):
-        """v0.24.0: o lockfile EXISTE. O registro tem de dizer isso, e o CI e a imagem têm de usá-lo.
+        """v0.24.0: o lockfile EXISTE e `npm ci` passou no CI. O registro diz isso, com a execução que prova.
 
         Até a v0.23.1 este teste falhava de propósito no dia em que alguém commitasse o lockfile,
         para que o registro não continuasse afirmando que falta um arquivo que já existe. O dia
@@ -109,8 +109,8 @@ class TheMissingLockfileIsDeclaredNotHiddenTests(unittest.TestCase):
         """
         self.assertTrue((ROOT / "web" / "package-lock.json").exists(), "o lockfile sumiu")
         texto = (ROOT / "TECHNICAL_DEBT_REGISTER.md").read_text(encoding="utf-8")
-        self.assertIn("PARCIALMENTE FECHADO", texto)
-        self.assertIn("não foi executado aqui", texto, "o que continua aberto tem de estar dito")
+        self.assertIn("FECHADO na v0.24.0", texto)
+        self.assertIn("37712067072", texto, "fechamento sem a execução do CI que o prova é afirmação, não prova")
         ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         self.assertIn("npm ci --no-audit", ci)
         self.assertNotIn("npm install", ci, "com lockfile, o CI instala com `npm ci`")

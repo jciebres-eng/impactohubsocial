@@ -20,11 +20,9 @@ import tempfile
 import unittest
 import uuid
 
-from tests.support import ADMIN_URL, HOST, PORT, ROOT
+from tests.support import ADMIN_URL, APP_PW, HOST, OWNER_PW, PORT, ROOT
 
 DB = f"impacto_v0181_upgrade_{os.getpid()}"
-OWNER_PW = "up_owner_" + uuid.uuid4().hex[:8]
-APP_PW = "up_app_" + uuid.uuid4().hex[:8]
 OWNER_DSN = f"host={HOST} port={PORT} dbname={DB} user=impacto_owner password={OWNER_PW}"
 
 #: Última migration de cada versão entregue.
@@ -187,9 +185,8 @@ class FailedMigrationTests(unittest.TestCase):
         subprocess.run(["psql", ADMIN_URL, "-v", "ON_ERROR_STOP=1", "-q", "-v", f"db={db}", "-f",
                         str(ROOT / "infra/db/bootstrap.sql")], check=True, capture_output=True,
                        text=True)
-        pw = "broken_" + uuid.uuid4().hex[:8]
-        psql("-c", f"ALTER ROLE impacto_owner PASSWORD '{pw}'")
-        dsn = f"host={HOST} port={PORT} dbname={db} user=impacto_owner password={pw}"
+        psql("-c", f"ALTER ROLE impacto_owner PASSWORD '{OWNER_PW}'")   # a do processo: ver support.py
+        dsn = f"host={HOST} port={PORT} dbname={db} user=impacto_owner password={OWNER_PW}"
         original = M.MIGRATIONS_DIR
         try:
             with tempfile.TemporaryDirectory() as tmp:

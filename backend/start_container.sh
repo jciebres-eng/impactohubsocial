@@ -31,17 +31,7 @@ tail -n 3 /tmp/impacto-migrate.log || true
 log "migrações concluídas"
 
 # A aplicação NÃO roda com a conexão administrativa: troca o usuário da URL por impacto_app.
-export DATABASE_URL="$(python3 - <<'PY'
-import os
-from urllib.parse import quote, urlsplit, urlunsplit
-u = urlsplit(os.environ["DATABASE_URL"])
-if not u.netloc or "@" not in u.netloc:
-    raise SystemExit("DATABASE_URL precisa ser uma URI PostgreSQL com usuário e host")
-host = u.netloc.rsplit("@", 1)[1]
-netloc = "impacto_app:" + quote(os.environ["IMPACTO_APP_PASSWORD"], safe="") + "@" + host
-print(urlunsplit((u.scheme, netloc, u.path, u.query, u.fragment)))
-PY
-)"
+export DATABASE_URL="$(python3 -m impacto.db.app_url)"   # sabe do sufixo de projeto do pooler do Supabase
 log "aplicação conectará como impacto_app"
 
 if [ "${IMPACTO_SEED_DEMO:-false}" = "true" ]; then

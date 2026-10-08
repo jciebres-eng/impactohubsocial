@@ -1,0 +1,137 @@
+name: supabase
+# Executado À MÃO, nunca em push: Actions → supabase → Run workflow.
+#
+# Por que no GitHub e não no ambiente de desenvolvimento: lá não há rota até o Supabase. E por que
+# segredos do repositório: a senha do banco nunca passa por conversa, commit ou log — o GitHub
+# mascara o valor em toda saída.
+#
+# SEGREDOS (Settings → Secrets and variables → Actions):
+#   SUPABASE_ADMIN_URL    string do POOLER DE SESSÃO (Supabase → Connect → Session pooler):
+#                         postgresql://postgres.<ref>:<senha>@aws-0-<região>.pooler.supabase.com:5432/postgres
+#                         A conexão direta db.<ref>.supabase.co é IPv6, e o GitHub Actions não tem IPv6.
+#   IMPACTO_APP_PASSWORD  senha do papel impacto_app (≥16 caracteres, DIFERENTE da do administrador).
+#
+# MODOS
+#   verificar  somente leitura (transação READ ONLY) + sonda das cadeias de hash em ROLLBACK.
+#   aplicar    constrói a imagem e a põe em pé contra o banco em IMPACTO_ENV=staging (endurecido:
+#              exige SMTP — vem de um Mailpit descartável do próprio job —, chaves ≥32, cookie
+#              seguro, nenhum seed). O entrypoint cria/rotaciona impacto_app e APLICA AS MIGRAÇÕES:
+#              isso muda o schema do banco e não se desfaz. Exige a frase de confirmação.
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "verificar (somente leitura) ou aplicar (migra o banco — irreversível)"
+        type: choice
+        options: [verificar, aplicar]
+        default: verificar
+      rotacionar_senha_app:
+        description: "aplicar: trocar a senha de impacto_app por IMPACTO_APP_PASSWORD (derruba quem use a antiga)"
+        type: boolean
+        default: false
+      confirmacao:
+        description: "aplicar: digite exatamente APLICAR NO SUPABASE"
+        type: string
+        default: ""
+permissions: { contents: read }
+concurrency: { group: supabase, cancel-in-progress: false }
+
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y libpq5
+      - name: Segredos cadastrados?
+        env:
+          ADMIN: ${{ secrets.SUPABASE_ADMIN_URL }}
+          APP: ${{ secrets.IMPACTO_APP_PASSWORD }}
+        run: |
+          test -n "$ADMIN" || { echo "::error title=Segredo ausente::cadastre SUPABASE_ADMIN_URL (string do pooler de sessão)"; exit 1; }
+          test -n "$APP" || echo "::warning title=Segredo ausente::IMPACTO_APP_PASSWORD não cadastrada: o modo aplicar vai recusar"
+      - name: Diagnóstico somente leitura
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          IMPACTO_APP_PASSWORD: ${{ secrets.IMPACTO_APP_PASSWORD }}
+        run: python3 scripts/supabase_check.py
+      - name: Sonda das cadeias de hash (grava e desfaz)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: |
+          # Só faz sentido com o schema do IMPACTO já presente; num banco vazio, pula e diz.
+          if python3 -c "import sys; sys.path.insert(0,'backend'); from impacto.db.pq import Connection; import os; c=Connection(os.environ['DATABASE_URL']); sys.exit(0 if c.scalar(\"SELECT to_regclass('public.audit_events') IS NOT NULL\") else 1)"; then
+            python3 scripts/supabase_digest_probe.py
+          else
+            echo "::notice title=Sonda das cadeias de hash::banco sem as tabelas do IMPACTO — sonda pulada"
+          fi
+
+  aplicar:
+    needs: verificar
+    if: inputs.modo == 'aplicar'
+    runs-on: ubuntu-24.04
+    services:
+      mailpit:   # SMTP DESCARTÁVEL deste job: o modo staging exige SMTP, e nenhum e-mail sai daqui.
+        image: axllent/mailpit:latest
+        ports: ["1025:1025"]
+    steps:
+      - name: Confirmação
+        env: { CONFIRMACAO: "${{ inputs.confirmacao }}" }
+        run: |
+          test "$CONFIRMACAO" = "APLICAR NO SUPABASE" || { echo "::error title=Sem confirmação::digite exatamente APLICAR NO SUPABASE"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update && sudo apt-get install -y libpq5
+      - run: docker build -t impacto:${{ github.sha }} .
+      - name: Imagem em pé contra o banco (staging endurecido)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          IMPACTO_APP_PASSWORD: ${{ secrets.IMPACTO_APP_PASSWORD }}
+          ROTACIONAR: ${{ inputs.rotacionar_senha_app }}
+        run: |
+          set -euo pipefail
+          test ${#IMPACTO_APP_PASSWORD} -ge 16 || { echo "::error::IMPACTO_APP_PASSWORD ausente ou curta"; exit 1; }
+          # Chaves geradas NESTA execução e descartadas: o contêiner vive minutos, não recebe tráfego
+          # e não cifra nada. Uma publicação de verdade recebe as suas do cofre de segredos.
+          gera() { python3 -c "import secrets; print(secrets.token_urlsafe(48))"; }
+          export SECRET_KEY="$(gera)" VOUCHER_HMAC_KEY="$(gera)"
+          export FIELD_ENCRYPTION_KEY="$(python3 -c "import base64,os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())")"
+          echo "::add-mask::$SECRET_KEY"; echo "::add-mask::$VOUCHER_HMAC_KEY"; echo "::add-mask::$FIELD_ENCRYPTION_KEY"
+          docker run -d --name impacto --network host \
+            -e DATABASE_URL -e IMPACTO_APP_PASSWORD -e SECRET_KEY -e VOUCHER_HMAC_KEY -e FIELD_ENCRYPTION_KEY \
+            -e IMPACTO_BOOTSTRAP_EXTERNAL=true -e IMPACTO_APP_ROTATE_PASSWORD="$ROTACIONAR" \
+            -e IMPACTO_ENV=staging -e PORT=8080 -e WEB_CONCURRENCY=1 \
+            -e MAIL_PROVIDER=smtp -e SMTP_HOST=127.0.0.1 -e SMTP_PORT=1025 \
+            -e COOKIE_SECURE=true -e PUBLIC_BASE_URL=https://verificacao-ci.invalid \
+            impacto:${{ github.sha }}
+          pronto=""
+          for i in $(seq 1 120); do
+            if curl -fsS http://127.0.0.1:8080/readyz -o readyz.json 2>/dev/null; then pronto=1; break; fi
+            [ "$(docker inspect -f '{{.State.Running}}' impacto)" = "true" ] || break
+            sleep 2
+          done
+          docker logs impacto > contêiner.log 2>&1 || true
+          if [ -z "$pronto" ]; then
+            python3 -c "import sys; t=open('contêiner.log',encoding='utf-8',errors='replace').read()[-6000:]; print('::error title=Contêiner não ficou pronto::'+t.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))"
+            exit 1
+          fi
+          echo "readyz: $(cat readyz.json)"
+          curl -fsS http://127.0.0.1:8080/v1/meta/config | tee config.json
+          python3 -c "import json; d=json.load(open('config.json')); assert d['env']=='staging', d"
+          grep -E "\[impacto-start\]" contêiner.log | sed 's/^/  /'
+          echo "::notice title=Imagem contra o banco::readyz 200, env=staging, entrypoint completo (bootstrap → migrações → impacto_app → ASGI)"
+      - name: Diagnóstico depois de aplicar (somente leitura)
+        if: always()
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          IMPACTO_APP_PASSWORD: ${{ secrets.IMPACTO_APP_PASSWORD }}
+        run: python3 scripts/supabase_check.py
+      - name: Sonda das cadeias de hash depois de aplicar (grava e desfaz)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: python3 scripts/supabase_digest_probe.py
+      - name: Derrubar o contêiner
+        if: always()
+        run: docker rm -f impacto >/dev/null 2>&1 || true

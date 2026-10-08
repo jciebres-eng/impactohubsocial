@@ -236,11 +236,48 @@ A migração `0063` fixa `search_path = public, extensions, pg_temp` nas nove fu
 Sem isso, num banco gerenciado a plataforma não sobe: o primeiro INSERT em `audit_events` falha com
 "function digest(text, unknown) does not exist".
 
-**O que foi provado e o que não foi.** Provado aqui, sem Docker: migrações como administrador, troca
-de papel, seed e login. **Não provado aqui:** o comportamento com o pgcrypto efetivamente em
-`extensions` — neste ambiente ele está em `public` desde a migração 0001, então a schema
-`extensions` fica vazia e o teste só prova que nada quebrou. A prova positiva só vem do primeiro
-`readyz` contra o banco gerenciado. A construção da imagem Docker também continua sem prova aqui.
+**O que foi provado e o que não foi.** Provado aqui, sem Docker e sem o Supabase:
+`test_v0240_managed_db.py` monta um banco com o layout do Supabase (pgcrypto instalado em
+`extensions` ANTES da primeira migração), aplica as 63 migrações, grava um evento de auditoria com o
+search_path da sessão SEM `extensions` — só o search_path de cada função pode achar `digest()` — e a
+cadeia calcula e valida, em transação desfeita. Contraprova no mesmo teste: sem a 0063, `chain_audit`
+e `audit_verify` falham com "function digest(text, unknown) does not exist", o erro exato da
+publicação no Supabase. O entrypoint também foi ensaiado em `staging` endurecido contra esse layout:
+`readyz` pronto, só `impacto_app` conectado ao banco.
+
+A imagem Docker constrói e recusa subir em produção sem segredos — job `docker` do CI, verde desde a
+v0.24.0 (antes ele dependia da suíte e nunca rodava).
+
+**Continua fora do que este repositório consegue provar sozinho:** administrador não-superusuário, o
+pooler Supavisor e as concessões padrão do Supabase. Para isso há o workflow manual abaixo.
+
+### 1-B. Pelo GitHub, sem a senha passar por ninguém — `.github/workflows/supabase.yml`
+
+O ambiente de desenvolvimento não tem rota até o Supabase; o GitHub Actions tem. A senha fica em
+**segredo do repositório**, que o GitHub mascara em toda saída — ela não passa por conversa, commit
+nem log.
+
+1. **Pegue a string do POOLER DE SESSÃO**, não a direta: Supabase → *Connect* → *Session pooler*.
+   Formato `postgresql://postgres.<ref>:<senha>@aws-0-<região>.pooler.supabase.com:5432/postgres`.
+   A direta (`db.<ref>.supabase.co`) é IPv6, e o GitHub Actions não tem IPv6.
+2. **Cadastre dois segredos** em *Settings → Secrets and variables → Actions*:
+   `SUPABASE_ADMIN_URL` (a string acima) e `IMPACTO_APP_PASSWORD` (≥16 caracteres, **diferente** da
+   do administrador).
+3. **Rode `verificar`** (*Actions → supabase → Run workflow*). Somente leitura: transação `READ ONLY`
+   mais uma sonda que grava e desfaz. O resumo da execução diz que migrações faltam, quais o
+   repositório não conhece, se `impacto_app` existe, se é seguro, se aceita a senha do administrador,
+   e quantos usuários reais o banco já tem.
+4. **Só então decida `aplicar`**, digitando `APLICAR NO SUPABASE`. Ele constrói a imagem e a põe em pé
+   contra o banco em `staging` endurecido (SMTP de um Mailpit descartável do próprio job, chaves
+   geradas e descartadas na execução, nenhum seed): bootstrap → **migrações (irreversível)** →
+   `impacto_app` → `readyz`, e repete o diagnóstico e a sonda no fim.
+
+**Se o banco já foi usado pela publicação feita por terceiro:** ali o `impacto_app` foi criado com a
+**mesma senha do administrador** — o `verificar` diz se é o caso. A opção `rotacionar_senha_app`
+corrige isso, e **derruba aquela instância** na próxima conexão, porque ela ainda deriva a senha da
+URL administrativa. A migração `0063_v0231_…` que ela aplicou fica registrada como "desconhecida
+aqui" e não atrapalha: as versões são chaveadas pelo nome do arquivo, e a `0063_v0240_…` deste
+repositório é idempotente sobre ela.
 
 **Demonstração num banco gerenciado NÃO é produção.** Para ter seed e contas de demonstração o
 contêiner tem de subir com `IMPACTO_ENV=development`, e isso desliga: custo mínimo de senha, limite

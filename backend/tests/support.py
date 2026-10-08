@@ -33,6 +33,11 @@ ADMIN_URL = os.getenv("TEST_ADMIN_DATABASE_URL", "postgresql://postgres@127.0.0.
 _P = urllib.parse.urlparse(ADMIN_URL)
 HOST, PORT = _P.hostname or "127.0.0.1", _P.port or 5432
 DB_NAME = f"impacto_test_{os.getpid()}"
+#: UMA senha por processo para cada papel, usada por TODO teste. `impacto_owner` e `impacto_app` são
+#: papéis da INSTÂNCIA, não do banco: um teste que lhes dê senha própria derruba a conexão de todos os
+#: que rodam depois. Aqui isso nunca apareceu porque o PostgreSQL local autentica em `trust` (aceita
+#: qualquer senha); no CI ele confere a senha, e a primeira execução real da suíte no GitHub (v0.24.0)
+#: deu 105 erros "password authentication failed" por causa de três classes que faziam isso.
 OWNER_PW, APP_PW = "owner_test_pw_" + uuid.uuid4().hex[:6], "app_test_pw_" + uuid.uuid4().hex[:6]
 OWNER_DSN = f"host={HOST} port={PORT} dbname={DB_NAME} user=impacto_owner password={OWNER_PW}"
 APP_DSN = f"host={HOST} port={PORT} dbname={DB_NAME} user=impacto_app password={APP_PW}"
@@ -369,23 +374,33 @@ def set_role(user_id: str, org_id: str, role: str) -> None:
 #
 # O defeito encontrou o teste, não o contrário: o arranjo só funcionava porque o reuso era possível.
 #
-# `fresh_totp()` emite um código por PASSO DISTINTO, sempre à frente do último usado. A janela de
-# verificação é de ±1 passo, então há três passos utilizáveis em cada janela de 30 segundos
-# (n-1, n, n+1). Quem precisar de um quarto código na mesma janela recebe um erro claro em vez de
-# um 401 misterioso — e a resposta certa nesse caso é reaproveitar a sessão já reautenticada
-# (a janela de step-up dura 15 minutos), não pedir outro código.
+# `fresh_totp()` emite um código por PASSO DISTINTO, sempre à frente do último usado, a partir do
+# passo atual (n, n+1). Usar n-1 dava três códigos por janela, mas falhava quando a requisição
+# cruzava a virada de 30 s (v0.24.1). Quando os dois códigos da janela acabam, o auxiliar espera a
+# próxima. Ainda assim, a resposta certa para quem precisa de muitos códigos seguidos é reaproveitar
+# a sessão já reautenticada (a janela de step-up dura 15 minutos).
 _ultimo_passo: dict[str, int] = {}
 
 
 def fresh_totp(secret: str) -> str:
+    """Código TOTP ainda não usado para `secret`, válido quando o servidor o conferir.
+
+    Começa no passo ATUAL, não no anterior. A versão anterior começava em `agora - 1` para caber três
+    códigos por janela — e falhava quando a requisição cruzava uma virada de 30 s entre gerar e
+    conferir: o servidor já estava em `agora + 1`, e a janela de ±1 passo não alcança `agora - 1`.
+    Raro por chamada, frequente numa suíte que liga o segundo fator em centenas de contas; foi a
+    falha intermitente de `make_staff` que apareceu na primeira execução da suíte com senha exigida.
+
+    Quando os códigos da janela acabam (o servidor queima cada contador usado), espera a próxima em
+    vez de falhar: o código seguinte passa a existir, só não existia ainda.
+    """
     from impacto.security import totp as _t
-    agora = int(time.time() // 30)
-    passo = max(agora - 1, _ultimo_passo.get(secret, agora - 2) + 1)
-    if passo > agora + 1:
-        raise AssertionError(
-            "mais de três códigos TOTP pedidos na mesma janela de 30 s para o mesmo segredo. "
-            "A janela de verificação é de ±1 passo, então não existe quarto código válido. "
-            "Reaproveite a sessão já reautenticada (step-up vale 15 min) em vez de pedir outro código.")
+    while True:
+        agora = int(time.time() // 30)
+        passo = max(agora, _ultimo_passo.get(secret, agora - 1) + 1)
+        if passo <= agora + 1:
+            break
+        time.sleep(max(0.0, (agora + 1) * 30 - time.time()) + 0.05)
     _ultimo_passo[secret] = passo
     return _t.totp(secret, at=passo * 30)
 
@@ -400,7 +415,8 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
     secret = None
     if mfa:
         secret = c.post("/v1/auth/mfa/setup").json["secret"]
-        assert c.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)}).status == 200
+        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)})
+        assert r.status == 200, f"mfa/enable recusou: {r.status} {r.json}"
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     # v0.22.0 — ADMINISTRADOR TRABALHANDO. A partir desta versão, as permissões de
     # `core/access.py::STEP_UP_PERMISSIONS` exigem identidade confirmada há menos de 15 minutos:
@@ -451,7 +467,8 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
                    " ON CONFLICT DO NOTHING", c.user["id"], papel)
     if mfa:
         segredo = c.post("/v1/auth/mfa/setup").json["secret"]
-        assert c.post("/v1/auth/mfa/enable", {"code": fresh_totp(segredo)}).status == 200
+        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(segredo)})
+        assert r.status == 200, f"mfa/enable recusou: {r.status} {r.json}"
         c.mfa_secret = segredo
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     c.staff_roles = tuple(roles)

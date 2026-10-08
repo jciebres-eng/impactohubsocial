@@ -13,13 +13,10 @@ from __future__ import annotations
 import os
 import subprocess
 import unittest
-import uuid
 
-from tests.support import ADMIN_URL, HOST, PORT, ROOT
+from tests.support import ADMIN_URL, APP_PW, HOST, OWNER_PW, PORT, ROOT
 
 DB = f"impacto_upgrade_{os.getpid()}"
-OWNER_PW = "upgrade_owner_" + uuid.uuid4().hex[:8]
-APP_PW = "upgrade_app_" + uuid.uuid4().hex[:8]
 OWNER_DSN = f"host={HOST} port={PORT} dbname={DB} user=impacto_owner password={OWNER_PW}"
 APP_DSN = f"host={HOST} port={PORT} dbname={DB} user=impacto_app password={APP_PW}"
 # última migration de cada versão entregue

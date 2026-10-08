@@ -1,6 +1,79 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.24.1] — 2026-10-07
+
+### A suíte de testes nunca tinha rodado no GitHub
+
+Pedido: construir a imagem Docker e resolver o que fosse preciso para o Supabase. Ao conferir o CI —
+o GitHub tem Docker, este ambiente não —, todas as execuções recentes estavam vermelhas e ninguém
+sabia em quê: o log bruto do Actions fica num blob da Azure, ilegível fora do navegador do GitHub.
+
+Duas mudanças para enxergar: cada teste que falha vira **anotação** do check run, legível pela API
+(`scripts/ci_annotate_failures.py`); e o job `docker` deixou de depender da suíte (`needs: backend`
+escondia a resposta "a imagem constrói?" atrás de qualquer teste quebrado).
+
+O que apareceu: o primeiro passo, `gitleaks/gitleaks-action@v2`, morria com "missing gitleaks
+license" (a action exige licença paga em conta de organização). **Tudo depois dele ficava
+"skipped" — lint, build do front, a suíte inteira, auditoria de dependências, o ciclo de
+backup/restauração.** Toda afirmação de que "o CI valida X" valia só para este ambiente local.
+Troca: o binário oficial (MIT), versão 8.30.1, conferido contra o arquivo de checksums da release.
+
+### A primeira execução real: 105 erros que este ambiente escondia
+
+`impacto_owner` e `impacto_app` são papéis da INSTÂNCIA, e três classes de teste lhes davam senha
+própria sem restaurar — derrubando a conexão de todo teste seguinte. Aqui nunca apareceu porque o
+PostgreSQL local autentica em `trust` (aceita qualquer senha); no CI ele confere. Uma das três era
+minha, da v0.24.0. Agora há uma senha por processo em `support.py`, usada por todos. A correção foi
+**reproduzida aqui** antes de ir ao CI: o PostgreSQL local passou a exigir senha (`scram-sha-256`),
+como o do CI, e a suíte foi de 105 erros para zero.
+
+Com senha exigida apareceu também uma corrida no auxiliar `fresh_totp`: ele gerava o código do passo
+ANTERIOR, e quando a requisição cruzava a virada de 30 s o servidor já não o aceitava. Agora parte do
+passo atual e, se os códigos da janela acabam, espera a próxima.
+
+### Imagem e dependências — com prova do CI
+
+- **A imagem Docker constrói** e recusa subir em produção sem segredos (job `docker`, verde).
+- **D-SUP1 fechado**: `npm ci` instalou a árvore travada e o typecheck com `@types/react` oficial
+  passou no GitHub (execução `37712067072`).
+
+### gitleaks: 15 achados no histórico, nenhum é credencial
+
+Senhas e segredos fictícios de teste, o literal de placeholder da Stripe com cliente HTTP falso, a
+lista de senhas FRACAS que o cadastro recusa, uma linha de texto. `.gitleaksignore` libera por
+impressão digital — um achado por linha, cada grupo com motivo, teste exigindo formato e contagem. O
+comentário que escrevi explicando o placeholder citava o literal e foi achado também; está lá, com
+motivo, porque o commit já estava publicado.
+
+### Supabase
+
+Este ambiente **não alcança o Supabase** (nem resolve o nome; a porta 5432 não passa pelo proxy), e
+a conexão direta `db.<ref>.supabase.co` é IPv6 — que o GitHub Actions não tem. O caminho é o pooler
+de sessão, por um workflow manual com a senha em segredo do repositório:
+
+- `.github/workflows/supabase.yml`: `verificar` (transação READ ONLY + sonda que grava e desfaz) e
+  `aplicar` (imagem em pé contra o banco em `staging` endurecido, com Mailpit descartável; migra,
+  irreversível; exige digitar a confirmação). Nunca roda em push; nenhum input ou segredo é
+  interpolado no shell.
+- `impacto/db/app_url.py`: pelo pooler o usuário é `postgres.<ref>`, e o papel da aplicação tem de ir
+  como `impacto_app.<ref>`; a troca antiga, embutida no shell, não sabia disso.
+- `scripts/supabase_check.py`: diz o que falta migrar, o que o repositório não conhece (a
+  `0063_v0231_…` de terceiro), se `impacto_app` é seguro e se **aceita a senha do administrador** —
+  o defeito da publicação de terceiro. `IMPACTO_APP_ROTATE_PASSWORD=true` corrige, e derruba aquela
+  instância.
+- **O layout do Supabase foi reproduzido em teste** (pgcrypto em `extensions` antes da primeira
+  migração): 63 migrações aplicam e as cadeias de hash calculam e validam; sem a 0063, `chain_audit`
+  e `audit_verify` falham com o erro exato da publicação no Supabase. O modo `aplicar` foi ensaiado
+  aqui sem Docker, em `staging` endurecido: `readyz` pronto, só `impacto_app` conectado.
+
+### Um gerador que perdia evidência
+
+A matriz de personas buscava evidência por trecho só quando não havia casamento exato — e meu teste
+novo, por conter a string `"verificar"`, desligou a busca que achava o teste de navegador de
+`/verificar`. Agora busca sempre as duas; 49/49 seguem em PASS, e um passo subiu de travessia para
+navegador (20 + 29).
+
 ## [0.24.0] — 2026-10-07
 
 ### Correção de registro, antes de qualquer novidade

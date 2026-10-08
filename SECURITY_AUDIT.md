@@ -1,6 +1,28 @@
 # SECURITY_AUDIT — v0.18.1 (2026-10-06)
 
-## 0. Auditoria de dependências — **BLOCKED BY ENVIRONMENT**
+## 0. Auditoria de dependências — **EXECUTADA NO CI na v0.24.1**
+
+Até a v0.24.0 nenhuma auditoria de dependências tinha rodado em lugar nenhum: aqui o registry
+responde 403, e no GitHub Actions o passo de auditoria vinha DEPOIS da suíte, que morria antes, no
+primeiro passo (a action do gitleaks exigia licença). Na v0.24.1 a auditoria ganhou job próprio
+(`auditoria`, em `.github/workflows/ci.yml`) e rodou pela primeira vez.
+
+**O que ela achou** — execução `37720370295`, nas dependências de EXECUÇÃO do backend:
+
+| Pacote | Versão | Vulnerabilidades | Corrigidas em | Onde o produto usa |
+|---|---|---:|---|---|
+| PyJWT | 2.14.0 | 2 | 2.15.0 | validação do `id_token` do login corporativo (`services/oidc.py`) |
+| pypdf | 5.9.0 | 49 | 6.19.0 (a maior versão de correção entre as 49) | extração de texto de **PDF enviado por usuário** (`services/documents.py`) — exatamente o caminho que PDF malformado atinge |
+
+As versões de destino vêm do relatório (`fix_versions`), não de escolha.
+
+**Depois da atualização** — execução `37720482955`: `pip-audit` (requirements + opcionais) com 0 itens
+relatados; `npm audit --omit=dev` com 0 itens relatados; a imagem Docker construiu com as versões
+novas. Isso é o que as duas ferramentas relataram contra as bases públicas naquele momento — não é
+prova de ausência de falha, e a auditoria roda de novo a cada push.
+
+### Histórico: até a v0.24.0 — **BLOCKED BY ENVIRONMENT**
+
 
 Classificação honesta, porque "não consegui executar" **não é** "sem vulnerabilidades":
 

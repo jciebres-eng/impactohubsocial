@@ -246,7 +246,7 @@ publicação no Supabase. O entrypoint também foi ensaiado em `staging` endurec
 `readyz` pronto, só `impacto_app` conectado ao banco.
 
 A imagem Docker constrói e recusa subir em produção sem segredos — job `docker` do CI, verde desde a
-v0.24.0 (antes ele dependia da suíte e nunca rodava).
+v0.24.1 (antes ele dependia da suíte e nunca rodava). Execução inteira verde: `37720482955`.
 
 **Continua fora do que este repositório consegue provar sozinho:** administrador não-superusuário, o
 pooler Supavisor e as concessões padrão do Supabase. Para isso há o workflow manual abaixo.

@@ -17,7 +17,10 @@ NUNCA tinha rodado no GitHub — a action do gitleaks exigia licença e derrubav
 push. Corrigido, a primeira execução real expôs 105 erros que este ambiente escondia (testes trocando a
 senha de papéis da instância; aqui a autenticação local aceitava qualquer senha) e uma corrida no
 auxiliar de TOTP; os dois foram corrigidos e reproduzidos aqui com autenticação por senha. A imagem
-Docker constrói no CI, e `npm ci` + typecheck oficial passaram (D-SUP1 fechado). Para o Supabase:
+Docker constrói no CI, e `npm ci` + typecheck oficial passaram (D-SUP1 fechado). A primeira
+auditoria de dependências que de fato rodou achou vulnerabilidades reais — **PyJWT 2.14.0 (2) e
+pypdf 5.9.0 (49), este lendo PDF enviado por usuário** — e as duas foram atualizadas (2.15.0 e 6.19.0);
+CI inteiro verde na execução `37720482955`. Para o Supabase:
 `.github/workflows/supabase.yml` (manual; `verificar` é somente leitura, `aplicar` exige confirmação), a
 troca de usuário que entende o pooler (`impacto_app.<ref>`), e o layout do Supabase (pgcrypto em
 `extensions`) reproduzido em teste, com contraprova. Leia `docs/PUBLICACAO.md` §1-A e §1-B.

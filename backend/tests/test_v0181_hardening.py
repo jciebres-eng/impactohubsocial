@@ -270,11 +270,21 @@ class DependencyControlTests(unittest.TestCase):
         self.assertEqual(faltando, [], f"dependência sem inventário declarado: {faltando}")
 
     def test_the_blocked_audit_is_declared_as_blocked_and_not_as_clean(self):
-        """A regra do pedido: "não consegui executar" nunca é "sem vulnerabilidades"."""
+        """A regra do pedido: "não consegui executar" nunca é "sem vulnerabilidades".
+
+        v0.24.1: a auditoria passou a rodar no CI e achou vulnerabilidades reais (PyJWT, pypdf). O
+        documento tem de dizer o que foi achado, em que execução, e o que mudou — e continua proibido
+        de afirmar ausência de falha. O histórico do bloqueio fica, para não reescrever o passado.
+        """
         doc = (RAIZ / "SECURITY_AUDIT.md").read_text(encoding="utf-8")
-        self.assertIn("BLOCKED BY ENVIRONMENT", doc)
+        self.assertIn("BLOCKED BY ENVIRONMENT", doc, "o histórico do bloqueio sumiu")
         self.assertIn("npm audit", doc)
         self.assertIn("pip-audit", doc)
+        for evidencia in ("37720370295", "37720482955", "PyJWT", "pypdf", "6.19.0", "2.15.0"):
+            self.assertIn(evidencia, doc, f"o resultado da auditoria executada não está documentado: {evidencia}")
+        req = (RAIZ / "backend" / "requirements.txt").read_text(encoding="utf-8")
+        self.assertIn("PyJWT==2.15.0", req)
+        self.assertIn("pypdf==6.19.0", req)
         proibido = re.search(r"(sem vulnerabilidades|nenhuma vulnerabilidade)[^.]{0,80}\.", doc,
                              re.IGNORECASE)
         if proibido:

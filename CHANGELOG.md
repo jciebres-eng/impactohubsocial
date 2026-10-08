@@ -67,6 +67,19 @@ de sessão, por um workflow manual com a senha em segredo do repositório:
   e `audit_verify` falham com o erro exato da publicação no Supabase. O modo `aplicar` foi ensaiado
   aqui sem Docker, em `staging` endurecido: `readyz` pronto, só `impacto_app` conectado.
 
+### Segurança: a primeira auditoria de dependências achou vulnerabilidades reais
+
+O passo de auditoria do CI também nunca tinha rodado. Com job próprio (`auditoria`, ~1 min) e
+resumo por pacote, ele achou duas dependências de EXECUÇÃO com vulnerabilidades conhecidas:
+
+- **PyJWT 2.14.0** — 2 vulnerabilidades; valida o `id_token` do login corporativo. → **2.15.0**.
+- **pypdf 5.9.0** — 49 vulnerabilidades; lê **PDF enviado por usuário** para extrair texto. → **6.19.0**.
+
+Versões de destino tiradas do próprio relatório. Depois da troca, a auditoria relatou 0 itens
+(`pip-audit` e `npm audit --omit=dev`), a imagem construiu com as versões novas e a suíte rodou com
+elas no CI. `SECURITY_AUDIT.md` deixou de dizer "bloqueado pelo ambiente" e passou a dizer o que foi
+achado, em que execução, e o que mudou — sem afirmar ausência de falha.
+
 ### A segunda execução real: 6 problemas, todos de ambiente
 
 - **PyYAML não estava em `requirements-dev.txt`**: o portão que lê os workflows nunca tinha sido

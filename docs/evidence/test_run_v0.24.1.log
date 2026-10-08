@@ -6,3 +6,7 @@ OK (skipped=26)
 # Ambiente: PostgreSQL 16 local com autenticação scram-sha-256 nas conexões TCP (como o serviço do CI),
 # TEST_ADMIN_DATABASE_URL=postgresql://postgres:<senha>@127.0.0.1:5432/postgres. Antes da correção desta versão,
 # a mesma suíte nessas condições dava 105 erros 'password authentication failed' (e o CI do GitHub também).
+
+# Confirmação no GitHub Actions (ambiente com senha exigida, Python 3.12, PyPI e registry npm):
+# execução 37720482955 (commit 9f702d7) — backend (gitleaks, lint, front com npm ci + typecheck oficial,
+# suíte completa, backup/restauração com dump adulterado), auditoria (pip-audit + npm audit) e docker: todos verdes.

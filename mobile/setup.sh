@@ -8,7 +8,7 @@ npm install
 IMPACTO_API_BASE="$IMPACTO_API_BASE" node build.mjs
 [ -d android ] || npx cap add android
 [ "$(uname)" = "Darwin" ] && { [ -d ios ] || npx cap add ios; }
-npx --yes @capacitor/assets generate --assetPath ../mobile/resources --iconBackgroundColor '#172a46' --splashBackgroundColor '#172a46' || true
+npx --yes @capacitor/assets generate --assetPath ../mobile/resources --iconBackgroundColor '#16233B' --splashBackgroundColor '#16233B' || true
 npx cap sync
 echo "Android: cd web/android && ./gradlew bundleRelease   (assinatura: ver docs/MOBILE.md)"
 echo "iOS:     npx cap open ios   (Xcode → Archive)"

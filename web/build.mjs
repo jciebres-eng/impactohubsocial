@@ -14,7 +14,7 @@ const opts = {
   entryPoints: { app: "src/main.tsx", styles: "src/styles.css" },
   bundle: true, minify: !watch, sourcemap: watch ? "inline" : false, format: "esm", target: ["es2020", "chrome90", "firefox90", "safari15"],
   jsx: "automatic", outdir: join(dist, "assets"), entryNames: "[name]-[hash]", metafile: true, legalComments: "eof",
-  external: ["/fonts/*"], loader: { ".ttf": "file", ".woff": "file" },
+  external: ["/fonts/*"], loader: { ".ttf": "file", ".woff": "file", ".svg": "text" },  // .svg: ícones da identidade entram inline (currentColor)
   define: { "process.env.NODE_ENV": watch ? '"development"' : '"production"', "process.env.IMPACTO_API_BASE": JSON.stringify(process.env.IMPACTO_API_BASE || "") },
   logLevel: "info",
 };

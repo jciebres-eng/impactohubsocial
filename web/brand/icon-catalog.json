@@ -1,0 +1,383 @@
+{
+  "version": "1.1.0",
+  "viewBox": "0 0 24 24",
+  "strokeWidth": 1.75,
+  "color": "currentColor",
+  "icons": [
+    {
+      "name": "admin/integrations",
+      "label": "plug",
+      "file": "admin/integrations.svg"
+    },
+    {
+      "name": "admin/logs",
+      "label": "scroll-text",
+      "file": "admin/logs.svg"
+    },
+    {
+      "name": "admin/permissions",
+      "label": "key-round",
+      "file": "admin/permissions.svg"
+    },
+    {
+      "name": "admin/security",
+      "label": "shield",
+      "file": "admin/security.svg"
+    },
+    {
+      "name": "admin/tenant",
+      "label": "layers",
+      "file": "admin/tenant.svg"
+    },
+    {
+      "name": "compliance/audit",
+      "label": "clipboard-check",
+      "file": "compliance/audit.svg"
+    },
+    {
+      "name": "compliance/expired",
+      "label": "calendar-x",
+      "file": "compliance/expired.svg"
+    },
+    {
+      "name": "compliance/pending",
+      "label": "clock",
+      "file": "compliance/pending.svg"
+    },
+    {
+      "name": "compliance/rejected",
+      "label": "x-circle",
+      "file": "compliance/rejected.svg"
+    },
+    {
+      "name": "compliance/risk",
+      "label": "triangle-alert",
+      "file": "compliance/risk.svg"
+    },
+    {
+      "name": "documents/document",
+      "label": "Document",
+      "file": "documents/document.svg"
+    },
+    {
+      "name": "documents/evidence",
+      "label": "Evidence",
+      "file": "documents/evidence.svg"
+    },
+    {
+      "name": "esg/governance",
+      "label": "Governance",
+      "file": "esg/governance.svg"
+    },
+    {
+      "name": "esg/leaf",
+      "label": "Leaf",
+      "file": "esg/leaf.svg"
+    },
+    {
+      "name": "finance/fiscal",
+      "label": "Fiscal",
+      "file": "finance/fiscal.svg"
+    },
+    {
+      "name": "finance/funding",
+      "label": "Funding",
+      "file": "finance/funding.svg"
+    },
+    {
+      "name": "fiscal/contribution",
+      "label": "hand-coins",
+      "file": "fiscal/contribution.svg"
+    },
+    {
+      "name": "fiscal/eligibility",
+      "label": "badge-check",
+      "file": "fiscal/eligibility.svg"
+    },
+    {
+      "name": "fiscal/simulation",
+      "label": "calculator",
+      "file": "fiscal/simulation.svg"
+    },
+    {
+      "name": "fiscal/tax",
+      "label": "receipt",
+      "file": "fiscal/tax.svg"
+    },
+    {
+      "name": "fiscal/validation",
+      "label": "shield-check",
+      "file": "fiscal/validation.svg"
+    },
+    {
+      "name": "impact/community",
+      "label": "community",
+      "file": "impact/community.svg"
+    },
+    {
+      "name": "impact/culture",
+      "label": "palette",
+      "file": "impact/culture.svg"
+    },
+    {
+      "name": "impact/education",
+      "label": "book-open",
+      "file": "impact/education.svg"
+    },
+    {
+      "name": "impact/health",
+      "label": "heart-pulse",
+      "file": "impact/health.svg"
+    },
+    {
+      "name": "impact/inclusion",
+      "label": "accessibility",
+      "file": "impact/inclusion.svg"
+    },
+    {
+      "name": "impact/match",
+      "label": "Match",
+      "file": "impact/match.svg"
+    },
+    {
+      "name": "impact/ods",
+      "label": "Ods",
+      "file": "impact/ods.svg"
+    },
+    {
+      "name": "impact/people",
+      "label": "People",
+      "file": "impact/people.svg"
+    },
+    {
+      "name": "impact/target",
+      "label": "target",
+      "file": "impact/target.svg"
+    },
+    {
+      "name": "impact/territory",
+      "label": "map-pin",
+      "file": "impact/territory.svg"
+    },
+    {
+      "name": "match/compatibility",
+      "label": "link",
+      "file": "match/compatibility.svg"
+    },
+    {
+      "name": "match/connection",
+      "label": "network",
+      "file": "match/connection.svg"
+    },
+    {
+      "name": "match/intention",
+      "label": "compass",
+      "file": "match/intention.svg"
+    },
+    {
+      "name": "match/recommendation",
+      "label": "lightbulb-check",
+      "file": "match/recommendation.svg"
+    },
+    {
+      "name": "match/score",
+      "label": "gauge",
+      "file": "match/score.svg"
+    },
+    {
+      "name": "nav/analytics",
+      "label": "chart",
+      "file": "nav/analytics.svg"
+    },
+    {
+      "name": "nav/company",
+      "label": "briefcase",
+      "file": "nav/company.svg"
+    },
+    {
+      "name": "nav/compliance",
+      "label": "shield-check",
+      "file": "nav/compliance.svg"
+    },
+    {
+      "name": "nav/dashboard",
+      "label": "grid",
+      "file": "nav/dashboard.svg"
+    },
+    {
+      "name": "nav/documents",
+      "label": "files",
+      "file": "nav/documents.svg"
+    },
+    {
+      "name": "nav/finance",
+      "label": "coins",
+      "file": "nav/finance.svg"
+    },
+    {
+      "name": "nav/ideas",
+      "label": "bulb",
+      "file": "nav/ideas.svg"
+    },
+    {
+      "name": "nav/integrations",
+      "label": "plug",
+      "file": "nav/integrations.svg"
+    },
+    {
+      "name": "nav/lock",
+      "label": "lock",
+      "file": "nav/lock.svg"
+    },
+    {
+      "name": "nav/opportunities",
+      "label": "sparkles",
+      "file": "nav/opportunities.svg"
+    },
+    {
+      "name": "nav/organizations",
+      "label": "building",
+      "file": "nav/organizations.svg"
+    },
+    {
+      "name": "nav/projects",
+      "label": "folder",
+      "file": "nav/projects.svg"
+    },
+    {
+      "name": "nav/reports",
+      "label": "file-chart",
+      "file": "nav/reports.svg"
+    },
+    {
+      "name": "nav/support",
+      "label": "help-circle",
+      "file": "nav/support.svg"
+    },
+    {
+      "name": "nav/users",
+      "label": "users",
+      "file": "nav/users.svg"
+    },
+    {
+      "name": "navigation/home",
+      "label": "Home",
+      "file": "navigation/home.svg"
+    },
+    {
+      "name": "navigation/menu",
+      "label": "Menu",
+      "file": "navigation/menu.svg"
+    },
+    {
+      "name": "navigation/search",
+      "label": "Search",
+      "file": "navigation/search.svg"
+    },
+    {
+      "name": "patterns/download",
+      "label": "download",
+      "file": "patterns/download.svg"
+    },
+    {
+      "name": "patterns/external-link",
+      "label": "external-link",
+      "file": "patterns/external-link.svg"
+    },
+    {
+      "name": "patterns/search-filter",
+      "label": "list-filter",
+      "file": "patterns/search-filter.svg"
+    },
+    {
+      "name": "patterns/upload",
+      "label": "upload",
+      "file": "patterns/upload.svg"
+    },
+    {
+      "name": "profiles/government",
+      "label": "landmark",
+      "file": "profiles/government.svg"
+    },
+    {
+      "name": "profiles/nonprofit",
+      "label": "hand-heart",
+      "file": "profiles/nonprofit.svg"
+    },
+    {
+      "name": "profiles/researcher",
+      "label": "microscope",
+      "file": "profiles/researcher.svg"
+    },
+    {
+      "name": "profiles/university",
+      "label": "graduation-cap",
+      "file": "profiles/university.svg"
+    },
+    {
+      "name": "projects/active",
+      "label": "play-circle",
+      "file": "projects/active.svg"
+    },
+    {
+      "name": "projects/archived",
+      "label": "archive",
+      "file": "projects/archived.svg"
+    },
+    {
+      "name": "projects/completed",
+      "label": "check-circle",
+      "file": "projects/completed.svg"
+    },
+    {
+      "name": "projects/draft",
+      "label": "file-plus",
+      "file": "projects/draft.svg"
+    },
+    {
+      "name": "projects/funding-open",
+      "label": "wallet",
+      "file": "projects/funding-open.svg"
+    },
+    {
+      "name": "projects/replicable",
+      "label": "copy",
+      "file": "projects/replicable.svg"
+    },
+    {
+      "name": "status/alert",
+      "label": "Alert",
+      "file": "status/alert.svg"
+    },
+    {
+      "name": "status/blocked",
+      "label": "Blocked",
+      "file": "status/blocked.svg"
+    },
+    {
+      "name": "status/check",
+      "label": "Check",
+      "file": "status/check.svg"
+    },
+    {
+      "name": "status/verified",
+      "label": "Verified",
+      "file": "status/verified.svg"
+    },
+    {
+      "name": "system/bell",
+      "label": "Bell",
+      "file": "system/bell.svg"
+    },
+    {
+      "name": "system/settings",
+      "label": "Settings",
+      "file": "system/settings.svg"
+    },
+    {
+      "name": "system/user",
+      "label": "User",
+      "file": "system/user.svg"
+    }
+  ]
+}

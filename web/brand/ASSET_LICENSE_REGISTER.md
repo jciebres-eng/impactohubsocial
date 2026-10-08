@@ -1,0 +1,21 @@
+# Registro de licenças e procedência de assets
+
+| Classe/asset | Origem conhecida | Autor/titular | Licença/termos | Evidência e restrições | Status |
+|---|---|---|---|---|---|
+| Logo raster Impacto recebido diretamente nesta conversa | Anexo enviado pelo usuário; preservado como `brand/logos/impacto-reference.png` (303×240) | Titular não identificado; usuário autorizou o uso nesta tarefa | Nenhuma licença comercial/cessão formal anexada | Manter inalterado; pedir ao titular confirmação de direitos/uso comercial e master vetorial antes de distribuição pública | PENDENTE |
+| Marca antiga Convergência | ZIP de entrada, produzido via Lovable; movida a `brand/archive/convergencia-pre-refresh/` | Não identificado | Não comprovada | Arquivada para rastreabilidade; não usar como identidade padrão atual | PENDENTE |
+| Ícones SVG do ZIP original | ZIP de entrada | Não identificado | Não comprovada | Recebidos junto do pacote; manter atribuição/proveniência documentada. Revisão não constitui liberação jurídica | PENDENTE |
+| Ícones novos em `icons/` criados no release | Criados nesta revisão, formas SVG originais e simplificadas | Produção assistida por IA; Plataforma de Impacto deve revisar e aceitar | Sem dependência externa; não declarar exclusividade ou aconselhamento jurídico | Geometrias desenhadas para este pacote; revisar originalidade/trademark antes de uso comercial amplo | PENDENTE DE ACEITE |
+| Isotipo de alta resolução e derivados app/PWA/iOS/Android/favicon | Isotipo extraído da imagem fornecida e ampliação assistida por IA, visualmente revisada; derivados por downsampling | Produção assistida; Plataforma de Impacto deve aceitar | Derivados para integração; não substituem master oficial | Conferir com titular; app/loja real ainda não compilado/renderizado | PENDENTE DE ACEITE |
+| Open Graph novo | Derivado do logo autorizado nesta conversa e tokens do pacote | Produção assistida; Plataforma de Impacto deve aceitar | Não é arte oficial previamente aprovada | Revisar crop social final e direitos antes de publicar | PENDENTE DE ACEITE |
+| IBM Plex Sans / IBM Plex Mono (nome de família nos SVG/tokens) | Fontes não incluídas no ZIP | IBM | A família IBM Plex publica sob SIL Open Font License 1.1; nenhum arquivo da fonte ou cópia de OFL foi recebido aqui | Não embarcar/redistribuir binários até obter fontes oficiais e incluir o aviso OFL da versão utilizada. Referência: https://github.com/IBM/plex | PENDENTE — FONTE NÃO EMPACOTADA |
+| Tokens, CSS, TS, documentação, testes e showcase criados nesta revisão | Este release | Produção assistida por IA; adoção pela Plataforma de Impacto | Sem assets externos incorporados; termos legais devem ser definidos pelo titular do produto | Não constitui parecer jurídico nem concessão de direitos sobre a marca base | PENDENTE DE DEFINIÇÃO DO TITULAR |
+| Web standards / exemplos | W3C, WHATWG, Apple, Android, Tailwind, React Native | Respectivos titulares | Referências conceituais, sem conteúdo copiado além de identificadores técnicos | Não há dependência proprietária adicionada | GREEN |
+
+## Regra
+Não tratar a afirmação original “royalty-free” como evidência. Antes de publicar ou redistribuir, o responsável do produto deve obter a confirmação do titular e arquivar autor, URL/fonte, licença e restrições de cada asset de terceiros. Ícones originais do release não representam certificação oficial nem parecer jurídico.
+
+
+## Derivados transparentes do SaaS — v2.3
+
+Os arquivos `brand/logos/impacto-logo-transparent*.png`, `brand/marks/impacto-isotipo-transparent*.png`, `brand/app-icons/app-icon-1024-transparent.png`, `brand/favicon/*-transparent.*` e `pwa/*-transparent.png` são derivados técnicos das imagens raster preservadas nos caminhos originais. Foram criados a pedido do responsável para remover o matte navy, adaptar branco para navy apenas na variante de uso claro e exportar tamanhos web/PWA. Não constituem nova titularidade nem prova de cessão/licença; os originais permanecem intactos. A pendência de autorização comercial registrada acima continua válida.

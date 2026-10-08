@@ -1,0 +1,526 @@
+{
+ "gerado_em": "2026-10-08T00:04:59.802844+00:00",
+ "personas": {
+  "osc": {
+   "email": "osc@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 48,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/area",
+    "/reputacao",
+    "/selos",
+    "/afirmacoes",
+    "/responsabilidade",
+    "/propostas",
+    "/marketplace/meus",
+    "/marketplace",
+    "/rede/relacoes",
+    "/conversas",
+    "/perfil-publico",
+    "/prontidao/finalidades",
+    "/rede/experiencias",
+    "/rede/atividade",
+    "/vocabulario",
+    "/oportunidades",
+    "/ideias",
+    "/projetos",
+    "/candidaturas",
+    "/instituicao",
+    "/diagnosticos",
+    "/prontidao",
+    "/pagamentos",
+    "/cotas",
+    "/campanha-gestao",
+    "/documentos",
+    "/documentos/montagens",
+    "/documentos/modelos",
+    "/rascunhos",
+    "/acordos",
+    "/verificacoes",
+    "/profissionais",
+    "/solucoes",
+    "/solucoes/minhas",
+    "/solucoes/replicacao",
+    "/relatorios",
+    "/mapa",
+    "/mensagens",
+    "/conquistas",
+    "/materiais",
+    "/ia",
+    "/conta/seguranca",
+    "/ajuda",
+    "/notificacoes",
+    "/organizacao",
+    "/conta/plano",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/responsabilidade": [
+     "422 /v1/responsibility/current"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "company": {
+   "email": "empresa@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 37,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/area",
+    "/reputacao",
+    "/selos",
+    "/responsabilidade",
+    "/marketplace",
+    "/propostas",
+    "/relatorios-impacto",
+    "/rede/relacoes",
+    "/conversas",
+    "/perfil-publico",
+    "/rede/atividade",
+    "/explorar",
+    "/editais",
+    "/candidaturas",
+    "/carteira",
+    "/solucoes",
+    "/solucoes/minhas",
+    "/pagamentos",
+    "/relatorios",
+    "/mapa",
+    "/mensagens",
+    "/fiscal",
+    "/instituicao",
+    "/documentos",
+    "/acordos",
+    "/verificacoes",
+    "/documentos/montagens",
+    "/documentos/modelos",
+    "/materiais",
+    "/ia",
+    "/conta/seguranca",
+    "/ajuda",
+    "/notificacoes",
+    "/organizacao",
+    "/conta/plano",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/responsabilidade": [
+     "422 /v1/responsibility/current"
+    ],
+    "/documentos/montagens": [
+     "403 /v1/projects?limit=100"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "provider": {
+   "email": "contador@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 33,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/area",
+    "/reputacao",
+    "/selos",
+    "/marketplace",
+    "/propostas",
+    "/perfil-publico",
+    "/perfil-publico/experiencias",
+    "/conversas",
+    "/rede/relacoes",
+    "/instituicao",
+    "/oportunidades-profissionais",
+    "/revisoes",
+    "/minhas-atividades",
+    "/identidade",
+    "/solucoes",
+    "/solucoes/minhas",
+    "/acordos",
+    "/verificacoes",
+    "/mensagens",
+    "/conquistas",
+    "/rascunhos",
+    "/documentos",
+    "/documentos/montagens",
+    "/documentos/modelos",
+    "/materiais",
+    "/ia",
+    "/conta/seguranca",
+    "/ajuda",
+    "/notificacoes",
+    "/organizacao",
+    "/conta/plano",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/documentos/montagens": [
+     "403 /v1/projects?limit=100"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "government": {
+   "email": "governo@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 34,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/area",
+    "/reputacao",
+    "/selos",
+    "/responsabilidade",
+    "/territorio/necessidades",
+    "/marketplace",
+    "/propostas",
+    "/relatorios-impacto",
+    "/rede/relacoes",
+    "/conversas",
+    "/perfil-publico",
+    "/editais",
+    "/candidaturas",
+    "/carteira",
+    "/solucoes",
+    "/solucoes/minhas",
+    "/instituicao",
+    "/relatorios",
+    "/mapa",
+    "/acordos",
+    "/materiais",
+    "/dados-territoriais",
+    "/determinantes",
+    "/documentos",
+    "/documentos/montagens",
+    "/documentos/modelos",
+    "/ia",
+    "/conta/seguranca",
+    "/ajuda",
+    "/notificacoes",
+    "/organizacao",
+    "/conta/plano",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/responsabilidade": [
+     "422 /v1/responsibility/current"
+    ],
+    "/documentos/montagens": [
+     "403 /v1/projects?limit=100"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "admin": {
+   "email": "admin@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 53,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/admin",
+    "/area",
+    "/vocabulario",
+    "/admin/identidade",
+    "/admin/credenciais",
+    "/admin/credenciais-profissionais",
+    "/admin/honorarios",
+    "/admin/editais",
+    "/admin/institucional",
+    "/admin/vouchers",
+    "/admin/convenios",
+    "/admin/denuncias",
+    "/admin/medidas",
+    "/admin/solucoes",
+    "/solucoes",
+    "/admin/contribuicao",
+    "/dados-territoriais",
+    "/admin/linha-do-tempo",
+    "/admin/rastro",
+    "/admin/proveniencia",
+    "/admin/integridade",
+    "/admin/interruptor",
+    "/controladoria",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/financeiro/instrucoes",
+    "/admin/cobranca",
+    "/financeiro/periodos-gratuitos",
+    "/contabilidade",
+    "/contabilidade/plano-de-contas",
+    "/tesouraria",
+    "/administrativo/orcamento",
+    "/admin/fiscal",
+    "/operacoes",
+    "/operacoes/alertas",
+    "/admin/erros",
+    "/admin/risco",
+    "/admin/integracoes",
+    "/admin/compliance",
+    "/admin/organizacoes",
+    "/auditoria",
+    "/admin/auditoria",
+    "/admin/chaves",
+    "/admin/usuarios",
+    "/admin/permissoes",
+    "/admin/central/suporte",
+    "/admin/central",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {},
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "editor": {
+   "email": "editor@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 5,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/admin/central",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "reviewer": {
+   "email": "revisor@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 5,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/admin/central",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "support": {
+   "email": "suporte@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 6,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/admin/organizacoes",
+    "/admin/central/suporte",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "controller": {
+   "email": "controladoria@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 15,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/controladoria",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/financeiro/instrucoes",
+    "/admin/cobranca",
+    "/contabilidade",
+    "/contabilidade/plano-de-contas",
+    "/tesouraria",
+    "/administrativo/orcamento",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "finance": {
+   "email": "financeiro@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 11,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/financeiro/instrucoes",
+    "/admin/cobranca",
+    "/administrativo/orcamento",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ],
+    "/financeiro/despesas": [
+     "403 /v1/contabilidade/chart"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "accounting": {
+   "email": "contabilidade@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 11,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/contabilidade",
+    "/contabilidade/plano-de-contas",
+    "/admin/fiscal",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "treasury": {
+   "email": "tesouraria@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 9,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/tesouraria",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ],
+    "/financeiro/despesas": [
+     "403 /v1/contabilidade/chart"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "operations": {
+   "email": "operacoes@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 9,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/operacoes",
+    "/operacoes/alertas",
+    "/admin/erros",
+    "/admin/risco",
+    "/admin/integracoes",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ],
+    "/admin/risco": [
+     "403 /v1/admin/risk/assessments",
+     "403 /v1/admin/risk/signals?limit=50"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  },
+  "audit": {
+   "email": "auditoria@demo.impacto.local",
+   "tem_menu": true,
+   "telas_do_menu": 19,
+   "marca_renderizada": true,
+   "telas_ok": [
+    "/",
+    "/controladoria",
+    "/controladoria/conciliacao",
+    "/aprovacoes",
+    "/financeiro",
+    "/financeiro/despesas",
+    "/financeiro/instrucoes",
+    "/admin/cobranca",
+    "/contabilidade",
+    "/contabilidade/plano-de-contas",
+    "/tesouraria",
+    "/operacoes",
+    "/operacoes/alertas",
+    "/admin/compliance",
+    "/auditoria",
+    "/admin/auditoria",
+    "/ajuda",
+    "/notificacoes",
+    "/conta"
+   ],
+   "telas_4xx": {
+    "/": [
+     "403 /v1/admin/overview"
+    ],
+    "/admin/auditoria": [
+     "403 /v1/admin/audit/verify"
+    ]
+   },
+   "telas_5xx": {},
+   "erros_js": {}
+  }
+ },
+ "total_telas_de_menu_visitadas": 295
+}

@@ -1,6 +1,7 @@
 // Central de Conhecimento (v0.12.0): ajuda, guias, biblioteca, FAQ, academia, eventos, suporte, parcerias, demonstração,
 // solicitação de teste, boletim, "Comece aqui", pendências e preferências. Conteúdo vem sempre da API; nada é inventado aqui.
 import { useEffect, useState } from "react";
+import { Brand } from "../ui/brand";
 import type { ReactNode } from "react";
 import { api, qs } from "../api";
 import { Link, navigate, useLocation } from "../router";
@@ -15,7 +16,7 @@ export function PublicFrame({ children }: { children: ReactNode }) {
     <div className="pubhelp">
       <a className="skip" href="#conteudo">Pular para o conteúdo</a>
       <header className="pubhelp-bar">
-        <Link to="/" className="brand"><span className="brand-mark" aria-hidden="true" />Impacto</Link>
+        <Brand size="page" />
         <nav aria-label="Central de ajuda">
           <Link to="/ajuda">Ajuda</Link>
           <Link to="/ajuda/academia">Academia</Link>

@@ -44,6 +44,8 @@ import * as IL from "./pages/impactlayer";
 import * as Portal from "./pages/portal";
 import * as Int from "./pages/internal";
 import { useAccess } from "./access";
+import { Brand } from "./ui/brand";
+import { Icon, IconeDaRota } from "./ui/icon";
 import * as Sec from "./pages/security";
 import * as Trace from "./pages/traceability";
 
@@ -388,14 +390,14 @@ function Shell({ children }: { children: ReactNode }) {
     <div className="shell">
       <a className="skip" href="#conteudo">Pular para o conteúdo</a>
       <header className="topbar">
-        <button className="icon-btn menu-btn" aria-expanded={open} aria-controls="rail" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
-        <Link to="/" className="brand"><span className="brand-mark" aria-hidden="true" />Impacto</Link>
+        <button className="icon-btn menu-btn" aria-expanded={open} aria-controls="rail" onClick={() => setOpen(!open)} aria-label="Menu"><Icon name="navigation/menu" /></button>
+        <Brand size="bar" />
         <Link to="/notificacoes" className="notif" aria-label={`Notificações: ${me.unread_notifications} não lidas`}>
           Notificações{me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}
         </Link>
       </header>
       <nav id="rail" className={`rail${open ? " rail-open" : ""}`} aria-label="Navegação principal">
-        <Link to="/" className="brand brand-light rail-brand"><span className="brand-mark" aria-hidden="true" />Impacto</Link>
+        <Brand surface="navy" size="rail" className="rail-brand" />
         {me.active_org && (
           <div className="org-switch">
             <span className="org-kind">{KIND_LABEL[kind]}</span>
@@ -409,7 +411,7 @@ function Shell({ children }: { children: ReactNode }) {
         )}
         <ul>
           {nav.map(([to, label]) => (
-            <li key={to}><Link to={to} className={active(to) ? "on" : ""} aria-current={active(to) ? "page" : undefined}>{label}</Link></li>
+            <li key={to}><Link to={to} className={active(to) ? "on" : ""} aria-current={active(to) ? "page" : undefined}><IconeDaRota to={to} />{label}</Link></li>
           ))}
         </ul>
         {grupos.map((g) => (
@@ -417,19 +419,19 @@ function Shell({ children }: { children: ReactNode }) {
             <span>{g.group}</span>
             <ul>
               {g.items.map((i) => (
-                <li key={i.to}><Link to={i.to} className={active(i.to) ? "on" : ""} aria-current={active(i.to) ? "page" : undefined}>{i.label}</Link></li>
+                <li key={i.to}><Link to={i.to} className={active(i.to) ? "on" : ""} aria-current={active(i.to) ? "page" : undefined}><IconeDaRota to={i.to} />{i.label}</Link></li>
               ))}
             </ul>
           </div>
         ))}
         <ul className="rail-foot">
-          <li><Link to="/ajuda" className={active("/ajuda") ? "on" : ""}>Ajuda</Link></li>
-          {kind !== "platform" && !!me.user.staff_roles?.length && <li><Link to="/admin/central" className={active("/admin/central") ? "on" : ""}>Central (equipe)</Link></li>}
-          <li><Link to="/notificacoes" className={active("/notificacoes") ? "on" : ""}>Notificações {me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}</Link></li>
-          {kind !== "platform" && <li><Link to="/organizacao" className={active("/organizacao") ? "on" : ""}>Organização</Link></li>}
-          {kind !== "platform" && <li><Link to="/conta/plano" className={active("/conta/plano") ? "on" : ""}>Plano</Link></li>}
+          <li><Link to="/ajuda" className={active("/ajuda") ? "on" : ""}><IconeDaRota to="/ajuda" />Ajuda</Link></li>
+          {kind !== "platform" && !!me.user.staff_roles?.length && <li><Link to="/admin/central" className={active("/admin/central") ? "on" : ""}><IconeDaRota to="/admin/central" />Central (equipe)</Link></li>}
+          <li><Link to="/notificacoes" className={active("/notificacoes") ? "on" : ""}><IconeDaRota to="/notificacoes" />Notificações {me.unread_notifications > 0 && <span className="notif-count">{me.unread_notifications}</span>}</Link></li>
+          {kind !== "platform" && <li><Link to="/organizacao" className={active("/organizacao") ? "on" : ""}><IconeDaRota to="/organizacao" />Organização</Link></li>}
+          {kind !== "platform" && <li><Link to="/conta/plano" className={active("/conta/plano") ? "on" : ""}><IconeDaRota to="/conta/plano" />Plano</Link></li>}
           {me.organizations.length > 1 && <li><Link to="/portal?escolher=1" className={path === "/portal" ? "on" : ""}>Trocar de contexto</Link></li>}
-          <li><Link to="/conta" className={path === "/conta" ? "on" : ""}>Minha conta</Link></li>
+          <li><Link to="/conta" className={path === "/conta" ? "on" : ""}><IconeDaRota to="/conta" />Minha conta</Link></li>
           <li><button className="rail-logout" onClick={async () => { await logout(); navigate("/entrar"); }}>Sair</button></li>
         </ul>
       </nav>

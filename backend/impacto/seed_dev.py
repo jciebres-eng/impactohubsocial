@@ -3,6 +3,17 @@
 Tudo aqui é FICTÍCIO e marcado como tal (``is_example = true`` e prefixo "[EXEMPLO FICTÍCIO]" nos editais). CNPJs são
 gerados apenas com dígitos verificadores válidos para passar na validação de formato — não pertencem a organizações reais.
 Senha padrão: variável DEMO_PASSWORD (padrão "Demo-Impacto-2026!") — nunca usar fora do ambiente local.
+
+Segundo fator das contas INTERNAS (administrador e equipe): a administração exige MFA ativo e verificado
+na sessão (`require_mfa_for_admins`), e isso não é relaxado para demonstração — relaxar seria desligar
+uma trava de segurança para a tela ficar bonita. Em vez disso o seed CADASTRA o TOTP dessas contas pelo
+mesmo caminho que o produto usa (segredo cifrado em `users.mfa_secret_enc`, `mfa_enabled_at`), com um
+segredo de demonstração vindo de DEMO_TOTP_SECRET (base32) ou gerado na hora e devolvido no resultado.
+Quem for demonstrar coloca esse segredo no aplicativo autenticador e passa pela verificação de verdade.
+
+Até a v0.23.1 o seed criava essas contas SEM segundo fator, e a área administrativa inteira respondia
+403 `mfa_required` na demonstração: 40 das 53 telas do menu do administrador. O produto estava certo; a
+demonstração é que estava incompleta.
 """
 from __future__ import annotations
 
@@ -117,7 +128,35 @@ def seed(state, force: bool = False) -> dict:
         _seed_institutional(c, osc, u_osc, u_admin, org, user)
         _seed_knowledge(c, plat, user)
         _seed_internal_finance(c, plat, user, now)
-    return {"status": "seeded", "password_env": "DEMO_PASSWORD", "users": DEMO_EMAILS}
+        segredo, gerado = _enable_internal_mfa(c, state)
+    return {"status": "seeded", "password_env": "DEMO_PASSWORD", "users": DEMO_EMAILS,
+            "mfa_secret_env": "DEMO_TOTP_SECRET",
+            # O segredo só aparece aqui quando foi GERADO agora (ninguém mais o conhece); quando veio do
+            # ambiente, quem configurou já o tem, e repeti-lo na saída seria espalhá-lo sem motivo.
+            "mfa_secret_generated": segredo if gerado else None,
+            "mfa_accounts": sorted(k for k in DEMO_EMAILS if k not in ("osc", "company", "provider", "government"))}
+
+
+def _enable_internal_mfa(c, state) -> tuple[str, bool]:
+    """Cadastra TOTP em toda conta interna da demonstração (administrador da plataforma e equipe).
+
+    Mesmo armazenamento de `services.auth.mfa_setup`/`mfa_enable`: segredo cifrado pelo cifrador de
+    campo da aplicação e `mfa_enabled_at` preenchido. Sem código de recuperação: a demonstração usa o
+    aplicativo autenticador, e código de recuperação impresso em saída de seed vira porta dos fundos.
+    """
+    from .security import totp
+    segredo = os.getenv("DEMO_TOTP_SECRET", "").strip()
+    gerado = not segredo
+    if gerado:
+        segredo = totp.new_secret()
+    enc = state.cipher.encrypt(segredo)
+    internos = c.query("SELECT DISTINCT u.id::text AS id FROM users u LEFT JOIN staff_roles sr ON sr.user_id = u.id"
+                       " WHERE u.email = ANY($1::citext[]) AND (u.is_platform_admin OR sr.user_id IS NOT NULL)",
+                       [DEMO_EMAILS[k] for k in DEMO_EMAILS if k not in ("osc", "company", "provider", "government")])
+    for row in internos:
+        c.run("UPDATE users SET mfa_secret_enc = $2, mfa_enabled_at = now(), mfa_recovery_hashes = '{}' WHERE id = $1",
+              row["id"], enc)
+    return segredo, gerado
 
 
 def _seed_knowledge(c, plat: str, user) -> None:

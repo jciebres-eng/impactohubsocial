@@ -23,6 +23,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const reload = useCallback(async () => {
     try {
       const data = await api.get<Me>("/v1/me");
+      if (!data || typeof data !== "object" || !("user" in data)) {
+        setMe(null);
+        return;
+      }
       setCsrf(data.csrf_token);
       setMe(data);
     } catch {

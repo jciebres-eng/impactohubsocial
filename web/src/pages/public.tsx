@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Brand } from "../ui/brand";
 import type { ReactNode } from "react";
 import { absorbSession, api, describeError } from "../api";
 import { Link, navigate, useLocation } from "../router";
@@ -9,7 +10,7 @@ function AuthFrame({ title, children, aside }: { title: string; children: ReactN
   return (
     <div className="auth">
       <div className="auth-brand">
-        <Link to="/" className="brand brand-light"><span className="brand-mark" aria-hidden="true" />Impacto</Link>
+        <Brand surface="navy" size="auth" />
         <div className="auth-pitch">
           {aside ?? (
             <>
@@ -303,7 +304,7 @@ export function Legal({ doc }: { doc: string }) {
   }, [doc]);
   return (
     <main className="legal" id="conteudo">
-      <Link to="/" className="brand"><span className="brand-mark" aria-hidden="true" />Impacto</Link>
+      <Brand size="page" />
       <StateView loading={text === null && !err} error={err}>{text && <MarkdownText text={text} />}</StateView>
     </main>
   );

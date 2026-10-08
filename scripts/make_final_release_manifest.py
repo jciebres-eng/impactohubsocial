@@ -23,8 +23,10 @@ def main() -> int:
     files = subprocess.run(["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
     migrations = sorted(p.name for p in (ROOT / "backend" / "migrations").glob("*.sql"))
     texto = log.read_text(encoding="utf-8", errors="replace") if log.exists() else ""
-    m = re.search(r"Ran (\d+) tests in ([\d.]+)s\s+(OK|FAILED)(?: \(([^)]*)\))?", texto)
-    testes = {"total": int(m.group(1)), "seconds": float(m.group(2)), "result": m.group(3), "detail": m.group(4) or ""} if m else None
+    # a ÚLTIMA execução do log é a que vale (o log guarda a 1ª passagem, com as falhas corrigidas, e a 2ª)
+    ms = re.findall(r"Ran (\d+) tests in ([\d.]+)s\s+(OK|FAILED)(?: \(([^)]*)\))?", texto)
+    m = ms[-1] if ms else None
+    testes = {"total": int(m[0]), "seconds": float(m[1]), "result": m[2], "detail": m[3] or "", "runs_in_log": len(ms)} if m else None
     with (ROOT / "docs" / "execution" / "INTEGRATION_HOMOLOGATION_MATRIX.csv").open(encoding="utf-8") as fh:
         integ = [{"provider": r["provider"], "capability": r["capability"], "state": r["state"], "credentials": r["credentials"]}
                  for r in csv.DictReader(fh)]

@@ -9,10 +9,10 @@ Licenças dos pacotes Python foram lidas dos metadados instalados neste ambiente
 | starlette | 1.6.0 | BSD-3-Clause | OSS | framework ASGI |
 | uvicorn | 0.53.0 | BSD-3-Clause | OSS | servidor ASGI |
 | pydantic | 2.13.5 | MIT | OSS | validação |
-| PyJWT | 2.14.0 | MIT | OSS | validação de id_token OIDC |
+| PyJWT | 2.15.0 | MIT | OSS | validação de id_token OIDC |
 | cryptography | 50.0.1 | Apache-2.0 OR BSD-3-Clause | OSS | Fernet (MFA), RSA/JWKS |
 | python-multipart | 0.0.32 | Apache-2.0 | OSS | upload |
-| pypdf | 5.9.0 | BSD-3-Clause | OSS | inspeção de PDF enviado |
+| pypdf | 6.19.0 | BSD-3-Clause | OSS | inspeção de PDF enviado |
 | reportlab | 5.0.1 | BSD (ReportLab) | OSS | PDF de rascunhos |
 | defusedxml | 0.7.1 | PSF | OSS | XML seguro (importação de feeds) |
 | anyio | 4.15.1 | MIT | OSS | async |

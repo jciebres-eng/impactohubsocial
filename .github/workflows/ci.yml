@@ -111,8 +111,16 @@ jobs:
       - run: pip install -r backend/requirements-dev.txt
       - name: MinIO descartável
         run: |
+          # Primeira referência que existir, em ordem; a usada e o digest dela vão para o log e o resumo.
+          for img in quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z minio/minio:RELEASE.2025-04-22T22-12-26Z \
+                     minio/minio:RELEASE.2024-10-13T13-34-11Z quay.io/minio/minio:latest minio/minio:latest; do
+            if docker pull -q "$img" >/dev/null 2>&1; then usada="$img"; break; fi
+          done
+          test -n "${usada:-}" || { echo "::error::nenhuma imagem do MinIO disponível"; exit 1; }
+          digest=$(docker inspect --format '{{index .RepoDigests 0}}' "$usada")
+          echo "::notice title=Servidor S3 de teste::$usada ($digest)"
           docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=impactoteste -e MINIO_ROOT_PASSWORD=impactoteste-descartavel \
-            minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+            "$usada" server /data
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:9000/minio/health/live && break; sleep 1; done
       - name: Adaptador S3 contra servidor real (assinatura, URL pré-assinada, expiração, adulteração, exclusão)
         env:

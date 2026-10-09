@@ -1,9 +1,9 @@
 {
   "version": "0.31.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-09T20:40:48+00:00",
+  "generated_at": "2026-10-09T20:41:21+00:00",
   "files_total": 3922,
-  "size_bytes_total": 67872076,
+  "size_bytes_total": 67872931,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 62,
@@ -99,7 +99,7 @@
     },
     "operação": {
       "files": 51,
-      "size_bytes": 435280
+      "size_bytes": 436135
     },
     "outro": {
       "files": 4,
@@ -479,7 +479,7 @@
     },
     {
       "file": "FINAL_RELEASE_MANIFEST.json",
-      "sha256": "4f4bcd90b54ae95d5efa61bb1ef61f78da7b40bd5ab054bf30a8fa27fbbeabbe",
+      "sha256": "89980d801e8345fe2688c2e96f7a70e3e9e77baa558013dfb88a26f89602ad40",
       "size_bytes": 6515,
       "category": "manifesto de versão anterior"
     },
@@ -22133,8 +22133,8 @@
     },
     {
       "file": "scripts/make_release.py",
-      "sha256": "3a6626c7e6e7398c6c893732a700cbe4addf0339569a6b0db982fd3cbdcada15",
-      "size_bytes": 22356,
+      "sha256": "5db8c16614c9719cbcb7be3beff78631758d93048725efc6d8ca98eaf4badc8c",
+      "size_bytes": 23211,
       "category": "operação"
     },
     {

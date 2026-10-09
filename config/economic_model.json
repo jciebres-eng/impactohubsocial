@@ -7,11 +7,51 @@
   "new_funding_clients_per_month": 3,
   "_clients_note": "Premissa do prompt (§REDEFINIÇÃO ECONÔMICA): 3 novos clientes financiadores por mês em todos os cenários; o que muda entre cenários é o ticket médio por operação, as operações por cliente por ano e a fração que chega à quitação (só a camada PAGA é receita).",
   "scenarios": {
-    "conservador": {"label": "Conservador", "avg_operation_cents": 5000000, "operations_per_client_per_year": 1, "settled_share": 0.6, "months_to_settle": 6, "ramp_months": 6},
-    "base":        {"label": "Base",        "avg_operation_cents": 15000000, "operations_per_client_per_year": 2, "settled_share": 0.75, "months_to_settle": 5, "ramp_months": 4},
-    "agressivo":   {"label": "Agressivo",   "avg_operation_cents": 50000000, "operations_per_client_per_year": 3, "settled_share": 0.85, "months_to_settle": 4, "ramp_months": 3}
+    "conservador": {
+      "label": "Conservador",
+      "avg_operation_cents": 5000000,
+      "operations_per_client_per_year": 1,
+      "settled_share": 0.6,
+      "months_to_settle": 6,
+      "ramp_months": 6
+    },
+    "base": {
+      "label": "Base",
+      "avg_operation_cents": 15000000,
+      "operations_per_client_per_year": 2,
+      "settled_share": 0.75,
+      "months_to_settle": 5,
+      "ramp_months": 4
+    },
+    "agressivo": {
+      "label": "Agressivo",
+      "avg_operation_cents": 50000000,
+      "operations_per_client_per_year": 3,
+      "settled_share": 0.85,
+      "months_to_settle": 4,
+      "ramp_months": 3
+    }
   },
-  "sensitivity_operations_cents": [5000000, 10000000, 50000000, 100000000, 500000000, 1000000000],
-  "revenue_targets_cents": [100000000, 500000000, 1000000000],
-  "_targets_note": "GMV necessário para que a camada PAGA da plataforma alcance R$ 1 milhão, R$ 5 milhões e R$ 10 milhões no horizonte — só aritmética sobre o percentual; não é meta nem previsão."
+  "sensitivity_operations_cents": [
+    5000000,
+    10000000,
+    50000000,
+    100000000,
+    500000000,
+    1000000000
+  ],
+  "revenue_targets_cents": [
+    100000000,
+    500000000,
+    1000000000
+  ],
+  "_targets_note": "GMV necessário para que a camada PAGA da plataforma alcance R$ 1 milhão, R$ 5 milhões e R$ 10 milhões no horizonte — só aritmética sobre o percentual; não é meta nem previsão.",
+  "take_rate_sensitivity_bps": [
+    200,
+    300,
+    350,
+    400,
+    500
+  ],
+  "_take_rate_note": "v0.30.0: percentuais de SIMULAÇÃO pedidos pelo superprompt de monetização (2%–5%). Só o catálogo (platform_service_bps = 350, ADR-337/341) vale; nenhum destes ativa nada. Mostra quem suporta a taxa nos dois modos de cobrança (deducted/additional) e o efeito no líquido do projeto."
 }

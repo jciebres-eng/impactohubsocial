@@ -150,6 +150,28 @@ Premissa comum: **3 novos clientes financiadores por mês**. O que muda entre ce
 | Base | 72 | R$ 22.312.500,00 | R$ 780.937,50 | **R$ 369.140,63** | R$ 334.687,50 |
 | Agressivo | 72 | R$ 112.000.000,00 | R$ 3.920.000,00 | **R$ 2.327.937,50** | R$ 1.680.000,00 |
 
+## 5a. SENSIBILIDADE DO TAKE RATE (v0.30.0) — quem suporta, e o efeito no líquido do projeto
+
+Pedido do pacote de superprompts: simular a taxa de serviço em vários percentuais. **Nenhum deles é preço:** o único
+percentual com efeito no sistema é o do catálogo (3,50%, congelado no acordo, regra INATIVA). A linha do catálogo está em negrito.
+Dois modos existem no contrato (`fee_mode`): **deducted** (o financiador aporta o valor e a camada sai dele → o projeto recebe menos)
+e **additional** (o projeto recebe o valor cheio e o financiador paga a camada à parte). Em nenhum modo a plataforma desconta
+de dinheiro em trânsito (ADR-337): a camada é cobrança própria ao pagador, instruída e confirmada.
+
+Operação de referência: R$ 150.000,00 (ticket do cenário Base). Participação de autoria mantida em 1,50% (não é receita).
+
+| Take rate | Modo deducted: projeto recebe | Modo additional: financiador paga no total | Plataforma por operação | Camada PAGA em 24 m (cenário Base, só o take rate) |
+| ---: | ---: | ---: | ---: | ---: |
+| 2,00% | R$ 144.750,00 | R$ 155.250,00 | R$ 3.000,00 | R$ 210.937,50 |
+| 3,00% | R$ 143.250,00 | R$ 156.750,00 | R$ 4.500,00 | R$ 316.406,25 |
+| **3,50%** | R$ 142.500,00 | R$ 157.500,00 | R$ 5.250,00 | R$ 369.140,63 |
+| 4,00% | R$ 141.750,00 | R$ 158.250,00 | R$ 6.000,00 | R$ 421.875,01 |
+| 5,00% | R$ 140.250,00 | R$ 159.750,00 | R$ 7.500,00 | R$ 527.343,76 |
+
+Leitura honesta: o take rate só muda a receita da plataforma e o líquido do projeto (modo deducted) ou o desembolso do financiador
+(modo additional); não muda custo, risco, quitação nem a fração quitada. Quem decide o percentual decide quem paga a infraestrutura
+de evidência — e a decisão exige parecer (carta amarela em `MONETIZATION_LEGAL_MATRIX.md`).
+
 ## 6. O QUE ESTE MODELO NÃO CONTÉM, E POR QUÊ
 
 * **Custo e margem.** O lado do custo continua vazio (`UNIT_ECONOMICS.md`); um modelo com receita simulada e custo inventado produz margem inventada.

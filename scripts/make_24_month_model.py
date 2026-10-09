@@ -143,6 +143,31 @@ def main() -> int:
     for label, g, r, p, a, c in resumo:
         L.append(f"| {label} | {c} | {brl(g)} | {brl(r)} | **{brl(p)}** | {brl(a)} |")
     L.append("")
+    L.append("## 5a. SENSIBILIDADE DO TAKE RATE (v0.30.0) — quem suporta, e o efeito no líquido do projeto")
+    L.append("")
+    L.append("Pedido do pacote de superprompts: simular a taxa de serviço em vários percentuais. **Nenhum deles é preço:** o único")
+    L.append(f"percentual com efeito no sistema é o do catálogo ({pct(bps_p)}, congelado no acordo, regra INATIVA). A linha do catálogo está em negrito.")
+    L.append("Dois modos existem no contrato (`fee_mode`): **deducted** (o financiador aporta o valor e a camada sai dele → o projeto recebe menos)")
+    L.append("e **additional** (o projeto recebe o valor cheio e o financiador paga a camada à parte). Em nenhum modo a plataforma desconta")
+    L.append("de dinheiro em trânsito (ADR-337): a camada é cobrança própria ao pagador, instruída e confirmada.")
+    L.append("")
+    base_ticket = cfg["scenarios"]["base"]["avg_operation_cents"]
+    L.append(f"Operação de referência: {brl(base_ticket)} (ticket do cenário Base). Participação de autoria mantida em {pct(bps_a)} (não é receita).")
+    L.append("")
+    L.append("| Take rate | Modo deducted: projeto recebe | Modo additional: financiador paga no total | Plataforma por operação | Camada PAGA em 24 m (cenário Base, só o take rate) |")
+    L.append("| ---: | ---: | ---: | ---: | ---: |")
+    base_rows_fee = sum(r["platform_paid_cents"] for r in simulate(cfg, cfg["scenarios"]["base"]))
+    for bps in cfg["take_rate_sensitivity_bps"]:
+        fee = base_ticket * bps // 10_000
+        part = base_ticket * bps_a // 10_000
+        paid24 = round(base_rows_fee * bps / bps_p)
+        mark = "**" if bps == bps_p else ""
+        L.append(f"| {mark}{pct(bps)}{mark} | {brl(base_ticket - fee - part)} | {brl(base_ticket + fee + part)} | {brl(fee)} | {brl(paid24)} |")
+    L.append("")
+    L.append("Leitura honesta: o take rate só muda a receita da plataforma e o líquido do projeto (modo deducted) ou o desembolso do financiador")
+    L.append("(modo additional); não muda custo, risco, quitação nem a fração quitada. Quem decide o percentual decide quem paga a infraestrutura")
+    L.append("de evidência — e a decisão exige parecer (carta amarela em `MONETIZATION_LEGAL_MATRIX.md`).")
+    L.append("")
     L.append("## 6. O QUE ESTE MODELO NÃO CONTÉM, E POR QUÊ")
     L.append("")
     L.append("* **Custo e margem.** O lado do custo continua vazio (`UNIT_ECONOMICS.md`); um modelo com receita simulada e custo inventado produz margem inventada.")

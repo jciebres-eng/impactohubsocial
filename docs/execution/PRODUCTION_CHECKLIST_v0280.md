@@ -11,7 +11,7 @@ execução registrada), **PENDENTE DO PROPRIETÁRIO** (credencial, conta, parece
 | A1 | Backup da base anterior guardado fora do host (`pg_dump -Fc`) | PENDENTE DO PROPRIETÁRIO | `docs/execution/ROLLBACK_v0280.md` §0 |
 | A2 | Migração 0068 aplicada do zero e sobre cópia da v0.27.0 com ROLLBACK (dry-run) | FEITO | suíte (`tests/support`) e `impacto_m68`; `test_v0230_data_infra_gate` (nenhum DROP) |
 | A3 | Regressão completa verde (2ª passagem) e portões de fechamento | FEITO | `docs/evidence/test_run_v0.28.0.log`; `FINAL_EXECUTION_REPORT.md` §24 |
-| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | ver `FINAL_EXECUTION_REPORT.md` §3 | `gh run list` |
+| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | FEITO (`ff31622`, run `37884629991`, 4/4 verdes) | `FINAL_EXECUTION_REPORT.md` §3 |
 | A5 | Pacote confere byte a byte com o git; sem segredo; sem ZIP aninhado | FEITO no fechamento | `verify_package_against_git.py`, `secrets_scan.py`, `unzip -t` |
 | A6 | Tag `v0.28.0` no commit de fechamento | PENDENTE DO PROPRIETÁRIO (proxy recusa push de tag) | GitHub → Releases |
 

@@ -71,8 +71,10 @@ construído byte a byte (`verify_package_against_git.py`); o hash desse commit �
 `.sha256` do pacote e não cabe dentro do próprio commit. `FINAL_RELEASE_MANIFEST.json` registra o
 último commit de conteúdo.
 
-**GitHub Actions:** o resultado da run do commit final é relatado no parágrafo acrescentado ao fim
-desta seção depois da run (como na v0.27.0); até lá, nada aqui afirma que o CI passou.
+**GitHub Actions:** run do commit final `ff31622` (`37884629991`): `auditoria`, `docker` (typecheck
+oficial), `pilha-do-zero` (banco vazio → imagem → migrações → seed → jornadas → telas → axe → reinício) e
+`backend` (suíte oficial completa) — **os quatro verdes** na primeira tentativa. Este parágrafo foi
+acrescentado depois da run, no commit seguinte; a tag `v0.28.0` aponta para `ff31622`.
 
 ## 4. Architecture Status
 

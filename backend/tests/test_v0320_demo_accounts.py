@@ -83,15 +83,24 @@ class DemoAccountsInProductionTests(unittest.TestCase):
             c.execute_script("COMMIT;")
             self.assertEqual(feito["contas_desativadas"], n)
             self.assertEqual(feito["orgs_suspensas"], len(orgs))
+            publicados = sum(v for v in antes["conteudo_publico_das_orgs_demo"].values())
+            self.assertGreaterEqual(publicados, 1, "o seed publica conteúdo; sem isso o teste passaria no vazio")
+            self.assertEqual(feito["conteudo_tirado_do_ar"], publicados)
             depois = self.m.listar(c)
             self.assertTrue(all(u["status"] == "disabled" for u in depois["contas_demo"]))
             self.assertEqual(depois["sessoes_abertas_demo"], 0)
             self.assertTrue(all(o["status"] == "suspended" for o in depois["orgs_so_demo"]))
+            self.assertEqual(sum(depois["conteudo_publico_das_orgs_demo"].values()), 0, "nenhum conteúdo fictício fica público")
             self.assertEqual(c.scalar("SELECT status FROM organizations WHERE kind = 'platform' LIMIT 1"), plat_antes)
             self.assertEqual(c.scalar("SELECT count(*) FROM users WHERE email::text NOT LIKE '%@demo.impacto.local' AND status <> 'active'"
                                       " AND id IN (SELECT user_id FROM memberships m JOIN organizations o ON o.id = m.org_id WHERE o.kind = 'platform')"), 0)
             self.assertEqual(c.scalar("SELECT count(*) FROM audit_events WHERE action IN ('admin.user_status','admin.org_status')"),
                              audit_antes + n + len(orgs))
+            # repetir é inofensivo: nada mais a desativar
+            c.execute_script("BEGIN;")
+            de_novo = self.m.desativar(c)
+            c.execute_script("COMMIT;")
+            self.assertEqual(de_novo, {"contas_desativadas": 0, "orgs_suspensas": 0, "conteudo_tirado_do_ar": 0})
         finally:
             c.close()
 
@@ -105,9 +114,11 @@ class DemoAccountsInProductionTests(unittest.TestCase):
             volta = self.m.reativar(c)
             c.execute_script("COMMIT;")
             self.assertEqual(volta["contas_reativadas"], n)
+            self.assertEqual(volta["conteudo_devolvido"], publicados)
             fim = self.m.listar(c)
             self.assertTrue(all(u["status"] == "active" for u in fim["contas_demo"]))
             self.assertTrue(all(o["status"] == "active" for o in fim["orgs_so_demo"]))
+            self.assertEqual(sum(fim["conteudo_publico_das_orgs_demo"].values()), publicados, "reativar devolve o conteúdo")
         finally:
             c.close()
         self.assertEqual(self._login("osc@demo.impacto.local").status, 200, "reativar devolve o acesso")

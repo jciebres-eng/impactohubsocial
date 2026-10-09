@@ -408,10 +408,10 @@ class ConceptCatalogTests(unittest.TestCase):
             keys = {r["key"] for r in d.query("SELECT key FROM kb_sources")}
         for cid, t in self.CAT["terms"].items():
             for s in t["sources"]:
-                if s.get("source_key"):
-                    self.assertIn(s["source_key"], keys, (cid, s["source_key"]))
+                if s.get("source_ref"):
+                    self.assertIn(s["source_ref"], keys, (cid, s["source_ref"]))
                 if s["kind"] == "official":
-                    self.assertTrue(s.get("source_key") or s.get("url"), cid)
+                    self.assertTrue(s.get("source_ref") or s.get("url"), cid)
 
     def test_public_route_serves_the_catalog_without_auth(self):
         server()

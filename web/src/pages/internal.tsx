@@ -22,7 +22,7 @@ import { api } from "../api";
 import { date, dateTime, money } from "../format";
 import { Link } from "../router";
 import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, useAction, useLoad } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 import { useAccess } from "../access";
 
 const hoje = () => new Date().toISOString().slice(0, 7);

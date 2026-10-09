@@ -22,7 +22,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "br.lei.13019-2014",
+          "source_ref": "br.lei.13019-2014",
           "label": "Lei nº 13.019/2014 (Planalto)",
           "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019compilado.htm"
         }
@@ -50,7 +50,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "br.lei.13019-2014",
+          "source_ref": "br.lei.13019-2014",
           "label": "Lei nº 13.019/2014, art. 2º",
           "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019compilado.htm"
         }
@@ -136,7 +136,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "un.sdg",
+          "source_ref": "un.sdg",
           "label": "ODS Brasil (síntese)",
           "url": "https://odsbrasil.gov.br/relatorio/sintese"
         }
@@ -680,7 +680,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "br.lei.13019-2014",
+          "source_ref": "br.lei.13019-2014",
           "label": "Lei nº 13.019/2014, arts. 63–72",
           "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13019compilado.htm"
         }
@@ -735,7 +735,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "br.lei.12865-2013",
+          "source_ref": "br.lei.12865-2013",
           "label": "Lei nº 12.865/2013 (arranjos de pagamento)",
           "url": "https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12865.htm"
         },
@@ -906,7 +906,7 @@
       "sources": [
         {
           "kind": "official",
-          "source_key": "br.lei.13709-2018",
+          "source_ref": "br.lei.13709-2018",
           "label": "Lei nº 13.709/2018 (Planalto)",
           "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709compilado.htm"
         }

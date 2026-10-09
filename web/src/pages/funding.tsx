@@ -3,7 +3,7 @@ import { api, describeError } from "../api";
 import { date, dateTime, money } from "../format";
 import { Link, useLocation } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 
 const Q_STATUS: [string, string][] = [["draft", "Rascunho"], ["open", "Aberta"], ["paused", "Pausada"], ["closed", "Fechada"]];
 const C_STATUS: [string, string][] = [["draft", "Rascunho"], ["published", "Publicada"], ["closed", "Fechada"]];

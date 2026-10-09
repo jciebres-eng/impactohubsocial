@@ -69,9 +69,11 @@ deve apontar e do qual o pacote é construído byte a byte (`verify_package_agai
 desse commit é registrado no `.sha256` do pacote e não cabe dentro do próprio commit.
 `FINAL_RELEASE_MANIFEST.json` registra o último commit de conteúdo.
 
-**GitHub Actions:** o resultado da run do commit final é registrado no commit seguinte (mesmo
-procedimento da v0.28.0, cuja run `37884629991` foi 4/4 verde); ver o parágrafo "CI" no fim desta
-seção quando existir.
+**GitHub Actions:** a run `37932633056` do primeiro commit de manifestos (`9043b5a`) reprovou 3 de 4
+trabalhos — gitleaks (falso positivo no campo `source_key` do catálogo de conceitos) e o typecheck
+oficial (7 importações não usadas), que derrubou também a pilha do zero; causas e correções na
+auditoria §7 (3ª rodada). O commit de manifestos seguinte é o candidato à tag; o resultado da sua run
+é registrado no commit posterior, como na v0.28.0.
 
 ## 4. Architecture Status
 
@@ -199,7 +201,7 @@ SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.29.0.l
        anexada ao fim do mesmo log).
 MÓDULOS NOVOS: test_v0290_knowledge_base (27) · test_v0290_search_eval (4) · test_e2e_v0290_contextual_help (7)
 JORNADAS: 16 jornadas, 256 passos, 0 falha · TELAS: 226 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
-LINT: ruff 0 · BUILD: esbuild ok · SYNC: concepts.ts em sincronia · TYPECHECK: no CI (npm ci)
+LINT: ruff 0 · BUILD: esbuild ok · SYNC: concepts.ts em sincronia · TYPECHECK: tsc --noEmit 0 erros (local, tipos do DefinitelyTyped; oficial no CI)
 ```
 
 Testes que fixam contagem foram atualizados com a razão escrita ao lado (936 operações, 238 de

@@ -107,6 +107,13 @@ Primeira execução completa com o código novo (`scratchpad/suite/full_v0290_a.
 | `test_v0230_release_gate.test_the_manifest_exists_for_this_version` | manifesto é gerado no fechamento | gerado no fechamento (`FINAL_RELEASE_MANIFEST.json`) |
 | `test_v0270_release_docs` (4: auditoria, relatório, log de testes, manifesto/notas) | documentos de fechamento ainda eram os da v0.28.0 | reescritos para a v0.29.0 (este documento, `FINAL_EXECUTION_REPORT.md`, `RELEASE_NOTES.md`, manifesto) |
 
+**Terceira rodada — o CI do GitHub (run `37932633056`, commit `9043b5a`) reprovou 3 de 4 trabalhos; causas e correções:**
+
+| Falha | Causa real | Correção |
+|---|---|---|
+| `backend` → varredura gitleaks (17 achados `generic-api-key` em `4107b08` e `859efdc`) | o campo `source_key` do catálogo de conceitos guardava a CHAVE de registro de uma LEI em `kb_sources` (`"br.lei.13019-2014"`): a regra genérica casa qualquer `*_key` com valor alfanumérico — nome de lei, não credencial | campo renomeado para `source_ref` (catálogo, gerador, TS, componente, testes) para não voltar a casar; os 17 achados dos dois commits históricos liberados um a um em `.gitleaksignore` com motivo (grupo `[chave-de-fonte-do-glossario]`); contagem do `test_v0230_security_gate` 17 → 34 com a razão ao lado |
+| `docker` → `npx tsc --noEmit` (typecheck oficial) e, por consequência, `pilha-do-zero` | 7 importações não usadas (`GlossaryTerm`/`ContextualHelp` importados juntos em páginas que usam só um) sob `noUnusedLocals` — o ambiente local não tinha `@types/react` e o typecheck não rodava aqui | importações corrigidas; typecheck reproduzido localmente com os tipos do DefinitelyTyped (sparse clone) e `csstype` do GitHub: **0 erros**; esses tipos NÃO ficaram em `node_modules` (o portão "instalado = lockfile" continua exato) |
+
 Achados colaterais corrigidos durante a construção (antes da 1ª regressão, registrados por honestidade): `.pill-muted` a
 1,27:1 no tema escuro (`--linha-2` era neutro claro fixo — pré-existente, achado pelo E2E do glossário); path param `{item_id}`
 da fila forçava UUID e devolvia 404 para id inteiro; o assistente anterior respondia com conteúdo DEMO/vencido/terceiros sem
@@ -120,7 +127,7 @@ como OSC autenticada, com o anônimo medido à parte.
 | `ruff check impacto tests scripts/sync_concepts.py` | 0 avisos |
 | `node build.mjs` (esbuild) | ok; `dist/` regenerado; nenhum pacote npm adicionado |
 | `scripts/sync_concepts.py --check` | 33 conceitos em sincronia |
-| typecheck oficial (`tsconfig.json`) | roda no CI (`npm ci`); local sem `@types/react` |
+| typecheck oficial (`tsconfig.json`) | roda no CI (`npm ci`); reproduzido localmente com tipos do DefinitelyTyped: 0 erros (depois da 3ª rodada) |
 | `IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip` | `scripts/make_release.py` (REQUIRED inclui os 31 arquivos novos da rodada); `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; sem ZIP aninhado; SHA-256 ao lado |
 
 ## 9. Segurança revisada

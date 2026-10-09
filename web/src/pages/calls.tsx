@@ -4,7 +4,7 @@ import { centsToInput, date, daysUntil, label, money, parseMoney, MATCH_STATE } 
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Button, Chips, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { GlossaryTerm } from "../ui/help";
 import { MatchVerdict } from "../ui/trail";
 import { Suggest } from "../ui/suggest";
 

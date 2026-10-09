@@ -4,7 +4,7 @@ import { centsToInput, date, dateTime, label, money, n, parseMoney } from "../fo
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 import { FreePeriodBanner } from "./commercial";
 import { ContextHelp } from "./help";
 import { Preferences } from "./prefs";

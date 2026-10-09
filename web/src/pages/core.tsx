@@ -7,7 +7,7 @@ import { date, dateTime } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 // A Trilha é o elemento de identidade da plataforma e, até a v0.21.0, aparecia num lugar só.
 import { ASSEMBLY_TRAIL, PROJECT_PHASE_TRAIL, Trail } from "../ui/trail";
 

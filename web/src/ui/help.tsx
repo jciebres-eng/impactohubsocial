@@ -5,14 +5,14 @@
 // Acessibilidade: o gatilho é <button>; a dica curta usa role="tooltip" + aria-describedby e aparece com hover OU foco;
 // o cartão abre com clique/Enter/Espaço/toque, fecha com Escape, clique fora ou Tab para fora, e tem role="dialog" com título.
 // Tema e movimento: cores só por tokens (claro/escuro automáticos); a animação respeita prefers-reduced-motion no CSS.
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { CONCEPT_DOMAINS, concept, type Concept } from "../concepts";
 import { Link } from "../router";
 
 type Placement = "top" | "bottom";
 
 /** Posição fixa do balão em relação ao gatilho, invertendo quando não cabe (nunca sai da janela). */
-function usePlacement(open: boolean, anchor: React.RefObject<HTMLElement | null>, box: React.RefObject<HTMLElement | null>, prefer: Placement = "bottom") {
+function usePlacement(open: boolean, anchor: RefObject<HTMLElement | null>, box: RefObject<HTMLElement | null>, prefer: Placement = "bottom") {
   const [style, setStyle] = useState<{ top: number; left: number; placement: Placement } | null>(null);
   const place = useCallback(() => {
     const a = anchor.current, b = box.current;
@@ -98,12 +98,12 @@ export function InfoPopover({ title, children, trigger, label, inline, onOpenCha
       {inline ? (
         // Termo no meio de um texto ou título: <span role="button"> em vez de <button>, porque o navegador força display inline-block em
         // <button> e o nome acessível do TÍTULO que contém o termo ganharia espaços ("Originalidade , similaridade"). Enter/Espaço tratados à mão.
-        <span ref={anchor as React.RefObject<HTMLSpanElement>} role="button" tabIndex={0} className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog"
+        <span ref={anchor as RefObject<HTMLSpanElement>} role="button" tabIndex={0} className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog"
               onClick={() => setOpen((o) => !o)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen((o) => !o); } }}>
           {trigger}
         </span>
       ) : (
-        <button ref={anchor as React.RefObject<HTMLButtonElement>} type="button" className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog" aria-label={label} onClick={() => setOpen((o) => !o)}>
+        <button ref={anchor as RefObject<HTMLButtonElement>} type="button" className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog" aria-label={label} onClick={() => setOpen((o) => !o)}>
           {trigger ?? <span className="pop-i" aria-hidden="true">i</span>}
         </button>
       )}
@@ -124,7 +124,7 @@ export function InfoPopover({ title, children, trigger, label, inline, onOpenCha
 function SourceLine({ s }: { s: Concept["sources"][number] }) {
   const tag = s.kind === "official" ? "fonte oficial" : "documento da plataforma";
   const body = s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a> : s.path?.startsWith("/ajuda/") ? <Link to={s.path}>{s.label}</Link> : <span>{s.label}</span>;
-  return <li>{body} <span className="gloss-tag">{tag}</span>{s.source_key && <span className="fineprint"> · registro {s.source_key}</span>}</li>;
+  return <li>{body} <span className="gloss-tag">{tag}</span>{s.source_ref && <span className="fineprint"> · registro {s.source_ref}</span>}</li>;
 }
 
 /** O corpo completo de um conceito: usado pelo popover do termo e pela página /ajuda/glossario. Nunca mostra texto que não esteja no catálogo. */

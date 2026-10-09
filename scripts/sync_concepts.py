@@ -54,8 +54,8 @@ def validate(doc: dict) -> list[str]:
         for s in t.get("sources", []):
             if s.get("kind") not in SOURCE_KINDS or not s.get("label"):
                 errs.append(f"{cid}: fonte sem kind/label")
-            if s.get("kind") == "official" and not (s.get("source_key") or s.get("url")):
-                errs.append(f"{cid}: fonte 'official' precisa de source_key (kb_sources) ou url")
+            if s.get("kind") == "official" and not (s.get("source_ref") or s.get("url")):
+                errs.append(f"{cid}: fonte 'official' precisa de source_ref (kb_sources) ou url")
             if s.get("path") and not (ROOT / s["path"].lstrip("/")).exists() and not s["path"].startswith("/ajuda/"):
                 errs.append(f"{cid}: path inexistente {s['path']!r}")
         for field in ("short", "long", "why", "how_impacto", "limitations"):
@@ -69,7 +69,7 @@ def typescript(doc: dict) -> str:
     lines = ["// GERADO por scripts/sync_concepts.py a partir de config/concepts.json — não edite à mão.",
              "// Catálogo central de conceitos da ajuda contextual (tooltip = short; popover/glossário = tudo).",
              "// A mesma fonte é servida por GET /v1/public/concepts.", "",
-             "export type ConceptSource = { kind: \"official\" | \"illustrative\"; label: string; url?: string; path?: string; source_key?: string };",
+             "export type ConceptSource = { kind: \"official\" | \"illustrative\"; label: string; url?: string; path?: string; source_ref?: string };",
              "export type Concept = {",
              "  id: string; term: string; domain: string; short: string; long: string; why: string; how_impacto: string; limitations: string;",
              "  sources: ConceptSource[]; related: string[]; applies_to: string[]; status: \"published\" | \"needs_review\" | \"draft\";",

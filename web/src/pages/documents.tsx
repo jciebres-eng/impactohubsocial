@@ -4,7 +4,7 @@ import { date, label } from "../format";
 import { Link, navigate, useLocation } from "../router";
 import { useSession } from "../session";
 import { Button, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useLoad, useTaxonomy, useToast } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 import { ContextHelp } from "./help";
 import { DocLink } from "./projects";
 

@@ -484,7 +484,7 @@ class TheGitleaksIgnoreIsNarrowAndExplainedTests(unittest.TestCase):
 
     def test_every_entry_is_a_single_finding_fingerprint(self):
         entradas = [l for l in self.linhas if l.strip() and not l.startswith("#")]
-        self.assertEqual(len(entradas), 17, "achado novo liberado? revise e atualize este número junto")   # v0.27.0: a mesma linha da matriz de homologação (texto do SMTP) reapareceu em 0a44b31 — revisada, sem valor
+        self.assertEqual(len(entradas), 34, "achado novo liberado? revise e atualize este número junto")   # v0.29.0: +17 — o campo `source_key` do catálogo de conceitos (chave de registro de LEI em kb_sources, ex.: "br.lei.13019-2014") casou generic-api-key em dois commits históricos; renomeado para `source_ref` (grupo [chave-de-fonte-do-glossario]). v0.27.0: a mesma linha da matriz de homologação (texto do SMTP) reapareceu em 0a44b31 — revisada, sem valor
         for e in entradas:
             self.assertRegex(e, r"^[0-9a-f]{40}:[^:*]+:[a-z0-9-]+:\d+$",
                              f"entrada não é impressão digital de UM achado: {e}")

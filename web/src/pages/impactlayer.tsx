@@ -6,7 +6,7 @@ import { CLAIM_KIND, CLAIM_STATUS, EQUITY_DENOMINATOR, EQUITY_METHOD, EQUITY_STA
          REPUTATION_BAND, SEAL_STATUS } from "../glossary";
 import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
-import { GlossaryTerm, ContextualHelp } from "../ui/help";
+import { ContextualHelp } from "../ui/help";
 
 // AS SEIS TELAS QUE FALTAVAM (§94) — reputação, selos, afirmações, equidade, ODS, responsabilidade.
 //

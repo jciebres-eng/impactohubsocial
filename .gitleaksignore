@@ -41,3 +41,25 @@ d9f3077eeba153c7aa27fcf5238bbde78b667c31:backend/impacto/security/passwords.py:g
 # literal do placeholder e o gitleaks o achou (como devia). O commit já está no histórico publicado;
 # reescrever `main` para apagá-lo custaria mais que esta linha.
 fa5fb05240158df150eafa844f2ff2c98e412ce2:.gitleaksignore:stripe-access-token:6
+
+# [chave-de-fonte-do-glossario] v0.29.0: o campo `source_key` do catálogo de conceitos (config/concepts.json → web/src/concepts.ts →
+# bundle) guardava a CHAVE de registro de uma fonte legal em kb_sources ("br.lei.13019-2014", "br.lei.12865-2013"): nome de
+# lei, não credencial. O campo foi renomeado para `source_ref` no commit seguinte, para o gitleaks não voltar a casar; estes são
+# os achados nos dois commits históricos em que o nome antigo existiu.
+4107b08eba917e548d5ce3f874945e5b1562d0e1:config/concepts.json:generic-api-key:25
+4107b08eba917e548d5ce3f874945e5b1562d0e1:config/concepts.json:generic-api-key:53
+4107b08eba917e548d5ce3f874945e5b1562d0e1:config/concepts.json:generic-api-key:683
+4107b08eba917e548d5ce3f874945e5b1562d0e1:config/concepts.json:generic-api-key:738
+4107b08eba917e548d5ce3f874945e5b1562d0e1:config/concepts.json:generic-api-key:909
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/dist/assets/app-ZADDGX7Q.js:generic-api-key:10
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/src/concepts.ts:generic-api-key:36
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/src/concepts.ts:generic-api-key:39
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/src/concepts.ts:generic-api-key:40
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/src/concepts.ts:generic-api-key:44
+4107b08eba917e548d5ce3f874945e5b1562d0e1:web/src/concepts.ts:generic-api-key:45
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/dist/assets/app-RMOJDTEG.js:generic-api-key:10
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/src/concepts.ts:generic-api-key:36
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/src/concepts.ts:generic-api-key:39
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/src/concepts.ts:generic-api-key:40
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/src/concepts.ts:generic-api-key:44
+859efdc0d0d22dee0c5b1120ee74d9cad03569dd:web/src/concepts.ts:generic-api-key:45

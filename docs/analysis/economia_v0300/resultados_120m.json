@@ -1,0 +1,1333 @@
+{
+ "conservador": {
+  "atual": {
+   "milestones": {
+    "6": {
+     "funders": 17.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 44429,
+     "revenue_ttm": 158230,
+     "fee_ttm": 0,
+     "services_ttm": 158230,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 18215653,
+     "gmv_settled_ttm": 0,
+     "ebitda_ttm": -36848530,
+     "cash": -36936479,
+     "min_cash_to_date": -36936479,
+     "revenue_cum": 158230
+    },
+    "12": {
+     "funders": 32.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 83586,
+     "revenue_ttm": 564258,
+     "fee_ttm": 0,
+     "services_ttm": 564258,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 83284203,
+     "gmv_settled_ttm": 10929394,
+     "ebitda_ttm": -81604613,
+     "cash": -81797858,
+     "min_cash_to_date": -81797858,
+     "revenue_cum": 564258
+    },
+    "24": {
+     "funders": 57.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 545950,
+     "revenue_ttm": 3542732,
+     "fee_ttm": 2101414,
+     "services_ttm": 1441318,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 230980318,
+     "gmv_settled_ttm": 99081532,
+     "ebitda_ttm": -107685425,
+     "cash": -190601839,
+     "min_cash_to_date": -190601839,
+     "revenue_cum": 4106990
+    },
+    "48": {
+     "funders": 91.6,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 977699,
+     "revenue_ttm": 10741579,
+     "fee_ttm": 8089846,
+     "services_ttm": 2651733,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 424957057,
+     "gmv_settled_ttm": 231138463,
+     "ebitda_ttm": -140900657,
+     "cash": -459660772,
+     "min_cash_to_date": -459660772,
+     "revenue_cum": 23040372
+    },
+    "120": {
+     "funders": 132.5,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 1490173,
+     "revenue_ttm": 17664480,
+     "fee_ttm": 13576019,
+     "services_ttm": 4088461,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 655201954,
+     "gmv_settled_ttm": 387886286,
+     "ebitda_ttm": -181789897,
+     "cash": -1485622783,
+     "min_cash_to_date": -1485622783,
+     "revenue_cum": 116630882
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 158230,
+     "discount_pct": 45.0,
+     "ev": 87026,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 87026,
+     "share_needed": {
+      "R$ 100 milhões": 114907.52816670784,
+      "R$ 500 milhões": 574537.6408335392,
+      "R$ 1 bilhão": 1149075.2816670784,
+      "US$ 1 bilhão": 6319914.049168931
+     }
+    },
+    "12": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 564258,
+     "discount_pct": 45.0,
+     "ev": 310342,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 263791,
+     "share_needed": {
+      "R$ 100 milhões": 32222.526188052594,
+      "R$ 500 milhões": 161112.63094026296,
+      "R$ 1 bilhão": 322225.2618805259,
+      "US$ 1 bilhão": 1772238.9403428927
+     }
+    },
+    "24": {
+     "ev_saas": 0,
+     "ev_txn": 2879463,
+     "ev_services": 1441318,
+     "discount_pct": 45.0,
+     "ev": 2376429,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.7,
+     "founder_equity": 1663501,
+     "share_needed": {
+      "R$ 100 milhões": 4207.993912407813,
+      "R$ 500 milhões": 21039.969562039063,
+      "R$ 1 bilhão": 42079.939124078126,
+      "US$ 1 bilhão": 231439.6651824297
+     }
+    },
+    "48": {
+     "ev_saas": 0,
+     "ev_txn": 11085111,
+     "ev_services": 2651733,
+     "discount_pct": 45.0,
+     "ev": 7555264,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.55,
+     "founder_equity": 4155395,
+     "share_needed": {
+      "R$ 100 milhões": 1323.5804049688718,
+      "R$ 500 milhões": 6617.9020248443585,
+      "R$ 1 bilhão": 13235.804049688717,
+      "US$ 1 bilhão": 72796.92227328794
+     }
+    },
+    "120": {
+     "ev_saas": 0,
+     "ev_txn": 18602540,
+     "ev_services": 4088461,
+     "discount_pct": 45.0,
+     "ev": 12480051,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.45,
+     "founder_equity": 5616023,
+     "share_needed": {
+      "R$ 100 milhões": 801.2788044905442,
+      "R$ 500 milhões": 4006.394022452721,
+      "R$ 1 bilhão": 8012.788044905442,
+      "US$ 1 bilhão": 44070.33424697993
+     }
+    }
+   },
+   "breakeven_month": null,
+   "capital_need_cents": 1485622783
+  },
+  "hibrido": {
+   "milestones": {
+    "6": {
+     "funders": 17.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 44429,
+     "revenue_ttm": 158230,
+     "fee_ttm": 0,
+     "services_ttm": 158230,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 18215653,
+     "gmv_settled_ttm": 0,
+     "ebitda_ttm": -36848530,
+     "cash": -36936479,
+     "min_cash_to_date": -36936479,
+     "revenue_cum": 158230
+    },
+    "12": {
+     "funders": 32.1,
+     "inst_contracts": 1.5,
+     "mrr": 442542,
+     "arr": 5310504,
+     "revenue_month": 1026128,
+     "revenue_ttm": 2954300,
+     "fee_ttm": 0,
+     "services_ttm": 564258,
+     "software_ttm": 2390042,
+     "gmv_originated_ttm": 83284203,
+     "gmv_settled_ttm": 10929394,
+     "ebitda_ttm": -81941681,
+     "cash": -82408968,
+     "min_cash_to_date": -82408968,
+     "revenue_cum": 2954300
+    },
+    "24": {
+     "funders": 57.1,
+     "inst_contracts": 6.7,
+     "mrr": 2005544,
+     "arr": 24066528,
+     "revenue_month": 3051494,
+     "revenue_ttm": 25325580,
+     "fee_ttm": 2101414,
+     "services_ttm": 1441318,
+     "software_ttm": 21782848,
+     "gmv_originated_ttm": 230980318,
+     "gmv_settled_ttm": 99081532,
+     "ebitda_ttm": -101473446,
+     "cash": -180038283,
+     "min_cash_to_date": -180038283,
+     "revenue_cum": 28279880
+    },
+    "48": {
+     "funders": 91.6,
+     "inst_contracts": 14.4,
+     "mrr": 4327254,
+     "arr": 51927048,
+     "revenue_month": 5804953,
+     "revenue_ttm": 63134593,
+     "fee_ttm": 8089846,
+     "services_ttm": 2651733,
+     "software_ttm": 52393014,
+     "gmv_originated_ttm": 424957057,
+     "gmv_settled_ttm": 231138463,
+     "ebitda_ttm": -115587826,
+     "cash": -399526112,
+     "min_cash_to_date": -399526112,
+     "revenue_cum": 138232403
+    },
+    "120": {
+     "funders": 132.5,
+     "inst_contracts": 25.4,
+     "mrr": 7606757,
+     "arr": 91281084,
+     "revenue_month": 9596930,
+     "revenue_ttm": 113295512,
+     "fee_ttm": 13576019,
+     "services_ttm": 4088461,
+     "software_ttm": 95631032,
+     "gmv_originated_ttm": 655201954,
+     "gmv_settled_ttm": 387886286,
+     "ebitda_ttm": -129496388,
+     "cash": -1152032984,
+     "min_cash_to_date": -1152032984,
+     "revenue_cum": 722332244
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 158230,
+     "discount_pct": 45.0,
+     "ev": 87026,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 87026,
+     "share_needed": {
+      "R$ 100 milhões": 114907.52816670784,
+      "R$ 500 milhões": 574537.6408335392,
+      "R$ 1 bilhão": 1149075.2816670784,
+      "US$ 1 bilhão": 6319914.049168931
+     }
+    },
+    "12": {
+     "ev_saas": 13276260,
+     "ev_txn": 0,
+     "ev_services": 564258,
+     "discount_pct": 45.0,
+     "ev": 7612285,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 6470442,
+     "share_needed": {
+      "R$ 100 milhões": 1313.6660189899092,
+      "R$ 500 milhões": 6568.330094949546,
+      "R$ 1 bilhão": 13136.660189899092,
+      "US$ 1 bilhão": 72251.631044445
+     }
+    },
+    "24": {
+     "ev_saas": 60166320,
+     "ev_txn": 2879463,
+     "ev_services": 1441318,
+     "discount_pct": 45.0,
+     "ev": 35467905,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.7,
+     "founder_equity": 24827534,
+     "share_needed": {
+      "R$ 100 milhões": 281.94504065775175,
+      "R$ 500 milhões": 1409.7252032887586,
+      "R$ 1 bilhão": 2819.4504065775172,
+      "US$ 1 bilhão": 15506.977236176346
+     }
+    },
+    "48": {
+     "ev_saas": 129817620,
+     "ev_txn": 11085111,
+     "ev_services": 2651733,
+     "discount_pct": 45.0,
+     "ev": 78954955,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.55,
+     "founder_equity": 43425226,
+     "share_needed": {
+      "R$ 100 milhões": 126.65449484617936,
+      "R$ 500 milhões": 633.2724742308968,
+      "R$ 1 bilhão": 1266.5449484617936,
+      "US$ 1 bilhão": 6965.997216539865
+     }
+    },
+    "120": {
+     "ev_saas": 228202710,
+     "ev_txn": 18602540,
+     "ev_services": 4088461,
+     "discount_pct": 45.0,
+     "ev": 137991541,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.45,
+     "founder_equity": 62096193,
+     "share_needed": {
+      "R$ 100 milhões": 72.46821017087953,
+      "R$ 500 milhões": 362.3410508543977,
+      "R$ 1 bilhão": 724.6821017087954,
+      "US$ 1 bilhão": 3985.7515593983744
+     }
+    }
+   },
+   "breakeven_month": null,
+   "capital_need_cents": 1152032984
+  }
+ },
+ "base": {
+  "atual": {
+   "milestones": {
+    "6": {
+     "funders": 17.4,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 160510,
+     "revenue_ttm": 567674,
+     "fee_ttm": 0,
+     "services_ttm": 567674,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 135626354,
+     "gmv_settled_ttm": 1406250,
+     "ebitda_ttm": -53537003,
+     "cash": -53713800,
+     "min_cash_to_date": -53713800,
+     "revenue_cum": 567674
+    },
+    "12": {
+     "funders": 33.6,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 1636861,
+     "revenue_ttm": 3384653,
+     "fee_ttm": 1327508,
+     "services_ttm": 2057145,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 540373743,
+     "gmv_settled_ttm": 139648565,
+     "ebitda_ttm": -113393559,
+     "cash": -115100331,
+     "min_cash_to_date": -115100331,
+     "revenue_cum": 3384653
+    },
+    "24": {
+     "funders": 62.5,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 3923540,
+     "revenue_ttm": 34848383,
+     "fee_ttm": 29367224,
+     "services_ttm": 5481159,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 1489445457,
+     "gmv_settled_ttm": 839063529,
+     "ebitda_ttm": -116020310,
+     "cash": -234709788,
+     "min_cash_to_date": -234709788,
+     "revenue_cum": 38233036
+    },
+    "48": {
+     "funders": 108.8,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 7580657,
+     "revenue_ttm": 81921750,
+     "fee_ttm": 70964519,
+     "services_ttm": 10957231,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 2977508471,
+     "gmv_settled_ttm": 2027557691,
+     "ebitda_ttm": -123171971,
+     "cash": -486941293,
+     "min_cash_to_date": -486941293,
+     "revenue_cum": 180312864
+    },
+    "120": {
+     "funders": 187.0,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 13762751,
+     "revenue_ttm": 161495938,
+     "fee_ttm": 141281797,
+     "services_ttm": 20214141,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 5492973368,
+     "gmv_settled_ttm": 4036622762,
+     "ebitda_ttm": -135261327,
+     "cash": -1311653368,
+     "min_cash_to_date": -1311653368,
+     "revenue_cum": 984903346
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 851511,
+     "discount_pct": 35.0,
+     "ev": 553482,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 553482,
+     "share_needed": {
+      "R$ 100 milhões": 18067.429997516632,
+      "R$ 500 milhões": 90337.14998758315,
+      "R$ 1 bilhão": 180674.2999751663,
+      "US$ 1 bilhão": 993708.6498634147
+     }
+    },
+    "12": {
+     "ev_saas": 0,
+     "ev_txn": 2789161,
+     "ev_services": 3085718,
+     "discount_pct": 35.0,
+     "ev": 3818671,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 3245870,
+     "share_needed": {
+      "R$ 100 milhões": 2618.712236125339,
+      "R$ 500 milhões": 13093.561180626697,
+      "R$ 1 bilhão": 26187.122361253394,
+      "US$ 1 bilhão": 144029.17298689365
+     }
+    },
+    "24": {
+     "ev_saas": 0,
+     "ev_txn": 61702006,
+     "ev_services": 8221738,
+     "discount_pct": 35.0,
+     "ev": 45450434,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.7,
+     "founder_equity": 31815304,
+     "share_needed": {
+      "R$ 100 milhões": 220.0199016497419,
+      "R$ 500 milhões": 1100.0995082487095,
+      "R$ 1 bilhão": 2200.199016497419,
+      "US$ 1 bilhão": 12101.094590735805
+     }
+    },
+    "48": {
+     "ev_saas": 0,
+     "ev_txn": 149100003,
+     "ev_services": 16435846,
+     "discount_pct": 35.0,
+     "ev": 107598302,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.55,
+     "founder_equity": 59179066,
+     "share_needed": {
+      "R$ 100 milhões": 92.93826965024344,
+      "R$ 500 milhões": 464.6913482512172,
+      "R$ 1 bilhão": 929.3826965024344,
+      "US$ 1 bilhão": 5111.604830763389
+     }
+    },
+    "120": {
+     "ev_saas": 0,
+     "ev_txn": 296840120,
+     "ev_services": 30321212,
+     "discount_pct": 35.0,
+     "ev": 212654865,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.45,
+     "founder_equity": 95694689,
+     "share_needed": {
+      "R$ 100 milhões": 47.02455309588927,
+      "R$ 500 milhões": 235.12276547944634,
+      "R$ 1 bilhão": 470.2455309588927,
+      "US$ 1 bilhão": 2586.3504202739095
+     }
+    }
+   },
+   "breakeven_month": null,
+   "capital_need_cents": 1311653368
+  },
+  "hibrido": {
+   "milestones": {
+    "6": {
+     "funders": 17.4,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 160510,
+     "revenue_ttm": 567674,
+     "fee_ttm": 0,
+     "services_ttm": 567674,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 135626354,
+     "gmv_settled_ttm": 1406250,
+     "ebitda_ttm": -53537003,
+     "cash": -53713800,
+     "min_cash_to_date": -53713800,
+     "revenue_cum": 567674
+    },
+    "12": {
+     "funders": 33.6,
+     "inst_contracts": 5.9,
+     "mrr": 3511191,
+     "arr": 42134292,
+     "revenue_month": 7148052,
+     "revenue_ttm": 27776740,
+     "fee_ttm": 1327508,
+     "services_ttm": 2057145,
+     "software_ttm": 24392087,
+     "gmv_originated_ttm": 540373743,
+     "gmv_settled_ttm": 139648565,
+     "ebitda_ttm": -100405267,
+     "cash": -82344126,
+     "min_cash_to_date": -82344126,
+     "revenue_cum": 27776740
+    },
+    "24": {
+     "funders": 62.5,
+     "inst_contracts": 16.5,
+     "mrr": 9929174,
+     "arr": 119150088,
+     "revenue_month": 15852714,
+     "revenue_ttm": 143468038,
+     "fee_ttm": 29367224,
+     "services_ttm": 5481159,
+     "software_ttm": 108619655,
+     "gmv_originated_ttm": 1489445457,
+     "gmv_settled_ttm": 839063529,
+     "ebitda_ttm": -43845053,
+     "cash": -101780519,
+     "min_cash_to_date": -108740117,
+     "revenue_cum": 171244778
+    },
+    "48": {
+     "funders": 108.8,
+     "inst_contracts": 34.4,
+     "mrr": 20660447,
+     "arr": 247925364,
+     "revenue_month": 30241104,
+     "revenue_ttm": 326717302,
+     "fee_ttm": 70964519,
+     "services_ttm": 10957231,
+     "software_ttm": 244795552,
+     "gmv_originated_ttm": 2977508471,
+     "gmv_settled_ttm": 2027557691,
+     "ebitda_ttm": 53921962,
+     "cash": 669041,
+     "min_cash_to_date": -108740117,
+     "revenue_cum": 738928634
+    },
+    "120": {
+     "funders": 187.0,
+     "inst_contracts": 68.2,
+     "mrr": 40920656,
+     "arr": 491047872,
+     "revenue_month": 56683407,
+     "revenue_ttm": 663386090,
+     "fee_ttm": 141281797,
+     "services_ttm": 20214141,
+     "software_ttm": 501890152,
+     "gmv_originated_ttm": 5492973368,
+     "gmv_settled_ttm": 4036622762,
+     "ebitda_ttm": 239914827,
+     "cash": 1115078598,
+     "min_cash_to_date": -108740117,
+     "revenue_cum": 4001758387
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 851511,
+     "discount_pct": 35.0,
+     "ev": 553482,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 553482,
+     "share_needed": {
+      "R$ 100 milhões": 18067.429997516632,
+      "R$ 500 milhões": 90337.14998758315,
+      "R$ 1 bilhão": 180674.2999751663,
+      "US$ 1 bilhão": 993708.6498634147
+     }
+    },
+    "12": {
+     "ev_saas": 168537168,
+     "ev_txn": 2789161,
+     "ev_services": 3085718,
+     "discount_pct": 35.0,
+     "ev": 113367830,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 96362656,
+     "share_needed": {
+      "R$ 100 milhões": 88.2084450086547,
+      "R$ 500 milhões": 441.0422250432735,
+      "R$ 1 bilhão": 882.084450086547,
+      "US$ 1 bilhão": 4851.464475476008
+     }
+    },
+    "24": {
+     "ev_saas": 476600352,
+     "ev_txn": 61702006,
+     "ev_services": 8221738,
+     "discount_pct": 35.0,
+     "ev": 355240663,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.7,
+     "founder_equity": 248668464,
+     "share_needed": {
+      "R$ 100 milhões": 28.149930595113304,
+      "R$ 500 milhões": 140.7496529755665,
+      "R$ 1 bilhão": 281.499305951133,
+      "US$ 1 bilhão": 1548.2461827312318
+     }
+    },
+    "48": {
+     "ev_saas": 991701456,
+     "ev_txn": 149100003,
+     "ev_services": 16435846,
+     "discount_pct": 35.0,
+     "ev": 752204248,
+     "ev_ebitda_cross": 647063544,
+     "founder_share": 0.55,
+     "founder_equity": 413712337,
+     "share_needed": {
+      "R$ 100 milhões": 13.294261528052264,
+      "R$ 500 milhões": 66.47130764026132,
+      "R$ 1 bilhão": 132.94261528052263,
+      "US$ 1 bilhão": 731.1843840428745
+     }
+    },
+    "120": {
+     "ev_saas": 1964191488,
+     "ev_txn": 296840120,
+     "ev_services": 30321212,
+     "discount_pct": 35.0,
+     "ev": 1489379332,
+     "ev_ebitda_cross": 2878977924,
+     "founder_share": 0.45,
+     "founder_equity": 670220700,
+     "share_needed": {
+      "R$ 100 milhões": 6.714206235051336,
+      "R$ 500 milhões": 33.57103117525668,
+      "R$ 1 bilhão": 67.14206235051336,
+      "US$ 1 bilhão": 369.28134292782346
+     }
+    }
+   },
+   "breakeven_month": 29,
+   "capital_need_cents": 108740117
+  }
+ },
+ "agressivo": {
+  "atual": {
+   "milestones": {
+    "6": {
+     "funders": 17.6,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 380789,
+     "revenue_ttm": 1342056,
+     "fee_ttm": 0,
+     "services_ttm": 1342056,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 726757358,
+     "gmv_settled_ttm": 52947909,
+     "ebitda_ttm": -88056645,
+     "cash": -88456660,
+     "min_cash_to_date": -88456660,
+     "revenue_cum": 1342056
+    },
+    "12": {
+     "funders": 34.4,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 9411913,
+     "revenue_ttm": 37637732,
+     "fee_ttm": 32734604,
+     "services_ttm": 4903128,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 2787563523,
+     "gmv_settled_ttm": 1083052636,
+     "ebitda_ttm": -153159869,
+     "cash": -163136298,
+     "min_cash_to_date": -163136298,
+     "revenue_cum": 37637732
+    },
+    "24": {
+     "funders": 65.5,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 22046249,
+     "revenue_ttm": 196325852,
+     "fee_ttm": 182975994,
+     "services_ttm": 13349858,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 7725611674,
+     "gmv_settled_ttm": 5227885559,
+     "ebitda_ttm": -42910633,
+     "cash": -222355096,
+     "min_cash_to_date": -222355096,
+     "revenue_cum": 233963584
+    },
+    "48": {
+     "funders": 119.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 43808939,
+     "revenue_ttm": 469892748,
+     "fee_ttm": 441993375,
+     "services_ttm": 27899373,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 16145470288,
+     "gmv_settled_ttm": 12628382144,
+     "ebitda_ttm": 147121431,
+     "cash": -55886284,
+     "min_cash_to_date": -222726668,
+     "revenue_cum": 1043827695
+    },
+    "120": {
+     "funders": 228.1,
+     "inst_contracts": 0.0,
+     "mrr": 0,
+     "arr": 0,
+     "revenue_month": 88088961,
+     "revenue_ttm": 1026512790,
+     "fee_ttm": 969009866,
+     "services_ttm": 57502924,
+     "software_ttm": 0,
+     "gmv_originated_ttm": 33277155893,
+     "gmv_settled_ttm": 27685996192,
+     "ebitda_ttm": 533775149,
+     "cash": 2150693235,
+     "min_cash_to_date": -222726668,
+     "revenue_cum": 5973376977
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 0,
+     "ev_txn": 0,
+     "ev_services": 2684112,
+     "discount_pct": 25.0,
+     "ev": 2013084,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 2013084,
+     "share_needed": {
+      "R$ 100 milhões": 4967.502598003859,
+      "R$ 500 milhões": 24837.512990019295,
+      "R$ 1 bilhão": 49675.02598003859,
+      "US$ 1 bilhão": 273212.64289021224
+     }
+    },
+    "12": {
+     "ev_saas": 0,
+     "ev_txn": 119612243,
+     "ev_services": 9806256,
+     "discount_pct": 25.0,
+     "ev": 97063874,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 82504293,
+     "share_needed": {
+      "R$ 100 milhões": 103.02494183373997,
+      "R$ 500 milhões": 515.1247091686998,
+      "R$ 1 bilhão": 1030.2494183373997,
+      "US$ 1 bilhão": 5666.371800855699
+     }
+    },
+    "24": {
+     "ev_saas": 0,
+     "ev_txn": 668594282,
+     "ev_services": 26699716,
+     "discount_pct": 25.0,
+     "ev": 521470499,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.7,
+     "founder_equity": 365029349,
+     "share_needed": {
+      "R$ 100 milhões": 19.176540240860696,
+      "R$ 500 milhões": 95.88270120430349,
+      "R$ 1 bilhão": 191.76540240860697,
+      "US$ 1 bilhão": 1054.7097132473384
+     }
+    },
+    "48": {
+     "ev_saas": 0,
+     "ev_txn": 1615043792,
+     "ev_services": 55798746,
+     "discount_pct": 25.0,
+     "ev": 1253131904,
+     "ev_ebitda_cross": 2206821465,
+     "founder_share": 0.55,
+     "founder_equity": 689222547,
+     "share_needed": {
+      "R$ 100 milhões": 7.9800059120462326,
+      "R$ 500 milhões": 39.90002956023116,
+      "R$ 1 bilhão": 79.80005912046232,
+      "US$ 1 bilhão": 438.9003251625428
+     }
+    },
+    "120": {
+     "ev_saas": 0,
+     "ev_txn": 3540762050,
+     "ev_services": 115005848,
+     "discount_pct": 25.0,
+     "ev": 2741825924,
+     "ev_ebitda_cross": 8006627235,
+     "founder_share": 0.45,
+     "founder_equity": 1233821666,
+     "share_needed": {
+      "R$ 100 milhões": 3.647204555655779,
+      "R$ 500 milhões": 18.236022778278898,
+      "R$ 1 bilhão": 36.472045556557795,
+      "US$ 1 bilhão": 200.59625056106785
+     }
+    }
+   },
+   "breakeven_month": 24,
+   "capital_need_cents": 222726668
+  },
+  "hibrido": {
+   "milestones": {
+    "6": {
+     "funders": 17.6,
+     "inst_contracts": 6.0,
+     "mrr": 5960089,
+     "arr": 71521068,
+     "revenue_month": 12340878,
+     "revenue_ttm": 31288812,
+     "fee_ttm": 0,
+     "services_ttm": 1342056,
+     "software_ttm": 29946756,
+     "gmv_originated_ttm": 726757358,
+     "gmv_settled_ttm": 52947909,
+     "ebitda_ttm": -68220130,
+     "cash": -39766901,
+     "min_cash_to_date": -61053448,
+     "revenue_cum": 31288812
+    },
+    "12": {
+     "funders": 34.4,
+     "inst_contracts": 17.5,
+     "mrr": 17527392,
+     "arr": 210328704,
+     "revenue_month": 32939305,
+     "revenue_ttm": 180056250,
+     "fee_ttm": 32734604,
+     "services_ttm": 4903128,
+     "software_ttm": 142418518,
+     "gmv_originated_ttm": 2787563523,
+     "gmv_settled_ttm": 1083052636,
+     "ebitda_ttm": -50309199,
+     "cash": 32495854,
+     "min_cash_to_date": -61053448,
+     "revenue_cum": 180056250
+    },
+    "24": {
+     "funders": 65.5,
+     "inst_contracts": 39.3,
+     "mrr": 39314755,
+     "arr": 471777060,
+     "revenue_month": 67361004,
+     "revenue_ttm": 622008908,
+     "fee_ttm": 182975994,
+     "services_ttm": 13349858,
+     "software_ttm": 425683056,
+     "gmv_originated_ttm": 7725611674,
+     "gmv_settled_ttm": 5227885559,
+     "ebitda_ttm": 289099095,
+     "cash": 406050782,
+     "min_cash_to_date": -61053448,
+     "revenue_cum": 802065158
+    },
+    "48": {
+     "funders": 119.1,
+     "inst_contracts": 78.0,
+     "mrr": 77977660,
+     "arr": 935731920,
+     "revenue_month": 127786599,
+     "revenue_ttm": 1377045496,
+     "fee_ttm": 441993375,
+     "services_ttm": 27899373,
+     "software_ttm": 907152748,
+     "gmv_originated_ttm": 16145470288,
+     "gmv_settled_ttm": 12628382144,
+     "ebitda_ttm": 876648115,
+     "cash": 2032627979,
+     "min_cash_to_date": -61053448,
+     "revenue_cum": 3195156369
+    },
+    "120": {
+     "funders": 228.1,
+     "inst_contracts": 162.8,
+     "mrr": 162836882,
+     "arr": 1954042584,
+     "revenue_month": 256925843,
+     "revenue_ttm": 2990418595,
+     "fee_ttm": 969009866,
+     "services_ttm": 57502924,
+     "software_ttm": 1963905805,
+     "gmv_originated_ttm": 33277155893,
+     "gmv_settled_ttm": 27685996192,
+     "ebitda_ttm": 2135791356,
+     "cash": 12387664703,
+     "min_cash_to_date": -61053448,
+     "revenue_cum": 17512681584
+    }
+   },
+   "valuation": {
+    "6": {
+     "ev_saas": 429126408,
+     "ev_txn": 0,
+     "ev_services": 2684112,
+     "discount_pct": 25.0,
+     "ev": 323857890,
+     "ev_ebitda_cross": null,
+     "founder_share": 1.0,
+     "founder_equity": 323857890,
+     "share_needed": {
+      "R$ 100 milhões": 30.877740851087495,
+      "R$ 500 milhões": 154.38870425543746,
+      "R$ 1 bilhão": 308.7774085108749,
+      "US$ 1 bilhão": 1698.275746809812
+     }
+    },
+    "12": {
+     "ev_saas": 1261972224,
+     "ev_txn": 119612243,
+     "ev_services": 9806256,
+     "discount_pct": 25.0,
+     "ev": 1043543042,
+     "ev_ebitda_cross": null,
+     "founder_share": 0.85,
+     "founder_equity": 887011586,
+     "share_needed": {
+      "R$ 100 milhões": 9.582738416159476,
+      "R$ 500 milhões": 47.91369208079738,
+      "R$ 1 bilhão": 95.82738416159476,
+      "US$ 1 bilhão": 527.0506128887712
+     }
+    },
+    "24": {
+     "ev_saas": 2830662360,
+     "ev_txn": 668594282,
+     "ev_services": 26699716,
+     "discount_pct": 25.0,
+     "ev": 2644467269,
+     "ev_ebitda_cross": 4336486425,
+     "founder_share": 0.7,
+     "founder_equity": 1851127088,
+     "share_needed": {
+      "R$ 100 milhões": 3.7814799672134627,
+      "R$ 500 milhões": 18.907399836067313,
+      "R$ 1 bilhão": 37.814799672134626,
+      "US$ 1 bilhão": 207.98139819674046
+     }
+    },
+    "48": {
+     "ev_saas": 5614391520,
+     "ev_txn": 1615043792,
+     "ev_services": 55798746,
+     "discount_pct": 25.0,
+     "ev": 5463925544,
+     "ev_ebitda_cross": 13149721725,
+     "founder_share": 0.55,
+     "founder_equity": 3005159049,
+     "share_needed": {
+      "R$ 100 milhões": 1.8301859935761842,
+      "R$ 500 milhões": 9.150929967880922,
+      "R$ 1 bilhão": 18.301859935761843,
+      "US$ 1 bilhão": 100.66022964669014
+     }
+    },
+    "120": {
+     "ev_saas": 11724255504,
+     "ev_txn": 3540762050,
+     "ev_services": 115005848,
+     "discount_pct": 25.0,
+     "ev": 11535017552,
+     "ev_ebitda_cross": 32036870340,
+     "founder_share": 0.45,
+     "founder_equity": 5190757898,
+     "share_needed": {
+      "R$ 100 milhões": 0.8669254255675528,
+      "R$ 500 milhões": 4.334627127837764,
+      "R$ 1 bilhão": 8.669254255675527,
+      "US$ 1 bilhão": 47.680898406215405
+     }
+    }
+   },
+   "breakeven_month": 9,
+   "capital_need_cents": 61053448
+  }
+ },
+ "sensibilidade": {
+  "crescimento 50 % menor (financiadores e contratos)": {
+   "delta_revenue_120_pct": -50.0,
+   "capital_need_cents": 179895853,
+   "breakeven_month": 53,
+   "cash_m120_cents": 113539302,
+   "ev_m48_cents": 376102108
+  },
+  "metade das operações por financiador": {
+   "delta_revenue_120_pct": -10.7,
+   "capital_need_cents": 121067855,
+   "breakeven_month": 36,
+   "cash_m120_cents": 751131999,
+   "ev_m48_cents": 703746745
+  },
+  "ticket médio financiado 50 % menor": {
+   "delta_revenue_120_pct": -10.7,
+   "capital_need_cents": 121068073,
+   "breakeven_month": 36,
+   "cash_m120_cents": 751129656,
+   "ev_m48_cents": 703746745
+  },
+  "quitação 3 meses mais lenta": {
+   "delta_revenue_120_pct": -0.9,
+   "capital_need_cents": 114413333,
+   "breakeven_month": 30,
+   "cash_m120_cents": 1084124948,
+   "ev_m48_cents": 746004953
+  },
+  "churn dobrado": {
+   "delta_revenue_120_pct": -24.3,
+   "capital_need_cents": 106102840,
+   "breakeven_month": 31,
+   "cash_m120_cents": 732292112,
+   "ev_m48_cents": 622765839
+  },
+  "CAC dobrado": {
+   "delta_revenue_120_pct": 0.0,
+   "capital_need_cents": 151194751,
+   "breakeven_month": 35,
+   "cash_m120_cents": 888278598,
+   "ev_m48_cents": 752204248
+  },
+  "pessoal e infra 30 % maiores": {
+   "delta_revenue_120_pct": 0.0,
+   "capital_need_cents": 193873604,
+   "breakeven_month": 44,
+   "cash_m120_cents": 464404859,
+   "ev_m48_cents": 752204248
+  },
+  "inadimplência 15 %": {
+   "delta_revenue_120_pct": 0.0,
+   "capital_need_cents": 137449994,
+   "breakeven_month": 29,
+   "cash_m120_cents": 643074407,
+   "ev_m48_cents": 752204248
+  },
+  "ausência de contratos institucionais": {
+   "delta_revenue_120_pct": -75.4,
+   "capital_need_cents": 1311653368,
+   "breakeven_month": null,
+   "cash_m120_cents": -1311653368,
+   "ev_m48_cents": 107598302
+  },
+  "taxa transacional nunca ativada": {
+   "delta_revenue_120_pct": -21.4,
+   "capital_need_cents": 144191383,
+   "breakeven_month": 48,
+   "cash_m120_cents": 387180706,
+   "ev_m48_cents": 655289247
+  },
+  "concentração: 3 financiadores saem no mês 13 (churn 40 % no ano 2)": {
+   "delta_revenue_120_pct": -10.0,
+   "capital_need_cents": 105213624,
+   "breakeven_month": 28,
+   "cash_m120_cents": 1258819728,
+   "ev_m48_cents": 721443958
+  }
+ },
+ "premissas": {
+  "fatos": {
+   "service_bps": 350,
+   "authorship_bps": 150,
+   "ai_pack_price_per_credit_cents": 10,
+   "pix_fee_pct": 1.0,
+   "tax_pct": 8.65,
+   "support_cents_user_month": 30,
+   "ai_infra_cents_op": 2
+  },
+  "por_cenario": {
+   "new_funders_month": {
+    "conservador": 3,
+    "base": 3,
+    "agressivo": 3
+   },
+   "ops_per_funder_year": {
+    "conservador": 1,
+    "base": 2,
+    "agressivo": 3
+   },
+   "avg_op_cents": {
+    "conservador": 5000000,
+    "base": 15000000,
+    "agressivo": 50000000
+   },
+   "settled_share": {
+    "conservador": 0.6,
+    "base": 0.75,
+    "agressivo": 0.85
+   },
+   "months_to_settle": {
+    "conservador": 6,
+    "base": 5,
+    "agressivo": 4
+   },
+   "ramp_months": {
+    "conservador": 6,
+    "base": 4,
+    "agressivo": 3
+   },
+   "funder_churn_annual": {
+    "conservador": 0.25,
+    "base": 0.15,
+    "agressivo": 0.1
+   },
+   "fee_activation_month": {
+    "conservador": 13,
+    "base": 7,
+    "agressivo": 4
+   },
+   "fee_default_pct": {
+    "conservador": 8.0,
+    "base": 4.0,
+    "agressivo": 2.0
+   },
+   "receipt_lag_months": {
+    "conservador": 2,
+    "base": 1,
+    "agressivo": 1
+   },
+   "inst_new_month": {
+    "conservador": 0.5,
+    "base": 1.0,
+    "agressivo": 2.0
+   },
+   "inst_start_month": {
+    "conservador": 10,
+    "base": 7,
+    "agressivo": 4
+   },
+   "inst_acv_cents": {
+    "conservador": 3600000,
+    "base": 7200000,
+    "agressivo": 12000000
+   },
+   "inst_setup_cents": {
+    "conservador": 1000000,
+    "base": 2000000,
+    "agressivo": 3000000
+   },
+   "inst_churn_annual": {
+    "conservador": 0.2,
+    "base": 0.12,
+    "agressivo": 0.08
+   },
+   "inst_cac_cents": {
+    "conservador": 1500000,
+    "base": 1200000,
+    "agressivo": 1000000
+   },
+   "osc_per_funder": {
+    "conservador": 4,
+    "base": 8,
+    "agressivo": 12
+   },
+   "services_cents_per_osc_month": {
+    "conservador": 150,
+    "base": 400,
+    "agressivo": 800
+   },
+   "services_cents_per_funder_month": {
+    "conservador": 2000,
+    "base": 6000,
+    "agressivo": 12000
+   },
+   "services_cogs_pct": {
+    "conservador": 45.0,
+    "base": 35.0,
+    "agressivo": 30.0
+   },
+   "fte_base": {
+    "conservador": 3,
+    "base": 4,
+    "agressivo": 6
+   },
+   "fte_cost_cents_month": {
+    "conservador": 1200000,
+    "base": 1500000,
+    "agressivo": 1800000
+   },
+   "clients_per_extra_fte": {
+    "conservador": 15,
+    "base": 20,
+    "agressivo": 25
+   },
+   "infra_fixed_cents_month": {
+    "conservador": 300000,
+    "base": 400000,
+    "agressivo": 600000
+   },
+   "infra_var_cents_client_month": {
+    "conservador": 4000,
+    "base": 5000,
+    "agressivo": 6000
+   },
+   "marketing_cents_month": {
+    "conservador": 200000,
+    "base": 600000,
+    "agressivo": 1500000
+   },
+   "funder_cac_cents": {
+    "conservador": 300000,
+    "base": 250000,
+    "agressivo": 200000
+   },
+   "admin_cents_month": {
+    "conservador": 300000,
+    "base": 400000,
+    "agressivo": 500000
+   },
+   "initial_cash_cents": {
+    "conservador": 0,
+    "base": 0,
+    "agressivo": 0
+   }
+  },
+  "valuation": {
+   "saas_multiple": {
+    "conservador": 2.5,
+    "base": 4.0,
+    "agressivo": 6.0
+   },
+   "txn_multiple": {
+    "conservador": 1.5,
+    "base": 2.3,
+    "agressivo": 4.0
+   },
+   "services_multiple": {
+    "conservador": 1.0,
+    "base": 1.5,
+    "agressivo": 2.0
+   },
+   "ebitda_multiple": {
+    "conservador": 8.0,
+    "base": 12.0,
+    "agressivo": 15.0
+   },
+   "discount_pct": {
+    "conservador": 45.0,
+    "base": 35.0,
+    "agressivo": 25.0
+   }
+  },
+  "diluicao": [
+   [
+    0,
+    1.0
+   ],
+   [
+    12,
+    0.85
+   ],
+   [
+    24,
+    0.7
+   ],
+   [
+    48,
+    0.55
+   ],
+   [
+    120,
+    0.45
+   ]
+  ],
+  "usd_brl": 5.5
+ }
+}

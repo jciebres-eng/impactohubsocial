@@ -29,6 +29,7 @@ OUT = ROOT / "docs" / "execution" / "PROFILE_JOURNEY_MATRIX_v0300.md"
 
 UUID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 RANDOM_SUFFIX = re.compile(r"-[0-9a-f]{6}(?=/|$|\?)")   # slugs únicos por execução ("…/auditoria-5b00a4"): a matriz é função da ESTRUTURA, não da rodada
+VERIFY_CODE = re.compile(r"IMP-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}")   # códigos de verificação pública, gerados a cada rodada
 PROFILE_LABEL = {"osc": "OSC / executora", "company": "Financiador (empresa/instituto)", "individual": "Apoiador (pessoa física)",
                  "government": "Governo / órgão", "provider": "Profissional / prestador", "admin": "Administração / auditoria", "support": "Suporte",
                  "anônimo": "Visitante"}
@@ -36,7 +37,7 @@ PROFILE_LABEL = {"osc": "OSC / executora", "company": "Financiador (empresa/inst
 
 def templ(path: str) -> str:
     """Troca ids reais por {param} para casar com a matriz de autorização (que é por rota-modelo)."""
-    return RANDOM_SUFFIX.sub("-{slug}", UUID.sub("{id}", path.split("?")[0]))
+    return VERIFY_CODE.sub("IMP-{code}", RANDOM_SUFFIX.sub("-{slug}", UUID.sub("{id}", path.split("?")[0])))
 
 
 def load_auth() -> dict[tuple[str, str], dict]:

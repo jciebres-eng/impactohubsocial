@@ -1,62 +1,13 @@
 {
  "visitas": 833,
  "rotas": 227,
- "rotas_abertas_com_sucesso": 226,
- "persona_sem_registro_proprio": 61,
+ "rotas_abertas_com_sucesso": 227,
+ "persona_sem_registro_proprio": 65,
  "estados": {
-  "OK": 546,
-  "VAZIA": 125,
+  "OK": 539,
+  "VAZIA": 134,
   "RECUSA_CORRETA": 95,
-  "SEM_REGISTRO": 67
+  "SEM_REGISTRO": 65
  },
- "falhas": [
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "osc",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  },
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "company",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  },
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "provider",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  },
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "government",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  },
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "individual",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  },
-  {
-   "rota": "/projetos/:id/dossie",
-   "persona": "admin",
-   "url": "",
-   "estado": "SEM_REGISTRO",
-   "detalhe": "rota com parâmetro sem resolvedor no robô",
-   "api_4xx": []
-  }
- ]
+ "falhas": []
 }

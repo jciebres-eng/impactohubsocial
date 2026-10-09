@@ -1,150 +1,120 @@
-# Relatório final de execução — IMPACTO v0.29.0
+# Relatório final de execução — IMPACTO v0.30.0
 
-**Data:** 09/10/2026 · **Ramo:** `main` · **Tag:** `v0.29.0` (a criar no GitHub pelo proprietário no
-commit indicado em §3 — o proxy deste ambiente recusa envio de tag) · **Pacote:**
-`IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:**
-`FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.29.0_RELATORIO_TECNICO.docx`
-(entregue ao lado do pacote; conteúdo derivado deste relatório e da auditoria)
+**Data:** 09/10/2026 · **Ramo:** `main` · **Tag:** `v0.30.0` (a criar no GitHub pelo proprietário no commit indicado em §3 — o
+proxy deste ambiente recusa envio de tag) · **Pacote:** `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip` (SHA-256 no `.sha256` ao lado) ·
+**Auditoria:** `FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.30.0_RELATORIO_TECNICO.docx`
 
 ## 1. Executive Summary
 
-A rodada incorporou a **base de conhecimento v0.26.0** à release mais nova **sem retroceder nada** e deu à
-Central de Conhecimento governança de ponta a ponta — fonte → direitos → citação → quatro olhos →
-publicação imutável → retirada → busca → assistente → interface — mais um **sistema global de ajuda
-contextual** (tooltip, popover, glossário) alimentado por um único catálogo de conceitos:
+A rodada executou o pacote "IMPACTO_SUPERPROMPTS_MASTER" do jeito que ele manda: **inspeção e baseline antes de qualquer
+alteração**, inventário em quatro estados, plano P0/P1/P2 com evidência, implementação do viável com testes, regressão, versão,
+pacote e relatório — sem presumir que documento, rota, mock ou tela signifiquem funcionalidade pronta.
 
-- **Reconciliação, não cópia** (`knowledge-base/` + `CONTROL-RECONCILIATION.json`): os 58 controles
-  O/A/V/H/D classificados contra o código com os testes que os provam — IMPLEMENTED_TESTED 6 · PARTIAL
-  27 · BLOCKED_EXTERNAL 13 · NOT_IMPLEMENTED 12 (237 referências de teste conferidas por AST). Nenhum
-  controle foi declarado "em conformidade".
-- **Fontes com direitos de uso** (migração 0069): classe O/A/V/H/D, jurisdição, vigência, licença,
-  direitos por operação (allowed/denied/**unknown = bloqueado**), verificação por pessoa diferente de
-  quem registrou (gatilho), revisão marcada. 11 fontes semeadas, **0 conferidas** — a interface diz
-  "fonte ainda não conferida por outra pessoa" em cada citação.
-- **Citação, retirada e fila editorial:** citação só em rascunho, trecho só com direito permitido e
-  hash conferido pelo banco; retirada terminal com motivo que some da busca, do assistente e do
-  sitemap no mesmo instante; buscas sem resultado, "não ajudou", vencidos, relatos de erro e fontes a
-  revisar viram itens de trabalho deduplicados — **só hash e tópicos, nunca o texto** (ADR-043).
-- **Assistente que cita e se abstém:** extrativo (sem modelo), só publicado + oficial/educacional +
-  não DEMO + não vencido; devolve a **única** fonte usada com citações, o que excluiu e por quê;
-  em empate pergunta; sem base diz "Não encontrei informação suficiente na base publicada da
-  plataforma." Nunca se chama "base oficial".
-- **Busca medida antes de mudada:** 35 consultas rotuladas, 8 métricas, baseline gravado como piso
-  que reprova regressão (hit@1 0,875 · MRR 0,94 · nDCG@5 0,93 · abstenção 3/3 · p95 ≈ 25 ms). A única
-  mudança (tesauro 1.1) foi feita porque a medição mostrou ganho. **Sem embeddings** — sem ganho
-  demonstrado, não entra. Conjunto pequeno e sintético: o arquivo de evidência diz isso.
-- **Ajuda contextual:** 33 conceitos definidos UMA vez (`config/concepts.json`: definição, por que
-  importa, como o IMPACTO usa, limites, fontes) → `concepts.ts` gerado → `Tooltip`/`InfoPopover`/
-  `GlossaryTerm`/`ContextualHelp` sem biblioteca nova → `/ajuda/glossario`; aplicado em 11 telas;
-  mouse, teclado e toque; claro/escuro; movimento reduzido; `GET /v1/public/concepts`. As 33
-  definições estão **`needs_review`** (escritas a partir do código; revisão por área pendente) e a
-  interface avisa.
-- **Contagens** (ADR-340): 936 operações (+13), 238 de plataforma, 54 públicas, 226 telas (+1), 69
-  migrações, 50 motores (nenhum novo).
-- Tudo provado por HTTP e PostgreSQL reais (38 testes novos em 3 módulos), por 7 jornadas no
-  Chromium (mouse, teclado, toque, escuro, movimento reduzido, a11y, contraste), pelas 226 telas por
-  perfil e pela regressão completa, cuja primeira passagem acusou 10 falhas e 1 erro — todas com
-  causa e correção escritas (auditoria §7), nenhuma resolvida afrouxando teste; duas eram **achados
-  reais** (nome acessível de título com termos; medição da busca dependente da ordem dos testes).
+- **Baseline** (`docs/execution/BASELINE_v0300.md`): 18 contextos classificados (PROVADO / PARCIAL / SÓ DOCUMENTADO / AUSENTE) com o
+  teste que prova cada linha. Lacunas reais encontradas: evidência rasa (sem método, acesso, consentimento, versão, contestação,
+  histórico), dossiê inexistente como objeto, mudança metodológica sem rastro, matriz por jornada dispersa, economia do SaaS e
+  take rate sem documento gerado.
+- **Conflitos registrados e NÃO implementados** (ADR-363): escrow/conta gráfica, retenção automática do take rate, assinatura
+  corporativa e selo pago — o contexto do pacote os propõe, as decisões do repositório (ADR-284, 337, 341, selos) os recusam e os
+  próprios superprompts os chamam de hipóteses.
+- **Evidência como objeto de primeira classe** (ADR-360, migração 0070): método de coleta, nível de acesso, base de consentimento,
+  classe de retenção (`unknown` é lacuna visível); versão + substituição (nunca edição); **rejeitar exige motivo**; a executora
+  **contesta** com motivo e quem revisa decide com justificativa; máquina de estados e histórico append-only **no banco**; hash do
+  documento exposto com "integridade ≠ veracidade"; aceitar evidência **não move dinheiro** (teste).
+- **Dossiê longitudinal** (ADR-361): `GET /v1/projects/{id}/dossier` + `/projetos/:id/dossie` — prontidão, marcos/obrigações,
+  evidências por estado com qualidade, séries reportado × validado com método/unidade/descontinuidade, aportes e repasses,
+  diligências, trilha — cada bloco com **origem, atualidade e lacunas**; "o que isto não é" no topo; só para as partes; a OSC vê
+  exatamente o que o financiador vê.
+- **Mudança metodológica registrada** (ADR-362): motivo obrigatório, append-only, série marca `comparable = false`.
+- **Economia do SaaS** a partir do catálogo real (11 regras, 0 ativas, 5 recusadas), **sensibilidade do take rate 2–5 %** como
+  simulação (catálogo inalterado), **estados do financiamento por marcos** mapeados ao código (decisão ≠ instrução ≠ confirmação;
+  escrow "não existe" provado), **matriz perfil × jornada × permissão × dado × ação** gerada (16 jornadas, 256 passos).
+- **Contagens** (ADR-340): 940 operações (+4), 227 telas (+1), 70 migrações, 50 motores (nenhum novo).
+- Tudo provado por HTTP e PostgreSQL reais (20 testes novos em 4 módulos), no Chromium (dossiê: dona e financiador, claro e escuro,
+  a11y e contraste), pelas 227 telas por perfil e pela regressão completa (§24), cuja primeira passagem acusou 10 falhas — todas
+  com causa e correção (auditoria §7), nenhuma resolvida afrouxando teste.
 
-**Decisão: GO WITH CONDITIONS** (§27) — as condições são editoriais (conferir fontes, revisar
-definições, escrever conteúdo oficial) e externas (parecer, DPO, provedores), não técnicas.
+**Decisão: GO WITH CONDITIONS** (§27) — condições externas e decisórias, não técnicas.
 
 ## 2. Version
 
-0.29.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`,
-`README.md`, `docs/openapi.json`. Documentos da v0.28.0 preservados em `history/v0.28.0/` (166
-arquivos de `1c3114f`); manifestos anteriores em `history/manifests/`.
+0.30.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
+Documentos da v0.29.0 preservados em `history/v0.29.0/` (166 arquivos de `79a326d`); manifestos anteriores em `history/manifests/`.
 
 ## 3. Commit
 
-Commits da rodada (sobre `1c3114f`, v0.28.0): `aa2785c` (F1–F3: versão, snapshot, base de
-conhecimento versionada e reconciliada, migração 0069, serviço e rotas de proveniência, assistente
-reescrito, 22 testes), `bf0c3e4` (F4: conjunto de avaliação da busca, métricas, baseline, tesauro 1.1,
-4 testes), `4107b08` (F5: catálogo de conceitos, componentes de ajuda, glossário, 11 telas, E2E,
-contagens), `859efdc` (documentos: ADR-353..359, changelog, notas, KNOWLEDGE_*, checklist, rollback,
-rastreabilidade, segurança, limpeza; correções da 1ª regressão), o commit de fechamento (auditoria,
-relatório, evidência da regressão) e o **commit final dos manifestos**, para o qual a tag `v0.29.0`
-deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`); o hash
-desse commit é registrado no `.sha256` do pacote e não cabe dentro do próprio commit.
-`FINAL_RELEASE_MANIFEST.json` registra o último commit de conteúdo.
+Commits da rodada (sobre `79a326d`, v0.29.0): `3f5f139` (F1: versão, snapshot, baseline, P0 evidência — 0070, rotas, 7 testes),
+`90aa5ef` (F2: P0 dossiê + P1 mudança metodológica, tela, 4 testes + 1 E2E), `21361f6` (F3: matriz por jornada, sensibilidade do take
+rate, SAAS_ECONOMY, estados do financiamento, 8 testes de documento), commit de matrizes/contagens, `81d0792` (correções da 1ª
+regressão, ADR-360..363, changelog, notas, checklists, rollback, limpeza), o commit de fechamento (auditoria, relatório, evidência da
+regressão) e o **commit final dos manifestos**, para o qual a tag `v0.30.0` deve apontar e do qual o pacote é construído byte a byte
+(`verify_package_against_git.py`); o hash desse commit é registrado no `.sha256` do pacote. `FINAL_RELEASE_MANIFEST.json` registra o
+último commit de conteúdo.
 
-**GitHub Actions:** a run `37932633056` do primeiro commit de manifestos (`9043b5a`) reprovou 3 de 4
-trabalhos — gitleaks (falso positivo no campo `source_key` do catálogo de conceitos) e o typecheck
-oficial (7 importações não usadas), que derrubou também a pilha do zero; causas e correções na
-auditoria §7 (3ª rodada). **Run `37935603837` do commit candidato à tag `dd2f8c3`: `auditoria`, `docker`
-(typecheck oficial), `pilha-do-zero` (banco vazio → imagem → migrações → seed → jornadas → 226 telas → axe →
-reinício) e `backend` (gitleaks + suíte oficial completa) — os quatro verdes.** Este parágrafo foi acrescentado
-depois da run, no commit seguinte; a tag `v0.29.0` aponta para `dd2f8c3`.
+**GitHub Actions:** o resultado da run do commit candidato à tag é registrado no commit seguinte (procedimento das versões
+anteriores); ver o parágrafo "CI" no fim desta seção quando existir.
 
 ## 4. Architecture Status
 
-Starlette + PostgreSQL 16 com RLS em toda tabela (exceção: `schema_migrations`; nenhuma FORCE), hash
-encadeado em auditoria/razão/valor/confiança, sem custódia. Mudanças: 4 tabelas novas
-(`kb_sources`, `kb_citations`, `kb_work_items` + funções), estado `retracted` em 3 tabelas da Central;
-`services/kb_provenance.py`, `api/kb_provenance_routes.py` (12 rotas), `GET /v1/public/concepts`,
-`engines/knowledge/evaluation.py` novos; `services/knowledge.py` (busca abre lacuna; assistente
-reescrito); `knowledge-base/` versionada; `config/concepts.json`, `config/search_eval.json`;
-`web/src/ui/help.tsx`, `web/src/concepts.ts` (gerado). Documentos canônicos:
-`docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md`, `CONTENT_GOVERNANCE.md`, `KNOWLEDGE_DATA_MODEL.md`,
-`AI_SEARCH_ARCHITECTURE.md`, `docs/execution/TRACEABILITY_MATRIX_v0290.md`.
+Starlette + PostgreSQL 16 com RLS em toda tabela (exceção: `schema_migrations`; nenhuma FORCE), hash encadeado em auditoria/razão/
+valor/confiança, sem custódia. Mudanças: 2 tabelas novas append-only (`evidence_events`, `indicator_method_changes`); `evidences` com
+11 colunas e 3 estados a mais, máquina de estados e guardas; `project_indicators.method_change_reason` + gatilho; 4 rotas novas;
+`services/dossier.py` (composição somente-leitura); `scripts/make_profile_journey_matrix.py`; `web/src/pages/impact.tsx::ProjectDossier`.
+Documentos canônicos: `docs/execution/BASELINE_v0300.md`, `docs/SAAS_ECONOMY.md`, `docs/execution/MILESTONE_FUNDING_STATES_v0300.md`,
+`docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md`, `docs/execution/ACCEPTANCE_CHECKLIST_v0300.md`.
 
 ## 5. Engines Status
 
-50 motores: implemented/integrated/tested 50/50; `MOTOR_COVERAGE_MATRIX.md` (gerado) VERDE 37 ·
-AMARELO 13 · VERMELHO 0. Nenhum motor novo: a avaliação da busca é módulo de métricas, não decide
-nada em produção. `ENGINE_COVERAGE.md`, `docs/execution/ENGINE_VALIDATION_MATRIX.csv`, `docs/AI_ENGINES.md`.
+50 motores: implemented/integrated/tested 50/50; `MOTOR_COVERAGE_MATRIX.md` (gerado) VERDE 37 · AMARELO 13 · VERMELHO 0. Nenhum motor
+novo: o dossiê é composição (não decide); o teste de registro (`test_v0200_engines`) foi quem apontou que `ENGINE_VERSION` no módulo
+o faria parecer motor — renomeado para `DOSSIER_VERSION`.
 
 ## 6. Contract Intelligence
 
-PASS (inalterado da v0.26.0–v0.28.0). A camada de conhecimento não lê nem escreve no contrato.
+PASS (inalterado). O dossiê lê obrigações do contrato (`agreement_obligations`) e não escreve nelas.
 
 ## 7. Match
 
-PASS (inalterado): a busca da Central e o assistente **não leem** reputação, planos, pagamento nem
-match (`test_knowledge_search_and_match_never_read_reputation_or_plans`, guarda por AST). O conceito
-"compatibilidade" do glossário diz, em cada tela, que não é aprovação nem elegibilidade.
+PASS (inalterado): nenhum dado novo (evidência, dossiê, método) entra no match; sem pay-to-rank. Registrado como P2: guardar no
+resultado do match a versão das regras de elegibilidade usada.
 
 ## 8. Diagnostic
 
-PASS (inalterado): `diagnostic-engine@1.0.0`, 8 dimensões — agora nomeadas no conceito
-`diagnostico_prontidao` do glossário, com o aviso de que "IMPACTO Ready" é estado, não selo.
+PASS (inalterado): o dossiê reusa `project_ready_facts()`/`control_tower.ready` (15 critérios, `unknown` é terceiro estado).
 
 ## 9. Equity
 
-PASS (inalterado): sem nota única, denominador com fonte. Conceito `equidade` aplicado nas telas.
+PASS (inalterado). O dossiê não cria nota nem ranking; "delta não implica causalidade" está no `what_this_is_not`.
 
 ## 10. Evidence
 
-PASS (inalterado). Novo: evidência **editorial** — citação com hash de trecho e fonte verificada por
-outra pessoa é o mesmo princípio aplicado ao conteúdo da Central.
+**PASS — ampliado** (ADR-360): objeto de primeira classe. O que a v0.30.0 não faz: assinatura qualificada, carimbo de tempo externo
+(RFC 3161), auditoria independente — o aviso na API diz o que o hash prova.
 
 ## 11. Responsibility
 
-PARTIAL (inalterado): atribuição formal continua opcional.
+PARTIAL (inalterado): atribuição formal continua opcional. Conflito de interesse por serviço profissional: P2.
 
 ## 12. Reputation
 
-PASS (inalterado). A fila editorial e as retiradas não produzem efeito reputacional.
+PASS (inalterado). Contestação de evidência não produz efeito reputacional.
 
 ## 13. Seals
 
-PASS (inalterado): selos só na quitação.
+PASS (inalterado): selo só por critério e fato; **selo pago** (proposta do pacote) recusado (ADR-363).
 
 ## 14. Government Data
 
-Inalterado: torre territorial com k-anonimato ≥ 3. Dados IBGE/ODS oficiais continuam fora — e o
-conceito `ods` do glossário diz que as **metas** numeradas não estão carregadas até haver fonte,
-versão e licença registradas (controle LEG-024 continua PARTIAL).
+Inalterado: torre territorial k ≥ 3. O governo com acesso de revisão vê o dossiê (`app_review_access`).
 
 ## 15. Marketplace
 
-Inalterado.
+Inalterado: comissão recusada (`marketplace.take_rate` **refused** no catálogo).
 
 ## 16. Payments
 
-Inalterado (PASS / BLOCKED_EXTERNAL): nenhum pagamento real; camada 3,5 % / 1,5 % independente e
-inativa; o glossário explica "não custodial", "quitação" e "taxa de serviço" com os limites.
+Inalterado (PASS / BLOCKED_EXTERNAL): nenhum pagamento real; **escrow/conta gráfica não existe e não existirá dentro do produto**
+(ADR-284; `MILESTONE_FUNDING_STATES_v0300.md`); aprovação de evidência ≠ liquidação (teste).
 
 ## 17. Distribution
 
@@ -152,12 +122,11 @@ PASS (inalterado).
 
 ## 18. Billing
 
-Inalterado: sem assinatura (ADR-341); créditos de IA em modo piloto (ADR-349).
+Inalterado: sem assinatura (ADR-341); `docs/SAAS_ECONOMY.md` documenta o catálogo e a matriz de elegibilidade de cobrança.
 
 ## 19. Fiscal
 
-BLOCKED_EXTERNAL (inalterado): NFS-e não implementada; a reconciliação da base lista os controles
-fiscais como BLOCKED_EXTERNAL/NOT_IMPLEMENTED com o teste que falta.
+BLOCKED_EXTERNAL (inalterado): quem presta/fatura/recolhe por fluxo está em `SAAS_ECONOMY.md` §4; emissão real desligada.
 
 ## 20. Vouchers
 
@@ -165,77 +134,62 @@ Inalterado.
 
 ## 21. Identity
 
-PARTIAL (inalterado): biometria, KYC, gov.br BLOCKED_EXTERNAL.
+PARTIAL (inalterado).
 
 ## 22. Security
 
-Revisada (`docs/execution/SECURITY_PRIVACY_REPORT_v0290.md`): RLS nas 4 tabelas novas; quatro olhos
-na verificação de fonte e na publicação **no banco**; citações append-only com hash; retirada
-terminal; rotas editoriais com papel + MFA; 3 rotas públicas de referência revisadas e limitadas por
-taxa; texto de busca/pergunta nunca guardado; assistente sem modelo (sem superfície de injeção nesta
-versão; revisão obrigatória se um modelo for ligado); nenhum segredo em código, catálogo, documento
-ou pacote (`secrets_scan.py`, gitleaks no CI); sem `innerHTML`; URL de fonte imutável após o
-registro. **Nenhum sistema ligado à internet é "impossível de invadir", e este não é exceção.**
+Revisada: 4 rotas novas na matriz de autorização (940); dossiê só para as partes; 2 tabelas novas com RLS e append-only; quatro olhos
+preservado nas evidências (quem envia não revisa; só a executora contesta); conteúdo da evidência imutável após o envio; nenhum
+segredo em código, documento ou pacote (`secrets_scan.py`, gitleaks no CI). **Nenhum sistema ligado à internet é "impossível de
+invadir", e este não é exceção.**
 
 ## 23. LGPD
 
-As tabelas novas não guardam dado do titular além de referências editoriais (quem registrou,
-verificou, retirou, relatou); nada a declarar em `config/data_retention.json`;
-`test_v0190_lgpd_deletion` verde. A fila editorial guarda só `q_hash` + tópicos. Os direitos
-`embed/send_external/train` das fontes legais estão `unknown` de propósito: se um provedor externo
-for ligado, a operação fica bloqueada até conferência. Controles LGPD da base (ROPA, RIPD, DPO)
-continuam BLOCKED_EXTERNAL na reconciliação.
+`evidence_events`/`indicator_method_changes` guardam referências de ator (trilha editorial), não dado do titular; `access_level`,
+`consent_basis` e `retention_class` passam a existir por evidência (`unknown` visível); prazos por classe dependem do DPO (checklist D3);
+`test_v0190_lgpd_deletion` verde com a expectativa atualizada (evidência deixou de ser apagável — histórico append-only).
 
 ## 24. Tests
 
 ```text
-PRIMEIRA REGRESSÃO COMPLETA (código novo, antes das correções, scratchpad/suite/full_v0290_a.log):
-  Ran 2379 tests in 1915.199s — 10 falhas, 1 erro, 29 pulados
-  → causas e correções em FINAL_EXECUTION_AUDIT.md §7 (2 achados reais: nome acessível de título com termos
-    de glossário; medição da busca dependente da ordem dos testes — ambos corrigidos no produto/medição, não
-    no teste; 1 cartão 2 px fora da janela no celular; o resto: contagem 226, matrizes, openapi, documentos de
-    fechamento e manifesto gerados no fechamento)
-SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.29.0.log):
-  Ran 2380 tests in 1953.947s — 0 erro, 29 pulados (dependem de credencial), 5 falhas, TODAS de fechamento:
-    4× test_v0270_release_docs (lê auditoria, relatório e manifesto no início da execução — ainda os da v0.28.0
-       naquele instante; reescritos durante a execução), test_v0230_release_gate.test_the_manifest_exists_for_this_version
-       (manifesto é gerado no fechamento). Manifestos gerados em seguida; portões de fechamento reexecutados (saída
-       anexada ao fim do mesmo log).
-MÓDULOS NOVOS: test_v0290_knowledge_base (27) · test_v0290_search_eval (4) · test_e2e_v0290_contextual_help (7)
-JORNADAS: 16 jornadas, 256 passos, 0 falha · TELAS: 226 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
-LINT: ruff 0 · BUILD: esbuild ok · SYNC: concepts.ts em sincronia · TYPECHECK: tsc --noEmit 0 erros (local, tipos do DefinitelyTyped; oficial no CI)
+PRIMEIRA REGRESSÃO COMPLETA (código novo, antes das correções, scratchpad/suite/full_v0300_a.log):
+  Ran 2400 tests in 1947.064s — 10 falhas, 0 erro, 30 pulados
+  → causas e correções em FINAL_EXECUTION_AUDIT.md §7 (robô de telas sem resolvedor para /projetos/:id/dossie; E2E do dossiê lia a
+    página antes de o dado chegar sob carga; DOSSIER_VERSION; matriz por jornada dependia de slugs aleatórios; checksum da 0070
+    editada durante a rodada; documentos de fechamento e manifesto gerados no fechamento)
+SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.30.0.log):
+  Ran 2400 tests in 1906.212s — 0 erro, 30 pulados (dependem de credencial), 8 falhas: 5 de fechamento (4× test_v0270_release_docs
+       lendo os documentos da v0.29.0 no início da execução; manifesto gerado no fechamento) e 3 de regeneração (robô de telas sem
+       resolvedor por RELAÇÃO para /projetos/:id/dossie — o dossiê é só das partes, então o financiador abre o projeto que financia;
+       COVERAGE_MATRIX e PROFILE_JOURNEY_MATRIX regeradas da evidência desta rodada). Robô de telas reexecutado: 227 rotas, OK.
+       Portões de fechamento reexecutados (saída anexada ao fim do mesmo log).
+MÓDULOS NOVOS: test_v0300_evidence_object (7) · test_v0300_dossier (4) · test_v0300_release_docs (8) · test_e2e_v0300_dossier (1)
+JORNADAS: 16 jornadas, 256 passos, 0 falha · TELAS: 227 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
+LINT: ruff 0 · BUILD: esbuild ok · TYPECHECK: tsc --noEmit 0 erros (local com tipos do DefinitelyTyped; oficial no CI)
 ```
 
-Testes que fixam contagem foram atualizados com a razão escrita ao lado (936 operações, 238 de
-plataforma, 54 públicas, 226 telas): ADR-340. Expectativas atualizadas com motivo: mensagem de
-abstenção do assistente (`test_v0120_knowledge`, `test_e2e_knowledge`), lista de rotas públicas
-revisadas (`test_architecture`). Nenhum teste foi removido ou enfraquecido.
+Testes que fixam contagem foram atualizados com a razão escrita ao lado (940 operações, 227 telas): ADR-340. Expectativa atualizada
+com motivo: `test_v0190_lgpd_deletion`. Nenhum teste foi removido ou enfraquecido.
 
 ## 25. External Dependencies
 
-BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):
-
 | Dependência | Exige | Efeito hoje |
 |---|---|---|
-| Conferência das 11 fontes (vigência, licença, direitos) | pessoa com papel `reviewer`, diferente de quem registrou | todas `unverified`; a interface avisa em cada citação; direitos `embed/send_external/train` bloqueados |
-| Revisão das 33 definições do glossário | jurídico, contábil, especialista em impacto | todas `needs_review`; a interface avisa em cada cartão |
-| Conteúdo oficial com citações | equipe editorial (editor + reviewer) | a semente continua DEMO/educacional; o assistente responde com origem "educacional" e avisa |
-| Decisão sobre 13 controles BLOCKED_EXTERNAL e 12 NOT_IMPLEMENTED da reconciliação | parecer jurídico, DPO, provedores (fiscal, pagamento, identidade) | continuam P0/P1 na matriz; nada declarado conforme |
-| Conjunto de avaliação com consultas reais | piloto + rotulagem por mais de uma pessoa | piso atual vale para o corpus sintético |
-| Parecer, provedores, minutas, hospedagem, chave PIX, tag no GitHub | como na v0.27.0/v0.28.0 | inalterado |
+| Decisão formal sobre as propostas recusadas por ADR (escrow, retenção, assinatura, selo pago) | proprietário | continuam fora; qualquer reabertura exige parecer e ADR nova |
+| Parceiro de pagamento e modelo de repasse | contrato + análise jurídica | não há liquidação automática; instrução + confirmação continuam manuais |
+| Revisão jurídica/contábil da matriz de elegibilidade de cobrança | advogado(a) e contador(a) | 0 regras ativas; R$ 0,00 |
+| Prazos de retenção por classe de evidência | DPO | classes existem; prazos não declarados |
+| Conferência de fontes e revisão do glossário (v0.29.0) | equipe editorial | inalterado |
+| Tag `v0.30.0` no GitHub | o proxy recusa push de tag | criar manualmente |
 
 ## 26. Known Limitations
 
-- 0 de 11 fontes conferidas; 33 de 33 definições em revisão; nenhum conteúdo `official` — tudo dito
-  na interface.
-- A busca é léxica (FTS + trigram + tesauro); sem embeddings: paráfrase profunda pode não ser
-  encontrada. O conjunto de avaliação é pequeno, sintético e rotulado por uma pessoa.
-- O assistente é extrativo: responde com trechos de UM conteúdo; não sintetiza vários.
-- Retirar uma fonte não retira o conteúdo que a cita (decisão editorial por desenho).
-- Conceitos só em pt-BR; não aplicados em telas administrativas internas.
-- `examples` por conceito não foi incluído (as definições usam "como o IMPACTO usa").
-- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI;
-  defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) fora do escopo.
+- Evidências antigas `rejected` sem nota permanecem (CHECK `NOT VALID`); completar é trabalho editorial com auditoria.
+- O dossiê não sintetiza: compõe. Não há exportação em PDF; não há comparação entre projetos (de propósito).
+- Hash interno prova integridade do arquivo; não há carimbo externo nem assinatura qualificada.
+- A matriz por jornada lista 93 passos sem tela direta — fato medido (backend à frente da interface), não corrigido nesta rodada.
+- P2 registrados: conflito de interesse por serviço profissional; versão das regras de elegibilidade no resultado do match.
+- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI; defeitos pré-existentes B1/B2 fora do escopo.
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO
 
@@ -243,24 +197,19 @@ BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTER
 GO WITH CONDITIONS
 ```
 
-Nenhuma falha técnica interna crítica em aberto: base reconciliada sem retrocesso, fontes com direitos
-e verificação por outra pessoa, citações com hash só em rascunho, retirada terminal que propaga, fila
-editorial sem texto livre, assistente que cita e se abstém, busca medida com piso, catálogo único de
-conceitos com ajuda acessível, autorização, tenancy, persistência e regressão têm teste executado e
-verde na segunda rodada. As condições são **editoriais e externas** (§25): conferir fontes, revisar
-definições, escrever conteúdo oficial, decidir os controles bloqueados, tag no GitHub. Nenhuma falha
-crítica foi convertida em "condição". Checklist operacional:
-`docs/execution/PRODUCTION_CHECKLIST_v0290.md`; rollback: `docs/execution/ROLLBACK_v0290.md`.
+Nenhuma falha técnica interna crítica em aberto: evidência de primeira classe (origem, versão, contestação, histórico, máquina de
+estados no banco), dossiê para as partes sem nota e sem assimetria, mudança metodológica registrada, autorização, tenancy,
+persistência e regressão têm teste executado e verde na segunda rodada. As condições são **decisórias e externas** (§25): decisão
+sobre as propostas recusadas, parceiro de pagamento, parecer da matriz de cobrança, prazos de retenção, tag no GitHub. Nenhuma
+falha crítica foi convertida em "condição". Checklist operacional: `docs/execution/PRODUCTION_CHECKLIST_v0300.md`; rollback:
+`docs/execution/ROLLBACK_v0300.md`; aceite: `docs/execution/ACCEPTANCE_CHECKLIST_v0300.md`.
 
 ## 28. Exact Next Step
 
-1. Criar a tag `v0.29.0` no GitHub (Releases → nova tag no commit de fechamento) e anexar
-   `IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip` + `.sha256` + o relatório DOCX.
-2. Nomear editor(a) e reviewer (papéis `staff_roles` com MFA) e conferir as 11 fontes
-   (`POST /v1/admin/content/sources/{key}/verify`) — a primeira tarefa editorial, sem a qual nada é
-   "oficial".
-3. Revisar as 33 definições do glossário por área (`config/concepts.json` → `status = published`,
-   `scripts/sync_concepts.py`) e escrever os primeiros guias `official` com citações.
-4. Próxima rodada técnica (sem dependência externa): ampliar o conjunto de avaliação com consultas
-   reais (só hash/tópicos da fila `search_gap`) rotuladas por mais de uma pessoa; tela interna da fila
-   editorial; conceitos nas telas administrativas; tradução en/es do catálogo.
+1. Criar a tag `v0.30.0` no GitHub (Releases → nova tag no commit de fechamento) e anexar `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip`
+   + `.sha256` + o relatório DOCX.
+2. Decidir, por escrito, sobre as quatro propostas do pacote recusadas por ADR (manter fora ou reabrir com parecer) — ADR nova se mudar.
+3. Levar `docs/SAAS_ECONOMY.md` §4 (matriz de elegibilidade de cobrança) a advogado(a) e contador(a) junto com
+   `MONETIZATION_LEGAL_MATRIX.md`; declarar com o DPO os prazos de retenção por classe de evidência.
+4. Próxima rodada técnica (sem dependência externa): conflito de interesse por serviço profissional; versão das regras de
+   elegibilidade no resultado do match; telas para os passos de jornada que hoje só existem na API (93, medidos); exportação do dossiê.

@@ -89,9 +89,13 @@ RESOLVE: dict[str, str] = {
     "/solucoes/:id": "SELECT id::text FROM solutions WHERE visibility = 'published' ORDER BY created_at LIMIT 1",
 }
 #: subrotas que usam o mesmo registro da rota-mãe
-for _sub in ("apoio-profissional", "compras", "contribuicao", "dossie", "equidade", "equipe", "grafo", "impacto",   # dossie: v0.30.0 (ADR-361)
+for _sub in ("apoio-profissional", "compras", "contribuicao", "equidade", "equipe", "grafo", "impacto",
              "linha-do-tempo", "localizacao", "ods", "relatorios", "retratos", "riscos", "situacao"):
     RESOLVE[f"/projetos/:id/{_sub}"] = RESOLVE["/projetos/:id"]
+# v0.30.0 (ADR-361): o dossiê é só para as PARTES — projeto publicado não basta. A persona abre o projeto que é dela ou que
+# ela financia (compromisso); quem não tem relação fica "sem registro próprio", que é o comportamento correto, não falha.
+RESOLVE["/projetos/:id/dossie"] = ("SELECT p.id::text FROM projects p WHERE p.org_id = {org} OR EXISTS (SELECT 1 FROM commitments c"
+                                   " WHERE c.project_id = p.id AND c.funder_org_id = {org} AND c.status <> 'cancelled') ORDER BY p.created_at LIMIT 1")
 RESOLVE["/diagnosticos/:id/roteiro"] = RESOLVE["/diagnosticos/:id/versoes"] = RESOLVE["/diagnosticos/:id"]
 RESOLVE["/editais/:id/candidaturas"] = RESOLVE["/editais/:id/editar"] = RESOLVE["/editais/:id"]
 RESOLVE["/perfil-publico/:id/identificadores"] = RESOLVE["/perfil-publico/:id"]

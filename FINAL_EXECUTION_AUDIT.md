@@ -81,7 +81,23 @@ Retenção: `evidence_events`/`indicator_method_changes` não guardam dado do ti
 
 ## 7. Regressão — o que a primeira rodada completa encontrou e o que foi feito
 
-(preenchido a partir de `scratchpad/suite/full_v0300_a.log` — ver abaixo)
+Primeira execução completa com o código novo (`scratchpad/suite/full_v0300_a.log`): **2.400 testes, 10 falhas, 0 erro, 30 pulados**.
+Nenhuma foi "resolvida" afrouxando teste (ADR-340). Causa e correção:
+
+| Falha | Causa real | Correção |
+|---|---|---|
+| `test_e2e_v0300_dossier.test_owner_and_funder_open_the_same_dossier…` | o teste lia o texto da página assim que o título aparecia; na suíte completa o servidor está carregado e o dado do dossiê ainda não tinha chegado (em isolamento passava) | o teste espera o painel "O que este dossiê é" (prova de que o dado chegou) antes de ler — a tela não mudou |
+| `test_v0200_engines.test_every_module_with_its_own_engine_version_is_declared` | `services/dossier.py` tinha `ENGINE_VERSION`; o guarda de registro acusou módulo "com cara de motor" fora do registro | renomeado `DOSSIER_VERSION`: o dossiê é composição, não decide — e por isso não entra no registro de motores (declarado no relatório §5) |
+| `test_v0230_data_infra_gate.test_every_applied_migration_matches_the_file_sha256` [0070] | a 0070 foi editada DURANTE a rodada (CHECK de rejeição passou a `NOT VALID` para não bloquear instalações com rejeições antigas sem nota) | 2ª passagem com o arquivo final: verde |
+| `test_v0250_todas_as_telas.test_every_screen_in_the_router_opens_with_real_data` | `/projetos/:id/dossie` sem resolvedor no robô; depois (2ª passagem) o resolvedor genérico dava ao financiador um projeto publicado que ele NÃO financia → 404 correto do dossiê lido como erro de tela | resolvedor próprio por RELAÇÃO (dona ou financiadora com compromisso); quem não tem relação fica "sem registro próprio"; robô reexecutado: 227 rotas OK |
+| `test_v0300_release_docs.test_the_profile_journey_matrix_is_what_the_generator_produces` | a matriz era função de slugs e códigos de verificação gerados a cada rodada (`…-5b00a4`, `IMP-XXXX-…`) | o gerador normaliza (`-{slug}`, `IMP-{code}`): a matriz é função da estrutura, não da rodada |
+| `test_v0250_cobertura.test_the_committed_matrix_is_what_the_evidence_produces` (2ª passagem) | a matriz de cobertura é derivada da evidência que a própria rodada reescreve | regenerada no fechamento (`make_coverage_matrix.py`), como nas versões anteriores |
+| `test_v0230_release_gate.test_the_manifest_exists_for_this_version` | manifesto é gerado no fechamento | gerado no fechamento |
+| `test_v0270_release_docs` (4: auditoria, relatório, log de testes, manifesto/notas) | documentos de fechamento ainda eram os da v0.29.0 | reescritos para a v0.30.0 |
+
+Achado de desenho registrado durante a construção: o CHECK "rejeição exige motivo" passou a `NOT VALID` — linhas antigas `rejected`
+sem nota (instalações anteriores) não bloqueiam a migração nem são reescritas; completar é trabalho editorial com auditoria
+(`PRODUCTION_CHECKLIST_v0300.md` B1).
 
 ## 8. Build limpo e pacote
 

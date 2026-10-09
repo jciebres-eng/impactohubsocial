@@ -128,6 +128,7 @@ const ROUTES: R[] = [
   ["/materiais", () => <Org.Materials />],
   ["/dados-territoriais", () => <Org.GovData />, ["government", "platform"]],
   ["/projetos/:id/impacto", (p) => <Impact.ProjectImpact id={p.id} />],
+  ["/projetos/:id/dossie", (p) => <Impact.ProjectDossier id={p.id} />],   // v0.30.0 — dossiê longitudinal (ADR-361)
   // v0.20.0 (§94) — as seis áreas que tinham API, serviço, banco, eventos, permissões, testes e
   // documentação, e nenhuma tela. UI mínima funcional, para o fluxo poder ser validado por uma
   // pessoa antes do refinamento visual do Designer.

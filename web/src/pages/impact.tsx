@@ -247,3 +247,90 @@ export function Determinants() {
 }
 
 export { KeyValue, Chips };
+
+// ============================================================ dossiê longitudinal (v0.30.0, ADR-361)
+// Uma leitura só, para quem financia ou acompanha: cada bloco diz a ORIGEM, a ATUALIDADE e as LACUNAS. Nada aqui é nota.
+function Freshness({ b }: { b: any }) {
+  const tone = b.freshness === "recent" ? "ok" : b.freshness === "stale" ? "warn" : "muted";
+  const txt = b.freshness === "recent" ? `atualizado há ${b.age_days} d` : b.freshness === "stale" ? `sem novidade há ${b.age_days} d` : "sem data registrada";
+  return <Pill tone={tone}>{txt}</Pill>;
+}
+
+function Source({ b }: { b: any }) {
+  return <p className="fineprint">Origem: <code>{b.source}</code></p>;
+}
+
+export function ProjectDossier({ id }: { id: string }) {
+  const { data: d, loading, error, reload } = useLoad(`/v1/projects/${id}/dossier`);
+  const counts = (o: Record<string, number>) => Object.entries(o || {}).map(([k, v]) => `${label(k)} ${v}`).join(" · ") || "nenhum";
+  return (
+    <>
+      <PageHead title={<>Dossiê do projeto <ContextualHelp id="indicador_validado" /></>} sub={d?.project?.title}
+                back={<Link to={`/projetos/${id}`} className="back">Projeto</Link>} />
+      <StateView loading={loading} error={error} onRetry={reload}>
+        {d && (
+          <div className="stack-lg">
+            <Panel title="O que este dossiê é — e o que não é" quiet>
+              <ul className="rows">{d.what_this_is_not.map((x: string) => <li key={x}>{x}</li>)}</ul>
+              {d.gaps.length > 0 && <p className="note">Lacunas declaradas (não são zero): {d.gaps.map(label).join(", ")}.</p>}
+            </Panel>
+            <Panel title={<>Prontidão <ContextualHelp id="diagnostico_prontidao" /></>} actions={<Freshness b={d.readiness} />}>
+              <KeyValue items={[["Estado", label(d.readiness.state)], ["Critérios atendidos", `${d.readiness.met} de ${d.rules_version.readiness_criteria}`],
+                                ["Não atendidos", String(d.readiness.unmet)], ["Sem dado (desconhecido)", String(d.readiness.unknown)]]} />
+              <ul className="rows">{(d.readiness.criteria || []).map((c: any) => <li key={c.key}><span>{c.label}</span><Pill status={c.status} /></li>)}</ul>
+              <Source b={d.readiness} />
+            </Panel>
+            <Panel title="Marcos e obrigações contratuais" actions={<Freshness b={d.milestones} />}>
+              <KeyValue items={[["Marcos", counts(d.milestones.by_status)], ["Obrigações atrasadas", String(d.milestones.overdue_obligations)],
+                                ["Obrigações por tipo e estado", counts(d.milestones.obligations_by_kind_status)]]} />
+              <Source b={d.milestones} />
+            </Panel>
+            <Panel title={<><GlossaryTerm id="evidencia">Evidências</GlossaryTerm> por estado</>} actions={<Freshness b={d.evidences} />}>
+              <KeyValue items={[["Validadas (aceitas por quem financia)", String(d.evidences.classification.validated)],
+                                ["Declaradas (enviadas, aguardando)", String(d.evidences.classification.declared)],
+                                ["Contestadas / em reanálise", String(d.evidences.classification.contested)],
+                                ["Rejeitadas", String(d.evidences.classification.rejected)], ["Substituídas", String(d.evidences.classification.superseded)],
+                                ["Com documento (hash)", `${d.evidences.quality.with_document} de ${d.evidences.total}`],
+                                ["Com método de coleta declarado", `${d.evidences.quality.method_known} de ${d.evidences.total}`],
+                                ["Com base de consentimento declarada", `${d.evidences.quality.consent_known} de ${d.evidences.total}`]]} />
+              <Source b={d.evidences} />
+            </Panel>
+            <Panel title={<><GlossaryTerm id="indicador_validado">Indicadores</GlossaryTerm>: reportado × validado</>} actions={<Freshness b={d.indicators} />}>
+              {d.indicators.series.length === 0 && <p className="muted">Nenhum indicador definido: lacuna, não zero.</p>}
+              {d.indicators.series.map((s: any) => (
+                <div key={s.project_indicator_id} className="stack">
+                  <strong>{s.name}</strong> <span className="muted">({s.unit})</span>
+                  <p className="small">Método: {s.method || <em>não declarado</em>}{s.target != null && ` · meta ${n(s.target)}`}{s.baseline != null && ` · linha de base ${n(s.baseline)}`}</p>
+                  {!s.comparable && <p className="note">Método mudou {s.method_changes.length}×: valores antes e depois não são diretamente comparáveis ({s.method_changes.map((m: any) => m.reason).join("; ")}).</p>}
+                  <table className="table"><thead><tr><th>Data</th><th>Valor</th><th>Estado</th><th>Origem</th></tr></thead>
+                    <tbody>
+                      {[...s.validated.map((v: any) => ({ ...v, k: "validado" })), ...s.reported.map((v: any) => ({ ...v, k: "reportado" }))]
+                        .sort((a, b) => String(a.measured_on).localeCompare(String(b.measured_on)))
+                        .map((v: any, i: number) => <tr key={i}><td>{v.measured_on}</td><td>{n(v.value)}</td><td><Pill status={v.status} /></td><td>{label(v.source_kind)}{v.has_evidence ? "" : " (sem evidência)"}</td></tr>)}
+                      {s.validated.length + s.reported.length === 0 && <tr><td colSpan={4} className="muted">sem medição</td></tr>}
+                    </tbody></table>
+                </div>
+              ))}
+              <Source b={d.indicators} />
+            </Panel>
+            <Panel title={<>Aportes e repasses <ContextualHelp id="nao_custodial" /></>}>
+              <KeyValue items={[["Compromissos (centavos, por estado)", counts(d.funding.commitments_cents_by_status)],
+                                ["Transferências registradas / confirmadas", `${d.funding.transfers.registered} / ${d.funding.transfers.confirmed}`]]} />
+              <p className="fineprint">{d.funding.notice}</p>
+              <Source b={d.funding} />
+            </Panel>
+            <Panel title="Diligências pendentes">
+              <KeyValue items={[["Evidências aguardando decisão", String(d.diligence.evidence_pending)], ["Medições aguardando validação", String(d.diligence.values_awaiting_validation)],
+                                ["Obrigações atrasadas", String(d.diligence.obligations_overdue)]]} />
+            </Panel>
+            <Panel title="Trilha no tempo" actions={<Freshness b={d.timeline} />}>
+              <KeyValue items={[["Transições de situação", String(d.timeline.transitions)], ["Retratos", String(d.timeline.snapshots)]]} />
+              <Source b={d.timeline} />
+            </Panel>
+            <p className="fineprint">Motor {d.engine} · gerado em {d.generated_at} · regras: {d.rules_version.readiness_criteria} critérios de prontidão, estados de evidência {d.rules_version.evidence_states}, proveniência {d.rules_version.indicator_provenance}.</p>
+          </div>
+        )}
+      </StateView>
+    </>
+  );
+}

@@ -166,6 +166,7 @@ function Overview({ p }: { p: any }) {
         <Panel title="Aprofundar">
           <ul className="rows">
             <li><Link to={`/projetos/${p.id}/impacto`}>Impacto, ODS e indicadores</Link></li>
+            {(p.is_owner || p.my_application || p.funding?.committed_cents > 0) && <li><Link to={`/projetos/${p.id}/dossie`}>Dossiê longitudinal (evidências, séries, lacunas)</Link></li>}
             <li><Link to={`/projetos/${p.id}/grafo`}>Impact Graph</Link></li>
             {p.is_owner && <><li><ProposeParticipation projectId={p.id} onDone={() => navigate("/participacoes")} /></li>
             <li><Link to={`/projetos/${p.id}/situacao`}>Situação e transições</Link></li>

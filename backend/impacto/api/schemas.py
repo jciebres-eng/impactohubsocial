@@ -541,6 +541,12 @@ class IndicatorCatalogIn(In):
     ods_target: TargetCode | None = None
 
 
+class ProjectIndicatorMethodPatch(In):
+    """v0.30.0 (ADR-362): mudar o método de medição exige motivo; a mudança fica registrada e a série marca a descontinuidade."""
+    method: Annotated[str, Field(min_length=3, max_length=1000)]
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
 class ProjectIndicatorIn(In):
     indicator_id: Uuid
     baseline: Annotated[float | None, Field(ge=-1e12, le=1e12)] = None

@@ -123,6 +123,38 @@ def add_project_indicator(ctx: Ctx, body: S.ProjectIndicatorIn):
     return {"id": piid}
 
 
+@route("PATCH", "/v1/projects/{project_id}/indicators/{pi_id}/method", body=S.ProjectIndicatorMethodPatch, kinds=("osc",), min_role="member", tags=T,
+       summary="Muda o método de medição com motivo; a mudança fica registrada (append-only) e a série passa a marcar a descontinuidade (v0.30.0)")
+def change_indicator_method(ctx: Ctx, body: S.ProjectIndicatorMethodPatch):
+    with ctx.tx() as c:
+        p = _owned_project(c, ctx, ctx.path["project_id"])
+        n = c.run("UPDATE project_indicators SET method = $3, method_change_reason = $4 WHERE id = $1 AND project_id = $2",
+                  ctx.path["pi_id"], p["id"], body.method, body.reason)
+        if not n:
+            raise not_found("Indicador do projeto")
+        changes = c.query("SELECT changed_at, old_method, new_method, reason FROM indicator_method_changes WHERE project_indicator_id = $1 ORDER BY changed_at",
+                          ctx.path["pi_id"])
+        ctx.audit(c, "project.indicator_method_changed", "project_indicator", ctx.path["pi_id"], {"changes": len(changes)})
+    return {"id": ctx.path["pi_id"], "method": body.method, "changes": changes,
+            "notice": "a série passa a ter uma descontinuidade: valores antes e depois da mudança não são diretamente comparáveis"}
+
+
+@route("GET", "/v1/projects/{project_id}/dossier", min_role="viewer", tags=T,
+       summary="Dossiê longitudinal do projeto: prontidão, marcos, evidências por estado, indicadores reportado × validado, aportes, diligências, trilha — com origem, atualidade e lacunas (v0.30.0)")
+def project_dossier(ctx: Ctx):
+    from ..services import dossier as DS
+    pid = ctx.path["project_id"]
+    with ctx.tx(readonly=True) as c:
+        # o dossiê é para quem está NA relação com o projeto (dona, financiador com aporte, parte de acordo, governo com acesso
+        # de revisão, administração) — não para qualquer um que enxergue o projeto publicado: evidências e séries são das partes
+        allowed = c.scalar("SELECT EXISTS (SELECT 1 FROM projects p WHERE p.id = $1 AND (p.org_id = app_org() OR app_project_investor(p.id)"
+                           " OR app_project_party(p.id) OR app_review_access('project', p.id) OR app_priv()))", pid)
+        out = DS.build(c, pid, ctx.org_id) if allowed else None
+    if not out:
+        raise not_found("Projeto")
+    return out
+
+
 @route("DELETE", "/v1/projects/{project_id}/indicators/{pi_id}", kinds=("osc",), min_role="member", tags=T)
 def remove_project_indicator(ctx: Ctx):
     with ctx.tx() as c:

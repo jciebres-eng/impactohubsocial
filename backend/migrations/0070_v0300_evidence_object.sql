@@ -155,5 +155,42 @@ ALTER TABLE ledger_entries ADD CONSTRAINT ledger_entries_entry_type_check CHECK 
   'evidence_contested','evidence_superseded'));
 
 
--- ============================================================================ 6. auditoria
+-- ============================================================================ 6. mudança metodológica de indicador (ADR-362)
+-- `project_indicators.method` (como será medido) podia mudar por UPDATE sem rastro; uma série comparada antes e depois de
+-- uma mudança de método compara coisas diferentes. Toda mudança fica registrada (de → para, motivo, quem, quando), e a
+-- leitura da série marca a descontinuidade. Append-only.
+CREATE TABLE indicator_method_changes (
+  id                   bigserial PRIMARY KEY,
+  project_indicator_id uuid NOT NULL REFERENCES project_indicators(id) ON DELETE CASCADE,
+  project_id           uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  old_method           text,
+  new_method           text,
+  reason               text CHECK (length(reason) <= 2000),
+  changed_by           uuid REFERENCES users(id),
+  changed_at           timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ix_indicator_method_changes ON indicator_method_changes(project_indicator_id, changed_at);
+CREATE TRIGGER trg_indicator_method_changes_append_only BEFORE UPDATE OR DELETE ON indicator_method_changes FOR EACH ROW EXECUTE FUNCTION forbid_mutation();
+ALTER TABLE project_indicators ADD COLUMN method_change_reason text CHECK (length(method_change_reason) <= 2000);
+CREATE FUNCTION indicator_method_change_log() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.method IS DISTINCT FROM OLD.method THEN
+    IF NEW.method_change_reason IS NULL OR length(NEW.method_change_reason) < 10 THEN
+      RAISE EXCEPTION 'mudar o método de medição exige motivo escrito (method_change_reason)' USING ERRCODE = '23514';
+    END IF;
+    INSERT INTO indicator_method_changes(project_indicator_id, project_id, old_method, new_method, reason, changed_by)
+    VALUES (NEW.id, NEW.project_id, OLD.method, NEW.method, NEW.method_change_reason, app_uid());
+    NEW.method_change_reason := NULL;   -- o motivo vive no registro, não na linha corrente
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER trg_indicator_method_change BEFORE UPDATE ON project_indicators FOR EACH ROW EXECUTE FUNCTION indicator_method_change_log();
+ALTER TABLE indicator_method_changes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY indicator_method_changes_read ON indicator_method_changes FOR SELECT USING (
+  EXISTS (SELECT 1 FROM projects p WHERE p.id = indicator_method_changes.project_id));   -- quem enxerga o projeto (RLS de projects) enxerga a mudança
+CREATE POLICY indicator_method_changes_insert ON indicator_method_changes FOR INSERT WITH CHECK (true);   -- só o gatilho insere
+GRANT SELECT, INSERT ON indicator_method_changes TO impacto_app;
+GRANT USAGE ON SEQUENCE indicator_method_changes_id_seq TO impacto_app;
+
+-- ============================================================================ 7. auditoria
 -- (evidence_events referencia evidências por FK direta; nada polimórfico a declarar) — prefixo de auditoria já coberto por 'execution'

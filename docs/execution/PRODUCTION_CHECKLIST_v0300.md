@@ -9,8 +9,8 @@ Estado de cada item nesta instalação de referência (sem produção): **FEITO*
 |---|---|---|---|
 | A1 | Backup da base anterior guardado fora do host (`pg_dump -Fc`) | PENDENTE DO PROPRIETÁRIO | `docs/execution/ROLLBACK_v0300.md` §0 |
 | A2 | Migração 0070 aplicada do zero e sobre cópia da v0.29.0 com ROLLBACK (dry-run) | FEITO | `impacto_m70` (template de m69 + 0069; 0070 em BEGIN/ROLLBACK) e suíte; `test_v0230_data_infra_gate` (nenhum DROP de tabela) |
-| A3 | Regressão completa (2 passagens) e portões de fechamento | ver `FINAL_EXECUTION_REPORT.md` §24 | `docs/evidence/test_run_v0.30.0.log` |
-| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | ver `FINAL_EXECUTION_REPORT.md` §3 | `gh run list` |
+| A3 | Regressão completa (2 passagens: 2400 testes, 0 erro; falhas só de fechamento/regeneração) e portões 169/169; robô de telas 227 OK | FEITO | `docs/evidence/test_run_v0.30.0.log`; `FINAL_EXECUTION_REPORT.md` §24 |
+| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | FEITO (`5d46e50`, run `37957125812`, 4/4 verdes na primeira tentativa) | `FINAL_EXECUTION_REPORT.md` §3 |
 | A5 | Pacote confere byte a byte com o git; sem segredo; sem ZIP aninhado | FEITO no fechamento | `verify_package_against_git.py`, `secrets_scan.py`, `unzip -t` |
 | A6 | Tag `v0.30.0` no commit de fechamento | PENDENTE DO PROPRIETÁRIO (proxy recusa push de tag) | GitHub → Releases |
 | A7 | Evidências existentes continuam válidas após a 0070 | FEITO | colunas novas com DEFAULT (`method='unknown'`, `access_level='parties'`, `consent_basis='unknown'`, `retention_class='project'`, `version=1`); nenhum UPDATE em massa; o CHECK de rejeição é `NOT VALID` (vale para linhas que mudem daqui em diante) |

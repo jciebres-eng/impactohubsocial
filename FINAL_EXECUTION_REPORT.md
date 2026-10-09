@@ -51,8 +51,10 @@ regressão) e o **commit final dos manifestos**, para o qual a tag `v0.30.0` dev
 (`verify_package_against_git.py`); o hash desse commit é registrado no `.sha256` do pacote. `FINAL_RELEASE_MANIFEST.json` registra o
 último commit de conteúdo.
 
-**GitHub Actions:** o resultado da run do commit candidato à tag é registrado no commit seguinte (procedimento das versões
-anteriores); ver o parágrafo "CI" no fim desta seção quando existir.
+**GitHub Actions:** run `37957125812` do commit candidato à tag `5d46e50`: `auditoria` (gitleaks + ruff), `docker` (typecheck
+oficial `tsc --noEmit` + build), `pilha-do-zero` (banco vazio → imagem → migrações 0001–0070 → seed → jornadas → 227 telas → axe →
+reinício) e `backend` (suíte oficial completa) — **os quatro verdes na primeira tentativa**. Este parágrafo foi acrescentado depois
+da run, no commit seguinte; a tag `v0.30.0` aponta para `5d46e50`.
 
 ## 4. Architecture Status
 

@@ -49,8 +49,8 @@ documento, rota, mock ou tela — só por teste executado ou arquivo gerado.
 | E2E browser por perfil | PASSOU | `test_e2e_v0300_dossier` (dona + financiador), suíte E2E existente |
 | Acessibilidade e responsividade | PASSOU (telas tocadas) | A11Y_JS + contraste claro/escuro no dossiê; `test_e2e_v0181_accessibility` |
 | Testes de segurança e autorização negativa | PASSOU | sweep 940 operações; `test_v0230_security_gate` |
-| Regressão após correções | ver §24 do relatório | `docs/evidence/test_run_v0.30.0.log` |
-| ZIP validado e SHA-256 calculado | no fechamento | `FINAL_EXECUTION_REPORT.md` cabeçalho |
+| Regressão após correções | PASSOU (2ª passagem 0 erro; portões 169/169; CI 4/4 verde em `5d46e50`) | `docs/evidence/test_run_v0.30.0.log`; run `37957125812` |
+| ZIP validado e SHA-256 calculado | PASSOU | `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip` (3.726 arquivos, byte a byte = `5d46e50`); SHA-256 `3f1f3988…f086a5` |
 
 ## Release
 

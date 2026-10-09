@@ -10,8 +10,8 @@ registrada), **PENDENTE DO PROPRIETÁRIO** (credencial, conta, parecer, decisão
 |---|---|---|---|
 | A1 | Backup da base anterior guardado fora do host (`pg_dump -Fc`) | PENDENTE DO PROPRIETÁRIO | `docs/execution/ROLLBACK_v0290.md` §0 |
 | A2 | Migração 0069 aplicada do zero e sobre cópia da v0.28.0 com ROLLBACK (dry-run) | FEITO | suíte (`tests/support`) e `impacto_m69` (template de m68 + 0068, 0069 em BEGIN/ROLLBACK); `test_v0230_data_infra_gate` (nenhum DROP de tabela) |
-| A3 | Regressão completa verde (2 passagens) e portões de fechamento | ver `FINAL_EXECUTION_REPORT.md` §24 | `docs/evidence/test_run_v0.29.0.log` |
-| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | ver `FINAL_EXECUTION_REPORT.md` §3 | `gh run list` |
+| A3 | Regressão completa (2 passagens: 2379/2380 testes, 0 erro na 2ª; 5 falhas só de fechamento) e portões 184/184 | FEITO | `docs/evidence/test_run_v0.29.0.log`; `FINAL_EXECUTION_REPORT.md` §24 |
+| A4 | CI do GitHub (auditoria, backend, docker, pilha-do-zero) verde no commit final | FEITO (`dd2f8c3`, run `37935603837`, 4/4 verdes; a run anterior `37932633056` reprovou e foi corrigida — auditoria §7) | `FINAL_EXECUTION_REPORT.md` §3 |
 | A5 | Pacote confere byte a byte com o git; sem segredo; sem ZIP aninhado | FEITO no fechamento | `verify_package_against_git.py`, `secrets_scan.py`, `unzip -t` |
 | A6 | Tag `v0.29.0` no commit de fechamento | PENDENTE DO PROPRIETÁRIO (proxy recusa push de tag) | GitHub → Releases |
 | A7 | `web/src/concepts.ts` em sincronia com `config/concepts.json` | FEITO | `python3 scripts/sync_concepts.py --check` (também no teste) |

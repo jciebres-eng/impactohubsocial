@@ -72,8 +72,10 @@ desse commit é registrado no `.sha256` do pacote e não cabe dentro do próprio
 **GitHub Actions:** a run `37932633056` do primeiro commit de manifestos (`9043b5a`) reprovou 3 de 4
 trabalhos — gitleaks (falso positivo no campo `source_key` do catálogo de conceitos) e o typecheck
 oficial (7 importações não usadas), que derrubou também a pilha do zero; causas e correções na
-auditoria §7 (3ª rodada). O commit de manifestos seguinte é o candidato à tag; o resultado da sua run
-é registrado no commit posterior, como na v0.28.0.
+auditoria §7 (3ª rodada). **Run `37935603837` do commit candidato à tag `dd2f8c3`: `auditoria`, `docker`
+(typecheck oficial), `pilha-do-zero` (banco vazio → imagem → migrações → seed → jornadas → 226 telas → axe →
+reinício) e `backend` (gitleaks + suíte oficial completa) — os quatro verdes.** Este parágrafo foi acrescentado
+depois da run, no commit seguinte; a tag `v0.29.0` aponta para `dd2f8c3`.
 
 ## 4. Architecture Status
 

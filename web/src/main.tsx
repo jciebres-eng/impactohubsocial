@@ -9,6 +9,7 @@ import { StepUpProvider } from "./ui/stepup";
 import { ErrorBoundary as Boundary } from "./ui/boundary";
 import { bootTheme } from "./pages/prefs";
 import { installScrollFocus } from "./ui/scrollfocus";
+import { DemoBanner } from "./ui/demobanner";
 
 const ErrorBoundary = Boundary as unknown as (p: { children: any }) => any; // (componente de classe; tipagem mínima offline)
 
@@ -24,7 +25,7 @@ createRoot(document.getElementById("root")!).render(
         <SessionProvider>
           <AccessProvider>
             <StepUpProvider>
-              <ErrorBoundary><App /></ErrorBoundary>
+              <ErrorBoundary><DemoBanner /><App /></ErrorBoundary>
             </StepUpProvider>
           </AccessProvider>
         </SessionProvider>

@@ -65,9 +65,9 @@ Supabase nesta rodada: diagnóstico em `READ ONLY`, `pg_dump` só lê.
 
 | Job | Estado | Evidência |
 |---|---|---|
-| `auditoria`, `docker`, `pilha-do-zero` | PASS | run 37977204420 (branch) |
-| `armazenamento` (novo) | PASS | runs 37978728985 e seguintes |
-| `backend` | PARTIAL | 2.414 testes; 3 falhas de fechamento/segredo já corrigidas (§7); run final no fechamento |
+| `auditoria`, `docker`, `pilha-do-zero` | PASS | run 37988786394 (commit candidato `4f7f469`) |
+| `armazenamento` (novo) | PASS | run 37988786394: 8/8 contra CloudServer |
+| `backend` | PASS | run 37988786394 (suíte oficial completa, commit candidato `4f7f469`) |
 
 ## 7. Regressão — o que esta rodada encontrou e o que foi feito
 

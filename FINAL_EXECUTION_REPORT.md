@@ -41,9 +41,11 @@ dos manifestos, para o qual a tag `v0.31.0` deve apontar e do qual o pacote é c
 O hash desse commit é registrado no `.sha256` do pacote. A junção no `main` **não foi feita**: o Railway publica o `main`, e publicar
 depende da aprovação do proprietário.
 
-**GitHub Actions (ramo):** `supabase` (37974779816, 37975067994: verificar; 37975650545: backup-restaurar), `ci` (37977204420:
-auditoria, docker, pilha-do-zero verdes; backend 2.414 testes com 3 falhas de fechamento/segredo já corrigidas; 37978728985:
-armazenamento verde contra CloudServer).
+**GitHub Actions (ramo):** `supabase` (37974779816, 37975067994: verificar; 37975650545: backup-restaurar). **Run `37988786394` do
+commit candidato à tag `4f7f469`: `auditoria`, `docker`, `armazenamento` (8/8 verificações do adaptador S3 contra servidor real,
+`Content-Disposition` presente), `pilha-do-zero` e `backend` (suíte oficial completa) — os cinco verdes na primeira tentativa.**
+Este parágrafo foi acrescentado depois da run, no commit seguinte; a tag `v0.31.0` aponta para `4f7f469`. Pacote:
+`IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip`, SHA-256 `98399a267bee45a9e3033c77bf0f9b263aa4d0e6c7e75ec3975751f4e1c40637`.
 
 ## 4. Architecture Status
 

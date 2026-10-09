@@ -136,7 +136,13 @@ jobs:
           S3_TEST_BUCKET: impacto-teste
           S3_TEST_ACCESS_KEY_ID: impactoteste
           S3_TEST_SECRET_ACCESS_KEY: impactoteste-descartavel-0123
-        run: cd backend && python -m unittest tests.test_v0310_storage -v
+        run: |
+          set -o pipefail
+          cd backend && python -m unittest tests.test_v0310_storage -v 2>&1 | tee ../armazenamento.log
+          ! grep -q "skipped 'sem servidor S3" ../armazenamento.log || { echo "::error::o teste de protocolo PULOU — servidor não configurado"; exit 1; }
+          cd .. && S3_ENDPOINT=$S3_TEST_ENDPOINT S3_REGION=us-east-1 S3_BUCKET=$S3_TEST_BUCKET S3_ACCESS_KEY_ID=$S3_TEST_ACCESS_KEY_ID \
+            S3_SECRET_ACCESS_KEY=$S3_TEST_SECRET_ACCESS_KEY python3 scripts/storage_smoke.py | tee smoke.txt
+          echo "::notice title=Adaptador S3 × servidor real::$(grep -E 'PASS|FAIL|AVISO|VEREDITO' smoke.txt | sed 's/^ *//' | paste -sd'|' -)"
 
   auditoria:
     runs-on: ubuntu-24.04

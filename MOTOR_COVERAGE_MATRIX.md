@@ -1,4 +1,4 @@
-# MOTOR COVERAGE MATRIX — IMPACTO TRUST (v0.27.0)
+# MOTOR COVERAGE MATRIX — IMPACTO TRUST (v0.28.0)
 
 Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/coverage.py` e das jornadas
 (`tests/demo_journeys.py`, `tests/test_e2e_*.py`). **Nenhuma coluna é escrita à mão.** Conferida por

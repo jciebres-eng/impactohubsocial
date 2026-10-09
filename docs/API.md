@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.27.0)
+# API REST /v1 — referência gerada do código (v0.28.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (895)
+## Operações (923)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -22,8 +22,17 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/agreements/{agreement_id}/members/{org_id}/revoke` | admin da plataforma + MFA | — | Remove uma organização do convênio (revoga a licença e libera a vaga) |
 | GET | `/v1/admin/ai` | admin da plataforma + MFA | — | Central de controle de IA: prompts, faixas, resultados reais, custo e o que não está implementado |
 | GET | `/v1/admin/ai/cost` | admin da plataforma + MFA | — | Custo estimado de IA por provedor, modelo e recurso — insumo da margem |
+| GET | `/v1/admin/ai/credit-orders` | admin da plataforma + MFA | — | Pedidos de crédito de todas as organizações |
+| POST | `/v1/admin/ai/credit-orders/{order_id}/approve-pilot` | admin da plataforma + MFA | — | Aprova um pedido PILOTO como concessão promocional (sem pagamento; nunca receita) |
+| POST | `/v1/admin/ai/credit-orders/{order_id}/confirm` | admin da plataforma + MFA | — | Conciliação manual de um pedido REAL: referência do extrato obrigatória; credita compra uma vez |
+| POST | `/v1/admin/ai/credit-packs` | admin da plataforma + MFA | — | Publica uma versão nova de pacote de créditos (preço em centavos; status diz se é hipótese) |
+| GET | `/v1/admin/ai/disputes` | admin da plataforma + MFA | — | Contestações de similaridade para revisão humana |
+| POST | `/v1/admin/ai/disputes/{dispute_id}/review` | admin da plataforma + MFA | — | Revisão humana de uma contestação: mantida ou corrigida, com nota |
+| GET | `/v1/admin/ai/finance` | admin da plataforma + MFA | — | Painel financeiro da IA: execuções por categoria, custo medido × estimado, créditos vendidos/concedidos/consumidos, obrigações, margem, alertas |
+| POST | `/v1/admin/ai/operations` | admin da plataforma + MFA | — | Publica uma versão nova de operação do catálogo (a anterior fica; execuções antigas guardam a sua versão) |
 | POST | `/v1/admin/ai/prices` | admin da plataforma + MFA | — | Declara o preço de um modelo de IA (versionado, com fonte) |
 | GET | `/v1/admin/ai/prompts/{prompt_key}` | admin da plataforma + MFA | — | Histórico de versões de um prompt (sem o texto, que é do produto) |
+| PUT | `/v1/admin/ai/quota-policies/{key}` | admin da plataforma + MFA | — | Cria ou altera uma política de cota gratuita (com trilha de auditoria) |
 | GET | `/v1/admin/audit` | admin da plataforma + MFA | — | audit search |
 | POST | `/v1/admin/audit/export` | admin da plataforma + MFA | — | Exporta a trilha filtrada — e registra a própria exportação na trilha |
 | GET | `/v1/admin/audit/timeline` | admin da plataforma + MFA | — | Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização |
@@ -218,11 +227,25 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/agreements/join` | membro da organização ativa | papel ≥ owner; limite 10/3600s | Entrar em um convênio com o código (vagas, validade e — se houver — domínio de e-mail verificado). Resposta genérica para códigos inválidos. |
 | GET | `/v1/agreements/pending` | membro da organização ativa | papel ≥ viewer | O que espera decisão desta organização nos acordos vigentes (entregar, aceitar, pagar) |
 | PUT | `/v1/ai/budget` | membro da organização ativa | papel ≥ admin | Define o orçamento de IA da organização para o mês corrente |
+| GET | `/v1/ai/center` | membro da organização ativa | papel ≥ viewer | Central de IA: saldo por lote, cotas, operações com preço e elegibilidade, histórico, pedidos, patrocínios, regras |
 | POST | `/v1/ai/classify-document/{document_id}` | membro da organização ativa | papel ≥ member; limite 60/3600s | Sugere o tipo e a validade de um documento enviado (processamento local; nada é enviado a terceiros) |
+| GET | `/v1/ai/credit-orders` | membro da organização ativa | papel ≥ viewer | Pedidos de crédito da organização |
+| POST | `/v1/ai/credit-orders` | membro da organização ativa | papel ≥ admin; limite 20/3600s | Pedido de créditos por PIX (modo real: cobrança própria aguardando confirmação; modo piloto: sem pagamento) |
+| GET | `/v1/ai/credit-orders/{order_id}` | membro da organização ativa | papel ≥ viewer | Um pedido de crédito com a instrução de pagamento (ou o aviso de piloto) |
+| POST | `/v1/ai/credit-orders/{order_id}/cancel` | membro da organização ativa | papel ≥ admin; limite 20/3600s | Cancela um pedido não pago |
+| GET | `/v1/ai/credit-packs` | membro da organização ativa | papel ≥ viewer | Pacotes de crédito (status diz se o preço é hipótese ou vigente) e modo de venda |
 | GET | `/v1/ai/credits` | membro da organização ativa | papel ≥ viewer | Extrato de crédito de IA: concessão, consumo e devolução, em ordem |
 | POST | `/v1/ai/draft` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Gera rascunho de proposta/plano/relatório a partir dos dados do projeto (marca [COMPLETAR] onde faltar) |
 | GET | `/v1/ai/estimate` | membro da organização ativa | papel ≥ viewer | Estimativa de custo ANTES de uma operação paga (ou a declaração de que não há preço) |
+| GET | `/v1/ai/executions` | membro da organização ativa | papel ≥ viewer | Histórico de execuções de IA da organização |
+| GET | `/v1/ai/executions/{execution_id}` | membro da organização ativa | papel ≥ viewer | Uma execução, com a trilha de estados |
+| POST | `/v1/ai/executions/{execution_id}/cancel` | membro da organização ativa | papel ≥ member; limite 120/3600s | Cancela uma execução ainda não iniciada (nada é cobrado) |
+| GET | `/v1/ai/operations` | membro da organização ativa | papel ≥ viewer | Catálogo versionado de operações de IA (vigentes) |
 | GET | `/v1/ai/policies` | membro da organização ativa | papel ≥ viewer | Política de IA por faixa de risco: o que sai da instalação e o que exige revisão humana |
+| POST | `/v1/ai/preview` | membro da organização ativa | papel ≥ viewer; limite 120/3600s | Prévia ANTES de executar: o que será feito, créditos, custo estimado, quem paga, saldo, limites — ou por que não dá |
+| POST | `/v1/ai/sponsorships` | membro da organização ativa | tipos: company, government, osc; papel ≥ admin; limite 20/3600s | Cria um patrocínio de uso de IA: compromete créditos do patrocinador para organizações elegíveis |
+| GET | `/v1/ai/sponsorships/{sponsorship_id}` | membro da organização ativa | papel ≥ viewer | Prestação de contas agregada de um patrocínio (só o patrocinador) |
+| POST | `/v1/ai/sponsorships/{sponsorship_id}/close` | membro da organização ativa | papel ≥ admin; limite 20/3600s | Encerra o patrocínio e devolve o crédito não usado ao patrocinador |
 | POST | `/v1/ai/structure-need` | membro da organização ativa | tipos: osc; papel ≥ member; limite 60/3600s | Transforma uma necessidade descrita livremente em projeto estruturado (título, causas, ODS, itens de orçamento, perguntas) |
 | POST | `/v1/ai/summarize-project` | membro da organização ativa | papel ≥ viewer; limite 60/3600s | Resumo do projeto para leitura rápida do financiador |
 | GET | `/v1/ai/usage` | membro da organização ativa | papel ≥ viewer | Uso de IA no mês: cota, orçamento em dinheiro, crédito e como as chamadas terminaram |
@@ -730,6 +753,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/projects/{project_id}/risks` | membro da organização ativa | papel ≥ member | create risk |
 | POST | `/v1/projects/{project_id}/risks/scan` | membro da organização ativa | papel ≥ member | Aplica as regras de risco sobre o projeto (indícios, revisados por pessoa) |
 | PUT | `/v1/projects/{project_id}/risks/{risk_id}` | membro da organização ativa | papel ≥ member | Atualiza o risco (a origem nunca muda: risco apontado por regra não passa a declarado) |
+| POST | `/v1/projects/{project_id}/similarity` | membro da organização ativa | papel ≥ viewer; limite 60/3600s | Originalidade, comparação de dois, conjunto, complementaridade ou sobreposição de despesas — pela camada de uso (prévia, custeio, cobrança só em sucesso) |
 | GET | `/v1/projects/{project_id}/snapshots` | membro da organização ativa | papel ≥ viewer | list snapshots |
 | POST | `/v1/projects/{project_id}/snapshots` | membro da organização ativa | papel ≥ member | Guarda um retrato comparável do projeto neste instante |
 | GET | `/v1/projects/{project_id}/snapshots/compare` | membro da organização ativa | papel ≥ viewer | Compara dois retratos campo a campo (o que mudou, entrou e saiu) |
@@ -817,6 +841,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/signed-agreements/{agreement_id}/publish` | membro da organização ativa | papel ≥ manager | Envia o acordo para assinatura (exige pelo menos duas partes obrigatórias) |
 | POST | `/v1/signed-agreements/{agreement_id}/sign` | membro da organização ativa | papel ≥ owner; limite 30/3600s | Assina o acordo como parte (duas camadas: senha e código de uso único ligado ao hash) |
 | GET | `/v1/signed-agreements/{agreement_id}/value` | membro da organização ativa | papel ≥ viewer | O que o IMPACTO fez nesta operação — por registro, não por slogan (base do Value Capture) |
+| GET | `/v1/similarity/analyses` | membro da organização ativa | papel ≥ viewer | Análises de similaridade da organização |
+| GET | `/v1/similarity/analyses/{analysis_id}` | membro da organização ativa | papel ≥ viewer | Uma análise completa, com execução e contestações |
+| POST | `/v1/similarity/analyses/{analysis_id}/dispute` | membro da organização ativa | papel ≥ member; limite 60/3600s | Contesta uma análise (vai para revisão humana da administração) |
 | GET | `/v1/solution-intents/mine` | membro da organização ativa | papel ≥ viewer | Meu funil: soluções em que declarei interesse |
 | POST | `/v1/solution-intents/{intent_id}/stage` | membro da organização ativa | tipos: osc, individual, company, government, provider; papel ≥ admin | O autor confirma uma etapa avançada (negociando … concluído); exige pedido aceito do financiador |
 | GET | `/v1/solution-replications/mine` | membro da organização ativa | papel ≥ viewer | Replicações da minha organização (como replicadora) e das minhas soluções (como autora) |
@@ -905,6 +932,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/verifiable-records/{record_id}/revoke` | membro da organização ativa | papel ≥ owner | Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data) |
 | POST | `/v1/verifiable-records/{record_id}/timestamp` | membro da organização ativa | papel ≥ manager | Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível) |
 | POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher de concessão (transação atômica; resposta genérica para códigos inválidos; vouchers de desconto aposentados) |
+| POST | `/v1/webhooks/payments/{provider}` | pública | limite 600/60s | Webhook do provedor de pagamento: assinatura HMAC conferida, evento deduplicado, pedido de crédito creditado uma vez |
 | GET | `/v1/workspace` | membro da organização ativa | papel ≥ viewer | WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem |
 | GET | `/v1/workspace/personas` | usuário autenticado | — | Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano) |
 | POST | `/v1/workspace/personas` | membro da organização ativa | papel ≥ admin | declare persona |

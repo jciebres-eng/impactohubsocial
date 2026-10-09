@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -37761,6 +37761,1105 @@
     },
     "description": "Administração da plataforma com MFA"
    }
+  },
+  "/v1/ai/center": {
+   "get": {
+    "summary": "Central de IA: saldo por lote, cotas, operações com preço e elegibilidade, histórico, pedidos, patrocínios, regras",
+    "operationId": "get_ai_center_routes_center",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/ai/operations": {
+   "get": {
+    "summary": "Catálogo versionado de operações de IA (vigentes)",
+    "operationId": "get_ai_center_routes_operations",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/ai/preview": {
+   "post": {
+    "summary": "Prévia ANTES de executar: o que será feito, créditos, custo estimado, quem paga, saldo, limites — ou por que não dá",
+    "operationId": "post_ai_center_routes_preview",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer · Rate limit: 120/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PreviewIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/executions": {
+   "get": {
+    "summary": "Histórico de execuções de IA da organização",
+    "operationId": "get_ai_center_routes_executions",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/executions/{execution_id}": {
+   "get": {
+    "summary": "Uma execução, com a trilha de estados",
+    "operationId": "get_ai_center_routes_execution",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "execution_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/executions/{execution_id}/cancel": {
+   "post": {
+    "summary": "Cancela uma execução ainda não iniciada (nada é cobrado)",
+    "operationId": "post_ai_center_routes_cancel_execution",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "execution_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/credit-packs": {
+   "get": {
+    "summary": "Pacotes de crédito (status diz se o preço é hipótese ou vigente) e modo de venda",
+    "operationId": "get_ai_center_routes_credit_packs",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/ai/credit-orders": {
+   "post": {
+    "summary": "Pedido de créditos por PIX (modo real: cobrança própria aguardando confirmação; modo piloto: sem pagamento)",
+    "operationId": "post_ai_center_routes_create_order",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin · Rate limit: 20/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CreditOrderIn"
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "summary": "Pedidos de crédito da organização",
+    "operationId": "get_ai_center_routes_orders",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/credit-orders/{order_id}": {
+   "get": {
+    "summary": "Um pedido de crédito com a instrução de pagamento (ou o aviso de piloto)",
+    "operationId": "get_ai_center_routes_order",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "order_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/credit-orders/{order_id}/cancel": {
+   "post": {
+    "summary": "Cancela um pedido não pago",
+    "operationId": "post_ai_center_routes_cancel_order",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin · Rate limit: 20/3600s por IP",
+    "parameters": [
+     {
+      "name": "order_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/webhooks/payments/{provider}": {
+   "post": {
+    "summary": "Webhook do provedor de pagamento: assinatura HMAC conferida, evento deduplicado, pedido de crédito creditado uma vez",
+    "operationId": "post_ai_center_routes_payment_webhook",
+    "tags": [
+     "billing"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/60s por IP",
+    "parameters": [
+     {
+      "name": "provider",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/sponsorships": {
+   "post": {
+    "summary": "Cria um patrocínio de uso de IA: compromete créditos do patrocinador para organizações elegíveis",
+    "operationId": "post_ai_center_routes_create_sponsorship",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: company, government, osc · Papel mínimo: admin · Rate limit: 20/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SponsorshipIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/sponsorships/{sponsorship_id}": {
+   "get": {
+    "summary": "Prestação de contas agregada de um patrocínio (só o patrocinador)",
+    "operationId": "get_ai_center_routes_sponsorship",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "sponsorship_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/ai/sponsorships/{sponsorship_id}/close": {
+   "post": {
+    "summary": "Encerra o patrocínio e devolve o crédito não usado ao patrocinador",
+    "operationId": "post_ai_center_routes_close_sponsorship",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: admin · Rate limit: 20/3600s por IP",
+    "parameters": [
+     {
+      "name": "sponsorship_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/projects/{project_id}/similarity": {
+   "post": {
+    "summary": "Originalidade, comparação de dois, conjunto, complementaridade ou sobreposição de despesas — pela camada de uso (prévia, custeio, cobrança só em sucesso)",
+    "operationId": "post_ai_center_routes_analyze",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer · Rate limit: 60/3600s por IP",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SimilarityIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/similarity/analyses": {
+   "get": {
+    "summary": "Análises de similaridade da organização",
+    "operationId": "get_ai_center_routes_analyses",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/similarity/analyses/{analysis_id}": {
+   "get": {
+    "summary": "Uma análise completa, com execução e contestações",
+    "operationId": "get_ai_center_routes_analysis",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "analysis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/similarity/analyses/{analysis_id}/dispute": {
+   "post": {
+    "summary": "Contesta uma análise (vai para revisão humana da administração)",
+    "operationId": "post_ai_center_routes_dispute",
+    "tags": [
+     "ai"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: member · Rate limit: 60/3600s por IP",
+    "parameters": [
+     {
+      "name": "analysis_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DisputeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/finance": {
+   "get": {
+    "summary": "Painel financeiro da IA: execuções por categoria, custo medido × estimado, créditos vendidos/concedidos/consumidos, obrigações, margem, alertas",
+    "operationId": "get_ai_center_routes_admin_finance",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/ai/credit-orders": {
+   "get": {
+    "summary": "Pedidos de crédito de todas as organizações",
+    "operationId": "get_ai_center_routes_admin_orders",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/ai/credit-orders/{order_id}/confirm": {
+   "post": {
+    "summary": "Conciliação manual de um pedido REAL: referência do extrato obrigatória; credita compra uma vez",
+    "operationId": "post_ai_center_routes_admin_confirm",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "order_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/OrderConfirmIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/credit-orders/{order_id}/approve-pilot": {
+   "post": {
+    "summary": "Aprova um pedido PILOTO como concessão promocional (sem pagamento; nunca receita)",
+    "operationId": "post_ai_center_routes_admin_pilot",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "order_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PilotApproveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/operations": {
+   "post": {
+    "summary": "Publica uma versão nova de operação do catálogo (a anterior fica; execuções antigas guardam a sua versão)",
+    "operationId": "post_ai_center_routes_admin_operation",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/OperationIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/credit-packs": {
+   "post": {
+    "summary": "Publica uma versão nova de pacote de créditos (preço em centavos; status diz se é hipótese)",
+    "operationId": "post_ai_center_routes_admin_pack",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PackIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/quota-policies/{key}": {
+   "put": {
+    "summary": "Cria ou altera uma política de cota gratuita (com trilha de auditoria)",
+    "operationId": "put_ai_center_routes_admin_quota",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuotaPolicyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/ai/disputes": {
+   "get": {
+    "summary": "Contestações de similaridade para revisão humana",
+    "operationId": "get_ai_center_routes_admin_disputes",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 25,
+       "maximum": 100,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "maximum": 100000,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/ai/disputes/{dispute_id}/review": {
+   "post": {
+    "summary": "Revisão humana de uma contestação: mantida ou corrigida, com nota",
+    "operationId": "post_ai_center_routes_admin_review_dispute",
+    "tags": [
+     "admin"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "dispute_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DisputeReviewIn"
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -59539,41 +60638,15 @@
    "DisputeIn": {
     "additionalProperties": false,
     "properties": {
-     "dimension": {
-      "pattern": "^[a-z][a-z0-9_]{2,40}$",
-      "title": "Dimension",
-      "type": "string"
-     },
-     "what_is_contested": {
+     "reason": {
       "maxLength": 4000,
       "minLength": 20,
-      "title": "What Is Contested",
+      "title": "Reason",
       "type": "string"
-     },
-     "expected_correction": {
-      "maxLength": 4000,
-      "minLength": 20,
-      "title": "Expected Correction",
-      "type": "string"
-     },
-     "evidence_id": {
-      "anyOf": [
-       {
-        "pattern": "^[0-9a-fA-F-]{36}$",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "default": null,
-      "title": "Evidence Id"
      }
     },
     "required": [
-     "dimension",
-     "what_is_contested",
-     "expected_correction"
+     "reason"
     ],
     "title": "DisputeIn",
     "type": "object"
@@ -59962,6 +61035,662 @@
      "rationale"
     ],
     "title": "DismissIn",
+    "type": "object"
+   },
+   "PreviewIn": {
+    "additionalProperties": false,
+    "properties": {
+     "operation_code": {
+      "pattern": "^[a-z][a-z0-9_.]{2,60}$",
+      "title": "Operation Code",
+      "type": "string"
+     },
+     "units": {
+      "default": 1,
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Units",
+      "type": "integer"
+     },
+     "input_chars": {
+      "default": 0,
+      "maximum": 10000000,
+      "minimum": 0,
+      "title": "Input Chars",
+      "type": "integer"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     }
+    },
+    "required": [
+     "operation_code"
+    ],
+    "title": "PreviewIn",
+    "type": "object"
+   },
+   "CreditOrderIn": {
+    "additionalProperties": false,
+    "properties": {
+     "pack_code": {
+      "pattern": "^[a-z][a-z0-9_.]{2,40}$",
+      "title": "Pack Code",
+      "type": "string"
+     },
+     "accept_terms": {
+      "title": "Accept Terms",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "pack_code",
+     "accept_terms"
+    ],
+    "title": "CreditOrderIn",
+    "type": "object"
+   },
+   "SponsorshipIn": {
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "maxLength": 160,
+      "minLength": 3,
+      "title": "Name",
+      "type": "string"
+     },
+     "budget_credits": {
+      "maximum": 1000000,
+      "minimum": 1,
+      "title": "Budget Credits",
+      "type": "integer"
+     },
+     "starts_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts On"
+     },
+     "ends_on": {
+      "format": "date",
+      "title": "Ends On",
+      "type": "string"
+     },
+     "eligible_kinds": {
+      "default": [
+       "osc"
+      ],
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "government",
+        "individual",
+        "provider"
+       ],
+       "type": "string"
+      },
+      "title": "Eligible Kinds",
+      "type": "array"
+     },
+     "eligible_org_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "title": "Eligible Org Ids",
+      "type": "array"
+     },
+     "eligible_uf": {
+      "anyOf": [
+       {
+        "pattern": "^[A-Za-z]{2}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Eligible Uf"
+     },
+     "operations": {
+      "default": [
+       "*"
+      ],
+      "items": {
+       "pattern": "^(\\*|[a-z][a-z0-9_.]{2,60})$",
+       "type": "string"
+      },
+      "title": "Operations",
+      "type": "array"
+     },
+     "per_org_limit": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Per Org Limit"
+     },
+     "per_project_limit": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Per Project Limit"
+     },
+     "accountability": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Accountability",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "budget_credits",
+     "ends_on",
+     "accountability"
+    ],
+    "title": "SponsorshipIn",
+    "type": "object"
+   },
+   "SimilarityIn": {
+    "additionalProperties": false,
+    "properties": {
+     "kind": {
+      "enum": [
+       "single",
+       "pair",
+       "set",
+       "complementarity",
+       "expense_overlap"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "compared_project_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "title": "Compared Project Ids",
+      "type": "array"
+     },
+     "idempotency_key": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "minLength": 8,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Idempotency Key"
+     }
+    },
+    "required": [
+     "kind"
+    ],
+    "title": "SimilarityIn",
+    "type": "object"
+   },
+   "OrderConfirmIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reference": {
+      "maxLength": 120,
+      "minLength": 6,
+      "title": "Reference",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reference",
+     "note"
+    ],
+    "title": "OrderConfirmIn",
+    "type": "object"
+   },
+   "PilotApproveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "note"
+    ],
+    "title": "PilotApproveIn",
+    "type": "object"
+   },
+   "OperationIn": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "pattern": "^[a-z][a-z0-9_.]{2,60}$",
+      "title": "Code",
+      "type": "string"
+     },
+     "name_pt": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Name Pt",
+      "type": "string"
+     },
+     "description_pt": {
+      "maxLength": 1200,
+      "minLength": 20,
+      "title": "Description Pt",
+      "type": "string"
+     },
+     "purpose_pt": {
+      "maxLength": 400,
+      "minLength": 10,
+      "title": "Purpose Pt",
+      "type": "string"
+     },
+     "category": {
+      "enum": [
+       "A",
+       "B",
+       "C",
+       "D",
+       "E",
+       "F"
+      ],
+      "title": "Category",
+      "type": "string"
+     },
+     "tier": {
+      "maximum": 4,
+      "minimum": 0,
+      "title": "Tier",
+      "type": "integer"
+     },
+     "allowed_kinds": {
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "government",
+        "individual",
+        "provider"
+       ],
+       "type": "string"
+      },
+      "title": "Allowed Kinds",
+      "type": "array"
+     },
+     "min_role": {
+      "default": "member",
+      "enum": [
+       "viewer",
+       "member",
+       "manager",
+       "admin",
+       "owner"
+      ],
+      "title": "Min Role",
+      "type": "string"
+     },
+     "data_requirements_pt": {
+      "maxLength": 600,
+      "minLength": 5,
+      "title": "Data Requirements Pt",
+      "type": "string"
+     },
+     "provider_mode": {
+      "enum": [
+       "local",
+       "external_allowed"
+      ],
+      "title": "Provider Mode",
+      "type": "string"
+     },
+     "funding_modes": {
+      "items": {
+       "enum": [
+        "free",
+        "free_quota",
+        "sponsorship",
+        "credits"
+       ],
+       "type": "string"
+      },
+      "title": "Funding Modes",
+      "type": "array"
+     },
+     "credits_base": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Credits Base",
+      "type": "integer"
+     },
+     "credits_per_unit": {
+      "default": 0,
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Credits Per Unit",
+      "type": "integer"
+     },
+     "unit_label_pt": {
+      "default": "execução",
+      "maxLength": 40,
+      "minLength": 2,
+      "title": "Unit Label Pt",
+      "type": "string"
+     },
+     "max_units": {
+      "default": 1,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Max Units",
+      "type": "integer"
+     },
+     "max_input_chars": {
+      "maximum": 50000000,
+      "minimum": 100,
+      "title": "Max Input Chars",
+      "type": "integer"
+     },
+     "free_quota_eligible": {
+      "default": true,
+      "title": "Free Quota Eligible",
+      "type": "boolean"
+     },
+     "sponsor_eligible": {
+      "default": true,
+      "title": "Sponsor Eligible",
+      "type": "boolean"
+     },
+     "completion_rule_pt": {
+      "maxLength": 600,
+      "minLength": 10,
+      "title": "Completion Rule Pt",
+      "type": "string"
+     },
+     "delivers_pt": {
+      "maxLength": 600,
+      "minLength": 10,
+      "title": "Delivers Pt",
+      "type": "string"
+     },
+     "status": {
+      "enum": [
+       "active",
+       "hypothesis",
+       "planned",
+       "retired"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 600,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "name_pt",
+     "description_pt",
+     "purpose_pt",
+     "category",
+     "tier",
+     "allowed_kinds",
+     "data_requirements_pt",
+     "provider_mode",
+     "funding_modes",
+     "credits_base",
+     "max_input_chars",
+     "completion_rule_pt",
+     "delivers_pt",
+     "status",
+     "note"
+    ],
+    "title": "OperationIn",
+    "type": "object"
+   },
+   "PackIn": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "pattern": "^[a-z][a-z0-9_.]{2,40}$",
+      "title": "Code",
+      "type": "string"
+     },
+     "name_pt": {
+      "maxLength": 80,
+      "minLength": 3,
+      "title": "Name Pt",
+      "type": "string"
+     },
+     "credits": {
+      "maximum": 1000000,
+      "minimum": 1,
+      "title": "Credits",
+      "type": "integer"
+     },
+     "price_cents": {
+      "maximum": 100000000,
+      "minimum": 1,
+      "title": "Price Cents",
+      "type": "integer"
+     },
+     "validity_days": {
+      "default": 365,
+      "maximum": 3650,
+      "minimum": 1,
+      "title": "Validity Days",
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "active",
+       "hypothesis",
+       "retired"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 600,
+      "minLength": 20,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "name_pt",
+     "credits",
+     "price_cents",
+     "status",
+     "note"
+    ],
+    "title": "PackIn",
+    "type": "object"
+   },
+   "QuotaPolicyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "label_pt": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Label Pt",
+      "type": "string"
+     },
+     "scope": {
+      "enum": [
+       "welcome",
+       "periodic",
+       "campaign",
+       "kind",
+       "demo",
+       "institutional"
+      ],
+      "title": "Scope",
+      "type": "string"
+     },
+     "applies_to_kinds": {
+      "items": {
+       "enum": [
+        "osc",
+        "company",
+        "government",
+        "individual",
+        "provider"
+       ],
+       "type": "string"
+      },
+      "title": "Applies To Kinds",
+      "type": "array"
+     },
+     "credits": {
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Credits",
+      "type": "integer"
+     },
+     "period": {
+      "default": "once",
+      "enum": [
+       "once",
+       "month"
+      ],
+      "title": "Period",
+      "type": "string"
+     },
+     "validity_days": {
+      "anyOf": [
+       {
+        "maximum": 3650,
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Validity Days"
+     },
+     "max_grants_per_org": {
+      "default": 1,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Max Grants Per Org",
+      "type": "integer"
+     },
+     "one_per_user": {
+      "default": true,
+      "title": "One Per User",
+      "type": "boolean"
+     },
+     "valid_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Valid Until"
+     },
+     "active": {
+      "default": true,
+      "title": "Active",
+      "type": "boolean"
+     },
+     "note": {
+      "maxLength": 600,
+      "minLength": 20,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "label_pt",
+     "scope",
+     "applies_to_kinds",
+     "credits",
+     "note"
+    ],
+    "title": "QuotaPolicyIn",
+    "type": "object"
+   },
+   "DisputeReviewIn": {
+    "additionalProperties": false,
+    "properties": {
+     "outcome": {
+      "enum": [
+       "reviewed_upheld",
+       "reviewed_corrected"
+      ],
+      "title": "Outcome",
+      "type": "string"
+     },
+     "reviewer_note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reviewer Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "outcome",
+     "reviewer_note"
+    ],
+    "title": "DisputeReviewIn",
     "type": "object"
    }
   },

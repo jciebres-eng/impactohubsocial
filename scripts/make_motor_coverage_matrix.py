@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera MOTOR_COVERAGE_MATRIX.md — a matriz de cobertura dos motores exigida pelo PROMPT MASTER (v0.27.0).
+"""Gera MOTOR_COVERAGE_MATRIX.md — a matriz de cobertura dos motores exigida pelo PROMPT MASTER (v0.28.0).
 
 Derivada de `impacto.engines.coverage` (mesma fonte de ENGINE_COVERAGE.md) mais a prova por jornada:
 um motor conta como "coberto por jornada" quando alguma de suas rotas é chamada por `tests/demo_journeys.py`
@@ -57,7 +57,7 @@ def main() -> int:
     def sn(v):
         return "n/a" if v is None else ("sim" if v else "não")
 
-    out = ["# MOTOR COVERAGE MATRIX — IMPACTO TRUST (v0.27.0)", "",
+    out = ["# MOTOR COVERAGE MATRIX — IMPACTO TRUST (v0.28.0)", "",
            "Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/coverage.py` e das jornadas",
            "(`tests/demo_journeys.py`, `tests/test_e2e_*.py`). **Nenhuma coluna é escrita à mão.** Conferida por",
            "`backend/tests/test_v0270_release_docs.py`.", "",

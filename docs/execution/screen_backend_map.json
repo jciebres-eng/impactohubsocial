@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 901,
- "operacoes_registradas": 895,
+ "operacoes_no_backend": 929,
+ "operacoes_registradas": 923,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,16 +11,16 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 221,
+ "telas": 225,
  "estados": {
-  "backend presente": 158,
+  "backend presente": 162,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
   "sem chamada direta": 63
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 61,
- "operacoes_que_nenhuma_tela_chama": 235,
+ "arquivos_do_front_varridos": 62,
+ "operacoes_que_nenhuma_tela_chama": 245,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -56,8 +56,13 @@
   "GET /v1/admin/risk-levels",
   "GET /v1/admin/voucher-batches/{}/redemptions",
   "GET /v1/agreements/pending",
+  "GET /v1/ai/credit-orders/{}",
+  "GET /v1/ai/credit-packs",
   "GET /v1/ai/credits",
   "GET /v1/ai/estimate",
+  "GET /v1/ai/executions",
+  "GET /v1/ai/executions/{}",
+  "GET /v1/ai/operations",
   "GET /v1/auth/oidc/callback",
   "GET /v1/claims/review-requests",
   "GET /v1/claims/{}",
@@ -151,6 +156,8 @@
   "PATCH /v1/solution-replications/{}",
   "POST /v1/access/check",
   "POST /v1/admin/agreements/{}/members/{}/revoke",
+  "POST /v1/admin/ai/credit-packs",
+  "POST /v1/admin/ai/operations",
   "POST /v1/admin/ai/prices",
   "POST /v1/admin/audit/export",
   "POST /v1/admin/calls/{}/status",
@@ -190,6 +197,7 @@
   "POST /v1/admin/trust/credentials/{}/revoke",
   "POST /v1/admin/value/baselines",
   "POST /v1/ai/classify-document/{}",
+  "POST /v1/ai/executions/{}/cancel",
   "POST /v1/ai/summarize-project",
   "POST /v1/auth/mfa/disable",
   "POST /v1/claims/{}/review",
@@ -241,7 +249,9 @@
   "POST /v1/solutions/{}/reviews",
   "POST /v1/statements/reconcile",
   "POST /v1/verifiable-records/{}/timestamp",
+  "POST /v1/webhooks/payments/{}",
   "POST /v1/workspace/personas",
+  "PUT /v1/admin/ai/quota-policies/{}",
   "PUT /v1/admin/content/courses/{}",
   "PUT /v1/admin/content/faqs/{}",
   "PUT /v1/admin/content/resources/{}",
@@ -1037,6 +1047,18 @@
    "estado": "backend presente"
   },
   {
+   "rota": "/admin/ia/financeiro",
+   "componente": "AI.AdminAiFinance",
+   "arquivo": "web/src/pages/aicenter.tsx",
+   "operacoes": [
+    "POST /v1/admin/ai/credit-orders/{}/approve-pilot",
+    "POST /v1/admin/ai/credit-orders/{}/confirm",
+    "POST /v1/admin/ai/disputes/{}/review"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
    "rota": "/admin/identidade",
    "componente": "TrustA.IdentityQueue",
    "arquivo": "web/src/pages/trustAdmin.tsx",
@@ -1708,10 +1730,42 @@
   },
   {
    "rota": "/ia",
+   "componente": "AI.AiCenter",
+   "arquivo": "web/src/pages/aicenter.tsx",
+   "operacoes": [
+    "POST /v1/ai/credit-orders",
+    "POST /v1/ai/credit-orders/{}/cancel",
+    "POST /v1/ai/sponsorships"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "componente": "AI.SimilarityAnalysis",
+   "arquivo": "web/src/pages/aicenter.tsx",
+   "operacoes": [
+    "POST /v1/similarity/analyses/{}/dispute"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ia/orcamento",
    "componente": "Sec.PainelDeIa",
    "arquivo": "web/src/pages/security.tsx",
    "operacoes": [
     "PUT /v1/ai/budget"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "componente": "AI.SponsorshipReport",
+   "arquivo": "web/src/pages/aicenter.tsx",
+   "operacoes": [
+    "POST /v1/ai/sponsorships/{}/close"
    ],
    "ausentes": [],
    "estado": "backend presente"

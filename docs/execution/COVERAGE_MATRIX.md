@@ -1,10 +1,10 @@
-# Matriz de cobertura — v0.27.0
+# Matriz de cobertura — v0.28.0
 
 > Gerada por `scripts/make_coverage_matrix.py` a partir das evidências dos testes. Não edite à mão.
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 238 passos em 15 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Jornadas pela API** — 262 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
 - **Telas no navegador (Chromium)** — 805 visitas às 221 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
 - **Telefone (390 px)** — 236 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
@@ -12,12 +12,12 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 14 | 143 | 0 | 151 | 133 | 10 | 6 | 2 | 0 | 49 | 0 |
-| Empresa (financiador) | 7 | 44 | 0 | 100 | 77 | 18 | 0 | 5 | 0 | 38 | 0 |
+| OSC | 15 | 160 | 0 | 151 | 133 | 10 | 6 | 2 | 0 | 49 | 0 |
+| Empresa (financiador) | 8 | 47 | 0 | 100 | 77 | 18 | 0 | 5 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 94 | 61 | 24 | 1 | 8 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 183 | 62 | 25 | 79 | 17 | 0 | 35 | 0 |
 | Apoiadora (pessoa física) | 3 | 10 | 0 | 95 | 66 | 20 | 0 | 9 | 0 | 27 | 0 |
-| Administração | 4 | 17 | 0 | 144 | 109 | 25 | 0 | 10 | 0 | 54 | 0 |
+| Administração | 5 | 21 | 0 | 144 | 109 | 25 | 0 | 10 | 0 | 54 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
@@ -44,7 +44,8 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão | 35 | 0 |
 | Marketplace, soluções e perfis públicos | 6 | 0 |
 | Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 28 | 0 |
-| Suporte e Central de Conhecimento | 4 | 0 |
+| Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel | 18 | 0 |
+| Suporte e Central de Conhecimento | 10 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |
 | Administração: visão geral → verificação → auditoria | 7 | 0 |
 | Pendências: o que espera decisão de alguém | 12 | 0 |

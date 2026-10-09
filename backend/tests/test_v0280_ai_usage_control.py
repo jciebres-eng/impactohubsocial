@@ -272,10 +272,11 @@ class CreditOrdersAndPixTests(unittest.TestCase):
         self.assertEqual(osc.post("/v1/ai/credit-orders", {"pack_code": "pack.100", "accept_terms": True}).status, 201)
         self.assertEqual(osc.post("/v1/ai/credit-orders", {"pack_code": "pack.500", "accept_terms": True}).status, 409)
 
-    def test_webhook_without_secret_is_503_and_nothing_is_credited(self):
+    def test_webhook_without_secret_is_refused_and_nothing_is_credited(self):
         self.assertFalse(os.environ.get("PAYMENT_WEBHOOK_SECRET"))
         r = Client().post("/v1/webhooks/payments/pix", {"event_id": "e1", "type": "charge.paid"})
-        self.assertEqual(r.status, 503, r.json)
+        self.assertEqual(r.status, 404, r.json)
+        self.assertEqual(r.json["code"], "webhook_not_configured")
 
     def test_a_real_order_is_refused_by_the_database_without_an_active_rule(self):
         """Mesmo que o código tentasse abrir cobrança real, o gatilho recusa: sem regra ativa não há venda."""

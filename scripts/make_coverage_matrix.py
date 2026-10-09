@@ -6,7 +6,7 @@
 
 Nenhum número aqui é digitado: vem de
   - docs/evidence/jornadas_v0250/relatorio.json   (test_v0250_jornadas — jornadas pela API)
-  - docs/execution/ROUTE_RUNTIME_MATRIX.csv       (test_v0250_todas_as_telas — 221 telas no navegador)
+  - docs/execution/ROUTE_RUNTIME_MATRIX.csv       (test_v0250_todas_as_telas — 225 telas no navegador)
   - docs/evidence/responsivo_v0250/resumo.json    (test_v0250_responsivo — telefone, 390 px)
 """
 from __future__ import annotations
@@ -45,7 +45,7 @@ def gerar() -> str:
     fone = {k: v["telas_do_menu"] for k, v in resp["por_perfil"].items()}
     fone_falha = {k: len(v["com_rolagem_lateral"]) for k, v in resp["por_perfil"].items()}
 
-    out = ["# Matriz de cobertura — v0.27.0", "",
+    out = ["# Matriz de cobertura — v0.28.0", "",
            "> Gerada por `scripts/make_coverage_matrix.py` a partir das evidências dos testes. Não edite à mão.", "",
            "Três provas independentes, todas executadas (não planejadas):", "",
            f"- **Jornadas pela API** — {jor['passos']} passos em {len(jor['por_jornada'])} jornadas, "

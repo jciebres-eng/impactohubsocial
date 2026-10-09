@@ -210,13 +210,14 @@ def cancel_order(ctx: Ctx):
 @route("POST", "/v1/webhooks/payments/{provider}", auth="none", raw=True, raw_body=True, rate=("pay_webhook_ip", 600, 60), tags=("billing",),
        summary="Webhook do provedor de pagamento: assinatura HMAC conferida, evento deduplicado, pedido de crédito creditado uma vez")
 def payment_webhook(ctx: Ctx, payload: bytes):
-    """Quem confirma pagamento é o provedor, por evento assinado. Sem segredo configurado a rota responde 503:
-    não existe "aceitar sem conferir". Evento com assinatura inválida é gravado para auditoria e NÃO produz efeito."""
+    """Quem confirma pagamento é o provedor, por evento assinado. Sem segredo configurado a rota responde 404
+    (como o webhook de integração responde a conexão desconhecida): não existe "aceitar sem conferir". Evento com
+    assinatura inválida é gravado para auditoria e NÃO produz efeito."""
     secret = ctx.settings.payment_webhook_secret
     provider = ctx.path["provider"][:40]
     if not secret:
         return JSONResponse({"status": "rejected", "code": "webhook_not_configured",
-                             "note": "PAYMENT_WEBHOOK_SECRET ausente: nenhum evento de pagamento é aceito"}, status_code=503)
+                             "note": "PAYMENT_WEBHOOK_SECRET ausente: nenhum evento de pagamento é aceito"}, status_code=404)
     given = ctx.request.headers.get("x-impacto-signature", "")
     expected = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
     verified = bool(given) and hmac.compare_digest(given, expected)

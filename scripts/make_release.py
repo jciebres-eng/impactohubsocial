@@ -149,7 +149,13 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "config/economic_model.json", "backend/migrations/0067_v0270_no_subscription.sql",
             "backend/tests/test_v0270_no_subscription.py", "backend/tests/test_v0270_economy.py",
             "backend/tests/test_v0270_financial_model.py", "backend/tests/test_v0270_release_docs.py",
-            "docs/evidence/test_run_v0.27.0.log", "history/v0.26.0/VERSION"]
+            "docs/evidence/test_run_v0.27.0.log", "history/v0.26.0/VERSION",
+            # v0.28.0 — IA sustentável (ADR-347..352)
+            "AI_COST_MODEL.md", "AI_PROVIDERS_EVALUATION.md", "docs/execution/AI_INVENTORY.md", "docs/execution/CLEANUP_INVENTORY_v0280.md",
+            "config/ai_economics.json", "docs/evidence/ai_pilot_v0280.json", "docs/evidence/similarity_eval_v0280.json",
+            "backend/migrations/0068_v0280_ai_usage_control.sql", "backend/tests/test_v0280_ai_usage_control.py",
+            "backend/tests/test_v0280_similarity.py", "backend/tests/test_v0280_ai_cost_model.py", "backend/tests/test_e2e_v0280_ai_center.py",
+            "docs/evidence/test_run_v0.28.0.log", "history/v0.27.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

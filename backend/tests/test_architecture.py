@@ -169,7 +169,7 @@ class ArchitectureTests(unittest.TestCase):
                            "/v1/help/resources", "/v1/help/resources/{slug}", "/v1/help/assistant", "/v1/help/events", "/v1/help/events/{slug}",
                            "/v1/help/courses", "/v1/help/courses/{slug}", "/v1/help/certificates/{code}", "/v1/help/partnerships", "/v1/help/demo-requests",
                            "/v1/help/newsletter", "/v1/help/newsletter/confirm", "/v1/help/newsletter/unsubscribe", "/v1/help/sitemap", "/v1/integrations/inbound/{connection_id}",
-                           # v0.28.0 — webhook de pagamento: sem principal (fala o provedor); HMAC obrigatório (503 sem segredo),
+                           # v0.28.0 — webhook de pagamento: sem principal (fala o provedor); HMAC obrigatório (404 sem segredo),
                            #           assinatura inválida é gravada sem efeito, evento deduplicado, cobrança simulada nunca credita
                            "/v1/webhooks/payments/{provider}",
                            # v0.16.0 — rede. Cada uma lê SÓ projeção pública ou estado de publicação:

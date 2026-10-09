@@ -42,17 +42,18 @@ def main() -> int:
         "release_status": status,
         "files": {"tracked_total": len(files), "traceability": f"IMPACTO_v{version}_TRACEABILITY.json",
                   "package": f"IMPACTO_TRUST_FINAL_RELEASE_{version}.zip"},
-        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if "v0270" in x]},
+        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if "v0280" in x]},
         "tests": testes,
-        "new_test_modules": ["backend/tests/test_v0270_no_subscription.py", "backend/tests/test_v0270_economy.py",
-                             "backend/tests/test_v0270_financial_model.py", "backend/tests/test_v0270_release_docs.py"],
+        "new_test_modules": ["backend/tests/test_v0280_ai_usage_control.py", "backend/tests/test_v0280_similarity.py",
+                             "backend/tests/test_v0280_ai_cost_model.py", "backend/tests/test_e2e_v0280_ai_center.py"],
         "integrations": integ,
         "external_dependencies": secao(25),
         "known_limitations": secao(26),
         "decision": secao(27),
         "documents": ["FINAL_EXECUTION_REPORT.md", "FINAL_EXECUTION_AUDIT.md", "RELEASE_NOTES.md",
                       "MOTOR_COVERAGE_MATRIX.md", "EXTERNAL_INTEGRATIONS.md", "docs/ECONOMIC_MODEL.md",
-                      "docs/execution/SUBSCRIPTION_INVENTORY.md", "24_MONTH_FINANCIAL_MODEL.md"],
+                      "AI_COST_MODEL.md", "AI_PROVIDERS_EVALUATION.md", "docs/execution/AI_INVENTORY.md",
+                      "docs/execution/CLEANUP_INVENTORY_v0280.md"],
     }
     (ROOT / "FINAL_RELEASE_MANIFEST.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"FINAL_RELEASE_MANIFEST.json: {version} @ {commit[:7]} — {status}; testes: {testes}")

@@ -25,7 +25,7 @@ STATUSES = ("published", "needs_review", "draft")
 SOURCE_KINDS = ("official", "illustrative")
 AUDIENCES = ("osc", "company", "government", "provider", "individual")
 #: Palavras que nenhuma definição pode usar como promessa (o teste também confere).
-FORBIDDEN = re.compile(r"\b(garant\w*|certific\w+ que|100 ?%|aprova[çc][ãa]o garantida|inviol[áa]vel|imposs[íi]vel de invadir)\b", re.I)
+FORBIDDEN = re.compile(r"\b(garant\w*|certific\w+ que|100 ?%|aprova[çc][ãa]o garantida|inviol[áa]vel|imposs[íi]vel de invadir)\b", re.IGNORECASE)
 
 
 def validate(doc: dict) -> list[str]:

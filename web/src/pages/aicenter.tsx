@@ -7,6 +7,7 @@ import { date, dateTime, money } from "../format";
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 
 const CAT: Record<string, string> = { A: "Assistência leve", B: "Assistência contextual", C: "Análise avançada", D: "Originalidade e similaridade", E: "Lote", F: "Institucional" };
 const FUND: Record<string, string> = { free: "gratuita", promotional: "cota gratuita", purchased: "créditos comprados", sponsorship: "patrocínio", cached: "já calculado" };
@@ -81,7 +82,7 @@ export function SimilarityPanel({ projectId, isOwner }: { projectId: string; isO
     return r;
   }
   return (
-    <Panel title="Originalidade, similaridade e complementaridade">
+    <Panel title={<><GlossaryTerm id="originalidade">Originalidade</GlossaryTerm>, <GlossaryTerm id="similaridade">similaridade</GlossaryTerm> e <GlossaryTerm id="complementaridade">complementaridade</GlossaryTerm></>}>
       <p className="muted small">Oito dimensões separadas (texto, escopo, público, território, período, orçamento, financiamento, indicadores). Similaridade textual ≠ escopo ≠ território ≠ duplicidade financeira ≠ plágio ≠ fraude. Nada aqui bloqueia financiamento, altera reputação ou posição no match.</p>
       <div className="stack-row wrap">
         <OperationLauncher code="similarity.single" label="O que este projeto traz de novo" variant="primary" projectId={projectId} onConfirm={() => analisar("single")} />
@@ -242,7 +243,7 @@ export function AiCenter() {
           <>
             {d.quotas_granted_now?.length > 0 && <p className="note">Cota concedida agora: {d.quotas_granted_now.map((g: any) => `${g.policy} (+${g.credits})`).join(", ")}.</p>}
             <div className="metrics">
-              <div className="metric"><span className="metric-label">Cota gratuita disponível</span><p className="metric-value">{d.balances.promotional.available}</p><p className="small">de {d.balances.promotional.balance} ({d.balances.promotional.reserved} reservados)</p></div>
+              <div className="metric"><span className="metric-label">Cota gratuita disponível <ContextualHelp id="creditos_de_ia" /></span><p className="metric-value">{d.balances.promotional.available}</p><p className="small">de {d.balances.promotional.balance} ({d.balances.promotional.reserved} reservados)</p></div>
               <div className="metric"><span className="metric-label">Créditos comprados</span><p className="metric-value">{d.balances.purchased.available}</p><p className="small">de {d.balances.purchased.balance} ({d.balances.purchased.reserved} reservados)</p></div>
               <div className="metric"><span className="metric-label">Patrocínios disponíveis</span><p className="metric-value">{d.sponsorships.length}</p><p className="small">{d.sponsorships.reduce((s: number, x: any) => s + (x.budget_credits - x.used), 0)} créditos restantes no total</p></div>
               <div className="metric"><span className="metric-label">Este mês</span><p className="metric-value">{d.this_month.executions}</p><p className="small">{d.this_month.credits} créditos · {d.this_month.sponsored} patrocinada(s) · {d.this_month.failed_or_partial} não cobrada(s)</p></div>
@@ -272,7 +273,7 @@ export function AiCenter() {
               <p className="fineprint">{d.terms}</p>
             </Panel>
 
-            <Panel title="Patrocínio de uso">
+            <Panel title={<>Patrocínio de uso <ContextualHelp id="creditos_de_ia" /></>}>
               {d.sponsorships.length === 0 && d.my_sponsorships.length === 0 && <p className="muted">Nenhum patrocínio ativo para a sua organização.</p>}
               {d.sponsorships.length > 0 && <ul className="rows">{d.sponsorships.map((s: any) => <li key={s.id}><span><strong>{s.name_pt}</strong> · {s.sponsor_name}<br /><span className="small muted">{s.budget_credits - s.used} de {s.budget_credits} créditos restantes · até {date(s.ends_on)} · {s.operations?.includes("*") ? "todas as operações patrocináveis" : s.operations?.join(", ")}</span></span><Pill tone="ok">disponível para você</Pill></li>)}</ul>}
               {d.my_sponsorships.length > 0 && <ul className="rows">{d.my_sponsorships.map((s: any) => <li key={s.id}><span><strong>{s.name_pt}</strong> (meu patrocínio)<br /><span className="small muted">{s.used} de {s.budget_credits} usados · até {date(s.ends_on)}</span></span><Link to={`/ia/patrocinios/${s.id}`} className="btn btn-ghost btn-sm">Prestação de contas</Link></li>)}</ul>}

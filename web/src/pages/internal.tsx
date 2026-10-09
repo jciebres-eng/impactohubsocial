@@ -16,11 +16,13 @@
 // E TODO INDICADOR DIZ DE ONDE VEIO
 //
 // Indicador sem fonte responde `available: false` com o motivo, nunca zero. Zero parece medição.
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { api } from "../api";
 import { date, dateTime, money } from "../format";
 import { Link } from "../router";
 import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, useAction, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 import { useAccess } from "../access";
 
 const hoje = () => new Date().toISOString().slice(0, 7);
@@ -28,7 +30,7 @@ const hoje = () => new Date().toISOString().slice(0, 7);
 // --------------------------------------------------------------------------------- indicador honesto
 type Metric = { value?: number | null; source: string; calculation: string; period?: string | null; available?: boolean; unavailable_reason?: string; currency?: string; last_updated?: string | null };
 
-function Indicator({ title, m, kind = "money" }: { title: string; m?: Metric; kind?: "money" | "count" | "percent" | "months" }) {
+function Indicator({ title, m, kind = "money" }: { title: ReactNode; m?: Metric; kind?: "money" | "count" | "percent" | "months" }) {
   if (!m) return null;
   const indisponivel = m.available === false;
   const texto = indisponivel ? "não medido"
@@ -66,7 +68,7 @@ export function Controladoria() {
           <div className="stack-lg">
             <Panel title="Camada econômica da operação (sem assinatura — ADR-341)">
               <div className="metrics">
-                <Indicator title="Registrado (3,5%)" m={data.operation_layer?.platform_layer_registered} />
+                <Indicator title={<>Registrado (3,5%) <ContextualHelp id="taxa_de_servico" /></>} m={data.operation_layer?.platform_layer_registered} />
                 <Indicator title="Devido" m={data.operation_layer?.platform_layer_due} />
                 <Indicator title="Pago à plataforma" m={data.operation_layer?.platform_layer_paid} />
                 <div className="metric"><span className="metric-label">Operações com camada registrada</span><strong className="metric-value">{data.operation_layer?.operations ?? 0}</strong><span className="metric-why">economic_events · platform_service_registered</span></div>

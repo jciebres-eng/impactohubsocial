@@ -4,6 +4,7 @@ import { date, daysUntil, label, money, n } from "../format";
 import { Link } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, FirstRunPanel, MoneyFlow, PageHead, Pager, Panel, Pill, StateView, useAction, useLoad, useTaxonomy } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 
 function countOf(rows: any[] | undefined, status: string) {
   return rows?.find((r) => r.status === status)?.n ?? 0;
@@ -131,7 +132,7 @@ function FunderHome({ d, tax }: { d: any; tax: any }) {
       <Panel title="Por causa">
         <Bars rows={(d.by_cause as any[]).map((r) => ({ label: tax?.causes?.[r.cause] || r.cause, value: Number(r.committed_cents) }))} format={money} />
       </Panel>
-      <Panel title="Por ODS">
+      <Panel title={<>Por <GlossaryTerm id="ods">ODS</GlossaryTerm></>}>
         <Bars rows={(d.by_ods as any[]).map((r) => ({ label: `ODS ${r.ods}`, value: Number(r.committed_cents), tone: "leaf" }))} format={money} />
       </Panel>
       <Panel title="Por UF">
@@ -144,7 +145,7 @@ function FunderHome({ d, tax }: { d: any; tax: any }) {
 function ProviderHome({ d }: { d: any }) {
   return (
     <div className="grid-home">
-      <Panel title="Validações" actions={<Link to="/revisoes">Abrir</Link>}>
+      <Panel title={<>Validações <ContextualHelp id="quatro_olhos" /></>} actions={<Link to="/revisoes">Abrir</Link>}>
         <Bars rows={(d.reviews as any[]).map((r) => ({ label: label(r.status), value: r.n }))} format={(v) => n(v)} />
       </Panel>
       <Panel title="Credenciais" actions={<Link to="/organizacao">Gerenciar</Link>}>

@@ -118,6 +118,20 @@ def glossary(ctx: Ctx, q: TSch.GlossaryQ):
     return doc
 
 
+@route("GET", "/v1/public/concepts", auth="none", rate=("concepts_ip", 120, 3600), tags=("public",),
+       summary="Catálogo central de conceitos da ajuda contextual (tooltip, popover e glossário): origem config/concepts.json")
+def concepts(ctx: Ctx):
+    """v0.29.0. O mesmo arquivo que gera web/src/concepts.ts (scripts/sync_concepts.py): um conceito é definido uma vez,
+    com definição geral, como o IMPACTO o usa, limitações e fontes (fontes 'official' apontam para chaves de kb_sources).
+    Nada aqui é parecer jurídico nem promessa de aprovação — o próprio catálogo diz isso em cada termo."""
+    import json
+    from pathlib import Path
+    path = Path(__file__).resolve().parents[3] / "config" / "concepts.json"
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    return {"version": doc["version"], "domains": doc["domains"], "note": doc["note"],
+            "terms": [{"id": k, **v} for k, v in sorted(doc["terms"].items())]}
+
+
 @route("GET", "/v1/me/preferences", auth="user", tags=T, summary="Idioma e tema da pessoa (tema: system, light ou dark)")
 def prefs_get(ctx: Ctx):
     with ctx.system_tx() as c:

@@ -7,6 +7,7 @@ import { date, dateTime } from "../format";
 import { Link, navigate } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 // A Trilha é o elemento de identidade da plataforma e, até a v0.21.0, aparecia num lugar só.
 import { ASSEMBLY_TRAIL, PROJECT_PHASE_TRAIL, Trail } from "../ui/trail";
 
@@ -398,7 +399,7 @@ export function Readiness() {
   const { data, error, loading, reload } = useLoad<any>("/v1/readiness");
   return (
     <>
-      <PageHead title="Prontidão da organização"
+      <PageHead title={<>Prontidão da organização <ContextualHelp id="diagnostico_prontidao" /></>}
                 sub="Separa o que é FATO (evidência com fonte e data), o que é INFERÊNCIA de regra e o que é RECOMENDAÇÃO." />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && <AnalysisView a={data} />}

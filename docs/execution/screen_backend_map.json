@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 929,
- "operacoes_registradas": 923,
+ "operacoes_no_backend": 942,
+ "operacoes_registradas": 936,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,16 +11,16 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 225,
+ "telas": 226,
  "estados": {
   "backend presente": 162,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
-  "sem chamada direta": 63
+  "sem chamada direta": 64
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 62,
- "operacoes_que_nenhuma_tela_chama": 245,
+ "arquivos_do_front_varridos": 64,
+ "operacoes_que_nenhuma_tela_chama": 253,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -41,6 +41,7 @@
   "GET /v1/admin/ai",
   "GET /v1/admin/ai/cost",
   "GET /v1/admin/ai/prompts/{}",
+  "GET /v1/admin/content/citations/{}/{}",
   "GET /v1/admin/flags",
   "GET /v1/admin/integrations/overview",
   "GET /v1/admin/jobs",
@@ -79,6 +80,7 @@
   "GET /v1/fiscal/rules",
   "GET /v1/frameworks/mappings",
   "GET /v1/frameworks/{}/coverage",
+  "GET /v1/help/sources/{}",
   "GET /v1/institutional/maturity",
   "GET /v1/institutional/rules",
   "GET /v1/integrations/connections",
@@ -124,6 +126,7 @@
   "GET /v1/projects/{}/equity/assessments",
   "GET /v1/projects/{}/result-chain",
   "GET /v1/projects/{}/state",
+  "GET /v1/public/concepts",
   "GET /v1/public/glossary",
   "GET /v1/public/profiles/{}/open-graph",
   "GET /v1/public/projects/{}/impact",
@@ -165,6 +168,11 @@
   "POST /v1/admin/commercial/offers",
   "POST /v1/admin/content/events/{}/recording-to-resource",
   "POST /v1/admin/content/resources/{}/new-version",
+  "POST /v1/admin/content/sources/{}/retract",
+  "POST /v1/admin/content/sources/{}/verify",
+  "POST /v1/admin/content/work-items/sweep",
+  "POST /v1/admin/content/work-items/{}",
+  "POST /v1/admin/content/{}/{}/retract",
   "POST /v1/admin/datasets",
   "POST /v1/admin/equity/denominators",
   "POST /v1/admin/funding-quotas/pledges/{}/confirm",
@@ -274,6 +282,7 @@
   "/planos",
   "/verificar-email",
   "/@:handle",
+  "/ajuda/glossario",
   "/verificar",
   "/verificar/:code",
   "/",
@@ -631,6 +640,14 @@
    ],
    "ausentes": [],
    "estado": "backend presente"
+  },
+  {
+   "rota": "/ajuda/glossario",
+   "componente": "Help.Glossary",
+   "arquivo": "web/src/pages/help.tsx",
+   "operacoes": [],
+   "ausentes": [],
+   "estado": "sem chamada direta"
   },
   {
    "rota": "/ajuda/parcerias",

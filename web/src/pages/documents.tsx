@@ -4,6 +4,7 @@ import { date, label } from "../format";
 import { Link, navigate, useLocation } from "../router";
 import { useSession } from "../session";
 import { Button, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useLoad, useTaxonomy, useToast } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 import { ContextHelp } from "./help";
 import { DocLink } from "./projects";
 
@@ -57,7 +58,7 @@ export function Documents() {
   const docOpts = Object.entries(tax?.document_types || {}).map(([k, v]: any) => [k, v.label]) as [string, string][];
   return (
     <>
-      <PageHead title="Documentos" sub="Cofre privado: cada arquivo tem tipo verificado, hash SHA-256, validade e acesso só para quem precisa."
+      <PageHead title={<>Documentos <ContextualHelp id="evidencia" /></>} sub="Cofre privado: cada arquivo tem tipo verificado, hash SHA-256, validade e acesso só para quem precisa."
                 actions={<><Link to="/documentos/montagens">Montagem de documentos</Link>{" · "}
                            <Link to="/documentos/modelos">Modelos</Link></>} />
       <ContextHelp ctxKey="documents.upload" />

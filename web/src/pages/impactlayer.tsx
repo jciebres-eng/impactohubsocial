@@ -6,6 +6,7 @@ import { CLAIM_KIND, CLAIM_STATUS, EQUITY_DENOMINATOR, EQUITY_METHOD, EQUITY_STA
          REPUTATION_BAND, SEAL_STATUS } from "../glossary";
 import { Button, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, TextArea,
          useAction, useForm, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 
 // AS SEIS TELAS QUE FALTAVAM (§94) — reputação, selos, afirmações, equidade, ODS, responsabilidade.
 //
@@ -42,7 +43,7 @@ export function Reputation() {
   };
   return (
     <>
-      <PageHead title="Reputação" sub="Por dimensão, a partir do que foi observado — nunca uma nota só." />
+      <PageHead title={<>Reputação <ContextualHelp id="reputacao" /></>} sub="Por dimensão, a partir do que foi observado — nunca uma nota só." />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <>
@@ -98,7 +99,7 @@ export function Seals() {
   const evals = useLoad<any>("/v1/seals/evaluations");
   return (
     <>
-      <PageHead title="Selos" sub="A regra é pública, e a avaliação que NÃO concedeu também fica registrada." />
+      <PageHead title={<>Selos <ContextualHelp id="selo" /></>} sub="A regra é pública, e a avaliação que NÃO concedeu também fica registrada." />
       <StateView loading={awards.loading} error={awards.error} onRetry={awards.reload}>
         <Panel title="Selos da organização">
           {awards.data?.items?.length ? awards.data.items.map((a: any) => (
@@ -230,7 +231,7 @@ export function Equity({ id }: { id: string }) {
   };
   return (
     <>
-      <PageHead title="Equidade e contexto"
+      <PageHead title={<>Equidade e contexto <ContextualHelp id="equidade" /></>}
                 sub="Comparar sem denominador comum é comparar coisas diferentes." />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (

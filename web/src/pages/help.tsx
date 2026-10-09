@@ -9,6 +9,8 @@ import { useSession } from "../session";
 import { date, dateTime, label } from "../format";
 import { Button, Field, Group, Input, KeyValue, PageHead, Panel, Pill, Pager, Select, StateView, TextArea, useAction, useForm, useLoad, useToast, Chips } from "../ui/kit";
 import { JourneyTrail } from "../ui/trail";
+import { CONCEPTS, CONCEPTS_VERSION, CONCEPT_DOMAINS } from "../concepts";
+import { GlossaryContent } from "../ui/help";
 
 // ----------------------------------------------------------------------------------------- moldura pública
 export function PublicFrame({ children }: { children: ReactNode }) {
@@ -96,6 +98,7 @@ export function HelpHome() {
     <div className="stack-lg">
       <PageHead title="Como podemos ajudar?" sub="Guias, modelos, cursos, eventos e suporte em um só lugar." />
       <SearchBox />
+      <p className="fineprint"><Link to="/ajuda/glossario">Glossário de conceitos</Link> — o que significam compatibilidade, indicador validado, não custodial e outros termos da plataforma.</p>
       <AssistantPanel />
       {me && (
         <div className="stack-row">
@@ -890,6 +893,43 @@ export function Prefs() {
         </table>
         <div className="form-actions"><Button variant="primary" busy={busy} onClick={() => run(() => api.put("/v1/notifications/prefs", { items: items.map(({ grp, in_app, email }) => ({ grp, in_app, email })) }), "Preferências salvas").then(reload)}>Salvar</Button></div>
       </StateView>
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------------------------- glossário de conceitos (v0.29.0)
+// Mesma fonte dos tooltips e popovers (config/concepts.json → web/src/concepts.ts). A página só lê o catálogo.
+export function Glossary() {
+  const [q, setQ] = useState("");
+  const [domain, setDomain] = useState("");
+  const loc = useLocation();
+  const all = Object.values(CONCEPTS);
+  const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const items = all
+    .filter((c) => !domain || c.domain === domain)
+    .filter((c) => !q || norm(c.term + " " + c.short + " " + c.long).includes(norm(q)))
+    .sort((a, b) => a.term.localeCompare(b.term, "pt-BR"));
+  useEffect(() => {
+    const id = (typeof window !== "undefined" ? window.location.hash : "").replace("#", "");
+    if (id && CONCEPTS[id]) { setQ(""); setDomain(""); setTimeout(() => document.getElementById(`c-${id}`)?.focus(), 0); }
+  }, [loc]);
+  return (
+    <div className="stack-lg">
+      <PageHead title="Glossário de conceitos" sub={`${all.length} termos usados na plataforma, com definição, como o IMPACTO usa, limites e fontes. Versão ${CONCEPTS_VERSION}.`} back={<Link to="/ajuda">Ajuda</Link>} />
+      <p className="fineprint">Estas definições explicam a plataforma; não são parecer jurídico nem contábil e não prometem aprovação, captação ou conformidade. Os rótulos de status das telas estão no <Link to="/ajuda/glossario-basico">glossário básico</Link>.</p>
+      <div className="stack-row">
+        <Input aria-label="Procurar termo" value={q} onChange={setQ} placeholder="Procurar termo…" />
+        <Select aria-label="Área" value={domain} onChange={setDomain} placeholder="Todas as áreas" options={Object.entries(CONCEPT_DOMAINS)} />
+      </div>
+      {!items.length && <p className="muted">Nenhum termo encontrado. Sentiu falta de um? <Link to="/ajuda/suporte/novo?page=ajuda&field=glossario">Conte para a equipe</Link>.</p>}
+      <div className="gloss-list">
+        {items.map((c) => (
+          <article key={c.id} id={`c-${c.id}`} tabIndex={-1} className="panel gloss-item" aria-labelledby={`c-${c.id}-t`}>
+            <h2 id={`c-${c.id}-t`}><a href={`#${c.id}`}>{c.term}</a> <span className="pill pill-muted">{CONCEPT_DOMAINS[c.domain]}</span></h2>
+            <GlossaryContent c={c} />
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

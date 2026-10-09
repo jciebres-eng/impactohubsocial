@@ -5,6 +5,7 @@ import { label, n, pct } from "../format";
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Button, Chips, Field, Input, KeyValue, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 
 const EDGE_TONE: Record<string, string> = { validated_causality: "good", observed_evidence: "good", correlation: "warn", association: "muted", inference: "muted", hypothesis: "muted" };
 const EDGE_LABEL: Record<string, string> = { validated_causality: "Causalidade validada", observed_evidence: "Evidência observada", correlation: "Correlação", association: "Associação", inference: "Inferência", hypothesis: "Hipótese" };
@@ -165,7 +166,7 @@ export function Diagnoses() {
   const { busy, run } = useAction();
   return (
     <>
-      <PageHead title="Diagnóstico social" sub="Do problema às metas e ao plano de ação, antes de montar o projeto." />
+      <PageHead title="Diagnóstico social" sub={<>Do problema às metas e ao plano de ação, antes de montar o projeto — com a <GlossaryTerm id="teoria_da_mudanca">teoria da mudança</GlossaryTerm> explícita e <GlossaryTerm id="indicador_validado">indicadores validados</GlossaryTerm> separados dos informados.</>} />
       <StateView loading={loading} error={error} onRetry={reload} empty={data && data.items.length === 0 && false}>
         <div className="stack-lg">
           <Panel title="Seus diagnósticos">
@@ -231,7 +232,7 @@ export function Determinants() {
   const { data, error, loading, reload } = useLoad<any>("/v1/determinants");
   return (
     <>
-      <PageHead title="Determinantes sociais" sub="Distribuição dos projetos publicados por domínio" />
+      <PageHead title={<>Determinantes sociais <ContextualHelp id="equidade" /></>} sub="Distribuição dos projetos publicados por domínio" />
       <StateView loading={loading} error={error} onRetry={reload}>
         {data && (
           <div className="stack-lg">

@@ -3,6 +3,7 @@ import { api, describeError } from "../api";
 import { date, dateTime, money } from "../format";
 import { Link, useLocation } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 
 const Q_STATUS: [string, string][] = [["draft", "Rascunho"], ["open", "Aberta"], ["paused", "Pausada"], ["closed", "Fechada"]];
 const C_STATUS: [string, string][] = [["draft", "Rascunho"], ["published", "Publicada"], ["closed", "Fechada"]];
@@ -47,7 +48,7 @@ export function Quotas() {
 
   return (
     <>
-      <PageHead title="Financiamento em cotas" sub="Divida o custo do projeto em cotas e mostre publicamente quantas faltam."
+      <PageHead title={<>Financiamento em cotas <ContextualHelp id="nao_custodial" /></>} sub="Divida o custo do projeto em cotas e mostre publicamente quantas faltam. A plataforma instrui e concilia; nunca guarda o dinheiro."
                 actions={<Button variant="primary" onClick={() => setCreating(true)}>Criar cotas</Button>} />
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length}>
         {data?.items?.map((q: any) => (

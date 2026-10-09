@@ -302,6 +302,7 @@ const HELP: HR[] = [
   ["/ajuda/boletim", () => <Help.Newsletter />],
   ["/ajuda/boletim/confirmar", () => <Help.NewsletterToken mode="confirm" />],
   ["/ajuda/boletim/cancelar", () => <Help.NewsletterToken mode="unsubscribe" />],
+  ["/ajuda/glossario", () => <Help.Glossary />],   // v0.29.0 — antes do catch-all /ajuda/:slug
   ["/ajuda/:slug", (p) => <Help.Article slug={p.slug} />],
 ];
 

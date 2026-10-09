@@ -84,13 +84,13 @@ verificável, campanha pública, cotas apoiadas e itens pendentes. Os e-mails fi
 `dist-stack/data/outbox` (é demonstração: nenhum e-mail sai).
 
 **Isto é provado a cada push** pelo job `pilha-do-zero` do CI: o mesmo arquivo, do zero, com as
-jornadas, as 225 telas no Chromium com cada perfil, o axe-core e um reinício conferindo que os dados
+jornadas, as 226 telas no Chromium com cada perfil, o axe-core e um reinício conferindo que os dados
 continuam. O que ainda não existe é um **endereço público**: depende de conta de hospedagem em nome do
 dono do projeto (D-PUB1 em `execution/BLOCKERS.md`).
 
 ## 2. Por onde navegar
 
-São **225 telas** servidas pelo roteador. O mapa delas — rota, componente, arquivo, quais tipos de
+São **226 telas** servidas pelo roteador (a v0.29.0 acrescentou `/ajuda/glossario`). O mapa delas — rota, componente, arquivo, quais tipos de
 organização alcançam, se está em menu e quais operações de API cada uma chama — está em
 [`execution/screen_inventory.json`](execution/screen_inventory.json) e
 [`execution/screen_backend_map.json`](execution/screen_backend_map.json), e em forma navegável no
@@ -108,7 +108,7 @@ a tese do produto melhor que qualquer slide:
 | Apoiador | 21 | apoiar → carteira → prestação de contas recebida |
 | Administração | 32 | compliance, auditoria, integridade, interruptor |
 
-**84 das 225 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
+**85 das 226 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
 inventário lia só a primeira linha de cada menu e dizia 119; corrigido na v0.25.0). Em boa parte é correto
 (detalhe de item, formulário de edição), mas é a primeira pergunta que o Designer vai querer
 responder, e o painel permite marcá-las uma a uma.

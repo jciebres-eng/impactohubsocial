@@ -175,6 +175,8 @@ class ArchitectureTests(unittest.TestCase):
                            # v0.29.0 — registro de fontes da camada de conhecimento: são REFERÊNCIAS (lei, norma, padrão, documento
                            #           interno sem texto), nunca conteúdo privado; RLS de leitura aberta de propósito; limitadas por taxa
                            "/v1/help/sources", "/v1/help/sources/{key}",
+                           # v0.29.0 — catálogo de conceitos da ajuda contextual: arquivo estático versionado (config/concepts.json), sem banco
+                           "/v1/public/concepts",
                            # v0.16.0 — rede. Cada uma lê SÓ projeção pública ou estado de publicação:
                            # o feed lê marketplace_listings publicados; o perfil lê public_profiles.public_fields;
                            # as relações passam por relationships.visible_to, que filtra por visibility.

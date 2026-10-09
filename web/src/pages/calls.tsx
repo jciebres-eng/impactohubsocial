@@ -4,6 +4,7 @@ import { centsToInput, date, daysUntil, label, money, parseMoney, MATCH_STATE } 
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Button, Chips, Field, Input, Modal, PageHead, Pager, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 import { MatchVerdict } from "../ui/trail";
 import { Suggest } from "../ui/suggest";
 
@@ -50,7 +51,7 @@ export function Opportunities() {
   const [tab, setTab] = useState<"rec" | "search" | "saved">("rec");
   return (
     <>
-      <PageHead title="Oportunidades" sub="Editais, fundos e financiamentos privados, públicos e internacionais — com a compatibilidade da sua organização." />
+      <PageHead title="Oportunidades" sub={<><GlossaryTerm id="edital">Editais</GlossaryTerm>, fundos e financiamentos privados, públicos e internacionais — com a <GlossaryTerm id="match">compatibilidade</GlossaryTerm> da sua organização.</>} />
       <div className="tabs" role="tablist">
         {([["rec", "Recomendadas"], ["search", "Buscar"], ["saved", "Rastreio e alertas"]] as const).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "tab on" : "tab"} onClick={() => setTab(k)}>{l}</button>
@@ -137,7 +138,7 @@ function SavedSearches() {
               onChange={(v, item) => f.set("territory")(item ? item.value : v.toUpperCase())}
               placeholder="BR-MT" />
           </Field>
-          <Field label="Compatibilidade mínima" hint="0 a 100 (opcional)"><Input inputMode="numeric" value={f.v.min_score} onChange={f.set("min_score")} /></Field>
+          <Field label="Compatibilidade mínima" hint="0 a 100 (opcional) — compatibilidade não é elegibilidade nem aprovação"><Input inputMode="numeric" value={f.v.min_score} onChange={f.set("min_score")} /></Field>
           <Field label="Frequência"><Select value={f.v.frequency} onChange={f.set("frequency")} options={[["instant", "A cada rodada"], ["daily", "Diária"], ["weekly", "Semanal"]]} /></Field>
           <Button type="submit" variant="primary" busy={busy}>Salvar e acompanhar</Button>
         </form>

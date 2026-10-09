@@ -376,3 +376,49 @@ class SearchAndEnginesIgnoreReputationAndPlansTests(unittest.TestCase):
         src = (ROOT / "backend" / "impacto" / "services" / "knowledge.py").read_text(encoding="utf-8")
         self.assertIn('"ai_used": False', src)
         self.assertNotIn("gateway", src.lower())
+
+
+# ================================================================================================= catálogo de conceitos (ajuda contextual)
+class ConceptCatalogTests(unittest.TestCase):
+    """config/concepts.json é a ÚNICA origem de tooltip, popover e glossário; web/src/concepts.ts é gerado e conferido; a rota pública
+    serve o mesmo arquivo; nenhuma definição promete aprovação/garantia; toda fonte 'official' aponta para uma chave de kb_sources."""
+    CAT = json.loads((ROOT / "config" / "concepts.json").read_text(encoding="utf-8"))
+
+    def test_schema_and_generated_typescript_are_in_sync(self):
+        import subprocess
+        import sys
+        r = subprocess.run([sys.executable, str(ROOT / "scripts" / "sync_concepts.py"), "--check"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertGreaterEqual(len(self.CAT["terms"]), 30)
+
+    def test_every_term_separates_definition_platform_use_and_limits(self):
+        for cid, t in self.CAT["terms"].items():
+            for k in ("short", "long", "why", "how_impacto", "limitations", "sources"):
+                self.assertTrue(t.get(k), (cid, k))
+            self.assertLessEqual(len(t["short"]), 160, cid)
+
+    def test_no_term_promises_approval_compliance_or_guarantee(self):
+        bad = re.compile(r"((?<!não )(?<!nunca )garante (a|o|aprova)|aprova[çc][ãa]o garantida|100 ?% (seguro|conforme|imposs)|certifica(mos)? que|em conformidade com a lgpd\b(?! não))", re.I)
+        for cid, t in self.CAT["terms"].items():
+            text = " ".join(t[k] for k in ("short", "long", "why", "how_impacto", "limitations"))
+            self.assertIsNone(bad.search(text), (cid, bad.search(text) and bad.search(text).group(0)))
+
+    def test_official_sources_point_to_registered_kb_sources(self):
+        with db_system() as d:
+            keys = {r["key"] for r in d.query("SELECT key FROM kb_sources")}
+        for cid, t in self.CAT["terms"].items():
+            for s in t["sources"]:
+                if s.get("source_key"):
+                    self.assertIn(s["source_key"], keys, (cid, s["source_key"]))
+                if s["kind"] == "official":
+                    self.assertTrue(s.get("source_key") or s.get("url"), cid)
+
+    def test_public_route_serves_the_catalog_without_auth(self):
+        server()
+        r = Client().get("/v1/public/concepts")
+        self.assertEqual(r.status, 200, r.json)
+        self.assertEqual(r.json["version"], self.CAT["version"])
+        ids = {t["id"] for t in r.json["terms"]}
+        self.assertEqual(ids, set(self.CAT["terms"]))
+        match = next(t for t in r.json["terms"] if t["id"] == "match")
+        self.assertIn("não é aprovação", match["limitations"])

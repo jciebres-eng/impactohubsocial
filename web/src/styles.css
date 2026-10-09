@@ -242,6 +242,9 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .pill-bad { background: var(--barro-claro); color: var(--barro); }
 .pill-warn { background: var(--ambar-claro); color: var(--ambar); }
 .pill-muted { background: var(--linha-2); color: var(--texto-2); }
+/* v0.29.0: --linha-2 é um neutro claro fixo; no tema escuro o texto secundário (claro) ficava a 1,27:1 sobre ele (achado do E2E do glossário). */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill-muted { background: var(--pi-color-neutral-800); } }
+:root[data-theme="dark"] .pill-muted { background: var(--pi-color-neutral-800); }
 .state { padding: 40px 20px; text-align: center; color: var(--texto-2); background: var(--folha); border: 1px dashed var(--linha); border-radius: var(--raio-l); }
 .state h1 { font-size: 24px; }
 .state-error { border-color: var(--barro); color: var(--barro); }
@@ -635,3 +638,36 @@ ul.plain li { padding: 2px 0; }
 ul.plain li.warn { border-left: 3px solid var(--alerta); padding-left: 8px; }
 .note.warn { border-left: 3px solid var(--alerta); padding-left: 10px; }
 strong.ok { color: var(--ipe-escuro); }
+
+/* ------------------------------------------------------------------ ajuda contextual (v0.29.0): tooltip, popover, termo de glossário
+   Cores só por token (claro/escuro automáticos). Posição calculada em web/src/ui/help.tsx (position: fixed). Sem biblioteca. */
+.tip-anchor { position: relative; display: inline; }
+.tip { position: fixed; z-index: 60; max-width: 320px; padding: 8px 10px; font-size: 13px; line-height: 1.4; color: var(--folha); background: var(--texto);
+       border-radius: var(--raio-s); box-shadow: var(--sombra); pointer-events: none; opacity: 0; visibility: hidden; }
+.tip-open { opacity: 1; visibility: visible; }
+@media (prefers-reduced-motion: no-preference) { .tip { transition: opacity .12s ease; } }
+.pop-trigger { background: none; border: 0; padding: 0; min-height: 0; font: inherit; color: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; border-radius: var(--raio-s); }
+.pop-trigger:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
+.pop-i, .gterm-mark { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; font-size: 11px; font-weight: 700;
+                      line-height: 1; color: var(--texto-2); border: 1px solid var(--linha-2); background: var(--folha); margin-left: 3px; vertical-align: 2px; }
+.pop-trigger:hover .pop-i, .pop-trigger:hover .gterm-mark, .pop-trigger[aria-expanded="true"] .pop-i, .pop-trigger[aria-expanded="true"] .gterm-mark { color: var(--sobre-tinta); background: var(--tinta-botao); border-color: var(--tinta-botao); }
+.gterm-text { text-decoration: underline dotted; text-decoration-color: var(--texto-3); text-underline-offset: 3px; }
+.pop { position: fixed; z-index: 61; width: min(380px, calc(100vw - 16px)); max-height: min(70vh, 520px); overflow: auto; background: var(--folha); color: var(--texto);
+       border: 1px solid var(--linha); border-radius: var(--raio-m); box-shadow: var(--sombra); padding: 12px 14px; font-size: 14px; text-align: left; }
+@media (prefers-reduced-motion: no-preference) { .pop { animation: pop-in .12s ease; } @keyframes pop-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } }
+.pop-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.pop-close { background: none; border: 0; min-height: 0; padding: 0 4px; font-size: 20px; line-height: 1; color: var(--texto-2); cursor: pointer; border-radius: var(--raio-s); }
+.pop-close:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
+.pop-body p { margin: 0 0 6px; }
+.gloss-short { font-weight: 600; }
+.gloss-dl { margin: 6px 0; display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-size: 13.5px; }
+.gloss-dl dt { color: var(--texto-2); font-weight: 600; }
+.gloss-dl dd { margin: 0; }
+.gloss-src { margin: 0 0 6px; padding-left: 16px; font-size: 13px; }
+.gloss-tag { display: inline-block; border: 1px solid var(--linha-2); border-radius: 999px; padding: 0 8px; font-size: 12px; color: var(--texto-2); background: var(--folha); margin-left: 4px; }
+.gloss-list { display: grid; gap: 12px; }
+.gloss-item h2 { font-size: 18px; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gloss-item h2 a { color: inherit; text-decoration: none; }
+.gloss-item h2 a:hover { text-decoration: underline; }
+.gloss-item:focus { outline: 2px solid var(--tinta); outline-offset: 2px; }
+@media (max-width: 480px) { .gloss-dl { grid-template-columns: 1fr; } .pop { width: calc(100vw - 16px); } }

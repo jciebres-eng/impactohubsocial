@@ -1,16 +1,16 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 225,
+ "telas": 226,
  "por_tabela": {
   "PUBLIC": 9,
-  "HELP": 29,
+  "HELP": 30,
   "ROUTES": 187
  },
- "sem_login": 30,
+ "sem_login": 31,
  "com_parametro": 54,
  "em_algum_menu": 87,
- "so_por_link_direto": 84,
+ "so_por_link_direto": 85,
  "sombreadas": [],
  "menus_por_tipo": {
   "Empresa": 33,
@@ -557,6 +557,23 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "parâmetro"
+  },
+  {
+   "rota": "/ajuda/glossario",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Help.Glossary",
+   "arquivo": "web/src/pages/help.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "link direto"
   },
   {
    "rota": "/ajuda/parcerias",

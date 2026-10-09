@@ -4,6 +4,7 @@ import { centsToInput, date, dateTime, label, money, n, parseMoney } from "../fo
 import { Link, navigate } from "../router";
 import { useSession } from "../session";
 import { Bars, Button, Chips, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad, useTaxonomy } from "../ui/kit";
+import { GlossaryTerm, ContextualHelp } from "../ui/help";
 import { FreePeriodBanner } from "./commercial";
 import { ContextHelp } from "./help";
 import { Preferences } from "./prefs";
@@ -200,7 +201,7 @@ export function Compliance() {
             <Panel title="Situação">
               <KeyValue items={[["Status", <Pill key="s" status={data.compliance_status} />], ["Risco", data.compliance_risk || "—"], ["Última decisão", date(data.compliance_reviewed_at)]]} />
             </Panel>
-            <Panel title="Verificações automáticas">
+            <Panel title={<>Verificações automáticas <ContextualHelp id="conformidade" /></>}>
               {data.checks.length === 0 ? <p className="muted">Ainda não executadas.</p> : (
                 <ul className="rows">{data.checks.map((c: any) => (
                   <li key={c.check_type}><span><strong>{CHECK[c.check_type] || c.check_type}</strong><br /><span className="muted">

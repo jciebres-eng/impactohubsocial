@@ -1,33 +1,32 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.28.0",
- "version": "0.28.0",
- "commit": "cf4ee73",
- "date": "2026-10-09T04:34:53+00:00",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.29.0",
+ "version": "0.29.0",
+ "commit": "d373a9ed9bbabfde5f84ac4d66a178658b3927ca",
+ "date": "2026-10-09T12:47:31+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 3339,
-  "traceability": "IMPACTO_v0.28.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.28.0.zip"
+  "tracked_total": 3544,
+  "traceability": "IMPACTO_v0.29.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip"
  },
  "migrations": {
-  "total": 68,
-  "last": "0068_v0280_ai_usage_control.sql",
+  "total": 69,
+  "last": "0069_v0290_knowledge_provenance.sql",
   "new_in_this_version": [
-   "0068_v0280_ai_usage_control.sql"
+   "0069_v0290_knowledge_provenance.sql"
   ]
  },
  "tests": {
-  "total": 2342,
-  "seconds": 1953.844,
+  "total": 2380,
+  "seconds": 1953.947,
   "result": "FAILED",
   "detail": "failures=5, skipped=29",
-  "runs_in_log": 3
+  "runs_in_log": 2
  },
  "new_test_modules": [
-  "backend/tests/test_v0280_ai_usage_control.py",
-  "backend/tests/test_v0280_similarity.py",
-  "backend/tests/test_v0280_ai_cost_model.py",
-  "backend/tests/test_e2e_v0280_ai_center.py"
+  "backend/tests/test_v0290_knowledge_base.py",
+  "backend/tests/test_v0290_search_eval.py",
+  "backend/tests/test_e2e_v0290_contextual_help.py"
  ],
  "integrations": [
   {
@@ -115,9 +114,9 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da regra `ai.credits_prepaid` (e da taxa de serviço 3,5%) | advogado(a) e contador(a): natureza do crédito pré-pago, ISS, NFS-e, estorno, validade | regra desligada; pedidos só em modo piloto; **nenhuma venda** |\n| Provedor de pagamento PIX com webhook | contrato + `PAYMENT_WEBHOOK_SECRET` | webhook responde 404; nada creditado por pagamento |\n| Provedor de modelo + tabela de preço | `AI_API_KEY`, `AI_MODEL`, linhas em `ai_price_table` | `AI_PROVIDER=local`; custo externo zero MEDIDO porque não há chamada externa; com provedor e sem preço: NÃO MEDIDO |\n| BYOK | decisão do proprietário + cofre por tenant | não existe; a interface não promete |\n| Piloto com medição real | 30 dias com cota + patrocínio + pedidos piloto | preços, cotas e teto de subsídio continuam hipóteses |\n| Chave PIX da plataforma, banco, nota fiscal, assinatura qualificada, gov.br, biometria, KYC, SMS/WhatsApp, minutas, hospedagem | como na v0.27.0 | inalterado |\n| Tag `v0.28.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
- "known_limitations": "- Receita real de IA R$ 0,00 por construção até parecer + provedor + regra ativa.\n- Conjunto de avaliação da similaridade: 6 pares sintéticos; precisão/recall de 1,0 ali **não** é\n  desempenho em base real; alertas de alto impacto exigem revisão humana (o resultado diz isso).\n- Motor de similaridade é léxico/estrutural (shingles, Jaccard, dimensões declaradas) — sem\n  embeddings; paráfrase profunda pode escapar da leitura textual e cair só em escopo/público.\n- Lote, monitoramento recorrente e relatório institucional: declarados `planned`, rota 501.\n- Cache do resumo de IA por versão de projeto: parcial (hash de entrada em `ai_usage`).\n- Custo de infraestrutura, tarifa de PIX e impostos: NÃO MEDIDOS (painel diz).\n- Documentos SUPERADO da assinatura continuam no repositório com banner (movê-los exige atualizar\n  60+ referências — rodada dedicada).\n- Typecheck oficial do front só no CI.\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: catálogo versionado, execução com estado e débito só\nem sucesso, razão por lote com portão, cotas com anti-abuso, patrocínio, pedidos piloto × real, webhook\nidempotente, similaridade por dimensão sem bloqueio e sem efeito reputacional, isolamento k-anônimo,\npainel medido × não medido, projeção derivada, autorização, tenancy, persistência e fluxo completo têm\nteste executado e verde na segunda regressão. As condições são externas ou de piloto (§25): parecer,\nprovedor de pagamento, provedor de modelo com preço, **medição real do piloto antes de cobrança real**,\ntag no GitHub. Nenhuma falha crítica foi convertida em \"condição\". Checklist operacional:\n`docs/execution/PRODUCTION_CHECKLIST_v0280.md`; rollback: `docs/execution/ROLLBACK_v0280.md`;\nmonitoramento: `docs/execution/AI_COST_MONITORING_GUIDE.md`.",
+ "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Conferência das 11 fontes (vigência, licença, direitos) | pessoa com papel `reviewer`, diferente de quem registrou | todas `unverified`; a interface avisa em cada citação; direitos `embed/send_external/train` bloqueados |\n| Revisão das 33 definições do glossário | jurídico, contábil, especialista em impacto | todas `needs_review`; a interface avisa em cada cartão |\n| Conteúdo oficial com citações | equipe editorial (editor + reviewer) | a semente continua DEMO/educacional; o assistente responde com origem \"educacional\" e avisa |\n| Decisão sobre 13 controles BLOCKED_EXTERNAL e 12 NOT_IMPLEMENTED da reconciliação | parecer jurídico, DPO, provedores (fiscal, pagamento, identidade) | continuam P0/P1 na matriz; nada declarado conforme |\n| Conjunto de avaliação com consultas reais | piloto + rotulagem por mais de uma pessoa | piso atual vale para o corpus sintético |\n| Parecer, provedores, minutas, hospedagem, chave PIX, tag no GitHub | como na v0.27.0/v0.28.0 | inalterado |",
+ "known_limitations": "- 0 de 11 fontes conferidas; 33 de 33 definições em revisão; nenhum conteúdo `official` — tudo dito\n  na interface.\n- A busca é léxica (FTS + trigram + tesauro); sem embeddings: paráfrase profunda pode não ser\n  encontrada. O conjunto de avaliação é pequeno, sintético e rotulado por uma pessoa.\n- O assistente é extrativo: responde com trechos de UM conteúdo; não sintetiza vários.\n- Retirar uma fonte não retira o conteúdo que a cita (decisão editorial por desenho).\n- Conceitos só em pt-BR; não aplicados em telas administrativas internas.\n- `examples` por conceito não foi incluído (as definições usam \"como o IMPACTO usa\").\n- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI;\n  defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) fora do escopo.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: base reconciliada sem retrocesso, fontes com direitos\ne verificação por outra pessoa, citações com hash só em rascunho, retirada terminal que propaga, fila\neditorial sem texto livre, assistente que cita e se abstém, busca medida com piso, catálogo único de\nconceitos com ajuda acessível, autorização, tenancy, persistência e regressão têm teste executado e\nverde na segunda rodada. As condições são **editoriais e externas** (§25): conferir fontes, revisar\ndefinições, escrever conteúdo oficial, decidir os controles bloqueados, tag no GitHub. Nenhuma falha\ncrítica foi convertida em \"condição\". Checklist operacional:\n`docs/execution/PRODUCTION_CHECKLIST_v0290.md`; rollback: `docs/execution/ROLLBACK_v0290.md`.",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
@@ -125,12 +124,16 @@
   "MOTOR_COVERAGE_MATRIX.md",
   "EXTERNAL_INTEGRATIONS.md",
   "docs/ECONOMIC_MODEL.md",
-  "AI_COST_MODEL.md",
-  "AI_PROVIDERS_EVALUATION.md",
-  "docs/execution/AI_INVENTORY.md",
-  "docs/execution/CLEANUP_INVENTORY_v0280.md",
-  "docs/execution/PRODUCTION_CHECKLIST_v0280.md",
-  "docs/execution/ROLLBACK_v0280.md",
-  "docs/execution/AI_COST_MONITORING_GUIDE.md"
+  "KNOWLEDGE_HUB.md",
+  "KNOWLEDGE_DATA_MODEL.md",
+  "CONTENT_GOVERNANCE.md",
+  "AI_SEARCH_ARCHITECTURE.md",
+  "knowledge-base/CONTROL-RECONCILIATION.json",
+  "docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md",
+  "docs/execution/TRACEABILITY_MATRIX_v0290.md",
+  "docs/execution/SECURITY_PRIVACY_REPORT_v0290.md",
+  "docs/execution/CLEANUP_INVENTORY_v0290.md",
+  "docs/execution/PRODUCTION_CHECKLIST_v0290.md",
+  "docs/execution/ROLLBACK_v0290.md"
  ]
 }

@@ -33,3 +33,9 @@ FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (test_v0270_
 # FINAL_RELEASE_MANIFEST.json no início da execução (ainda os da v0.28.0 naquele instante); o manifesto é gerado no fechamento.
 # Nenhuma falha de código, banco, interface ou autorização (0 erro). Documentos reescritos e manifestos gerados; portões reexecutados abaixo.
 
+
+## Portões de fechamento reexecutados após reescrever os documentos de fechamento e gerar os manifestos
+## (release_gate, release_docs, execution_matrices, authorization_matrix, frontend_gate, cobertura, ai_cost_model, architecture, security_gate, v0290_knowledge_base)
+----------------------------------------------------------------------
+Ran 184 tests in 34.162s
+OK

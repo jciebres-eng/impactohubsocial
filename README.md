@@ -62,7 +62,7 @@ evidência → mudou → atrasos → riscos → o que preciso decidir) e do gove
 território → programas → editais → OSCs → projetos → recursos → indicadores declarados × validados →
 atrasos → territórios descobertos, com k-anonimato). E o estado verificável **"Projeto IMPACTO
 Ready"** na ficha do projeto: 15 critérios, cada um com a tabela e a contagem que o sustenta,
-desconhecido ≠ zero, mesmo resultado para dono e financiador. 226 telas, 936 operações, 50 motores.
+desconhecido ≠ zero, mesmo resultado para dono e financiador. 227 telas, 940 operações, 50 motores.
 Relatório em `FINAL_EXECUTION_REPORT.md`; auditoria em `FINAL_EXECUTION_AUDIT.md`.
 
 **Novo no v0.25.0 (validação operacional de baixo para cima):** as 218 telas do roteador abertas no

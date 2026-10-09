@@ -1,4 +1,4 @@
-"""Matriz de autorização das 936 operações (888 na v0.23.0; +6 na v0.26.0; v0.27.0: −19 de assinatura/trial, +18 da camada econômica, +2 torre master e cartões do dia; v0.28.0: +28 da Central de IA; v0.29.0: +13 da camada de conhecimento — fontes, citações, retirada, fila editorial, relato de erro, catálogo de conceitos): classificação completa + chokepoint exaustivo.
+"""Matriz de autorização das 940 operações (888 na v0.23.0; +6 na v0.26.0; v0.27.0: −19 de assinatura/trial, +18 da camada econômica, +2 torre master e cartões do dia; v0.28.0: +28 da Central de IA; v0.29.0: +13 da camada de conhecimento — fontes, citações, retirada, fila editorial, relato de erro, catálogo de conceitos; v0.30.0: +4 — evidência detalhe/contestação, método de indicador, dossiê): classificação completa + chokepoint exaustivo.
 
 O QUE ESTE ARQUIVO AFIRMA, E O QUE NÃO AFIRMA
 
@@ -103,7 +103,7 @@ class EveryOperationIsClassifiedTests(unittest.TestCase):
 
     def test_the_counts_match_what_the_report_states(self):
         """Número citado em relatório que ninguém confere é número que envelhece."""
-        self.assertEqual(936, len(self.linhas))   # v0.29.0 (ADR-353..357): +13 rotas da camada de conhecimento (3 públicas: fontes, fonte, conceitos; 1 de usuário: relato de erro; 9 de equipe editorial) — antes 923 (v0.28.0, +28 da Central de IA)
+        self.assertEqual(940, len(self.linhas))   # v0.30.0 (ADR-360..362): +4 rotas — GET evidência, POST contestação, PATCH método do indicador, GET dossiê (antes 936). v0.29.0 (ADR-353..357): +13 rotas da camada de conhecimento (3 públicas: fontes, fonte, conceitos; 1 de usuário: relato de erro; 9 de equipe editorial) — antes 923 (v0.28.0, +28 da Central de IA)
         # v0.27.0: −6 rotas de plataforma de assinatura/trial (trial, manual-subscription, preço de plano, trial-requests ×2,
         # painel de testes) +4 (proposta de contrato, licença, confirmação e conciliação de repasse pela administração);
         # +1 permissão nomeada líquida (torre master, proposta de contrato; −preço, −trial); −2 públicas (preço, webhook).

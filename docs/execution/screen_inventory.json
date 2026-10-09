@@ -1,14 +1,14 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 226,
+ "telas": 227,
  "por_tabela": {
   "PUBLIC": 9,
   "HELP": 30,
-  "ROUTES": 187
+  "ROUTES": 188
  },
  "sem_login": 31,
- "com_parametro": 54,
+ "com_parametro": 55,
  "em_algum_menu": 87,
  "so_por_link_direto": 85,
  "sombreadas": [],
@@ -3504,6 +3504,23 @@
    "exige_login": true,
    "componente": "Fin.ContributionModels",
    "arquivo": "web/src/pages/finance.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
+   "rota": "/projetos/:id/dossie",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Impact.ProjectDossier",
+   "arquivo": "web/src/pages/impact.tsx",
    "parametro": true,
    "tipos_declarados": [],
    "alcanca": [

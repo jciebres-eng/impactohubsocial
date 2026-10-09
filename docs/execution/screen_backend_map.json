@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 942,
- "operacoes_registradas": 936,
+ "operacoes_no_backend": 946,
+ "operacoes_registradas": 940,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,16 +11,16 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 226,
+ "telas": 227,
  "estados": {
-  "backend presente": 162,
+  "backend presente": 163,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
   "sem chamada direta": 64
  },
  "interface_sem_backend": {},
  "arquivos_do_front_varridos": 64,
- "operacoes_que_nenhuma_tela_chama": 253,
+ "operacoes_que_nenhuma_tela_chama": 256,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -74,6 +74,7 @@
   "GET /v1/documents/{}/integrity",
   "GET /v1/engines/coverage",
   "GET /v1/equity/denominators",
+  "GET /v1/evidences/{}",
   "GET /v1/fee-tables/{}",
   "GET /v1/files/{}",
   "GET /v1/financeiro/fee-preview",
@@ -156,6 +157,7 @@
   "PATCH /v1/integrations/connections/{}",
   "PATCH /v1/integrations/subscriptions/{}",
   "PATCH /v1/programs/{}",
+  "PATCH /v1/projects/{}/indicators/{}/method",
   "PATCH /v1/solution-replications/{}",
   "POST /v1/access/check",
   "POST /v1/admin/agreements/{}/members/{}/revoke",
@@ -219,6 +221,7 @@
   "POST /v1/drafts/{}/export",
   "POST /v1/equity/compare",
   "POST /v1/equity/denominators",
+  "POST /v1/evidences/{}/contest",
   "POST /v1/frameworks/mappings",
   "POST /v1/graph-edges/{}/validate",
   "POST /v1/integrations/connections",
@@ -2170,6 +2173,16 @@
    "operacoes": [
     "POST /v1/contribution-models/{}/submit",
     "POST /v1/projects/{}/contribution-models"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/projetos/:id/dossie",
+   "componente": "Impact.ProjectDossier",
+   "arquivo": "web/src/pages/impact.tsx",
+   "operacoes": [
+    "GET /v1/projects/{}/dossier"
    ],
    "ausentes": [],
    "estado": "backend presente"

@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -3641,6 +3641,42 @@
     }
    }
   },
+  "/v1/evidences/{evidence_id}": {
+   "get": {
+    "summary": "Uma evidência com origem, uso, versão, hash do documento e histórico de estados (v0.30.0)",
+    "operationId": "get_execution_routes_get_evidence",
+    "tags": [
+     "execution"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "evidence_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
   "/v1/evidences/{evidence_id}/review": {
    "post": {
     "summary": "review evidence",
@@ -3681,6 +3717,52 @@
       "application/json": {
        "schema": {
         "$ref": "#/components/schemas/ReviewDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/evidences/{evidence_id}/contest": {
+   "post": {
+    "summary": "A executora contesta uma evidência rejeitada, com motivo; quem revisa decide de novo com justificativa (v0.30.0)",
+    "operationId": "post_execution_routes_contest_evidence",
+    "tags": [
+     "execution"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "evidence_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EvidenceContestIn"
        }
       }
      }
@@ -7683,6 +7765,96 @@
       }
      }
     }
+   }
+  },
+  "/v1/projects/{project_id}/indicators/{pi_id}/method": {
+   "patch": {
+    "summary": "Muda o método de medição com motivo; a mudança fica registrada (append-only) e a série passa a marcar a descontinuidade (v0.30.0)",
+    "operationId": "patch_impact_routes_change_indicator_method",
+    "tags": [
+     "impact"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Tipos: osc · Papel mínimo: member",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "pi_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectIndicatorMethodPatch"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/projects/{project_id}/dossier": {
+   "get": {
+    "summary": "Dossiê longitudinal do projeto: prontidão, marcos, evidências por estado, indicadores reportado × validado, aportes, diligências, trilha — com origem, atualidade e lacunas (v0.30.0)",
+    "operationId": "get_impact_routes_project_dossier",
+    "tags": [
+     "impact"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "project_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
    }
   },
   "/v1/projects/{project_id}/indicators/{pi_id}": {
@@ -42390,6 +42562,67 @@
       ],
       "default": null,
       "title": "Indicator Value"
+     },
+     "method": {
+      "default": "unknown",
+      "enum": [
+       "direct_observation",
+       "document",
+       "self_report",
+       "third_party",
+       "sensor_or_system",
+       "interview",
+       "sample",
+       "unknown"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "access_level": {
+      "default": "parties",
+      "enum": [
+       "public",
+       "parties",
+       "restricted"
+      ],
+      "title": "Access Level",
+      "type": "string"
+     },
+     "consent_basis": {
+      "default": "unknown",
+      "enum": [
+       "not_personal",
+       "consent",
+       "legal_obligation",
+       "public_interest",
+       "legitimate_interest",
+       "unknown"
+      ],
+      "title": "Consent Basis",
+      "type": "string"
+     },
+     "retention_class": {
+      "default": "project",
+      "enum": [
+       "project",
+       "accountability",
+       "legal_hold"
+      ],
+      "title": "Retention Class",
+      "type": "string"
+     },
+     "supersedes_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Supersedes Id"
      }
     },
     "required": [
@@ -42397,6 +42630,22 @@
      "title"
     ],
     "title": "EvidenceIn",
+    "type": "object"
+   },
+   "EvidenceContestIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "EvidenceContestIn",
     "type": "object"
    },
    "FeedbackIn": {
@@ -44421,6 +44670,30 @@
      "indicator_id"
     ],
     "title": "ProjectIndicatorIn",
+    "type": "object"
+   },
+   "ProjectIndicatorMethodPatch": {
+    "additionalProperties": false,
+    "description": "v0.30.0 (ADR-362): mudar o método de medição exige motivo; a mudança fica registrada e a série marca a descontinuidade.",
+    "properties": {
+     "method": {
+      "maxLength": 1000,
+      "minLength": 3,
+      "title": "Method",
+      "type": "string"
+     },
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "method",
+     "reason"
+    ],
+    "title": "ProjectIndicatorMethodPatch",
     "type": "object"
    },
    "IndicatorValueIn": {

@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.29.0)
+# API REST /v1 — referência gerada do código (v0.30.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (936)
+## Operações (940)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -397,6 +397,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/equity/compare` | membro da organização ativa | papel ≥ viewer | Compara contextos — e devolve comparable=false com o motivo quando não há base |
 | GET | `/v1/equity/denominators` | membro da organização ativa | papel ≥ viewer | Denominadores vigentes, com fonte e data de cada um |
 | POST | `/v1/equity/denominators` | membro da organização ativa | papel ≥ manager | Declara denominador do projeto ou do programa (fonte e método obrigatórios) |
+| GET | `/v1/evidences/{evidence_id}` | membro da organização ativa | papel ≥ viewer | Uma evidência com origem, uso, versão, hash do documento e histórico de estados (v0.30.0) |
+| POST | `/v1/evidences/{evidence_id}/contest` | membro da organização ativa | tipos: osc; papel ≥ member | A executora contesta uma evidência rejeitada, com motivo; quem revisa decide de novo com justificativa (v0.30.0) |
 | POST | `/v1/evidences/{evidence_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | review evidence |
 | POST | `/v1/expenses/{expense_id}/review` | membro da organização ativa | tipos: company, government, individual; papel ≥ analyst | Financiador valida ou questiona a despesa (a OSC não revisa a si mesma — garantido também no banco) |
 | GET | `/v1/fee-tables` | membro da organização ativa | papel ≥ viewer | Tabelas de honorários publicadas, com a fonte e a data de consulta (a plataforma não inventa valor) |
@@ -724,6 +726,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | papel ≥ viewer | Modelos de contribuição do projeto (a OSC vê todos; os demais, só os aprovados juridicamente) |
 | POST | `/v1/projects/{project_id}/contribution-models` | membro da organização ativa | tipos: osc; papel ≥ manager | Propõe um modelo (doação, patrocínio, cotas, lei de incentivo, investimento de impacto). Nasce em rascunho |
 | GET | `/v1/projects/{project_id}/data-quality` | membro da organização ativa | papel ≥ viewer | Achados sobre o DADO declarado — nunca avaliação do projeto (§69) |
+| GET | `/v1/projects/{project_id}/dossier` | membro da organização ativa | papel ≥ viewer | Dossiê longitudinal do projeto: prontidão, marcos, evidências por estado, indicadores reportado × validado, aportes, diligências, trilha — com origem, atualidade e lacunas (v0.30.0) |
 | GET | `/v1/projects/{project_id}/equity` | membro da organização ativa | papel ≥ viewer | O contexto declarado do projeto, as barreiras e o que é normalizável |
 | GET | `/v1/projects/{project_id}/equity/assessments` | membro da organização ativa | papel ≥ viewer | Histórico dos retratos de contexto do projeto |
 | POST | `/v1/projects/{project_id}/equity/assessments` | membro da organização ativa | papel ≥ manager | Grava o retrato do contexto (append-only; não produz nota de equidade) |
@@ -746,6 +749,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/projects/{project_id}/impact` | membro da organização ativa | papel ≥ viewer | ODS, indicadores (reportado × validado) e progresso do projeto |
 | POST | `/v1/projects/{project_id}/indicators` | membro da organização ativa | tipos: osc; papel ≥ member | add project indicator |
 | DELETE | `/v1/projects/{project_id}/indicators/{pi_id}` | membro da organização ativa | tipos: osc; papel ≥ member | remove project indicator |
+| PATCH | `/v1/projects/{project_id}/indicators/{pi_id}/method` | membro da organização ativa | tipos: osc; papel ≥ member | Muda o método de medição com motivo; a mudança fica registrada (append-only) e a série passa a marcar a descontinuidade (v0.30.0) |
 | GET | `/v1/projects/{project_id}/ledger` | membro da organização ativa | papel ≥ viewer | Impact Ledger do projeto (append-only, encadeado por hash) com verificação de integridade |
 | GET | `/v1/projects/{project_id}/lifecycle` | membro da organização ativa | papel ≥ viewer | Situação atual, para onde pode ir e o que já aconteceu |
 | PUT | `/v1/projects/{project_id}/location` | membro da organização ativa | tipos: osc; papel ≥ member | Define a precisão pública da localização (exata, aproximada, bairro, município, região) e as coordenadas privadas |

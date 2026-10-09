@@ -112,7 +112,7 @@ class EveryScreenOpensForEveryPersonaTests(unittest.TestCase):
             "estados": dict(estados.most_common()),
             "falhas": [{k: x[k] for k in ("rota", "persona", "url", "estado", "detalhe", "api_4xx")} for x in falhas],
         }, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-        self.assertEqual(len(rotas), 226, "o inventário mudou: regere screen_inventory.json")   # v0.29.0: +/ajuda/glossario (ADR-359); v0.28.0: +/ia/orcamento +/ia/analises/:id +/ia/patrocinios/:id +/admin/ia/financeiro
+        self.assertEqual(len(rotas), 227, "o inventário mudou: regere screen_inventory.json")   # v0.30.0: +/projetos/:id/dossie (ADR-361); v0.29.0: +/ajuda/glossario (ADR-359); v0.28.0: +/ia/orcamento +/ia/analises/:id +/ia/patrocinios/:id +/admin/ia/financeiro
         self.assertEqual(sorted(rotas - rotas_ok), [], "rota que nenhum perfil conseguiu abrir com dado real")
         self.assertEqual(falhas, [], "\n" + "\n".join(
             f"{x['estado']:<16} {x['persona']:<10} {x['url'] or x['rota']}  {x['detalhe']}" for x in falhas))

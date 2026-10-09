@@ -29,3 +29,9 @@ FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_
 # Actions citada no texto; linhas da tabela de regressão sem o identificador entre crases) — corrigidos.
 # CI do ramo (run 37977204420, código antes do fechamento): Ran 2414 tests in 1651.243s — 3 falhas (manifesto ×2, segredo — corrigida).
 
+
+## Portões de fechamento reexecutados após gerar os manifestos e regenerar a matriz de cobertura
+## (release_gate, release_docs, cobertura, v0310_release_docs, v0310_storage, v0300_release_docs, economic_analysis, security_gate, execution_matrices, authorization_matrix, frontend_gate, ai_cost_model, architecture, financial_model)
+----------------------------------------------------------------------
+Ran 194 tests in 28.112s
+OK (skipped=2)

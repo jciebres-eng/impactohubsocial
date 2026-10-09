@@ -53,7 +53,7 @@ Inalterados: 940 operações, 227 telas. A faixa de demonstração não é tela 
 
 | Job | Estado | Evidência |
 |---|---|---|
-| CI do PR #5 (suíte completa, pilha do zero, imagem, auditoria, armazenamento) | PASS | execução registrada no relatório final §3 |
+| CI do PR #5 (suíte completa, pilha do zero, imagem, auditoria, armazenamento) | PASS | execução 38002549412 no commit candidato `8aec7d1`: os cinco verdes |
 
 ## 7. Regressão — o que esta rodada encontrou e o que foi feito
 

@@ -37,6 +37,11 @@ repositório privado, versão e documentos, e o commit final dos manifestos, par
 pacote é construído byte a byte (`verify_package_against_git.py`). PR #5. Execuções na produção: 37996712177, 37997211737,
 37997481695 (contas e conteúdo), 37997867650 (ensaio de restauração).
 
+**CI do commit candidato à tag `8aec7d1` (execução 38002549412, no PR #5): `backend` (suíte completa), `pilha-do-zero`, `docker`,
+`auditoria` e `armazenamento` — os cinco verdes.** Pacote `IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip`, SHA-256
+`add013b96658348eff823e45108f4c39133667572fdf72461a64320eec9d866b`, byte a byte o commit `8aec7d1`. Este parágrafo foi
+acrescentado depois da execução, no commit seguinte; a tag `v0.32.0` aponta para `8aec7d1`.
+
 ## 4. Architecture Status
 
 Inalterada no produto. Operação documentada no `CLAUDE.md`: Railway (`impactohubsocial`, `pleasing-trust`, `clamav`; demo

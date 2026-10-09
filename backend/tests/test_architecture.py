@@ -113,7 +113,11 @@ class ArchitectureTests(unittest.TestCase):
                    #       CLIENTE (`/v1/ai/usage`, `/budget`, `/credits`, `/estimate`,
                    #       `/policies`) usam `ctx.tx()` com a RLS normal, e `/policies` lê a visão
                    #       `ai_prompt_public`, que não tem a coluna do texto da instrução.
-                   "ai_routes.py"}
+                   "ai_routes.py",
+                   # v0.28.0: o webhook de pagamento (/v1/webhooks/payments/{provider}) não tem principal —
+                   #          quem fala é o provedor, por evento assinado; `apply_payment_webhook` só credita
+                   #          cobrança REAL com pedido associado, e o evento é deduplicado por billing_events.
+                   "ai_center_routes.py"}
         for f in PKG.rglob("*.py"):
             src = f.read_text(encoding="utf-8")
             if "system_tx(" in src or "system=True" in src:

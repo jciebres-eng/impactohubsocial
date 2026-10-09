@@ -104,6 +104,7 @@ class Settings:
     # apenas para `economics/payments.py` dizer se há provedor REAL configurado (sem chave = simulado).
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
+    payment_webhook_secret: str = ""      # v0.28.0: HMAC dos webhooks de pagamento em /v1/webhooks/payments/{provider}
     # v0.27.0 — chave PIX da própria plataforma para a linha "infraestrutura e inteligência" das instruções de repasse.
     # Vazia = "NÃO CONFIGURADA": a instrução sai sem chave e diz isso. Nunca é usada para mover dinheiro.
     platform_pix_key: str = ""
@@ -188,6 +189,7 @@ def load_settings() -> Settings:
         allow_unscanned_downloads=_bool("ALLOW_UNSCANNED_DOWNLOADS", not hardened),
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
+        payment_webhook_secret=_env("PAYMENT_WEBHOOK_SECRET", "") or "",
         platform_pix_key=_env("PLATFORM_PIX_KEY", "") or "",
         platform_pix_key_type=_env("PLATFORM_PIX_KEY_TYPE", "") or "",
         ai_provider=_env("AI_PROVIDER", "local"),

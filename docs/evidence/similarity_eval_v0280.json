@@ -1,0 +1,166 @@
+{
+ "engine_version": "similarity@1.0",
+ "cases": 6,
+ "textual_reproduction": {
+  "precision": 1.0,
+  "recall": 1.0,
+  "tp": 1,
+  "fp": 0,
+  "fn": 0
+ },
+ "expense_duplication": {
+  "precision": 1.0,
+  "recall": 1.0,
+  "tp": 1,
+  "fp": 0,
+  "fn": 0
+ },
+ "complementarity_agreement": "6/6",
+ "note": "Conjunto de avaliação PEQUENO e rotulado à mão (6 pares): mede se os limiares do motor separam os casos declarados; não é medida de desempenho em base real, que ainda não existe. Alertas de alto impacto exigem revisão humana.",
+ "rows": [
+  {
+   "case": "legítimos semelhantes (mesma causa, mesmo tipo, textos próprios)",
+   "expected": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "got": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "confidence": "high",
+   "dimensions": {
+    "text": 0.408,
+    "scope": 0.688,
+    "audience": 1.0,
+    "territory": 0.3,
+    "time": 0.408,
+    "budget": 0.0,
+    "funding": null,
+    "indicators": 1.0
+   }
+  },
+  {
+   "case": "cópia textual com pequenas alterações",
+   "expected": {
+    "textual_reproduction": true,
+    "expense_duplication": true,
+    "complementarity": false
+   },
+   "got": {
+    "textual_reproduction": true,
+    "expense_duplication": true,
+    "complementarity": false
+   },
+   "confidence": "high",
+   "dimensions": {
+    "text": 1.0,
+    "scope": 0.965,
+    "audience": 1.0,
+    "territory": 1.0,
+    "time": 1.0,
+    "budget": 1.0,
+    "funding": null,
+    "indicators": 1.0
+   }
+  },
+  {
+   "case": "distintos no mesmo território",
+   "expected": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": false
+   },
+   "got": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": false
+   },
+   "confidence": "high",
+   "dimensions": {
+    "text": 0.1,
+    "scope": 0.012,
+    "audience": 0.0,
+    "territory": 1.0,
+    "time": 1.0,
+    "budget": 0.0,
+    "funding": null,
+    "indicators": 0.0
+   }
+  },
+  {
+   "case": "semelhantes em territórios diferentes (mesmo desenho, texto próprio)",
+   "expected": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "got": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "confidence": "high",
+   "dimensions": {
+    "text": 0.36,
+    "scope": 0.833,
+    "audience": 1.0,
+    "territory": 0.12,
+    "time": 1.0,
+    "budget": 1.0,
+    "funding": null,
+    "indicators": 1.0
+   }
+  },
+  {
+   "case": "complementares: mesma causa, abordagem diferente, mesmo território",
+   "expected": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "got": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": true
+   },
+   "confidence": "high",
+   "dimensions": {
+    "text": 0.409,
+    "scope": 0.667,
+    "audience": 0.0,
+    "territory": 1.0,
+    "time": 1.0,
+    "budget": 0.0,
+    "funding": null,
+    "indicators": 0.0
+   }
+  },
+  {
+   "case": "dados incompletos",
+   "expected": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": false
+   },
+   "got": {
+    "textual_reproduction": false,
+    "expense_duplication": false,
+    "complementarity": false
+   },
+   "confidence": "low",
+   "dimensions": {
+    "text": 0.0,
+    "scope": 1.0,
+    "audience": null,
+    "territory": null,
+    "time": null,
+    "budget": null,
+    "funding": null,
+    "indicators": null
+   }
+  }
+ ]
+}

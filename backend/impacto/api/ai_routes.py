@@ -32,7 +32,7 @@ def draft(ctx: Ctx, body: S.AiDraftIn):
        summary="Resumo do projeto para leitura rápida do financiador")
 def summarize(ctx: Ctx, body: S.AiSummarizeIn):
     with ctx.tx(readonly=True) as c:
-        p = c.one("SELECT title, summary, problem, objectives, methodology, beneficiaries_count, budget_total_cents, territory FROM projects"
+        p = c.one("SELECT id::text AS id, title, summary, problem, objectives, methodology, beneficiaries_count, budget_total_cents, territory FROM projects"
                   " WHERE id = $1", body.project_id)
     if not p:
         raise not_found("Projeto")

@@ -23,7 +23,9 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            # continua em report_routes, que já estava na lista desde a v0.10.0)
            "complaint_routes",
            # v0.26.0 — torres de controle (financiador, governo) e o estado "Projeto IMPACTO Ready"
-           "tower_routes"]
+           "tower_routes",
+           # v0.28.0 — Central de IA: catálogo, prévia, execuções, créditos por PIX, patrocínio, similaridade
+           "ai_center_routes"]
 _loaded = False
 
 

@@ -18,6 +18,7 @@ import time
 from ...adapters.http_client import HttpClient
 from ...observability import METRICS, log
 from . import local, policy, prompts
+from . import usage_control as UC
 
 logger = logging.getLogger("impacto.ai")
 
@@ -102,7 +103,7 @@ class AiGateway:
         # que o que de fato bloqueava, e a pessoa planejava o mês com o número errado.
         used = conn.scalar("SELECT ai_usage_this_month($1)", ctx.org_id)
         if lim is not None and used >= lim:
-            raise ApiError(402, "ai_quota_exceeded", f"Cota mensal de assistência por IA atingida ({lim}). Faça upgrade do plano.",
+            raise ApiError(402, "ai_quota_exceeded", f"Limite mensal de chamadas do pacote de capacidades atingido ({lim}).",
                            {"limit": lim, "used": used})
 
     def _log(self, conn, ctx, feature, provider, status, text_in, text_out, meta, latency, redactions,
@@ -149,6 +150,20 @@ class AiGateway:
                                     metrics={"feature": feature, "ai_usage_id": usage_id,
                                              "tokens_in": meta.get("tokens_in"),
                                              "tokens_out": meta.get("tokens_out")})
+        return usage_id
+
+    @staticmethod
+    def _settle(run: UC.Run, r: dict, prompt: dict, usage_id, text_in: str) -> dict:
+        """Liquida a execução na camada de uso: sucesso cobra; provedor externo que falhou ou respondeu
+        inválido (resultado veio do motor local de contingência) é PARCIAL e não cobra."""
+        partial = r["status"] in ("fallback_local", "invalid_output", "blocked_policy")
+        ex = run.ok(result_type="ai_usage", result_id=str(usage_id) if usage_id else None,
+                    meta={"tokens_in": r["meta"].get("tokens_in"), "tokens_out": r["meta"].get("tokens_out"),
+                          "provider": r["provider"], "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}'},
+                    partial=partial)
+        if usage_id and ex.get("charged_credits"):
+            run.conn.run("UPDATE ai_usage SET credits_charged = $2 WHERE id = $1", int(usage_id), int(ex["charged_credits"]))
+        return {k: ex.get(k) for k in ("id", "state", "funding_source", "funding_label", "charged_credits", "estimated_credits", "cost_status")}
 
     def _external(self, conn, prompt: dict, user: str) -> dict:
         """Uma passagem única: política da faixa → redação → chamada → conferência de esquema.
@@ -213,31 +228,34 @@ class AiGateway:
             self._check_quota(c, ctx)
             self._check_budget(c, ctx)
             prompt = prompts.active(c, "structure_need")
-            base = local.structure_need(text)
-            r = self._external(c, prompt, text)
-            result = dict(base)
-            if r["status"] == "ok" and r.get("value"):
-                data = r["value"]
-                for k in ("title", "summary", "problem", "objectives", "beneficiaries_description"):
-                    if isinstance(data.get(k), str):
-                        result[k] = data[k][:2000]
-                if isinstance(data.get("questions"), list):
-                    result["questions"] = [str(q)[:300] for q in data["questions"][:8]]
-                result["engine"] = f'{r["provider"]}+local-rules'
-            else:
-                # A resposta externa não foi usada, e o resultado diz POR QUÊ. Antes desta versão o
-                # motivo aparecia só como sufixo numa string de motor, e `status` ia como 'ok'.
-                result["engine"] = "local-rules@1.0"
-                result["external_outcome"] = r["status"]
-                if r["problems"]:
-                    result["external_problems"] = r["problems"][:3]
-            self._log(c, ctx, "structure_need", r["provider"], r["status"], text,
-                      json.dumps(result, ensure_ascii=False), r["meta"],
-                      time.perf_counter() - t0, r["redactions"],
-                      prompt=prompt, schema_valid=r["schema_valid"])
+            with UC.Run(c, ctx, "assist.structure_need", params={"sha": hashlib.sha256(text.encode()).hexdigest()},
+                        input_chars=len(text)) as run:
+                base = local.structure_need(text)
+                r = self._external(c, prompt, text)
+                result = dict(base)
+                if r["status"] == "ok" and r.get("value"):
+                    data = r["value"]
+                    for k in ("title", "summary", "problem", "objectives", "beneficiaries_description"):
+                        if isinstance(data.get(k), str):
+                            result[k] = data[k][:2000]
+                    if isinstance(data.get("questions"), list):
+                        result["questions"] = [str(q)[:300] for q in data["questions"][:8]]
+                    result["engine"] = f'{r["provider"]}+local-rules'
+                else:
+                    # A resposta externa não foi usada, e o resultado diz POR QUÊ. Antes desta versão o
+                    # motivo aparecia só como sufixo numa string de motor, e `status` ia como 'ok'.
+                    result["engine"] = "local-rules@1.0"
+                    result["external_outcome"] = r["status"]
+                    if r["problems"]:
+                        result["external_problems"] = r["problems"][:3]
+                usage_id = self._log(c, ctx, "structure_need", r["provider"], r["status"], text,
+                                     json.dumps(result, ensure_ascii=False), r["meta"],
+                                     time.perf_counter() - t0, r["redactions"],
+                                     prompt=prompt, schema_valid=r["schema_valid"])
+                execution = self._settle(run, r, prompt, usage_id, text)
         result.update({"draft": True, "human_review_required": True,
                        "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
-                       "tier": prompt["tier"], "tier_label": prompt["tier_label"]})
+                       "tier": prompt["tier"], "tier_label": prompt["tier_label"], "execution": execution})
         return result
 
     def draft(self, ctx, kind: str, project: dict, org: dict, call: dict | None, items: list, milestones: list,
@@ -251,19 +269,23 @@ class AiGateway:
             self._check_quota(c, ctx)
             self._check_budget(c, ctx)
             prompt = prompts.active(c, "draft_document")
-            r = self._external(c, prompt, template)
-            usou = bool(r["text"]) and len(r["text"]) > 200
-            content = r["text"].strip() if usou else template
-            self._log(c, ctx, f"draft:{kind}", r["provider"],
-                      r["status"] if usou or r["status"] != "ok" else "invalid_output",
-                      template, content, r["meta"], time.perf_counter() - t0, r["redactions"],
-                      prompt=prompt, schema_valid=r["schema_valid"])
+            with UC.Run(c, ctx, "assist.draft_document", params={"kind": kind, "project": str(project.get("id")), "sha": hashlib.sha256(template.encode()).hexdigest()},
+                        input_chars=len(template), project_id=str(project.get("id")) if project.get("id") else None) as run:
+                r = self._external(c, prompt, template)
+                usou = bool(r["text"]) and len(r["text"]) > 200
+                content = r["text"].strip() if usou else template
+                if not usou and r["status"] == "ok":
+                    r = dict(r, status="invalid_output")
+                usage_id = self._log(c, ctx, f"draft:{kind}", r["provider"], r["status"],
+                                     template, content, r["meta"], time.perf_counter() - t0, r["redactions"],
+                                     prompt=prompt, schema_valid=r["schema_valid"])
+                execution = self._settle(run, r, prompt, usage_id, template)
         return {"content": content,
                 "engine": r["provider"] if usou else "local-template@1.0",
                 "external_outcome": r["status"],
                 "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
                 "tier": prompt["tier"], "tier_label": prompt["tier_label"],
-                "draft": True, "human_review_required": True}
+                "draft": True, "human_review_required": True, "execution": execution}
 
     def summarize(self, ctx, project: dict) -> dict:
         t0 = time.perf_counter()
@@ -273,16 +295,19 @@ class AiGateway:
             self._check_budget(c, ctx)
             prompt = prompts.active(c, "summarize_project")
             src = "\n".join(str(project.get(k) or "") for k in ("title", "summary", "problem", "objectives", "methodology"))
-            r = self._external(c, prompt, src)
-            text = r["text"].strip()[:1200] if r["text"] else base
-            self._log(c, ctx, "summarize", r["provider"], r["status"], src, text, r["meta"],
-                      time.perf_counter() - t0, r["redactions"],
-                      prompt=prompt, schema_valid=r["schema_valid"])
+            with UC.Run(c, ctx, "assist.summarize_project", params={"sha": hashlib.sha256(src.encode()).hexdigest()},
+                        input_chars=len(src), project_id=str(project.get("id")) if project.get("id") else None) as run:
+                r = self._external(c, prompt, src)
+                text = r["text"].strip()[:1200] if r["text"] else base
+                usage_id = self._log(c, ctx, "summarize", r["provider"], r["status"], src, text, r["meta"],
+                                     time.perf_counter() - t0, r["redactions"],
+                                     prompt=prompt, schema_valid=r["schema_valid"])
+                execution = self._settle(run, r, prompt, usage_id, src)
         return {"summary": text,
                 "engine": r["provider"] if r["text"] else "local-extractive@1.0",
                 "external_outcome": r["status"],
                 "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
-                "tier": prompt["tier"], "tier_label": prompt["tier_label"], "draft": True}
+                "tier": prompt["tier"], "tier_label": prompt["tier_label"], "draft": True, "execution": execution}
 
     # -- orçamento em dinheiro --------------------------------------------------------------------
     def _check_budget(self, conn, ctx) -> None:

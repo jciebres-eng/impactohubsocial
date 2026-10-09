@@ -1,6 +1,20 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## v0.1 – auditoria inicial — 2026-10-09
+
+> Numeração própria da série de documentos de auditoria (`docs/01` a `docs/04`). **Não muda a versão do produto**, que
+> continua 0.30.0 no arquivo `VERSION` (o último commit da `main` se chama "v0.30.1"; ver `docs/02-auditoria.md`, M5).
+
+Somente documentação, na branch `auditoria-inicial`. Nenhum código, configuração de deploy, variável ou chave alterado.
+
+- `docs/01-estado-atual.md`: o que a plataforma faz hoje, o que está desligado de propósito, tecnologias, onde roda,
+  estrutura de pastas e o resultado da suíte de testes executada nesta auditoria.
+- `docs/02-auditoria.md`: problemas por gravidade — 2 críticos (contas de demonstração no banco de produção; chaves do
+  backup expostas num chat), 6 altos, 11 médios, 4 baixos — cada um com prova e correção. Nenhum segredo no repositório.
+- `docs/03-checklist-demo.md`: o demo já está no ar; passos para deixá-lo seguro para mostrar e separado da produção.
+- `docs/04-roadmap.md`: 19 incrementos em ordem de urgência e 5 decisões do responsável.
+
 ## [0.30.0] — 2026-10-09
 
 ### Pacote "Superprompts Master": baseline, evidência de primeira classe, dossiê longitudinal, mudança metodológica, economia do SaaS (ADR-360 a ADR-363)

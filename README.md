@@ -12,7 +12,16 @@ permissão frouxa.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
 
-**Novo no v0.29.0 (base de conhecimento governada e ajuda contextual — ADR-353 a ADR-359):** a base de conhecimento
+**Novo no v0.30.0 (evidência de primeira classe e dossiê longitudinal — ADR-360 a ADR-363):** a partir de um pacote de
+superprompts, a base real foi **inventariada em quatro estados antes de qualquer alteração** (`docs/execution/BASELINE_v0300.md`).
+A **evidência** passou a declarar método de coleta, nível de acesso, base de consentimento e retenção, a ter **versão** (substituir,
+nunca editar), **contestação com motivo** e histórico próprio que ninguém apaga; o hash do documento é exposto com o aviso de que
+prova integridade, não veracidade. O **dossiê longitudinal** (`/projetos/:id/dossie`) compõe prontidão, marcos, evidências por
+estado, séries reportado × validado, aportes, diligências e trilha — cada bloco com origem, atualidade e lacunas, só para as partes,
+sem nota nem ranking. Mudar o **método de medição** exige motivo e marca a descontinuidade. O que o pacote propunha contra decisões
+já tomadas (escrow, retenção automática do take rate, assinatura, selo pago) **não foi implementado** e está registrado.
+
+**v0.29.0 (base de conhecimento governada e ajuda contextual — ADR-353 a ADR-359):** a base de conhecimento
 v0.26.0 (58 controles O/A/V/H/D, 12 pesquisas) entrou no repositório **versionada e reconciliada contra o código**
 (6 implementados e testados · 27 parciais · 13 bloqueados por terceiro · 12 não implementados — nada declarado "em
 conformidade"). A Central ganhou **registro de fontes com direitos de uso** por operação, verificação por outra pessoa,

@@ -34,8 +34,10 @@ ALTER TABLE evidences DROP CONSTRAINT evidences_status_check;
 ALTER TABLE evidences ADD CONSTRAINT evidences_status_check
   CHECK (status IN ('submitted','needs_info','accepted','rejected','contested','under_review','superseded'));
 -- rejeição e contestação sempre têm motivo escrito
+-- NOT VALID: vale para toda linha que MUDE a partir de agora; linhas antigas 'rejected' sem nota (instalações anteriores) não são
+-- reescritas nem impedem a migração — ficam como estão e aparecem no dossiê como rejeitadas (a lacuna é visível, não corrigida à mão).
 ALTER TABLE evidences ADD CONSTRAINT evidences_rejection_has_reason
-  CHECK (status <> 'rejected' OR (review_note IS NOT NULL AND length(review_note) >= 10));
+  CHECK (status <> 'rejected' OR (review_note IS NOT NULL AND length(review_note) >= 10)) NOT VALID;
 ALTER TABLE evidences ADD CONSTRAINT evidences_contest_has_reason
   CHECK (status NOT IN ('contested','under_review') OR contest_reason IS NOT NULL);
 ALTER TABLE evidences ADD CONSTRAINT evidences_superseded_has_successor

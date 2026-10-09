@@ -89,7 +89,7 @@ RESOLVE: dict[str, str] = {
     "/solucoes/:id": "SELECT id::text FROM solutions WHERE visibility = 'published' ORDER BY created_at LIMIT 1",
 }
 #: subrotas que usam o mesmo registro da rota-mãe
-for _sub in ("apoio-profissional", "compras", "contribuicao", "equidade", "equipe", "grafo", "impacto",
+for _sub in ("apoio-profissional", "compras", "contribuicao", "dossie", "equidade", "equipe", "grafo", "impacto",   # dossie: v0.30.0 (ADR-361)
              "linha-do-tempo", "localizacao", "ods", "relatorios", "retratos", "riscos", "situacao"):
     RESOLVE[f"/projetos/:id/{_sub}"] = RESOLVE["/projetos/:id"]
 RESOLVE["/diagnosticos/:id/roteiro"] = RESOLVE["/diagnosticos/:id/versoes"] = RESOLVE["/diagnosticos/:id"]

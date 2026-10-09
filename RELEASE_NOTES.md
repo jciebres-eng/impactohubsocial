@@ -1,3 +1,31 @@
+# Notas da versão — v0.30.0 (Evidência de primeira classe e dossiê longitudinal)
+
+**Uma regra:** o que a plataforma mostra a quem financia é exatamente o que está gravado — com origem, data e lacunas — e cada
+evidência diz como foi coletada, quem pode vê-la, se pode ser contestada e o que o hash prova (integridade, não veracidade).
+
+**O que isso virou em software:**
+
+1. **Baseline antes de alterar** — inventário da base real em quatro estados, com o teste que prova cada linha; o que o pacote
+   propunha contra decisões já tomadas (escrow, retenção automática, assinatura, selo pago) ficou registrado e fora.
+2. **Evidência como objeto** — método de coleta, nível de acesso, base de consentimento, classe de retenção; substituir cria
+   versão nova (a anterior fica legível como substituída); rejeitar exige motivo; a executora contesta com motivo e quem revisa
+   decide com justificativa; histórico próprio que ninguém apaga; máquina de estados no banco.
+3. **Dossiê longitudinal** — uma leitura só para quem financia ou acompanha: prontidão, marcos e obrigações, evidências por
+   estado (validadas × declaradas × contestadas), séries reportado × validado com método e unidade, aportes e repasses,
+   diligências, trilha — cada bloco com origem e atualidade, lacunas declaradas, "o que isto não é" no topo. A OSC vê o mesmo.
+4. **Mudança metodológica registrada** — trocar o método de medição exige motivo, fica no histórico e a série marca a
+   descontinuidade em vez de fingir comparabilidade.
+5. **Economia do SaaS a partir do catálogo real** — 11 regras, 0 ativas, 5 recusadas; mapa pagador → valor → evento → preço-hipótese;
+   sensibilidade do take rate 2–5 % como simulação; matriz de elegibilidade de cobrança para revisão jurídica/contábil.
+6. **Matriz perfil × jornada × permissão × dado × ação** gerada das jornadas realmente executadas.
+
+**Números:** 940 operações · 227 telas · 70 migrações · 50 motores · 20 testes novos.
+
+**O que continua dependendo de pessoa ou terceiro:** parecer para ativar qualquer regra comercial; provedor de pagamento/fiscal;
+conferência das fontes e revisão do glossário (v0.29.0); decisão sobre os controles bloqueados.
+
+---
+
 # Notas da versão — v0.29.0 (Base de conhecimento governada e ajuda contextual)
 
 **Uma regra:** a plataforma só explica o que tem fonte registrada, conferida por outra pessoa e com direito de uso — e

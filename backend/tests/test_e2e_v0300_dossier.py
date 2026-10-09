@@ -54,6 +54,7 @@ class DossierE2E(unittest.TestCase):
     def _open(self, p):
         p.goto(f"{self.base}/projetos/{self.pair['pid']}/dossie")
         p.get_by_role("heading", name=re.compile("Dossiê do projeto")).wait_for()
+        p.get_by_text("O que este dossiê é — e o que não é").wait_for()   # o dado chegou (na suíte completa o servidor está carregado: achado da 1ª regressão)
         txt = p.locator("main").inner_text()
         for needle in ("não é nota nem ranking", "Lacunas declaradas", "Origem:", "Evidências", "reportado × validado", "Declaradas (enviadas, aguardando)"):
             self.assertIn(needle, txt)

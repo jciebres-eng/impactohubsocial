@@ -1,6 +1,44 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.30.0] — 2026-10-09
+
+### Pacote "Superprompts Master": baseline, evidência de primeira classe, dossiê longitudinal, mudança metodológica, economia do SaaS (ADR-360 a ADR-363)
+
+Pedido do proprietário (pacote de 10 superprompts): inspecionar a base real antes de alterar, inventariar em quatro estados,
+planejar P0/P1/P2 com evidência e critério de aceite, implementar o viável com testes, e fechar com regressão, versão, ZIP e
+relatório — sem presumir que documento, rota, mock ou tela signifiquem funcionalidade pronta.
+
+**Baseline** (`docs/execution/BASELINE_v0300.md`): inventário por contexto delimitado (PROVADO / PARCIAL / SÓ DOCUMENTADO / AUSENTE)
+com o teste que prova cada linha; conflitos do material do pacote com decisões vinculantes registrados e **não implementados**
+(escrow, retenção automática, assinatura, selo pago — ADR-363).
+
+**Banco** (`migrations/0070_v0300_evidence_object.sql`): evidência com método de coleta, nível de acesso, base de consentimento,
+classe de retenção, versão/substituição, contestação com motivo, máquina de estados no banco, histórico append-only
+(`evidence_events`); `indicator_method_changes` + gatilho que exige motivo para mudar o método; tipos de lançamento
+`evidence_contested`/`evidence_superseded`.
+
+**Backend**: `GET /v1/evidences/{id}` (origem, uso, hash do documento, histórico, classificação, lacunas, aviso),
+`POST /v1/evidences/{id}/contest`, rejeição exige justificativa (API + CHECK), substituição por `supersedes_id`;
+`services/dossier.py` + `GET /v1/projects/{id}/dossier` (só para as partes); `PATCH /v1/projects/{id}/indicators/{pi}/method`.
+
+**Front**: `/projetos/:id/dossie` (prontidão, marcos/obrigações, evidências por estado com qualidade, indicadores reportado ×
+validado com método/unidade/descontinuidade, aportes e repasses, diligências, trilha — cada bloco com origem e atualidade;
+"o que este dossiê não é" no topo); link na ficha do projeto para dona, candidato e financiador.
+
+**Documentos gerados/novos**: `docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md` (perfil × jornada × permissão × dado × ação, 16
+jornadas / 256 passos), `docs/SAAS_ECONOMY.md` (pagador → valor → evento → preço-hipótese → custo → margem → alternativa, a partir
+do catálogo real; matriz de elegibilidade de cobrança), sensibilidade do take rate 2–5 % em `24_MONTH_FINANCIAL_MODEL.md`
+(hipóteses; o catálogo não mudou), `docs/execution/MILESTONE_FUNDING_STATES_v0300.md` (cada estado pedido → objeto/coluna/teste real).
+
+**Contagens** (ADR-340): 940 operações (+4), 227 telas (+1), 70 migrações.
+
+**Testes novos**: `test_v0300_evidence_object` (7), `test_v0300_dossier` (4), `test_v0300_release_docs` (8), `test_e2e_v0300_dossier` (1).
+Expectativa atualizada com motivo: `test_v0190_lgpd_deletion` (evidência não é mais apagável — histórico append-only).
+
+**O que NÃO foi feito** (declarado): escrow/BaaS, assinatura, selo pago (ADR-363); conflito de interesse por serviço profissional
+(P2); versão das regras de elegibilidade guardada no resultado do match (P2); tudo o que depende de parceiro, parecer ou DPO.
+
 ## [0.29.0] — 2026-10-09
 
 ### Engenharia da base de conhecimento e ajuda contextual (ADR-353 a ADR-359)

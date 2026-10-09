@@ -174,7 +174,7 @@ Jornadas: **16** · passos: **256** · falhas: **0**
 | 6 | Apoiador (pessoa física) | apoiadora manifesta interesse no projeto da horta | `POST /v1/applications/interest` | 201 | organizacao_tipo_e_papel · papel ≥ analyst · tipos: company|individual | — | /projetos/:id |
 | 7 | OSC / executora | OSC cria campanha | `POST /v1/campaigns` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
 | 8 | OSC / executora | OSC publica a campanha | `PATCH /v1/campaigns/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
-| 9 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-2773b3` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 9 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Documentos: montagem → acordo assinado → registro verificável
 
@@ -194,7 +194,7 @@ Jornadas: **16** · passos: **256** · falhas: **0**
 | 12 | Profissional / prestador | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
 | 13 | Profissional / prestador | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
 | 14 | OSC / executora | emite registro verificável do acordo | `POST /v1/verifiable-records` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 15 | Visitante | visitante confere o registro sem login | `GET /v1/public/verify/IMP-FWY1-0V4T-SB9Y` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 15 | Visitante | visitante confere o registro sem login | `GET /v1/public/verify/IMP-CANF-NGY6-3PRA` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
 | 16 | OSC / executora | abre compra do projeto | `POST /v1/projects/{id}/procurement` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/compras |
 | 17 | OSC / executora | registra orçamento (Loja Exemplo A) | `POST /v1/procurement/{id}/quotes` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /compras/:id |
 | 18 | OSC / executora | registra orçamento (Loja Exemplo B) | `POST /v1/procurement/{id}/quotes` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /compras/:id |

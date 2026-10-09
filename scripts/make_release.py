@@ -166,7 +166,14 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "backend/tests/test_v0290_knowledge_base.py", "backend/tests/test_v0290_search_eval.py", "backend/tests/test_e2e_v0290_contextual_help.py",
             "docs/evidence/search_eval_v0290.json", "docs/evidence/test_run_v0.29.0.log", "history/v0.28.0/VERSION",
             "docs/execution/CLEANUP_INVENTORY_v0290.md", "docs/execution/PRODUCTION_CHECKLIST_v0290.md", "docs/execution/ROLLBACK_v0290.md",
-            "docs/execution/TRACEABILITY_MATRIX_v0290.md", "docs/execution/SECURITY_PRIVACY_REPORT_v0290.md", "docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md"]
+            "docs/execution/TRACEABILITY_MATRIX_v0290.md", "docs/execution/SECURITY_PRIVACY_REPORT_v0290.md", "docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md",
+            # v0.30.0 — pacote de superprompts: baseline, evidência de primeira classe, dossiê, economia do SaaS (ADR-360..363)
+            "docs/execution/BASELINE_v0300.md", "docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md", "docs/execution/MILESTONE_FUNDING_STATES_v0300.md",
+            "docs/SAAS_ECONOMY.md", "scripts/make_profile_journey_matrix.py", "backend/migrations/0070_v0300_evidence_object.sql",
+            "backend/impacto/services/dossier.py", "backend/tests/test_v0300_evidence_object.py", "backend/tests/test_v0300_dossier.py",
+            "backend/tests/test_v0300_release_docs.py", "backend/tests/test_e2e_v0300_dossier.py", "docs/evidence/test_run_v0.30.0.log",
+            "history/v0.29.0/VERSION", "docs/execution/CLEANUP_INVENTORY_v0300.md", "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
+            "docs/execution/ROLLBACK_v0300.md", "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md"]
 
 
 def sha256(p: Path) -> str:

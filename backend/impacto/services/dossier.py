@@ -20,7 +20,7 @@ from ..clock import today
 from ..db.pq import Connection
 from ..network import control_tower as CT
 
-ENGINE_VERSION = "dossier@1.0"
+DOSSIER_VERSION = "dossier@1.0"   # versão da LEITURA (não é motor: não decide nada — por isso não está em engines/registry.py)
 
 WHAT_THIS_IS_NOT = [
     "não é nota nem ranking: cada bloco é contagem ou leitura do que está registrado, com a origem ao lado",
@@ -154,7 +154,7 @@ def build(c: Connection, project_id: str, viewer_org_id: str | None) -> dict[str
                       transitions=int(trail["transitions"] or 0), snapshots=int(trail["snapshots"] or 0))
 
     return {
-        "engine": ENGINE_VERSION, "generated_at": today().isoformat(),
+        "engine": DOSSIER_VERSION, "generated_at": today().isoformat(),
         "project": {k: p[k] for k in ("id", "title", "status", "territory", "causes", "ods", "beneficiaries_count", "starts_on", "ends_on",
                                      "budget_total_cents", "org_name", "org_compliance")},
         "viewer_is_owner": viewer_org_id == p["org_id"],

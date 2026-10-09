@@ -125,8 +125,17 @@ artefato. Revisão jurídica dos termos e da política e encarregado de dados co
 ## 24. Tests
 
 ```text
-Ver docs/evidence/test_run_v0.32.0.log
+REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.32.0.log):
+  Ran 2434 tests in 1945.779s — 5 falhas, 0 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
+  → mapa tela × API (regenerado), manifesto e 3 verificações deste relatório (completados no fechamento)
+CI DO PR #5 (execução 37998628082): Ran 2434 tests in 1797.986s — as mesmas falhas de fechamento + a auditoria ainda da v0.31.0
+MÓDULOS NOVOS: test_v0320_demo_accounts (2) · test_v0320_release_docs (5)
+PROVAS NA PRODUÇÃO: contas/conteúdo (37996712177, 37997211737, 37997481695) · ensaio de restauração (37997867650)
+LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok · IMAGEM: job docker verde
 ```
+
+Portões de fechamento reexecutados após gerar os manifestos (fim do mesmo log). Nenhum teste removido ou enfraquecido; a
+exceção de RLS mudou com o motivo escrito ao lado (a 0071 protegeu a tabela).
 
 ## 25. External Dependencies
 

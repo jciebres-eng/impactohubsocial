@@ -169,7 +169,7 @@ def main() -> int:
     for label, users, tot in resumo:
         L.append(f"| {label} | {users:.0f} | {tot['ops']:.0f} | {brl(tot['cost'])} | {brl(tot['free_cost'])} | {brl(tot['revenue'])} ({brl(tot['sponsored_revenue'])}) | **{brl(tot['margin'])}** |")
     L += ["", "## 5. Sensibilidade: e se o uso dobrar? [PREMISSA]", ""]
-    for key, sc in cfg["scenarios"].items():
+    for sc in cfg["scenarios"].values():
         sc2 = dict(sc, ops_per_ai_user_month=sc["ops_per_ai_user_month"] * 2)
         a = simulate(cfg, sc)
         b = simulate(cfg, sc2)

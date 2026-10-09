@@ -189,8 +189,10 @@ class IntegrationTests(unittest.TestCase):
         shown = [p["project_id"] for p in r.json["result"]["shown"]]
         self.assertNotIn(theirs, shown)
         self.assertNotIn("Rascunho confidencial", json.dumps(r.json, ensure_ascii=False))
-        # com menos de 3 rascunhos alheios na mesma causa/território, a contagem agregada é ZERO (k-anonimato)
-        self.assertEqual(r.json["result"]["hidden_overlap_count"], 0)
+        # a contagem agregada é a do banco (k-anonimato: abaixo de 3 vira zero) e nunca nomeia os projetos
+        with db_system() as d:
+            esperado = int(d.scalar("SELECT similarity_hidden_overlap($1)", mine))
+        self.assertEqual(r.json["result"]["hidden_overlap_count"], esperado)
         for i in range(3):
             _projeto(new_account("osc"), title=f"Rascunho alheio {i}")
         with db_system() as d:
@@ -198,7 +200,7 @@ class IntegrationTests(unittest.TestCase):
         a.patch(f"/v1/projects/{mine}", {"summary": "Resumo alterado para forçar nova análise."})
         r2 = a.post(f"/v1/projects/{mine}/similarity", {"kind": "single"})
         self.assertEqual(r2.status, 200, r2.json)
-        self.assertGreaterEqual(r2.json["result"]["hidden_overlap_count"], 3)
+        self.assertGreaterEqual(r2.json["result"]["hidden_overlap_count"], max(3, esperado + 3))
         self.assertIn("k-anonimato", r2.json["result"]["hidden_overlap_note"])
 
     def test_published_projects_are_compared_and_the_analysis_is_explainable(self):

@@ -1,3 +1,40 @@
+# Notas da versão — v0.28.0 (IA sustentável: cota, crédito, patrocínio e similaridade)
+
+**Uma regra:** ninguém paga para entrar no IMPACTO; paga-se pela operação de inteligência efetivamente executada —
+e cada operação mostra o custo e quem paga ANTES de rodar. Falhou, não cobra. Mesmos dados, não cobra de novo.
+
+**O que isso virou em software:**
+
+1. **Catálogo versionado de operações** (A assistência leve, B contextual, C avançada, D originalidade e similaridade,
+   E lote, F institucional) com faixa de risco, quem pode, de onde o dinheiro vem, créditos, limites e critério de
+   conclusão. Preço novo = versão nova; execuções antigas guardam a sua.
+2. **Camada de uso e custo** — prévia → autoriza → reserva → executa → liquida; débito só em sucesso; concorrência
+   e idempotência no banco; o frontend nunca decide preço, saldo ou fonte.
+3. **Gratuidade orçada** — cotas configuráveis (boas-vindas uma vez por organização e por pessoa; mensal leve);
+   acabou, a tela diz o custo, as opções e preserva o trabalho.
+4. **Créditos por PIX** — pedido com termos aceitos; em modo PILOTO (regra comercial inativa, sem provedor) não há
+   pagamento e a administração pode aprovar como concessão; em modo REAL o crédito só nasce por webhook assinado
+   (HMAC) ou conciliação manual com referência; cobrança simulada nunca credita.
+5. **Patrocínio de uso** — financiador, governo ou empresa compromete créditos do próprio saldo para organizações
+   elegíveis; esgotado, para; prestação de contas agregada, nunca conteúdo.
+6. **Motor de originalidade, similaridade, complementaridade e integridade do financiamento** — local, oito
+   dimensões separadas; similaridade textual ≠ escopo ≠ território ≠ duplicidade financeira ≠ plágio ≠ fraude;
+   indícios com confiança e revisão humana; contestação; só projetos visíveis (rascunhos alheios como contagem
+   k-anônima); nada bloqueia financiamento, reputação ou match.
+7. **Painel financeiro da IA** — medido × NÃO MEDIDO, créditos vendidos/concedidos/consumidos, obrigações com
+   clientes, margem parcial, alertas; e `AI_COST_MODEL.md` com piloto medido, três cenários e as doze perguntas.
+
+**Números:** 923 operações, 225 telas, 50 motores (VERDE 37 · AMARELO 13 · VERMELHO 0), 68 migrações,
+11 regras de monetização (0 ativas), 16 jornadas / 262 passos / 0 falha. Regressão completa:
+`FINAL_EXECUTION_REPORT.md` §24. **Receita real de IA desta instalação: R$ 0,00 (modo piloto).**
+
+**O que esta versão NÃO entrega**, com nome: venda real de créditos (parecer + provedor); BYOK; lote,
+monitoramento e relatório institucional (planejados, 501); preço de produção; custo de provedor medido;
+NFS-e; tag enviada ao GitHub (proxy). Detalhes em `FINAL_EXECUTION_REPORT.md` §25–26, `FINAL_EXECUTION_AUDIT.md`,
+`AI_PROVIDERS_EVALUATION.md` e `EXTERNAL_INTEGRATIONS.md`.
+
+---
+
 # Notas da versão — v0.27.0 (não existem mais assinaturas)
 
 **Uma decisão:** o IMPACTO deixa de ser um SaaS por mensalidade (ADR-341). Não há plano pago, trial,

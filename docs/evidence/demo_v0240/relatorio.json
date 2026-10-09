@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-10-08T23:13:40.137394+00:00",
+ "gerado_em": "2026-10-09T03:28:36.640783+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
@@ -241,7 +241,7 @@
   "admin": {
    "email": "admin@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 54,
+   "telas_do_menu": 55,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -270,6 +270,7 @@
     "/controladoria",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -367,13 +368,14 @@
   "controller": {
    "email": "controladoria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 16,
+   "telas_do_menu": 17,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -398,12 +400,13 @@
   "finance": {
    "email": "financeiro@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 12,
+   "telas_do_menu": 13,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -418,6 +421,9 @@
     "/": [
      "403 /v1/admin/overview"
     ],
+    "/admin/ia/financeiro": [
+     "403 /v1/admin/ai/disputes"
+    ],
     "/financeiro/despesas": [
      "403 /v1/contabilidade/chart"
     ]
@@ -428,12 +434,13 @@
   "accounting": {
    "email": "contabilidade@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 12,
+   "telas_do_menu": 13,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -447,6 +454,10 @@
    "telas_4xx": {
     "/": [
      "403 /v1/admin/overview"
+    ],
+    "/admin/ia/financeiro": [
+     "403 /v1/admin/ai/credit-orders",
+     "403 /v1/admin/ai/disputes"
     ]
    },
    "telas_5xx": {},
@@ -455,12 +466,13 @@
   "treasury": {
    "email": "tesouraria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 10,
+   "telas_do_menu": 11,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -472,6 +484,10 @@
    "telas_4xx": {
     "/": [
      "403 /v1/admin/overview"
+    ],
+    "/admin/ia/financeiro": [
+     "403 /v1/admin/ai/credit-orders",
+     "403 /v1/admin/ai/disputes"
     ],
     "/financeiro/despesas": [
      "403 /v1/contabilidade/chart"
@@ -511,13 +527,14 @@
   "audit": {
    "email": "auditoria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 20,
+   "telas_do_menu": 21,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/controladoria",
     "/controladoria/conciliacao",
     "/controladoria/torre",
+    "/admin/ia/financeiro",
     "/aprovacoes",
     "/financeiro",
     "/financeiro/despesas",
@@ -547,5 +564,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 331
+ "total_telas_de_menu_visitadas": 337
 }

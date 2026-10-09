@@ -4,20 +4,20 @@
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 262 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
-- **Telas no navegador (Chromium)** — 805 visitas às 221 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
-- **Telefone (390 px)** — 236 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
+- **Jornadas pela API** — 256 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Telas no navegador (Chromium)** — 825 visitas às 225 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
+- **Telefone (390 px)** — 237 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
 ## Por perfil
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 160 | 0 | 151 | 133 | 10 | 6 | 2 | 0 | 49 | 0 |
-| Empresa (financiador) | 8 | 47 | 0 | 100 | 77 | 18 | 0 | 5 | 0 | 38 | 0 |
-| Profissional | 4 | 12 | 0 | 94 | 61 | 24 | 1 | 8 | 0 | 33 | 0 |
-| Governo | 1 | 9 | 0 | 183 | 62 | 25 | 79 | 17 | 0 | 35 | 0 |
-| Apoiadora (pessoa física) | 3 | 10 | 0 | 95 | 66 | 20 | 0 | 9 | 0 | 27 | 0 |
-| Administração | 5 | 21 | 0 | 144 | 109 | 25 | 0 | 10 | 0 | 54 | 0 |
+| OSC | 15 | 154 | 0 | 154 | 134 | 10 | 6 | 4 | 0 | 49 | 0 |
+| Empresa (financiador) | 8 | 47 | 0 | 103 | 78 | 18 | 0 | 7 | 0 | 38 | 0 |
+| Profissional | 4 | 12 | 0 | 97 | 62 | 24 | 1 | 10 | 0 | 33 | 0 |
+| Governo | 1 | 9 | 0 | 187 | 63 | 25 | 80 | 19 | 0 | 35 | 0 |
+| Apoiadora (pessoa física) | 3 | 10 | 0 | 98 | 67 | 20 | 0 | 11 | 0 | 27 | 0 |
+| Administração | 5 | 21 | 0 | 148 | 111 | 25 | 0 | 12 | 0 | 55 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
@@ -45,7 +45,7 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Marketplace, soluções e perfis públicos | 6 | 0 |
 | Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 28 | 0 |
 | Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel | 18 | 0 |
-| Suporte e Central de Conhecimento | 10 | 0 |
+| Suporte e Central de Conhecimento | 4 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |
 | Administração: visão geral → verificação → auditoria | 7 | 0 |
 | Pendências: o que espera decisão de alguém | 12 | 0 |
@@ -88,6 +88,7 @@ URL, chamadas de API e tempo, está no CSV).
 | `/admin/erros` | 2 | admin: ok, government: recusa |
 | `/admin/fiscal` | 2 | admin: ok, government: recusa |
 | `/admin/honorarios` | 2 | admin: ok, government: recusa |
+| `/admin/ia/financeiro` | 2 | admin: ok, government: recusa |
 | `/admin/identidade` | 2 | admin: ok, government: recusa |
 | `/admin/institucional` | 2 | admin: ok, government: recusa |
 | `/admin/integracoes` | 2 | admin: ok, government: recusa |
@@ -186,6 +187,9 @@ URL, chamadas de API e tempo, está no CSV).
 | `/financeiro/periodos-gratuitos` | 2 | admin: ok, government: recusa |
 | `/fiscal` | 2 | company: ok, government: recusa |
 | `/ia` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
+| `/ia/analises/:id` | 6 | osc: s/registro, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
+| `/ia/orcamento` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
+| `/ia/patrocinios/:id` | 6 | osc: s/registro, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
 | `/ideias` | 2 | osc: ok, government: recusa |
 | `/identidade` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/instituicao` | 5 | osc: ok, company: ok, government: ok, provider: ok, individual: ok |

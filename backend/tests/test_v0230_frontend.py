@@ -77,7 +77,7 @@ class TheScreensCallRoutesThatExistTests(unittest.TestCase):
                                            r'\s*\(\)\s*=>\s*<(\w+\.\w+)', app):
             with self.subTest(rota=rota):
                 modulo, nome = componente.split(".")
-                arquivo = "pages/security.tsx" if modulo == "Sec" else "pages/traceability.tsx"
+                arquivo = {"Sec": "pages/security.tsx", "AI": "pages/aicenter.tsx"}.get(modulo, "pages/traceability.tsx")   # v0.28.0: /ia → Central de IA
                 self.assertIn(f"export function {nome}", _fonte(arquivo),
                               f"{rota} aponta para {componente}, que não existe")
 

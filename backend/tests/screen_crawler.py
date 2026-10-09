@@ -54,6 +54,8 @@ RESOLVE: dict[str, str] = {
     "/ajuda/suporte/:id": "SELECT id::text FROM support_tickets WHERE org_id = {org} ORDER BY created_at LIMIT 1",
     "/campanha/:slug": "SELECT slug FROM campaigns WHERE published_at IS NOT NULL ORDER BY created_at LIMIT 1",
     "/verificar/:code": "SELECT code FROM verifiable_records ORDER BY created_at LIMIT 1",
+    "/ia/analises/:id": "SELECT id::text FROM similarity_analyses WHERE org_id = {org} ORDER BY created_at LIMIT 1",
+    "/ia/patrocinios/:id": "SELECT id::text FROM ai_sponsorships WHERE sponsor_org_id = {org} ORDER BY created_at LIMIT 1",
     "/acordos/:id": "SELECT a.id::text FROM signed_agreements a WHERE a.org_id = {org}"
                     " OR EXISTS (SELECT 1 FROM signed_agreement_parties p WHERE p.agreement_id = a.id AND p.org_id = {org})"
                     # o acordo mais rico primeiro: vigente com matriz de distribuição e obrigações (v0.26.0)

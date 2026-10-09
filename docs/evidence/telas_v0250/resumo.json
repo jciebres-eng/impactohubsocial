@@ -1,13 +1,110 @@
 {
- "visitas": 805,
- "rotas": 221,
- "rotas_abertas_com_sucesso": 221,
+ "visitas": 825,
+ "rotas": 225,
+ "rotas_abertas_com_sucesso": 223,
  "persona_sem_registro_proprio": 51,
  "estados": {
-  "OK": 535,
+  "OK": 542,
   "VAZIA": 125,
-  "RECUSA_CORRETA": 94,
-  "SEM_REGISTRO": 51
+  "RECUSA_CORRETA": 95,
+  "SEM_REGISTRO": 63
  },
- "falhas": []
+ "falhas": [
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "osc",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "company",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "provider",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "government",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "individual",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/analises/:id",
+   "persona": "admin",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "osc",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "company",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "provider",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "government",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "individual",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  },
+  {
+   "rota": "/ia/patrocinios/:id",
+   "persona": "admin",
+   "url": "",
+   "estado": "SEM_REGISTRO",
+   "detalhe": "rota com parâmetro sem resolvedor no robô",
+   "api_4xx": []
+  }
+ ]
 }

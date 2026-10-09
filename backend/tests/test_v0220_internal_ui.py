@@ -309,7 +309,6 @@ class EveryPermissionInTheCatalogGuardsSomethingTests(unittest.TestCase):
         "admin.organizations.write": "rota de organização ainda exige is_platform_admin",
         "content.write": "CMS da Central ainda usa `staff=` (editor/revisor), da v0.12.0",
         "content.publish": "idem: o fluxo editorial tem quatro olhos próprios",
-        "support.write": "fila de suporte ainda usa `staff=('support',)`",
         # Escrita de recurso que EXISTE no banco e ainda não tem rota de escrita — e não deveria
         # ganhar uma sem decisão: mexer nestes muda a régua de todas as medições.
         "budget.write": "orçamento é carregado por migração/seed; não há rota que o edite",

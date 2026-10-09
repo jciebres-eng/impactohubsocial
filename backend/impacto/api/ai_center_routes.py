@@ -367,7 +367,7 @@ def admin_quota(ctx: Ctx, body: QuotaPolicyIn):
     return dict(row) | {"note": "Cotas já concedidas não mudam; a política vale para concessões futuras."}
 
 
-@route("GET", "/v1/admin/ai/disputes", auth="admin", permission="metrics.read", query=Pagination, tags=("admin",), summary="Contestações de similaridade para revisão humana")
+@route("GET", "/v1/admin/ai/disputes", auth="admin", permission="support.read", query=Pagination, tags=("admin",), summary="Contestações de similaridade para revisão humana")
 def admin_disputes(ctx: Ctx, q: Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT d.id::text AS id, d.analysis_id::text AS analysis_id, g.legal_name AS org_name, d.status, d.reason, d.reviewer_note, d.created_at, d.reviewed_at"
@@ -376,7 +376,7 @@ def admin_disputes(ctx: Ctx, q: Pagination):
     return page(rows, q.limit, q.offset)
 
 
-@route("POST", "/v1/admin/ai/disputes/{dispute_id}/review", auth="admin", permission="metrics.read", body=DisputeReviewIn, tags=("admin",),
+@route("POST", "/v1/admin/ai/disputes/{dispute_id}/review", auth="admin", permission="support.write", body=DisputeReviewIn, tags=("admin",),
        summary="Revisão humana de uma contestação: mantida ou corrigida, com nota")
 def admin_review_dispute(ctx: Ctx, body: DisputeReviewIn):
     with ctx.tx() as c:

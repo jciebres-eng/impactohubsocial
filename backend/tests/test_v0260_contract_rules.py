@@ -195,7 +195,11 @@ class ContractRulesTests(unittest.TestCase):
         self.assertEqual(ms["status"], "delivered")
         # prazo de aceite: 5 dias ÚTEIS a partir de hoje (política do acordo, não "7 dias")
         from impacto.trust.contract_rules import business_days
-        self.assertEqual(ms["acceptance_due_on"], business_days(dt.date.today(), 5).isoformat())
+        # "hoje" é o do BANCO (UTC): perto da meia-noite local, date.today() já estava um dia atrás e o teste reprovava
+        # sem defeito algum no produto (regressão da v0.28.0, 23h58 America/Cuiaba).
+        with db_system() as c:
+            hoje = c.scalar("SELECT current_date")
+        self.assertEqual(ms["acceptance_due_on"], business_days(hoje, 5).isoformat())
         # quem entregou NÃO aceita a própria entrega
         r = self.osc.patch(f"/v1/signed-agreements/{aid}/milestones/{m1}", {"status": "accepted"})
         self.assertIn(r.status, (403, 422), r)

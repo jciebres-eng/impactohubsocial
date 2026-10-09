@@ -1,6 +1,74 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.28.0] — 2026-10-09
+
+### IA sustentável: catálogo de operações, cotas configuráveis, créditos por PIX, patrocínio, similaridade por dimensão (ADR-347 a ADR-352)
+
+Pedido do proprietário: IA útil, acessível, governável e financeiramente sustentável — sem consumo ilimitado pago
+pela plataforma, sem assinatura, sem excluir quem não pode pagar, sem cobrar o que não executou, sem confundir o
+preço do cliente com o custo do fornecedor; e um motor de originalidade, similaridade, complementaridade e
+integridade do financiamento que ajude a direcionar recursos sem penalizar projetos legítimos.
+
+**Inspeção primeiro** (`docs/execution/AI_INVENTORY.md`): a camada de IA já tinha prompt versionado, faixa de risco,
+uso registrado, tabela de preço (vazia), orçamento em dinheiro e razão de créditos — mas nenhuma chamada consumia
+crédito, a cota era fixa no pacote e não havia prévia, fonte de custeio, patrocínio, pedido de crédito, execução com
+estado nem conciliação.
+
+**Banco** (`migrations/0068_v0280_ai_usage_control.sql`): catálogo versionado `ai_operations` (12 operações: 9
+executáveis, 3 declaradas e NÃO implementadas → 501); `ai_executions` + `ai_execution_events` + grafo de estados
+(`created → authorized → reserved → running → succeeded/failed/partial/cancelled → reconciled`); `ai_credit_ledger`
+com lote (`purchased`/`promotional`), validade e motivos `purchase`/`sponsor_commit`/`release`; escrita só por
+`ai_credit_post`/`ai_credit_consume_bucket` (SECURITY DEFINER com portão por motivo); `ai_quota_policies` +
+`ai_quota_grants` (boas-vindas 60 — uma por organização E por pessoa; mensal leve 10); `ai_sponsorships` com
+consumo e prestação de contas agregada por função SECURITY DEFINER; `ai_credit_packs` (3 hipóteses) e
+`ai_credit_orders` (piloto/real) com grafo de estados; `platform_charges.kind = 'ai_credits'` e
+`charge_requires_authorization` v3 (pedido consentido + regra ativa); 11ª regra de monetização `ai.credits_prepaid`
+(review_required, carta amarela); `similarity_analyses` (append-only, cache por insumo+versão) e
+`similarity_disputes`; `similarity_hidden_overlap` (k-anonimato ≥ 3); categoria de auditoria `ai`; `ai_credit_consume`
+da 0058 vira invólucro da função por lote.
+
+**Backend:** `engines/ai/usage_control.py` (prévia → autoriza → reserva → executa → liquida; débito só em sucesso;
+idempotência; ordem de custeio gratuito → patrocínio → cota → comprado → recusa com opções);
+`engines/similarity/engine.py` (local, oito dimensões, leituras separadas, recomendações, confiança);
+`services/similarity.py` (RLS, cache, contestação); `services/ai_center.py` (central, pedidos, webhook, patrocínio,
+painel financeiro medido × NÃO MEDIDO); `api/ai_center_routes.py` (+28 rotas: `/v1/ai/center`, `/preview`,
+`/executions`, `/credit-packs`, `/credit-orders`, `/sponsorships`, `/v1/projects/{id}/similarity`,
+`/v1/similarity/analyses`, `/v1/webhooks/payments/{provider}`, `/v1/admin/ai/finance|credit-orders|operations|
+credit-packs|quota-policies|disputes`); gateway: `structure_need`, `draft` e `summarize` passam pela camada de uso
+(provedor externo que falha = parcial, não cobra); `PAYMENT_WEBHOOK_SECRET`; dois motores novos no registro (50).
+
+**Interface:** `/ia` (Central de IA: saldo por lote, cotas, operações com preço e quem paga, pedidos, patrocínio,
+histórico, extrato, regras), `/ia/orcamento` (orçamento em dinheiro e política), `/ia/analises/:id` (dimensões,
+leituras, recomendações, contestação), `/ia/patrocinios/:id` (prestação de contas), `/admin/ia/financeiro`
+(menu Controladoria, `finance.read`); painel "Originalidade, similaridade e complementaridade" na ficha do projeto
+com confirmação ANTES de executar (o que será feito, custo, quem paga, saldo, critério de conclusão, "se falhar nada
+é cobrado"). 225 telas.
+
+**Testes:** `test_v0280_ai_usage_control.py` (25: autorização/isolamento, cota uma vez por pessoa, prévia, débito só
+em sucesso, concorrência, idempotência, portão do razão, pedidos piloto/real, webhook HMAC válido/inválido/repetido,
+cobrança simulada nunca credita, patrocínio esgotado não migra, painel), `test_v0280_similarity.py` (13: conjunto de
+avaliação rotulado com precisão/recall em `docs/evidence/similarity_eval_v0280.json`, confidencialidade k-anônima,
+cache por versão, contestação, 50 candidatos < 2 s, arquitetura), `test_v0280_ai_cost_model.py` (4),
+`test_e2e_v0280_ai_center.py` (3 jornadas no navegador); jornada demo "Central de IA" (16 jornadas, 262 passos);
+contagens fixadas atualizadas com a razão escrita (923 operações, 229 de plataforma, 94 com permissão, 51 públicas,
+225 telas, 50 motores, 11 regras).
+
+**Documentos:** `AI_COST_MODEL.md` (gerado: piloto MEDIDO + hipóteses, 3 cenários × 12 meses, sensibilidades, as
+doze perguntas, operação deficitária nomeada), `AI_PROVIDERS_EVALUATION.md` (fatos verificados na documentação
+oficial: assinatura Claude.ai não paga API de terceiros; BYOK NÃO liberado), `docs/execution/AI_INVENTORY.md`,
+`docs/execution/CLEANUP_INVENTORY_v0280.md`, `config/ai_economics.json`, `scripts/make_ai_cost_model.py`,
+`scripts/measure_ai_pilot.py`, `DECISIONS.md` ADR-347..352, MONETIZATION §10, MONETIZATION_LEGAL_MATRIX (11ª
+carta), EXTERNAL_INTEGRATIONS (webhook), AI_ENGINES (50). Snapshot da v0.27.0 em `history/v0.27.0/`.
+
+**Limpeza:** 19 manifestos de versões anteriores (5,3 MB) movidos da raiz para `history/manifests/`; função de
+consumo de crédito unificada; inventário do que ficou e por quê.
+
+**O que NÃO foi feito, de propósito:** venda real de créditos (regra inativa até parecer; provedor de pagamento
+ausente → modo piloto); BYOK; lote, monitoramento recorrente e relatório institucional (declarados `planned`,
+rota 501); preço de produção (hipóteses de teste); custo de provedor (tabela vazia); NFS-e. Tag `v0.28.0` a criar no
+GitHub pelo proprietário.
+
 ## [0.27.0] — 2026-10-08
 
 ### Não existem mais assinaturas: a receita nasce da operação financiada (ADR-341)

@@ -12,7 +12,18 @@ permissão frouxa.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
 
-**Novo no v0.27.0 (não existem mais assinaturas — ADR-341):** o IMPACTO deixa de ser um SaaS por
+**Novo no v0.28.0 (IA sustentável — ADR-347 a ADR-352):** toda operação de IA passa por uma **camada de uso e
+custo**: catálogo versionado (A–F), prévia com custo em créditos e **quem paga** (gratuita → patrocínio → cota →
+comprado) antes de executar, débito só em sucesso, idempotência e concorrência no banco. Gratuidade **orçada**
+(cotas configuráveis; boas-vindas uma vez por organização e por pessoa), **créditos por PIX** (modo piloto até
+parecer e provedor real; webhook assinado ou conciliação com referência; cobrança simulada nunca credita),
+**patrocínio** de uso por financiadores (compromete crédito do patrocinador; esgotado, para), e o **motor de
+originalidade, similaridade, complementaridade e integridade do financiamento** — local, oito dimensões
+separadas, indícios com confiança e revisão humana, contestação, nada bloqueia financiamento ou reputação.
+Central de IA (`/ia`), painel na ficha do projeto, painel financeiro medido × NÃO MEDIDO (`/admin/ia/financeiro`),
+`AI_COST_MODEL.md` com piloto medido e três cenários. Receita real de IA: R$ 0,00 (piloto).
+
+**v0.27.0 (não existem mais assinaturas — ADR-341):** o IMPACTO deixa de ser um SaaS por
 mensalidade. Não há plano pago, trial, checkout, reajuste nem paywall: planos viraram **pacotes de
 capacidades** concedidos por concessão, convênio, voucher ou contrato avulso/parcelado. A receita da
 plataforma nasce da **camada econômica da operação financiada**: 5% do valor financiado = **3,5% taxa de

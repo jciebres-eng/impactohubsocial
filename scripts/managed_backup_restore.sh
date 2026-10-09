@@ -15,6 +15,11 @@
 #
 # Uso: SOURCE_DATABASE_URL=… TARGET_ADMIN_URL=postgresql://postgres:…@localhost:5432/postgres \
 #        bash scripts/managed_backup_restore.sh
+#
+# v0.32.0 — DUMP_FILE=<arquivo .dump já existente> (p.ex. o backup diário decifrado, baixado do R2): não faz
+# dump; restaura ESSE arquivo. A origem continua sendo lida (só leitura) para saber em que schema estão as
+# extensões e quais tabelas existem; as CONTAGENS de linhas não são comparadas (o banco mudou desde o
+# backup) — compara-se o CONJUNTO de tabelas, e os verificadores de integridade rodam do mesmo jeito.
 set -euo pipefail
 : "${SOURCE_DATABASE_URL:?SOURCE_DATABASE_URL (origem, só leitura) é obrigatória}"
 : "${TARGET_ADMIN_URL:?TARGET_ADMIN_URL (PostgreSQL DESCARTÁVEL) é obrigatória}"
@@ -55,7 +60,12 @@ log "origem: $(wc -l < "$WORK/origem.txt") tabelas em public"
 
 t0=$(agora)
 F="$WORK/impacto-managed.dump"
-pg_dump --format=custom --schema=public --no-owner --no-privileges "$SOURCE_DATABASE_URL" -f "$F"
+if [ -n "${DUMP_FILE:-}" ]; then
+  cp "$DUMP_FILE" "$F"
+  log "restaurando arquivo existente (DUMP_FILE): $(du -h "$F" | cut -f1)"
+else
+  pg_dump --format=custom --schema=public --no-owner --no-privileges "$SOURCE_DATABASE_URL" -f "$F"
+fi
 sha256sum "$F" > "$F.sha256"
 t1=$(agora)
 log "dump: $(du -h "$F" | cut -f1) em $(dur "$t0" "$t1") s (sha256 $(cut -c1-16 "$F.sha256")…)"
@@ -88,7 +98,17 @@ log "restauração + verificações: $(dur "$t2" "$t3") s"
 
 contar "${TARGET_ADMIN_URL%/*}/$DB" | sed '/^$/d;/^BEGIN$/d;/^ROLLBACK$/d' > "$WORK/destino.txt"
 psql "$TARGET_ADMIN_URL" -q -c "DROP DATABASE $DB WITH (FORCE)"
-if diff -q "$WORK/origem.txt" "$WORK/destino.txt" >/dev/null; then
+if [ -n "${DUMP_FILE:-}" ]; then
+  cut -d= -f1 "$WORK/origem.txt" > "$WORK/origem.tabelas"; cut -d= -f1 "$WORK/destino.txt" > "$WORK/destino.tabelas"
+  if diff -q "$WORK/origem.tabelas" "$WORK/destino.tabelas" >/dev/null; then
+    total=$(awk -F= '{s+=$2} END {print s}' "$WORK/destino.txt")
+    log "tabelas: $(wc -l < "$WORK/destino.tabelas") — o MESMO conjunto da origem; $total linhas restauradas (contagens não comparadas: o banco mudou desde o backup)"
+  else
+    log "FALHA: conjunto de tabelas diferente (< origem | > restaurado):"
+    diff "$WORK/origem.tabelas" "$WORK/destino.tabelas" | grep '^[<>]' | head -20
+    exit 1
+  fi
+elif diff -q "$WORK/origem.txt" "$WORK/destino.txt" >/dev/null; then
   total=$(awk -F= '{s+=$2} END {print s}' "$WORK/origem.txt")
   log "contagens: $(wc -l < "$WORK/origem.txt") tabelas, $total linhas — IDÊNTICAS entre origem e restauração"
 else

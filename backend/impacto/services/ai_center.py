@@ -367,7 +367,7 @@ def admin_finance(ctx) -> dict:
     cost_measured = sum(float(o["cost_measured_cents"] or 0) for o in ops)
     alerts = []
     if price["rows"] == 0 and any(o["unpriced"] for o in ops):
-        alerts.append("Há execuções externas sem preço vigente na tabela do provedor: custo NÃO MEDIDO. Cadastre o preço em Administração → IA.")
+        alerts.append("Há execuções externas sem preço vigente na tabela do provedor: custo NÃO MEDIDO. Cadastre o preço em ai_price_table (administração do banco, com fonte e data; não há rota de escrita).")
     if credits["outstanding_purchased"] > 0:
         alerts.append(f"{credits['outstanding_purchased']} crédito(s) comprado(s) ainda não consumido(s): obrigação com clientes, não receita.")
     if disputes["open"]:

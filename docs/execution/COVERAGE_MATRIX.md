@@ -12,8 +12,8 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 154 | 0 | 154 | 134 | 10 | 6 | 4 | 0 | 49 | 0 |
-| Empresa (financiador) | 8 | 47 | 0 | 103 | 78 | 18 | 0 | 7 | 0 | 38 | 0 |
+| OSC | 15 | 154 | 0 | 154 | 135 | 10 | 6 | 3 | 0 | 49 | 0 |
+| Empresa (financiador) | 8 | 47 | 0 | 103 | 79 | 18 | 0 | 6 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 97 | 62 | 24 | 1 | 10 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 187 | 63 | 25 | 80 | 19 | 0 | 35 | 0 |
 | Apoiadora (pessoa física) | 3 | 10 | 0 | 98 | 67 | 20 | 0 | 11 | 0 | 27 | 0 |
@@ -187,9 +187,9 @@ URL, chamadas de API e tempo, está no CSV).
 | `/financeiro/periodos-gratuitos` | 2 | admin: ok, government: recusa |
 | `/fiscal` | 2 | company: ok, government: recusa |
 | `/ia` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
-| `/ia/analises/:id` | 6 | osc: s/registro, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
+| `/ia/analises/:id` | 6 | osc: ok, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
 | `/ia/orcamento` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
-| `/ia/patrocinios/:id` | 6 | osc: s/registro, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
+| `/ia/patrocinios/:id` | 6 | osc: s/registro, company: ok, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
 | `/ideias` | 2 | osc: ok, government: recusa |
 | `/identidade` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/instituicao` | 5 | osc: ok, company: ok, government: ok, provider: ok, individual: ok |

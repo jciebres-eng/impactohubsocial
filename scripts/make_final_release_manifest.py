@@ -53,7 +53,8 @@ def main() -> int:
         "documents": ["FINAL_EXECUTION_REPORT.md", "FINAL_EXECUTION_AUDIT.md", "RELEASE_NOTES.md",
                       "MOTOR_COVERAGE_MATRIX.md", "EXTERNAL_INTEGRATIONS.md", "docs/ECONOMIC_MODEL.md",
                       "AI_COST_MODEL.md", "AI_PROVIDERS_EVALUATION.md", "docs/execution/AI_INVENTORY.md",
-                      "docs/execution/CLEANUP_INVENTORY_v0280.md"],
+                      "docs/execution/CLEANUP_INVENTORY_v0280.md", "docs/execution/PRODUCTION_CHECKLIST_v0280.md",
+                      "docs/execution/ROLLBACK_v0280.md", "docs/execution/AI_COST_MONITORING_GUIDE.md"],
     }
     (ROOT / "FINAL_RELEASE_MANIFEST.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"FINAL_RELEASE_MANIFEST.json: {version} @ {commit[:7]} — {status}; testes: {testes}")

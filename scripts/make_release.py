@@ -155,7 +155,8 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "config/ai_economics.json", "docs/evidence/ai_pilot_v0280.json", "docs/evidence/similarity_eval_v0280.json",
             "backend/migrations/0068_v0280_ai_usage_control.sql", "backend/tests/test_v0280_ai_usage_control.py",
             "backend/tests/test_v0280_similarity.py", "backend/tests/test_v0280_ai_cost_model.py", "backend/tests/test_e2e_v0280_ai_center.py",
-            "docs/evidence/test_run_v0.28.0.log", "history/v0.27.0/VERSION"]
+            "docs/evidence/test_run_v0.28.0.log", "history/v0.27.0/VERSION",
+            "docs/execution/PRODUCTION_CHECKLIST_v0280.md", "docs/execution/ROLLBACK_v0280.md", "docs/execution/AI_COST_MONITORING_GUIDE.md"]
 
 
 def sha256(p: Path) -> str:

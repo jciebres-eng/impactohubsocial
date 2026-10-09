@@ -50,7 +50,7 @@ em sucesso, concorrência, idempotência, portão do razão, pedidos piloto/real
 cobrança simulada nunca credita, patrocínio esgotado não migra, painel), `test_v0280_similarity.py` (13: conjunto de
 avaliação rotulado com precisão/recall em `docs/evidence/similarity_eval_v0280.json`, confidencialidade k-anônima,
 cache por versão, contestação, 50 candidatos < 2 s, arquitetura), `test_v0280_ai_cost_model.py` (4),
-`test_e2e_v0280_ai_center.py` (3 jornadas no navegador); jornada demo "Central de IA" (16 jornadas, 262 passos);
+`test_e2e_v0280_ai_center.py` (3 jornadas no navegador); jornada demo "Central de IA" (16 jornadas, 256 passos);
 contagens fixadas atualizadas com a razão escrita (923 operações, 229 de plataforma, 94 com permissão, 51 públicas,
 225 telas, 50 motores, 11 regras).
 

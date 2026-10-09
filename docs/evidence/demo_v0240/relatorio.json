@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-10-09T03:28:36.640783+00:00",
+ "gerado_em": "2026-10-09T04:10:06.828701+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
@@ -392,6 +392,9 @@
    "telas_4xx": {
     "/": [
      "403 /v1/admin/overview"
+    ],
+    "/admin/ia/financeiro": [
+     "403 /v1/admin/ai/disputes"
     ]
    },
    "telas_5xx": {},
@@ -555,6 +558,9 @@
    "telas_4xx": {
     "/": [
      "403 /v1/admin/overview"
+    ],
+    "/admin/ia/financeiro": [
+     "403 /v1/admin/ai/disputes"
     ],
     "/admin/auditoria": [
      "403 /v1/admin/audit/verify"

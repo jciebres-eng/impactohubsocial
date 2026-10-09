@@ -25,13 +25,18 @@ e cada operação mostra o custo e quem paga ANTES de rodar. Falhou, não cobra.
    clientes, margem parcial, alertas; e `AI_COST_MODEL.md` com piloto medido, três cenários e as doze perguntas.
 
 **Números:** 923 operações, 225 telas, 50 motores (VERDE 37 · AMARELO 13 · VERMELHO 0), 68 migrações,
-11 regras de monetização (0 ativas), 16 jornadas / 262 passos / 0 falha. Regressão completa:
+11 regras de monetização (0 ativas), 16 jornadas / 256 passos / 0 falha. Regressão completa:
 `FINAL_EXECUTION_REPORT.md` §24. **Receita real de IA desta instalação: R$ 0,00 (modo piloto).**
 
 **O que esta versão NÃO entrega**, com nome: venda real de créditos (parecer + provedor); BYOK; lote,
 monitoramento e relatório institucional (planejados, 501); preço de produção; custo de provedor medido;
 NFS-e; tag enviada ao GitHub (proxy). Detalhes em `FINAL_EXECUTION_REPORT.md` §25–26, `FINAL_EXECUTION_AUDIT.md`,
 `AI_PROVIDERS_EVALUATION.md` e `EXTERNAL_INTEGRATIONS.md`.
+
+**Para operar o piloto:** `docs/execution/PRODUCTION_CHECKLIST_v0280.md` (o que está feito, o que depende do
+proprietário, o que só o piloto responde), `docs/execution/ROLLBACK_v0280.md` (código com banco mantido; restauração
+só em último caso; migrações são forward-only) e `docs/execution/AI_COST_MONITORING_GUIDE.md` (onde olhar, alertas,
+rotina diária/semanal/mensal, botões de emergência).
 
 ---
 

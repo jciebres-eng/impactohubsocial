@@ -1,0 +1,46 @@
+name: contas-demo
+# Executado À MÃO: Actions → contas-demo → Run workflow.
+# Contas de DEMONSTRAÇÃO (`@demo.impacto.local`) no banco de PRODUÇÃO (Supabase) — v0.32.0.
+#
+#   listar     somente leitura: quantas contas de demonstração, quantas reais, quais organizações são só
+#              de demonstração e quanto conteúdo público elas têm.
+#   desativar  contas → `disabled` (sessões encerradas na hora), organizações só de demonstração →
+#              `suspended`; tudo na trilha de auditoria; numa transação só. NÃO apaga nada.
+#              Exige a frase: DESATIVAR CONTAS DEMO
+#   reativar   desfaz. Exige a frase: REATIVAR CONTAS DEMO
+#
+# Mesmo segredo do workflow `supabase`: SUPABASE_ADMIN_URL (pooler de sessão). O script nunca imprime
+# senha nem dado de conta real — só contagens e os e-mails fictícios do domínio de demonstração.
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "listar (somente leitura), desativar ou reativar"
+        type: choice
+        options: [listar, desativar, reativar]
+        default: listar
+      confirmacao:
+        description: "desativar: DESATIVAR CONTAS DEMO · reativar: REATIVAR CONTAS DEMO"
+        type: string
+        default: ""
+permissions: { contents: read }
+concurrency: { group: contas-demo, cancel-in-progress: false }
+
+jobs:
+  contas:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libpq5
+      - name: Antes (somente leitura)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: python3 scripts/demo_accounts.py listar
+      - name: ${{ inputs.modo }}
+        if: inputs.modo != 'listar'
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          CONFIRMACAO: ${{ inputs.confirmacao }}
+        run: python3 scripts/demo_accounts.py "${{ inputs.modo }}"

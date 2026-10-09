@@ -1,27 +1,27 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.31.0",
- "version": "0.31.0",
- "commit": "50d9bd3",
- "date": "2026-10-09T20:41:20+00:00",
- "release_status": "NO-GO",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.32.0",
+ "version": "0.32.0",
+ "commit": "bc5791d",
+ "date": "2026-10-09T23:03:21+00:00",
+ "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 3925,
-  "traceability": "IMPACTO_v0.31.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip"
+  "tracked_total": 4106,
+  "traceability": "IMPACTO_v0.32.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip"
  },
  "migrations": {
-  "total": 70,
-  "last": "0070_v0300_evidence_object.sql",
+  "total": 71,
+  "last": "0071_v0301_supabase_data_api_closed.sql",
   "new_in_this_version": [
    "0070_v0300_evidence_object.sql"
   ]
  },
  "tests": {
-  "total": 2425,
-  "seconds": 1874.551,
+  "total": 2434,
+  "seconds": 1945.779,
   "result": "FAILED",
   "detail": "failures=5, skipped=31",
-  "runs_in_log": 3
+  "runs_in_log": 1
  },
  "new_test_modules": [
   "backend/tests/test_v0300_evidence_object.py",
@@ -115,9 +115,9 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Separar staging × produção no Supabase (G1) | decisão do proprietário | produção bloqueada |\n| URL e configuração do Railway (G2) | proprietário (`railway config pull`) | Railway não comprovado |\n| Senha de `impacto_app` igual no Railway e no GitHub | proprietário | modo `aplicar` do workflow recusaria/derrubaria |\n| Buckets e tokens R2 | conta Cloudflare | armazenamento em disco efêmero ou indefinido |\n| Serviço ClamAV | Railway | uploads em quarentena |\n| Provedor SMTP + SPF/DKIM/DMARC | proprietário | sem e-mail transacional |\n| Domínio e Cloudflare | proprietário | sem domínio próprio |\n| Tag `v0.31.0` e junção no `main` | proxy recusa tag; junção publica no Railway | aguardam o proprietário |",
- "known_limitations": "- Railway, R2, ClamAV, SMTP e Cloudflare não foram tocados nem verificados por dentro.\n- O servidor S3 de teste do CI não é o R2: `response-content-disposition` e *path-style* no R2 só o workflow `armazenamento` prova.\n- RTO medido é do volume atual (2,3 MB); RPO não definido (depende do plano do Supabase).\n- O backup gerenciado do Supabase não foi conferido (só pelo painel).\n- Credencial administrativa no ambiente da `api` (o entrypoint migra com ela) — P2.\n- Ações do GitHub em Node 20 (aviso de descontinuação) — P2.",
- "decision": "```text\nNO-GO\n```\n\n**Para publicação em produção hoje.** Dois P0 dependem do proprietário: (G1) o único projeto Supabase mistura 15 contas de\ndemonstração com 1 conta real — produção precisa de um projeto próprio ou das contas de demonstração desativadas; (G2) o Railway não\nfoi verificado — não se sabe com que ambiente, armazenamento e e-mail a instância de 09/10 subiu. O critério do pacote (\"backup sem\nrestauração testada resulta em NO-GO\") **está satisfeito**: a restauração foi feita e conferida. Nenhuma falha técnica interna fica\naberta. **Staging pode ser montado agora** com `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`; com G1 e G2 resolvidos e o `pos-deploy`\nverde em produção, a decisão passa a GO WITH CONDITIONS (condições: SMTP, R2 e domínio verificados). Rollback:\n`docs/ops/ROLLBACK_v0310.md`; backup: `docs/ops/BACKUP_RESTORE_RUNBOOK.md`.",
+ "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Publicar a produção (\"Deploy latest commit\" no `impactohubsocial` e no `pleasing-trust`) | responsável | 0071 e worker novo fora da produção |\n| Start Command do `pleasing-trust` = `sh /app/start_worker.sh` | responsável | worker com conexão administrativa |\n| Token novo do backup (o antigo foi exposto num chat) | responsável (Cloudflare + GitHub) | risco sobre os backups |\n| Repositório privado | responsável (Settings) | código público |\n| Monitor externo (UptimeRobot/Better Stack) | responsável | só o monitor horário do GitHub |\n| Senha de `impacto_app` igual no GitHub | responsável | modo `aplicar` do workflow recusaria |\n| Domínio, e-mail autenticado, revisão jurídica, encarregado de dados | responsável e terceiros | sem domínio próprio; sem dados reais |\n| Tags v0.31.0 e v0.32.0 | o ambiente não envia tags | criar no GitHub |",
+ "known_limitations": "- Conteúdo de nível \"rede\" (visível só a membros logados) das organizações fictícias não foi alterado — o cadastro em produção\n  está bloqueado pela trava jurídica, então não há membros externos para vê-lo.\n- O plano do GitHub da conta não foi verificado (cota de minutos estimada pelo plano gratuito).\n- O monitor agendado do GitHub não disparou nas primeiras horas; por isso o externo é o principal.\n- RPO do banco depende do plano do Supabase e não foi conferido no painel.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nPara juntar o PR #5 na `main` (o demo publica sozinho) e, depois de conferido o demo, publicar a produção. Os críticos internos\nda auditoria inicial estão resolvidos com prova na própria produção (contas e conteúdo fictícios; restauração do backup real).\nCondições: trocar o comando do worker na mesma publicação; trocar o token do backup; tornar o repositório privado; monitor\nexterno. Dados reais continuam bloqueados até a revisão jurídica. Nenhuma falha crítica foi convertida em \"condição\".",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",

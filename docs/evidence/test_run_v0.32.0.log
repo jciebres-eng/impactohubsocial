@@ -16,3 +16,8 @@ FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_
 # CI do PR #5 (execução 37998628082, mesmo código): Ran 2434 tests in 1797.986s — 6 falhas: as mesmas 5 + a auditoria final,
 # que ainda era a da v0.31.0 naquele commit. Causas e correções: FINAL_EXECUTION_AUDIT.md §7.
 
+
+## Portões de fechamento reexecutados após gerar os manifestos
+----------------------------------------------------------------------
+Ran 217 tests in 30.187s
+OK (skipped=2)

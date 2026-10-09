@@ -1,122 +1,104 @@
-# Relatório final de execução — IMPACTO v0.30.0
+# Relatório final de execução — IMPACTO v0.31.0
 
-**Data:** 09/10/2026 · **Ramo:** `main` · **Tag:** `v0.30.0` (a criar no GitHub pelo proprietário no commit indicado em §3 — o
-proxy deste ambiente recusa envio de tag) · **Pacote:** `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip` (SHA-256 no `.sha256` ao lado) ·
-**Auditoria:** `FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.30.0_RELATORIO_TECNICO.docx`
+**Data:** 09/10/2026 · **Ramo:** `infra/v0.31.0` · **Tag:** `v0.31.0` (a criar no GitHub pelo proprietário no commit indicado em §3 —
+o proxy deste ambiente recusa envio de tag) · **Pacote:** `IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip` (SHA-256 no `.sha256` ao lado) ·
+**Auditoria:** `FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.31.0_RELATORIO_TECNICO.docx`
 
 ## 1. Executive Summary
 
-A rodada executou o pacote "IMPACTO_SUPERPROMPTS_MASTER" do jeito que ele manda: **inspeção e baseline antes de qualquer
-alteração**, inventário em quatro estados, plano P0/P1/P2 com evidência, implementação do viável com testes, regressão, versão,
-pacote e relatório — sem presumir que documento, rota, mock ou tela signifiquem funcionalidade pronta.
+A rodada executou o pacote de infraestrutura (Railway Pro + Supabase Pro + Cloudflare R2 + Cloudflare Pro + GitHub) do jeito que
+ele manda: **auditoria read-only primeiro**, prova de tudo o que dava para provar sem as contas do proprietário, correções seguras
+com teste, e **nenhuma** publicação, migração em produção, mudança de DNS, troca de senha ou cobrança.
 
-- **Baseline** (`docs/execution/BASELINE_v0300.md`): 18 contextos classificados (PROVADO / PARCIAL / SÓ DOCUMENTADO / AUSENTE) com o
-  teste que prova cada linha. Lacunas reais encontradas: evidência rasa (sem método, acesso, consentimento, versão, contestação,
-  histórico), dossiê inexistente como objeto, mudança metodológica sem rastro, matriz por jornada dispersa, economia do SaaS e
-  take rate sem documento gerado.
-- **Conflitos registrados e NÃO implementados** (ADR-363): escrow/conta gráfica, retenção automática do take rate, assinatura
-  corporativa e selo pago — o contexto do pacote os propõe, as decisões do repositório (ADR-284, 337, 341, selos) os recusam e os
-  próprios superprompts os chamam de hipóteses.
-- **Evidência como objeto de primeira classe** (ADR-360, migração 0070): método de coleta, nível de acesso, base de consentimento,
-  classe de retenção (`unknown` é lacuna visível); versão + substituição (nunca edição); **rejeitar exige motivo**; a executora
-  **contesta** com motivo e quem revisa decide com justificativa; máquina de estados e histórico append-only **no banco**; hash do
-  documento exposto com "integridade ≠ veracidade"; aceitar evidência **não move dinheiro** (teste).
-- **Dossiê longitudinal** (ADR-361): `GET /v1/projects/{id}/dossier` + `/projetos/:id/dossie` — prontidão, marcos/obrigações,
-  evidências por estado com qualidade, séries reportado × validado com método/unidade/descontinuidade, aportes e repasses,
-  diligências, trilha — cada bloco com **origem, atualidade e lacunas**; "o que isto não é" no topo; só para as partes; a OSC vê
-  exatamente o que o financiador vê.
-- **Mudança metodológica registrada** (ADR-362): motivo obrigatório, append-only, série marca `comparable = false`.
-- **Economia do SaaS** a partir do catálogo real (11 regras, 0 ativas, 5 recusadas), **sensibilidade do take rate 2–5 %** como
-  simulação (catálogo inalterado), **estados do financiamento por marcos** mapeados ao código (decisão ≠ instrução ≠ confirmação;
-  escrow "não existe" provado), **matriz perfil × jornada × permissão × dado × ação** gerada (16 jornadas, 256 passos).
-- **Contagens** (ADR-340): 940 operações (+4), 227 telas (+1), 70 migrações, 50 motores (nenhum novo).
-- Tudo provado por HTTP e PostgreSQL reais (20 testes novos em 4 módulos), no Chromium (dossiê: dona e financiador, claro e escuro,
-  a11y e contraste), pelas 227 telas por perfil e pela regressão completa (§24), cuja primeira passagem acusou 10 falhas — todas
-  com causa e correção (auditoria §7), nenhuma resolvida afrouxando teste.
+- **Identidade:** a "baseline 0.29.01" do pacote é, byte a byte, a tag v0.29.0 (`dd2f8c3`); o repositório está à frente
+  (`docs/release/REPO_BASELINE_DIFF.md`). Nada dela foi copiado — regrediria o código.
+- **Supabase comprovado por leitura:** PostgreSQL 17.11, `impacto_app` sem superusuário e sem bypass de RLS, 71 migrações em dia,
+  cadeia de auditoria válida. Achados: **15 contas de demonstração e 1 real no mesmo projeto** (P0: separar staging e produção);
+  o lote 0064–0070 foi aplicado em 09/10 18:24 UTC **fora** do GitHub, junto com a troca da senha de `impacto_app` — o padrão do
+  entrypoint do contêiner (hipótese: primeira implantação do Railway), a confirmar com o proprietário.
+- **Backup com restauração real** (o pacote declara NO-GO sem isso): dump do Supabase restaurado num PostgreSQL 17 descartável com
+  os verificadores de integridade do CI — **341 tabelas, 2.577 linhas idênticas, RTO medido 15,1 s**, nada exportado.
+- **Correções no código:** serviço `worker` próprio (`start_worker.sh`: não migra, espera o esquema, roda como `impacto_app`);
+  validação do R2 (região `auto`); disco local efêmero sinalizado em `/readyz` e no log; commit implantado em `/healthz`;
+  adaptador S3 provado contra servidor S3 real no CI; `deploy.yml` (modelo com `echo`) substituído por `pos-deploy` (só verifica);
+  workflows `armazenamento` (bucket R2 real) e `backup-restaurar`.
+- **Sem `railway.json`, de propósito:** o Config as Code do Railway está descontinuado (corte em 2026-12-01).
+- **Não comprovado (sem acesso):** Railway, R2, ClamAV, SMTP, Cloudflare. Tudo com passo exato em
+  `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`.
 
-**Decisão: GO WITH CONDITIONS** (§27) — condições externas e decisórias, não técnicas.
+**Decisão: NO-GO para produção hoje** (§27) — dois P0 abertos que dependem do proprietário. Staging pode ser montado já.
 
 ## 2. Version
 
-0.30.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
-Documentos da v0.29.0 preservados em `history/v0.29.0/` (166 arquivos de `79a326d`); manifestos anteriores em `history/manifests/`.
+0.31.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
+Documentos da v0.30.0 preservados em `history/v0.30.0/` (166 arquivos); manifestos anteriores em `history/manifests/`.
 
 ## 3. Commit
 
-Commits da rodada (sobre `79a326d`, v0.29.0): `3f5f139` (F1: versão, snapshot, baseline, P0 evidência — 0070, rotas, 7 testes),
-`90aa5ef` (F2: P0 dossiê + P1 mudança metodológica, tela, 4 testes + 1 E2E), `21361f6` (F3: matriz por jornada, sensibilidade do take
-rate, SAAS_ECONOMY, estados do financiamento, 8 testes de documento), commit de matrizes/contagens, `81d0792` (correções da 1ª
-regressão, ADR-360..363, changelog, notas, checklists, rollback, limpeza), o commit de fechamento (auditoria, relatório, evidência da
-regressão) e o **commit final dos manifestos**, para o qual a tag `v0.30.0` deve apontar e do qual o pacote é construído byte a byte
-(`verify_package_against_git.py`); o hash desse commit é registrado no `.sha256` do pacote. `FINAL_RELEASE_MANIFEST.json` registra o
-último commit de conteúdo.
+Commits da rodada (sobre `171d8b4`), no ramo `infra/v0.31.0`: diagnóstico estendido do Supabase; backup e restauração de banco
+gerenciado; worker, R2, `/healthz`/`/readyz`, workflows; correções do job `armazenamento`; versão/ADRs/documentos; e o commit final
+dos manifestos, para o qual a tag `v0.31.0` deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`).
+O hash desse commit é registrado no `.sha256` do pacote. A junção no `main` **não foi feita**: o Railway publica o `main`, e publicar
+depende da aprovação do proprietário.
 
-**GitHub Actions:** run `37957125812` do commit candidato à tag `5d46e50`: `auditoria` (gitleaks + ruff), `docker` (typecheck
-oficial `tsc --noEmit` + build), `pilha-do-zero` (banco vazio → imagem → migrações 0001–0070 → seed → jornadas → 227 telas → axe →
-reinício) e `backend` (suíte oficial completa) — **os quatro verdes na primeira tentativa**. Este parágrafo foi acrescentado depois
-da run, no commit seguinte; a tag `v0.30.0` aponta para `5d46e50`.
+**GitHub Actions (ramo):** `supabase` (37974779816, 37975067994: verificar; 37975650545: backup-restaurar), `ci` (37977204420:
+auditoria, docker, pilha-do-zero verdes; backend 2.414 testes com 3 falhas de fechamento/segredo já corrigidas; 37978728985:
+armazenamento verde contra CloudServer).
 
 ## 4. Architecture Status
 
-Starlette + PostgreSQL 16 com RLS em toda tabela (exceção: `schema_migrations`; nenhuma FORCE), hash encadeado em auditoria/razão/
-valor/confiança, sem custódia. Mudanças: 2 tabelas novas append-only (`evidence_events`, `indicator_method_changes`); `evidences` com
-11 colunas e 3 estados a mais, máquina de estados e guardas; `project_indicators.method_change_reason` + gatilho; 4 rotas novas;
-`services/dossier.py` (composição somente-leitura); `scripts/make_profile_journey_matrix.py`; `web/src/pages/impact.tsx::ProjectDossier`.
-Documentos canônicos: `docs/execution/BASELINE_v0300.md`, `docs/SAAS_ECONOMY.md`, `docs/execution/MILESTONE_FUNDING_STATES_v0300.md`,
-`docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md`, `docs/execution/ACCEPTANCE_CHECKLIST_v0300.md`.
+Inalterada no produto (Starlette + PostgreSQL com RLS em toda tabela, hash encadeado, sem custódia). Topologia de publicação
+documentada: Railway com `api` (entrypoint que migra com lock e troca para `impacto_app`), `worker` (novo entrypoint) e `clamav`;
+Supabase só como PostgreSQL (nenhum uso de Auth/Storage/Realtime/Functions); R2 como armazenamento S3 privado com URL assinada;
+Cloudflare como DNS/TLS/WAF. Documento canônico: `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md`.
 
 ## 5. Engines Status
 
-50 motores: implemented/integrated/tested 50/50; `MOTOR_COVERAGE_MATRIX.md` (gerado) VERDE 37 · AMARELO 13 · VERMELHO 0. Nenhum motor
-novo: o dossiê é composição (não decide); o teste de registro (`test_v0200_engines`) foi quem apontou que `ENGINE_VERSION` no módulo
-o faria parecer motor — renomeado para `DOSSIER_VERSION`.
+50 motores, inalterados; `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0.
 
 ## 6. Contract Intelligence
 
-PASS (inalterado). O dossiê lê obrigações do contrato (`agreement_obligations`) e não escreve nelas.
+PASS (inalterado).
 
 ## 7. Match
 
-PASS (inalterado): nenhum dado novo (evidência, dossiê, método) entra no match; sem pay-to-rank. Registrado como P2: guardar no
-resultado do match a versão das regras de elegibilidade usada.
+PASS (inalterado); sem pay-to-rank.
 
 ## 8. Diagnostic
 
-PASS (inalterado): o dossiê reusa `project_ready_facts()`/`control_tower.ready` (15 critérios, `unknown` é terceiro estado).
+PASS (inalterado).
 
 ## 9. Equity
 
-PASS (inalterado). O dossiê não cria nota nem ranking; "delta não implica causalidade" está no `what_this_is_not`.
+PASS (inalterado).
 
 ## 10. Evidence
 
-**PASS — ampliado** (ADR-360): objeto de primeira classe. O que a v0.30.0 não faz: assinatura qualificada, carimbo de tempo externo
-(RFC 3161), auditoria independente — o aviso na API diz o que o hash prova.
+PASS (inalterado desde a v0.30.0). Armazenamento dos arquivos de evidência: alvo R2 privado; não comprovado no bucket real.
 
 ## 11. Responsibility
 
-PARTIAL (inalterado): atribuição formal continua opcional. Conflito de interesse por serviço profissional: P2.
+PARTIAL (inalterado).
 
 ## 12. Reputation
 
-PASS (inalterado). Contestação de evidência não produz efeito reputacional.
+PASS (inalterado).
 
 ## 13. Seals
 
-PASS (inalterado): selo só por critério e fato; **selo pago** (proposta do pacote) recusado (ADR-363).
+PASS (inalterado).
 
 ## 14. Government Data
 
-Inalterado: torre territorial k ≥ 3. O governo com acesso de revisão vê o dossiê (`app_review_access`).
+Inalterado.
 
 ## 15. Marketplace
 
-Inalterado: comissão recusada (`marketplace.take_rate` **refused** no catálogo).
+Inalterado (comissão recusada).
 
 ## 16. Payments
 
-Inalterado (PASS / BLOCKED_EXTERNAL): nenhum pagamento real; **escrow/conta gráfica não existe e não existirá dentro do produto**
-(ADR-284; `MILESTONE_FUNDING_STATES_v0300.md`); aprovação de evidência ≠ liquidação (teste).
+Inalterado: nenhum pagamento real; nenhum provedor ligado.
 
 ## 17. Distribution
 
@@ -124,11 +106,12 @@ PASS (inalterado).
 
 ## 18. Billing
 
-Inalterado: sem assinatura (ADR-341); `docs/SAAS_ECONOMY.md` documenta o catálogo e a matriz de elegibilidade de cobrança.
+Inalterado: sem assinatura (ADR-341); 0 regras ativas. A análise econômica de 120 meses (`docs/analysis/economia_v0300/`) é
+proposta e não alterou regra, catálogo, planos ou banco.
 
 ## 19. Fiscal
 
-BLOCKED_EXTERNAL (inalterado): quem presta/fatura/recolhe por fluxo está em `SAAS_ECONOMY.md` §4; emissão real desligada.
+BLOCKED_EXTERNAL (inalterado).
 
 ## 20. Vouchers
 
@@ -140,78 +123,74 @@ PARTIAL (inalterado).
 
 ## 22. Security
 
-Revisada: 4 rotas novas na matriz de autorização (940); dossiê só para as partes; 2 tabelas novas com RLS e append-only; quatro olhos
-preservado nas evidências (quem envia não revisa; só a executora contesta); conteúdo da evidência imutável após o envio; nenhum
-segredo em código, documento ou pacote (`secrets_scan.py`, gitleaks no CI). **Nenhum sistema ligado à internet é "impossível de
-invadir", e este não é exceção.**
+Revisada para o ambiente hospedado: nenhum segredo em código, workflow, documento ou pacote (`secrets_scan.py`, gitleaks no CI);
+dump com dado pessoal nunca sai do job; restauração recusa destino igual à origem; worker com menor privilégio e sem rotação de
+senha; `impacto_app` sem superusuário e sem bypass de RLS no Supabase (lido); contas de demonstração no banco que tem dado real
+registradas como P0. **Nenhum sistema ligado à internet é "impossível de invadir", e este não é exceção.**
 
 ## 23. LGPD
 
-`evidence_events`/`indicator_method_changes` guardam referências de ator (trilha editorial), não dado do titular; `access_level`,
-`consent_basis` e `retention_class` passam a existir por evidência (`unknown` visível); prazos por classe dependem do DPO (checklist D3);
-`test_v0190_lgpd_deletion` verde com a expectativa atualizada (evidência deixou de ser apagável — histórico append-only).
+O backup restaurado não gera artefato; o diagnóstico conta usuários sem ler conteúdo; nenhum endereço, IP ou consulta é impresso.
+Retenção LGPD só roda com o `worker` no ar (antes desta rodada nenhum serviço a executaria no Railway). DPO continua pendente.
 
 ## 24. Tests
 
 ```text
-PRIMEIRA REGRESSÃO COMPLETA (código novo, antes das correções, scratchpad/suite/full_v0300_a.log):
-  Ran 2400 tests in 1947.064s — 10 falhas, 0 erro, 30 pulados
-  → causas e correções em FINAL_EXECUTION_AUDIT.md §7 (robô de telas sem resolvedor para /projetos/:id/dossie; E2E do dossiê lia a
-    página antes de o dado chegar sob carga; DOSSIER_VERSION; matriz por jornada dependia de slugs aleatórios; checksum da 0070
-    editada durante a rodada; documentos de fechamento e manifesto gerados no fechamento)
-SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.30.0.log):
-  Ran 2400 tests in 1906.212s — 0 erro, 30 pulados (dependem de credencial), 8 falhas: 5 de fechamento (4× test_v0270_release_docs
-       lendo os documentos da v0.29.0 no início da execução; manifesto gerado no fechamento) e 3 de regeneração (robô de telas sem
-       resolvedor por RELAÇÃO para /projetos/:id/dossie — o dossiê é só das partes, então o financiador abre o projeto que financia;
-       COVERAGE_MATRIX e PROFILE_JOURNEY_MATRIX regeradas da evidência desta rodada). Robô de telas reexecutado: 227 rotas, OK.
-       Portões de fechamento reexecutados (saída anexada ao fim do mesmo log).
-MÓDULOS NOVOS: test_v0300_evidence_object (7) · test_v0300_dossier (4) · test_v0300_release_docs (8) · test_e2e_v0300_dossier (1)
-JORNADAS: 16 jornadas, 256 passos, 0 falha · TELAS: 227 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
-LINT: ruff 0 · BUILD: esbuild ok · TYPECHECK: tsc --noEmit 0 erros (local com tipos do DefinitelyTyped; oficial no CI)
+PRIMEIRA REGRESSÃO COMPLETA LOCAL (código novo, antes do fechamento, scratchpad/full_v0310_a.log):
+  Ran 2425 tests in 1874.719s — 6 falhas, 0 erro, 31 pulados
+  → 1 real (web/package.json e package-lock em 0.30.0 — corrigido) e 5 de fechamento (manifesto e documentos finais gerados no
+    fechamento); causas e correções em FINAL_EXECUTION_AUDIT.md §7
+CI DO RAMO (run 37977204420): Ran 2414 tests in 1651.243s — 3 falhas (2 do manifesto, 1 da varredura de segredo — corrigida)
+SEGUNDA REGRESSÃO COMPLETA LOCAL: ver docs/evidence/test_run_v0.31.0.log
+MÓDULOS NOVOS: test_v0310_storage (8, 1 deles de protocolo S3 que roda no CI) · test_v0310_release_docs (11) ·
+               test_v0300_economic_analysis (6)
+PROVAS FORA DA SUÍTE: backup+restauração do Supabase (run 37975650545) · adaptador S3 × CloudServer (job armazenamento)
+LINT: ruff 0 · IMAGEM: job docker verde
 ```
 
-Testes que fixam contagem foram atualizados com a razão escrita ao lado (940 operações, 227 telas): ADR-340. Expectativa atualizada
-com motivo: `test_v0190_lgpd_deletion`. Nenhum teste foi removido ou enfraquecido.
+Nenhum teste foi removido ou enfraquecido; nenhuma contagem fixada mudou (940 operações, 227 telas, 70 migrações, 50 motores).
 
 ## 25. External Dependencies
 
 | Dependência | Exige | Efeito hoje |
 |---|---|---|
-| Decisão formal sobre as propostas recusadas por ADR (escrow, retenção, assinatura, selo pago) | proprietário | continuam fora; qualquer reabertura exige parecer e ADR nova |
-| Parceiro de pagamento e modelo de repasse | contrato + análise jurídica | não há liquidação automática; instrução + confirmação continuam manuais |
-| Revisão jurídica/contábil da matriz de elegibilidade de cobrança | advogado(a) e contador(a) | 0 regras ativas; R$ 0,00 |
-| Prazos de retenção por classe de evidência | DPO | classes existem; prazos não declarados |
-| Conferência de fontes e revisão do glossário (v0.29.0) | equipe editorial | inalterado |
-| Tag `v0.30.0` no GitHub | o proxy recusa push de tag | criar manualmente |
+| Separar staging × produção no Supabase (G1) | decisão do proprietário | produção bloqueada |
+| URL e configuração do Railway (G2) | proprietário (`railway config pull`) | Railway não comprovado |
+| Senha de `impacto_app` igual no Railway e no GitHub | proprietário | modo `aplicar` do workflow recusaria/derrubaria |
+| Buckets e tokens R2 | conta Cloudflare | armazenamento em disco efêmero ou indefinido |
+| Serviço ClamAV | Railway | uploads em quarentena |
+| Provedor SMTP + SPF/DKIM/DMARC | proprietário | sem e-mail transacional |
+| Domínio e Cloudflare | proprietário | sem domínio próprio |
+| Tag `v0.31.0` e junção no `main` | proxy recusa tag; junção publica no Railway | aguardam o proprietário |
 
 ## 26. Known Limitations
 
-- Evidências antigas `rejected` sem nota permanecem (CHECK `NOT VALID`); completar é trabalho editorial com auditoria.
-- O dossiê não sintetiza: compõe. Não há exportação em PDF; não há comparação entre projetos (de propósito).
-- Hash interno prova integridade do arquivo; não há carimbo externo nem assinatura qualificada.
-- A matriz por jornada lista 93 passos sem tela direta — fato medido (backend à frente da interface), não corrigido nesta rodada.
-- P2 registrados: conflito de interesse por serviço profissional; versão das regras de elegibilidade no resultado do match.
-- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI; defeitos pré-existentes B1/B2 fora do escopo.
+- Railway, R2, ClamAV, SMTP e Cloudflare não foram tocados nem verificados por dentro.
+- O servidor S3 de teste do CI não é o R2: `response-content-disposition` e *path-style* no R2 só o workflow `armazenamento` prova.
+- RTO medido é do volume atual (2,3 MB); RPO não definido (depende do plano do Supabase).
+- O backup gerenciado do Supabase não foi conferido (só pelo painel).
+- Credencial administrativa no ambiente da `api` (o entrypoint migra com ela) — P2.
+- Ações do GitHub em Node 20 (aviso de descontinuação) — P2.
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO
 
 ```text
-GO WITH CONDITIONS
+NO-GO
 ```
 
-Nenhuma falha técnica interna crítica em aberto: evidência de primeira classe (origem, versão, contestação, histórico, máquina de
-estados no banco), dossiê para as partes sem nota e sem assimetria, mudança metodológica registrada, autorização, tenancy,
-persistência e regressão têm teste executado e verde na segunda rodada. As condições são **decisórias e externas** (§25): decisão
-sobre as propostas recusadas, parceiro de pagamento, parecer da matriz de cobrança, prazos de retenção, tag no GitHub. Nenhuma
-falha crítica foi convertida em "condição". Checklist operacional: `docs/execution/PRODUCTION_CHECKLIST_v0300.md`; rollback:
-`docs/execution/ROLLBACK_v0300.md`; aceite: `docs/execution/ACCEPTANCE_CHECKLIST_v0300.md`.
+**Para publicação em produção hoje.** Dois P0 dependem do proprietário: (G1) o único projeto Supabase mistura 15 contas de
+demonstração com 1 conta real — produção precisa de um projeto próprio ou das contas de demonstração desativadas; (G2) o Railway não
+foi verificado — não se sabe com que ambiente, armazenamento e e-mail a instância de 09/10 subiu. O critério do pacote ("backup sem
+restauração testada resulta em NO-GO") **está satisfeito**: a restauração foi feita e conferida. Nenhuma falha técnica interna fica
+aberta. **Staging pode ser montado agora** com `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`; com G1 e G2 resolvidos e o `pos-deploy`
+verde em produção, a decisão passa a GO WITH CONDITIONS (condições: SMTP, R2 e domínio verificados). Rollback:
+`docs/ops/ROLLBACK_v0310.md`; backup: `docs/ops/BACKUP_RESTORE_RUNBOOK.md`.
 
 ## 28. Exact Next Step
 
-1. Criar a tag `v0.30.0` no GitHub (Releases → nova tag no commit de fechamento) e anexar `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip`
-   + `.sha256` + o relatório DOCX.
-2. Decidir, por escrito, sobre as quatro propostas do pacote recusadas por ADR (manter fora ou reabrir com parecer) — ADR nova se mudar.
-3. Levar `docs/SAAS_ECONOMY.md` §4 (matriz de elegibilidade de cobrança) a advogado(a) e contador(a) junto com
-   `MONETIZATION_LEGAL_MATRIX.md`; declarar com o DPO os prazos de retenção por classe de evidência.
-4. Próxima rodada técnica (sem dependência externa): conflito de interesse por serviço profissional; versão das regras de
-   elegibilidade no resultado do match; telas para os passos de jornada que hoje só existem na API (93, medidos); exportação do dossiê.
+1. Responder: foi você que ligou o Railway por volta de 14:20 de 09/10? E enviar a URL pública (e, se puder, a saída de
+   `railway config pull`).
+2. Decidir G1: este projeto Supabase vira **staging** e cria-se um projeto de **produção** (recomendado).
+3. Igualar `IMPACTO_APP_PASSWORD` no GitHub ao valor do Railway; `IMPACTO_APP_ROTATE_PASSWORD=false`.
+4. Autorizar a junção de `infra/v0.31.0` no `main` (o Railway publica o `main`) e criar a tag `v0.31.0` no commit de fechamento.
+5. Criar os serviços `worker` e `clamav`, os buckets R2 e rodar `armazenamento` e `pos-deploy`.

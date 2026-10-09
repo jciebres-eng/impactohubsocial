@@ -114,7 +114,8 @@ jobs:
           # Primeira referência que existir, em ordem; a usada e o digest dela vão para o log e o resumo.
           for img in quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z minio/minio:RELEASE.2025-04-22T22-12-26Z \
                      minio/minio:RELEASE.2024-10-13T13-34-11Z quay.io/minio/minio:latest minio/minio:latest; do
-            if docker pull -q "$img" >/dev/null 2>&1; then usada="$img"; break; fi
+            if docker pull -q "$img" 2>pull.err; then usada="$img"; break; fi
+            echo "::warning title=pull falhou::$img — $(tail -c 300 pull.err | tr "\n" " ")"
           done
           test -n "${usada:-}" || { echo "::error::nenhuma imagem do MinIO disponível"; exit 1; }
           digest=$(docker inspect --format '{{index .RepoDigests 0}}' "$usada")

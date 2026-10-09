@@ -40,6 +40,12 @@ CONTEUDO = [
     ("solutions", "org_id", "visibility", "published", "archived"),
     ("materials", "org_id", "status", "published", "archived"),
     ("calls", "owner_org_id", "status", "open", "suspended"),
+    ("public_profiles", "org_id", "visibility", "public", "private"),
+    ("programs", "owner_org_id", "visibility", "public", "organization"),
+    ("territory_needs", "org_id", "visibility", "public", "organization"),
+    ("investment_intents", "investor_org_id", "visibility", "public", "private"),
+    ("documents", "org_id", "visibility", "public", "private"),
+    ("relationships", "org_id", "visibility", "public", "private"),
 ]
 
 

@@ -1,13 +1,13 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.30.0",
- "version": "0.30.0",
- "commit": "107f6a822954913148b5e0f4be9b16d144eb7a0b",
- "date": "2026-10-09T16:08:38+00:00",
- "release_status": "GO WITH CONDITIONS",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.31.0",
+ "version": "0.31.0",
+ "commit": "50d9bd3",
+ "date": "2026-10-09T20:41:20+00:00",
+ "release_status": "NO-GO",
  "files": {
-  "tracked_total": 3727,
-  "traceability": "IMPACTO_v0.30.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip"
+  "tracked_total": 3925,
+  "traceability": "IMPACTO_v0.31.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip"
  },
  "migrations": {
   "total": 70,
@@ -17,10 +17,10 @@
   ]
  },
  "tests": {
-  "total": 2400,
-  "seconds": 1906.212,
+  "total": 2425,
+  "seconds": 1874.551,
   "result": "FAILED",
-  "detail": "failures=8, skipped=30",
+  "detail": "failures=5, skipped=31",
   "runs_in_log": 3
  },
  "new_test_modules": [
@@ -115,9 +115,9 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Decisão formal sobre as propostas recusadas por ADR (escrow, retenção, assinatura, selo pago) | proprietário | continuam fora; qualquer reabertura exige parecer e ADR nova |\n| Parceiro de pagamento e modelo de repasse | contrato + análise jurídica | não há liquidação automática; instrução + confirmação continuam manuais |\n| Revisão jurídica/contábil da matriz de elegibilidade de cobrança | advogado(a) e contador(a) | 0 regras ativas; R$ 0,00 |\n| Prazos de retenção por classe de evidência | DPO | classes existem; prazos não declarados |\n| Conferência de fontes e revisão do glossário (v0.29.0) | equipe editorial | inalterado |\n| Tag `v0.30.0` no GitHub | o proxy recusa push de tag | criar manualmente |",
- "known_limitations": "- Evidências antigas `rejected` sem nota permanecem (CHECK `NOT VALID`); completar é trabalho editorial com auditoria.\n- O dossiê não sintetiza: compõe. Não há exportação em PDF; não há comparação entre projetos (de propósito).\n- Hash interno prova integridade do arquivo; não há carimbo externo nem assinatura qualificada.\n- A matriz por jornada lista 93 passos sem tela direta — fato medido (backend à frente da interface), não corrigido nesta rodada.\n- P2 registrados: conflito de interesse por serviço profissional; versão das regras de elegibilidade no resultado do match.\n- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI; defeitos pré-existentes B1/B2 fora do escopo.",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: evidência de primeira classe (origem, versão, contestação, histórico, máquina de\nestados no banco), dossiê para as partes sem nota e sem assimetria, mudança metodológica registrada, autorização, tenancy,\npersistência e regressão têm teste executado e verde na segunda rodada. As condições são **decisórias e externas** (§25): decisão\nsobre as propostas recusadas, parceiro de pagamento, parecer da matriz de cobrança, prazos de retenção, tag no GitHub. Nenhuma\nfalha crítica foi convertida em \"condição\". Checklist operacional: `docs/execution/PRODUCTION_CHECKLIST_v0300.md`; rollback:\n`docs/execution/ROLLBACK_v0300.md`; aceite: `docs/execution/ACCEPTANCE_CHECKLIST_v0300.md`.",
+ "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Separar staging × produção no Supabase (G1) | decisão do proprietário | produção bloqueada |\n| URL e configuração do Railway (G2) | proprietário (`railway config pull`) | Railway não comprovado |\n| Senha de `impacto_app` igual no Railway e no GitHub | proprietário | modo `aplicar` do workflow recusaria/derrubaria |\n| Buckets e tokens R2 | conta Cloudflare | armazenamento em disco efêmero ou indefinido |\n| Serviço ClamAV | Railway | uploads em quarentena |\n| Provedor SMTP + SPF/DKIM/DMARC | proprietário | sem e-mail transacional |\n| Domínio e Cloudflare | proprietário | sem domínio próprio |\n| Tag `v0.31.0` e junção no `main` | proxy recusa tag; junção publica no Railway | aguardam o proprietário |",
+ "known_limitations": "- Railway, R2, ClamAV, SMTP e Cloudflare não foram tocados nem verificados por dentro.\n- O servidor S3 de teste do CI não é o R2: `response-content-disposition` e *path-style* no R2 só o workflow `armazenamento` prova.\n- RTO medido é do volume atual (2,3 MB); RPO não definido (depende do plano do Supabase).\n- O backup gerenciado do Supabase não foi conferido (só pelo painel).\n- Credencial administrativa no ambiente da `api` (o entrypoint migra com ela) — P2.\n- Ações do GitHub em Node 20 (aviso de descontinuação) — P2.",
+ "decision": "```text\nNO-GO\n```\n\n**Para publicação em produção hoje.** Dois P0 dependem do proprietário: (G1) o único projeto Supabase mistura 15 contas de\ndemonstração com 1 conta real — produção precisa de um projeto próprio ou das contas de demonstração desativadas; (G2) o Railway não\nfoi verificado — não se sabe com que ambiente, armazenamento e e-mail a instância de 09/10 subiu. O critério do pacote (\"backup sem\nrestauração testada resulta em NO-GO\") **está satisfeito**: a restauração foi feita e conferida. Nenhuma falha técnica interna fica\naberta. **Staging pode ser montado agora** com `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`; com G1 e G2 resolvidos e o `pos-deploy`\nverde em produção, a decisão passa a GO WITH CONDITIONS (condições: SMTP, R2 e domínio verificados). Rollback:\n`docs/ops/ROLLBACK_v0310.md`; backup: `docs/ops/BACKUP_RESTORE_RUNBOOK.md`.",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",

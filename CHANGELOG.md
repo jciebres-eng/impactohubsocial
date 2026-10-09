@@ -14,6 +14,39 @@ Somente documentação, na branch `auditoria-inicial`. Nenhum código, configura
   backup expostas num chat), 6 altos, 11 médios, 4 baixos — cada um com prova e correção. Nenhum segredo no repositório.
 - `docs/03-checklist-demo.md`: o demo já está no ar; passos para deixá-lo seguro para mostrar e separado da produção.
 - `docs/04-roadmap.md`: 19 incrementos em ordem de urgência e 5 decisões do responsável.
+## [0.31.0] — 2026-10-09
+
+### Infraestrutura Railway Pro + Supabase Pro + Cloudflare R2 + Cloudflare: auditoria, prova de backup e preparação — sem publicar (ADR-364 a ADR-367)
+
+Pedido do proprietário (pacote `IMPACTO_FINAL_FULL_RAILWAY_SUPABASE_R2_CLOUDFLARE_CLAUDE`): auditar o estado real antes de
+alterar, provar o que puder, preparar staging e deixar produção bloqueada até aprovação humana.
+
+**Comprovado:** baseline do pacote = tag v0.29.0 byte a byte (`docs/release/REPO_BASELINE_DIFF.md`); estado do Supabase por
+leitura (runs 37974779816, 37975067994); **backup + restauração** do Supabase num banco descartável (run 37975650545: 341
+tabelas, 2.577 linhas idênticas, RTO 15,1 s); imagem com o worker constrói no CI; adaptador S3 contra servidor S3 real.
+**Não comprovado (sem acesso):** Railway, R2, DNS/Cloudflare, SMTP.
+
+**Código**: `backend/start_worker.sh` (worker: `migrate --check` em laço, `impacto_app`, `jobs loop`; não migra nem rotaciona);
+`config.validate` recusa região AWS com endpoint R2 e http em produção; `config.storage_is_ephemeral` → `/readyz`
+`storage_durable` + aviso no log; `/healthz` → `commit` (`RAILWAY_GIT_COMMIT_SHA` / `IMPACTO_GIT_SHA`); Dockerfile copia o worker.
+
+**Scripts**: `managed_backup_restore.sh` (dump de `public`, extensões recriadas no schema da origem, restauração com
+`restore_test.sh`, contagem de todas as tabelas, recusa destino = origem); `restore_test.sh` ganha `RESTORE_KEEP_DB` e
+`RESTORE_TOC_LIST` (padrão inalterado); `storage_smoke.py` (8 verificações com o adaptador do produto);
+`supabase_check.py` mostra a linha do tempo dos lotes de migração e as sessões por papel/aplicação.
+
+**Workflows**: `supabase` modo `backup-restaurar`; `ci` com job `armazenamento` (servidor S3 que valida SigV4 — as imagens
+públicas do MinIO deixaram de ser baixáveis) e disparo manual; `armazenamento` (bucket R2 real, por ambiente); `pos-deploy`
+substitui `deploy.yml` (que era modelo terminando em `echo`). Sem `railway.json`: Config as Code do Railway descontinuado.
+
+**Documentos**: `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md` (estado comprovado, configuração por serviço, variáveis,
+16 achados P0/P1/P2, gates), `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`, `docs/release/REPO_BASELINE_DIFF.md`; a análise
+econômica de 120 meses (`docs/analysis/economia_v0300/`, proposta) entra no manifesto desta versão.
+
+**Testes novos**: `test_v0310_storage` (7 + 1 de protocolo no CI), `test_v0310_release_docs` (11), `test_v0300_economic_analysis` (6).
+
+**O que NÃO foi feito** (declarado): deploy, DNS, criação de bucket, troca de senha, migração em produção — dependem do
+proprietário; separação staging/produção do Supabase (decisão P0 do proprietário).
 
 ## [0.30.0] — 2026-10-09
 

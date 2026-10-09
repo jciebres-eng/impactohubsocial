@@ -1,6 +1,8 @@
 """Fábrica da aplicação ASGI (Starlette) — API /v1, SPA/PWA estática, health, métricas e OpenAPI."""
 from __future__ import annotations
 
+import os
+
 import contextlib
 import hmac
 import json
@@ -155,8 +157,12 @@ class Cors:
 def _infra_routes(state: AppState) -> list[Route]:
     s = state.settings
 
+    # v0.31.0: o commit implantado, quando o provedor o informa (Railway: RAILWAY_GIT_COMMIT_SHA em deploy
+    # vindo do GitHub; outro provedor: IMPACTO_GIT_SHA). É o que prova "o que está no ar é o que foi testado".
+    commit = (os.getenv("RAILWAY_GIT_COMMIT_SHA") or os.getenv("IMPACTO_GIT_SHA") or "")[:12] or None
+
     async def healthz(request: Request):
-        return JSONResponse({"status": "ok", "version": s.version, "env": s.env})
+        return JSONResponse({"status": "ok", "version": s.version, "env": s.env, "commit": commit})
 
     def _ready():
         from .db.migrate import _files
@@ -175,6 +181,8 @@ def _infra_routes(state: AppState) -> list[Route]:
         if pending:
             return JSONResponse({"status": "unavailable", "pending_migrations": pending}, status_code=503)
         return JSONResponse({"status": "ready", "database": "ok", "storage": state.storage.kind,
+                             # v0.31.0: false = arquivos em disco de contêiner sem volume declarado (somem no redeploy)
+                             "storage_durable": not config_mod.storage_is_ephemeral(s),
                              "antivirus": state.antivirus.name, "ai": state.ai.provider_name,
                              "billing": "none-subscription", "payments": "stripe" if s.stripe_secret_key else "simulated",
                              "mail": s.mail_provider})
@@ -243,6 +251,10 @@ def create_app(settings: config_mod.Settings | None = None, state: AppState | No
     @contextlib.asynccontextmanager
     async def lifespan(app):
         log(logger, logging.INFO, "startup", version=settings.version, env=settings.env, routes=len(ROUTES))
+        if config_mod.storage_is_ephemeral(settings):
+            log(logger, logging.WARNING, "storage_ephemeral",
+                detail="STORAGE_PROVIDER=local sem volume declarado (STORAGE_LOCAL_PERSISTENT): arquivos enviados "
+                       "se perdem no próximo deploy — use S3/R2 ou monte um volume")
         problems = db_role_problems(state.pool)
         if problems:
             if settings.is_hardened:

@@ -1,0 +1,336 @@
+{
+  "version": "search-eval@1.0 (v0.29.0)",
+  "note": "Conjunto VERSIONADO de consultas em pt-BR para medir a busca da Central (help-search) sobre o conteúdo semeado (kb_seed, publicado para a medição). Julgamentos feitos à mão a partir do conteúdo: 'relevant' = o item responde a consulta; 'acceptable' = ajuda mas não é a resposta. Chaves: slug (artigo/recurso) ou 'faq:<pergunta>'. Consultas 'sem resposta' têm relevant vazio: o certo é não achar nada (abstenção). É um conjunto PEQUENO e sintético; mede se o motor separa o que foi rotulado, não desempenho em base real. Os pisos em 'floors' são o BASELINE medido na v0.29.0 antes do ajuste de vocabulário (perfil OSC autenticada: hit@1 0,84, MRR 0,91, R@5 0,97, nDCG@5 0,91, 0 consultas sem resultado, abstenção 3/3); depois do ajuste de help_synonyms 1.1 a medição ficou em hit@1 0,88, MRR 0,94, R@5 0,98, nDCG@5 0,93: uma mudança de ranking que fique abaixo deles reprova.",
+  "k": 5,
+  "floors": {
+    "precision_at_5": 0.19,
+    "recall_at_5": 0.96,
+    "mrr": 0.9,
+    "ndcg_at_5": 0.9,
+    "hit_at_1": 0.84,
+    "zero_result_rate_max": 0.04,
+    "correct_abstention_rate": 1.0,
+    "latency_p95_ms_max": 400
+  },
+  "queries": [
+    {
+      "q": "cadastrar organização",
+      "kind": "exact",
+      "relevant": [
+        "como-cadastrar-organizacao"
+      ],
+      "acceptable": [
+        "comece-aqui-osc"
+      ]
+    },
+    {
+      "q": "como cadastro minha OSC",
+      "kind": "natural",
+      "relevant": [
+        "como-cadastrar-organizacao"
+      ],
+      "acceptable": [
+        "comece-aqui-osc"
+      ]
+    },
+    {
+      "q": "enviar documentos",
+      "kind": "exact",
+      "relevant": [
+        "como-enviar-documentos"
+      ],
+      "acceptable": [
+        "checklist-documentos-organizacao"
+      ]
+    },
+    {
+      "q": "certidão vencida",
+      "kind": "synonym",
+      "relevant": [
+        "como-enviar-documentos"
+      ],
+      "acceptable": [
+        "entender-conformidade",
+        "checklist-documentos-organizacao"
+      ]
+    },
+    {
+      "q": "criar projeto",
+      "kind": "exact",
+      "relevant": [
+        "como-cadastrar-projeto"
+      ],
+      "acceptable": [
+        "comece-aqui-osc"
+      ]
+    },
+    {
+      "q": "orçamento do projeto",
+      "kind": "exact",
+      "relevant": [
+        "como-montar-orcamento"
+      ],
+      "acceptable": [
+        "modelo-justificativa-orcamento"
+      ]
+    },
+    {
+      "q": "orcamneto",
+      "kind": "typo",
+      "relevant": [
+        "como-montar-orcamento"
+      ],
+      "acceptable": [
+        "modelo-justificativa-orcamento"
+      ]
+    },
+    {
+      "q": "três cotações",
+      "kind": "exact",
+      "relevant": [
+        "como-fazer-cotacoes"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "cotacao fornecedor",
+      "kind": "unaccented",
+      "relevant": [
+        "como-fazer-cotacoes"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "conformidade",
+      "kind": "exact",
+      "relevant": [
+        "entender-conformidade"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "compatibilidade",
+      "kind": "exact",
+      "relevant": [
+        "como-funciona-a-compatibilidade"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "match",
+      "kind": "acronym",
+      "relevant": [
+        "como-funciona-a-compatibilidade"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "prestação de contas",
+      "kind": "exact",
+      "relevant": [
+        "como-prestar-contas"
+      ],
+      "acceptable": [
+        "checklist-prestacao-contas"
+      ]
+    },
+    {
+      "q": "prestar contas do projeto",
+      "kind": "natural",
+      "relevant": [
+        "como-prestar-contas"
+      ],
+      "acceptable": [
+        "checklist-prestacao-contas"
+      ]
+    },
+    {
+      "q": "relatório final",
+      "kind": "synonym",
+      "relevant": [
+        "como-prestar-contas"
+      ],
+      "acceptable": [
+        "checklist-prestacao-contas"
+      ]
+    },
+    {
+      "q": "prestacao de contas",
+      "kind": "unaccented",
+      "relevant": [
+        "como-prestar-contas"
+      ],
+      "acceptable": [
+        "checklist-prestacao-contas"
+      ]
+    },
+    {
+      "q": "existe assinatura?",
+      "kind": "natural",
+      "relevant": [
+        "faq:Existe assinatura ou mensalidade?"
+      ],
+      "acceptable": [
+        "como-funciona-o-acesso"
+      ]
+    },
+    {
+      "q": "mensalidade",
+      "kind": "synonym",
+      "relevant": [
+        "faq:Existe assinatura ou mensalidade?"
+      ],
+      "acceptable": [
+        "como-funciona-o-acesso"
+      ]
+    },
+    {
+      "q": "quanto custa",
+      "kind": "natural",
+      "relevant": [
+        "faq:Preciso pagar para pedir ajuda?",
+        "faq:Existe assinatura ou mensalidade?"
+      ],
+      "acceptable": [
+        "como-funciona-o-acesso"
+      ]
+    },
+    {
+      "q": "abrir chamado",
+      "kind": "exact",
+      "relevant": [
+        "como-abrir-chamado"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "suporte",
+      "kind": "exact",
+      "relevant": [
+        "como-abrir-chamado"
+      ],
+      "acceptable": [
+        "faq:Preciso pagar para pedir ajuda?"
+      ]
+    },
+    {
+      "q": "recuperar senha",
+      "kind": "exact",
+      "relevant": [
+        "faq:Como recupero minha senha?"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "esqueci a senha",
+      "kind": "synonym",
+      "relevant": [
+        "faq:Como recupero minha senha?"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "LGPD",
+      "kind": "acronym",
+      "relevant": [
+        "privacidade-e-seus-dados"
+      ],
+      "acceptable": [
+        "faq:O texto da minha busca fica guardado?"
+      ]
+    },
+    {
+      "q": "meus dados pessoais",
+      "kind": "natural",
+      "relevant": [
+        "privacidade-e-seus-dados"
+      ],
+      "acceptable": [
+        "faq:O texto da minha busca fica guardado?"
+      ]
+    },
+    {
+      "q": "o que é OSC",
+      "kind": "natural",
+      "relevant": [
+        "glossario-basico"
+      ],
+      "acceptable": [
+        "comece-aqui-osc"
+      ]
+    },
+    {
+      "q": "plano de trabalho",
+      "kind": "exact",
+      "relevant": [
+        "modelo-plano-trabalho"
+      ],
+      "acceptable": [
+        "como-cadastrar-projeto"
+      ]
+    },
+    {
+      "q": "certificado vale como diploma",
+      "kind": "natural",
+      "relevant": [
+        "faq:O certificado dos cursos vale como diploma?"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "o assistente usa inteligência artificial",
+      "kind": "natural",
+      "relevant": [
+        "faq:O assistente da Central usa inteligência artificial?"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "quem aprova o conteúdo",
+      "kind": "natural",
+      "relevant": [
+        "faq:Quem aprova o conteúdo oficial?"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "empresa financiadora começar",
+      "kind": "natural",
+      "relevant": [
+        "comece-aqui-empresa"
+      ],
+      "acceptable": []
+    },
+    {
+      "q": "projeto",
+      "kind": "ambiguous",
+      "relevant": [
+        "como-cadastrar-projeto"
+      ],
+      "acceptable": [
+        "como-montar-orcamento",
+        "como-prestar-contas",
+        "modelo-plano-trabalho",
+        "comece-aqui-osc"
+      ]
+    },
+    {
+      "q": "capital da Mongólia",
+      "kind": "unanswerable",
+      "relevant": [],
+      "acceptable": []
+    },
+    {
+      "q": "previsão do tempo para amanhã",
+      "kind": "unanswerable",
+      "relevant": [],
+      "acceptable": []
+    },
+    {
+      "q": "receita de bolo de cenoura",
+      "kind": "unanswerable",
+      "relevant": [],
+      "acceptable": []
+    }
+  ]
+}

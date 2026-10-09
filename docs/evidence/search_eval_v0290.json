@@ -1,0 +1,565 @@
+{
+ "engine": "help-search@1.0.0",
+ "weights": {
+  "fts": 0.4,
+  "title": 0.2,
+  "topic": 0.25,
+  "ctx": 0.1,
+  "audience": 0.05
+ },
+ "min_score": 0.18,
+ "answer_min": 0.3,
+ "eval_set": "search-eval@1.0 (v0.29.0)",
+ "queries": 35,
+ "corpus": {
+  "articles_published": 14,
+  "faqs_published": 8,
+  "resources_published": 4
+ },
+ "profile": "osc autenticada",
+ "metrics": {
+  "queries": 35,
+  "answerable": 32,
+  "unanswerable": 3,
+  "k": 5,
+  "precision_at_5": 0.2,
+  "recall_at_5": 0.9844,
+  "mrr": 0.9375,
+  "ndcg_at_5": 0.9266,
+  "zero_result_rate": 0.0,
+  "hit_at_1": 0.875,
+  "correct_abstention_rate": 1.0,
+  "unanswerable_with_results": 0,
+  "latency_ms": {
+   "p50": 13.5,
+   "p95": 19.6,
+   "n": 35
+  },
+  "by_kind": {
+   "exact": {
+    "n": 12,
+    "hit_at_1": 11,
+    "zero": 0,
+    "mrr": 0.9583
+   },
+   "natural": {
+    "n": 10,
+    "hit_at_1": 9,
+    "zero": 0,
+    "mrr": 0.95
+   },
+   "synonym": {
+    "n": 4,
+    "hit_at_1": 3,
+    "zero": 0,
+    "mrr": 0.875
+   },
+   "typo": {
+    "n": 1,
+    "hit_at_1": 1,
+    "zero": 0,
+    "mrr": 1.0
+   },
+   "unaccented": {
+    "n": 2,
+    "hit_at_1": 1,
+    "zero": 0,
+    "mrr": 0.75
+   },
+   "acronym": {
+    "n": 2,
+    "hit_at_1": 2,
+    "zero": 0,
+    "mrr": 1.0
+   },
+   "ambiguous": {
+    "n": 1,
+    "hit_at_1": 1,
+    "zero": 0,
+    "mrr": 1.0
+   },
+   "unanswerable": {
+    "n": 3,
+    "hit_at_1": 0,
+    "zero": 0,
+    "mrr": 0.0
+   }
+  }
+ },
+ "anonymous_metrics": {
+  "queries": 35,
+  "answerable": 32,
+  "unanswerable": 3,
+  "k": 5,
+  "precision_at_5": 0.1188,
+  "recall_at_5": 0.5781,
+  "mrr": 0.5938,
+  "ndcg_at_5": 0.5248,
+  "zero_result_rate": 0.0938,
+  "hit_at_1": 0.5938,
+  "correct_abstention_rate": 1.0,
+  "unanswerable_with_results": 0,
+  "latency_ms": {
+   "p50": 10.8,
+   "p95": 13.1,
+   "n": 35
+  },
+  "by_kind": {
+   "exact": {
+    "n": 12,
+    "hit_at_1": 5,
+    "zero": 1,
+    "mrr": 0.4167
+   },
+   "natural": {
+    "n": 10,
+    "hit_at_1": 9,
+    "zero": 0,
+    "mrr": 0.9
+   },
+   "synonym": {
+    "n": 4,
+    "hit_at_1": 3,
+    "zero": 0,
+    "mrr": 0.75
+   },
+   "typo": {
+    "n": 1,
+    "hit_at_1": 0,
+    "zero": 1,
+    "mrr": 0.0
+   },
+   "unaccented": {
+    "n": 2,
+    "hit_at_1": 1,
+    "zero": 1,
+    "mrr": 0.5
+   },
+   "acronym": {
+    "n": 2,
+    "hit_at_1": 1,
+    "zero": 0,
+    "mrr": 0.5
+   },
+   "ambiguous": {
+    "n": 1,
+    "hit_at_1": 0,
+    "zero": 0,
+    "mrr": 0.0
+   },
+   "unanswerable": {
+    "n": 3,
+    "hit_at_1": 0,
+    "zero": 0,
+    "mrr": 0.0
+   }
+  }
+ },
+ "per_query": [
+  {
+   "q": "cadastrar organização",
+   "kind": "exact",
+   "top": [
+    "como-cadastrar-organizacao",
+    "como-cadastrar-projeto",
+    "comece-aqui-osc"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "como cadastro minha OSC",
+   "kind": "natural",
+   "top": [
+    "como-cadastrar-organizacao",
+    "como-cadastrar-projeto",
+    "comece-aqui-osc"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "enviar documentos",
+   "kind": "exact",
+   "top": [
+    "como-enviar-documentos",
+    "checklist-documentos-organizacao",
+    "como-abrir-chamado"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "certidão vencida",
+   "kind": "synonym",
+   "top": [
+    "como-abrir-chamado",
+    "como-enviar-documentos",
+    "checklist-documentos-organizacao"
+   ],
+   "hit": false,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "criar projeto",
+   "kind": "exact",
+   "top": [
+    "como-cadastrar-projeto",
+    "como-montar-orcamento",
+    "como-prestar-contas"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "orçamento do projeto",
+   "kind": "exact",
+   "top": [
+    "como-montar-orcamento",
+    "como-cadastrar-projeto",
+    "como-prestar-contas"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "orcamneto",
+   "kind": "typo",
+   "top": [
+    "como-montar-orcamento"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "três cotações",
+   "kind": "exact",
+   "top": [
+    "como-fazer-cotacoes",
+    "como-montar-orcamento",
+    "primeiros-passos-na-plataforma"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "cotacao fornecedor",
+   "kind": "unaccented",
+   "top": [
+    "como-fazer-cotacoes",
+    "como-montar-orcamento"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "conformidade",
+   "kind": "exact",
+   "top": [
+    "entender-conformidade",
+    "como-prestar-contas",
+    "como-enviar-documentos"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "compatibilidade",
+   "kind": "exact",
+   "top": [
+    "como-funciona-a-compatibilidade",
+    "glossario-basico"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "match",
+   "kind": "acronym",
+   "top": [
+    "como-funciona-a-compatibilidade",
+    "glossario-basico"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "prestação de contas",
+   "kind": "exact",
+   "top": [
+    "checklist-prestacao-contas",
+    "como-prestar-contas",
+    "como-montar-orcamento"
+   ],
+   "hit": false,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "prestar contas do projeto",
+   "kind": "natural",
+   "top": [
+    "como-prestar-contas",
+    "como-montar-orcamento",
+    "comece-aqui-osc"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "relatório final",
+   "kind": "synonym",
+   "top": [
+    "como-prestar-contas",
+    "checklist-prestacao-contas",
+    "como-montar-orcamento"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "prestacao de contas",
+   "kind": "unaccented",
+   "top": [
+    "checklist-prestacao-contas",
+    "como-prestar-contas",
+    "como-montar-orcamento"
+   ],
+   "hit": false,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "existe assinatura?",
+   "kind": "natural",
+   "top": [
+    "faq:Existe assinatura ou mensalidade?",
+    "como-funciona-o-acesso",
+    "modelo-plano-trabalho"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "mensalidade",
+   "kind": "synonym",
+   "top": [
+    "faq:Existe assinatura ou mensalidade?",
+    "modelo-plano-trabalho",
+    "como-funciona-o-acesso"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "quanto custa",
+   "kind": "natural",
+   "top": [
+    "faq:Existe assinatura ou mensalidade?",
+    "como-funciona-o-acesso",
+    "modelo-plano-trabalho"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "abrir chamado",
+   "kind": "exact",
+   "top": [
+    "como-abrir-chamado",
+    "faq:Preciso pagar para pedir ajuda?",
+    "faq:O assistente da Central usa inteligência artificial?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "suporte",
+   "kind": "exact",
+   "top": [
+    "como-abrir-chamado",
+    "faq:Preciso pagar para pedir ajuda?",
+    "faq:O assistente da Central usa inteligência artificial?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "recuperar senha",
+   "kind": "exact",
+   "top": [
+    "faq:Como recupero minha senha?",
+    "privacidade-e-seus-dados",
+    "como-cadastrar-organizacao"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "esqueci a senha",
+   "kind": "synonym",
+   "top": [
+    "faq:Como recupero minha senha?",
+    "privacidade-e-seus-dados",
+    "como-cadastrar-organizacao"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "LGPD",
+   "kind": "acronym",
+   "top": [
+    "privacidade-e-seus-dados"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "meus dados pessoais",
+   "kind": "natural",
+   "top": [
+    "privacidade-e-seus-dados",
+    "como-cadastrar-organizacao",
+    "faq:Quem aprova o conteúdo oficial?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "o que é OSC",
+   "kind": "natural",
+   "top": [
+    "comece-aqui-osc",
+    "glossario-basico",
+    "como-funciona-o-acesso"
+   ],
+   "hit": false,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "plano de trabalho",
+   "kind": "exact",
+   "top": [
+    "modelo-plano-trabalho",
+    "como-montar-orcamento",
+    "como-prestar-contas"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "certificado vale como diploma",
+   "kind": "natural",
+   "top": [
+    "faq:O certificado dos cursos vale como diploma?",
+    "primeiros-passos-na-plataforma",
+    "faq:Como consigo um pacote com mais capacidades?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "o assistente usa inteligência artificial",
+   "kind": "natural",
+   "top": [
+    "faq:O assistente da Central usa inteligência artificial?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "quem aprova o conteúdo",
+   "kind": "natural",
+   "top": [
+    "faq:Quem aprova o conteúdo oficial?",
+    "como-prestar-contas",
+    "como-montar-orcamento"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "empresa financiadora começar",
+   "kind": "natural",
+   "top": [
+    "comece-aqui-empresa",
+    "comece-aqui-osc",
+    "faq:Existe assinatura ou mensalidade?"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "projeto",
+   "kind": "ambiguous",
+   "top": [
+    "como-cadastrar-projeto",
+    "como-montar-orcamento",
+    "como-prestar-contas"
+   ],
+   "hit": true,
+   "found_any_relevant": true,
+   "abstained": false
+  },
+  {
+   "q": "capital da Mongólia",
+   "kind": "unanswerable",
+   "top": [],
+   "hit": null,
+   "found_any_relevant": null,
+   "abstained": true
+  },
+  {
+   "q": "previsão do tempo para amanhã",
+   "kind": "unanswerable",
+   "top": [],
+   "hit": null,
+   "found_any_relevant": null,
+   "abstained": true
+  },
+  {
+   "q": "receita de bolo de cenoura",
+   "kind": "unanswerable",
+   "top": [],
+   "hit": null,
+   "found_any_relevant": null,
+   "abstained": true
+  }
+ ],
+ "what_this_is_not": [
+  "desempenho em base real (o corpus é a semente demo/educacional publicada só para a medição)",
+  "julgamento por mais de uma pessoa (rótulos feitos à mão por quem escreveu o conjunto)",
+  "medida de embeddings ou de modelo (não existem; a busca é determinística)"
+ ],
+ "measured_at": "2026-10-09T10:55:27Z"
+}

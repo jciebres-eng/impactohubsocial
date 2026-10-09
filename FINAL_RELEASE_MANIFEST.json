@@ -1,34 +1,33 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.27.0",
- "version": "0.27.0",
- "commit": "3b19aff",
- "date": "2026-10-09T00:01:20+00:00",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.28.0",
+ "version": "0.28.0",
+ "commit": "cf4ee73",
+ "date": "2026-10-09T04:34:53+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 3150,
-  "traceability": "IMPACTO_v0.27.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.27.0.zip"
+  "tracked_total": 3339,
+  "traceability": "IMPACTO_v0.28.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.28.0.zip"
  },
  "migrations": {
-  "total": 67,
-  "last": "0067_v0270_no_subscription.sql",
+  "total": 68,
+  "last": "0068_v0280_ai_usage_control.sql",
   "new_in_this_version": [
-   "0066_v0270_economic_layer.sql",
-   "0067_v0270_no_subscription.sql"
+   "0068_v0280_ai_usage_control.sql"
   ]
  },
  "tests": {
-  "total": 2285,
-  "seconds": 1890.687,
+  "total": 2342,
+  "seconds": 1953.844,
   "result": "FAILED",
-  "detail": "failures=4, skipped=29",
+  "detail": "failures=5, skipped=29",
   "runs_in_log": 3
  },
  "new_test_modules": [
-  "backend/tests/test_v0270_no_subscription.py",
-  "backend/tests/test_v0270_economy.py",
-  "backend/tests/test_v0270_financial_model.py",
-  "backend/tests/test_v0270_release_docs.py"
+  "backend/tests/test_v0280_ai_usage_control.py",
+  "backend/tests/test_v0280_similarity.py",
+  "backend/tests/test_v0280_ai_cost_model.py",
+  "backend/tests/test_e2e_v0280_ai_center.py"
  ],
  "integrations": [
   {
@@ -116,9 +115,9 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da taxa de serviço (3,5%) | advogado(a) e contador(a): arranjo de pagamento (Lei 12.865/2013), ISS, cláusula, NFS-e | regra desligada; camada registrada e instruída, **nada devido, nada cobrado** |\n| Chave PIX real da plataforma | pessoa jurídica titular | `PLATFORM_PIX_KEY` vazia → instrução \"NÃO CONFIGURADA\" |\n| Banco / provedor de pagamento | integração bancária ou provedor homologado | conciliação manual, registrada e confirmada pelas partes; torre diz \"DADO FINANCEIRO NÃO CONECTADO\" |\n| Nota fiscal | provedor fiscal | não emitida |\n| Assinatura qualificada, gov.br, ICP-Brasil, biometria, KYC, SMS/WhatsApp | credenciais e contratos | não simulados; a interface diz \"não ligado\" |\n| Aceite de termos | minutas por advogado(a) | cadastro em produção bloqueado (503) |\n| Endereço público | conta de hospedagem do dono | pilha do zero provada no CI, sem URL |\n| Tag `v0.27.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
- "known_limitations": "- Receita real R$ 0,00 por construção até a regra `contract.platform_service_fee` ficar ativa.\n- Conciliação bancária manual; `value_capture_ratio` NÃO MEDIDO sem recursos de projeto confirmados.\n- Preço de contrato avulso/parcelado é negociado (piso publicado não é preço); nenhuma tabela.\n- `economic_rules` 2027.01 não tem `effective_until` fechado (CHECK impede data futura); a vigente é\n  escolhida pela maior versão com `effective_from <= now()`.\n- Documentos de assinatura permanecem no repositório marcados SUPERADO (histórico), e em `history/`.\n- Motores de leitura (13) sem rastro durável — por desenho.\n- Typecheck oficial do front só no CI; a reprodução local usa o `tsc` da máquina sem `@types/react` (ruído de tipos ausentes filtrado).\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: nenhuma assinatura; integridade econômica (3,5 +\n1,5 do catálogo, distribuição fechada, instrução ≠ custódia, confirmação por quem recebe, GMV ≠\nreceita, reconhecimento só na quitação), autorização, tenancy, persistência e fluxo de negócio\ncompleto têm teste executado e verde na segunda regressão. As condições são todas externas (§25):\nparecer da taxa, chave PIX real, banco/provedor, nota fiscal, minutas, hospedagem, tag no GitHub.\nNenhuma falha crítica foi convertida em \"condição\".",
+ "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da regra `ai.credits_prepaid` (e da taxa de serviço 3,5%) | advogado(a) e contador(a): natureza do crédito pré-pago, ISS, NFS-e, estorno, validade | regra desligada; pedidos só em modo piloto; **nenhuma venda** |\n| Provedor de pagamento PIX com webhook | contrato + `PAYMENT_WEBHOOK_SECRET` | webhook responde 404; nada creditado por pagamento |\n| Provedor de modelo + tabela de preço | `AI_API_KEY`, `AI_MODEL`, linhas em `ai_price_table` | `AI_PROVIDER=local`; custo externo zero MEDIDO porque não há chamada externa; com provedor e sem preço: NÃO MEDIDO |\n| BYOK | decisão do proprietário + cofre por tenant | não existe; a interface não promete |\n| Piloto com medição real | 30 dias com cota + patrocínio + pedidos piloto | preços, cotas e teto de subsídio continuam hipóteses |\n| Chave PIX da plataforma, banco, nota fiscal, assinatura qualificada, gov.br, biometria, KYC, SMS/WhatsApp, minutas, hospedagem | como na v0.27.0 | inalterado |\n| Tag `v0.28.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
+ "known_limitations": "- Receita real de IA R$ 0,00 por construção até parecer + provedor + regra ativa.\n- Conjunto de avaliação da similaridade: 6 pares sintéticos; precisão/recall de 1,0 ali **não** é\n  desempenho em base real; alertas de alto impacto exigem revisão humana (o resultado diz isso).\n- Motor de similaridade é léxico/estrutural (shingles, Jaccard, dimensões declaradas) — sem\n  embeddings; paráfrase profunda pode escapar da leitura textual e cair só em escopo/público.\n- Lote, monitoramento recorrente e relatório institucional: declarados `planned`, rota 501.\n- Cache do resumo de IA por versão de projeto: parcial (hash de entrada em `ai_usage`).\n- Custo de infraestrutura, tarifa de PIX e impostos: NÃO MEDIDOS (painel diz).\n- Documentos SUPERADO da assinatura continuam no repositório com banner (movê-los exige atualizar\n  60+ referências — rodada dedicada).\n- Typecheck oficial do front só no CI.\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: catálogo versionado, execução com estado e débito só\nem sucesso, razão por lote com portão, cotas com anti-abuso, patrocínio, pedidos piloto × real, webhook\nidempotente, similaridade por dimensão sem bloqueio e sem efeito reputacional, isolamento k-anônimo,\npainel medido × não medido, projeção derivada, autorização, tenancy, persistência e fluxo completo têm\nteste executado e verde na segunda regressão. As condições são externas ou de piloto (§25): parecer,\nprovedor de pagamento, provedor de modelo com preço, **medição real do piloto antes de cobrança real**,\ntag no GitHub. Nenhuma falha crítica foi convertida em \"condição\". Checklist operacional:\n`docs/execution/PRODUCTION_CHECKLIST_v0280.md`; rollback: `docs/execution/ROLLBACK_v0280.md`;\nmonitoramento: `docs/execution/AI_COST_MONITORING_GUIDE.md`.",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
@@ -126,7 +125,12 @@
   "MOTOR_COVERAGE_MATRIX.md",
   "EXTERNAL_INTEGRATIONS.md",
   "docs/ECONOMIC_MODEL.md",
-  "docs/execution/SUBSCRIPTION_INVENTORY.md",
-  "24_MONTH_FINANCIAL_MODEL.md"
+  "AI_COST_MODEL.md",
+  "AI_PROVIDERS_EVALUATION.md",
+  "docs/execution/AI_INVENTORY.md",
+  "docs/execution/CLEANUP_INVENTORY_v0280.md",
+  "docs/execution/PRODUCTION_CHECKLIST_v0280.md",
+  "docs/execution/ROLLBACK_v0280.md",
+  "docs/execution/AI_COST_MONITORING_GUIDE.md"
  ]
 }

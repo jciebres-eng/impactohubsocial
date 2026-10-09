@@ -59,8 +59,9 @@ registra `3b19aff` como último commit de conteúdo.
 `docker` e `pilha-do-zero` vermelhos por duas causas, ambas corrigidas no commit seguinte — um achado do
 gitleaks já revisado (texto da matriz de homologação, sem valor) e um `DemoRow` sem uso que escondia uma
 regressão real (painel de demonstrações sem tela; restaurado em `/admin/central/parcerias`). Detalhe em
-`FINAL_EXECUTION_AUDIT.md` §7. O resultado da run do commit final **não é afirmado aqui**: é conferido no
-GitHub depois do envio.
+`FINAL_EXECUTION_AUDIT.md` §7. Run do commit final `cf52330` (`37862604808`): `auditoria`, `docker` (typecheck oficial), `pilha-do-zero`
+(banco vazio → imagem → migrações → seed → jornadas → telas → axe → reinício) e `backend` (suíte oficial
+completa) — **os quatro verdes**. Este parágrafo foi acrescentado depois da run, no commit seguinte.
 
 ## 4. Architecture Status
 

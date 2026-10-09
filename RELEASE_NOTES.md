@@ -1,3 +1,22 @@
+# Notas da versão — v0.32.0 (Produção limpa, backup que restaura, worker com menor privilégio)
+
+**Uma regra:** o que a auditoria inicial encontrou foi resolvido com prova — e o que depende de um clique seu está listado.
+
+1. **Produção limpa** — as 15 contas de demonstração estão desativadas (o acesso caiu na hora) e o conteúdo público das
+   5 organizações fictícias saiu do ar: 1 projeto, 7 soluções, 1 material, 2 editais. Nada foi apagado; dá para desfazer.
+2. **Backup que restaura** — o backup cifrado de hoje, guardado no R2, foi baixado, decifrado e restaurado num banco de
+   teste, com todas as verificações de integridade. A partir de agora isso se repete sozinho todo dia 1º.
+3. **Worker com menor privilégio** — novo início do worker que usa o usuário limitado do banco (falta você trocar o comando
+   no Railway).
+4. **Demo com aviso** — faixa "Ambiente de demonstração — não cadastre dados reais" em toda tela do demo.
+5. **CI verde de novo** e rotinas do GitHub ajustadas para o repositório privado.
+6. **Tudo junto** — v0.30.1 (proteção do banco, backup diário, monitor), v0.31.0 (infraestrutura) e a auditoria inicial.
+
+**O que continua dependendo de você:** publicar a produção (aplica a proteção 0071); trocar o comando do worker; trocar o
+token do backup; tornar o repositório privado; monitor externo; domínio, e-mail, revisão jurídica.
+
+---
+
 # Notas da versão — v0.31.0 (Infraestrutura Railway + Supabase + Cloudflare R2: auditada e preparada, não publicada)
 
 **Uma regra:** conectar um serviço não prova que ele funciona. Cada item desta rodada diz se foi **comprovado**, **não

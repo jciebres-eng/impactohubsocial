@@ -1,5 +1,9 @@
 # Checklist do proprietário — Railway, Supabase, R2, Cloudflare (v0.31.0)
 
+> **SUPERADO EM PARTE pela v0.32.0 (09/10/2026, noite).** Este documento descreve o estado de antes de a infraestrutura
+> ser montada na outra conversa. O estado em uso está no `CLAUDE.md`; os passos atuais, em `docs/03-checklist-demo.md` e
+> `docs/04-roadmap.md`. Mantido sem alteração no restante, como registro.
+
 Tudo aqui depende de conta, painel ou decisão sua. **Nenhum valor secreto vai para o chat, para o Git ou
 para um relatório** — você cola o valor no painel e me diz só o **nome** da variável que configurou.
 Detalhes técnicos de cada item: `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md`.

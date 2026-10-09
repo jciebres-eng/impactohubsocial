@@ -1,5 +1,9 @@
 # Infraestrutura — Railway + Supabase + Cloudflare R2 + Cloudflare (v0.31.0)
 
+> **SUPERADO EM PARTE pela v0.32.0 (09/10/2026, noite).** Este documento descreve o estado de antes de a infraestrutura
+> ser montada na outra conversa. O estado em uso está no `CLAUDE.md`; os passos atuais, em `docs/03-checklist-demo.md` e
+> `docs/04-roadmap.md`. Mantido sem alteração no restante, como registro.
+
 > **O que este documento é:** o estado **comprovado** da infraestrutura em 09/10/2026, a configuração-alvo
 > de cada serviço derivada do código real, e o que falta — com quem faz. **Não é prova de que o sistema está
 > publicado.** Cada linha diz de onde veio a evidência. Nada foi alterado em produção, DNS, cobrança ou

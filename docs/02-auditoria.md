@@ -9,6 +9,27 @@ foi copiado para este arquivo.
 Níveis: **CRÍTICO** (resolver antes de qualquer outra coisa) · **ALTO** (antes de receber dados reais) ·
 **MÉDIO** (próximas semanas) · **BAIXO** (quando houver tempo).
 
+
+## Situação depois da v0.32.0 (09/10/2026, noite)
+
+| Achado | Situação | Prova / o que falta |
+|---|---|---|
+| C1 contas de demonstração na produção | **RESOLVIDO** | 15 desativadas, 5 organizações suspensas, 11 itens públicos fora do ar (execuções 37996712177, 37997211737, 37997481695); reversível |
+| C2 chaves do backup expostas | **PENDENTE — você** | trocar o token (checklist do demo, seção 0) |
+| A1 proteção 0071 fora da produção | **PENDENTE — você** | "Deploy latest commit" no `impactohubsocial` e no `pleasing-trust` |
+| A2 restauração do backup | **RESOLVIDO** | backup cifrado do R2 restaurado de verdade (37997867650); ensaio mensal automático; instruções corrigidas |
+| A3 worker com conexão administrativa | **CÓDIGO PRONTO — falta você** | trocar o Start Command do `pleasing-trust` para `sh /app/start_worker.sh` |
+| A4 CI vermelho | **RESOLVIDO** | teste de RLS atualizado, matriz regenerada, manifesto da v0.32.0 |
+| A5 revisão jurídica / encarregado | **PENDENTE — você** | nome e OAB do revisor; encarregado de dados |
+| A6 senha de `impacto_app` no GitHub | **PENDENTE — você** | copiar do Railway para o GitHub |
+| M1 monitor | **MITIGADO** | workflow de hora em hora; monitor externo recomendado como principal (você cria a conta) |
+| M5 versão | **RESOLVIDO** | 0.32.0; v0.30.1 registrada no CHANGELOG |
+| M6 branch `infra/v0.31.0` | **RESOLVIDO** | juntada nesta versão |
+| M7 `deploy.yml` de modelo | **RESOLVIDO** | removido; `pos-deploy` verifica sem publicar |
+| M10 demo sem aviso | **RESOLVIDO** | faixa em toda tela do demo |
+| B1 repositório público | **DECIDIDO: privado — falta você** | Settings → General → Danger Zone → Change visibility (rotinas já ajustadas à cota) |
+| M2, M3, M4, M8, M9, M11, B2–B4 | pendentes | ver `04-roadmap.md` |
+
 ---
 
 ## CRÍTICO

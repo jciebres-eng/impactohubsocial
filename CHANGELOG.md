@@ -1,6 +1,34 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.32.0] — 2026-10-09
+
+### Correções da auditoria inicial: produção limpa, backup que restaura, worker com menor privilégio, CI verde (ADR-368 a ADR-371)
+
+Decisões do responsável (09/10/2026): desativar as 15 contas de demonstração da produção; demo aberto a quem tiver o link;
+código privado; trazer a branch `infra/v0.31.0` e resolver os achados da auditoria.
+
+**Feito na produção (com autorização, pelo workflow `supabase`):** 15 contas `@demo.impacto.local` desativadas (sessões
+encerradas na hora), 5 organizações só de demonstração suspensas, 11 itens de conteúdo público fictício fora do ar
+(1 projeto, 7 soluções, 1 material, 2 editais); nada apagado; reversível (`contas-demo-reativar`). Execuções 37996712177,
+37997211737, 37997481695.
+
+**Backup:** o backup cifrado do R2 (20:43 UTC) foi baixado, conferido, decifrado e **restaurado** num PostgreSQL 17 descartável
+com os verificadores de integridade (execução 37997867650). Novo job `ensaio-restauracao` (todo dia 1º e à mão); as instruções
+de restauração do `backup-supabase.yml` foram corrigidas (um `pg_restore` direto falha); `managed_backup_restore.sh` aceita
+`DUMP_FILE`.
+
+**Código:** `scripts/demo_accounts.py` (listar/desativar/reativar, igual à tela de administração, auditoria, uma transação);
+faixa "Ambiente de demonstração" no site quando o servidor está em `development` (`web/src/ui/demobanner.tsx`).
+
+**CI:** teste de RLS reconhece a 0071 (nenhuma tabela sem RLS); matriz de integrações regenerada; manifesto da versão inclui a
+análise econômica e os documentos novos. Para o repositório privado: suíte completa só em pull request; monitor de hora em hora.
+
+**Operação:** `CLAUDE.md` com o novo comando do worker (`sh /app/start_worker.sh`), as ferramentas de operação e as regras
+novas. Documentos `docs/ops/*_v0310.md` marcados como superados onde a realidade mudou.
+
+**Testes novos:** `test_v0320_demo_accounts` (2), `test_v0320_release_docs`.
+
 ## v0.1 – auditoria inicial — 2026-10-09
 
 > Numeração própria da série de documentos de auditoria (`docs/01` a `docs/04`). **Não muda a versão do produto**, que
@@ -47,6 +75,15 @@ econômica de 120 meses (`docs/analysis/economia_v0300/`, proposta) entra no man
 
 **O que NÃO foi feito** (declarado): deploy, DNS, criação de bucket, troca de senha, migração em produção — dependem do
 proprietário; separação staging/produção do Supabase (decisão P0 do proprietário).
+
+## [0.30.1] — 2026-10-09
+
+### Feita em outra conversa, sem entrada no changelog na época (registrada aqui na v0.32.0)
+
+- Migração 0071: revoga de `anon`/`authenticated` tudo no esquema `public` e liga RLS em `schema_migrations` (leitura para
+  `impacto_app`) — resolve os 3 alertas críticos do Security Advisor do Supabase. PR #1.
+- `jobs.pending_scans`: arquivo ausente no armazenamento não derruba a rotina (fica em quarentena como ilegível). PR #1.
+- Workflows `backup-supabase` (diário, cifrado, R2) e `monitor`. PR #2. `CLAUDE.md` com a infraestrutura em uso. PR #3.
 
 ## [0.30.0] — 2026-10-09
 

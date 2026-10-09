@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.30.0
+# Plataforma Impacto — v0.31.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,15 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.31.0 (infraestrutura Railway + Supabase + Cloudflare R2 — ADR-364 a ADR-367):** auditoria da
+infraestrutura real e preparação para publicação, **sem publicar nada**. Comprovado: o banco Supabase (leitura) e um
+**backup restaurado de verdade** num PostgreSQL descartável (341 tabelas, contagens idênticas, RTO medido 15 s).
+Novo: serviço `worker` próprio (`start_worker.sh`), validação do R2, armazenamento efêmero sinalizado em `/readyz`,
+commit implantado em `/healthz`, adaptador S3 testado contra servidor real no CI, workflows `armazenamento` e
+`pos-deploy` (o antigo `deploy.yml` era um modelo com `echo` e saiu). Railway, R2, DNS e SMTP **não comprovados**
+(sem acesso): ver `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md` e `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`.
+A análise econômica de 120 meses (proposta, sem alteração de produto) está em `docs/analysis/economia_v0300/`.
 
 **Novo no v0.30.0 (evidência de primeira classe e dossiê longitudinal — ADR-360 a ADR-363):** a partir de um pacote de
 superprompts, a base real foi **inventariada em quatro estados antes de qualquer alteração** (`docs/execution/BASELINE_v0300.md`).

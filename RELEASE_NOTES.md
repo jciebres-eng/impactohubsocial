@@ -1,3 +1,32 @@
+# Notas da versão — v0.31.0 (Infraestrutura Railway + Supabase + Cloudflare R2: auditada e preparada, não publicada)
+
+**Uma regra:** conectar um serviço não prova que ele funciona. Cada item desta rodada diz se foi **comprovado**, **não
+comprovado** ou **bloqueado por acesso** — e nada foi publicado, migrado em produção, apagado ou cobrado.
+
+**O que isso virou em software e em prova:**
+
+1. **Identidade do código** — a "baseline 0.29.01" do pacote é, byte a byte, a tag v0.29.0 (`dd2f8c3`); o repositório está
+   à frente. Nada da baseline foi copiado (regrediria o código).
+2. **Supabase lido de verdade** — PostgreSQL 17.11; `impacto_app` sem superusuário e sem bypass de RLS; 71 migrações em dia;
+   **15 contas de demonstração e 1 real no mesmo projeto** (decisão sua: separar staging e produção); o lote 0064–0070 foi
+   aplicado em 09/10 fora do GitHub, com troca da senha de `impacto_app` — a confirmar com você.
+3. **Backup restaurado de verdade** — dump do Supabase restaurado num PostgreSQL descartável, com os verificadores de
+   integridade do CI: 341 tabelas, 2.577 linhas idênticas, RTO medido 15,1 s, nada exportado.
+4. **Worker próprio** — as 21 tarefas periódicas (antivírus, retenção LGPD, prazos, canário, backup) ganham um serviço que
+   não migra, espera o esquema e roda como `impacto_app`.
+5. **Armazenamento** — região `auto` do R2 validada; arquivo em disco de contêiner sem volume sinalizado em `/readyz` e no log;
+   adaptador S3 provado contra servidor S3 real no CI; verificador do bucket R2 pronto.
+6. **Um caminho de publicação** — o Railway publica pelo Git; o `deploy.yml` (modelo com `echo`) saiu; `pos-deploy` verifica a
+   instância de fora e confere que o commit no ar é o esperado (`/healthz` agora informa o commit).
+
+**Números:** 940 operações · 227 telas · 70 migrações · 50 motores · 24 testes novos (+1 de protocolo S3 que roda no CI).
+
+**O que continua dependendo de você:** URL e configuração do Railway; separar staging/produção; igualar a senha de
+`impacto_app` no GitHub; buckets e tokens R2; SMTP; domínio na Cloudflare; aprovação para produção.
+Lista em ordem: `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`.
+
+---
+
 # Notas da versão — v0.30.0 (Evidência de primeira classe e dossiê longitudinal)
 
 **Uma regra:** o que a plataforma mostra a quem financia é exatamente o que está gravado — com origem, data e lacunas — e cada

@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.28.0)
+# API REST /v1 — referência gerada do código (v0.29.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (923)
+## Operações (936)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -56,6 +56,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PATCH | `/v1/admin/content/articles/{slug}` | admin da plataforma + MFA | — | Atualiza metadados (público, tags, telas, relacionados). O texto só muda por nova versão. |
 | POST | `/v1/admin/content/articles/{slug}/versions` | admin da plataforma + MFA | — | Nova versão (rascunho) a partir de uma edição; exige nota de mudança |
 | POST | `/v1/admin/content/categories` | admin da plataforma + MFA | — | category create |
+| POST | `/v1/admin/content/citations` | admin da plataforma + MFA | — | Cita uma fonte numa versão em RASCUNHO (localizador; trecho só se a fonte tiver direito de trecho permitido; hash conferido pelo banco) |
+| GET | `/v1/admin/content/citations/{object_type}/{object_id}` | admin da plataforma + MFA | — | Citações de uma versão/FAQ/recurso |
 | GET | `/v1/admin/content/courses` | admin da plataforma + MFA | — | course list |
 | POST | `/v1/admin/content/courses` | admin da plataforma + MFA | — | Cria curso (módulos, aulas, quiz com gabarito separado) em rascunho |
 | PUT | `/v1/admin/content/courses/{id}` | admin da plataforma + MFA | — | Substitui a estrutura de um curso em RASCUNHO/REVISÃO (cursos publicados: arquive e crie outro — limitação documentada) |
@@ -79,7 +81,14 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PUT | `/v1/admin/content/resources/{id}` | admin da plataforma + MFA | — | Edita recurso em RASCUNHO |
 | POST | `/v1/admin/content/resources/{id}/new-version` | admin da plataforma + MFA | — | Nova versão de um recurso publicado (a anterior fica no histórico como 'superseded') |
 | POST | `/v1/admin/content/resources/{id}/transition` | admin da plataforma + MFA | — | Fluxo editorial: rascunho → revisão → aprovado → publicado → arquivado. Aprovação por OUTRA pessoa (quatro olhos). |
+| POST | `/v1/admin/content/sources` | admin da plataforma + MFA | — | Registra uma fonte (classe O/A/V/H/D, jurisdição, vigência, licença, direitos de uso); nasce 'unverified' |
+| POST | `/v1/admin/content/sources/{key}/retract` | admin da plataforma + MFA | — | Retira uma fonte (terminal, com motivo); todo conteúdo que a cita vira item de trabalho — não é retirado automaticamente |
+| POST | `/v1/admin/content/sources/{key}/verify` | admin da plataforma + MFA | — | Marca a fonte como conferida/em disputa/vencida — por pessoa diferente de quem a registrou (quatro olhos) |
+| GET | `/v1/admin/content/work-items` | admin da plataforma + MFA | — | Fila editorial: buscas sem resultado, assistente sem base, 'não ajudou', vencidos, relatos de erro, fontes a revisar |
+| POST | `/v1/admin/content/work-items/sweep` | admin da plataforma + MFA | — | Varre conteúdo vencido/atrasado e fontes a revisar e abre os itens que faltam (idempotente) |
+| POST | `/v1/admin/content/work-items/{item}` | admin da plataforma + MFA | — | Assume, conclui ou dispensa um item (concluir/dispensar exige resolução) |
 | POST | `/v1/admin/content/{obj_type}/{id}/reviewed` | admin da plataforma + MFA | — | Confirma que o conteúdo continua válido (zera 'Revisão necessária') |
+| POST | `/v1/admin/content/{object_type}/{object_id}/retract` | admin da plataforma + MFA | — | Retira conteúdo publicado (terminal, com motivo): sai da busca, do assistente e do sitemap; reativar exige nova versão |
 | GET | `/v1/admin/contribution-models` | admin da plataforma + MFA | — | Fila de revisão jurídica de modelos de contribuição |
 | POST | `/v1/admin/contribution-models/{model_id}/decide` | admin da plataforma + MFA | — | Decisão jurídica: aprova (vira utilizável em pagamentos) ou devolve ao rascunho, com parecer registrado |
 | GET | `/v1/admin/credentials` | admin da plataforma + MFA | — | credentials |
@@ -451,12 +460,15 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/help/partnerships` | pública | limite 5/3600s | Pedido de parceria (formulário público; consentimento obrigatório para contato) |
 | GET | `/v1/help/pending` | usuário autenticado | — | O que falta para eu avançar? (pendências derivadas de dados reais) |
 | GET | `/v1/help/recommendations` | usuário autenticado | — | Próximos conteúdos recomendados (etapas faltantes, cursos em andamento, eventos); plano não influencia |
+| POST | `/v1/help/report-incorrect` | usuário autenticado | limite 20/3600s | Relata informação incorreta em um conteúdo publicado: entra na fila editorial para revisão humana (o conteúdo continua visível até a revisão) |
 | GET | `/v1/help/resources` | pública | limite 600/3600s | Biblioteca de documentos, modelos, checklists, vídeos e relatórios publicados |
 | POST | `/v1/help/resources/{resource_id}/download-url` | usuário autenticado | limite 120/3600s | URL temporária (5 min) do arquivo do recurso; só recurso publicado e visível; arquivo já passou por varredura antivírus |
 | POST | `/v1/help/resources/{resource_id}/use-template` | membro da organização ativa | papel ≥ member | Preenche um modelo e cria um rascunho (drafts) da organização — conteúdo gerado do modelo, sem IA |
 | GET | `/v1/help/resources/{slug}` | pública | limite 600/3600s | Recurso da biblioteca (com modelo preenchível, checklist e versões anteriores) |
 | GET | `/v1/help/search` | pública | limite 600/3600s | Busca híbrida (texto + similaridade + vocabulário de tópicos + perfil + tela). Pública para conteúdo público; autenticada amplia por perfil. Sem embeddings. |
 | GET | `/v1/help/sitemap` | pública | limite 600/3600s | Sitemap do conteúdo PÚBLICO indexável (exemplos/DEMO e conteúdo privado ficam de fora) |
+| GET | `/v1/help/sources` | pública | limite 300/3600s | Registro de fontes da camada de conhecimento: classe editorial O/A/V/H/D, jurisdição, vigência, licença, direitos de uso e verificação |
+| GET | `/v1/help/sources/{key}` | pública | limite 300/3600s | Uma fonte, com os conteúdos que a citam |
 | GET | `/v1/help/start` | membro da organização ativa | papel ≥ viewer | Comece aqui: jornada por tipo de organização com % de prontidão calculado por dados reais |
 | GET | `/v1/ideas` | membro da organização ativa | papel ≥ viewer | Ideias da organização |
 | POST | `/v1/ideas` | membro da organização ativa | papel ≥ member | Registra uma ideia (ainda não é projeto, e não consome cota de projeto) |
@@ -772,6 +784,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/proposals/{proposal_id}/attachments` | membro da organização ativa | papel ≥ member | Anexa documento do cofre à proposta e avisa a outra parte e a equipe |
 | POST | `/v1/proposals/{proposal_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, aceita, recusa, pede ajuste ou retira |
 | GET | `/v1/public/campaigns/{slug}` | pública | limite 120/3600s | Campanha pública: história do projeto, meta e QUANTAS COTAS FALTAM |
+| GET | `/v1/public/concepts` | pública | limite 120/3600s | Catálogo central de conceitos da ajuda contextual (tooltip, popover e glossário): origem config/concepts.json |
 | GET | `/v1/public/glossary` | pública | limite 120/3600s | Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json) |
 | GET | `/v1/public/locales` | pública | limite 120/3600s | Idiomas disponíveis, com a cobertura real de tradução declarada |
 | GET | `/v1/public/profiles/{handle}` | pública | — | Perfil público: lê SÓ a projeção curada (public_fields), nunca tabela privada |

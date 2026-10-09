@@ -1,826 +1,856 @@
 rota,tabela,componente,alcance,persona,deve_ver,url,estado,detalhe,chamadas_api,api_4xx,ms
-/cadastro,PUBLIC,Pub.Register,link direto,anônimo,True,/cadastro,OK,Criar conta,2,401 /v1/me,1018
-/convite,PUBLIC,Pub.AcceptInvite,link direto,anônimo,True,/convite,OK,Convite para equipe,1,401 /v1/me,787
-/entrar,PUBLIC,Pub.Login,link direto,anônimo,True,/entrar,OK,Entrar,2,401 /v1/me,779
-/esqueci-senha,PUBLIC,Pub.Forgot,link direto,anônimo,True,/esqueci-senha,OK,Recuperar acesso,1,401 /v1/me,764
-/legal/privacidade,PUBLIC,Pub.Legal,link direto,anônimo,True,/legal/privacidade,OK,Política de Privacidade — Plataforma Impacto,2,401 /v1/me,776
-/legal/termos,PUBLIC,Pub.Legal,link direto,anônimo,True,/legal/termos,OK,Termos de Uso — Plataforma Impacto,2,401 /v1/me,766
-/planos,PUBLIC,Com.Pricing,link direto,anônimo,True,/planos,OK,Como o IMPACTO se sustenta,2,401 /v1/me,757
-/redefinir-senha,PUBLIC,Pub.Reset,link direto,anônimo,True,/redefinir-senha,OK,Nova senha,1,401 /v1/me,767
-/verificar-email,PUBLIC,Pub.VerifyEmail,link direto,anônimo,True,/verificar-email,OK,Confirmação de e-mail,1,401 /v1/me,781
-/@:handle,HELP,PP.PublicProfilePage,parâmetro,anônimo,True,/@pro579ea19f,OK,Ana Profissional,2,401 /v1/me,772
-/@:handle,HELP,PP.PublicProfilePage,parâmetro,osc,True,/@pro579ea19f,OK,Ana Profissional,5,,907
-/ajuda,HELP,Help.HelpHome,link direto,anônimo,True,/ajuda,OK,Como podemos ajudar?,4,401 /v1/me,807
-/ajuda,HELP,Help.HelpHome,link direto,osc,True,/ajuda,OK,Como podemos ajudar?,7,,879
-/ajuda/:slug,HELP,Help.Article,parâmetro,anônimo,True,/ajuda/cms-46c2d075,OK,Guia criado no CMS E2E,2,401 /v1/me,781
-/ajuda/:slug,HELP,Help.Article,parâmetro,osc,True,/ajuda/cms-46c2d075,OK,Guia criado no CMS E2E,4,,825
-/ajuda/academia,HELP,Help.Academy,link direto,anônimo,True,/ajuda/academia,OK,Academia,2,401 /v1/me,781
-/ajuda/academia,HELP,Help.Academy,link direto,osc,True,/ajuda/academia,OK,Academia,4,,839
-/ajuda/academia/:slug,HELP,Help.Course,parâmetro,anônimo,True,/ajuda/academia/curso-3a06b3a1,OK,Curso E2E de evidências,2,401 /v1/me,772
-/ajuda/academia/:slug,HELP,Help.Course,parâmetro,osc,True,/ajuda/academia/curso-3a06b3a1,OK,Curso E2E de evidências,4,,880
-/ajuda/academia/aula/:id,HELP,Help.Lesson,parâmetro,anônimo,False,/ajuda/academia/aula/5c69a802-0011-4495-8fe6-19bb4fa74e67,RECUSA_CORRETA,pediu login,2,401 /v1/me,775
-/ajuda/academia/aula/:id,HELP,Help.Lesson,parâmetro,osc,True,/ajuda/academia/aula/5c69a802-0011-4495-8fe6-19bb4fa74e67,OK,Leitura inicial,5,,851
-/ajuda/atividades,HELP,Help.Activities,link direto,anônimo,False,/ajuda/atividades,RECUSA_CORRETA,pediu login,2,401 /v1/me,768
-/ajuda/atividades,HELP,Help.Activities,link direto,osc,True,/ajuda/atividades,OK,Minhas atividades,4,,824
-/ajuda/biblioteca,HELP,Help.Library,link direto,anônimo,True,/ajuda/biblioteca,OK,Biblioteca de documentos e modelos,2,401 /v1/me,790
-/ajuda/biblioteca,HELP,Help.Library,link direto,osc,True,/ajuda/biblioteca,OK,Biblioteca de documentos e modelos,4,,830
-/ajuda/biblioteca/:slug,HELP,Help.Resource,parâmetro,anônimo,True,/ajuda/biblioteca/boletim-4da5e638,OK,Boletim de teste de entrega,2,401 /v1/me,789
-/ajuda/biblioteca/:slug,HELP,Help.Resource,parâmetro,osc,True,/ajuda/biblioteca/boletim-4da5e638,OK,Boletim de teste de entrega,4,,873
-/ajuda/boletim,HELP,Help.Newsletter,link direto,anônimo,True,/ajuda/boletim,OK,Receber o boletim,1,401 /v1/me,774
-/ajuda/boletim,HELP,Help.Newsletter,link direto,osc,True,/ajuda/boletim,OK,Receber o boletim,3,,808
-/ajuda/boletim/cancelar,HELP,Help.NewsletterToken,link direto,anônimo,True,/ajuda/boletim/cancelar,VAZIA,Cancelar inscrição,1,401 /v1/me,789
-/ajuda/boletim/cancelar,HELP,Help.NewsletterToken,link direto,osc,True,/ajuda/boletim/cancelar,VAZIA,Cancelar inscrição,3,,851
-/ajuda/boletim/confirmar,HELP,Help.NewsletterToken,link direto,anônimo,True,/ajuda/boletim/confirmar,VAZIA,Confirmar inscrição,1,401 /v1/me,762
-/ajuda/boletim/confirmar,HELP,Help.NewsletterToken,link direto,osc,True,/ajuda/boletim/confirmar,VAZIA,Confirmar inscrição,3,,815
-/ajuda/busca,HELP,Help.HelpSearch,link direto,anônimo,True,/ajuda/busca,VAZIA,Buscar na Central,2,401 /v1/me,790
-/ajuda/busca,HELP,Help.HelpSearch,link direto,osc,True,/ajuda/busca,VAZIA,Buscar na Central,4,,843
-/ajuda/certificado/:code,HELP,Help.Certificate,parâmetro,anônimo,True,/ajuda/certificado/MA26SUXET2TY,OK,Verificação de certificado,2,401 /v1/me,780
-/ajuda/certificado/:code,HELP,Help.Certificate,parâmetro,osc,True,/ajuda/certificado/MA26SUXET2TY,OK,Verificação de certificado,4,,851
-/ajuda/comece-aqui,HELP,Help.Start,link direto,anônimo,False,/ajuda/comece-aqui,RECUSA_CORRETA,pediu login,2,401 /v1/me,793
-/ajuda/comece-aqui,HELP,Help.Start,link direto,osc,True,/ajuda/comece-aqui,OK,Comece aqui,4,,843
-/ajuda/demonstracao,HELP,Help.DemoForm,link direto,anônimo,True,/ajuda/demonstracao,OK,Agendar uma demonstração,1,401 /v1/me,771
-/ajuda/demonstracao,HELP,Help.DemoForm,link direto,osc,True,/ajuda/demonstracao,OK,Agendar uma demonstração,3,,836
-/ajuda/eventos,HELP,Help.Events,link direto,anônimo,True,/ajuda/eventos,OK,Eventos,2,401 /v1/me,803
-/ajuda/eventos,HELP,Help.Events,link direto,osc,True,/ajuda/eventos,OK,Eventos,4,,849
-/ajuda/eventos/:slug,HELP,Help.EventPage,parâmetro,anônimo,True,/ajuda/eventos/evento-16b27665,OK,Webinar E2E,2,401 /v1/me,774
-/ajuda/eventos/:slug,HELP,Help.EventPage,parâmetro,osc,True,/ajuda/eventos/evento-16b27665,OK,Webinar E2E,4,,848
-/ajuda/faq,HELP,Help.Faq,link direto,anônimo,True,/ajuda/faq,OK,Perguntas frequentes,3,401 /v1/me,786
-/ajuda/faq,HELP,Help.Faq,link direto,osc,True,/ajuda/faq,OK,Perguntas frequentes,5,,875
-/ajuda/faq/:id,HELP,Help.Faq,parâmetro,anônimo,True,/ajuda/faq/e8a7f3bd-e100-44f0-b63b-17a4e36903f8,OK,Perguntas frequentes,3,401 /v1/me,790
-/ajuda/faq/:id,HELP,Help.Faq,parâmetro,osc,True,/ajuda/faq/e8a7f3bd-e100-44f0-b63b-17a4e36903f8,OK,Perguntas frequentes,5,,855
-/ajuda/parcerias,HELP,Help.PartnershipForm,link direto,anônimo,True,/ajuda/parcerias,OK,Propor uma parceria,1,401 /v1/me,763
-/ajuda/parcerias,HELP,Help.PartnershipForm,link direto,osc,True,/ajuda/parcerias,OK,Propor uma parceria,3,,829
-/ajuda/pendencias,HELP,Help.Pending,link direto,anônimo,False,/ajuda/pendencias,RECUSA_CORRETA,pediu login,2,401 /v1/me,765
-/ajuda/pendencias,HELP,Help.Pending,link direto,osc,True,/ajuda/pendencias,OK,O que falta para eu avançar?,4,,836
-/ajuda/preferencias,HELP,Help.Prefs,link direto,anônimo,False,/ajuda/preferencias,RECUSA_CORRETA,pediu login,2,401 /v1/me,785
-/ajuda/preferencias,HELP,Help.Prefs,link direto,osc,True,/ajuda/preferencias,OK,Preferências de notificação,4,,865
-/ajuda/suporte,HELP,Help.Tickets,link direto,anônimo,False,/ajuda/suporte,RECUSA_CORRETA,pediu login,2,401 /v1/me,776
-/ajuda/suporte,HELP,Help.Tickets,link direto,osc,True,/ajuda/suporte,OK,Meus chamados,4,,912
-/ajuda/suporte/:id,HELP,Help.Ticket,parâmetro,anônimo,False,/ajuda/suporte/ef63fa17-d4ee-4e2d-8f55-96884cbf1c59,RECUSA_CORRETA,pediu login,2,401 /v1/me,794
-/ajuda/suporte/:id,HELP,Help.Ticket,parâmetro,osc,True,/ajuda/suporte/ef63fa17-d4ee-4e2d-8f55-96884cbf1c59,OK,#18 Como anexo a ata de eleição?,4,,874
-/ajuda/suporte/novo,HELP,Help.NewTicket,link direto,anônimo,False,/ajuda/suporte/novo,RECUSA_CORRETA,pediu login,2,401 /v1/me,774
-/ajuda/suporte/novo,HELP,Help.NewTicket,link direto,osc,True,/ajuda/suporte/novo,OK,Abrir um chamado,3,,816
-/campanha/:slug,HELP,Funding.PublicCampaign,parâmetro,anônimo,True,/campanha/campanha-e2e-1a32a8a1,OK,Ajude o projeto da campanha,2,401 /v1/me,769
-/campanha/:slug,HELP,Funding.PublicCampaign,parâmetro,osc,True,/campanha/campanha-e2e-1a32a8a1,OK,Ajude o projeto da campanha,4,,829
-/verificar,HELP,Verify.VerifyPage,link direto,anônimo,True,/verificar,OK,Verificação de documento,1,401 /v1/me,756
-/verificar,HELP,Verify.VerifyPage,link direto,osc,True,/verificar,OK,Verificação de documento,3,,818
-/verificar/:code,HELP,Verify.VerifyPage,parâmetro,anônimo,True,/verificar/IMP-5SDX-W0LQ-F154,OK,Relatório final E2E,2,401 /v1/me,794
-/verificar/:code,HELP,Verify.VerifyPage,parâmetro,osc,True,/verificar/IMP-5SDX-W0LQ-F154,OK,Relatório final E2E,4,,837
-/,ROUTES,Home.Dashboard,menu,osc,True,/,OK,"Olá, Ana",7,,875
-/,ROUTES,Home.Dashboard,menu,company,True,/,OK,"Olá, Bruno",8,,934
-/,ROUTES,Home.Dashboard,menu,provider,True,/,OK,"Olá, Carla",10,,903
-/,ROUTES,Home.Dashboard,menu,government,True,/,OK,"Olá, Davi",8,,889
-/,ROUTES,Home.Dashboard,menu,individual,True,/,OK,"Olá, Elisa",8,,880
-/,ROUTES,Home.Dashboard,menu,admin,True,/,OK,Administração,4,,844
-/acordos,ROUTES,Trust.Agreements,menu,osc,True,/acordos,OK,Acordos,4,,844
-/acordos,ROUTES,Trust.Agreements,menu,company,True,/acordos,OK,Acordos,4,,824
-/acordos,ROUTES,Trust.Agreements,menu,provider,True,/acordos,OK,Acordos,4,,838
-/acordos,ROUTES,Trust.Agreements,menu,government,True,/acordos,VAZIA,Acordos,4,,852
-/acordos,ROUTES,Trust.Agreements,menu,individual,True,/acordos,OK,Acordos,4,,845
-/acordos,ROUTES,Trust.Agreements,menu,admin,True,/acordos,VAZIA,Acordos,4,,818
-/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,osc,True,/acordos/4095193d-423f-40aa-a3c3-1f2d75573d22,OK,Prestação de contas do 1º semestre (exemplo),6,,909
-/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,company,True,/acordos/59dc907c-a48f-4951-9525-77b9f768fe87,OK,Financiamento — Orquestra na escola (exemplo),6,,906
-/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,provider,True,/acordos/4095193d-423f-40aa-a3c3-1f2d75573d22,OK,Prestação de contas do 1º semestre (exemplo),6,,910
+/cadastro,PUBLIC,Pub.Register,link direto,anônimo,True,/cadastro,OK,Criar conta,2,401 /v1/me,927
+/convite,PUBLIC,Pub.AcceptInvite,link direto,anônimo,True,/convite,OK,Convite para equipe,1,401 /v1/me,751
+/entrar,PUBLIC,Pub.Login,link direto,anônimo,True,/entrar,OK,Entrar,2,401 /v1/me,744
+/esqueci-senha,PUBLIC,Pub.Forgot,link direto,anônimo,True,/esqueci-senha,OK,Recuperar acesso,1,401 /v1/me,737
+/legal/privacidade,PUBLIC,Pub.Legal,link direto,anônimo,True,/legal/privacidade,OK,Política de Privacidade — Plataforma Impacto,2,401 /v1/me,749
+/legal/termos,PUBLIC,Pub.Legal,link direto,anônimo,True,/legal/termos,OK,Termos de Uso — Plataforma Impacto,2,401 /v1/me,752
+/planos,PUBLIC,Com.Pricing,link direto,anônimo,True,/planos,OK,Como o IMPACTO se sustenta,2,401 /v1/me,758
+/redefinir-senha,PUBLIC,Pub.Reset,link direto,anônimo,True,/redefinir-senha,OK,Nova senha,1,401 /v1/me,742
+/verificar-email,PUBLIC,Pub.VerifyEmail,link direto,anônimo,True,/verificar-email,OK,Confirmação de e-mail,1,401 /v1/me,744
+/@:handle,HELP,PP.PublicProfilePage,parâmetro,anônimo,True,/@pro11c33ca1,OK,Ana Profissional,2,401 /v1/me,749
+/@:handle,HELP,PP.PublicProfilePage,parâmetro,osc,True,/@pro11c33ca1,OK,Ana Profissional,5,,828
+/ajuda,HELP,Help.HelpHome,link direto,anônimo,True,/ajuda,OK,Como podemos ajudar?,4,401 /v1/me,787
+/ajuda,HELP,Help.HelpHome,link direto,osc,True,/ajuda,OK,Como podemos ajudar?,7,,862
+/ajuda/:slug,HELP,Help.Article,parâmetro,anônimo,True,/ajuda/cms-a37e8b36,OK,Guia criado no CMS E2E,2,401 /v1/me,773
+/ajuda/:slug,HELP,Help.Article,parâmetro,osc,True,/ajuda/cms-a37e8b36,OK,Guia criado no CMS E2E,4,,838
+/ajuda/academia,HELP,Help.Academy,link direto,anônimo,True,/ajuda/academia,OK,Academia,2,401 /v1/me,760
+/ajuda/academia,HELP,Help.Academy,link direto,osc,True,/ajuda/academia,OK,Academia,4,,820
+/ajuda/academia/:slug,HELP,Help.Course,parâmetro,anônimo,True,/ajuda/academia/curso-571f0a9e,OK,Curso E2E de evidências,2,401 /v1/me,755
+/ajuda/academia/:slug,HELP,Help.Course,parâmetro,osc,True,/ajuda/academia/curso-571f0a9e,OK,Curso E2E de evidências,4,,805
+/ajuda/academia/aula/:id,HELP,Help.Lesson,parâmetro,anônimo,False,/ajuda/academia/aula/3aa7db53-bfb1-40e3-ae82-b559844e5227,RECUSA_CORRETA,pediu login,2,401 /v1/me,761
+/ajuda/academia/aula/:id,HELP,Help.Lesson,parâmetro,osc,True,/ajuda/academia/aula/3aa7db53-bfb1-40e3-ae82-b559844e5227,OK,Leitura inicial,5,,844
+/ajuda/atividades,HELP,Help.Activities,link direto,anônimo,False,/ajuda/atividades,RECUSA_CORRETA,pediu login,2,401 /v1/me,748
+/ajuda/atividades,HELP,Help.Activities,link direto,osc,True,/ajuda/atividades,OK,Minhas atividades,4,,804
+/ajuda/biblioteca,HELP,Help.Library,link direto,anônimo,True,/ajuda/biblioteca,OK,Biblioteca de documentos e modelos,2,401 /v1/me,754
+/ajuda/biblioteca,HELP,Help.Library,link direto,osc,True,/ajuda/biblioteca,OK,Biblioteca de documentos e modelos,4,,854
+/ajuda/biblioteca/:slug,HELP,Help.Resource,parâmetro,anônimo,True,/ajuda/biblioteca/boletim-72eef556,OK,Boletim de teste de entrega,2,401 /v1/me,775
+/ajuda/biblioteca/:slug,HELP,Help.Resource,parâmetro,osc,True,/ajuda/biblioteca/boletim-72eef556,OK,Boletim de teste de entrega,4,,804
+/ajuda/boletim,HELP,Help.Newsletter,link direto,anônimo,True,/ajuda/boletim,OK,Receber o boletim,1,401 /v1/me,755
+/ajuda/boletim,HELP,Help.Newsletter,link direto,osc,True,/ajuda/boletim,OK,Receber o boletim,3,,786
+/ajuda/boletim/cancelar,HELP,Help.NewsletterToken,link direto,anônimo,True,/ajuda/boletim/cancelar,VAZIA,Cancelar inscrição,1,401 /v1/me,740
+/ajuda/boletim/cancelar,HELP,Help.NewsletterToken,link direto,osc,True,/ajuda/boletim/cancelar,VAZIA,Cancelar inscrição,3,,827
+/ajuda/boletim/confirmar,HELP,Help.NewsletterToken,link direto,anônimo,True,/ajuda/boletim/confirmar,VAZIA,Confirmar inscrição,1,401 /v1/me,741
+/ajuda/boletim/confirmar,HELP,Help.NewsletterToken,link direto,osc,True,/ajuda/boletim/confirmar,VAZIA,Confirmar inscrição,3,,798
+/ajuda/busca,HELP,Help.HelpSearch,link direto,anônimo,True,/ajuda/busca,VAZIA,Buscar na Central,2,401 /v1/me,788
+/ajuda/busca,HELP,Help.HelpSearch,link direto,osc,True,/ajuda/busca,VAZIA,Buscar na Central,4,,821
+/ajuda/certificado/:code,HELP,Help.Certificate,parâmetro,anônimo,True,/ajuda/certificado/5H8JB7CHQL3W,OK,Verificação de certificado,2,401 /v1/me,747
+/ajuda/certificado/:code,HELP,Help.Certificate,parâmetro,osc,True,/ajuda/certificado/5H8JB7CHQL3W,OK,Verificação de certificado,4,,817
+/ajuda/comece-aqui,HELP,Help.Start,link direto,anônimo,False,/ajuda/comece-aqui,RECUSA_CORRETA,pediu login,2,401 /v1/me,747
+/ajuda/comece-aqui,HELP,Help.Start,link direto,osc,True,/ajuda/comece-aqui,OK,Comece aqui,4,,801
+/ajuda/demonstracao,HELP,Help.DemoForm,link direto,anônimo,True,/ajuda/demonstracao,OK,Agendar uma demonstração,1,401 /v1/me,761
+/ajuda/demonstracao,HELP,Help.DemoForm,link direto,osc,True,/ajuda/demonstracao,OK,Agendar uma demonstração,3,,800
+/ajuda/eventos,HELP,Help.Events,link direto,anônimo,True,/ajuda/eventos,OK,Eventos,2,401 /v1/me,769
+/ajuda/eventos,HELP,Help.Events,link direto,osc,True,/ajuda/eventos,OK,Eventos,4,,824
+/ajuda/eventos/:slug,HELP,Help.EventPage,parâmetro,anônimo,True,/ajuda/eventos/evento-34177df1,OK,Webinar E2E,2,401 /v1/me,795
+/ajuda/eventos/:slug,HELP,Help.EventPage,parâmetro,osc,True,/ajuda/eventos/evento-34177df1,OK,Webinar E2E,4,,832
+/ajuda/faq,HELP,Help.Faq,link direto,anônimo,True,/ajuda/faq,OK,Perguntas frequentes,3,401 /v1/me,763
+/ajuda/faq,HELP,Help.Faq,link direto,osc,True,/ajuda/faq,OK,Perguntas frequentes,5,,830
+/ajuda/faq/:id,HELP,Help.Faq,parâmetro,anônimo,True,/ajuda/faq/d9519d60-b577-4ce1-8d43-3e8102d09d66,OK,Perguntas frequentes,3,401 /v1/me,755
+/ajuda/faq/:id,HELP,Help.Faq,parâmetro,osc,True,/ajuda/faq/d9519d60-b577-4ce1-8d43-3e8102d09d66,OK,Perguntas frequentes,5,,832
+/ajuda/glossario,HELP,Help.Glossary,link direto,anônimo,True,/ajuda/glossario,OK,Glossário de conceitos,1,401 /v1/me,785
+/ajuda/glossario,HELP,Help.Glossary,link direto,osc,True,/ajuda/glossario,OK,Glossário de conceitos,3,,851
+/ajuda/parcerias,HELP,Help.PartnershipForm,link direto,anônimo,True,/ajuda/parcerias,OK,Propor uma parceria,1,401 /v1/me,758
+/ajuda/parcerias,HELP,Help.PartnershipForm,link direto,osc,True,/ajuda/parcerias,OK,Propor uma parceria,3,,806
+/ajuda/pendencias,HELP,Help.Pending,link direto,anônimo,False,/ajuda/pendencias,RECUSA_CORRETA,pediu login,2,401 /v1/me,758
+/ajuda/pendencias,HELP,Help.Pending,link direto,osc,True,/ajuda/pendencias,OK,O que falta para eu avançar?,4,,818
+/ajuda/preferencias,HELP,Help.Prefs,link direto,anônimo,False,/ajuda/preferencias,RECUSA_CORRETA,pediu login,2,401 /v1/me,749
+/ajuda/preferencias,HELP,Help.Prefs,link direto,osc,True,/ajuda/preferencias,OK,Preferências de notificação,4,,803
+/ajuda/suporte,HELP,Help.Tickets,link direto,anônimo,False,/ajuda/suporte,RECUSA_CORRETA,pediu login,2,401 /v1/me,750
+/ajuda/suporte,HELP,Help.Tickets,link direto,osc,True,/ajuda/suporte,OK,Meus chamados,4,,827
+/ajuda/suporte/:id,HELP,Help.Ticket,parâmetro,anônimo,False,/ajuda/suporte/46affb34-0950-456c-a3f2-60c561c2f1a5,RECUSA_CORRETA,pediu login,2,401 /v1/me,740
+/ajuda/suporte/:id,HELP,Help.Ticket,parâmetro,osc,True,/ajuda/suporte/46affb34-0950-456c-a3f2-60c561c2f1a5,OK,#18 Como anexo a ata de eleição?,4,,821
+/ajuda/suporte/novo,HELP,Help.NewTicket,link direto,anônimo,False,/ajuda/suporte/novo,RECUSA_CORRETA,pediu login,2,401 /v1/me,754
+/ajuda/suporte/novo,HELP,Help.NewTicket,link direto,osc,True,/ajuda/suporte/novo,OK,Abrir um chamado,3,,811
+/campanha/:slug,HELP,Funding.PublicCampaign,parâmetro,anônimo,True,/campanha/campanha-e2e-2a06ec29,OK,Ajude o projeto da campanha,2,401 /v1/me,796
+/campanha/:slug,HELP,Funding.PublicCampaign,parâmetro,osc,True,/campanha/campanha-e2e-2a06ec29,OK,Ajude o projeto da campanha,4,,815
+/verificar,HELP,Verify.VerifyPage,link direto,anônimo,True,/verificar,OK,Verificação de documento,1,401 /v1/me,744
+/verificar,HELP,Verify.VerifyPage,link direto,osc,True,/verificar,OK,Verificação de documento,3,,813
+/verificar/:code,HELP,Verify.VerifyPage,parâmetro,anônimo,True,/verificar/IMP-N3QY-41N5-WLHR,OK,Relatório final E2E,2,401 /v1/me,758
+/verificar/:code,HELP,Verify.VerifyPage,parâmetro,osc,True,/verificar/IMP-N3QY-41N5-WLHR,OK,Relatório final E2E,4,,814
+/,ROUTES,Home.Dashboard,menu,osc,True,/,OK,"Olá, Ana",7,,896
+/,ROUTES,Home.Dashboard,menu,company,True,/,OK,"Olá, Bruno",7,,890
+/,ROUTES,Home.Dashboard,menu,provider,True,/,OK,"Olá, Carla",9,,887
+/,ROUTES,Home.Dashboard,menu,government,True,/,OK,"Olá, Davi",9,,880
+/,ROUTES,Home.Dashboard,menu,individual,True,/,OK,"Olá, Elisa",8,,904
+/,ROUTES,Home.Dashboard,menu,admin,True,/,OK,Administração,6,,949
+/acordos,ROUTES,Trust.Agreements,menu,osc,True,/acordos,OK,Acordos,4,,837
+/acordos,ROUTES,Trust.Agreements,menu,company,True,/acordos,OK,Acordos,4,,817
+/acordos,ROUTES,Trust.Agreements,menu,provider,True,/acordos,OK,Acordos,4,,813
+/acordos,ROUTES,Trust.Agreements,menu,government,True,/acordos,VAZIA,Acordos,4,,806
+/acordos,ROUTES,Trust.Agreements,menu,individual,True,/acordos,OK,Acordos,4,,813
+/acordos,ROUTES,Trust.Agreements,menu,admin,True,/acordos,VAZIA,Acordos,4,,792
+/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,osc,True,/acordos/bb3c5a82-8ffe-431b-9f1a-80fae769dc0f,OK,Prestação de contas do 1º semestre (exemplo),6,,903
+/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,company,True,/acordos/30d7d710-9493-4711-869c-05b481b988e2,OK,Financiamento — Orquestra na escola (exemplo),6,,899
+/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,provider,True,/acordos/bb3c5a82-8ffe-431b-9f1a-80fae769dc0f,OK,Prestação de contas do 1º semestre (exemplo),6,,860
 /acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,individual,True,/acordos/59dc907c-a48f-4951-9525-77b9f768fe87,OK,Financiamento — Orquestra na escola (exemplo),6,,924
+/acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,individual,True,/acordos/30d7d710-9493-4711-869c-05b481b988e2,OK,Financiamento — Orquestra na escola (exemplo),6,,880
 /acordos/:id,ROUTES,Trust.AgreementDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,osc,True,/acordos/novo,OK,Novo acordo,3,,1048
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,company,True,/acordos/novo,OK,Novo acordo,3,,826
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,provider,True,/acordos/novo,OK,Novo acordo,3,,822
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,government,True,/acordos/novo,OK,Novo acordo,3,,844
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,individual,True,/acordos/novo,OK,Novo acordo,3,,829
-/acordos/novo,ROUTES,Trust.AgreementForm,link direto,admin,True,/acordos/novo,OK,Novo acordo,3,,830
-/admin,ROUTES,Admin.Overview,menu,admin,True,/admin,OK,Administração,4,,842
-/admin,ROUTES,Admin.Overview,menu,government,False,/admin,RECUSA_CORRETA,,3,,821
-/admin/auditoria,ROUTES,Admin.Audit,menu,admin,True,/admin/auditoria,OK,Auditoria,5,,867
-/admin/auditoria,ROUTES,Admin.Audit,menu,government,False,/admin/auditoria,RECUSA_CORRETA,,3,,813
-/admin/central,ROUTES,HelpA.Overview,menu,admin,True,/admin/central,OK,Central de Conhecimento,4,,822
-/admin/central,ROUTES,HelpA.Overview,menu,government,False,/admin/central,RECUSA_CORRETA,,3,,797
-/admin/central/analytics,ROUTES,HelpA.Analytics,link direto,admin,True,/admin/central/analytics,OK,Indicadores da Central,5,,850
-/admin/central/analytics,ROUTES,HelpA.Analytics,link direto,government,False,/admin/central/analytics,RECUSA_CORRETA,,3,,817
-/admin/central/artigos,ROUTES,HelpA.Articles,link direto,admin,True,/admin/central/artigos,OK,Guias e artigos,4,,853
-/admin/central/artigos,ROUTES,HelpA.Articles,link direto,government,False,/admin/central/artigos,RECUSA_CORRETA,,3,,818
-/admin/central/artigos/:slug,ROUTES,HelpA.ArticleEditor,parâmetro,admin,True,/admin/central/artigos/cms-46c2d075,OK,Guia criado no CMS E2E,5,,867
-/admin/central/artigos/:slug,ROUTES,HelpA.ArticleEditor,parâmetro,government,False,/admin/central/artigos/cms-46c2d075,RECUSA_CORRETA,,3,,820
-/admin/central/cursos,ROUTES,HelpA.Courses,link direto,admin,True,/admin/central/cursos,OK,Cursos,4,,857
-/admin/central/cursos,ROUTES,HelpA.Courses,link direto,government,False,/admin/central/cursos,RECUSA_CORRETA,,3,,827
-/admin/central/equipe,ROUTES,HelpA.StaffRoles,link direto,admin,True,/admin/central/equipe,OK,Equipe editorial,4,,880
-/admin/central/equipe,ROUTES,HelpA.StaffRoles,link direto,government,False,/admin/central/equipe,RECUSA_CORRETA,,3,,804
-/admin/central/eventos,ROUTES,HelpA.EventsAdmin,link direto,admin,True,/admin/central/eventos,OK,Eventos,5,,869
-/admin/central/eventos,ROUTES,HelpA.EventsAdmin,link direto,government,False,/admin/central/eventos,RECUSA_CORRETA,,3,,821
-/admin/central/faqs,ROUTES,HelpA.Faqs,link direto,admin,True,/admin/central/faqs,OK,Perguntas frequentes,4,,864
-/admin/central/faqs,ROUTES,HelpA.Faqs,link direto,government,False,/admin/central/faqs,RECUSA_CORRETA,,3,,796
-/admin/central/parcerias,ROUTES,HelpA.Partnerships,link direto,admin,True,/admin/central/parcerias,OK,Parcerias e demonstrações,5,,836
-/admin/central/parcerias,ROUTES,HelpA.Partnerships,link direto,government,False,/admin/central/parcerias,RECUSA_CORRETA,,3,,809
-/admin/central/recursos,ROUTES,HelpA.Resources,link direto,admin,True,/admin/central/recursos,OK,Biblioteca,4,,849
-/admin/central/recursos,ROUTES,HelpA.Resources,link direto,government,False,/admin/central/recursos,RECUSA_CORRETA,,3,,820
-/admin/central/suporte,ROUTES,HelpA.SupportQueue,link direto,admin,True,/admin/central/suporte,OK,Fila de suporte,5,,848
-/admin/central/suporte,ROUTES,HelpA.SupportQueue,link direto,government,False,/admin/central/suporte,RECUSA_CORRETA,,3,,851
-/admin/central/suporte/:id,ROUTES,HelpA.SupportTicket,parâmetro,admin,True,/admin/central/suporte/e1540dec-824d-4da9-9d05-69fd4db59350,OK,#9 Chamado antigo sem resposta,4,,861
-/admin/central/suporte/:id,ROUTES,HelpA.SupportTicket,parâmetro,government,False,/admin/central/suporte/e1540dec-824d-4da9-9d05-69fd4db59350,RECUSA_CORRETA,,3,,831
-/admin/chaves,ROUTES,Core.EncryptionKeys,menu,admin,True,/admin/chaves,OK,Chaves de cifragem,4,,832
-/admin/chaves,ROUTES,Core.EncryptionKeys,menu,government,False,/admin/chaves,RECUSA_CORRETA,,3,,850
-/admin/cobranca,ROUTES,Admin.OrgBilling,menu,admin,True,/admin/cobranca,OK,Acesso por organização,3,,834
-/admin/cobranca,ROUTES,Admin.OrgBilling,menu,government,False,/admin/cobranca,RECUSA_CORRETA,,3,,806
-/admin/compliance,ROUTES,Admin.ComplianceQueue,menu,admin,True,/admin/compliance,OK,Compliance,4,,833
-/admin/compliance,ROUTES,Admin.ComplianceQueue,menu,government,False,/admin/compliance,RECUSA_CORRETA,,3,,810
-/admin/contribuicao,ROUTES,Ops.ContributionReview,menu,admin,True,/admin/contribuicao,OK,Modelos de contribuição,4,,829
-/admin/contribuicao,ROUTES,Ops.ContributionReview,menu,government,False,/admin/contribuicao,RECUSA_CORRETA,,3,,835
-/admin/convenios,ROUTES,Admin.Agreements,menu,admin,True,/admin/convenios,OK,Convênios e contratos,4,,847
-/admin/convenios,ROUTES,Admin.Agreements,menu,government,False,/admin/convenios,RECUSA_CORRETA,,3,,837
-/admin/credenciais,ROUTES,Admin.Credentials,menu,admin,True,/admin/credenciais,VAZIA,Credenciais profissionais,4,,849
-/admin/credenciais,ROUTES,Admin.Credentials,menu,government,False,/admin/credenciais,RECUSA_CORRETA,,3,,795
-/admin/credenciais-profissionais,ROUTES,TrustA.CredentialQueue,menu,admin,True,/admin/credenciais-profissionais,VAZIA,Credenciais profissionais — conferência documental,4,,819
-/admin/credenciais-profissionais,ROUTES,TrustA.CredentialQueue,menu,government,False,/admin/credenciais-profissionais,RECUSA_CORRETA,,3,,796
-/admin/denuncias,ROUTES,Admin.Reports,menu,admin,True,/admin/denuncias,OK,Denúncias,5,,859
-/admin/denuncias,ROUTES,Admin.Reports,menu,government,False,/admin/denuncias,RECUSA_CORRETA,,3,,800
-/admin/editais,ROUTES,Admin.CuratedCalls,menu,admin,True,/admin/editais,OK,Editais curados e fontes,4,,817
-/admin/editais,ROUTES,Admin.CuratedCalls,menu,government,False,/admin/editais,RECUSA_CORRETA,,3,,799
-/admin/erros,ROUTES,Ops.Errors,menu,admin,True,/admin/erros,OK,Erros agrupados,4,,802
-/admin/erros,ROUTES,Ops.Errors,menu,government,False,/admin/erros,RECUSA_CORRETA,,3,,817
-/admin/fiscal,ROUTES,Admin.FiscalRules,menu,admin,True,/admin/fiscal,OK,Regras fiscais,4,,826
-/admin/fiscal,ROUTES,Admin.FiscalRules,menu,government,False,/admin/fiscal,RECUSA_CORRETA,,3,,810
-/admin/honorarios,ROUTES,TrustA.FeeTables,menu,admin,True,/admin/honorarios,OK,Tabelas de honorários,5,,831
-/admin/honorarios,ROUTES,TrustA.FeeTables,menu,government,False,/admin/honorarios,RECUSA_CORRETA,,3,,793
-/admin/ia/financeiro,ROUTES,AI.AdminAiFinance,link direto,admin,True,/admin/ia/financeiro,OK,"IA: custos, créditos e sustentabilidade",6,,824
-/admin/ia/financeiro,ROUTES,AI.AdminAiFinance,link direto,government,False,/admin/ia/financeiro,RECUSA_CORRETA,,3,,788
-/admin/identidade,ROUTES,TrustA.IdentityQueue,menu,admin,True,/admin/identidade,OK,Identidade — conferência humana,4,,806
-/admin/identidade,ROUTES,TrustA.IdentityQueue,menu,government,False,/admin/identidade,RECUSA_CORRETA,,3,,802
-/admin/institucional,ROUTES,Inst.InstitutionAdmin,menu,admin,True,/admin/institucional,OK,Institucional,4,,827
-/admin/institucional,ROUTES,Inst.InstitutionAdmin,menu,government,False,/admin/institucional,RECUSA_CORRETA,,3,,783
-/admin/integracoes,ROUTES,Int.Integracoes,link direto,admin,True,/admin/integracoes,OK,Integrações,4,,827
-/admin/integracoes,ROUTES,Int.Integracoes,link direto,government,False,/admin/integracoes,RECUSA_CORRETA,,3,,787
-/admin/integridade,ROUTES,Trace.Integridade,menu,admin,True,/admin/integridade,OK,Integridade dos dados,4,,2958
-/admin/integridade,ROUTES,Trace.Integridade,menu,government,False,/admin/integridade,RECUSA_CORRETA,,3,,826
-/admin/interruptor,ROUTES,Trace.Interruptor,menu,admin,True,/admin/interruptor,OK,identidade confirmada; Interruptor de emergência,6,401 /v1/admin/kill-switch,1124
-/admin/interruptor,ROUTES,Trace.Interruptor,menu,government,False,/admin/interruptor,RECUSA_CORRETA,,3,,807
-/admin/linha-do-tempo,ROUTES,Trace.LinhaDoTempo,menu,admin,True,/admin/linha-do-tempo,OK,Linha do tempo de uma entidade,3,,841
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,osc,True,/acordos/novo,OK,Novo acordo,3,,811
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,company,True,/acordos/novo,OK,Novo acordo,3,,804
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,provider,True,/acordos/novo,OK,Novo acordo,3,,848
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,government,True,/acordos/novo,OK,Novo acordo,3,,817
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,individual,True,/acordos/novo,OK,Novo acordo,3,,820
+/acordos/novo,ROUTES,Trust.AgreementForm,link direto,admin,True,/acordos/novo,OK,Novo acordo,3,,806
+/admin,ROUTES,Admin.Overview,menu,admin,True,/admin,OK,Administração,4,,835
+/admin,ROUTES,Admin.Overview,menu,government,False,/admin,RECUSA_CORRETA,,3,,803
+/admin/auditoria,ROUTES,Admin.Audit,menu,admin,True,/admin/auditoria,OK,Auditoria,5,,873
+/admin/auditoria,ROUTES,Admin.Audit,menu,government,False,/admin/auditoria,RECUSA_CORRETA,,3,,789
+/admin/central,ROUTES,HelpA.Overview,menu,admin,True,/admin/central,OK,Central de Conhecimento,4,,840
+/admin/central,ROUTES,HelpA.Overview,menu,government,False,/admin/central,RECUSA_CORRETA,,3,,790
+/admin/central/analytics,ROUTES,HelpA.Analytics,link direto,admin,True,/admin/central/analytics,OK,Indicadores da Central,5,,834
+/admin/central/analytics,ROUTES,HelpA.Analytics,link direto,government,False,/admin/central/analytics,RECUSA_CORRETA,,3,,798
+/admin/central/artigos,ROUTES,HelpA.Articles,link direto,admin,True,/admin/central/artigos,OK,Guias e artigos,4,,802
+/admin/central/artigos,ROUTES,HelpA.Articles,link direto,government,False,/admin/central/artigos,RECUSA_CORRETA,,3,,781
+/admin/central/artigos/:slug,ROUTES,HelpA.ArticleEditor,parâmetro,admin,True,/admin/central/artigos/cms-a37e8b36,OK,Guia criado no CMS E2E,5,,827
+/admin/central/artigos/:slug,ROUTES,HelpA.ArticleEditor,parâmetro,government,False,/admin/central/artigos/cms-a37e8b36,RECUSA_CORRETA,,3,,777
+/admin/central/cursos,ROUTES,HelpA.Courses,link direto,admin,True,/admin/central/cursos,OK,Cursos,4,,829
+/admin/central/cursos,ROUTES,HelpA.Courses,link direto,government,False,/admin/central/cursos,RECUSA_CORRETA,,3,,796
+/admin/central/equipe,ROUTES,HelpA.StaffRoles,link direto,admin,True,/admin/central/equipe,OK,Equipe editorial,4,,984
+/admin/central/equipe,ROUTES,HelpA.StaffRoles,link direto,government,False,/admin/central/equipe,RECUSA_CORRETA,,3,,792
+/admin/central/eventos,ROUTES,HelpA.EventsAdmin,link direto,admin,True,/admin/central/eventos,OK,Eventos,5,,834
+/admin/central/eventos,ROUTES,HelpA.EventsAdmin,link direto,government,False,/admin/central/eventos,RECUSA_CORRETA,,3,,774
+/admin/central/faqs,ROUTES,HelpA.Faqs,link direto,admin,True,/admin/central/faqs,OK,Perguntas frequentes,4,,788
+/admin/central/faqs,ROUTES,HelpA.Faqs,link direto,government,False,/admin/central/faqs,RECUSA_CORRETA,,3,,792
+/admin/central/parcerias,ROUTES,HelpA.Partnerships,link direto,admin,True,/admin/central/parcerias,OK,Parcerias e demonstrações,5,,824
+/admin/central/parcerias,ROUTES,HelpA.Partnerships,link direto,government,False,/admin/central/parcerias,RECUSA_CORRETA,,3,,789
+/admin/central/recursos,ROUTES,HelpA.Resources,link direto,admin,True,/admin/central/recursos,OK,Biblioteca,4,,805
+/admin/central/recursos,ROUTES,HelpA.Resources,link direto,government,False,/admin/central/recursos,RECUSA_CORRETA,,3,,798
+/admin/central/suporte,ROUTES,HelpA.SupportQueue,link direto,admin,True,/admin/central/suporte,OK,Fila de suporte,5,,790
+/admin/central/suporte,ROUTES,HelpA.SupportQueue,link direto,government,False,/admin/central/suporte,RECUSA_CORRETA,,3,,804
+/admin/central/suporte/:id,ROUTES,HelpA.SupportTicket,parâmetro,admin,True,/admin/central/suporte/443be51c-6da7-4e7b-878b-c0163c9f47d2,OK,#9 Chamado antigo sem resposta,4,,777
+/admin/central/suporte/:id,ROUTES,HelpA.SupportTicket,parâmetro,government,False,/admin/central/suporte/443be51c-6da7-4e7b-878b-c0163c9f47d2,RECUSA_CORRETA,,3,,790
+/admin/chaves,ROUTES,Core.EncryptionKeys,menu,admin,True,/admin/chaves,OK,Chaves de cifragem,4,,787
+/admin/chaves,ROUTES,Core.EncryptionKeys,menu,government,False,/admin/chaves,RECUSA_CORRETA,,3,,778
+/admin/cobranca,ROUTES,Admin.OrgBilling,menu,admin,True,/admin/cobranca,OK,Acesso por organização,3,,781
+/admin/cobranca,ROUTES,Admin.OrgBilling,menu,government,False,/admin/cobranca,RECUSA_CORRETA,,3,,780
+/admin/compliance,ROUTES,Admin.ComplianceQueue,menu,admin,True,/admin/compliance,OK,Compliance,4,,803
+/admin/compliance,ROUTES,Admin.ComplianceQueue,menu,government,False,/admin/compliance,RECUSA_CORRETA,,3,,778
+/admin/contribuicao,ROUTES,Ops.ContributionReview,menu,admin,True,/admin/contribuicao,OK,Modelos de contribuição,4,,804
+/admin/contribuicao,ROUTES,Ops.ContributionReview,menu,government,False,/admin/contribuicao,RECUSA_CORRETA,,3,,782
+/admin/convenios,ROUTES,Admin.Agreements,menu,admin,True,/admin/convenios,OK,Convênios e contratos,4,,819
+/admin/convenios,ROUTES,Admin.Agreements,menu,government,False,/admin/convenios,RECUSA_CORRETA,,3,,792
+/admin/credenciais,ROUTES,Admin.Credentials,menu,admin,True,/admin/credenciais,VAZIA,Credenciais profissionais,4,,794
+/admin/credenciais,ROUTES,Admin.Credentials,menu,government,False,/admin/credenciais,RECUSA_CORRETA,,3,,791
+/admin/credenciais-profissionais,ROUTES,TrustA.CredentialQueue,menu,admin,True,/admin/credenciais-profissionais,VAZIA,Credenciais profissionais — conferência documental,4,,799
+/admin/credenciais-profissionais,ROUTES,TrustA.CredentialQueue,menu,government,False,/admin/credenciais-profissionais,RECUSA_CORRETA,,3,,809
+/admin/denuncias,ROUTES,Admin.Reports,menu,admin,True,/admin/denuncias,OK,Denúncias,5,,844
+/admin/denuncias,ROUTES,Admin.Reports,menu,government,False,/admin/denuncias,RECUSA_CORRETA,,3,,822
+/admin/editais,ROUTES,Admin.CuratedCalls,menu,admin,True,/admin/editais,OK,Editais curados e fontes,4,,809
+/admin/editais,ROUTES,Admin.CuratedCalls,menu,government,False,/admin/editais,RECUSA_CORRETA,,3,,814
+/admin/erros,ROUTES,Ops.Errors,menu,admin,True,/admin/erros,OK,Erros agrupados,4,,783
+/admin/erros,ROUTES,Ops.Errors,menu,government,False,/admin/erros,RECUSA_CORRETA,,3,,792
+/admin/fiscal,ROUTES,Admin.FiscalRules,menu,admin,True,/admin/fiscal,OK,Regras fiscais,4,,806
+/admin/fiscal,ROUTES,Admin.FiscalRules,menu,government,False,/admin/fiscal,RECUSA_CORRETA,,3,,802
+/admin/honorarios,ROUTES,TrustA.FeeTables,menu,admin,True,/admin/honorarios,OK,Tabelas de honorários,5,,810
+/admin/honorarios,ROUTES,TrustA.FeeTables,menu,government,False,/admin/honorarios,RECUSA_CORRETA,,3,,784
+/admin/ia/financeiro,ROUTES,AI.AdminAiFinance,link direto,admin,True,/admin/ia/financeiro,OK,"IA: custos, créditos e sustentabilidade",6,,866
+/admin/ia/financeiro,ROUTES,AI.AdminAiFinance,link direto,government,False,/admin/ia/financeiro,RECUSA_CORRETA,,3,,807
+/admin/identidade,ROUTES,TrustA.IdentityQueue,menu,admin,True,/admin/identidade,OK,Identidade — conferência humana,4,,819
+/admin/identidade,ROUTES,TrustA.IdentityQueue,menu,government,False,/admin/identidade,RECUSA_CORRETA,,3,,791
+/admin/institucional,ROUTES,Inst.InstitutionAdmin,menu,admin,True,/admin/institucional,OK,Institucional,4,,806
+/admin/institucional,ROUTES,Inst.InstitutionAdmin,menu,government,False,/admin/institucional,RECUSA_CORRETA,,3,,805
+/admin/integracoes,ROUTES,Int.Integracoes,link direto,admin,True,/admin/integracoes,OK,Integrações,4,,804
+/admin/integracoes,ROUTES,Int.Integracoes,link direto,government,False,/admin/integracoes,RECUSA_CORRETA,,3,,798
+/admin/integridade,ROUTES,Trace.Integridade,menu,admin,True,/admin/integridade,OK,Integridade dos dados,4,,3086
+/admin/integridade,ROUTES,Trace.Integridade,menu,government,False,/admin/integridade,RECUSA_CORRETA,,3,,788
+/admin/interruptor,ROUTES,Trace.Interruptor,menu,admin,True,/admin/interruptor,OK,identidade confirmada; Interruptor de emergência,6,401 /v1/admin/kill-switch,1008
+/admin/interruptor,ROUTES,Trace.Interruptor,menu,government,False,/admin/interruptor,RECUSA_CORRETA,,3,,806
+/admin/linha-do-tempo,ROUTES,Trace.LinhaDoTempo,menu,admin,True,/admin/linha-do-tempo,OK,Linha do tempo de uma entidade,3,,829
 /admin/linha-do-tempo,ROUTES,Trace.LinhaDoTempo,menu,government,False,/admin/linha-do-tempo,RECUSA_CORRETA,,3,,819
-/admin/medidas,ROUTES,Mod.EnforcementAdmin,menu,admin,True,/admin/medidas,OK,Medidas de moderação,5,,829
-/admin/medidas,ROUTES,Mod.EnforcementAdmin,menu,government,False,/admin/medidas,RECUSA_CORRETA,,3,,801
-/admin/organizacoes,ROUTES,Admin.Orgs,menu,admin,True,/admin/organizacoes,OK,Organizações,4,,841
-/admin/organizacoes,ROUTES,Admin.Orgs,menu,government,False,/admin/organizacoes,RECUSA_CORRETA,,3,,814
-/admin/permissoes,ROUTES,Int.MatrizPermissoes,link direto,admin,True,/admin/permissoes,OK,Matriz de permissões,4,,826
+/admin/medidas,ROUTES,Mod.EnforcementAdmin,menu,admin,True,/admin/medidas,OK,Medidas de moderação,5,,881
+/admin/medidas,ROUTES,Mod.EnforcementAdmin,menu,government,False,/admin/medidas,RECUSA_CORRETA,,3,,786
+/admin/organizacoes,ROUTES,Admin.Orgs,menu,admin,True,/admin/organizacoes,OK,Organizações,4,,829
+/admin/organizacoes,ROUTES,Admin.Orgs,menu,government,False,/admin/organizacoes,RECUSA_CORRETA,,3,,792
+/admin/permissoes,ROUTES,Int.MatrizPermissoes,link direto,admin,True,/admin/permissoes,OK,Matriz de permissões,4,,843
 /admin/permissoes,ROUTES,Int.MatrizPermissoes,link direto,government,False,/admin/permissoes,RECUSA_CORRETA,,3,,788
-/admin/proveniencia,ROUTES,Trace.Proveniencia,menu,admin,True,/admin/proveniencia,OK,De onde veio este número,3,,792
-/admin/proveniencia,ROUTES,Trace.Proveniencia,menu,government,False,/admin/proveniencia,RECUSA_CORRETA,,3,,844
-/admin/rastro,ROUTES,Trace.Rastro,menu,admin,True,/admin/rastro,OK,Cadeia de causa,3,,823
-/admin/rastro,ROUTES,Trace.Rastro,menu,government,False,/admin/rastro,RECUSA_CORRETA,,3,,802
-/admin/risco,ROUTES,Ops.Risk,menu,admin,True,/admin/risco,OK,Sinais de risco,5,,838
-/admin/risco,ROUTES,Ops.Risk,menu,government,False,/admin/risco,RECUSA_CORRETA,,3,,796
+/admin/proveniencia,ROUTES,Trace.Proveniencia,menu,admin,True,/admin/proveniencia,OK,De onde veio este número,3,,814
+/admin/proveniencia,ROUTES,Trace.Proveniencia,menu,government,False,/admin/proveniencia,RECUSA_CORRETA,,3,,795
+/admin/rastro,ROUTES,Trace.Rastro,menu,admin,True,/admin/rastro,OK,Cadeia de causa,3,,806
+/admin/rastro,ROUTES,Trace.Rastro,menu,government,False,/admin/rastro,RECUSA_CORRETA,,3,,793
+/admin/risco,ROUTES,Ops.Risk,menu,admin,True,/admin/risco,OK,Sinais de risco,5,,808
+/admin/risco,ROUTES,Ops.Risk,menu,government,False,/admin/risco,RECUSA_CORRETA,,3,,793
 /admin/solucoes,ROUTES,SolM.AdminSolutions,menu,admin,True,/admin/solucoes,OK,Soluções — verificação,4,,807
-/admin/solucoes,ROUTES,SolM.AdminSolutions,menu,government,False,/admin/solucoes,RECUSA_CORRETA,,3,,789
-/admin/usuarios,ROUTES,Admin.Users,menu,admin,True,/admin/usuarios,OK,Usuários,4,,833
-/admin/usuarios,ROUTES,Admin.Users,menu,government,False,/admin/usuarios,RECUSA_CORRETA,,3,,804
-/admin/vouchers,ROUTES,Admin.Vouchers,menu,admin,True,/admin/vouchers,OK,Vouchers,4,,831
-/admin/vouchers,ROUTES,Admin.Vouchers,menu,government,False,/admin/vouchers,RECUSA_CORRETA,,3,,820
-/administrativo/orcamento,ROUTES,Int.Orcamento,link direto,admin,True,/administrativo/orcamento,OK,Orçamento,4,,864
-/administrativo/orcamento,ROUTES,Int.Orcamento,link direto,government,False,/administrativo/orcamento,RECUSA_CORRETA,,3,,832
-/afirmacoes,ROUTES,IL.Claims,menu,osc,True,/afirmacoes,OK,Afirmações de impacto,6,,853
-/afirmacoes,ROUTES,IL.Claims,menu,company,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,840
-/afirmacoes,ROUTES,IL.Claims,menu,provider,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,832
-/afirmacoes,ROUTES,IL.Claims,menu,government,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,835
-/afirmacoes,ROUTES,IL.Claims,menu,individual,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,845
-/afirmacoes,ROUTES,IL.Claims,menu,admin,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,843
-/aprovacoes,ROUTES,Int.Aprovacoes,link direto,admin,True,/aprovacoes,OK,Aprovações,4,,812
-/aprovacoes,ROUTES,Int.Aprovacoes,link direto,government,False,/aprovacoes,RECUSA_CORRETA,,3,,787
-/area,ROUTES,Ws.Workspace,menu,osc,True,/area,OK,Organização executora,5,,915
-/area,ROUTES,Ws.Workspace,menu,company,True,/area,OK,Investidor social / financiador,5,,887
-/area,ROUTES,Ws.Workspace,menu,provider,True,/area,OK,Profissional,5,,914
-/area,ROUTES,Ws.Workspace,menu,government,True,/area,OK,Poder público,5,,933
-/area,ROUTES,Ws.Workspace,menu,individual,True,/area,OK,Doador,5,,914
-/area,ROUTES,Ws.Workspace,menu,admin,True,/area,OK,Administração da plataforma,5,,874
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,osc,True,/assinatura/politica,OK,Política de assinatura,4,,884
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,company,True,/assinatura/politica,OK,Política de assinatura,4,,862
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,provider,True,/assinatura/politica,OK,Política de assinatura,4,,857
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,government,True,/assinatura/politica,OK,Política de assinatura,4,,881
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,individual,True,/assinatura/politica,OK,Política de assinatura,4,,824
-/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,admin,True,/assinatura/politica,OK,Política de assinatura,4,,903
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,osc,True,/assinatura/provedores,OK,Provedores de assinatura,4,,874
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,company,True,/assinatura/provedores,OK,Provedores de assinatura,4,,838
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,provider,True,/assinatura/provedores,OK,Provedores de assinatura,4,,819
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,government,True,/assinatura/provedores,OK,Provedores de assinatura,4,,849
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,individual,True,/assinatura/provedores,OK,Provedores de assinatura,4,,846
-/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,admin,True,/assinatura/provedores,OK,Provedores de assinatura,4,,816
-/auditoria,ROUTES,Int.AcessoPrivilegiado,link direto,admin,True,/auditoria,OK,Acesso privilegiado,4,,852
-/auditoria,ROUTES,Int.AcessoPrivilegiado,link direto,government,False,/auditoria,RECUSA_CORRETA,,3,,805
-/campanha-gestao,ROUTES,Funding.Campaigns,menu,osc,True,/campanha-gestao,OK,Campanha de divulgação,5,,873
-/campanha-gestao,ROUTES,Funding.Campaigns,menu,government,False,/campanha-gestao,RECUSA_CORRETA,,3,,800
-/candidaturas,ROUTES,Apps.Applications,menu,osc,True,/candidaturas,OK,Candidaturas,4,,823
-/candidaturas,ROUTES,Apps.Applications,menu,company,True,/candidaturas,OK,Candidaturas,4,,817
-/candidaturas,ROUTES,Apps.Applications,menu,provider,True,/candidaturas,VAZIA,Candidaturas,4,,819
-/candidaturas,ROUTES,Apps.Applications,menu,government,True,/candidaturas,OK,Candidaturas,4,,855
-/candidaturas,ROUTES,Apps.Applications,menu,individual,True,/candidaturas,OK,Candidaturas,4,,804
-/candidaturas,ROUTES,Apps.Applications,menu,admin,True,/candidaturas,VAZIA,Candidaturas,4,,827
-/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,osc,True,/candidaturas/4c462931-8b5c-4fd1-a97c-6af6636ef192,OK,[EXEMPLO FICTÍCIO] Programa Música nas Escolas,5,,860
-/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,company,True,/candidaturas/4c462931-8b5c-4fd1-a97c-6af6636ef192,OK,[EXEMPLO FICTÍCIO] Programa Música nas Escolas,5,,843
+/admin/solucoes,ROUTES,SolM.AdminSolutions,menu,government,False,/admin/solucoes,RECUSA_CORRETA,,3,,780
+/admin/usuarios,ROUTES,Admin.Users,menu,admin,True,/admin/usuarios,OK,Usuários,4,,823
+/admin/usuarios,ROUTES,Admin.Users,menu,government,False,/admin/usuarios,RECUSA_CORRETA,,3,,797
+/admin/vouchers,ROUTES,Admin.Vouchers,menu,admin,True,/admin/vouchers,OK,Vouchers,4,,815
+/admin/vouchers,ROUTES,Admin.Vouchers,menu,government,False,/admin/vouchers,RECUSA_CORRETA,,3,,791
+/administrativo/orcamento,ROUTES,Int.Orcamento,link direto,admin,True,/administrativo/orcamento,OK,Orçamento,4,,792
+/administrativo/orcamento,ROUTES,Int.Orcamento,link direto,government,False,/administrativo/orcamento,RECUSA_CORRETA,,3,,805
+/afirmacoes,ROUTES,IL.Claims,menu,osc,True,/afirmacoes,OK,Afirmações de impacto,6,,843
+/afirmacoes,ROUTES,IL.Claims,menu,company,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,846
+/afirmacoes,ROUTES,IL.Claims,menu,provider,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,840
+/afirmacoes,ROUTES,IL.Claims,menu,government,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,831
+/afirmacoes,ROUTES,IL.Claims,menu,individual,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,837
+/afirmacoes,ROUTES,IL.Claims,menu,admin,True,/afirmacoes,VAZIA,Afirmações de impacto,5,,920
+/aprovacoes,ROUTES,Int.Aprovacoes,link direto,admin,True,/aprovacoes,OK,Aprovações,4,,796
+/aprovacoes,ROUTES,Int.Aprovacoes,link direto,government,False,/aprovacoes,RECUSA_CORRETA,,3,,781
+/area,ROUTES,Ws.Workspace,menu,osc,True,/area,OK,Organização executora,5,,878
+/area,ROUTES,Ws.Workspace,menu,company,True,/area,OK,Investidor social / financiador,5,,849
+/area,ROUTES,Ws.Workspace,menu,provider,True,/area,OK,Profissional,5,,863
+/area,ROUTES,Ws.Workspace,menu,government,True,/area,OK,Poder público,5,,858
+/area,ROUTES,Ws.Workspace,menu,individual,True,/area,OK,Doador,5,,893
+/area,ROUTES,Ws.Workspace,menu,admin,True,/area,OK,Administração da plataforma,5,,851
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,osc,True,/assinatura/politica,OK,Política de assinatura,4,,821
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,company,True,/assinatura/politica,OK,Política de assinatura,4,,810
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,provider,True,/assinatura/politica,OK,Política de assinatura,4,,821
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,government,True,/assinatura/politica,OK,Política de assinatura,4,,797
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,individual,True,/assinatura/politica,OK,Política de assinatura,4,,819
+/assinatura/politica,ROUTES,Core.SignaturePolicies,link direto,admin,True,/assinatura/politica,OK,Política de assinatura,4,,808
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,osc,True,/assinatura/provedores,OK,Provedores de assinatura,4,,828
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,company,True,/assinatura/provedores,OK,Provedores de assinatura,4,,819
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,provider,True,/assinatura/provedores,OK,Provedores de assinatura,4,,805
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,government,True,/assinatura/provedores,OK,Provedores de assinatura,4,,817
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,individual,True,/assinatura/provedores,OK,Provedores de assinatura,4,,797
+/assinatura/provedores,ROUTES,Core.SignatureProviders,link direto,admin,True,/assinatura/provedores,OK,Provedores de assinatura,4,,826
+/auditoria,ROUTES,Int.AcessoPrivilegiado,link direto,admin,True,/auditoria,OK,Acesso privilegiado,4,,854
+/auditoria,ROUTES,Int.AcessoPrivilegiado,link direto,government,False,/auditoria,RECUSA_CORRETA,,3,,819
+/campanha-gestao,ROUTES,Funding.Campaigns,menu,osc,True,/campanha-gestao,OK,Campanha de divulgação,5,,882
+/campanha-gestao,ROUTES,Funding.Campaigns,menu,government,False,/campanha-gestao,RECUSA_CORRETA,,3,,811
+/candidaturas,ROUTES,Apps.Applications,menu,osc,True,/candidaturas,OK,Candidaturas,4,,836
+/candidaturas,ROUTES,Apps.Applications,menu,company,True,/candidaturas,OK,Candidaturas,4,,819
+/candidaturas,ROUTES,Apps.Applications,menu,provider,True,/candidaturas,VAZIA,Candidaturas,4,,812
+/candidaturas,ROUTES,Apps.Applications,menu,government,True,/candidaturas,OK,Candidaturas,4,,815
+/candidaturas,ROUTES,Apps.Applications,menu,individual,True,/candidaturas,OK,Candidaturas,4,,823
+/candidaturas,ROUTES,Apps.Applications,menu,admin,True,/candidaturas,VAZIA,Candidaturas,4,,816
+/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,osc,True,/candidaturas/436881d2-8110-4f75-b49e-71164325dd91,OK,[EXEMPLO FICTÍCIO] Programa Música nas Escolas,5,,908
+/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,company,True,/candidaturas/436881d2-8110-4f75-b49e-71164325dd91,OK,[EXEMPLO FICTÍCIO] Programa Música nas Escolas,5,,875
 /candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,government,True,/candidaturas/97aeef95-ca81-4018-a392-32666919edc6,OK,[EXEMPLO FICTÍCIO] Chamamento Cultura nos Bairros,5,,882
-/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,individual,True,/candidaturas/12c7dbf1-594c-4ccd-9f6f-367d80269b29,OK,Horta Escolar Comunitária (exemplo),5,,883
+/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,government,True,/candidaturas/52cf06dc-3b75-409a-85dc-233c4391040e,OK,[EXEMPLO FICTÍCIO] Chamamento Cultura nos Bairros,5,,905
+/candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,individual,True,/candidaturas/1926c1a0-b5fb-4f87-8a20-e9146080a2f1,OK,Horta Escolar Comunitária (exemplo),5,,836
 /candidaturas/:id,ROUTES,Apps.ApplicationDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/carteira,ROUTES,Proj.Portfolio,menu,company,True,/carteira,OK,Carteira e resultados,4,,820
-/carteira,ROUTES,Proj.Portfolio,menu,government,True,/carteira,VAZIA,Carteira e resultados,4,,820
-/carteira,ROUTES,Proj.Portfolio,menu,individual,True,/carteira,VAZIA,Carteira e resultados,4,,833
-/carteira,ROUTES,Proj.Portfolio,menu,osc,False,/carteira,RECUSA_CORRETA,,3,,805
-/compras/:id,ROUTES,Fin.ProcurementDetail,parâmetro,osc,True,/compras/3d51b832-5a8f-4106-a1ea-02364d96e369,OK,Compra de 10 violões,4,,851
+/carteira,ROUTES,Proj.Portfolio,menu,company,True,/carteira,OK,Carteira e resultados,4,,833
+/carteira,ROUTES,Proj.Portfolio,menu,government,True,/carteira,VAZIA,Carteira e resultados,4,,805
+/carteira,ROUTES,Proj.Portfolio,menu,individual,True,/carteira,VAZIA,Carteira e resultados,4,,851
+/carteira,ROUTES,Proj.Portfolio,menu,osc,False,/carteira,RECUSA_CORRETA,,3,,822
+/compras/:id,ROUTES,Fin.ProcurementDetail,parâmetro,osc,True,/compras/287e1c8b-e137-4881-aa34-5cdb68c76015,OK,Compra de 10 violões,4,,824
 /compras/:id,ROUTES,Fin.ProcurementDetail,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/conquistas,ROUTES,Net.Badges,menu,osc,True,/conquistas,OK,Conquistas,4,,847
-/conquistas,ROUTES,Net.Badges,menu,provider,True,/conquistas,OK,Conquistas,4,,822
-/conquistas,ROUTES,Net.Badges,menu,company,True,/conquistas,OK,Conquistas,4,,820
-/conquistas,ROUTES,Net.Badges,menu,government,False,/conquistas,RECUSA_CORRETA,,3,,815
-/conta,ROUTES,Org.Account,link direto,osc,True,/conta,OK,Minha conta,6,,877
-/conta,ROUTES,Org.Account,link direto,company,True,/conta,OK,Minha conta,6,,855
-/conta,ROUTES,Org.Account,link direto,provider,True,/conta,OK,Minha conta,6,,1042
-/conta,ROUTES,Org.Account,link direto,government,True,/conta,OK,Minha conta,6,,872
-/conta,ROUTES,Org.Account,link direto,individual,True,/conta,OK,Minha conta,6,,858
-/conta,ROUTES,Org.Account,link direto,admin,True,/conta,OK,Minha conta,6,,855
-/conta/acesso,ROUTES,Org.Plan,link direto,osc,True,/conta/acesso,OK,Acesso e concessões,6,,858
-/conta/acesso,ROUTES,Org.Plan,link direto,company,True,/conta/acesso,OK,Acesso e concessões,6,,852
-/conta/acesso,ROUTES,Org.Plan,link direto,provider,True,/conta/acesso,OK,Acesso e concessões,6,,847
-/conta/acesso,ROUTES,Org.Plan,link direto,government,True,/conta/acesso,OK,Acesso e concessões,6,,837
-/conta/acesso,ROUTES,Org.Plan,link direto,individual,True,/conta/acesso,OK,Acesso e concessões,6,,864
-/conta/acesso,ROUTES,Org.Plan,link direto,admin,True,/conta/acesso,OK,Acesso e concessões,6,,850
-/conta/comercial,ROUTES,Com.Commercial,link direto,osc,True,/conta/comercial,OK,Situação comercial,7,,933
-/conta/comercial,ROUTES,Com.Commercial,link direto,company,True,/conta/comercial,OK,Situação comercial,7,,860
-/conta/comercial,ROUTES,Com.Commercial,link direto,provider,True,/conta/comercial,OK,Situação comercial,7,,820
-/conta/comercial,ROUTES,Com.Commercial,link direto,government,True,/conta/comercial,OK,Situação comercial,7,,823
-/conta/comercial,ROUTES,Com.Commercial,link direto,individual,True,/conta/comercial,OK,Situação comercial,7,,834
-/conta/comercial,ROUTES,Com.Commercial,link direto,admin,True,/conta/comercial,OK,Situação comercial,7,,866
-/conta/consumo,ROUTES,Com.Usage,link direto,osc,True,/conta/consumo,OK,Consumo,4,,873
-/conta/consumo,ROUTES,Com.Usage,link direto,company,True,/conta/consumo,OK,Consumo,4,,844
-/conta/consumo,ROUTES,Com.Usage,link direto,provider,True,/conta/consumo,OK,Consumo,4,,861
-/conta/consumo,ROUTES,Com.Usage,link direto,government,True,/conta/consumo,OK,Consumo,4,,816
-/conta/consumo,ROUTES,Com.Usage,link direto,individual,True,/conta/consumo,OK,Consumo,4,,819
-/conta/consumo,ROUTES,Com.Usage,link direto,admin,True,/conta/consumo,OK,Consumo,4,,817
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,osc,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,830
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,company,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,831
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,provider,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,843
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,government,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,822
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,individual,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,823
-/conta/denuncias,ROUTES,Mod.MyReports,link direto,admin,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,825
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,osc,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,820
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,company,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,814
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,provider,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,820
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,government,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,833
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,individual,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,832
-/conta/moderacao,ROUTES,Mod.MyModeration,link direto,admin,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,828
-/conta/plano,ROUTES,Org.Plan,link direto,osc,True,/conta/plano,OK,Acesso e concessões,6,,858
-/conta/plano,ROUTES,Org.Plan,link direto,company,True,/conta/plano,OK,Acesso e concessões,6,,846
-/conta/plano,ROUTES,Org.Plan,link direto,provider,True,/conta/plano,OK,Acesso e concessões,6,,892
-/conta/plano,ROUTES,Org.Plan,link direto,government,True,/conta/plano,OK,Acesso e concessões,6,,882
-/conta/plano,ROUTES,Org.Plan,link direto,individual,True,/conta/plano,OK,Acesso e concessões,6,,853
-/conta/plano,ROUTES,Org.Plan,link direto,admin,True,/conta/plano,OK,Acesso e concessões,6,,859
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,osc,True,/conta/preferencias,OK,Aparência e idioma,5,,905
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,company,True,/conta/preferencias,OK,Aparência e idioma,5,,847
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,provider,True,/conta/preferencias,OK,Aparência e idioma,5,,841
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,government,True,/conta/preferencias,OK,Aparência e idioma,5,,840
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,individual,True,/conta/preferencias,OK,Aparência e idioma,5,,836
-/conta/preferencias,ROUTES,Prefs.Preferences,link direto,admin,True,/conta/preferencias,OK,Aparência e idioma,5,,823
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,osc,True,/conta/seguranca,OK,Segurança da conta,4,,862
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,company,True,/conta/seguranca,OK,Segurança da conta,4,,840
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,provider,True,/conta/seguranca,OK,Segurança da conta,4,,820
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,government,True,/conta/seguranca,OK,Segurança da conta,4,,852
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,individual,True,/conta/seguranca,OK,Segurança da conta,4,,817
-/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,admin,True,/conta/seguranca,OK,Segurança da conta,4,,838
-/contabilidade,ROUTES,Int.Contabilidade,link direto,admin,True,/contabilidade,OK,Contabilidade,4,,851
-/contabilidade,ROUTES,Int.Contabilidade,link direto,government,False,/contabilidade,RECUSA_CORRETA,,3,,810
-/contabilidade/plano-de-contas,ROUTES,Int.PlanoDeContas,link direto,admin,True,/contabilidade/plano-de-contas,OK,Plano de contas,4,,818
-/contabilidade/plano-de-contas,ROUTES,Int.PlanoDeContas,link direto,government,False,/contabilidade/plano-de-contas,RECUSA_CORRETA,,3,,810
-/controladoria,ROUTES,Int.Controladoria,link direto,admin,True,/controladoria,OK,Controladoria,4,,861
-/controladoria,ROUTES,Int.Controladoria,link direto,government,False,/controladoria,RECUSA_CORRETA,,3,,823
-/controladoria/conciliacao,ROUTES,Int.Conciliacao,link direto,admin,True,/controladoria/conciliacao,OK,Conciliação,4,,854
-/controladoria/conciliacao,ROUTES,Int.Conciliacao,link direto,government,False,/controladoria/conciliacao,RECUSA_CORRETA,,3,,808
-/controladoria/torre,ROUTES,Int.TorreMaster,link direto,admin,True,/controladoria/torre,OK,Torre financeira (master),4,,836
-/controladoria/torre,ROUTES,Int.TorreMaster,link direto,government,False,/controladoria/torre,RECUSA_CORRETA,,3,,821
-/conversas,ROUTES,Talk.Conversations,menu,osc,True,/conversas,OK,Conversas,5,,901
-/conversas,ROUTES,Talk.Conversations,menu,company,True,/conversas,OK,Conversas,5,,822
-/conversas,ROUTES,Talk.Conversations,menu,provider,True,/conversas,VAZIA,Conversas,5,,854
-/conversas,ROUTES,Talk.Conversations,menu,government,True,/conversas,VAZIA,Conversas,5,,848
-/conversas,ROUTES,Talk.Conversations,menu,individual,True,/conversas,VAZIA,Conversas,5,,838
-/conversas,ROUTES,Talk.Conversations,menu,admin,True,/conversas,VAZIA,Conversas,5,,833
-/conversas/:id,ROUTES,Talk.Conversation,parâmetro,osc,True,/conversas/b1156f54-7c3c-4e92-8179-bb7eca660537,OK,Cronograma do segundo semestre,5,,853
-/conversas/:id,ROUTES,Talk.Conversation,parâmetro,company,True,/conversas/b1156f54-7c3c-4e92-8179-bb7eca660537,OK,Cronograma do segundo semestre,5,,859
+/conquistas,ROUTES,Net.Badges,menu,osc,True,/conquistas,OK,Conquistas,4,,806
+/conquistas,ROUTES,Net.Badges,menu,provider,True,/conquistas,OK,Conquistas,4,,801
+/conquistas,ROUTES,Net.Badges,menu,company,True,/conquistas,OK,Conquistas,4,,808
+/conquistas,ROUTES,Net.Badges,menu,government,False,/conquistas,RECUSA_CORRETA,,3,,792
+/conta,ROUTES,Org.Account,link direto,osc,True,/conta,OK,Minha conta,6,,840
+/conta,ROUTES,Org.Account,link direto,company,True,/conta,OK,Minha conta,6,,848
+/conta,ROUTES,Org.Account,link direto,provider,True,/conta,OK,Minha conta,6,,838
+/conta,ROUTES,Org.Account,link direto,government,True,/conta,OK,Minha conta,6,,843
+/conta,ROUTES,Org.Account,link direto,individual,True,/conta,OK,Minha conta,6,,861
+/conta,ROUTES,Org.Account,link direto,admin,True,/conta,OK,Minha conta,6,,835
+/conta/acesso,ROUTES,Org.Plan,link direto,osc,True,/conta/acesso,OK,Acesso e concessões,6,,844
+/conta/acesso,ROUTES,Org.Plan,link direto,company,True,/conta/acesso,OK,Acesso e concessões,6,,836
+/conta/acesso,ROUTES,Org.Plan,link direto,provider,True,/conta/acesso,OK,Acesso e concessões,6,,807
+/conta/acesso,ROUTES,Org.Plan,link direto,government,True,/conta/acesso,OK,Acesso e concessões,6,,850
+/conta/acesso,ROUTES,Org.Plan,link direto,individual,True,/conta/acesso,OK,Acesso e concessões,6,,834
+/conta/acesso,ROUTES,Org.Plan,link direto,admin,True,/conta/acesso,OK,Acesso e concessões,6,,811
+/conta/comercial,ROUTES,Com.Commercial,link direto,osc,True,/conta/comercial,OK,Situação comercial,7,,848
+/conta/comercial,ROUTES,Com.Commercial,link direto,company,True,/conta/comercial,OK,Situação comercial,7,,835
+/conta/comercial,ROUTES,Com.Commercial,link direto,provider,True,/conta/comercial,OK,Situação comercial,7,,817
+/conta/comercial,ROUTES,Com.Commercial,link direto,government,True,/conta/comercial,OK,Situação comercial,7,,831
+/conta/comercial,ROUTES,Com.Commercial,link direto,individual,True,/conta/comercial,OK,Situação comercial,7,,840
+/conta/comercial,ROUTES,Com.Commercial,link direto,admin,True,/conta/comercial,OK,Situação comercial,7,,828
+/conta/consumo,ROUTES,Com.Usage,link direto,osc,True,/conta/consumo,OK,Consumo,4,,1006
+/conta/consumo,ROUTES,Com.Usage,link direto,company,True,/conta/consumo,OK,Consumo,4,,788
+/conta/consumo,ROUTES,Com.Usage,link direto,provider,True,/conta/consumo,OK,Consumo,4,,804
+/conta/consumo,ROUTES,Com.Usage,link direto,government,True,/conta/consumo,OK,Consumo,4,,814
+/conta/consumo,ROUTES,Com.Usage,link direto,individual,True,/conta/consumo,OK,Consumo,4,,790
+/conta/consumo,ROUTES,Com.Usage,link direto,admin,True,/conta/consumo,OK,Consumo,4,,813
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,osc,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,823
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,company,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,807
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,provider,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,816
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,government,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,814
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,individual,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,824
+/conta/denuncias,ROUTES,Mod.MyReports,link direto,admin,True,/conta/denuncias,VAZIA,Denúncias sobre a minha organização,4,,816
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,osc,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,821
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,company,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,860
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,provider,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,840
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,government,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,798
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,individual,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,812
+/conta/moderacao,ROUTES,Mod.MyModeration,link direto,admin,True,/conta/moderacao,VAZIA,Medidas de moderação,4,,847
+/conta/plano,ROUTES,Org.Plan,link direto,osc,True,/conta/plano,OK,Acesso e concessões,6,,825
+/conta/plano,ROUTES,Org.Plan,link direto,company,True,/conta/plano,OK,Acesso e concessões,6,,823
+/conta/plano,ROUTES,Org.Plan,link direto,provider,True,/conta/plano,OK,Acesso e concessões,6,,855
+/conta/plano,ROUTES,Org.Plan,link direto,government,True,/conta/plano,OK,Acesso e concessões,6,,877
+/conta/plano,ROUTES,Org.Plan,link direto,individual,True,/conta/plano,OK,Acesso e concessões,6,,870
+/conta/plano,ROUTES,Org.Plan,link direto,admin,True,/conta/plano,OK,Acesso e concessões,6,,846
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,osc,True,/conta/preferencias,OK,Aparência e idioma,5,,825
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,company,True,/conta/preferencias,OK,Aparência e idioma,5,,826
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,provider,True,/conta/preferencias,OK,Aparência e idioma,5,,837
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,government,True,/conta/preferencias,OK,Aparência e idioma,5,,819
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,individual,True,/conta/preferencias,OK,Aparência e idioma,5,,812
+/conta/preferencias,ROUTES,Prefs.Preferences,link direto,admin,True,/conta/preferencias,OK,Aparência e idioma,5,,846
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,osc,True,/conta/seguranca,OK,Segurança da conta,4,,908
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,company,True,/conta/seguranca,OK,Segurança da conta,4,,826
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,provider,True,/conta/seguranca,OK,Segurança da conta,4,,850
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,government,True,/conta/seguranca,OK,Segurança da conta,4,,872
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,individual,True,/conta/seguranca,OK,Segurança da conta,4,,826
+/conta/seguranca,ROUTES,Sec.CentroDeSeguranca,menu,admin,True,/conta/seguranca,OK,Segurança da conta,4,,832
+/contabilidade,ROUTES,Int.Contabilidade,link direto,admin,True,/contabilidade,OK,Contabilidade,4,,818
+/contabilidade,ROUTES,Int.Contabilidade,link direto,government,False,/contabilidade,RECUSA_CORRETA,,3,,800
+/contabilidade/plano-de-contas,ROUTES,Int.PlanoDeContas,link direto,admin,True,/contabilidade/plano-de-contas,OK,Plano de contas,4,,817
+/contabilidade/plano-de-contas,ROUTES,Int.PlanoDeContas,link direto,government,False,/contabilidade/plano-de-contas,RECUSA_CORRETA,,3,,776
+/controladoria,ROUTES,Int.Controladoria,link direto,admin,True,/controladoria,OK,Controladoria,4,,821
+/controladoria,ROUTES,Int.Controladoria,link direto,government,False,/controladoria,RECUSA_CORRETA,,3,,792
+/controladoria/conciliacao,ROUTES,Int.Conciliacao,link direto,admin,True,/controladoria/conciliacao,OK,Conciliação,4,,806
+/controladoria/conciliacao,ROUTES,Int.Conciliacao,link direto,government,False,/controladoria/conciliacao,RECUSA_CORRETA,,3,,870
+/controladoria/torre,ROUTES,Int.TorreMaster,link direto,admin,True,/controladoria/torre,OK,Torre financeira (master),4,,825
+/controladoria/torre,ROUTES,Int.TorreMaster,link direto,government,False,/controladoria/torre,RECUSA_CORRETA,,3,,817
+/conversas,ROUTES,Talk.Conversations,menu,osc,True,/conversas,OK,Conversas,5,,855
+/conversas,ROUTES,Talk.Conversations,menu,company,True,/conversas,OK,Conversas,5,,841
+/conversas,ROUTES,Talk.Conversations,menu,provider,True,/conversas,VAZIA,Conversas,5,,810
+/conversas,ROUTES,Talk.Conversations,menu,government,True,/conversas,VAZIA,Conversas,5,,831
+/conversas,ROUTES,Talk.Conversations,menu,individual,True,/conversas,VAZIA,Conversas,5,,819
+/conversas,ROUTES,Talk.Conversations,menu,admin,True,/conversas,VAZIA,Conversas,5,,797
+/conversas/:id,ROUTES,Talk.Conversation,parâmetro,osc,True,/conversas/2945dece-c6d5-4df5-975f-8ff94bd4e4b3,OK,Cronograma do segundo semestre,5,,800
+/conversas/:id,ROUTES,Talk.Conversation,parâmetro,company,True,/conversas/2945dece-c6d5-4df5-975f-8ff94bd4e4b3,OK,Cronograma do segundo semestre,5,,805
 /conversas/:id,ROUTES,Talk.Conversation,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /conversas/:id,ROUTES,Talk.Conversation,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /conversas/:id,ROUTES,Talk.Conversation,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /conversas/:id,ROUTES,Talk.Conversation,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/cotas,ROUTES,Funding.Quotas,menu,osc,True,/cotas,OK,Financiamento em cotas,4,,820
-/cotas,ROUTES,Funding.Quotas,menu,government,False,/cotas,RECUSA_CORRETA,,3,,798
-/cotas/:id/apoios,ROUTES,Funding.QuotaPledges,parâmetro,osc,True,/cotas/592e074b-d4d9-400a-8df2-343a0ed638dd/apoios,OK,Apoios recebidos,4,,834
+/cotas,ROUTES,Funding.Quotas,menu,osc,True,/cotas,OK,"Financiamento em cotas 
+i",4,,839
+/cotas,ROUTES,Funding.Quotas,menu,government,False,/cotas,RECUSA_CORRETA,,3,,784
+/cotas/:id/apoios,ROUTES,Funding.QuotaPledges,parâmetro,osc,True,/cotas/bb0f219f-99c2-4619-9635-d4f40b73a5a8/apoios,OK,Apoios recebidos,4,,804
 /cotas/:id/apoios,ROUTES,Funding.QuotaPledges,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/dados-territoriais,ROUTES,Org.GovData,menu,government,True,/dados-territoriais,OK,Dados do território,5,,871
-/dados-territoriais,ROUTES,Org.GovData,menu,admin,True,/dados-territoriais,OK,Dados do território,5,,834
-/dados-territoriais,ROUTES,Org.GovData,menu,osc,False,/dados-territoriais,RECUSA_CORRETA,,3,,812
-/determinantes,ROUTES,Impact.Determinants,menu,government,True,/determinantes,OK,Determinantes sociais,4,,798
-/determinantes,ROUTES,Impact.Determinants,menu,admin,True,/determinantes,OK,Determinantes sociais,4,,844
-/determinantes,ROUTES,Impact.Determinants,menu,osc,False,/determinantes,RECUSA_CORRETA,,3,,819
-/diagnosticos,ROUTES,Impact.Diagnoses,menu,osc,True,/diagnosticos,OK,Diagnóstico social,4,,838
-/diagnosticos,ROUTES,Impact.Diagnoses,menu,government,False,/diagnosticos,RECUSA_CORRETA,,3,,811
-/diagnosticos/:id,ROUTES,Impact.DiagnosisEditor,parâmetro,osc,True,/diagnosticos/6102a19d-3dc1-4f89-8b5c-0983ac7d249a,OK,Diagnóstico,5,,851
+/dados-territoriais,ROUTES,Org.GovData,menu,government,True,/dados-territoriais,OK,Dados do território,5,,829
+/dados-territoriais,ROUTES,Org.GovData,menu,admin,True,/dados-territoriais,OK,Dados do território,5,,818
+/dados-territoriais,ROUTES,Org.GovData,menu,osc,False,/dados-territoriais,RECUSA_CORRETA,,3,,806
+/determinantes,ROUTES,Impact.Determinants,menu,government,True,/determinantes,OK,"Determinantes sociais 
+i",4,,800
+/determinantes,ROUTES,Impact.Determinants,menu,admin,True,/determinantes,OK,"Determinantes sociais 
+i",4,,806
+/determinantes,ROUTES,Impact.Determinants,menu,osc,False,/determinantes,RECUSA_CORRETA,,3,,790
+/diagnosticos,ROUTES,Impact.Diagnoses,menu,osc,True,/diagnosticos,OK,Diagnóstico social,4,,836
+/diagnosticos,ROUTES,Impact.Diagnoses,menu,government,False,/diagnosticos,RECUSA_CORRETA,,3,,816
+/diagnosticos/:id,ROUTES,Impact.DiagnosisEditor,parâmetro,osc,True,/diagnosticos/5a7cc1b6-ce34-47e1-9c8f-548f7d03fa55,OK,Diagnóstico,5,,828
 /diagnosticos/:id,ROUTES,Impact.DiagnosisEditor,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/diagnosticos/:id/roteiro,ROUTES,DiagGuide.DiagnosisGuide,parâmetro,osc,True,/diagnosticos/6102a19d-3dc1-4f89-8b5c-0983ac7d249a/roteiro,OK,Diagnóstico guiado,4,,875
+/diagnosticos/:id/roteiro,ROUTES,DiagGuide.DiagnosisGuide,parâmetro,osc,True,/diagnosticos/5a7cc1b6-ce34-47e1-9c8f-548f7d03fa55/roteiro,OK,Diagnóstico guiado,4,,824
 /diagnosticos/:id/roteiro,ROUTES,DiagGuide.DiagnosisGuide,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/diagnosticos/:id/versoes,ROUTES,Core.DiagnosisVersions,parâmetro,osc,True,/diagnosticos/6102a19d-3dc1-4f89-8b5c-0983ac7d249a/versoes,OK,Versões do diagnóstico,6,,871
+/diagnosticos/:id/versoes,ROUTES,Core.DiagnosisVersions,parâmetro,osc,True,/diagnosticos/5a7cc1b6-ce34-47e1-9c8f-548f7d03fa55/versoes,OK,Versões do diagnóstico,6,,854
 /diagnosticos/:id/versoes,ROUTES,Core.DiagnosisVersions,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/documentos,ROUTES,Docs.Documents,menu,osc,True,/documentos,OK,Documentos,5,,905
-/documentos,ROUTES,Docs.Documents,menu,company,True,/documentos,VAZIA,Documentos,5,,856
-/documentos,ROUTES,Docs.Documents,menu,provider,True,/documentos,VAZIA,Documentos,5,,844
-/documentos,ROUTES,Docs.Documents,menu,government,True,/documentos,VAZIA,Documentos,5,,888
-/documentos,ROUTES,Docs.Documents,menu,individual,True,/documentos,VAZIA,Documentos,5,,874
-/documentos,ROUTES,Docs.Documents,menu,admin,True,/documentos,OK,Documentos,5,,855
-/documentos/modelos,ROUTES,Core.Templates,menu,osc,True,/documentos/modelos,OK,Modelos de documento,4,,826
-/documentos/modelos,ROUTES,Core.Templates,menu,company,True,/documentos/modelos,OK,Modelos de documento,4,,820
-/documentos/modelos,ROUTES,Core.Templates,menu,provider,True,/documentos/modelos,OK,Modelos de documento,4,,832
-/documentos/modelos,ROUTES,Core.Templates,menu,government,True,/documentos/modelos,OK,Modelos de documento,4,,824
-/documentos/modelos,ROUTES,Core.Templates,menu,individual,True,/documentos/modelos,OK,Modelos de documento,4,,820
-/documentos/modelos,ROUTES,Core.Templates,menu,admin,True,/documentos/modelos,OK,Modelos de documento,4,,824
-/documentos/montagens,ROUTES,Core.Assemblies,menu,osc,True,/documentos/montagens,OK,Montagem de documentos,6,,872
-/documentos/montagens,ROUTES,Core.Assemblies,menu,company,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,824
-/documentos/montagens,ROUTES,Core.Assemblies,menu,provider,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,828
-/documentos/montagens,ROUTES,Core.Assemblies,menu,government,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,864
-/documentos/montagens,ROUTES,Core.Assemblies,menu,individual,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,836
-/documentos/montagens,ROUTES,Core.Assemblies,menu,admin,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,816
-/documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,osc,True,/documentos/montagens/8d93c5f1-2f56-4071-8ab9-fb7b92293a31,OK,Plano de monitoramento — Orquestra,5,,887
+/documentos,ROUTES,Docs.Documents,menu,osc,True,/documentos,OK,"Documentos 
+i",5,,827
+/documentos,ROUTES,Docs.Documents,menu,company,True,/documentos,VAZIA,"Documentos 
+i",5,,828
+/documentos,ROUTES,Docs.Documents,menu,provider,True,/documentos,VAZIA,"Documentos 
+i",5,,834
+/documentos,ROUTES,Docs.Documents,menu,government,True,/documentos,VAZIA,"Documentos 
+i",5,,829
+/documentos,ROUTES,Docs.Documents,menu,individual,True,/documentos,VAZIA,"Documentos 
+i",5,,890
+/documentos,ROUTES,Docs.Documents,menu,admin,True,/documentos,OK,"Documentos 
+i",5,,835
+/documentos/modelos,ROUTES,Core.Templates,menu,osc,True,/documentos/modelos,OK,Modelos de documento,4,,816
+/documentos/modelos,ROUTES,Core.Templates,menu,company,True,/documentos/modelos,OK,Modelos de documento,4,,830
+/documentos/modelos,ROUTES,Core.Templates,menu,provider,True,/documentos/modelos,OK,Modelos de documento,4,,821
+/documentos/modelos,ROUTES,Core.Templates,menu,government,True,/documentos/modelos,OK,Modelos de documento,4,,823
+/documentos/modelos,ROUTES,Core.Templates,menu,individual,True,/documentos/modelos,OK,Modelos de documento,4,,797
+/documentos/modelos,ROUTES,Core.Templates,menu,admin,True,/documentos/modelos,OK,Modelos de documento,4,,810
+/documentos/montagens,ROUTES,Core.Assemblies,menu,osc,True,/documentos/montagens,OK,Montagem de documentos,6,,833
+/documentos/montagens,ROUTES,Core.Assemblies,menu,company,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,808
+/documentos/montagens,ROUTES,Core.Assemblies,menu,provider,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,874
+/documentos/montagens,ROUTES,Core.Assemblies,menu,government,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,808
+/documentos/montagens,ROUTES,Core.Assemblies,menu,individual,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,819
+/documentos/montagens,ROUTES,Core.Assemblies,menu,admin,True,/documentos/montagens,VAZIA,Montagem de documentos,5,,814
+/documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,osc,True,/documentos/montagens/0c6bee9a-0dd3-49c1-902e-108e7798522a,OK,Plano de monitoramento — Orquestra,5,,811
 /documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /documentos/montagens/:id,ROUTES,Core.AssemblyDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/editais,ROUTES,Calls.MyCalls,menu,company,True,/editais,OK,Programas,4,,844
-/editais,ROUTES,Calls.MyCalls,menu,government,True,/editais,OK,Editais,4,,828
-/editais,ROUTES,Calls.MyCalls,menu,osc,False,/editais,RECUSA_CORRETA,,3,,875
-/editais/:id/candidaturas,ROUTES,Calls.CallApplications,parâmetro,company,True,/editais/92918213-cf5f-48bc-b7af-8ae17b121dc9/candidaturas,OK,Candidaturas recebidas,4,,852
-/editais/:id/candidaturas,ROUTES,Calls.CallApplications,parâmetro,government,True,/editais/4ab57cf7-fdb0-405d-8cb1-c90dfc301e82/candidaturas,VAZIA,Candidaturas recebidas,4,,812
+/editais,ROUTES,Calls.MyCalls,menu,company,True,/editais,OK,Programas,4,,849
+/editais,ROUTES,Calls.MyCalls,menu,government,True,/editais,OK,Editais,4,,822
+/editais,ROUTES,Calls.MyCalls,menu,osc,False,/editais,RECUSA_CORRETA,,3,,785
+/editais/:id/candidaturas,ROUTES,Calls.CallApplications,parâmetro,company,True,/editais/1b164700-3e2a-47c6-b7dc-a902885d0408/candidaturas,OK,Candidaturas recebidas,4,,825
+/editais/:id/candidaturas,ROUTES,Calls.CallApplications,parâmetro,government,True,/editais/b5a90b45-3510-4a93-aca8-942b17d20e5c/candidaturas,VAZIA,Candidaturas recebidas,4,,810
 /editais/:id/candidaturas,ROUTES,Calls.CallApplications,parâmetro,osc,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/editais/:id/editar,ROUTES,Calls.CallForm,parâmetro,company,True,/editais/92918213-cf5f-48bc-b7af-8ae17b121dc9/editar,OK,Editar chamada,6,,838
-/editais/:id/editar,ROUTES,Calls.CallForm,parâmetro,government,True,/editais/4ab57cf7-fdb0-405d-8cb1-c90dfc301e82/editar,OK,Editar chamada,6,,839
+/editais/:id/editar,ROUTES,Calls.CallForm,parâmetro,company,True,/editais/1b164700-3e2a-47c6-b7dc-a902885d0408/editar,OK,Editar chamada,6,,830
+/editais/:id/editar,ROUTES,Calls.CallForm,parâmetro,government,True,/editais/b5a90b45-3510-4a93-aca8-942b17d20e5c/editar,OK,Editar chamada,6,,857
 /editais/:id/editar,ROUTES,Calls.CallForm,parâmetro,osc,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/editais/novo,ROUTES,Calls.CallForm,link direto,company,True,/editais/novo,OK,Novo programa,5,,830
-/editais/novo,ROUTES,Calls.CallForm,link direto,government,True,/editais/novo,OK,Novo edital,5,,863
-/editais/novo,ROUTES,Calls.CallForm,link direto,osc,False,/editais/novo,RECUSA_CORRETA,,3,,821
-/explorar,ROUTES,Proj.Feed,menu,company,True,/explorar,OK,Projetos para apoiar,6,,1320
-/explorar,ROUTES,Proj.Feed,menu,individual,True,/explorar,OK,Projetos para apoiar,6,,1206
+/editais/novo,ROUTES,Calls.CallForm,link direto,company,True,/editais/novo,OK,Novo programa,5,,808
+/editais/novo,ROUTES,Calls.CallForm,link direto,government,True,/editais/novo,OK,Novo edital,5,,832
+/editais/novo,ROUTES,Calls.CallForm,link direto,osc,False,/editais/novo,RECUSA_CORRETA,,3,,812
+/explorar,ROUTES,Proj.Feed,menu,company,True,/explorar,OK,Projetos para apoiar,6,,1357
+/explorar,ROUTES,Proj.Feed,menu,individual,True,/explorar,OK,Projetos para apoiar,6,,1411
 /explorar,ROUTES,Proj.Feed,menu,government,False,/explorar,RECUSA_CORRETA,,3,,789
-/extratos,ROUTES,Fin.Statements,link direto,osc,True,/extratos,OK,Extrato e conciliação,4,,839
-/extratos,ROUTES,Fin.Statements,link direto,government,False,/extratos,RECUSA_CORRETA,,3,,808
-/financeiro,ROUTES,Int.Financeiro,link direto,admin,True,/financeiro,OK,Financeiro,4,,856
-/financeiro,ROUTES,Int.Financeiro,link direto,government,False,/financeiro,RECUSA_CORRETA,,3,,792
-/financeiro/despesas,ROUTES,Int.Despesas,link direto,admin,True,/financeiro/despesas,OK,Despesas da plataforma,5,,844
-/financeiro/despesas,ROUTES,Int.Despesas,link direto,government,False,/financeiro/despesas,RECUSA_CORRETA,,3,,833
-/financeiro/instrucoes,ROUTES,Int.Instrucoes,link direto,admin,True,/financeiro/instrucoes,OK,Instruções de pagamento,4,,860
-/financeiro/instrucoes,ROUTES,Int.Instrucoes,link direto,government,False,/financeiro/instrucoes,RECUSA_CORRETA,,3,,812
-/financeiro/periodos-gratuitos,ROUTES,Int.PeriodosGratuitos,link direto,admin,True,/financeiro/periodos-gratuitos,OK,Períodos gratuitos,4,,859
-/financeiro/periodos-gratuitos,ROUTES,Int.PeriodosGratuitos,link direto,government,False,/financeiro/periodos-gratuitos,RECUSA_CORRETA,,3,,799
-/fiscal,ROUTES,Org.Fiscal,menu,company,True,/fiscal,OK,Incentivos fiscais,5,,840
+/extratos,ROUTES,Fin.Statements,link direto,osc,True,/extratos,OK,Extrato e conciliação,4,,814
+/extratos,ROUTES,Fin.Statements,link direto,government,False,/extratos,RECUSA_CORRETA,,3,,796
+/financeiro,ROUTES,Int.Financeiro,link direto,admin,True,/financeiro,OK,Financeiro,4,,817
+/financeiro,ROUTES,Int.Financeiro,link direto,government,False,/financeiro,RECUSA_CORRETA,,3,,918
+/financeiro/despesas,ROUTES,Int.Despesas,link direto,admin,True,/financeiro/despesas,OK,Despesas da plataforma,5,,810
+/financeiro/despesas,ROUTES,Int.Despesas,link direto,government,False,/financeiro/despesas,RECUSA_CORRETA,,3,,805
+/financeiro/instrucoes,ROUTES,Int.Instrucoes,link direto,admin,True,/financeiro/instrucoes,OK,Instruções de pagamento,4,,917
+/financeiro/instrucoes,ROUTES,Int.Instrucoes,link direto,government,False,/financeiro/instrucoes,RECUSA_CORRETA,,3,,806
+/financeiro/periodos-gratuitos,ROUTES,Int.PeriodosGratuitos,link direto,admin,True,/financeiro/periodos-gratuitos,OK,Períodos gratuitos,4,,838
+/financeiro/periodos-gratuitos,ROUTES,Int.PeriodosGratuitos,link direto,government,False,/financeiro/periodos-gratuitos,RECUSA_CORRETA,,3,,790
+/fiscal,ROUTES,Org.Fiscal,menu,company,True,/fiscal,OK,Incentivos fiscais,5,,826
 /fiscal,ROUTES,Org.Fiscal,menu,government,False,/fiscal,RECUSA_CORRETA,,3,,781
-/ia,ROUTES,AI.AiCenter,menu,osc,True,/ia,OK,Central de IA,4,,810
-/ia,ROUTES,AI.AiCenter,menu,company,True,/ia,OK,Central de IA,4,,824
-/ia,ROUTES,AI.AiCenter,menu,provider,True,/ia,OK,Central de IA,4,,815
-/ia,ROUTES,AI.AiCenter,menu,government,True,/ia,OK,Central de IA,4,,848
-/ia,ROUTES,AI.AiCenter,menu,individual,True,/ia,OK,Central de IA,4,,836
-/ia,ROUTES,AI.AiCenter,menu,admin,True,/ia,OK,Central de IA,4,,817
-/ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,osc,True,/ia/analises/d5b1e728-2cf6-47c8-9977-0d8972355fc3,OK,Originalidade,4,,868
+/ia,ROUTES,AI.AiCenter,menu,osc,True,/ia,OK,Central de IA,4,,826
+/ia,ROUTES,AI.AiCenter,menu,company,True,/ia,OK,Central de IA,4,,836
+/ia,ROUTES,AI.AiCenter,menu,provider,True,/ia,OK,Central de IA,4,,869
+/ia,ROUTES,AI.AiCenter,menu,government,True,/ia,OK,Central de IA,4,,830
+/ia,ROUTES,AI.AiCenter,menu,individual,True,/ia,OK,Central de IA,4,,814
+/ia,ROUTES,AI.AiCenter,menu,admin,True,/ia,OK,Central de IA,4,,847
+/ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,osc,True,/ia/analises/ade26d7a-9cc0-4b45-8447-1068c13da872,OK,Originalidade,4,,835
 /ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/analises/:id,ROUTES,AI.SimilarityAnalysis,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,osc,True,/ia/orcamento,OK,Inteligência artificial,5,,823
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,company,True,/ia/orcamento,OK,Inteligência artificial,5,,873
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,provider,True,/ia/orcamento,OK,Inteligência artificial,5,,855
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,government,True,/ia/orcamento,OK,Inteligência artificial,5,,882
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,individual,True,/ia/orcamento,OK,Inteligência artificial,5,,825
-/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,admin,True,/ia/orcamento,OK,Inteligência artificial,5,,835
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,osc,True,/ia/orcamento,OK,Inteligência artificial,5,,842
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,company,True,/ia/orcamento,OK,Inteligência artificial,5,,833
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,provider,True,/ia/orcamento,OK,Inteligência artificial,5,,816
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,government,True,/ia/orcamento,OK,Inteligência artificial,5,,817
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,individual,True,/ia/orcamento,OK,Inteligência artificial,5,,808
+/ia/orcamento,ROUTES,Sec.PainelDeIa,link direto,admin,True,/ia/orcamento,OK,Inteligência artificial,5,,801
 /ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,osc,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,company,True,/ia/patrocinios/5e91a692-7ec4-41c2-ad1b-65034738506d,OK,Diagnóstico e originalidade para OSCs (exemplo),4,,827
+/ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,company,True,/ia/patrocinios/0e26844a-9d09-4cd6-bd9a-54ea8a44f9d0,OK,Diagnóstico e originalidade para OSCs (exemplo),4,,826
 /ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /ia/patrocinios/:id,ROUTES,AI.SponsorshipReport,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/ideias,ROUTES,Core.Ideas,menu,osc,True,/ideias,OK,Ideias,4,,855
-/ideias,ROUTES,Core.Ideas,menu,government,False,/ideias,RECUSA_CORRETA,,3,,810
-/identidade,ROUTES,Trust.Identity,menu,osc,True,/identidade,OK,Minha identidade,4,,837
-/identidade,ROUTES,Trust.Identity,menu,company,True,/identidade,OK,Minha identidade,4,,829
-/identidade,ROUTES,Trust.Identity,menu,provider,True,/identidade,OK,Minha identidade,4,,827
-/identidade,ROUTES,Trust.Identity,menu,government,True,/identidade,OK,Minha identidade,4,,799
-/identidade,ROUTES,Trust.Identity,menu,individual,True,/identidade,OK,Minha identidade,4,,845
-/identidade,ROUTES,Trust.Identity,menu,admin,True,/identidade,OK,Minha identidade,4,,869
-/instituicao,ROUTES,Inst.Institution,menu,osc,True,/instituicao,OK,Instituição,4,,867
-/instituicao,ROUTES,Inst.Institution,menu,company,True,/instituicao,OK,Instituição,4,,870
-/instituicao,ROUTES,Inst.Institution,menu,government,True,/instituicao,OK,Instituição,4,,832
-/instituicao,ROUTES,Inst.Institution,menu,provider,True,/instituicao,OK,Instituição,4,,855
-/instituicao,ROUTES,Inst.Institution,menu,individual,True,/instituicao,OK,Instituição,4,,825
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,osc,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,VAZIA,Organização,3,,799
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,company,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,OK,Org osc dc5c80,4,,813
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,provider,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,VAZIA,Organização,3,,1093
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,government,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,OK,Org osc dc5c80,4,,817
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,individual,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,OK,Org osc dc5c80,4,,815
-/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,admin,True,/instituicoes/efb1b624-fb87-4f8c-a374-d5baae773f86,OK,Org osc dc5c80,4,,838
-/mapa,ROUTES,Rep.MapView,menu,osc,True,/mapa,OK,Mapa de projetos,4,,816
-/mapa,ROUTES,Rep.MapView,menu,company,True,/mapa,OK,Mapa de projetos,4,,831
-/mapa,ROUTES,Rep.MapView,menu,provider,True,/mapa,OK,Mapa de projetos,4,,841
+/ideias,ROUTES,Core.Ideas,menu,osc,True,/ideias,OK,Ideias,4,,808
+/ideias,ROUTES,Core.Ideas,menu,government,False,/ideias,RECUSA_CORRETA,,3,,803
+/identidade,ROUTES,Trust.Identity,menu,osc,True,/identidade,OK,Minha identidade,4,,833
+/identidade,ROUTES,Trust.Identity,menu,company,True,/identidade,OK,Minha identidade,4,,819
+/identidade,ROUTES,Trust.Identity,menu,provider,True,/identidade,OK,Minha identidade,4,,802
+/identidade,ROUTES,Trust.Identity,menu,government,True,/identidade,OK,Minha identidade,4,,807
+/identidade,ROUTES,Trust.Identity,menu,individual,True,/identidade,OK,Minha identidade,4,,803
+/identidade,ROUTES,Trust.Identity,menu,admin,True,/identidade,OK,Minha identidade,4,,801
+/instituicao,ROUTES,Inst.Institution,menu,osc,True,/instituicao,OK,Instituição,4,,817
+/instituicao,ROUTES,Inst.Institution,menu,company,True,/instituicao,OK,Instituição,4,,845
+/instituicao,ROUTES,Inst.Institution,menu,government,True,/instituicao,OK,Instituição,4,,817
+/instituicao,ROUTES,Inst.Institution,menu,provider,True,/instituicao,OK,Instituição,4,,823
+/instituicao,ROUTES,Inst.Institution,menu,individual,True,/instituicao,OK,Instituição,4,,830
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,osc,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,VAZIA,Organização,3,,822
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,company,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,OK,Org osc 4d7133,4,,827
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,provider,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,VAZIA,Organização,3,,818
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,government,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,OK,Org osc 4d7133,4,,807
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,individual,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,OK,Org osc 4d7133,4,,805
+/instituicoes/:id,ROUTES,Inst.PublicOrg,parâmetro,admin,True,/instituicoes/43027b46-d45f-4efe-881e-cfaf0d90cd61,OK,Org osc 4d7133,4,,798
+/mapa,ROUTES,Rep.MapView,menu,osc,True,/mapa,OK,Mapa de projetos,4,,797
+/mapa,ROUTES,Rep.MapView,menu,company,True,/mapa,OK,Mapa de projetos,4,,810
+/mapa,ROUTES,Rep.MapView,menu,provider,True,/mapa,OK,Mapa de projetos,4,,808
 /mapa,ROUTES,Rep.MapView,menu,government,True,/mapa,OK,Mapa de projetos,4,,820
-/mapa,ROUTES,Rep.MapView,menu,individual,True,/mapa,OK,Mapa de projetos,4,,872
-/mapa,ROUTES,Rep.MapView,menu,admin,True,/mapa,OK,Mapa de projetos,4,,826
-/marketplace,ROUTES,Mkt.Marketplace,menu,osc,True,/marketplace,OK,Marketplace de impacto,4,,862
-/marketplace,ROUTES,Mkt.Marketplace,menu,company,True,/marketplace,OK,Marketplace de impacto,4,,845
-/marketplace,ROUTES,Mkt.Marketplace,menu,provider,True,/marketplace,OK,Marketplace de impacto,4,,842
-/marketplace,ROUTES,Mkt.Marketplace,menu,government,True,/marketplace,OK,Marketplace de impacto,4,,835
-/marketplace,ROUTES,Mkt.Marketplace,menu,individual,True,/marketplace,OK,Marketplace de impacto,4,,823
-/marketplace,ROUTES,Mkt.Marketplace,menu,admin,True,/marketplace,OK,Marketplace de impacto,4,,843
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,osc,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,856
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,company,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,841
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,provider,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,831
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,government,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,823
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,individual,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,816
-/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,admin,True,/marketplace/39deaa7b-4981-4dd9-a93b-55b61329f159,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,830
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,osc,True,/marketplace/meus,OK,Meus anúncios,4,,846
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,company,True,/marketplace/meus,VAZIA,Meus anúncios,4,,868
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,provider,True,/marketplace/meus,VAZIA,Meus anúncios,4,,867
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,government,True,/marketplace/meus,VAZIA,Meus anúncios,4,,861
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,individual,True,/marketplace/meus,VAZIA,Meus anúncios,4,,847
-/marketplace/meus,ROUTES,Mkt.MyListings,menu,admin,True,/marketplace/meus,VAZIA,Meus anúncios,4,,829
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,osc,True,/marketplace/novo,OK,Novo anúncio,4,,883
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,company,True,/marketplace/novo,OK,Novo anúncio,3,,860
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,provider,True,/marketplace/novo,OK,Novo anúncio,3,,852
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,government,True,/marketplace/novo,OK,Novo anúncio,3,,822
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,individual,True,/marketplace/novo,OK,Novo anúncio,3,,808
-/marketplace/novo,ROUTES,Mkt.NewListing,link direto,admin,True,/marketplace/novo,OK,Novo anúncio,3,,791
-/materiais,ROUTES,Org.Materials,menu,osc,True,/materiais,OK,Materiais,4,,815
-/materiais,ROUTES,Org.Materials,menu,company,True,/materiais,OK,Materiais,4,,817
-/materiais,ROUTES,Org.Materials,menu,provider,True,/materiais,OK,Materiais,4,,823
-/materiais,ROUTES,Org.Materials,menu,government,True,/materiais,OK,Materiais,4,,814
-/materiais,ROUTES,Org.Materials,menu,individual,True,/materiais,OK,Materiais,4,,830
-/materiais,ROUTES,Org.Materials,menu,admin,True,/materiais,OK,Materiais,4,,820
-/mensagens,ROUTES,Net.Messages,menu,osc,True,/mensagens,OK,Mensagens,4,,830
-/mensagens,ROUTES,Net.Messages,menu,company,True,/mensagens,OK,Mensagens,4,,808
-/mensagens,ROUTES,Net.Messages,menu,provider,True,/mensagens,OK,Mensagens,4,,816
-/mensagens,ROUTES,Net.Messages,menu,government,True,/mensagens,OK,Mensagens,4,,845
-/mensagens,ROUTES,Net.Messages,menu,individual,True,/mensagens,OK,Mensagens,4,,816
-/mensagens,ROUTES,Net.Messages,menu,admin,True,/mensagens,OK,Mensagens,4,,862
-/mensagens/:id,ROUTES,Net.Messages,parâmetro,osc,True,/mensagens/b1156f54-7c3c-4e92-8179-bb7eca660537,OK,Mensagens,5,,875
-/mensagens/:id,ROUTES,Net.Messages,parâmetro,company,True,/mensagens/b1156f54-7c3c-4e92-8179-bb7eca660537,OK,Mensagens,5,,887
+/mapa,ROUTES,Rep.MapView,menu,individual,True,/mapa,OK,Mapa de projetos,4,,823
+/mapa,ROUTES,Rep.MapView,menu,admin,True,/mapa,OK,Mapa de projetos,4,,819
+/marketplace,ROUTES,Mkt.Marketplace,menu,osc,True,/marketplace,OK,Marketplace de impacto,4,,824
+/marketplace,ROUTES,Mkt.Marketplace,menu,company,True,/marketplace,OK,Marketplace de impacto,4,,817
+/marketplace,ROUTES,Mkt.Marketplace,menu,provider,True,/marketplace,OK,Marketplace de impacto,4,,838
+/marketplace,ROUTES,Mkt.Marketplace,menu,government,True,/marketplace,OK,Marketplace de impacto,4,,793
+/marketplace,ROUTES,Mkt.Marketplace,menu,individual,True,/marketplace,OK,Marketplace de impacto,4,,820
+/marketplace,ROUTES,Mkt.Marketplace,menu,admin,True,/marketplace,OK,Marketplace de impacto,4,,793
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,osc,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,826
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,company,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,848
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,provider,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,845
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,government,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,1030
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,individual,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,802
+/marketplace/:id,ROUTES,Mkt.ListingDetail,parâmetro,admin,True,/marketplace/b2a28a67-f75d-4887-bed3-9fac90fa9f8d,OK,Formação profissional para 200 jovens na regional leste de Cuiabá,4,,803
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,osc,True,/marketplace/meus,OK,Meus anúncios,4,,843
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,company,True,/marketplace/meus,VAZIA,Meus anúncios,4,,817
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,provider,True,/marketplace/meus,VAZIA,Meus anúncios,4,,796
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,government,True,/marketplace/meus,VAZIA,Meus anúncios,4,,797
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,individual,True,/marketplace/meus,VAZIA,Meus anúncios,4,,800
+/marketplace/meus,ROUTES,Mkt.MyListings,menu,admin,True,/marketplace/meus,VAZIA,Meus anúncios,4,,788
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,osc,True,/marketplace/novo,OK,Novo anúncio,4,,819
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,company,True,/marketplace/novo,OK,Novo anúncio,3,,796
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,provider,True,/marketplace/novo,OK,Novo anúncio,3,,791
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,government,True,/marketplace/novo,OK,Novo anúncio,3,,823
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,individual,True,/marketplace/novo,OK,Novo anúncio,3,,795
+/marketplace/novo,ROUTES,Mkt.NewListing,link direto,admin,True,/marketplace/novo,OK,Novo anúncio,3,,790
+/materiais,ROUTES,Org.Materials,menu,osc,True,/materiais,OK,Materiais,4,,829
+/materiais,ROUTES,Org.Materials,menu,company,True,/materiais,OK,Materiais,4,,812
+/materiais,ROUTES,Org.Materials,menu,provider,True,/materiais,OK,Materiais,4,,797
+/materiais,ROUTES,Org.Materials,menu,government,True,/materiais,OK,Materiais,4,,811
+/materiais,ROUTES,Org.Materials,menu,individual,True,/materiais,OK,Materiais,4,,777
+/materiais,ROUTES,Org.Materials,menu,admin,True,/materiais,OK,Materiais,4,,786
+/mensagens,ROUTES,Net.Messages,menu,osc,True,/mensagens,OK,Mensagens,4,,813
+/mensagens,ROUTES,Net.Messages,menu,company,True,/mensagens,OK,Mensagens,4,,803
+/mensagens,ROUTES,Net.Messages,menu,provider,True,/mensagens,OK,Mensagens,4,,813
+/mensagens,ROUTES,Net.Messages,menu,government,True,/mensagens,OK,Mensagens,4,,812
+/mensagens,ROUTES,Net.Messages,menu,individual,True,/mensagens,OK,Mensagens,4,,800
+/mensagens,ROUTES,Net.Messages,menu,admin,True,/mensagens,OK,Mensagens,4,,807
+/mensagens/:id,ROUTES,Net.Messages,parâmetro,osc,True,/mensagens/2945dece-c6d5-4df5-975f-8ff94bd4e4b3,OK,Mensagens,5,,893
+/mensagens/:id,ROUTES,Net.Messages,parâmetro,company,True,/mensagens/2945dece-c6d5-4df5-975f-8ff94bd4e4b3,OK,Mensagens,5,,833
 /mensagens/:id,ROUTES,Net.Messages,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /mensagens/:id,ROUTES,Net.Messages,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /mensagens/:id,ROUTES,Net.Messages,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /mensagens/:id,ROUTES,Net.Messages,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/minhas-atividades,ROUTES,TrustA.MyServices,menu,provider,True,/minhas-atividades,VAZIA,Minhas atividades,5,,854
-/minhas-atividades,ROUTES,TrustA.MyServices,menu,individual,True,/minhas-atividades,VAZIA,Minhas atividades,5,,847
-/minhas-atividades,ROUTES,TrustA.MyServices,menu,government,False,/minhas-atividades,RECUSA_CORRETA,,3,,818
-/necessidades/:id,ROUTES,Net.NeedDetail,parâmetro,osc,True,/necessidades/78ae6613-3745-4867-bebf-37e3b4a774bf,OK,Ofertas recebidas,4,,814
+/minhas-atividades,ROUTES,TrustA.MyServices,menu,provider,True,/minhas-atividades,VAZIA,Minhas atividades,5,,792
+/minhas-atividades,ROUTES,TrustA.MyServices,menu,individual,True,/minhas-atividades,VAZIA,Minhas atividades,5,,805
+/minhas-atividades,ROUTES,TrustA.MyServices,menu,government,False,/minhas-atividades,RECUSA_CORRETA,,3,,775
+/necessidades/:id,ROUTES,Net.NeedDetail,parâmetro,osc,True,/necessidades/d16cf2c8-e940-4892-b770-aa7d709e4c0f,OK,Ofertas recebidas,4,,797
 /necessidades/:id,ROUTES,Net.NeedDetail,parâmetro,government,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/notificacoes,ROUTES,Home.Notifications,link direto,osc,True,/notificacoes,OK,Notificações,4,,812
-/notificacoes,ROUTES,Home.Notifications,link direto,company,True,/notificacoes,OK,Notificações,4,,851
-/notificacoes,ROUTES,Home.Notifications,link direto,provider,True,/notificacoes,OK,Notificações,4,,810
-/notificacoes,ROUTES,Home.Notifications,link direto,government,True,/notificacoes,OK,Notificações,4,,849
-/notificacoes,ROUTES,Home.Notifications,link direto,individual,True,/notificacoes,OK,Notificações,4,,847
-/notificacoes,ROUTES,Home.Notifications,link direto,admin,True,/notificacoes,VAZIA,Notificações,4,,822
-/operacoes,ROUTES,Int.Operacoes,link direto,admin,True,/operacoes,OK,Saúde do sistema,4,,810
-/operacoes,ROUTES,Int.Operacoes,link direto,government,False,/operacoes,RECUSA_CORRETA,,3,,807
-/operacoes/alertas,ROUTES,Int.Alertas,link direto,admin,True,/operacoes/alertas,OK,Central de alertas,4,,839
-/operacoes/alertas,ROUTES,Int.Alertas,link direto,government,False,/operacoes/alertas,RECUSA_CORRETA,,3,,808
-/oportunidades,ROUTES,Calls.Opportunities,menu,osc,True,/oportunidades,OK,Oportunidades,4,,852
-/oportunidades,ROUTES,Calls.Opportunities,menu,government,False,/oportunidades,RECUSA_CORRETA,,3,,822
-/oportunidades-profissionais,ROUTES,Net.Opportunities,menu,provider,True,/oportunidades-profissionais,OK,Oportunidades profissionais,5,,833
-/oportunidades-profissionais,ROUTES,Net.Opportunities,menu,government,False,/oportunidades-profissionais,RECUSA_CORRETA,,3,,808
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,osc,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,6,,888
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,company,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,5,,860
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,provider,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,5,,868
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,government,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,5,,864
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,individual,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,5,,819
-/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,admin,True,/oportunidades/ffd4f712-6a5c-452b-8641-82bbb1bec3a6,OK,Edital Municipal Ambiental,5,,818
-/organizacao,ROUTES,Org.OrgProfile,link direto,osc,True,/organizacao,OK,Organização,5,,859
-/organizacao,ROUTES,Org.OrgProfile,link direto,company,True,/organizacao,OK,Organização,6,,910
-/organizacao,ROUTES,Org.OrgProfile,link direto,provider,True,/organizacao,OK,Organização,6,,849
-/organizacao,ROUTES,Org.OrgProfile,link direto,government,True,/organizacao,OK,Organização,5,,838
-/organizacao,ROUTES,Org.OrgProfile,link direto,individual,True,/organizacao,OK,Organização,6,,980
-/organizacao,ROUTES,Org.OrgProfile,link direto,admin,True,/organizacao,OK,Organização,5,,852
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,osc,True,/organizacao/compliance,OK,Verificação do cadastro,4,,867
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,company,True,/organizacao/compliance,OK,Verificação do cadastro,4,,866
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,provider,True,/organizacao/compliance,OK,Verificação do cadastro,4,,856
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,government,True,/organizacao/compliance,OK,Verificação do cadastro,4,,849
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,individual,True,/organizacao/compliance,OK,Verificação do cadastro,4,,804
-/organizacao/compliance,ROUTES,Org.Compliance,link direto,admin,True,/organizacao/compliance,OK,Verificação do cadastro,4,,834
-/organizacao/equipe,ROUTES,Org.Team,link direto,osc,True,/organizacao/equipe,OK,Equipe,5,,839
-/organizacao/equipe,ROUTES,Org.Team,link direto,company,True,/organizacao/equipe,OK,Equipe,5,,827
-/organizacao/equipe,ROUTES,Org.Team,link direto,provider,True,/organizacao/equipe,OK,Equipe,5,,822
-/organizacao/equipe,ROUTES,Org.Team,link direto,government,True,/organizacao/equipe,OK,Equipe,5,,858
-/organizacao/equipe,ROUTES,Org.Team,link direto,individual,True,/organizacao/equipe,OK,Equipe,5,,845
-/organizacao/equipe,ROUTES,Org.Team,link direto,admin,True,/organizacao/equipe,OK,Equipe,5,,872
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,osc,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,843
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,company,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,841
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,provider,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,842
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,government,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,861
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,individual,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,830
-/organizacao/nova,ROUTES,Org.CreateOrg,link direto,admin,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,858
-/pagamentos,ROUTES,Fin.Payments,menu,osc,True,/pagamentos,OK,Pagamentos,4,,858
-/pagamentos,ROUTES,Fin.Payments,menu,company,True,/pagamentos,OK,Pagamentos,4,,851
-/pagamentos,ROUTES,Fin.Payments,menu,individual,True,/pagamentos,VAZIA,Pagamentos,4,,819
-/pagamentos,ROUTES,Fin.Payments,menu,government,True,/pagamentos,VAZIA,Pagamentos,4,,846
-/pagamentos,ROUTES,Fin.Payments,menu,provider,False,/pagamentos,RECUSA_CORRETA,,3,,833
-/pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,osc,True,/pagamentos/e2c98078-e942-4092-b5c1-353cb75603fd,OK,Pagamento,4,,879
-/pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,company,True,/pagamentos/e2c98078-e942-4092-b5c1-353cb75603fd,OK,Pagamento,4,,831
+/notificacoes,ROUTES,Home.Notifications,link direto,osc,True,/notificacoes,OK,Notificações,4,,825
+/notificacoes,ROUTES,Home.Notifications,link direto,company,True,/notificacoes,OK,Notificações,4,,831
+/notificacoes,ROUTES,Home.Notifications,link direto,provider,True,/notificacoes,OK,Notificações,4,,862
+/notificacoes,ROUTES,Home.Notifications,link direto,government,True,/notificacoes,OK,Notificações,4,,795
+/notificacoes,ROUTES,Home.Notifications,link direto,individual,True,/notificacoes,OK,Notificações,4,,796
+/notificacoes,ROUTES,Home.Notifications,link direto,admin,True,/notificacoes,VAZIA,Notificações,4,,794
+/operacoes,ROUTES,Int.Operacoes,link direto,admin,True,/operacoes,OK,Saúde do sistema,4,,806
+/operacoes,ROUTES,Int.Operacoes,link direto,government,False,/operacoes,RECUSA_CORRETA,,3,,780
+/operacoes/alertas,ROUTES,Int.Alertas,link direto,admin,True,/operacoes/alertas,OK,Central de alertas,4,,815
+/operacoes/alertas,ROUTES,Int.Alertas,link direto,government,False,/operacoes/alertas,RECUSA_CORRETA,,3,,759
+/oportunidades,ROUTES,Calls.Opportunities,menu,osc,True,/oportunidades,OK,Oportunidades,4,,845
+/oportunidades,ROUTES,Calls.Opportunities,menu,government,False,/oportunidades,RECUSA_CORRETA,,3,,774
+/oportunidades-profissionais,ROUTES,Net.Opportunities,menu,provider,True,/oportunidades-profissionais,OK,Oportunidades profissionais,5,,815
+/oportunidades-profissionais,ROUTES,Net.Opportunities,menu,government,False,/oportunidades-profissionais,RECUSA_CORRETA,,3,,791
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,osc,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,6,,897
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,company,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,5,,803
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,provider,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,5,,840
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,government,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,5,,815
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,individual,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,5,,843
+/oportunidades/:id,ROUTES,Calls.CallDetail,parâmetro,admin,True,/oportunidades/cde6c47b-cb71-4434-88a7-5948c199b0a8,OK,Edital Municipal Ambiental,5,,820
+/organizacao,ROUTES,Org.OrgProfile,link direto,osc,True,/organizacao,OK,Organização,5,,810
+/organizacao,ROUTES,Org.OrgProfile,link direto,company,True,/organizacao,OK,Organização,6,,828
+/organizacao,ROUTES,Org.OrgProfile,link direto,provider,True,/organizacao,OK,Organização,6,,818
+/organizacao,ROUTES,Org.OrgProfile,link direto,government,True,/organizacao,OK,Organização,5,,865
+/organizacao,ROUTES,Org.OrgProfile,link direto,individual,True,/organizacao,OK,Organização,6,,888
+/organizacao,ROUTES,Org.OrgProfile,link direto,admin,True,/organizacao,OK,Organização,5,,787
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,osc,True,/organizacao/compliance,OK,Verificação do cadastro,4,,792
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,company,True,/organizacao/compliance,OK,Verificação do cadastro,4,,809
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,provider,True,/organizacao/compliance,OK,Verificação do cadastro,4,,813
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,government,True,/organizacao/compliance,OK,Verificação do cadastro,4,,805
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,individual,True,/organizacao/compliance,OK,Verificação do cadastro,4,,815
+/organizacao/compliance,ROUTES,Org.Compliance,link direto,admin,True,/organizacao/compliance,OK,Verificação do cadastro,4,,790
+/organizacao/equipe,ROUTES,Org.Team,link direto,osc,True,/organizacao/equipe,OK,Equipe,5,,833
+/organizacao/equipe,ROUTES,Org.Team,link direto,company,True,/organizacao/equipe,OK,Equipe,5,,790
+/organizacao/equipe,ROUTES,Org.Team,link direto,provider,True,/organizacao/equipe,OK,Equipe,5,,815
+/organizacao/equipe,ROUTES,Org.Team,link direto,government,True,/organizacao/equipe,OK,Equipe,5,,805
+/organizacao/equipe,ROUTES,Org.Team,link direto,individual,True,/organizacao/equipe,OK,Equipe,5,,812
+/organizacao/equipe,ROUTES,Org.Team,link direto,admin,True,/organizacao/equipe,OK,Equipe,5,,817
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,osc,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,803
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,company,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,791
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,provider,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,809
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,government,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,810
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,individual,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,789
+/organizacao/nova,ROUTES,Org.CreateOrg,link direto,admin,True,/organizacao/nova,OK,Crie ou entre em uma organização,3,,786
+/pagamentos,ROUTES,Fin.Payments,menu,osc,True,/pagamentos,OK,Pagamentos,4,,809
+/pagamentos,ROUTES,Fin.Payments,menu,company,True,/pagamentos,OK,Pagamentos,4,,799
+/pagamentos,ROUTES,Fin.Payments,menu,individual,True,/pagamentos,VAZIA,Pagamentos,4,,794
+/pagamentos,ROUTES,Fin.Payments,menu,government,True,/pagamentos,VAZIA,Pagamentos,4,,803
+/pagamentos,ROUTES,Fin.Payments,menu,provider,False,/pagamentos,RECUSA_CORRETA,,3,,777
+/pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,osc,True,/pagamentos/ca4c5040-be13-4704-9340-853e53a3c1ad,OK,Pagamento,4,,796
+/pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,company,True,/pagamentos/ca4c5040-be13-4704-9340-853e53a3c1ad,OK,Pagamento,4,,801
 /pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /pagamentos/:id,ROUTES,Fin.PaymentDetail,parâmetro,provider,False,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/participacoes,ROUTES,Part.Participations,menu,osc,True,/participacoes,OK,Participação de autoria,4,,830
-/participacoes,ROUTES,Part.Participations,menu,individual,True,/participacoes,OK,Participação de autoria,4,,837
-/participacoes,ROUTES,Part.Participations,menu,provider,True,/participacoes,VAZIA,Participação de autoria,4,,819
-/participacoes,ROUTES,Part.Participations,menu,company,True,/participacoes,VAZIA,Participação de autoria,4,,813
-/participacoes,ROUTES,Part.Participations,menu,government,False,/participacoes,RECUSA_CORRETA,,3,,808
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,osc,True,/perfil-publico,OK,Perfil público,4,,859
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,company,True,/perfil-publico,OK,Perfil público,4,,846
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,provider,True,/perfil-publico,OK,Perfil público,4,,808
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,government,True,/perfil-publico,OK,Perfil público,4,,829
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,individual,True,/perfil-publico,OK,Perfil público,4,,847
-/perfil-publico,ROUTES,PP.MyPublicProfile,menu,admin,True,/perfil-publico,OK,Perfil público,4,,824
-/perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,osc,True,/perfil-publico/92fcc42c-b588-4555-90ab-ae89e77070e9/identificadores,VAZIA,Histórico de identificadores,4,,808
+/participacoes,ROUTES,Part.Participations,menu,osc,True,/participacoes,OK,Participação de autoria,4,,813
+/participacoes,ROUTES,Part.Participations,menu,individual,True,/participacoes,OK,Participação de autoria,4,,789
+/participacoes,ROUTES,Part.Participations,menu,provider,True,/participacoes,VAZIA,Participação de autoria,4,,795
+/participacoes,ROUTES,Part.Participations,menu,company,True,/participacoes,VAZIA,Participação de autoria,4,,797
+/participacoes,ROUTES,Part.Participations,menu,government,False,/participacoes,RECUSA_CORRETA,,3,,794
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,osc,True,/perfil-publico,OK,Perfil público,4,,823
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,company,True,/perfil-publico,OK,Perfil público,4,,804
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,provider,True,/perfil-publico,OK,Perfil público,4,,799
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,government,True,/perfil-publico,OK,Perfil público,4,,814
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,individual,True,/perfil-publico,OK,Perfil público,4,,875
+/perfil-publico,ROUTES,PP.MyPublicProfile,menu,admin,True,/perfil-publico,OK,Perfil público,4,,797
+/perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,osc,True,/perfil-publico/a2230635-79c1-4f52-8285-23d2be5ada4d/identificadores,VAZIA,Histórico de identificadores,4,,811
 /perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,provider,True,/perfil-publico/62f42e51-c1b6-48a4-bc01-9f075c267bcb/identificadores,VAZIA,Histórico de identificadores,4,,811
+/perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,provider,True,/perfil-publico/a0f93745-219b-4268-bdd4-316c1ece218d/identificadores,VAZIA,Histórico de identificadores,4,,790
 /perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /perfil-publico/:id/identificadores,ROUTES,PP.HandleHistory,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /perfil-publico/experiencias,ROUTES,PP.Experiences,menu,osc,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,833
-/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,company,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,824
-/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,provider,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,892
-/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,government,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,824
-/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,individual,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,851
-/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,admin,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,838
-/portal,ROUTES,Portal.Portal,link direto,osc,True,/portal,OK,"Olá, Ana",8,,910
-/portal,ROUTES,Portal.Portal,link direto,company,True,/portal,OK,"Olá, Bruno",8,,908
-/portal,ROUTES,Portal.Portal,link direto,provider,True,/portal,OK,"Olá, Carla",8,,931
-/portal,ROUTES,Portal.Portal,link direto,government,True,/portal,OK,"Olá, Davi",8,,901
-/portal,ROUTES,Portal.Portal,link direto,individual,True,/portal,OK,"Olá, Elisa",8,,920
-/portal,ROUTES,Portal.Portal,link direto,admin,True,/portal,OK,Administração,5,,863
-/profissionais,ROUTES,Docs.Directory,menu,osc,True,/profissionais,OK,Profissionais parceiros,6,,834
-/profissionais,ROUTES,Docs.Directory,menu,company,True,/profissionais,OK,Profissionais parceiros,6,,842
-/profissionais,ROUTES,Docs.Directory,menu,provider,True,/profissionais,OK,Profissionais parceiros,6,,887
-/profissionais,ROUTES,Docs.Directory,menu,government,True,/profissionais,OK,Profissionais parceiros,6,,887
-/profissionais,ROUTES,Docs.Directory,menu,individual,True,/profissionais,OK,Profissionais parceiros,6,,868
-/profissionais,ROUTES,Docs.Directory,menu,admin,True,/profissionais,OK,Profissionais parceiros,6,,874
-/projetos,ROUTES,Proj.Projects,menu,osc,True,/projetos,OK,Projetos,4,,847
-/projetos,ROUTES,Proj.Projects,menu,government,False,/projetos,RECUSA_CORRETA,,3,,822
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca,OK,Orquestra Comunitária Exemplo,9,,887
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a,OK,Projeto Gov 0,10,,920
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a,OK,Projeto Gov 0,9,,904
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a,OK,Projeto Gov 0,9,,872
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a,OK,Projeto Gov 0,10,,919
-/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a,OK,Projeto Gov 0,9,,951
-/projetos/:id/apoio-profissional,ROUTES,Net.ProjectNeeds,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/apoio-profissional,OK,Apoio profissional,5,,867
-/projetos/:id/apoio-profissional,ROUTES,Net.ProjectNeeds,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/apoio-profissional,RECUSA_CORRETA,,3,,815
-/projetos/:id/compras,ROUTES,Fin.Procurement,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/compras,OK,Compras e cotações,5,,861
-/projetos/:id/compras,ROUTES,Fin.Procurement,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/compras,RECUSA_CORRETA,,3,,803
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/contribuicao,OK,Modelos de contribuição,5,,829
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/contribuicao,OK,Modelos de contribuição,5,,850
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/contribuicao,OK,Modelos de contribuição,5,,814
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/contribuicao,OK,Modelos de contribuição,5,,847
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/contribuicao,OK,Modelos de contribuição,5,,860
-/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/contribuicao,OK,Modelos de contribuição,5,,844
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/equidade,OK,Equidade e contexto,6,,854
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equidade,OK,Equidade e contexto,6,,871
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equidade,OK,Equidade e contexto,6,,822
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equidade,OK,Equidade e contexto,6,,853
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equidade,OK,Equidade e contexto,6,,836
-/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equidade,OK,Equidade e contexto,6,,830
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/equipe,OK,Equipe do projeto,4,,888
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equipe,OK,Equipe do projeto,4,,838
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equipe,OK,Equipe do projeto,4,,844
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equipe,OK,Equipe do projeto,4,,837
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equipe,OK,Equipe do projeto,4,,830
-/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/equipe,OK,Equipe do projeto,4,,827
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/grafo,OK,Impact Graph,5,,825
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/grafo,OK,Impact Graph,5,,874
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/grafo,OK,Impact Graph,5,,869
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/grafo,OK,Impact Graph,5,,917
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/grafo,OK,Impact Graph,5,,861
-/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/grafo,OK,Impact Graph,5,,846
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/impacto,OK,Impacto e indicadores,6,,854
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/impacto,OK,Impacto e indicadores,6,,851
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/impacto,OK,Impacto e indicadores,6,,840
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/impacto,OK,Impacto e indicadores,6,,843
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/impacto,OK,Impacto e indicadores,6,,862
-/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/impacto,OK,Impacto e indicadores,6,,834
-/projetos/:id/linha-do-tempo,ROUTES,Core.Timeline,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/linha-do-tempo,OK,Linha de tempo,5,,862
-/projetos/:id/linha-do-tempo,ROUTES,Core.Timeline,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/linha-do-tempo,RECUSA_CORRETA,,3,,824
-/projetos/:id/localizacao,ROUTES,Rep.LocationEditor,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/localizacao,OK,Localização pública,3,,844
-/projetos/:id/localizacao,ROUTES,Rep.LocationEditor,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/localizacao,RECUSA_CORRETA,,3,,808
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/ods,OK,ODS do projeto,5,,860
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/ods,OK,ODS do projeto,5,,848
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/ods,OK,ODS do projeto,5,,836
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/ods,OK,ODS do projeto,5,,858
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/ods,OK,ODS do projeto,5,,1143
-/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/ods,OK,ODS do projeto,5,,815
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/relatorios,OK,Relatórios de impacto,4,,825
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,company,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/relatorios,VAZIA,Relatórios de impacto,4,,842
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,provider,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/relatorios,VAZIA,Relatórios de impacto,4,,840
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,government,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/relatorios,VAZIA,Relatórios de impacto,4,,828
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,individual,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/relatorios,VAZIA,Relatórios de impacto,4,,832
-/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,admin,True,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/relatorios,VAZIA,Relatórios de impacto,4,,828
-/projetos/:id/retratos,ROUTES,Core.Snapshots,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/retratos,OK,Retratos do projeto,4,,851
-/projetos/:id/retratos,ROUTES,Core.Snapshots,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/retratos,RECUSA_CORRETA,,3,,828
-/projetos/:id/riscos,ROUTES,Core.Risks,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/riscos,OK,Riscos do projeto,5,,829
-/projetos/:id/riscos,ROUTES,Core.Risks,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/riscos,RECUSA_CORRETA,,3,,806
-/projetos/:id/situacao,ROUTES,Core.Lifecycle,parâmetro,osc,True,/projetos/e5d7c3d1-fac0-442c-8c03-0e45e37766ca/situacao,OK,Situação do projeto,4,,856
-/projetos/:id/situacao,ROUTES,Core.Lifecycle,parâmetro,government,False,/projetos/521c382d-3402-439c-abcf-8fb28e6c9e1a/situacao,RECUSA_CORRETA,,3,,800
-/projetos/novo,ROUTES,Proj.NewProject,link direto,osc,True,/projetos/novo,OK,Novo projeto,4,,830
-/projetos/novo,ROUTES,Proj.NewProject,link direto,government,False,/projetos/novo,RECUSA_CORRETA,,3,,818
-/prontidao,ROUTES,Core.Readiness,menu,osc,True,/prontidao,OK,Prontidão da organização,4,,859
-/prontidao,ROUTES,Core.Readiness,menu,government,False,/prontidao,RECUSA_CORRETA,,3,,840
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,osc,True,/prontidao/finalidades,OK,Prontidão por finalidade,5,,870
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,company,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,892
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,provider,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,874
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,government,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,848
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,individual,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,855
-/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,admin,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,862
-/propostas,ROUTES,NetX.Proposals,menu,osc,True,/propostas,OK,Propostas,5,,875
-/propostas,ROUTES,NetX.Proposals,menu,company,True,/propostas,VAZIA,Propostas,5,,887
-/propostas,ROUTES,NetX.Proposals,menu,provider,True,/propostas,VAZIA,Propostas,5,,858
-/propostas,ROUTES,NetX.Proposals,menu,government,True,/propostas,VAZIA,Propostas,5,,863
-/propostas,ROUTES,NetX.Proposals,menu,individual,True,/propostas,VAZIA,Propostas,5,,865
-/propostas,ROUTES,NetX.Proposals,menu,admin,True,/propostas,VAZIA,Propostas,5,,831
-/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,osc,True,/propostas/1d767ab0-eb13-47cd-9cf6-07ed2b8e7dcb,OK,Apoio ao segundo semestre da orquestra,5,,878
-/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,company,True,/propostas/1d767ab0-eb13-47cd-9cf6-07ed2b8e7dcb,OK,Apoio ao segundo semestre da orquestra,5,,858
-/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,provider,True,/propostas/52ca510a-200b-4dc3-99a0-fc1157efd97c,OK,Organização do arquivo de prestação de contas,5,,840
+/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,company,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,806
+/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,provider,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,827
+/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,government,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,806
+/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,individual,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,815
+/perfil-publico/experiencias,ROUTES,PP.Experiences,menu,admin,True,/perfil-publico/experiencias,OK,Experiência profissional,4,,816
+/portal,ROUTES,Portal.Portal,link direto,osc,True,/portal,OK,"Olá, Ana",8,,894
+/portal,ROUTES,Portal.Portal,link direto,company,True,/portal,OK,"Olá, Bruno",8,,860
+/portal,ROUTES,Portal.Portal,link direto,provider,True,/portal,OK,"Olá, Carla",8,,837
+/portal,ROUTES,Portal.Portal,link direto,government,True,/portal,OK,"Olá, Davi",8,,842
+/portal,ROUTES,Portal.Portal,link direto,individual,True,/portal,OK,"Olá, Elisa",8,,870
+/portal,ROUTES,Portal.Portal,link direto,admin,True,/portal,OK,Administração,5,,871
+/profissionais,ROUTES,Docs.Directory,menu,osc,True,/profissionais,OK,Profissionais parceiros,6,,838
+/profissionais,ROUTES,Docs.Directory,menu,company,True,/profissionais,OK,Profissionais parceiros,6,,832
+/profissionais,ROUTES,Docs.Directory,menu,provider,True,/profissionais,OK,Profissionais parceiros,6,,831
+/profissionais,ROUTES,Docs.Directory,menu,government,True,/profissionais,OK,Profissionais parceiros,6,,837
+/profissionais,ROUTES,Docs.Directory,menu,individual,True,/profissionais,OK,Profissionais parceiros,6,,829
+/profissionais,ROUTES,Docs.Directory,menu,admin,True,/profissionais,OK,Profissionais parceiros,6,,825
+/projetos,ROUTES,Proj.Projects,menu,osc,True,/projetos,OK,Projetos,4,,796
+/projetos,ROUTES,Proj.Projects,menu,government,False,/projetos,RECUSA_CORRETA,,3,,792
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a,OK,Orquestra Comunitária Exemplo,9,,878
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb,OK,Projeto Gov 0,10,,892
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb,OK,Projeto Gov 0,9,,868
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb,OK,Projeto Gov 0,9,,842
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb,OK,Projeto Gov 0,10,,902
+/projetos/:id,ROUTES,Proj.ProjectDetail,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb,OK,Projeto Gov 0,9,,883
+/projetos/:id/apoio-profissional,ROUTES,Net.ProjectNeeds,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/apoio-profissional,OK,Apoio profissional,5,,790
+/projetos/:id/apoio-profissional,ROUTES,Net.ProjectNeeds,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/apoio-profissional,RECUSA_CORRETA,,3,,799
+/projetos/:id/compras,ROUTES,Fin.Procurement,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/compras,OK,Compras e cotações,5,,826
+/projetos/:id/compras,ROUTES,Fin.Procurement,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/compras,RECUSA_CORRETA,,3,,823
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/contribuicao,OK,Modelos de contribuição,5,,814
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/contribuicao,OK,Modelos de contribuição,5,,825
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/contribuicao,OK,Modelos de contribuição,5,,808
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/contribuicao,OK,Modelos de contribuição,5,,813
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/contribuicao,OK,Modelos de contribuição,5,,823
+/projetos/:id/contribuicao,ROUTES,Fin.ContributionModels,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/contribuicao,OK,Modelos de contribuição,5,,810
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/equidade,OK,"Equidade e contexto 
+i",6,,814
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equidade,OK,"Equidade e contexto 
+i",6,,810
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equidade,OK,"Equidade e contexto 
+i",6,,814
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equidade,OK,"Equidade e contexto 
+i",6,,819
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equidade,OK,"Equidade e contexto 
+i",6,,827
+/projetos/:id/equidade,ROUTES,IL.Equity,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equidade,OK,"Equidade e contexto 
+i",6,,796
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/equipe,OK,Equipe do projeto,4,,796
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equipe,OK,Equipe do projeto,4,,792
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equipe,OK,Equipe do projeto,4,,783
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equipe,OK,Equipe do projeto,4,,790
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equipe,OK,Equipe do projeto,4,,795
+/projetos/:id/equipe,ROUTES,Talk.ProjectTeam,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/equipe,OK,Equipe do projeto,4,,793
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/grafo,OK,Impact Graph,5,,851
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/grafo,OK,Impact Graph,5,,841
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/grafo,OK,Impact Graph,5,,799
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/grafo,OK,Impact Graph,5,,823
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/grafo,OK,Impact Graph,5,,835
+/projetos/:id/grafo,ROUTES,Impact.ImpactGraph,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/grafo,OK,Impact Graph,5,,815
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/impacto,OK,Impacto e indicadores,6,,811
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/impacto,OK,Impacto e indicadores,6,,911
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/impacto,OK,Impacto e indicadores,6,,803
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/impacto,OK,Impacto e indicadores,6,,814
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/impacto,OK,Impacto e indicadores,6,,805
+/projetos/:id/impacto,ROUTES,Impact.ProjectImpact,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/impacto,OK,Impacto e indicadores,6,,820
+/projetos/:id/linha-do-tempo,ROUTES,Core.Timeline,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/linha-do-tempo,OK,Linha de tempo,5,,827
+/projetos/:id/linha-do-tempo,ROUTES,Core.Timeline,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/linha-do-tempo,RECUSA_CORRETA,,3,,791
+/projetos/:id/localizacao,ROUTES,Rep.LocationEditor,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/localizacao,OK,Localização pública,3,,819
+/projetos/:id/localizacao,ROUTES,Rep.LocationEditor,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/localizacao,RECUSA_CORRETA,,3,,835
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/ods,OK,ODS do projeto,5,,854
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/ods,OK,ODS do projeto,5,,874
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/ods,OK,ODS do projeto,5,,806
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/ods,OK,ODS do projeto,5,,810
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/ods,OK,ODS do projeto,5,,820
+/projetos/:id/ods,ROUTES,IL.OdsTargets,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/ods,OK,ODS do projeto,5,,806
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/relatorios,OK,Relatórios de impacto,4,,838
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,company,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/relatorios,VAZIA,Relatórios de impacto,4,,828
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,provider,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/relatorios,VAZIA,Relatórios de impacto,4,,813
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,government,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/relatorios,VAZIA,Relatórios de impacto,4,,814
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,individual,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/relatorios,VAZIA,Relatórios de impacto,4,,803
+/projetos/:id/relatorios,ROUTES,IR.ProjectImpactReports,parâmetro,admin,True,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/relatorios,VAZIA,Relatórios de impacto,4,,797
+/projetos/:id/retratos,ROUTES,Core.Snapshots,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/retratos,OK,Retratos do projeto,4,,808
+/projetos/:id/retratos,ROUTES,Core.Snapshots,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/retratos,RECUSA_CORRETA,,3,,800
+/projetos/:id/riscos,ROUTES,Core.Risks,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/riscos,OK,Riscos do projeto,5,,840
+/projetos/:id/riscos,ROUTES,Core.Risks,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/riscos,RECUSA_CORRETA,,3,,795
+/projetos/:id/situacao,ROUTES,Core.Lifecycle,parâmetro,osc,True,/projetos/777cc5be-e845-4117-ba08-8f7d254ec94a/situacao,OK,Situação do projeto,4,,814
+/projetos/:id/situacao,ROUTES,Core.Lifecycle,parâmetro,government,False,/projetos/75cbb350-1695-4f00-886d-6d84068c1fdb/situacao,RECUSA_CORRETA,,3,,798
+/projetos/novo,ROUTES,Proj.NewProject,link direto,osc,True,/projetos/novo,OK,Novo projeto,4,,792
+/projetos/novo,ROUTES,Proj.NewProject,link direto,government,False,/projetos/novo,RECUSA_CORRETA,,3,,796
+/prontidao,ROUTES,Core.Readiness,menu,osc,True,/prontidao,OK,"Prontidão da organização 
+i",4,,834
+/prontidao,ROUTES,Core.Readiness,menu,government,False,/prontidao,RECUSA_CORRETA,,3,,790
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,osc,True,/prontidao/finalidades,OK,Prontidão por finalidade,5,,851
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,company,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,850
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,provider,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,851
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,government,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,958
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,individual,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,853
+/prontidao/finalidades,ROUTES,IR.ReadinessPurposes,menu,admin,True,/prontidao/finalidades,OK,Prontidão por finalidade,4,,818
+/propostas,ROUTES,NetX.Proposals,menu,osc,True,/propostas,OK,Propostas,5,,835
+/propostas,ROUTES,NetX.Proposals,menu,company,True,/propostas,VAZIA,Propostas,5,,868
+/propostas,ROUTES,NetX.Proposals,menu,provider,True,/propostas,VAZIA,Propostas,5,,841
+/propostas,ROUTES,NetX.Proposals,menu,government,True,/propostas,VAZIA,Propostas,5,,820
+/propostas,ROUTES,NetX.Proposals,menu,individual,True,/propostas,VAZIA,Propostas,5,,821
+/propostas,ROUTES,NetX.Proposals,menu,admin,True,/propostas,VAZIA,Propostas,5,,812
+/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,osc,True,/propostas/12cf87cd-9f44-4815-bcae-9f2e76df4cd4,OK,Apoio ao segundo semestre da orquestra,5,,837
+/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,company,True,/propostas/12cf87cd-9f44-4815-bcae-9f2e76df4cd4,OK,Apoio ao segundo semestre da orquestra,5,,818
+/propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,provider,True,/propostas/ea637c1e-e546-4ebe-97cc-11723460f4e4,OK,Organização do arquivo de prestação de contas,5,,1141
 /propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /propostas/:id,ROUTES,NetX.ProposalDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,osc,True,/propostas/nova,OK,Nova proposta,5,,856
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,company,True,/propostas/nova,OK,Nova proposta,5,,872
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,provider,True,/propostas/nova,OK,Nova proposta,5,,849
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,government,True,/propostas/nova,OK,Nova proposta,5,,875
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,individual,True,/propostas/nova,OK,Nova proposta,5,,836
-/propostas/nova,ROUTES,NetX.NewProposal,link direto,admin,True,/propostas/nova,OK,Nova proposta,5,,879
-/rascunhos,ROUTES,Docs.Drafts,menu,osc,True,/rascunhos,OK,Rascunhos,5,,847
-/rascunhos,ROUTES,Docs.Drafts,menu,company,True,/rascunhos,VAZIA,Rascunhos,4,,848
-/rascunhos,ROUTES,Docs.Drafts,menu,provider,True,/rascunhos,VAZIA,Rascunhos,4,,844
-/rascunhos,ROUTES,Docs.Drafts,menu,government,True,/rascunhos,VAZIA,Rascunhos,4,,843
-/rascunhos,ROUTES,Docs.Drafts,menu,individual,True,/rascunhos,VAZIA,Rascunhos,4,,839
-/rascunhos,ROUTES,Docs.Drafts,menu,admin,True,/rascunhos,VAZIA,Rascunhos,4,,860
-/rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,osc,True,/rascunhos/38cf4de9-e501-4072-9d41-1b3187e2e808,OK,Plano de trabalho (exemplo),4,,864
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,osc,True,/propostas/nova,OK,Nova proposta,5,,827
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,company,True,/propostas/nova,OK,Nova proposta,5,,820
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,provider,True,/propostas/nova,OK,Nova proposta,5,,818
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,government,True,/propostas/nova,OK,Nova proposta,5,,839
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,individual,True,/propostas/nova,OK,Nova proposta,5,,809
+/propostas/nova,ROUTES,NetX.NewProposal,link direto,admin,True,/propostas/nova,OK,Nova proposta,5,,822
+/rascunhos,ROUTES,Docs.Drafts,menu,osc,True,/rascunhos,OK,Rascunhos,5,,797
+/rascunhos,ROUTES,Docs.Drafts,menu,company,True,/rascunhos,VAZIA,Rascunhos,4,,806
+/rascunhos,ROUTES,Docs.Drafts,menu,provider,True,/rascunhos,VAZIA,Rascunhos,4,,800
+/rascunhos,ROUTES,Docs.Drafts,menu,government,True,/rascunhos,VAZIA,Rascunhos,4,,790
+/rascunhos,ROUTES,Docs.Drafts,menu,individual,True,/rascunhos,VAZIA,Rascunhos,4,,787
+/rascunhos,ROUTES,Docs.Drafts,menu,admin,True,/rascunhos,VAZIA,Rascunhos,4,,805
+/rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,osc,True,/rascunhos/600bc215-2640-4489-a138-aa6cb0c68626,OK,Plano de trabalho (exemplo),4,,801
 /rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /rascunhos/:id,ROUTES,Docs.DraftEditor,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,osc,True,/rede/atividade,OK,Atividade da rede,4,,865
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,company,True,/rede/atividade,OK,Atividade da rede,4,,840
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,provider,True,/rede/atividade,OK,Atividade da rede,4,,856
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,government,True,/rede/atividade,VAZIA,Atividade da rede,4,,852
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,individual,True,/rede/atividade,OK,Atividade da rede,4,,841
-/rede/atividade,ROUTES,Talk.NetworkEvents,menu,admin,True,/rede/atividade,VAZIA,Atividade da rede,4,,841
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,osc,True,/rede/experiencias,OK,Experiências declaradas na sua organização,4,,854
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,company,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,836
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,provider,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,888
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,government,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,883
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,individual,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,881
-/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,admin,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,889
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,osc,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,844
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,company,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,819
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,provider,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,817
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,government,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,823
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,individual,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,861
-/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,admin,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,822
-/rede/relacoes,ROUTES,NetX.Relationships,menu,osc,True,/rede/relacoes,OK,Relações,5,,843
-/rede/relacoes,ROUTES,NetX.Relationships,menu,company,True,/rede/relacoes,OK,Relações,5,,873
-/rede/relacoes,ROUTES,NetX.Relationships,menu,provider,True,/rede/relacoes,VAZIA,Relações,5,,870
-/rede/relacoes,ROUTES,NetX.Relationships,menu,government,True,/rede/relacoes,VAZIA,Relações,5,,863
-/rede/relacoes,ROUTES,NetX.Relationships,menu,individual,True,/rede/relacoes,VAZIA,Relações,5,,848
-/rede/relacoes,ROUTES,NetX.Relationships,menu,admin,True,/rede/relacoes,VAZIA,Relações,5,,859
-/relatorios,ROUTES,Rep.ReportCenter,menu,osc,True,/relatorios,OK,Relatórios,5,,832
-/relatorios,ROUTES,Rep.ReportCenter,menu,company,True,/relatorios,OK,Relatórios,5,,937
-/relatorios,ROUTES,Rep.ReportCenter,menu,provider,True,/relatorios,OK,Relatórios,4,,841
-/relatorios,ROUTES,Rep.ReportCenter,menu,government,True,/relatorios,OK,Relatórios,5,,857
-/relatorios,ROUTES,Rep.ReportCenter,menu,individual,True,/relatorios,OK,Relatórios,5,,880
-/relatorios,ROUTES,Rep.ReportCenter,menu,admin,True,/relatorios,OK,Relatórios,4,,830
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,osc,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,871
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,company,True,/relatorios-impacto,OK,Relatórios para analisar,4,,855
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,provider,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,865
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,government,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,844
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,individual,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,851
-/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,admin,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,864
-/relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,osc,True,/relatorios-impacto/e195f744-1f51-4c91-920b-5201d9415ebd,OK,12 de mai. de 2026 a 08 de out. de 2026,4,,848
-/relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,company,True,/relatorios-impacto/e195f744-1f51-4c91-920b-5201d9415ebd,OK,12 de mai. de 2026 a 08 de out. de 2026,4,,832
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,osc,True,/rede/atividade,OK,Atividade da rede,4,,816
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,company,True,/rede/atividade,OK,Atividade da rede,4,,820
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,provider,True,/rede/atividade,OK,Atividade da rede,4,,801
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,government,True,/rede/atividade,VAZIA,Atividade da rede,4,,817
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,individual,True,/rede/atividade,OK,Atividade da rede,4,,816
+/rede/atividade,ROUTES,Talk.NetworkEvents,menu,admin,True,/rede/atividade,VAZIA,Atividade da rede,4,,812
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,osc,True,/rede/experiencias,OK,Experiências declaradas na sua organização,4,,842
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,company,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,828
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,provider,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,807
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,government,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,814
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,individual,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,815
+/rede/experiencias,ROUTES,PP.ExperienceRequests,menu,admin,True,/rede/experiencias,VAZIA,Experiências declaradas na sua organização,4,,815
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,osc,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,839
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,company,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,821
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,provider,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,828
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,government,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,853
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,individual,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,803
+/rede/grafo,ROUTES,NetX.NetworkGraph,link direto,admin,True,/rede/grafo,VAZIA,Vizinhança na rede,4,,818
+/rede/relacoes,ROUTES,NetX.Relationships,menu,osc,True,/rede/relacoes,OK,Relações,5,,848
+/rede/relacoes,ROUTES,NetX.Relationships,menu,company,True,/rede/relacoes,OK,Relações,5,,816
+/rede/relacoes,ROUTES,NetX.Relationships,menu,provider,True,/rede/relacoes,VAZIA,Relações,5,,811
+/rede/relacoes,ROUTES,NetX.Relationships,menu,government,True,/rede/relacoes,VAZIA,Relações,5,,810
+/rede/relacoes,ROUTES,NetX.Relationships,menu,individual,True,/rede/relacoes,VAZIA,Relações,5,,843
+/rede/relacoes,ROUTES,NetX.Relationships,menu,admin,True,/rede/relacoes,VAZIA,Relações,5,,868
+/relatorios,ROUTES,Rep.ReportCenter,menu,osc,True,/relatorios,OK,Relatórios,5,,803
+/relatorios,ROUTES,Rep.ReportCenter,menu,company,True,/relatorios,OK,Relatórios,5,,835
+/relatorios,ROUTES,Rep.ReportCenter,menu,provider,True,/relatorios,OK,Relatórios,4,,806
+/relatorios,ROUTES,Rep.ReportCenter,menu,government,True,/relatorios,OK,Relatórios,5,,809
+/relatorios,ROUTES,Rep.ReportCenter,menu,individual,True,/relatorios,OK,Relatórios,5,,829
+/relatorios,ROUTES,Rep.ReportCenter,menu,admin,True,/relatorios,OK,Relatórios,4,,819
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,osc,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,801
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,company,True,/relatorios-impacto,OK,Relatórios para analisar,4,,823
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,provider,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,799
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,government,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,813
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,individual,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,803
+/relatorios-impacto,ROUTES,IR.ImpactReportInbox,menu,admin,True,/relatorios-impacto,VAZIA,Relatórios para analisar,4,,816
+/relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,osc,True,/relatorios-impacto/0e6a0469-8392-4085-9950-d35795f2bb87,OK,12 de mai. de 2026 a 08 de out. de 2026,4,,828
+/relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,company,True,/relatorios-impacto/0e6a0469-8392-4085-9950-d35795f2bb87,OK,12 de mai. de 2026 a 08 de out. de 2026,4,,815
 /relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /relatorios-impacto/:id,ROUTES,IR.ImpactReportDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/reputacao,ROUTES,IL.Reputation,menu,osc,True,/reputacao,OK,Reputação,4,,842
-/reputacao,ROUTES,IL.Reputation,menu,company,True,/reputacao,OK,Reputação,4,,821
-/reputacao,ROUTES,IL.Reputation,menu,provider,True,/reputacao,OK,Reputação,4,,853
-/reputacao,ROUTES,IL.Reputation,menu,government,True,/reputacao,OK,Reputação,4,,838
-/reputacao,ROUTES,IL.Reputation,menu,individual,True,/reputacao,OK,Reputação,4,,829
-/reputacao,ROUTES,IL.Reputation,menu,admin,True,/reputacao,OK,Reputação,4,,837
-/responsabilidade,ROUTES,IL.Responsibility,menu,osc,True,/responsabilidade,OK,Responsabilidade,6,,876
-/responsabilidade,ROUTES,IL.Responsibility,menu,company,True,/responsabilidade,OK,Responsabilidade,6,,861
-/responsabilidade,ROUTES,IL.Responsibility,menu,provider,True,/responsabilidade,OK,Responsabilidade,6,,870
-/responsabilidade,ROUTES,IL.Responsibility,menu,government,True,/responsabilidade,OK,Responsabilidade,6,,912
-/responsabilidade,ROUTES,IL.Responsibility,menu,individual,True,/responsabilidade,OK,Responsabilidade,6,,856
-/responsabilidade,ROUTES,IL.Responsibility,menu,admin,True,/responsabilidade,OK,Responsabilidade,6,,851
-/revisoes,ROUTES,Docs.Reviews,menu,osc,True,/revisoes,OK,Validações,4,,873
-/revisoes,ROUTES,Docs.Reviews,menu,company,True,/revisoes,VAZIA,Validações,4,,832
-/revisoes,ROUTES,Docs.Reviews,menu,provider,True,/revisoes,OK,Validações,4,,819
-/revisoes,ROUTES,Docs.Reviews,menu,government,True,/revisoes,VAZIA,Validações,4,,842
-/revisoes,ROUTES,Docs.Reviews,menu,individual,True,/revisoes,VAZIA,Validações,4,,828
-/revisoes,ROUTES,Docs.Reviews,menu,admin,True,/revisoes,VAZIA,Validações,4,,817
-/revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,osc,True,/revisoes/130d331d-4876-437c-8237-5e23417a8844,OK,Validação profissional,4,,836
+/reputacao,ROUTES,IL.Reputation,menu,osc,True,/reputacao,OK,"Reputação 
+i",4,,824
+/reputacao,ROUTES,IL.Reputation,menu,company,True,/reputacao,OK,"Reputação 
+i",4,,826
+/reputacao,ROUTES,IL.Reputation,menu,provider,True,/reputacao,OK,"Reputação 
+i",4,,811
+/reputacao,ROUTES,IL.Reputation,menu,government,True,/reputacao,OK,"Reputação 
+i",4,,830
+/reputacao,ROUTES,IL.Reputation,menu,individual,True,/reputacao,OK,"Reputação 
+i",4,,846
+/reputacao,ROUTES,IL.Reputation,menu,admin,True,/reputacao,OK,"Reputação 
+i",4,,864
+/responsabilidade,ROUTES,IL.Responsibility,menu,osc,True,/responsabilidade,OK,Responsabilidade,6,,832
+/responsabilidade,ROUTES,IL.Responsibility,menu,company,True,/responsabilidade,OK,Responsabilidade,6,,857
+/responsabilidade,ROUTES,IL.Responsibility,menu,provider,True,/responsabilidade,OK,Responsabilidade,6,,848
+/responsabilidade,ROUTES,IL.Responsibility,menu,government,True,/responsabilidade,OK,Responsabilidade,6,,843
+/responsabilidade,ROUTES,IL.Responsibility,menu,individual,True,/responsabilidade,OK,Responsabilidade,6,,822
+/responsabilidade,ROUTES,IL.Responsibility,menu,admin,True,/responsabilidade,OK,Responsabilidade,6,,807
+/revisoes,ROUTES,Docs.Reviews,menu,osc,True,/revisoes,OK,Validações,4,,805
+/revisoes,ROUTES,Docs.Reviews,menu,company,True,/revisoes,VAZIA,Validações,4,,809
+/revisoes,ROUTES,Docs.Reviews,menu,provider,True,/revisoes,OK,Validações,4,,833
+/revisoes,ROUTES,Docs.Reviews,menu,government,True,/revisoes,VAZIA,Validações,4,,805
+/revisoes,ROUTES,Docs.Reviews,menu,individual,True,/revisoes,VAZIA,Validações,4,,788
+/revisoes,ROUTES,Docs.Reviews,menu,admin,True,/revisoes,VAZIA,Validações,4,,810
+/revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,osc,True,/revisoes/4a72338f-7a51-4d45-85a7-9f5d6edec7ce,OK,Validação profissional,4,,808
 /revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,provider,True,/revisoes/130d331d-4876-437c-8237-5e23417a8844,OK,Validação profissional,5,,836
+/revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,provider,True,/revisoes/4a72338f-7a51-4d45-85a7-9f5d6edec7ce,OK,Validação profissional,5,,837
 /revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,individual,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /revisoes/:id,ROUTES,Docs.ReviewDetail,parâmetro,admin,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/selos,ROUTES,IL.Seals,menu,osc,True,/selos,OK,Selos,6,,880
-/selos,ROUTES,IL.Seals,menu,company,True,/selos,OK,Selos,6,,877
-/selos,ROUTES,IL.Seals,menu,provider,True,/selos,OK,Selos,6,,864
-/selos,ROUTES,IL.Seals,menu,government,True,/selos,OK,Selos,6,,842
-/selos,ROUTES,IL.Seals,menu,individual,True,/selos,OK,Selos,6,,870
-/selos,ROUTES,IL.Seals,menu,admin,True,/selos,OK,Selos,6,,972
-/settings/billing,ROUTES,Org.Plan,link direto,osc,True,/settings/billing,OK,Acesso e concessões,6,,896
-/settings/billing,ROUTES,Org.Plan,link direto,company,True,/settings/billing,OK,Acesso e concessões,6,,903
-/settings/billing,ROUTES,Org.Plan,link direto,provider,True,/settings/billing,OK,Acesso e concessões,6,,929
-/settings/billing,ROUTES,Org.Plan,link direto,government,True,/settings/billing,OK,Acesso e concessões,6,,907
-/settings/billing,ROUTES,Org.Plan,link direto,individual,True,/settings/billing,OK,Acesso e concessões,6,,907
-/settings/billing,ROUTES,Org.Plan,link direto,admin,True,/settings/billing,OK,Acesso e concessões,6,,859
-/solucoes,ROUTES,Sol.Library,menu,osc,True,/solucoes,OK,Biblioteca de soluções,6,,915
-/solucoes,ROUTES,Sol.Library,menu,company,True,/solucoes,OK,Biblioteca de soluções,6,,898
-/solucoes,ROUTES,Sol.Library,menu,provider,True,/solucoes,OK,Biblioteca de soluções,6,,874
-/solucoes,ROUTES,Sol.Library,menu,government,True,/solucoes,OK,Biblioteca de soluções,6,,886
-/solucoes,ROUTES,Sol.Library,menu,individual,True,/solucoes,OK,Biblioteca de soluções,6,,907
-/solucoes,ROUTES,Sol.Library,menu,admin,True,/solucoes,OK,Biblioteca de soluções,6,,866
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,osc,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,821
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,company,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,855
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,provider,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,843
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,government,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,842
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,individual,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,827
-/solucoes/:id,ROUTES,Sol.Profile,parâmetro,admin,True,/solucoes/5d500b93-f9b0-445c-9936-e1e065d42434,OK,Rede E2E principal,4,,873
-/solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,osc,True,/solucoes/565b22c9-9e9f-4300-a42f-dd3230a0b8fd/editar,OK,Editar solução,6,,890
-/solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,individual,True,/solucoes/150e1e8b-b85c-495f-a487-5eb6ae5cd9b3/editar,OK,Editar solução,6,,880
+/selos,ROUTES,IL.Seals,menu,osc,True,/selos,OK,"Selos 
+i",6,,859
+/selos,ROUTES,IL.Seals,menu,company,True,/selos,OK,"Selos 
+i",6,,854
+/selos,ROUTES,IL.Seals,menu,provider,True,/selos,OK,"Selos 
+i",6,,875
+/selos,ROUTES,IL.Seals,menu,government,True,/selos,OK,"Selos 
+i",6,,836
+/selos,ROUTES,IL.Seals,menu,individual,True,/selos,OK,"Selos 
+i",6,,823
+/selos,ROUTES,IL.Seals,menu,admin,True,/selos,OK,"Selos 
+i",6,,856
+/settings/billing,ROUTES,Org.Plan,link direto,osc,True,/settings/billing,OK,Acesso e concessões,6,,845
+/settings/billing,ROUTES,Org.Plan,link direto,company,True,/settings/billing,OK,Acesso e concessões,6,,801
+/settings/billing,ROUTES,Org.Plan,link direto,provider,True,/settings/billing,OK,Acesso e concessões,6,,824
+/settings/billing,ROUTES,Org.Plan,link direto,government,True,/settings/billing,OK,Acesso e concessões,6,,815
+/settings/billing,ROUTES,Org.Plan,link direto,individual,True,/settings/billing,OK,Acesso e concessões,6,,825
+/settings/billing,ROUTES,Org.Plan,link direto,admin,True,/settings/billing,OK,Acesso e concessões,6,,815
+/solucoes,ROUTES,Sol.Library,menu,osc,True,/solucoes,OK,Biblioteca de soluções,6,,874
+/solucoes,ROUTES,Sol.Library,menu,company,True,/solucoes,OK,Biblioteca de soluções,6,,850
+/solucoes,ROUTES,Sol.Library,menu,provider,True,/solucoes,OK,Biblioteca de soluções,6,,841
+/solucoes,ROUTES,Sol.Library,menu,government,True,/solucoes,OK,Biblioteca de soluções,6,,851
+/solucoes,ROUTES,Sol.Library,menu,individual,True,/solucoes,OK,Biblioteca de soluções,6,,827
+/solucoes,ROUTES,Sol.Library,menu,admin,True,/solucoes,OK,Biblioteca de soluções,6,,867
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,osc,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,856
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,company,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,842
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,provider,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,835
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,government,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,824
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,individual,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,816
+/solucoes/:id,ROUTES,Sol.Profile,parâmetro,admin,True,/solucoes/dfe839a5-5d1c-42f2-bf22-207c5d48d24f,OK,Rede E2E principal,4,,932
+/solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,osc,True,/solucoes/979830e3-b35f-4217-a5c6-0683647e7e08/editar,OK,Editar solução,6,,881
+/solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,individual,True,/solucoes/59b0d0cd-32a2-47c7-ac06-e3139161c2ed/editar,OK,Editar solução,6,,872
 /solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,company,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,government,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
 /solucoes/:id/editar,ROUTES,SolM.SolutionForm,parâmetro,provider,True,,SEM_REGISTRO,a persona não participa de nenhum registro deste tipo na demonstração,0,,0
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,osc,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,808
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,company,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,812
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,provider,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,822
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,government,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,824
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,individual,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,834
-/solucoes/comparar,ROUTES,Sol.Compare,link direto,admin,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,802
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,osc,True,/solucoes/minhas,OK,Minha área na biblioteca,4,,815
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,company,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,829
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,provider,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,836
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,government,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,832
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,individual,True,/solucoes/minhas,OK,Minha área na biblioteca,4,,812
-/solucoes/minhas,ROUTES,SolM.MyArea,menu,admin,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,813
-/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,osc,True,/solucoes/nova,OK,Cadastrar solução,4,,857
-/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,individual,True,/solucoes/nova,OK,Cadastrar solução,4,,872
-/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,company,True,/solucoes/nova,OK,Cadastrar solução,4,,872
-/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,government,True,/solucoes/nova,OK,Cadastrar solução,4,,858
-/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,provider,True,/solucoes/nova,OK,Cadastrar solução,4,,834
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,osc,True,/solucoes/pedidos,OK,Minha área na biblioteca,4,,869
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,company,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,862
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,provider,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,873
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,government,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,837
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,individual,True,/solucoes/pedidos,OK,Minha área na biblioteca,4,,850
-/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,admin,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,831
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,osc,True,/solucoes/preferencias,OK,Tese e personalização,6,,858
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,company,True,/solucoes/preferencias,OK,Tese e personalização,6,,864
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,provider,True,/solucoes/preferencias,OK,Tese e personalização,6,,831
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,government,True,/solucoes/preferencias,OK,Tese e personalização,6,,875
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,individual,True,/solucoes/preferencias,OK,Tese e personalização,6,,882
-/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,admin,True,/solucoes/preferencias,OK,Tese e personalização,6,,856
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,osc,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,837
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,company,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,872
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,provider,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,831
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,government,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,858
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,individual,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,844
-/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,admin,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,843
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,osc,True,/solucoes/replicacoes,OK,Minha área na biblioteca,4,,873
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,company,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,881
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,provider,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,929
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,government,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,859
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,individual,True,/solucoes/replicacoes,OK,Minha área na biblioteca,4,,858
-/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,admin,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,832
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,osc,True,/territorio/necessidades,OK,Necessidades do território,6,,895
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,company,True,/territorio/necessidades,OK,Necessidades do território,6,,876
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,provider,True,/territorio/necessidades,OK,Necessidades do território,6,,871
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,government,True,/territorio/necessidades,OK,Necessidades do território,6,,835
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,individual,True,/territorio/necessidades,OK,Necessidades do território,6,,856
-/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,admin,True,/territorio/necessidades,OK,Necessidades do território,6,,920
-/tesouraria,ROUTES,Int.Tesouraria,link direto,admin,True,/tesouraria,OK,Tesouraria,4,,856
-/tesouraria,ROUTES,Int.Tesouraria,link direto,government,False,/tesouraria,RECUSA_CORRETA,,3,,834
-/torre,ROUTES,Tower.FunderTower,menu,company,True,/torre,OK,Torre de controle,4,,923
-/torre,ROUTES,Tower.FunderTower,menu,individual,True,/torre,OK,Torre de controle,4,,852
-/torre,ROUTES,Tower.FunderTower,menu,government,False,/torre,RECUSA_CORRETA,,3,,794
-/torre-territorial,ROUTES,Tower.GovernmentTower,menu,government,True,/torre-territorial,OK,Torre territorial,4,,861
-/torre-territorial,ROUTES,Tower.GovernmentTower,menu,admin,True,/torre-territorial,OK,Torre territorial,4,,852
-/torre-territorial,ROUTES,Tower.GovernmentTower,menu,osc,False,/torre-territorial,RECUSA_CORRETA,,3,,818
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,osc,True,/verificacoes,OK,Verificação pública,4,,820
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,company,True,/verificacoes,VAZIA,Verificação pública,4,,852
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,provider,True,/verificacoes,VAZIA,Verificação pública,4,,878
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,government,True,/verificacoes,VAZIA,Verificação pública,4,,837
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,individual,True,/verificacoes,VAZIA,Verificação pública,4,,839
-/verificacoes,ROUTES,Trust.VerifiableRecords,menu,admin,True,/verificacoes,VAZIA,Verificação pública,4,,855
-/vocabulario,ROUTES,Terr.Taxonomies,menu,osc,True,/vocabulario,OK,Vocabulário da plataforma,4,,866
-/vocabulario,ROUTES,Terr.Taxonomies,menu,company,True,/vocabulario,OK,Vocabulário da plataforma,4,,869
-/vocabulario,ROUTES,Terr.Taxonomies,menu,provider,True,/vocabulario,OK,Vocabulário da plataforma,4,,856
-/vocabulario,ROUTES,Terr.Taxonomies,menu,government,True,/vocabulario,OK,Vocabulário da plataforma,4,,876
-/vocabulario,ROUTES,Terr.Taxonomies,menu,individual,True,/vocabulario,OK,Vocabulário da plataforma,4,,831
-/vocabulario,ROUTES,Terr.Taxonomies,menu,admin,True,/vocabulario,OK,Vocabulário da plataforma,4,,823
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,osc,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,859
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,company,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,825
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,provider,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,796
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,government,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,818
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,individual,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,819
+/solucoes/comparar,ROUTES,Sol.Compare,link direto,admin,True,/solucoes/comparar,VAZIA,Comparar soluções,3,,795
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,osc,True,/solucoes/minhas,OK,Minha área na biblioteca,4,,838
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,company,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,831
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,provider,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,816
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,government,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,843
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,individual,True,/solucoes/minhas,OK,Minha área na biblioteca,4,,858
+/solucoes/minhas,ROUTES,SolM.MyArea,menu,admin,True,/solucoes/minhas,VAZIA,Minha área na biblioteca,4,,852
+/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,osc,True,/solucoes/nova,OK,Cadastrar solução,4,,849
+/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,individual,True,/solucoes/nova,OK,Cadastrar solução,4,,808
+/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,company,True,/solucoes/nova,OK,Cadastrar solução,4,,813
+/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,government,True,/solucoes/nova,OK,Cadastrar solução,4,,802
+/solucoes/nova,ROUTES,SolM.SolutionForm,link direto,provider,True,/solucoes/nova,OK,Cadastrar solução,4,,795
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,osc,True,/solucoes/pedidos,OK,Minha área na biblioteca,4,,810
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,company,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,810
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,provider,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,825
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,government,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,801
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,individual,True,/solucoes/pedidos,OK,Minha área na biblioteca,4,,819
+/solucoes/pedidos,ROUTES,SolM.MyArea,link direto,admin,True,/solucoes/pedidos,VAZIA,Minha área na biblioteca,4,,798
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,osc,True,/solucoes/preferencias,OK,Tese e personalização,6,,825
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,company,True,/solucoes/preferencias,OK,Tese e personalização,6,,848
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,provider,True,/solucoes/preferencias,OK,Tese e personalização,6,,799
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,government,True,/solucoes/preferencias,OK,Tese e personalização,6,,825
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,individual,True,/solucoes/preferencias,OK,Tese e personalização,6,,839
+/solucoes/preferencias,ROUTES,SolM.Preferences,link direto,admin,True,/solucoes/preferencias,OK,Tese e personalização,6,,818
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,osc,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,816
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,company,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,829
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,provider,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,879
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,government,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,794
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,individual,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,800
+/solucoes/replicacao,ROUTES,SolM.Marketplace,menu,admin,True,/solucoes/replicacao,OK,Marketplace de replicação,4,,791
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,osc,True,/solucoes/replicacoes,OK,Minha área na biblioteca,4,,801
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,company,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,794
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,provider,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,794
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,government,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,806
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,individual,True,/solucoes/replicacoes,OK,Minha área na biblioteca,4,,803
+/solucoes/replicacoes,ROUTES,SolM.MyArea,link direto,admin,True,/solucoes/replicacoes,VAZIA,Minha área na biblioteca,4,,794
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,osc,True,/territorio/necessidades,OK,Necessidades do território,6,,854
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,company,True,/territorio/necessidades,OK,Necessidades do território,6,,824
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,provider,True,/territorio/necessidades,OK,Necessidades do território,6,,840
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,government,True,/territorio/necessidades,OK,Necessidades do território,6,,834
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,individual,True,/territorio/necessidades,OK,Necessidades do território,6,,831
+/territorio/necessidades,ROUTES,Terr.TerritoryNeeds,menu,admin,True,/territorio/necessidades,OK,Necessidades do território,6,,839
+/tesouraria,ROUTES,Int.Tesouraria,link direto,admin,True,/tesouraria,OK,Tesouraria,4,,796
+/tesouraria,ROUTES,Int.Tesouraria,link direto,government,False,/tesouraria,RECUSA_CORRETA,,3,,810
+/torre,ROUTES,Tower.FunderTower,menu,company,True,/torre,OK,Torre de controle,4,,853
+/torre,ROUTES,Tower.FunderTower,menu,individual,True,/torre,OK,Torre de controle,4,,817
+/torre,ROUTES,Tower.FunderTower,menu,government,False,/torre,RECUSA_CORRETA,,3,,793
+/torre-territorial,ROUTES,Tower.GovernmentTower,menu,government,True,/torre-territorial,OK,Torre territorial,4,,825
+/torre-territorial,ROUTES,Tower.GovernmentTower,menu,admin,True,/torre-territorial,OK,Torre territorial,4,,798
+/torre-territorial,ROUTES,Tower.GovernmentTower,menu,osc,False,/torre-territorial,RECUSA_CORRETA,,3,,773
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,osc,True,/verificacoes,OK,Verificação pública,4,,816
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,company,True,/verificacoes,VAZIA,Verificação pública,4,,811
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,provider,True,/verificacoes,VAZIA,Verificação pública,4,,808
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,government,True,/verificacoes,VAZIA,Verificação pública,4,,808
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,individual,True,/verificacoes,VAZIA,Verificação pública,4,,798
+/verificacoes,ROUTES,Trust.VerifiableRecords,menu,admin,True,/verificacoes,VAZIA,Verificação pública,4,,813
+/vocabulario,ROUTES,Terr.Taxonomies,menu,osc,True,/vocabulario,OK,Vocabulário da plataforma,4,,829
+/vocabulario,ROUTES,Terr.Taxonomies,menu,company,True,/vocabulario,OK,Vocabulário da plataforma,4,,809
+/vocabulario,ROUTES,Terr.Taxonomies,menu,provider,True,/vocabulario,OK,Vocabulário da plataforma,4,,811
+/vocabulario,ROUTES,Terr.Taxonomies,menu,government,True,/vocabulario,OK,Vocabulário da plataforma,4,,810
+/vocabulario,ROUTES,Terr.Taxonomies,menu,individual,True,/vocabulario,OK,Vocabulário da plataforma,4,,817
+/vocabulario,ROUTES,Terr.Taxonomies,menu,admin,True,/vocabulario,OK,Vocabulário da plataforma,4,,798

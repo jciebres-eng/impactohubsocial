@@ -1,4 +1,4 @@
-# KNOWLEDGE_HUB — Central de Conhecimento (v0.12.0)
+# KNOWLEDGE_HUB — Central de Conhecimento (v0.12.0; proveniência, fila editorial e ajuda contextual na v0.29.0)
 
 Hub único de ajuda, guias, biblioteca, FAQ, academia, eventos, suporte, parcerias, demonstração, teste e boletim. **Auditoria prévia** (para não duplicar) e o que foi reaproveitado estão em §1. Modelo de dados: `KNOWLEDGE_DATA_MODEL.md`. Rotas: `docs/API.md` (grupos *help*, *support*, *trial*, *partnerships*, *notifications*, *content-admin*).
 
@@ -36,3 +36,12 @@ Todo item exibe a **origem** (informação oficial, comunidade, parceiro, educat
 - Editor de curso/recurso/FAQ/evento no CMS é **JSON validado pelo servidor** (editor visual completo só para guias).
 - Curso publicado não é editado no lugar (nova versão = novo curso/versão; ver `TRAINING_ACADEMY.md`).
 - Acessibilidade: verificação própria (rótulos, foco, `aria-*`), **sem axe/leitor de tela**.
+
+## 5. v0.29.0 — proveniência, fila editorial e ajuda contextual
+
+- **Fontes e citações:** `GET /v1/help/sources` (público: classe O/A/V/H/D, jurisdição, vigência, licença, direitos de uso, verificação) e `GET /v1/help/sources/{key}` (com os conteúdos que a citam). Artigos devolvem `citations` com avisos: "fonte retirada", "fonte ainda não conferida por outra pessoa", "não é norma: …". Detalhes em `CONTENT_GOVERNANCE.md` e `KNOWLEDGE_DATA_MODEL.md`.
+- **Assistente:** cita só a fonte usada, exclui com motivo, pergunta em empate, abstém-se sem base (`AI_SEARCH_ARCHITECTURE.md`).
+- **Fila editorial** (`/v1/admin/content/work-items`): busca sem resultado, assistente sem base, "não ajudou", vencido, fonte a revisar, relato de erro (`POST /v1/help/report-incorrect`), retirada a acompanhar.
+- **Busca medida:** conjunto de 35 consultas e piso gravado; a Central não afirma "qualidade de busca" além do medido.
+- **Ajuda contextual (ADR-359):** `config/concepts.json` → `web/src/concepts.ts` → `Tooltip`/`InfoPopover`/`GlossaryTerm`/`ContextualHelp` (`web/src/ui/help.tsx`) e página `/ajuda/glossario`; `GET /v1/public/concepts` serve o catálogo. 33 conceitos em 6 áreas, cada um com definição, por que importa, como o IMPACTO usa, limites e fontes. Status `needs_review` marca definição aguardando pessoa da área. O glossário de RÓTULOS (`config/glossary.json`) continua separado: é vocabulário de enum, não de conceito.
+- **Base de conhecimento v0.26.0:** `knowledge-base/` (versionada) + `CONTROL-RECONCILIATION.json` (58 controles contra o código). Rótulos de honestidade da §4 valem para ela: nada ali é "em conformidade".

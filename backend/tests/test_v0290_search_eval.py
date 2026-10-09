@@ -48,16 +48,29 @@ def restore_seed_to_draft() -> None:
         d.run("UPDATE kb_articles SET live_version_id = NULL, search_doc = NULL WHERE demo AND slug = ANY($1::text[])", slugs)
 
 
+def judged_corpus() -> set[str]:
+    """As chaves do corpus ROTULADO (a semente): slugs de artigos e recursos e `faq:<pergunta>`."""
+    from impacto.services import kb_seed
+    return {x[0] for x in kb_seed.ARTICLES} | {x[0] for x in kb_seed.RESOURCES} | {"faq:" + x[0] for x in kb_seed.FAQS}
+
+
 def run_eval(client: Client, k: int) -> list[dict]:
+    """Pede 4k resultados e pontua só os do corpus rotulado. Na suíte completa, outros módulos publicam artigos de teste
+    ("Prestação de contas passo a passo E2E", slugs aleatórios…) no mesmo banco; eles não têm rótulo e, mantidos no ranking,
+    fariam a medição depender da ORDEM dos testes (achado da 1ª regressão v0.29.0: P@5 0,1875 contra piso 0,19). Como a
+    pontuação da busca é por documento (FTS/trigram/tesauro não olham os vizinhos), remover os não rotulados equivale a medir
+    sobre a semente sozinha. A evidência registra quantos foram removidos."""
+    corpus = judged_corpus()
     out = []
     for q in CFG["queries"]:
         t0 = time.perf_counter()
-        r = client.get(f"/v1/help/search?q={quote(q['q'])}&limit={k}")
+        r = client.get(f"/v1/help/search?q={quote(q['q'])}&limit={4 * k}")
         ms = (time.perf_counter() - t0) * 1000
         assert r.status == 200, (q, r)
-        ranked = [EV.item_key(i) for i in r.json["items"]]
+        all_keys = [EV.item_key(i) for i in r.json["items"]]
+        ranked = [x for x in all_keys if x in corpus]
         out.append({"query": q["q"], "kind": q["kind"], "relevant": q["relevant"], "acceptable": q.get("acceptable", []), "ranked": ranked[:k],
-                    "latency_ms": round(ms, 1), "abstained": not r.json["items"]})
+                    "unjudged_removed": len(all_keys) - len(ranked), "latency_ms": round(ms, 1), "abstained": not r.json["items"]})
     return out
 
 
@@ -83,6 +96,8 @@ class SearchEvaluationTests(unittest.TestCase):
             "engine": KS.ENGINE_VERSION, "weights": KS.WEIGHTS, "min_score": KS.MIN_SCORE, "answer_min": KS.ANSWER_MIN,
             "eval_set": CFG["version"], "queries": len(CFG["queries"]), "corpus": corpus, "profile": "osc autenticada", "metrics": cls.metrics,
             "anonymous_metrics": cls.anon_metrics,
+            "unjudged_removed_total": sum(r["unjudged_removed"] for r in cls.results),
+            "scoring_note": "só itens do corpus rotulado (semente) entram no ranking pontuado; conteúdo criado por outros testes no mesmo banco é removido antes de pontuar",
             "per_query": [{"q": r["query"], "kind": r["kind"], "top": r["ranked"][:3], "hit": bool(r["ranked"][:1] and r["ranked"][0] in set(r["relevant"])) if r["relevant"] else None,
                            "found_any_relevant": any(x in set(r["relevant"]) for x in r["ranked"]) if r["relevant"] else None, "abstained": r["abstained"]} for r in cls.results],
             "what_this_is_not": ["desempenho em base real (o corpus é a semente demo/educacional publicada só para a medição)",

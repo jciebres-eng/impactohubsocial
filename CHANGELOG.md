@@ -1,6 +1,47 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.29.0] — 2026-10-09
+
+### Engenharia da base de conhecimento e ajuda contextual (ADR-353 a ADR-359)
+
+Pedido do proprietário: incorporar a base de conhecimento v0.26.0 (58 controles O/A/V/H/D, 12 pesquisas) SEM retroceder a
+release mais nova; governança editorial de ponta a ponta (fonte → direitos → citação → publicação → retirada → busca →
+assistente → interface); busca medida antes de mudada; e um sistema global de tooltip, popover e glossário conceitual.
+
+**Reconciliação** (`knowledge-base/`, `CONTROL-RECONCILIATION.json`): base versionada no git sem alteração; cada controle
+LEG-001..058 classificado contra o código com os testes que o provam (IMPLEMENTED_TESTED 6 · PARTIAL 27 ·
+BLOCKED_EXTERNAL 13 · NOT_IMPLEMENTED 12; 237 referências conferidas por AST).
+
+**Banco** (`migrations/0069_v0290_knowledge_provenance.sql`): `kb_sources` (classe O/A/V/H/D, jurisdição, vigência, licença,
+direitos de uso por operação com allowed/denied/unknown, verificação por outra pessoa, revisão marcada, hash, supersedes);
+`kb_citations` (append-only; trecho só com direito permitido e hash conferido; só em rascunho); estado `retracted` terminal
+com motivo em artigos/FAQs/recursos; `kb_work_items` + `kb_work_open()` (fila editorial deduplicada, só hash + tópicos);
+RLS, grants, categoria de auditoria `kb`; 11 fontes semeadas `unverified` com revisão em 2026-11-07.
+
+**Backend**: `services/kb_provenance.py`; 13 rotas (`/v1/help/sources`, `/v1/help/sources/{key}`, `/v1/public/concepts`,
+`/v1/help/report-incorrect`, 9 de equipe editorial em `/v1/admin/content/*`); `knowledge.search()` abre `search_gap`;
+`set_feedback()` abre `unhelpful`; `assistant()` reescrito: só publicado + oficial/educacional + não demo + não vencido,
+uma fonte usada com citações, `excluded` com motivo, `ambiguous` em empate, abstenção explícita, `assistant_gap`.
+
+**Busca medida**: `config/search_eval.json` (35 consultas), `engines/knowledge/evaluation.py`, baseline gravado como piso,
+evidência `docs/evidence/search_eval_v0290.json`; tesauro 1.1 (hit@1 0,84 → 0,875; MRR 0,91 → 0,94). Sem embeddings.
+
+**Ajuda contextual**: `config/concepts.json` (33 conceitos) → `scripts/sync_concepts.py` → `web/src/concepts.ts`;
+`web/src/ui/help.tsx` (`Tooltip`, `InfoPopover`, `GlossaryTerm`, `ContextualHelp`, `GlossaryContent`) sem biblioteca nova;
+página `/ajuda/glossario` (busca, filtro por área, âncora); aplicado em 11 telas reais; E2E Playwright (mouse, teclado,
+toque, escuro, movimento reduzido, a11y, contraste). Correção colateral: `.pill-muted` no tema escuro (1,27:1 → ok).
+
+**Contagens** (ADR-340): 936 operações (+13), 238 de plataforma, 54 públicas, 226 telas (+1), 69 migrações.
+
+**Testes novos**: `test_v0290_knowledge_base` (27), `test_v0290_search_eval` (4), `test_e2e_v0290_contextual_help` (6).
+Expectativas atualizadas com motivo: mensagem de abstenção do assistente (`test_v0120_knowledge`, `test_e2e_knowledge`);
+lista de rotas públicas revisadas (`test_architecture`); contagens (`test_v0230_authorization_matrix`, `frontend_gate`).
+
+**O que NÃO foi feito** (declarado): embeddings/vector DB/reranking (sem ganho medido); verificação das 11 fontes
+(exige pessoa da área); retirada automática de conteúdo quando a fonte é retirada (decisão editorial); tradução dos
+conceitos (en/es); conceitos em telas administrativas internas.
+
 ## [0.28.0] — 2026-10-09
 
 ### IA sustentável: catálogo de operações, cotas configuráveis, créditos por PIX, patrocínio, similaridade por dimensão (ADR-347 a ADR-352)

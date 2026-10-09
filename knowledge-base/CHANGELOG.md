@@ -4,6 +4,13 @@
 **Estado:** plano de correção e governança; uma recomendação não é evidência de implementação.  
 **Regra:** não apagar históricos. Marcar versões antigas como `HISTORICAL`, `DRAFT`, `SUPERSEDED` ou `RETRACTED`; publicar somente após o gate correspondente.
 
+## 2026-10-09 — v0.29.0: reconciliação com a release (código, banco e testes)
+
+- A base entrou no repositório do produto **sem alteração** dos arquivos de 2026-10-08 (são a fonte; nada foi reescrito).
+- `CONTROL-RECONCILIATION.json`: cada controle LEG-001..058 classificado contra o CÓDIGO da release v0.29.0 — `IMPLEMENTED_TESTED` 6, `PARTIAL` 27, `BLOCKED_EXTERNAL` 13, `NOT_IMPLEMENTED` 12 — com os testes que provam cada estado (237 referências conferidas por análise estática; teste `test_v0290_knowledge_base`).
+- O que a release implementou a partir desta base: registro de fontes com classe O/A/V/H/D e direitos de uso (`kb_sources`), citações com trecho só por direito permitido, retirada terminal com motivo, fila editorial, assistente que cita e se abstém, busca medida (ADR-353 a ADR-358). Isso **não** muda o status dos controles bloqueados por terceiro (parecer, provedor, DPO): eles continuam `P0_BLOCKED`/`BLOCKED_EXTERNAL`.
+- As 11 fontes semeadas no banco a partir desta base estão `unverified`, revisão marcada para 2026-11-07.
+
 ## 2026-10-08 — consolidação das 12 pesquisas
 
 - Criada a base mestre operacional com inventário de módulos, hierarquia de fontes, taxonomia **O/A/V/H/D**, ciclo de vida, claims, gaps, checklist de go-live, perguntas profissionais e URLs preservadas.

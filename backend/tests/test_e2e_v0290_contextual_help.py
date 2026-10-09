@@ -94,17 +94,17 @@ class ContextualHelpE2E(unittest.TestCase):
         self.login(p, acct)
         p.goto(self.base + "/oportunidades")
         p.get_by_role("heading", name="Oportunidades").wait_for()
-        trigger = p.locator('[data-concept="match"] button').first
+        trigger = p.locator('[data-concept="match"] [role=button]').first
         tip = p.locator('[data-concept="match"] [role="tooltip"]').first
         # hover → dica curta visível (texto vem do catálogo)
         trigger.hover()
-        p.wait_for_function("el => getComputedStyle(el).visibility === 'visible'", arg=tip.element_handle())
+        tip.wait_for(state="visible")            # a dica só existe no DOM enquanto visível (nome acessível do título fica limpo)
         self.assertIn("critério a critério", tip.inner_text())
         p.mouse.move(5, 5)
-        p.wait_for_function("el => getComputedStyle(el).visibility === 'hidden'", arg=tip.element_handle())
+        tip.wait_for(state="detached")
         # foco por teclado → dica visível
         trigger.focus()
-        p.wait_for_function("el => getComputedStyle(el).visibility === 'visible'", arg=tip.element_handle())
+        tip.wait_for(state="visible")
         self.assertEqual(trigger.get_attribute("aria-expanded"), "false")
         # Enter → cartão (dialog) com título, "Como o IMPACTO usa", fontes
         p.keyboard.press("Enter")
@@ -129,13 +129,27 @@ class ContextualHelpE2E(unittest.TestCase):
         p.wait_for_function("() => !document.querySelector('[role=dialog].pop')")
         self.assertEqual(p.errors, [])
 
+    def test_a_heading_made_of_terms_keeps_a_clean_accessible_name(self):
+        """Achado da regressão: <button> dentro de <h2> virava "Originalidade , similaridade" no nome acessível. O termo é role=button inline."""
+        acct = new_account("osc")
+        p = self.page()
+        self.login(p, acct)
+        p.goto(self.base + "/ia")
+        p.get_by_role("heading", name="Central de IA").wait_for()
+        p.goto(self.base + "/oportunidades")
+        p.get_by_role("heading", name="Oportunidades").wait_for()
+        snap = p.locator("article, main").first.aria_snapshot()
+        self.assertNotIn(" , ", snap)
+        self.assertIn('button "compatibilidade"', snap)
+        self.assertEqual(p.errors, [])
+
     def test_term_on_touch_device_opens_card_and_card_fits_viewport(self):
         acct = new_account("osc")
         p = self.page(mobile=True)
         self.login(p, acct)
         p.goto(self.base + "/oportunidades")
         p.get_by_role("heading", name="Oportunidades").wait_for()
-        p.locator('[data-concept="edital"] button').first.tap()
+        p.locator('[data-concept="edital"] [role=button]').first.tap()
         dlg = p.get_by_role("dialog", name="Edital / chamada")
         dlg.wait_for()
         box = dlg.bounding_box()

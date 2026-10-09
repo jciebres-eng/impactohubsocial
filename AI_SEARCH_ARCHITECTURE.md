@@ -22,3 +22,16 @@ Etapas ordenadas do mais barato ao mais caro; a IA nunca entra no caminho críti
 
 ## Quando considerar vetores
 Quando houver volume de consultas reais com `unmatched_terms` frequentes (métrica já gravada) e pgvector/serviço equivalente disponível. Avaliar com conjunto de relevância rotulado por humanos antes de trocar pesos.
+
+## v0.29.0 — a busca da Central é medida (ADR-358)
+
+- **Motor:** `help-search@1.0.0` — FTS `pt_unaccent` + trigram no título + tesauro (`config/help_synonyms.json`, agora `help-thesaurus@1.1`) + contexto de tela + perfil. Sem embeddings, sem reranking por modelo: a busca é determinística.
+- **Conjunto de avaliação:** `config/search_eval.json` — 35 consultas pt-BR (exato, natural, sinônimo, erro de digitação, sem acento, sigla, ambígua, sem resposta) com itens relevantes/aceitáveis rotulados à mão.
+- **Métricas:** `engines/knowledge/evaluation.py` — P@5, R@5, MRR, nDCG@5 (ganho 2/1), hit@1, taxa de zero resultado, abstenção correta, latência p50/p95.
+- **Baseline (OSC autenticada, semente publicada para a medição):** hit@1 0,84 · MRR 0,91 · R@5 0,97 · nDCG@5 0,91 · zero 0 % · abstenção 3/3 · p95 ≈ 17 ms — gravado como **piso** em `floors`: uma mudança de ranking abaixo dele reprova (`test_v0290_search_eval`).
+- **Única mudança feita, porque mediu ganho:** tesauro 1.1 (custo/mensalidade/gratuito; certidão/documento vencido; esqueci/recuperar senha) → hit@1 0,875 · MRR 0,94 · nDCG 0,93 · R@5 0,98.
+- **Anônimo medido à parte** para provar que conteúdo `authenticated`/por público **não vaza** (R@5 menor, restrito ausente de todos os rankings).
+- **Evidência:** `docs/evidence/search_eval_v0290.json` (motor, pesos, corpus, métricas, por consulta, `what_this_is_not`).
+- **O que isto NÃO é:** desempenho em base real (corpus = semente demo/educacional), julgamento por mais de uma pessoa, medida de modelo. **Quando considerar vetores:** só com conjunto maior, rotulado por mais de uma pessoa, e ganho medido contra este piso.
+
+**Assistente (ADR-357):** extrativo (`ai_used = false`), só `published` + origem `official`/`educational` + não demo + não vencido; uma fonte usada com citações; `excluded` com motivo; `ambiguous` em empate (gap < 0,04); abstenção explícita e item `assistant_gap`.

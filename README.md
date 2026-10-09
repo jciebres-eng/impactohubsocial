@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.28.0
+# Plataforma Impacto — v0.29.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -12,7 +12,18 @@ permissão frouxa.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
 
-**Novo no v0.28.0 (IA sustentável — ADR-347 a ADR-352):** toda operação de IA passa por uma **camada de uso e
+**Novo no v0.29.0 (base de conhecimento governada e ajuda contextual — ADR-353 a ADR-359):** a base de conhecimento
+v0.26.0 (58 controles O/A/V/H/D, 12 pesquisas) entrou no repositório **versionada e reconciliada contra o código**
+(6 implementados e testados · 27 parciais · 13 bloqueados por terceiro · 12 não implementados — nada declarado "em
+conformidade"). A Central ganhou **registro de fontes com direitos de uso** por operação, verificação por outra pessoa,
+**citações** só em rascunho e com trecho permitido, **retirada** terminal com motivo que some da busca e do assistente,
+**fila editorial** (lacunas de busca, "não ajudou", vencidos, relatos de erro — só hash + tópicos) e um **assistente
+que cita a única fonte usada, exclui com motivo e se abstém**. A busca foi **medida** (35 consultas, piso gravado;
+sem embeddings). **Ajuda contextual:** 33 conceitos definidos uma vez (`config/concepts.json`) e consumidos por
+tooltip, popover e `/ajuda/glossario`, acessíveis por mouse, teclado e toque, aplicados em 11 telas. 11 fontes
+registradas, **0 conferidas** — conferir é tarefa de pessoa.
+
+**v0.28.0 (IA sustentável — ADR-347 a ADR-352):** toda operação de IA passa por uma **camada de uso e
 custo**: catálogo versionado (A–F), prévia com custo em créditos e **quem paga** (gratuita → patrocínio → cota →
 comprado) antes de executar, débito só em sucesso, idempotência e concorrência no banco. Gratuidade **orçada**
 (cotas configuráveis; boas-vindas uma vez por organização e por pessoa), **créditos por PIX** (modo piloto até

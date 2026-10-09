@@ -12,9 +12,9 @@
  "eval_set": "search-eval@1.0 (v0.29.0)",
  "queries": 35,
  "corpus": {
-  "articles_published": 14,
-  "faqs_published": 8,
-  "resources_published": 4
+  "articles_published": 28,
+  "faqs_published": 11,
+  "resources_published": 8
  },
  "profile": "osc autenticada",
  "metrics": {
@@ -31,8 +31,8 @@
   "correct_abstention_rate": 1.0,
   "unanswerable_with_results": 0,
   "latency_ms": {
-   "p50": 13.5,
-   "p95": 19.6,
+   "p50": 17.0,
+   "p95": 21.4,
    "n": 35
   },
   "by_kind": {
@@ -100,8 +100,8 @@
   "correct_abstention_rate": 1.0,
   "unanswerable_with_results": 0,
   "latency_ms": {
-   "p50": 10.8,
-   "p95": 13.1,
+   "p50": 12.7,
+   "p95": 15.9,
    "n": 35
   },
   "by_kind": {
@@ -155,6 +155,8 @@
    }
   }
  },
+ "unjudged_removed_total": 134,
+ "scoring_note": "só itens do corpus rotulado (semente) entram no ranking pontuado; conteúdo criado por outros testes no mesmo banco é removido antes de pontuar",
  "per_query": [
   {
    "q": "cadastrar organização",
@@ -243,8 +245,7 @@
    "kind": "exact",
    "top": [
     "como-fazer-cotacoes",
-    "como-montar-orcamento",
-    "primeiros-passos-na-plataforma"
+    "como-montar-orcamento"
    ],
    "hit": true,
    "found_any_relevant": true,
@@ -478,7 +479,6 @@
    "kind": "natural",
    "top": [
     "faq:O certificado dos cursos vale como diploma?",
-    "primeiros-passos-na-plataforma",
     "faq:Como consigo um pacote com mais capacidades?"
    ],
    "hit": true,
@@ -561,5 +561,5 @@
   "julgamento por mais de uma pessoa (rótulos feitos à mão por quem escreveu o conjunto)",
   "medida de embeddings ou de modelo (não existem; a busca é determinística)"
  ],
- "measured_at": "2026-10-09T10:55:27Z"
+ "measured_at": "2026-10-09T12:12:09Z"
 }

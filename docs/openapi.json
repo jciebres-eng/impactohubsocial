@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -24226,6 +24226,25 @@
     ]
    }
   },
+  "/v1/public/concepts": {
+   "get": {
+    "summary": "Catálogo central de conceitos da ajuda contextual (tooltip, popover e glossário): origem config/concepts.json",
+    "operationId": "get_platform_routes_concepts",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP"
+   }
+  },
   "/v1/me/preferences": {
    "get": {
     "summary": "Idioma e tema da pessoa (tema: system, light ou dark)",
@@ -38860,6 +38879,604 @@
      }
     }
    }
+  },
+  "/v1/help/sources": {
+   "get": {
+    "summary": "Registro de fontes da camada de conhecimento: classe editorial O/A/V/H/D, jurisdição, vigência, licença, direitos de uso e verificação",
+    "operationId": "get_kb_provenance_routes_sources_public",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 300/3600s por IP",
+    "parameters": [
+     {
+      "name": "klass",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "O",
+          "A",
+          "V",
+          "H",
+          "D"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Klass"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "active",
+          "retracted"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": "active",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 100,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/sources/{key}": {
+   "get": {
+    "summary": "Uma fonte, com os conteúdos que a citam",
+    "operationId": "get_kb_provenance_routes_source_public",
+    "tags": [
+     "help"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 300/3600s por IP",
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/help/report-incorrect": {
+   "post": {
+    "summary": "Relata informação incorreta em um conteúdo publicado: entra na fila editorial para revisão humana (o conteúdo continua visível até a revisão)",
+    "operationId": "post_kb_provenance_routes_report_incorrect",
+    "tags": [
+     "help"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 20/3600s por IP",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IncorrectReportIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/sources": {
+   "post": {
+    "summary": "Registra uma fonte (classe O/A/V/H/D, jurisdição, vigência, licença, direitos de uso); nasce 'unverified'",
+    "operationId": "post_kb_provenance_routes_source_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SourceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/sources/{key}/verify": {
+   "post": {
+    "summary": "Marca a fonte como conferida/em disputa/vencida — por pessoa diferente de quem a registrou (quatro olhos)",
+    "operationId": "post_kb_provenance_routes_source_verify",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SourceVerifyIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/sources/{key}/retract": {
+   "post": {
+    "summary": "Retira uma fonte (terminal, com motivo); todo conteúdo que a cita vira item de trabalho — não é retirado automaticamente",
+    "operationId": "post_kb_provenance_routes_source_retract",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "key",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RetractIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/citations": {
+   "post": {
+    "summary": "Cita uma fonte numa versão em RASCUNHO (localizador; trecho só se a fonte tiver direito de trecho permitido; hash conferido pelo banco)",
+    "operationId": "post_kb_provenance_routes_citation_create",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CitationIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/citations/{object_type}/{object_id}": {
+   "get": {
+    "summary": "Citações de uma versão/FAQ/recurso",
+    "operationId": "get_kb_provenance_routes_citations_get",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "object_type",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "object_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/{object_type}/{object_id}/retract": {
+   "post": {
+    "summary": "Retira conteúdo publicado (terminal, com motivo): sai da busca, do assistente e do sitemap; reativar exige nova versão",
+    "operationId": "post_kb_provenance_routes_content_retract",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "object_type",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "object_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RetractIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/content/work-items": {
+   "get": {
+    "summary": "Fila editorial: buscas sem resultado, assistente sem base, 'não ajudou', vencidos, relatos de erro, fontes a revisar",
+    "operationId": "get_kb_provenance_routes_work_items",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "open",
+          "in_progress",
+          "done",
+          "dismissed"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": "open",
+       "title": "Status"
+      }
+     },
+     {
+      "name": "kind",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "search_gap",
+          "assistant_gap",
+          "unhelpful",
+          "stale",
+          "expired",
+          "incorrect_report",
+          "source_review",
+          "retraction_followup"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "title": "Kind"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 50,
+       "maximum": 200,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": 0,
+       "minimum": 0,
+       "title": "Offset",
+       "type": "integer"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/content/work-items/sweep": {
+   "post": {
+    "summary": "Varre conteúdo vencido/atrasado e fontes a revisar e abre os itens que faltam (idempotente)",
+    "operationId": "post_kb_provenance_routes_work_items_sweep",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/content/work-items/{item}": {
+   "post": {
+    "summary": "Assume, conclui ou dispensa um item (concluir/dispensar exige resolução)",
+    "operationId": "post_kb_provenance_routes_work_item_update",
+    "tags": [
+     "admin",
+     "content"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "item",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkItemUpdateIn"
+       }
+      }
+     }
+    }
+   }
   }
  },
  "components": {
@@ -42479,62 +43096,269 @@
    "SourceIn": {
     "additionalProperties": false,
     "properties": {
-     "name": {
-      "maxLength": 120,
-      "minLength": 2,
-      "title": "Name",
+     "key": {
+      "pattern": "^[a-z0-9][a-z0-9.-]{2,80}$",
+      "title": "Key",
       "type": "string"
      },
-     "kind": {
-      "enum": [
-       "json_feed",
-       "csv_feed",
-       "rss"
-      ],
-      "title": "Kind",
+     "title": {
+      "maxLength": 300,
+      "minLength": 3,
+      "title": "Title",
       "type": "string"
+     },
+     "publisher": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Publisher"
      },
      "url": {
-      "maxLength": 500,
-      "pattern": "^https://",
-      "title": "Url",
-      "type": "string"
-     },
-     "sphere": {
-      "enum": [
-       "private",
-       "federal",
-       "state",
-       "municipal",
-       "local",
-       "international"
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
       ],
-      "title": "Sphere",
+      "default": null,
+      "title": "Url"
+     },
+     "effective_url": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "pattern": "^https?://",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective Url"
+     },
+     "source_type": {
+      "enum": [
+       "constitution",
+       "law",
+       "decree",
+       "resolution",
+       "guidance",
+       "jurisprudence",
+       "standard",
+       "literature",
+       "contract",
+       "internal_evidence",
+       "report",
+       "dataset",
+       "other"
+      ],
+      "title": "Source Type",
       "type": "string"
      },
-     "terms_note": {
-      "maxLength": 2000,
-      "minLength": 10,
-      "title": "Terms Note",
+     "klass": {
+      "enum": [
+       "O",
+       "A",
+       "V",
+       "H",
+       "D"
+      ],
+      "title": "Klass",
       "type": "string"
      },
-     "mapping": {
-      "additionalProperties": true,
-      "title": "Mapping",
+     "jurisdiction": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Jurisdiction"
+     },
+     "language": {
+      "default": "pt-BR",
+      "maxLength": 10,
+      "minLength": 2,
+      "title": "Language",
+      "type": "string"
+     },
+     "published_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Published On"
+     },
+     "consulted_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Consulted On"
+     },
+     "effective_from": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective From"
+     },
+     "effective_until": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Effective Until"
+     },
+     "license": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "License"
+     },
+     "rights": {
+      "additionalProperties": {
+       "enum": [
+        "allowed",
+        "denied",
+        "unknown"
+       ],
+       "type": "string"
+      },
+      "propertyNames": {
+       "enum": [
+        "store",
+        "index",
+        "excerpt",
+        "summarize",
+        "translate",
+        "embed",
+        "send_external",
+        "train",
+        "redistribute"
+       ]
+      },
+      "title": "Rights",
       "type": "object"
      },
-     "active": {
-      "default": false,
-      "title": "Active",
-      "type": "boolean"
+     "review_due": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Due"
+     },
+     "content_sha256": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Content Sha256"
+     },
+     "supersedes_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Supersedes Id"
+     },
+     "limitations": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Limitations"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
      }
     },
     "required": [
-     "name",
-     "kind",
-     "url",
-     "sphere",
-     "terms_note"
+     "key",
+     "title",
+     "source_type",
+     "klass"
     ],
     "title": "SourceIn",
     "type": "object"
@@ -61691,6 +62515,230 @@
      "reviewer_note"
     ],
     "title": "DisputeReviewIn",
+    "type": "object"
+   },
+   "IncorrectReportIn": {
+    "additionalProperties": false,
+    "properties": {
+     "target_type": {
+      "enum": [
+       "article",
+       "faq",
+       "resource"
+      ],
+      "title": "Target Type",
+      "type": "string"
+     },
+     "target_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Target Id",
+      "type": "string"
+     },
+     "what": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "What",
+      "type": "string"
+     },
+     "ctx": {
+      "anyOf": [
+       {
+        "pattern": "^[a-z0-9_.-]{2,80}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ctx"
+     }
+    },
+    "required": [
+     "target_type",
+     "target_id",
+     "what"
+    ],
+    "title": "IncorrectReportIn",
+    "type": "object"
+   },
+   "SourceVerifyIn": {
+    "additionalProperties": false,
+    "properties": {
+     "verification": {
+      "enum": [
+       "verified",
+       "disputed",
+       "expired",
+       "unverified"
+      ],
+      "title": "Verification",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     },
+     "review_due": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Review Due"
+     }
+    },
+    "required": [
+     "verification"
+    ],
+    "title": "SourceVerifyIn",
+    "type": "object"
+   },
+   "RetractIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 1000,
+      "minLength": 5,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "RetractIn",
+    "type": "object"
+   },
+   "CitationIn": {
+    "additionalProperties": false,
+    "properties": {
+     "object_type": {
+      "enum": [
+       "article_version",
+       "faq",
+       "resource"
+      ],
+      "title": "Object Type",
+      "type": "string"
+     },
+     "object_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Object Id",
+      "type": "string"
+     },
+     "source": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Source",
+      "type": "string"
+     },
+     "locator": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Locator"
+     },
+     "excerpt": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Excerpt"
+     },
+     "claim": {
+      "anyOf": [
+       {
+        "maxLength": 600,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Claim"
+     }
+    },
+    "required": [
+     "object_type",
+     "object_id",
+     "source"
+    ],
+    "title": "CitationIn",
+    "type": "object"
+   },
+   "WorkItemUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "open",
+       "in_progress",
+       "done",
+       "dismissed"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "resolution": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Resolution"
+     },
+     "assigned_to": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Assigned To"
+     }
+    },
+    "required": [
+     "status"
+    ],
+    "title": "WorkItemUpdateIn",
     "type": "object"
    }
   },

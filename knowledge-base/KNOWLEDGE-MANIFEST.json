@@ -44,6 +44,12 @@
       "kind": "continuation_instructions",
       "status": "ACTIVE_GUARDRAIL",
       "purpose": "Instruções de continuidade sem inventar compliance ou substituir profissionais."
+    },
+    {
+      "path": "knowledge-base/CONTROL-RECONCILIATION.json",
+      "kind": "control_reconciliation",
+      "status": "ACTIVE_GENERATED_FOR_RELEASE",
+      "purpose": "Estado de cada controle da matriz contra o código da release (v0.29.0), com os testes que o provam; conferido por teste automatizado."
     }
   ],
   "source_reports": [

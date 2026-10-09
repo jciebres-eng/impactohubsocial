@@ -17,3 +17,17 @@
 | Boletim/preferências | `newsletter_subscriptions` (**duplo opt-in**, token só como hash), `notification_prefs` | confirmação/cancelamento por funções dedicadas |
 
 Fontes versionadas fora do banco: `config/help_synonyms.json` (assuntos e sinônimos) e `config/onboarding_paths.json` (jornadas e detectores) — **hipóteses editoriais** a validar.
+
+## v0.29.0 — migração `0069_v0290_knowledge_provenance.sql` (ADR-354 a ADR-357)
+
+| Grupo | Tabelas / funções | Garantias no banco |
+|---|---|---|
+| Fontes | `kb_sources` | chave única; `klass` ∈ O/A/V/H/D; `rights` jsonb validado por `kb_rights_ok()`; `verification` ∈ unverified/verified/disputed/expired com `verified_by ≠ created_by` (trigger `kb_source_guard`); campos de identidade imutáveis; `status` retracted terminal com motivo; DELETE proibido; RLS: leitura pública, escrita `app_priv()` |
+| Citações | `kb_citations`, `kb_source_right(uuid, text)` | append-only; `object_type` ∈ article_version/faq/resource; trecho só com `rights.excerpt = allowed` e `excerpt_sha256 = sha256(excerpt)` (trigger `kb_citation_guard`); citação de artigo só em versão `draft`; leitura via conteúdo publicado + `kb_visible` |
+| Retirada | `kb_article_versions`, `kb_faqs`, `kb_resources` (+ `retraction_reason/retracted_by/retracted_at`) | CHECK: `retracted` exige os três campos; trigger `kb_retraction_terminal`; `kb_unpublish_article` anula `live_version_id`/`search_doc` |
+| Fila editorial | `kb_work_items`, `kb_work_open(kind, dedupe_key, details, reporter)` | `kind` em 8 valores; `dedupe_key` única enquanto open/in_progress (índice parcial) com `occurrences` incrementado; `resolution` obrigatória para done/dismissed; `details` só `q_hash` + tópicos; RLS `app_priv()` |
+| Histórico | `content_history.object_type += 'source'` | mesma trilha de transições |
+| Auditoria | categoria `kb` em `audit_action_categories`; `polymorphic_refs` para `kb_source`/`kb_work_item` | filtros do painel |
+| Semente | 11 fontes (8 leis federais, WCAG 2.2, ODS, base interna v0.26.0) | todas `unverified`, `review_due = 2026-11-07`; direitos `embed/send_external/train = unknown` para texto legal (bloqueado até conferência) |
+
+Tabelas: **+4** (desenvolvimento: 325 → 329), todas com RLS; nenhuma tem `org_id`/`user_id` (nada a declarar em `config/data_retention.json`). Catálogo de conceitos da ajuda contextual **não** está no banco: é `config/concepts.json` servido por `GET /v1/public/concepts` (ADR-359).

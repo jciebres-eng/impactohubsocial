@@ -1,3 +1,38 @@
+# Notas da versão — v0.29.0 (Base de conhecimento governada e ajuda contextual)
+
+**Uma regra:** a plataforma só explica o que tem fonte registrada, conferida por outra pessoa e com direito de uso — e
+diz em cada tela, no mesmo texto, o que um conceito é, como o IMPACTO o usa e o que ele NÃO garante.
+
+**O que isso virou em software:**
+
+1. **Base de conhecimento versionada e reconciliada** — a base v0.26.0 entrou no git sem retroceder a release; os 58
+   controles foram classificados contra o código com os testes que os provam (6 implementados e testados, 27 parciais,
+   13 bloqueados por terceiro, 12 não implementados). Nada foi declarado "em conformidade".
+2. **Fontes com direitos de uso** — registro de fonte (lei, orientação, padrão voluntário, hipótese, decisão pendente)
+   com jurisdição, vigência, licença, direitos por operação (guardar, indexar, citar trecho, resumir, traduzir, embutir,
+   enviar a terceiro, treinar, redistribuir), verificação por pessoa diferente de quem registrou e data de revisão.
+   As 11 fontes iniciais estão **não conferidas** — e a interface diz isso.
+3. **Citação, retirada e fila editorial** — citação só em rascunho, trecho só com direito permitido e hash conferido
+   pelo banco; retirada é terminal com motivo e some da busca, do assistente e do sitemap no mesmo instante; buscas
+   sem resultado, "não ajudou", conteúdo vencido, fonte atrasada e relatos de erro viram itens de trabalho (só hash e
+   tópicos, nunca o texto da pergunta).
+4. **Assistente que cita e se abstém** — responde por extração a partir de UMA fonte publicada, oficial/educacional, não
+   demo e não vencida; mostra o que excluiu e por quê; em empate, pergunta em vez de escolher; sem base, diz que não
+   encontrou. Nunca se apresenta como "base oficial".
+5. **Busca medida** — 35 consultas rotuladas, 8 métricas, baseline gravado como piso que reprova regressão. A única
+   mudança (tesauro) foi feita porque a medição mostrou ganho. Embeddings não foram adicionados: sem ganho demonstrado.
+6. **Ajuda contextual** — 33 conceitos definidos uma vez (`config/concepts.json`) e consumidos por tooltip (hover/foco),
+   popover (clique/Enter/toque, Escape fecha) e página `/ajuda/glossario`; aplicado em 11 telas; acessível por mouse,
+   teclado e toque; claro/escuro; movimento reduzido respeitado; sem biblioteca nova.
+
+**Números:** 936 operações · 226 telas · 69 migrações · 50 motores · 33 conceitos · 11 fontes (0 conferidas) ·
+58 controles reconciliados.
+
+**O que continua dependendo de pessoa:** conferir as 11 fontes (reviewer), revisar as definições do glossário por área,
+escrever conteúdo oficial com citações (a semente continua DEMO/educacional), e as 13 dependências externas da base.
+
+---
+
 # Notas da versão — v0.28.0 (IA sustentável: cota, crédito, patrocínio e similaridade)
 
 **Uma regra:** ninguém paga para entrar no IMPACTO; paga-se pela operação de inteligência efetivamente executada —

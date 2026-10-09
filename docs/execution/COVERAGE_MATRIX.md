@@ -5,14 +5,14 @@
 Três provas independentes, todas executadas (não planejadas):
 
 - **Jornadas pela API** — 256 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
-- **Telas no navegador (Chromium)** — 825 visitas às 225 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
+- **Telas no navegador (Chromium)** — 827 visitas às 226 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
 - **Telefone (390 px)** — 237 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
 ## Por perfil
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 154 | 0 | 154 | 135 | 10 | 6 | 3 | 0 | 49 | 0 |
+| OSC | 15 | 154 | 0 | 155 | 136 | 10 | 6 | 3 | 0 | 49 | 0 |
 | Empresa (financiador) | 8 | 47 | 0 | 103 | 79 | 18 | 0 | 6 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 97 | 62 | 24 | 1 | 10 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 187 | 63 | 25 | 80 | 19 | 0 | 35 | 0 |
@@ -21,7 +21,7 @@ Três provas independentes, todas executadas (não planejadas):
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| Visitante sem login | 2 | 2 | 0 | 38 | 27 | 3 | 8 | 0 | 0 | — | — |
+| Visitante sem login | 2 | 2 | 0 | 39 | 28 | 3 | 8 | 0 | 0 | — | — |
 
 **Como ler.** *Com dado*: a tela abriu com conteúdo vindo da API. *Vazias*: abriu e mostrou o estado
 vazio do produto (lista sem item, busca sem termo). *Recusa correta*: perfil que NÃO deve ver a tela
@@ -125,6 +125,7 @@ URL, chamadas de API e tempo, está no CSV).
 | `/ajuda/eventos/:slug` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/faq` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/faq/:id` | 2 | anônimo: ok, osc: ok |
+| `/ajuda/glossario` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/parcerias` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/pendencias` | 2 | anônimo: recusa, osc: ok |
 | `/ajuda/preferencias` | 2 | anônimo: recusa, osc: ok |

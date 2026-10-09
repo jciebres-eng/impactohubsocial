@@ -643,15 +643,15 @@ strong.ok { color: var(--ipe-escuro); }
    Cores só por token (claro/escuro automáticos). Posição calculada em web/src/ui/help.tsx (position: fixed). Sem biblioteca. */
 .tip-anchor { position: relative; display: inline; }
 .tip { position: fixed; z-index: 60; max-width: 320px; padding: 8px 10px; font-size: 13px; line-height: 1.4; color: var(--folha); background: var(--texto);
-       border-radius: var(--raio-s); box-shadow: var(--sombra); pointer-events: none; opacity: 0; visibility: hidden; }
-.tip-open { opacity: 1; visibility: visible; }
-@media (prefers-reduced-motion: no-preference) { .tip { transition: opacity .12s ease; } }
-.pop-trigger { background: none; border: 0; padding: 0; min-height: 0; font: inherit; color: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; border-radius: var(--raio-s); }
+       border-radius: var(--raio-s); box-shadow: var(--sombra); pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .tip-open { animation: tip-in .12s ease; } @keyframes tip-in { from { opacity: 0; } to { opacity: 1; } } }
+.pop-trigger { background: none; border: 0; padding: 0; min-height: 0; font: inherit; color: inherit; cursor: pointer; display: inline; border-radius: var(--raio-s); }  /* inline (não inline-flex): o nome acessível de um título que contém o termo não ganha espaços extras */
 .pop-trigger:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
-.pop-i, .gterm-mark { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; font-size: 11px; font-weight: 700;
+.pop-i { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; font-size: 11px; font-weight: 700;
                       line-height: 1; color: var(--texto-2); border: 1px solid var(--linha-2); background: var(--folha); margin-left: 3px; vertical-align: 2px; }
-.pop-trigger:hover .pop-i, .pop-trigger:hover .gterm-mark, .pop-trigger[aria-expanded="true"] .pop-i, .pop-trigger[aria-expanded="true"] .gterm-mark { color: var(--sobre-tinta); background: var(--tinta-botao); border-color: var(--tinta-botao); }
-.gterm-text { text-decoration: underline dotted; text-decoration-color: var(--texto-3); text-underline-offset: 3px; }
+.pop-trigger:hover .pop-i, .pop-trigger[aria-expanded="true"] .pop-i { color: var(--sobre-tinta); background: var(--tinta-botao); border-color: var(--tinta-botao); }
+.gterm-text { text-decoration: underline dotted; text-decoration-color: var(--texto-3); text-underline-offset: 3px; cursor: help; }
+.pop-trigger:hover .gterm-text, .pop-trigger[aria-expanded="true"] .gterm-text { text-decoration-style: solid; text-decoration-color: var(--tinta-botao); }
 .pop { position: fixed; z-index: 61; width: min(380px, calc(100vw - 16px)); max-height: min(70vh, 520px); overflow: auto; background: var(--folha); color: var(--texto);
        border: 1px solid var(--linha); border-radius: var(--raio-m); box-shadow: var(--sombra); padding: 12px 14px; font-size: 14px; text-align: left; }
 @media (prefers-reduced-motion: no-preference) { .pop { animation: pop-in .12s ease; } @keyframes pop-in { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } } }

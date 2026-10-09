@@ -21,7 +21,8 @@ function usePlacement(open: boolean, anchor: React.RefObject<HTMLElement | null>
     const w = b.offsetWidth, h = b.offsetHeight, gap = 8, pad = 8;
     const below = window.innerHeight - r.bottom - gap, above = r.top - gap;
     const placement: Placement = prefer === "bottom" ? (below >= h || below >= above ? "bottom" : "top") : (above >= h || above >= below ? "top" : "bottom");
-    const top = placement === "bottom" ? r.bottom + gap : Math.max(pad, r.top - gap - h);
+    const raw = placement === "bottom" ? r.bottom + gap : r.top - gap - h;
+    const top = Math.max(pad, Math.min(raw, window.innerHeight - h - pad));   // nunca sai da janela: se não cabe de nenhum lado, encosta na borda (o cartão tem rolagem própria)
     const left = Math.min(Math.max(pad, r.left + r.width / 2 - w / 2), Math.max(pad, window.innerWidth - w - pad));
     setStyle({ top, left, placement });
   }, [anchor, box, prefer]);
@@ -53,20 +54,22 @@ export function Tooltip({ text, children, id }: { text: string; children: ReactN
   return (
     <span ref={anchor} className="tip-anchor" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)}>
       {children}
-      <span ref={box} id={tid} role="tooltip" className={`tip ${open ? "tip-open" : ""} ${style ? `tip-${style.placement}` : ""}`} style={style ? { top: style.top, left: style.left } : undefined} aria-hidden={!open}>
-        {text}
-      </span>
+      {open && (   // só existe no DOM enquanto visível: um elemento posicionado (display block) dentro de um título mudaria o nome acessível do título
+        <span ref={box} id={tid} role="tooltip" className={`tip tip-open ${style ? `tip-${style.placement}` : ""}`} style={style ? { top: style.top, left: style.left } : { visibility: "hidden" }}>
+          {text}
+        </span>
+      )}
     </span>
   );
 }
 
 // ----------------------------------------------------------------------------------------------- InfoPopover
 /** Cartão explicativo aberto por um botão. Fecha com Escape, clique fora e Tab para fora; devolve o foco ao gatilho. */
-export function InfoPopover({ title, children, trigger, label, onOpenChange }: { title: string; children: ReactNode; trigger?: ReactNode; label?: string; onOpenChange?: (open: boolean) => void }) {
+export function InfoPopover({ title, children, trigger, label, inline, onOpenChange }: { title: string; children: ReactNode; trigger?: ReactNode; label?: string; inline?: boolean; onOpenChange?: (open: boolean) => void }) {
   const id = useId();
   const [open, setOpen] = useState(false);
   useEffect(() => { onOpenChange?.(open); }, [open]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const anchor = useRef<HTMLButtonElement>(null);
+  const anchor = useRef<HTMLElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const style = usePlacement(open, anchor, box, "bottom");
   const close = useCallback(() => { setOpen(false); anchor.current?.focus(); }, []);
@@ -92,9 +95,18 @@ export function InfoPopover({ title, children, trigger, label, onOpenChange }: {
   useEffect(() => { if (open) box.current?.querySelector<HTMLElement>("button, a, [tabindex]")?.focus(); }, [open]);
   return (
     <>
-      <button ref={anchor} type="button" className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog" aria-label={label} onClick={() => setOpen((o) => !o)}>
-        {trigger ?? <span className="pop-i" aria-hidden="true">i</span>}
-      </button>
+      {inline ? (
+        // Termo no meio de um texto ou título: <span role="button"> em vez de <button>, porque o navegador força display inline-block em
+        // <button> e o nome acessível do TÍTULO que contém o termo ganharia espaços ("Originalidade , similaridade"). Enter/Espaço tratados à mão.
+        <span ref={anchor as React.RefObject<HTMLSpanElement>} role="button" tabIndex={0} className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog"
+              onClick={() => setOpen((o) => !o)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen((o) => !o); } }}>
+          {trigger}
+        </span>
+      ) : (
+        <button ref={anchor as React.RefObject<HTMLButtonElement>} type="button" className="pop-trigger" aria-expanded={open} aria-controls={open ? id : undefined} aria-haspopup="dialog" aria-label={label} onClick={() => setOpen((o) => !o)}>
+          {trigger ?? <span className="pop-i" aria-hidden="true">i</span>}
+        </button>
+      )}
       {open && (
         <div ref={box} id={id} role="dialog" aria-labelledby={`${id}-t`} className={`pop ${style ? `pop-${style.placement}` : ""}`} style={style ? { top: style.top, left: style.left } : { visibility: "hidden" }}>
           <div className="pop-head">
@@ -143,7 +155,9 @@ export function GlossaryContent({ c, compact, onNavigate }: { c: Concept; compac
 
 // ----------------------------------------------------------------------------------------------- GlossaryTerm
 /** Termo com ajuda: hover/foco mostra a definição curta; clique/Enter/toque abre o cartão completo. `id` = chave de config/concepts.json.
- *  Sem conceito cadastrado, renderiza só o texto (nunca inventa definição). */
+ *  Sem conceito cadastrado, renderiza só o texto (nunca inventa definição). O botão NÃO leva aria-label: o nome acessível é o próprio
+ *  texto do termo, para que um título que contenha o termo continue sendo lido como o título (achado da regressão v0.29.0); pelo mesmo
+ *  motivo não há ícone dentro do termo — o sublinhado pontilhado e o cursor são a marca; o ícone 'i' fica no ContextualHelp. */
 export function GlossaryTerm({ id, children }: { id: string; children?: ReactNode }) {
   const c = concept(id);
   const tipId = useId();
@@ -153,7 +167,7 @@ export function GlossaryTerm({ id, children }: { id: string; children?: ReactNod
   return (
     <span className="gterm" data-concept={c.id}>
       <Tooltip text={c.short} id={`gt-${tipId}`}>
-        <InfoPopover title={shown.term} label={`O que é ${c.term}`} onOpenChange={(o) => { if (!o) setCur(null); }} trigger={<span className="gterm-text" aria-describedby={`gt-${tipId}`}>{children ?? c.term}<span className="gterm-mark" aria-hidden="true">?</span></span>}>
+        <InfoPopover title={shown.term} inline onOpenChange={(o) => { if (!o) setCur(null); }} trigger={<span className="gterm-text" aria-describedby={`gt-${tipId}`}>{children ?? c.term}</span>}>
           <GlossaryContent c={shown} compact onNavigate={(r) => { const n = concept(r); if (n) setCur(n); }} />
           {shown.id !== c.id && <p className="fineprint"><button type="button" className="btn-link" onClick={() => setCur(null)}>Voltar a {c.term}</button></p>}
         </InfoPopover>

@@ -156,7 +156,17 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "backend/migrations/0068_v0280_ai_usage_control.sql", "backend/tests/test_v0280_ai_usage_control.py",
             "backend/tests/test_v0280_similarity.py", "backend/tests/test_v0280_ai_cost_model.py", "backend/tests/test_e2e_v0280_ai_center.py",
             "docs/evidence/test_run_v0.28.0.log", "history/v0.27.0/VERSION",
-            "docs/execution/PRODUCTION_CHECKLIST_v0280.md", "docs/execution/ROLLBACK_v0280.md", "docs/execution/AI_COST_MONITORING_GUIDE.md"]
+            "docs/execution/PRODUCTION_CHECKLIST_v0280.md", "docs/execution/ROLLBACK_v0280.md", "docs/execution/AI_COST_MONITORING_GUIDE.md",
+            # v0.29.0 — base de conhecimento governada e ajuda contextual (ADR-353..359)
+            "knowledge-base/MASTER-KNOWLEDGE-BASE.md", "knowledge-base/KNOWLEDGE-MANIFEST.json", "knowledge-base/LEGAL-APPLICABILITY-MATRIX.csv",
+            "knowledge-base/CHANGELOG.md", "knowledge-base/CLAUDE-HANDOFF.md", "knowledge-base/CONTROL-RECONCILIATION.json",
+            "config/concepts.json", "config/search_eval.json", "web/src/concepts.ts", "web/src/ui/help.tsx", "scripts/sync_concepts.py",
+            "backend/migrations/0069_v0290_knowledge_provenance.sql", "backend/impacto/services/kb_provenance.py",
+            "backend/impacto/api/kb_provenance_routes.py", "backend/impacto/engines/knowledge/evaluation.py",
+            "backend/tests/test_v0290_knowledge_base.py", "backend/tests/test_v0290_search_eval.py", "backend/tests/test_e2e_v0290_contextual_help.py",
+            "docs/evidence/search_eval_v0290.json", "docs/evidence/test_run_v0.29.0.log", "history/v0.28.0/VERSION",
+            "docs/execution/CLEANUP_INVENTORY_v0290.md", "docs/execution/PRODUCTION_CHECKLIST_v0290.md", "docs/execution/ROLLBACK_v0290.md",
+            "docs/execution/TRACEABILITY_MATRIX_v0290.md", "docs/execution/SECURITY_PRIVACY_REPORT_v0290.md", "docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md"]
 
 
 def sha256(p: Path) -> str:

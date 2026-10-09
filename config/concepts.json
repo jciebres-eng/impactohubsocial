@@ -1,7 +1,7 @@
 {
   "version": "concepts@1.0",
   "generated_at": "2026-10-09",
-  "note": "CATÁLOGO CENTRAL DE CONCEITOS (ajuda contextual: tooltip = short, popover = long + why + how_impacto + limitations + sources). Uma fonte só: scripts/sync_concepts.py gera web/src/concepts.ts; GET /v1/public/concepts serve este arquivo. Cada definição separa (a) definição geral, (b) como o IMPACTO usa o conceito e (c) limitações — e nunca promete aprovação, captação, conformidade ou garantia. 'sources' com kind 'official' apontam para fontes registradas em kb_sources (chave) ou documentos do repositório; 'illustrative' é interpretação da plataforma. Status 'needs_review' = definição aguarda revisão de pessoa da área. Rótulos de ENUM (status, faixas) continuam em config/glossary.json; este arquivo é de CONCEITOS.",
+  "note": "CATÁLOGO CENTRAL DE CONCEITOS (ajuda contextual: tooltip = short, popover = long + why + how_impacto + limitations + sources). Uma fonte só: scripts/sync_concepts.py gera web/src/concepts.ts; GET /v1/public/concepts serve este arquivo. Cada definição separa (a) definição geral, (b) como o IMPACTO usa o conceito e (c) limitações — e nunca promete aprovação, captação, conformidade ou garantia. 'sources' com kind 'official' apontam para fontes registradas em kb_sources (chave) ou documentos do repositório; 'illustrative' é interpretação da plataforma. Status 'needs_review' = definição aguarda revisão de pessoa da área (na v0.29.0 TODOS os 33 termos estão needs_review: foram escritos a partir do código e dos documentos do repositório, não revisados por jurídico/contábil/impacto; a interface avisa isso em cada cartão). Rótulos de ENUM (status, faixas) continuam em config/glossary.json; este arquivo é de CONCEITOS.",
   "domains": {
     "marco_legal": "Marco legal e terceiro setor",
     "impacto": "Impacto, indicadores e evidência",
@@ -37,7 +37,7 @@
         "government",
         "company"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "osc": {
       "term": "OSC",
@@ -66,7 +66,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "edital": {
       "term": "Edital / chamada",
@@ -92,7 +92,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "esg": {
       "term": "ESG",
@@ -123,7 +123,7 @@
         "osc",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "ods": {
       "term": "ODS",
@@ -151,7 +151,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "match": {
       "term": "Compatibilidade (match)",
@@ -179,7 +179,7 @@
         "government",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "match_territorial": {
       "term": "Compatibilidade territorial",
@@ -205,7 +205,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "elegibilidade": {
       "term": "Elegibilidade",
@@ -231,7 +231,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "conformidade": {
       "term": "Conformidade (situação cadastral e documental)",
@@ -258,7 +258,7 @@
         "company",
         "provider"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "diagnostico_prontidao": {
       "term": "Diagnóstico de prontidão",
@@ -289,7 +289,7 @@
         "osc",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "teoria_da_mudanca": {
       "term": "Teoria da mudança",
@@ -316,7 +316,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "indicador_validado": {
       "term": "Indicador validado",
@@ -343,7 +343,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "dado_autodeclarado": {
       "term": "Dado autodeclarado",
@@ -369,7 +369,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "unknown_nao_e_zero": {
       "term": "Desconhecido não é zero",
@@ -397,7 +397,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "beneficiario": {
       "term": "Beneficiário (contagem)",
@@ -423,7 +423,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "adicionalidade": {
       "term": "Adicionalidade",
@@ -449,7 +449,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "equidade": {
       "term": "Equidade e determinantes sociais",
@@ -475,7 +475,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "evidencia": {
       "term": "Evidência",
@@ -503,7 +503,7 @@
         "government",
         "provider"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "proveniencia": {
       "term": "Proveniência",
@@ -532,7 +532,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "oavhd": {
       "term": "Classe de fonte (O/A/V/H/D)",
@@ -559,7 +559,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "quatro_olhos": {
       "term": "Quatro olhos",
@@ -587,7 +587,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "governanca": {
       "term": "Governança",
@@ -613,7 +613,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "reputacao": {
       "term": "Reputação (por dimensão)",
@@ -640,7 +640,7 @@
         "government",
         "provider"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "selo": {
       "term": "Selo / reconhecimento",
@@ -667,7 +667,7 @@
         "government",
         "provider"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "prestacao_de_contas": {
       "term": "Prestação de contas",
@@ -695,7 +695,7 @@
         "government",
         "company"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "quitacao": {
       "term": "Quitação da operação",
@@ -722,7 +722,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "nao_custodial": {
       "term": "Não custodial",
@@ -754,7 +754,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "taxa_de_servico": {
       "term": "Taxa de serviço (3,5%) e participação de autoria (1,5%)",
@@ -786,7 +786,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "creditos_de_ia": {
       "term": "Créditos de IA, cota gratuita e patrocínio",
@@ -814,7 +814,7 @@
         "individual",
         "provider"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "similaridade": {
       "term": "Similaridade por dimensões",
@@ -841,7 +841,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "originalidade": {
       "term": "Originalidade",
@@ -867,7 +867,7 @@
         "individual",
         "company"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "complementaridade": {
       "term": "Complementaridade",
@@ -893,7 +893,7 @@
         "company",
         "government"
       ],
-      "status": "published"
+      "status": "needs_review"
     },
     "lgpd": {
       "term": "LGPD",
@@ -922,7 +922,7 @@
         "provider",
         "individual"
       ],
-      "status": "published"
+      "status": "needs_review"
     }
   }
 }

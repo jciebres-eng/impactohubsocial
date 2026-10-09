@@ -1,10 +1,10 @@
 {
- "visitas": 825,
- "rotas": 225,
- "rotas_abertas_com_sucesso": 225,
+ "visitas": 827,
+ "rotas": 226,
+ "rotas_abertas_com_sucesso": 226,
  "persona_sem_registro_proprio": 61,
  "estados": {
-  "OK": 544,
+  "OK": 546,
   "VAZIA": 125,
   "RECUSA_CORRETA": 95,
   "SEM_REGISTRO": 61

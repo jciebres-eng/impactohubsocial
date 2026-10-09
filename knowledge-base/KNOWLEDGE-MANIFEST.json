@@ -1,0 +1,107 @@
+{
+  "manifest_version": "1.0.0",
+  "knowledge_base_version": "0.26.0",
+  "research_date": "2026-10-08",
+  "generated_at": "2026-10-08",
+  "status": "BASE_TECNICA_FECHADA_COM_CONDICOES_NAO_PUBLICADA",
+  "language": "pt-BR",
+  "scope": "Consolidação operacional de 12 pesquisas sobre contratos, consumidor, LGPD, OSCs/MROSC, compras públicas, fiscal/pagamentos, impacto/ESG/ODS, IA, cibersegurança, integrações governamentais, conhecimento/publicação e direitos humanos/trabalho.",
+  "domains": [
+    "direito civil, contratos, consumidor e assinaturas",
+    "LGPD, ANPD, privacidade, crianças e transferências",
+    "OSCs, terceiro setor, MROSC e fundos",
+    "compras públicas, inovação, PNCP e B2G",
+    "fiscal, financeiro, pagamentos e arquitetura não custodial",
+    "impacto social, ESG, ODS, avaliação e direitos humanos",
+    "IA, algoritmos, recomendação, match, reputação e copyright",
+    "cibersegurança, identidade, auditoria e continuidade",
+    "integrações gov.br, Conecta, Transferegov, PNCP e eSocial condicional",
+    "governança de conhecimento, conteúdo, acessibilidade e publicação",
+    "marketplace, parcerias, publicidade, moderação e fraude",
+    "governança institucional, trabalho decente, safeguarding e participação"
+  ],
+  "files": [
+    {
+      "path": "knowledge-base/MASTER-KNOWLEDGE-BASE.md",
+      "kind": "master_operational_knowledge",
+      "status": "ACTIVE_DRAFT_FOR_REVIEW",
+      "purpose": "Base mestre, hierarquia de fontes, taxonomia O/A/V/H/D, inventário, ciclo de vida, claims, gaps e go-live."
+    },
+    {
+      "path": "knowledge-base/LEGAL-APPLICABILITY-MATRIX.csv",
+      "kind": "operational_matrix",
+      "status": "ACTIVE_CONTROL_REGISTER",
+      "purpose": "Rastreamento obrigação/controle/teste/responsável/revisão/status."
+    },
+    {
+      "path": "knowledge-base/CHANGELOG.md",
+      "kind": "prioritized_change_plan",
+      "status": "ACTIVE_PLAN_NOT_PROOF",
+      "purpose": "Alterações P0/P1/P2 recomendadas; conclusão exige evidência separada."
+    },
+    {
+      "path": "knowledge-base/CLAUDE-HANDOFF.md",
+      "kind": "continuation_instructions",
+      "status": "ACTIVE_GUARDRAIL",
+      "purpose": "Instruções de continuidade sem inventar compliance ou substituir profissionais."
+    }
+  ],
+  "source_reports": [
+    "knowledge-base/research/01-civil-consumer-contracts.md",
+    "knowledge-base/research/02-lgpd-anpd.md",
+    "knowledge-base/research/03-osc-mro-sc.md",
+    "knowledge-base/research/04-public-procurement-innovation.md",
+    "knowledge-base/research/05-finance-tax-payment.md",
+    "knowledge-base/research/06-impact-esg-sdg.md",
+    "knowledge-base/research/07-ai-algorithmic-governance.md",
+    "knowledge-base/research/08-cybersecurity-trust.md",
+    "knowledge-base/research/09-integrations-egov.md",
+    "knowledge-base/research/10-knowledge-content-publishing.md",
+    "knowledge-base/research/11-marketplace-partnerships.md",
+    "knowledge-base/research/12-governance-impact-workers-rights.md"
+  ],
+  "tags": [
+    "impacto",
+    "trust",
+    "v0.26.0",
+    "brasil",
+    "governança",
+    "proveniência",
+    "claims",
+    "go-live",
+    "não custodial",
+    "LGPD",
+    "MROSC",
+    "PNCP",
+    "IA responsável"
+  ],
+  "taxonomy": {
+    "O": "Obrigação normativa vigente ou obrigação contratual aprovada aplicável ao fato",
+    "A": "Autoridade, orientação administrativa, manual ou jurisprudência não automaticamente vinculante",
+    "V": "Padrão voluntário, literatura ou boa prática",
+    "H": "Hipótese de produto sem força normativa",
+    "D": "Decisão, dependência externa ou evidência profissional pendente"
+  },
+  "review_periodicity": {
+    "legal_and_regulatory": "mensal e imediatamente após mudança relevante",
+    "privacy_and_security": "mensal; incidente ou mudança de provedor exige revisão extraordinária",
+    "integrations_and_providers": "a cada credencial, ambiente, contrato ou alteração de API",
+    "content_and_sources": "review_due por item; no máximo trimestral para conteúdo público",
+    "claims_and_marketing": "antes de cada publicação e trimestral",
+    "impact_frameworks": "semestral ou conforme nova edição/fonte"
+  },
+  "go_live_gate": "NO-GO enquanto houver qualquer P0 aberto, minuta legal no caminho de aceite, provedor real não homologado, integração governamental não autorizada, base/ROPA/RIPD ausentes quando necessários, backup/restauração não provados ou claim fora do escopo da evidência.",
+  "known_contradictions": [
+    "README v0.26.0 declara 45 motores, enquanto TECHNICAL_FINALIZATION_STATUS.md registra 42; pesquisa de IA exige reconciliação.",
+    "Documentação e pesquisas referem contagens e versões históricas diferentes; documentos v0.12.0/v0.17.0/v0.18.1/v0.22.0 não podem ser tratados como estado efetivo sem marcador.",
+    "README descreve 220 telas/894 operações, enquanto a documentação técnica registra outras contagens; gerar manifesto do código antes de claim externo.",
+    "Acessibilidade axe é reportada com escopo divergente; não tratar axe isolado como auditoria WCAG/ABNT.",
+    "Os relatórios incluem atos e leis de 2025/2026 conforme a data informada; a vigência deve ser revalidada na data da decisão."
+  ],
+  "disclaimer": "Este manifesto organiza pesquisas e controles; não é parecer, certificação, selo de conformidade, homologação, autorização de cobrança, prova de integração oficial nem substituto de advogado, DPO/encarregado, contador, profissional de segurança ou responsável de impacto. Documentos legais atuais são minutas até aprovação e vigência registradas.",
+  "integrity": {
+    "hash_policy": "Calcular SHA-256 no servidor para arquivos e versões efetivas; registrar hash e cadeia de auditoria sem tratar hash interno como carimbo de tempo externo.",
+    "source_policy": "Preservar URLs dos relatórios; revalidar fonte, jurisdição, vigência, licença e data de acesso antes de publicação.",
+    "unknown_policy": "Desconhecido não é zero, validado não é autodeclarado e hipótese não é obrigação."
+  }
+}

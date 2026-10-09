@@ -261,7 +261,8 @@ class SearchAndAssistant(unittest.TestCase):
     def test_assistant_refuses_without_base_and_offers_ticket(self):
         r = self.anon.post("/v1/help/assistant", {"question": "Qual é a capital da Mongólia e a previsão do tempo?"}).json
         self.assertIsNone(r["answer"])
-        self.assertEqual(r["message"], "Não encontrei informação suficiente na base oficial.")
+        # v0.29.0: "base publicada" em vez de "base oficial" — a base inclui material educacional; o rótulo da origem real vem em cada fonte
+        self.assertEqual(r["message"], "Não encontrei informação suficiente na base publicada da plataforma.")
         self.assertEqual(r["sources"], [])
         self.assertEqual(r["actions"][0]["link"], "/ajuda/suporte/novo")
         self.assertFalse(r["ai_used"])

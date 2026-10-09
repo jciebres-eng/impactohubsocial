@@ -435,3 +435,76 @@ class AdminListQ(Pagination):
 
 class RevokeCertIn(In):
     reason: Reason
+
+
+# ------------------------------------------------------------------------------------------------ v0.29.0 — proveniência, retirada, fila editorial
+Rights = Literal["allowed", "denied", "unknown"]
+
+
+class SourceIn(In):
+    key: Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9.-]{2,80}$")]
+    title: Annotated[str, Field(min_length=3, max_length=300)]
+    publisher: Annotated[str | None, Field(max_length=200)] = None
+    url: Annotated[str | None, Field(pattern=r"^https?://", max_length=600)] = None
+    effective_url: Annotated[str | None, Field(pattern=r"^https?://", max_length=600)] = None
+    source_type: Literal["constitution", "law", "decree", "resolution", "guidance", "jurisprudence", "standard", "literature", "contract", "internal_evidence", "report", "dataset", "other"]
+    klass: Literal["O", "A", "V", "H", "D"]
+    jurisdiction: Annotated[str | None, Field(max_length=80)] = None
+    language: Annotated[str, Field(min_length=2, max_length=10)] = "pt-BR"
+    published_on: date | None = None
+    consulted_on: date | None = None
+    effective_from: date | None = None
+    effective_until: date | None = None
+    license: Annotated[str | None, Field(max_length=200)] = None
+    rights: dict[Literal["store", "index", "excerpt", "summarize", "translate", "embed", "send_external", "train", "redistribute"], Rights] = Field(default_factory=dict)
+    review_due: date | None = None
+    content_sha256: Annotated[str | None, Field(pattern=r"^[0-9a-f]{64}$")] = None
+    supersedes_id: Uuid | None = None
+    limitations: Annotated[str | None, Field(max_length=2000)] = None
+    note: Annotated[str | None, Field(max_length=1000)] = None
+
+
+class SourceVerifyIn(In):
+    verification: Literal["verified", "disputed", "expired", "unverified"]
+    note: Annotated[str | None, Field(max_length=1000)] = None
+    review_due: date | None = None
+
+
+class SourceListQ(In):
+    klass: Literal["O", "A", "V", "H", "D"] | None = None
+    status: Literal["active", "retracted"] | None = "active"
+    limit: Annotated[int, Field(ge=1, le=200)] = 100
+    offset: Annotated[int, Field(ge=0)] = 0
+
+
+class RetractIn(In):
+    reason: Annotated[str, Field(min_length=5, max_length=1000)]
+
+
+class CitationIn(In):
+    object_type: Literal["article_version", "faq", "resource"]
+    object_id: Uuid
+    source: Annotated[str, Field(min_length=3, max_length=120)]          # key ou id da fonte
+    locator: Annotated[str | None, Field(max_length=200)] = None
+    excerpt: Annotated[str | None, Field(max_length=600)] = None
+    claim: Annotated[str | None, Field(max_length=600)] = None
+
+
+class WorkItemsQ(In):
+    status: Literal["open", "in_progress", "done", "dismissed"] | None = "open"
+    kind: Literal["search_gap", "assistant_gap", "unhelpful", "stale", "expired", "incorrect_report", "source_review", "retraction_followup"] | None = None
+    limit: Annotated[int, Field(ge=1, le=200)] = 50
+    offset: Annotated[int, Field(ge=0)] = 0
+
+
+class WorkItemUpdateIn(In):
+    status: Literal["open", "in_progress", "done", "dismissed"]
+    resolution: Annotated[str | None, Field(max_length=1000)] = None
+    assigned_to: Uuid | None = None
+
+
+class IncorrectReportIn(In):
+    target_type: Literal["article", "faq", "resource"]
+    target_id: Uuid
+    what: Annotated[str, Field(min_length=10, max_length=1000)]
+    ctx: CtxKey | None = None

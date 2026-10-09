@@ -172,6 +172,9 @@ class ArchitectureTests(unittest.TestCase):
                            # v0.28.0 — webhook de pagamento: sem principal (fala o provedor); HMAC obrigatório (404 sem segredo),
                            #           assinatura inválida é gravada sem efeito, evento deduplicado, cobrança simulada nunca credita
                            "/v1/webhooks/payments/{provider}",
+                           # v0.29.0 — registro de fontes da camada de conhecimento: são REFERÊNCIAS (lei, norma, padrão, documento
+                           #           interno sem texto), nunca conteúdo privado; RLS de leitura aberta de propósito; limitadas por taxa
+                           "/v1/help/sources", "/v1/help/sources/{key}",
                            # v0.16.0 — rede. Cada uma lê SÓ projeção pública ou estado de publicação:
                            # o feed lê marketplace_listings publicados; o perfil lê public_profiles.public_fields;
                            # as relações passam por relationships.visible_to, que filtra por visibility.

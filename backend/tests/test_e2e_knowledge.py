@@ -86,7 +86,7 @@ class KnowledgeE2E(unittest.TestCase):
         p.goto(self.base + "/ajuda")
         p.get_by_label("Pergunte ao assistente").fill("qual a cotação do dólar hoje")
         p.get_by_role("button", name="Perguntar").click()
-        p.get_by_text("Não encontrei informação suficiente na base oficial.").wait_for()
+        p.get_by_text("Não encontrei informação suficiente na base publicada da plataforma.").wait_for()   # v0.29.0: "base publicada" (inclui material educacional; origem real vem em cada fonte)
         # demonstração pública com consentimento
         p.goto(self.base + "/ajuda/demonstracao")
         p.get_by_role("textbox", name="Organização", exact=True).fill("Instituto E2E")

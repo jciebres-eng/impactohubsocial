@@ -145,6 +145,11 @@ def search(c, query: str, *, user_kind: str | None, ctx_key: str | None = None, 
               "semantic": "vocabulário de tópicos (sem embeddings)"}
     if record and (parsed["q"] or ctx_key):
         log(c, "search" if keep else "search_empty", q=parsed["q"], concepts=parsed["topics"], count=len(keep), ctx_key=ctx_key)
+        if not keep and parsed["q"]:
+            from . import kb_provenance as KP
+            key = "topic:" + ",".join(parsed["topics"]) if parsed["topics"] else "qhash:" + KS.q_hash(parsed["q"])
+            KP.open_work(c, "search_gap", "search_gap:" + key, ref_type="topic" if parsed["topics"] else None, topic=",".join(parsed["topic_labels"])[:120] or None,
+                         ctx_key=ctx_key, details={"q_hash": KS.q_hash(parsed["q"]), "topics": parsed["topics"]})
     if not keep:
         result["empty"] = {"message": "Não encontramos conteúdo para esta busca.", "suggest": ["Tente palavras mais simples", "Veja os guias por assunto", "Abra um chamado"]}
     return result
@@ -177,7 +182,7 @@ def _res_cards(c, slugs: list[str]) -> list[dict]:
 def get_article(c, slug: str, *, user_id: str | None) -> dict:
     a = c.one("SELECT a.id::text AS id, a.slug, a.kind, a.audience, a.visibility, a.origin, a.tags, a.ctx_keys, a.est_minutes, a.required_docs, a.action_label, a.action_link,"
               " a.related_articles, a.related_resources, a.related_courses, a.demo, a.published_at, a.last_reviewed_at, a.review_every_days, cat.slug AS category_slug,"
-              " cat.name AS category_name, v.version, v.title, v.summary, v.body, v.steps, v.checklist, v.common_mistakes, v.refs, v.regulatory, v.regulatory_source,"
+              " cat.name AS category_name, v.id::text AS version_id, v.version, v.title, v.summary, v.body, v.steps, v.checklist, v.common_mistakes, v.refs, v.regulatory, v.regulatory_source,"
               " v.regulatory_date, v.valid_until, v.author_id::text AS author_id, v.approved_by::text AS reviewer_id, v.approved_at"
               " FROM kb_articles a JOIN kb_article_versions v ON v.id = a.live_version_id LEFT JOIN kb_categories cat ON cat.id = a.category_id WHERE a.slug = $1 AND a.live_version_id IS NOT NULL", slug)
     if not a:
@@ -199,6 +204,8 @@ def get_article(c, slug: str, *, user_id: str | None) -> dict:
         a["checklist_progress"] = cp["checked"] if cp else []
         a["my_feedback"] = c.one("SELECT helpful, reason, comment FROM kb_feedback WHERE user_id = $1 AND target_type = 'article' AND target_id = $2", user_id, a["id"])
     a["help"] = {"label": "Preciso de ajuda", "context": {"page": f"ajuda/{slug}", "article": slug}}
+    from . import kb_provenance as KP
+    a["citations"] = KP.citations_for(c, "article_version", a["version_id"])
     a["structured_data"] = _structured_data(a)
     a["seo"] = {"index": a["visibility"] == "public" and not a["demo"], "title": a["title"], "description": (a["summary"] or "")[:160]}
     log(c, "view", target_type="article", target_id=a["id"])
@@ -226,6 +233,9 @@ def set_feedback(c, *, user_id: str, org_id: str | None, target_type: str, targe
     c.run("INSERT INTO kb_feedback(user_id, org_id, target_type, target_id, helpful, reason, comment) VALUES ($1,$2,$3,$4,$5,$6,$7)"
           " ON CONFLICT (user_id, target_type, target_id) DO UPDATE SET helpful = EXCLUDED.helpful, reason = EXCLUDED.reason, comment = EXCLUDED.comment, updated_at = now()",
           user_id, org_id, target_type, target_id, helpful, None if helpful else reason, comment)
+    if not helpful and target_type in ("article", "faq", "resource"):
+        from . import kb_provenance as KP
+        KP.open_work(c, "unhelpful", f"unhelpful:{target_type}:{target_id}", ref_type=target_type, ref_id=target_id, details={"reasons": [reason]})
     return {"recorded": True, "offer_support": (not helpful and reason in ("need_support", "not_found"))}
 
 
@@ -238,37 +248,78 @@ def set_checklist(c, *, user_id: str, org_id: str | None, scope: str, project_id
 
 
 # ------------------------------------------------------------------------------------------------ assistente ancorado (sem IA generativa)
+AMBIGUITY_GAP = 0.04      # dois candidatos quase empatados e de assuntos diferentes → a pergunta é ambígua: pedir escolha, não chutar
+GROUNDABLE_ORIGINS = ("official", "educational")   # terceiros nunca fundamentam resposta; aparecem como "encontrado, não utilizável"
+
+
+def _usable(item: dict) -> tuple[bool, str | None]:
+    """Um resultado só fundamenta resposta se for publicado, não DEMO, sem revisão pendente/vencido e de origem oficial ou educacional."""
+    if item.get("demo"):
+        return False, "exemplo/rascunho (DEMO) não fundamenta resposta"
+    if item.get("needs_review"):
+        return False, "revisão pendente ou validade vencida: confirme na fonte oficial"
+    if item.get("origin") not in GROUNDABLE_ORIGINS:
+        return False, "conteúdo de terceiros não é apresentado como orientação da plataforma"
+    return True, None
+
+
 def assistant(c, question: str, *, user_kind: str | None, ctx_key: str | None) -> dict:
-    """Responde SÓ com a base publicada (extrativo), cita a fonte e recusa quando não há base suficiente. `ai_used` é sempre falso: nenhum modelo gera texto."""
-    res = search(c, question, user_kind=user_kind, ctx_key=ctx_key, types={"article", "faq"}, limit=5, record=False)
-    top = [i for i in res["items"] if i["score"] >= KS.ANSWER_MIN]
-    out = {"question": question[:300], "grounded": True, "ai_used": False, "engine": res["engine"], "human_review_required": False}
-    if not top:
-        out.update({"answer": None, "message": "Não encontrei informação suficiente na base oficial.", "actions": [{"label": "Abrir chamado", "link": "/ajuda/suporte/novo"}], "sources": []})
-        log(c, "assistant_empty", q=question, concepts=res["topics"] and KS.parse(question)["topics"], count=0, ctx_key=ctx_key)
+    """Responde SÓ com a base publicada (extrativo), cita EXATAMENTE a fonte usada e recusa quando não há base suficiente.
+    `ai_used` é sempre falso: nenhum modelo gera texto. Conteúdo DEMO, vencido ou de terceiros nunca fundamenta a resposta (aparece
+    como "encontrado, não utilizável", com o motivo). Pergunta ambígua devolve as opções em vez de escolher por conta própria."""
+    from . import kb_provenance as KP
+    res = search(c, question, user_kind=user_kind, ctx_key=ctx_key, types={"article", "faq"}, limit=8, record=False)
+    parsed_topics = KS.parse(question)["topics"]
+    above = [i for i in res["items"] if i["score"] >= KS.ANSWER_MIN]
+    usable, excluded = [], []
+    for i in above:
+        ok, why = _usable(i)
+        (usable if ok else excluded).append(i if ok else {"type": i["type"], "title": i["title"], "link": i["link"], "reason": why, "origin_label": i["origin_label"]})
+    out = {"question": question[:300], "grounded": True, "ai_used": False, "engine": res["engine"], "human_review_required": False,
+           "excluded": excluded, "topics": res["topics"]}
+    if not usable:
+        out.update({"answer": None, "sources": [],
+                    "message": ("Encontrei conteúdo relacionado, mas nenhum que possa fundamentar uma resposta: " + "; ".join(sorted({e["reason"] for e in excluded})) + "."
+                                if excluded else "Não encontrei informação suficiente na base publicada da plataforma."),
+                    "actions": [{"label": "Abrir chamado", "link": "/ajuda/suporte/novo"}, {"label": "Ver resultados da busca", "link": "/ajuda/busca?q=" + question[:120]}]})
+        log(c, "assistant_empty", q=question, concepts=parsed_topics, count=0, ctx_key=ctx_key)
+        key = "topic:" + ",".join(parsed_topics) if parsed_topics else "qhash:" + KS.q_hash(question)
+        KP.open_work(c, "assistant_gap", "assistant_gap:" + key, ref_type="topic" if parsed_topics else None, topic=",".join(res["topics"])[:120] or None,
+                     ctx_key=ctx_key, details={"q_hash": KS.q_hash(question), "excluded": len(excluded)})
         return out
-    best = top[0]
+    best = usable[0]
+    if len(usable) > 1 and usable[0]["score"] - usable[1]["score"] < AMBIGUITY_GAP and set(usable[0].get("why", [])) != set(usable[1].get("why", [])):
+        out.update({"answer": None, "ambiguous": True, "message": "A pergunta pode se referir a mais de um assunto. Escolha um:",
+                    "options": [{"type": i["type"], "title": i["title"], "link": i["link"], "origin_label": i["origin_label"]} for i in usable[:3]], "sources": []})
+        log(c, "assistant_empty", q=question, concepts=parsed_topics, count=len(usable), ctx_key=ctx_key)
+        return out
     if best["type"] == "article":
-        a = c.one("SELECT a.slug, a.action_label, a.action_link, v.title, v.summary, v.steps, v.version, a.origin, a.demo FROM kb_articles a JOIN kb_article_versions v ON v.id = a.live_version_id WHERE a.id = $1", best["id"])
+        a = c.one("SELECT a.slug, a.action_label, a.action_link, v.id::text AS version_id, v.title, v.summary, v.steps, v.version, v.regulatory, v.regulatory_source,"
+                  " v.regulatory_date, v.valid_until, a.origin, a.demo FROM kb_articles a JOIN kb_article_versions v ON v.id = a.live_version_id WHERE a.id = $1", best["id"])
         steps = [f"{i + 1}. {s.get('title') or s.get('text')}" for i, s in enumerate((a["steps"] or [])[:6])]
         answer = f"Segundo o guia «{a['title']}»: {a['summary'] or ''}".strip()
         if steps:
             answer += "\n" + "\n".join(steps)
         out["actions"] = ([{"label": a["action_label"] or "Fazer agora", "link": a["action_link"]}] if a["action_link"] else []) + [{"label": "Abrir o guia completo", "link": best["link"]}]
-        src_version = a["version"]
+        used = {"type": "article", "title": a["title"], "link": best["link"], "version": a["version"], "origin_label": best["origin_label"],
+                "regulatory": bool(a["regulatory"]), "regulatory_source": a["regulatory_source"], "regulatory_date": a["regulatory_date"], "valid_until": a["valid_until"],
+                "citations": KP.citations_for(c, "article_version", a["version_id"])}
     else:
-        f = c.one("SELECT question, answer FROM kb_faqs WHERE id = $1", best["id"])
+        f = c.one("SELECT id::text AS id, question, answer, published_at FROM kb_faqs WHERE id = $1", best["id"])
         answer = f"Segundo a FAQ «{f['question']}»: {f['answer'][:1200]}"
         out["actions"] = [{"label": "Ver a FAQ", "link": best["link"]}]
-        src_version = None
+        used = {"type": "faq", "title": f["question"], "link": best["link"], "version": None, "published_at": f["published_at"], "origin_label": best["origin_label"],
+                "citations": KP.citations_for(c, "faq", f["id"])}
     out["answer"] = answer
-    out["sources"] = [{"type": i["type"], "title": i["title"], "link": i["link"], "origin_label": i["origin_label"], "demo": i["demo"], "demo_label": i["demo_label"],
-                       "needs_review": i["needs_review"], "version": src_version if i is best else None} for i in top[:3]]
+    out["sources"] = [used]                                   # SÓ a fonte efetivamente usada
+    out["also_found"] = [{"type": i["type"], "title": i["title"], "link": i["link"], "origin_label": i["origin_label"]} for i in usable[1:3]]
     out["confidence"] = best["score"]
-    out["notice"] = "Resposta montada a partir de conteúdo publicado da plataforma (sem IA generativa). Em caso de dúvida, abra um chamado."
-    if any(s["needs_review"] for s in out["sources"]):
-        out["notice"] += " Atenção: alguma fonte está com revisão pendente."
-    log(c, "assistant", target_type=best["type"], target_id=best["id"], q=question, concepts=KS.parse(question)["topics"], count=len(top), ctx_key=ctx_key)
+    out["origin_label"] = best["origin_label"]                 # rótulo da origem REAL: "Material educacional" não vira "oficial"
+    out["notice"] = ("Resposta montada a partir de conteúdo publicado da plataforma (sem IA generativa), origem: " + best["origin_label"].lower()
+                     + ". Em caso de dúvida, abra um chamado.")
+    if not used["citations"]:
+        out["notice"] += " Este conteúdo ainda não tem fonte primária citada: trate como orientação operacional da plataforma."
+    log(c, "assistant", target_type=best["type"], target_id=best["id"], q=question, concepts=parsed_topics, count=len(usable), ctx_key=ctx_key)
     return out
 
 

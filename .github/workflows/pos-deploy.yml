@@ -1,0 +1,79 @@
+name: pos-deploy
+# v0.31.0 — substitui o antigo `deploy.yml`, que era um MODELO: construía uma imagem para um registry
+# inexistente e terminava num `echo "Implemente aqui o rollout"`. O deploy do IMPACTO é feito pelo
+# Railway, ligado ao GitHub (um único caminho de publicação; nenhum deploy paralelo por Actions).
+# Este workflow NÃO publica nada: verifica, de fora, a instância que o Railway pôs no ar.
+#
+#   Actions → pos-deploy → Run workflow → informe a URL pública (ex.: https://impacto-staging.up.railway.app)
+#
+# Verifica: /healthz (versão e COMMIT implantado), /readyz (banco, migrações, armazenamento durável,
+# antivírus, e-mail), cabeçalhos de segurança, e o smoke de 24 verificações de scripts/smoke_test.py.
+# Com SMOKE_EMAIL/SMOKE_PASSWORD (conta de TESTE do ambiente), roda também as verificações autenticadas.
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL pública da instância (https://…)"
+        type: string
+        required: true
+      ambiente:
+        description: "ambiente (segredos SMOKE_* daquele ambiente)"
+        type: choice
+        options: [staging, production]
+        default: staging
+      commit_esperado:
+        description: "opcional: SHA que deveria estar no ar (vazio = o deste workflow)"
+        type: string
+        default: ""
+permissions: { contents: read }
+jobs:
+  verificar:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.ambiente }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Identidade do que está no ar
+        env:
+          BASE: ${{ inputs.url }}
+          ESPERADO: ${{ inputs.commit_esperado || github.sha }}
+        run: |
+          set -euo pipefail
+          case "$BASE" in https://*) ;; *) echo "::error::a URL tem de começar com https://"; exit 1;; esac
+          curl -fsS --max-time 20 "$BASE/healthz" -o healthz.json
+          curl -sS --max-time 20 "$BASE/readyz" -o readyz.json -w '%{http_code}' > readyz.code || true
+          curl -sSI --max-time 20 "$BASE/" -o cabecalhos.txt || true
+          curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 20 "http://${BASE#https://}/healthz" > http.txt || true
+          python3 - <<'PY'
+          import json, os
+          h = json.load(open("healthz.json")); r = json.load(open("readyz.json")) if os.path.getsize("readyz.json") else {}
+          code = open("readyz.code").read().strip(); cab = open("cabecalhos.txt").read().lower(); http = open("http.txt").read()
+          esperado = os.environ["ESPERADO"][:12]
+          linhas = [f"versão {h.get('version')} · env {h.get('env')} · commit {h.get('commit')}",
+                    f"readyz HTTP {code}: " + ", ".join(f"{k}={v}" for k, v in r.items()),
+                    "HTTP→HTTPS: " + http]
+          for nome in ("strict-transport-security", "content-security-policy", "x-content-type-options", "referrer-policy"):
+              linhas.append(f"{nome}: {'presente' if nome in cab else 'AUSENTE'}")
+          problemas = []
+          if h.get("commit") is None: problemas.append("o serviço não informa o commit (RAILWAY_GIT_COMMIT_SHA ausente)")
+          elif h["commit"] != esperado: problemas.append(f"commit no ar {h['commit']} ≠ esperado {esperado}")
+          if code != "200": problemas.append(f"readyz {code}")
+          if r and r.get("storage_durable") is False: problemas.append("armazenamento NÃO durável (arquivos somem no redeploy)")
+          if r and r.get("antivirus") in (None, "none", "noop"): problemas.append("sem antivírus: uploads ficam em quarentena e downloads bloqueados")
+          print("\n".join(linhas))
+          print("::notice title=Instância no ar::" + " | ".join(linhas))
+          for p in problemas: print(f"::warning title=Pós-deploy::{p}")
+          open(os.environ["GITHUB_STEP_SUMMARY"], "a").write("## Instância\n\n" + "\n".join("- " + l for l in linhas + ["**atenção:** " + p for p in problemas]) + "\n")
+          PY
+      - name: Smoke de 24 verificações
+        env:
+          BASE: ${{ inputs.url }}
+          SMOKE_EMAIL: ${{ secrets.SMOKE_EMAIL }}
+          SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
+        run: |
+          set -o pipefail
+          args=(--base "$BASE" --out smoke.json)
+          if [ -n "$SMOKE_EMAIL" ] && [ -n "$SMOKE_PASSWORD" ]; then args+=(--email "$SMOKE_EMAIL" --password "$SMOKE_PASSWORD"); fi
+          python3 scripts/smoke_test.py "${args[@]}" | tail -40
+          python3 -c "import json; d=json.load(open('smoke.json')); print('::notice title=Smoke::' + str(d.get('verdict')) + ' — ' + ', '.join(f\"{k}={v}\" for k, v in (d.get('summary') or {}).items()))" || true

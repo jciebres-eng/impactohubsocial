@@ -2,6 +2,7 @@ name: ci
 on:
   push: { branches: [main] }
   pull_request:
+  workflow_dispatch:   # v0.31.0: validar um branch de trabalho sem publicá-lo no main (o Railway publica o main)
 permissions: { contents: read }
 jobs:
   backend:
@@ -98,6 +99,29 @@ jobs:
           echo "restore_test.sh recusa dump adulterado, como deve"
   # AUDITORIA DE VULNERABILIDADES em job próprio: resposta em ~1 min, sem esperar a suíte (~15 min),
   # e sem ser escondida por ela. Nunca tinha rodado até a v0.24.1 — e achou vulnerabilidades reais.
+  # ARMAZENAMENTO (v0.31.0): o adaptador S3 do produto contra um servidor S3 que VALIDA assinatura
+  # (MinIO, versão fixada). Até aqui a assinatura só era conferida contra o vetor de teste da AWS; nunca
+  # tinha falado com um servidor. Não prova o R2 — isso é o workflow `armazenamento`, com o bucket real.
+  armazenamento:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r backend/requirements-dev.txt
+      - name: MinIO descartável
+        run: |
+          docker run -d --name minio -p 9000:9000 -e MINIO_ROOT_USER=impactoteste -e MINIO_ROOT_PASSWORD=impactoteste-descartavel \
+            minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:9000/minio/health/live && break; sleep 1; done
+      - name: Adaptador S3 contra servidor real (assinatura, URL pré-assinada, expiração, adulteração, exclusão)
+        env:
+          S3_TEST_ENDPOINT: http://127.0.0.1:9000
+          S3_TEST_BUCKET: impacto-teste
+          S3_TEST_ACCESS_KEY_ID: impactoteste
+          S3_TEST_SECRET_ACCESS_KEY: impactoteste-descartavel
+        run: cd backend && python -m unittest tests.test_v0310_storage -v
+
   auditoria:
     runs-on: ubuntu-24.04
     steps:

@@ -216,6 +216,22 @@ def _looks_placeholder(v: str) -> bool:
     return any(m in lv for m in _PLACEHOLDER_MARKERS)
 
 
+def is_r2_endpoint(endpoint: str) -> bool:
+    """Endpoint S3 do Cloudflare R2 (`https://<conta>.r2.cloudflarestorage.com`, inclusive jurisdição `.eu.`)."""
+    from urllib.parse import urlsplit
+    host = (urlsplit(endpoint).hostname or "") if endpoint else ""
+    return host.endswith(".r2.cloudflarestorage.com")
+
+
+def storage_is_ephemeral(s: Settings) -> bool:
+    """Arquivos em disco local num contêiner sem volume declarado se perdem no próximo deploy (v0.31.0).
+
+    Não recusa subir — uma instância de demonstração pode aceitar isso —, mas a condição aparece no
+    log de inicialização e em /readyz, para ninguém descobrir depois do primeiro redeploy. Declarar
+    STORAGE_LOCAL_PERSISTENT=true é afirmar que há um volume montado em STORAGE_LOCAL_DIR."""
+    return s.storage_provider == "local" and s.is_hardened and os.getenv("STORAGE_LOCAL_PERSISTENT", "false") != "true"
+
+
 def validate(s: Settings) -> None:
     errors: list[str] = []
     if not s.database_url:
@@ -243,6 +259,13 @@ def validate(s: Settings) -> None:
             errors.append("PUBLIC_BASE_URL deve usar https em staging/production")
     if s.storage_provider == "s3" and not (s.s3_bucket and s.s3_access_key_id and s.s3_secret_access_key):
         errors.append("STORAGE_PROVIDER=s3 exige S3_BUCKET, S3_ACCESS_KEY_ID e S3_SECRET_ACCESS_KEY")
+    # v0.31.0 — Cloudflare R2: a assinatura SigV4 usa a região; o R2 só reconhece `auto` (e aceita
+    # `us-east-1` ou vazio como apelido — documentação do R2, "S3 API compatibility"). Com a região de
+    # exemplo do .env (sa-east-1) toda URL assinada falharia em produção, em silêncio, no primeiro upload.
+    if s.storage_provider == "s3" and is_r2_endpoint(s.s3_endpoint) and s.s3_region not in ("auto", "us-east-1", ""):
+        errors.append("S3_ENDPOINT é do Cloudflare R2: S3_REGION deve ser `auto` (R2 não tem região AWS)")
+    if s.storage_provider == "s3" and s.s3_endpoint and not s.s3_endpoint.startswith("https://") and s.is_hardened:
+        errors.append("S3_ENDPOINT deve usar https em staging/production")
     if bool(s.stripe_secret_key) != bool(s.stripe_webhook_secret):
         errors.append("STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET vêm juntas ou nenhuma")
     if s.ai_provider in ("anthropic", "openai_compatible") and not (s.ai_api_key and s.ai_model):

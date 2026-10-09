@@ -75,17 +75,20 @@ Nenhuma falha foi "resolvida" afrouxando teste.
 
 | Falha | Causa real | Correção |
 |---|---|---|
-| CI do `main` vermelho desde `171d8b4` (`test_every_tracked_file_is_either_in_the_manifest…`) | os 18 arquivos da análise econômica entraram no Git sem entrar no manifesto de nenhuma versão; o portão não foi rodado antes do commit | não reescrevo o manifesto da v0.30.0 (já tem tag): a análise entra no manifesto da v0.31.0, gerado no fechamento |
-| Restauração local: `schema "public" already exists` | o dump de um único schema traz `CREATE SCHEMA public`, que todo banco já tem | lista de restauração (`RESTORE_TOC_LIST`) pula só essa entrada e o comentário dela |
-| Restauração local: `type "public.citext" does not exist` (e `unaccent`) | `pg_dump --schema=public` não leva extensões; o produto usa `pgcrypto` (em `extensions` no Supabase), `citext`, `unaccent`, `pg_trgm` | o script lê na origem as extensões do produto e o schema de cada uma e as recria no destino antes de restaurar |
+| `test_every_tracked_file_is_either_in_the_manifest…` (CI do `main` vermelho desde `171d8b4`) | os 18 arquivos da análise econômica entraram no Git sem entrar no manifesto de nenhuma versão; o portão não foi rodado antes do commit | não reescrevo o manifesto da v0.30.0 (já tem tag): a análise entra no manifesto da v0.31.0, gerado no fechamento |
+| `pg_restore`: schema "public" already exists (ensaio local) | o dump de um único schema traz `CREATE SCHEMA public`, que todo banco já tem | lista de restauração (`RESTORE_TOC_LIST`) pula só essa entrada e o comentário dela |
+| `pg_restore`: type "public.citext" does not exist, e `unaccent` (ensaio local) | `pg_dump --schema=public` não leva extensões; o produto usa `pgcrypto` (em `extensions` no Supabase), `citext`, `unaccent`, `pg_trgm` | o script lê na origem as extensões do produto e o schema de cada uma e as recria no destino antes de restaurar |
 | `test_the_repository_carries_no_secret` (`supabase.yml:165`) | URL do PostgreSQL descartável com senha própria (`descartavel`) | segue a convenção do repositório para banco de CI (`postgres`), sem exceção no scanner |
-| Job `armazenamento`: `docker run` saiu com 125 | a tag fixada do MinIO não existe | seleção por lista com a imagem e o digest registrados |
-| Job `armazenamento`: nenhuma imagem do MinIO baixável | Docker Hub e quay.io negam acesso às imagens públicas do MinIO (run 37978407913) | servidores S3 alternativos que validam SigV4 (CloudServer na prática); o job falha se o teste de protocolo pular |
+| `docker run` saiu com 125 (job `armazenamento`) | a tag fixada do MinIO não existe | seleção por lista com a imagem e o digest registrados |
+| `docker pull` negado para todas as imagens do MinIO (job `armazenamento`) | Docker Hub e quay.io negam acesso às imagens públicas do MinIO (run 37978407913) | servidores S3 alternativos que validam SigV4 (CloudServer na prática); o job falha se o teste de protocolo pular |
 | `test_v0310_storage` (5 erros na primeira versão) | `load_settings()` valida e recusa sem `DATABASE_URL` no ambiente do teste | ambiente mínimo de desenvolvimento no próprio teste |
-| `armazenamento.yml` inválido | `concurrency` em mapa de fluxo com `${{ }}` | mapa em bloco |
+| `armazenamento.yml` inválido (YAML) | `concurrency` escrito como mapa de fluxo contendo uma expressão de contexto do Actions | mapa em bloco |
 | `test_the_frontend_package_metadata_matches` (1ª passagem local) | `web/package.json`/`package-lock.json` ficaram em 0.30.0 | atualizados para 0.31.0 (só o campo de versão) |
 | `test_v0230_release_gate` / `test_v0270_release_docs` (5, 1ª passagem) | manifesto e documentos de fechamento são gerados no fechamento | reescritos/gerados no fechamento |
-| Afirmação errada num documento meu: "SHA da v0.29.0 registrado no relatório" | estava no `.sha256` do empacotamento (fora do Git) | texto corrigido para o lugar exato |
+| `REPO_BASELINE_DIFF.md`: afirmação errada minha ("SHA da v0.29.0 registrado no relatório") | estava no `.sha256` do empacotamento (fora do Git) | texto corrigido para o lugar exato |
+| `test_no_fail_is_left_open_and_every_row_has_evidence` (2ª passagem) | eu citei na auditoria a sintaxe de expressão do Actions, que contém a marca que o teste usa para achar placeholder esquecido | reescrito em palavras |
+| `test_the_regression_section_names_a_cause_and_a_fix_for_every_failure` (2ª passagem) | as linhas da tabela não começavam pelo identificador da falha entre crases, que é como o teste as reconhece | reformatadas, conteúdo igual |
+| `test_the_committed_matrix_is_what_the_evidence_produces` (2ª passagem) | a matriz de cobertura deriva da evidência que a própria suíte reescreve | regenerada com `make_coverage_matrix.py` |
 
 ## 8. Build e pacote
 

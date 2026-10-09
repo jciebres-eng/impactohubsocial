@@ -141,7 +141,10 @@ PRIMEIRA REGRESSÃO COMPLETA LOCAL (código novo, antes do fechamento, scratchpa
   → 1 real (web/package.json e package-lock em 0.30.0 — corrigido) e 5 de fechamento (manifesto e documentos finais gerados no
     fechamento); causas e correções em FINAL_EXECUTION_AUDIT.md §7
 CI DO RAMO (run 37977204420): Ran 2414 tests in 1651.243s — 3 falhas (2 do manifesto, 1 da varredura de segredo — corrigida)
-SEGUNDA REGRESSÃO COMPLETA LOCAL: ver docs/evidence/test_run_v0.31.0.log
+SEGUNDA REGRESSÃO COMPLETA LOCAL (documentos de fechamento já escritos, docs/evidence/test_run_v0.31.0.log):
+  Ran 2425 tests in 1874.551s — 5 falhas, 0 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
+  → manifesto (gerado no fechamento), COVERAGE_MATRIX (regenerada), manifesto/notas, e 2 defeitos reais de forma na auditoria
+    (corrigidos; FINAL_EXECUTION_AUDIT.md §7). Portões de fechamento reexecutados após gerar os manifestos (fim do mesmo log)
 MÓDULOS NOVOS: test_v0310_storage (8, 1 deles de protocolo S3 que roda no CI) · test_v0310_release_docs (11) ·
                test_v0300_economic_analysis (6)
 PROVAS FORA DA SUÍTE: backup+restauração do Supabase (run 37975650545) · adaptador S3 × CloudServer (job armazenamento)

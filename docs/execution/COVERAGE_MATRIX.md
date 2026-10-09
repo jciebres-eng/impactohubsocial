@@ -12,16 +12,16 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 154 | 0 | 156 | 138 | 9 | 6 | 3 | 0 | 49 | 0 |
+| OSC | 15 | 154 | 0 | 156 | 137 | 10 | 6 | 3 | 0 | 49 | 0 |
 | Empresa (financiador) | 8 | 47 | 0 | 104 | 80 | 18 | 0 | 6 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 98 | 62 | 24 | 1 | 11 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 188 | 63 | 25 | 80 | 20 | 0 | 35 | 0 |
 | Apoiadora (pessoa física) | 3 | 10 | 0 | 99 | 67 | 20 | 0 | 12 | 0 | 27 | 0 |
-| Administração | 5 | 21 | 0 | 149 | 105 | 31 | 0 | 13 | 0 | 55 | 0 |
+| Administração | 5 | 21 | 0 | 149 | 111 | 25 | 0 | 13 | 0 | 55 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| Visitante sem login | 2 | 2 | 0 | 39 | 24 | 7 | 8 | 0 | 0 | — | — |
+| Visitante sem login | 2 | 2 | 0 | 39 | 28 | 3 | 8 | 0 | 0 | — | — |
 
 **Como ler.** *Com dado*: a tela abriu com conteúdo vindo da API. *Vazias*: abriu e mostrou o estado
 vazio do produto (lista sem item, busca sem termo). *Recusa correta*: perfil que NÃO deve ver a tela
@@ -72,13 +72,13 @@ URL, chamadas de API e tempo, está no CSV).
 | `/admin/central/equipe` | 2 | admin: ok, government: recusa |
 | `/admin/central/eventos` | 2 | admin: ok, government: recusa |
 | `/admin/central/faqs` | 2 | admin: ok, government: recusa |
-| `/admin/central/parcerias` | 2 | admin: vazia, government: recusa |
+| `/admin/central/parcerias` | 2 | admin: ok, government: recusa |
 | `/admin/central/recursos` | 2 | admin: ok, government: recusa |
 | `/admin/central/suporte` | 2 | admin: ok, government: recusa |
 | `/admin/central/suporte/:id` | 2 | admin: ok, government: recusa |
 | `/admin/chaves` | 2 | admin: ok, government: recusa |
 | `/admin/cobranca` | 2 | admin: ok, government: recusa |
-| `/admin/compliance` | 2 | admin: vazia, government: recusa |
+| `/admin/compliance` | 2 | admin: ok, government: recusa |
 | `/admin/contribuicao` | 2 | admin: ok, government: recusa |
 | `/admin/convenios` | 2 | admin: ok, government: recusa |
 | `/admin/credenciais` | 2 | admin: vazia, government: recusa |
@@ -87,15 +87,15 @@ URL, chamadas de API e tempo, está no CSV).
 | `/admin/editais` | 2 | admin: ok, government: recusa |
 | `/admin/erros` | 2 | admin: ok, government: recusa |
 | `/admin/fiscal` | 2 | admin: ok, government: recusa |
-| `/admin/honorarios` | 2 | admin: vazia, government: recusa |
+| `/admin/honorarios` | 2 | admin: ok, government: recusa |
 | `/admin/ia/financeiro` | 2 | admin: ok, government: recusa |
-| `/admin/identidade` | 2 | admin: vazia, government: recusa |
+| `/admin/identidade` | 2 | admin: ok, government: recusa |
 | `/admin/institucional` | 2 | admin: ok, government: recusa |
 | `/admin/integracoes` | 2 | admin: ok, government: recusa |
 | `/admin/integridade` | 2 | admin: ok, government: recusa |
 | `/admin/interruptor` | 2 | admin: ok, government: recusa |
 | `/admin/linha-do-tempo` | 2 | admin: ok, government: recusa |
-| `/admin/medidas` | 2 | admin: vazia, government: recusa |
+| `/admin/medidas` | 2 | admin: ok, government: recusa |
 | `/admin/organizacoes` | 2 | admin: ok, government: recusa |
 | `/admin/permissoes` | 2 | admin: ok, government: recusa |
 | `/admin/proveniencia` | 2 | admin: ok, government: recusa |
@@ -108,12 +108,12 @@ URL, chamadas de API e tempo, está no CSV).
 | `/afirmacoes` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: vazia |
 | `/ajuda` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/:slug` | 2 | anônimo: ok, osc: ok |
-| `/ajuda/academia` | 2 | anônimo: vazia, osc: ok |
-| `/ajuda/academia/:slug` | 2 | anônimo: vazia, osc: ok |
+| `/ajuda/academia` | 2 | anônimo: ok, osc: ok |
+| `/ajuda/academia/:slug` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/academia/aula/:id` | 2 | anônimo: recusa, osc: ok |
 | `/ajuda/atividades` | 2 | anônimo: recusa, osc: ok |
-| `/ajuda/biblioteca` | 2 | anônimo: vazia, osc: ok |
-| `/ajuda/biblioteca/:slug` | 2 | anônimo: vazia, osc: ok |
+| `/ajuda/biblioteca` | 2 | anônimo: ok, osc: ok |
+| `/ajuda/biblioteca/:slug` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/boletim` | 2 | anônimo: ok, osc: ok |
 | `/ajuda/boletim/cancelar` | 2 | anônimo: vazia, osc: vazia |
 | `/ajuda/boletim/confirmar` | 2 | anônimo: vazia, osc: vazia |
@@ -170,7 +170,7 @@ URL, chamadas de API e tempo, está no CSV).
 | `/diagnosticos/:id` | 2 | osc: ok, government: s/registro |
 | `/diagnosticos/:id/roteiro` | 2 | osc: ok, government: s/registro |
 | `/diagnosticos/:id/versoes` | 2 | osc: ok, government: s/registro |
-| `/documentos` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: vazia |
+| `/documentos` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: ok |
 | `/documentos/modelos` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/documentos/montagens` | 6 | osc: ok, company: vazia, provider: vazia, government: vazia, individual: vazia, admin: vazia |
 | `/documentos/montagens/:id` | 6 | osc: ok, company: s/registro, provider: s/registro, government: s/registro, individual: s/registro, admin: s/registro |
@@ -194,7 +194,7 @@ URL, chamadas de API e tempo, está no CSV).
 | `/ideias` | 2 | osc: ok, government: recusa |
 | `/identidade` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/instituicao` | 5 | osc: ok, company: ok, government: ok, provider: ok, individual: ok |
-| `/instituicoes/:id` | 6 | osc: ok, company: ok, provider: vazia, government: ok, individual: ok, admin: ok |
+| `/instituicoes/:id` | 6 | osc: vazia, company: ok, provider: vazia, government: ok, individual: ok, admin: ok |
 | `/legal/privacidade` | 1 | anônimo: ok |
 | `/legal/termos` | 1 | anônimo: ok |
 | `/mapa` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |

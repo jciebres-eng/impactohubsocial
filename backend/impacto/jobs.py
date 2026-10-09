@@ -225,10 +225,21 @@ def pending_scans(app) -> dict:
     if app.antivirus.name == "none":
         return {"skipped": "antivírus não configurado"}
     done = 0
+    unreadable: list[str] = []
     with app.pool.tx(DbContext(system=True), readonly=True) as c:
         docs = c.query("SELECT id::text AS id, storage_key FROM documents WHERE status = 'pending_scan' AND deleted_at IS NULL LIMIT 200")
     for d in docs:
-        status, note = app.antivirus.scan(app.storage.get(d["storage_key"]))
+        # UM ARQUIVO ILEGÍVEL NÃO PODE PARAR A FILA. Antes, um único objeto ausente no storage (404
+        # do S3/R2 — por exemplo, registro criado antes de o bucket existir) derrubava a rotina
+        # inteira e NENHUM outro documento era escaneado. O documento continua em quarentena
+        # (`pending_scan`, download bloqueado): nada é marcado como limpo sem ter sido lido.
+        try:
+            data = app.storage.get(d["storage_key"])
+        except Exception as exc:  # noqa: BLE001 - qualquer falha de leitura mantém a quarentena
+            unreadable.append(d["id"])
+            log(logger, logging.WARNING, "pending_scan_unreadable", document_id=d["id"], error=str(exc)[:200])
+            continue
+        status, note = app.antivirus.scan(data)
         if status == "pending_scan":
             continue
         with app.pool.tx(DbContext(system=True)) as c:
@@ -236,7 +247,7 @@ def pending_scans(app) -> dict:
         if status == "infected":
             app.storage.delete(d["storage_key"])
         done += 1
-    return {"scanned": done}
+    return {"scanned": done, "unreadable": len(unreadable), "unreadable_ids": unreadable[:20]}
 
 
 def document_expiry(app) -> dict:

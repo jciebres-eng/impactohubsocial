@@ -39,3 +39,7 @@ FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (test_v0270_
 ----------------------------------------------------------------------
 Ran 184 tests in 34.162s
 OK
+
+## Portões reexecutados após as correções da rodada do CI (commit c413681; manifestos regerados)
+Ran 184 tests in 35.369s
+OK (skipped=1)

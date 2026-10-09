@@ -1,11 +1,11 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.29.0",
  "version": "0.29.0",
- "commit": "d373a9ed9bbabfde5f84ac4d66a178658b3927ca",
- "date": "2026-10-09T12:47:31+00:00",
+ "commit": "c41368140abe892406aa268251a14a9dc1ef4a47",
+ "date": "2026-10-09T13:14:45+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 3544,
+  "tracked_total": 3545,
   "traceability": "IMPACTO_v0.29.0_TRACEABILITY.json",
   "package": "IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip"
  },
@@ -21,7 +21,7 @@
   "seconds": 1953.947,
   "result": "FAILED",
   "detail": "failures=5, skipped=29",
-  "runs_in_log": 2
+  "runs_in_log": 3
  },
  "new_test_modules": [
   "backend/tests/test_v0290_knowledge_base.py",

@@ -1,9 +1,9 @@
 {
   "version": "0.29.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-09T12:47:51+00:00",
+  "generated_at": "2026-10-09T13:14:45+00:00",
   "files_total": 3542,
-  "size_bytes_total": 60462143,
+  "size_bytes_total": 60466222,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 62,
@@ -31,7 +31,7 @@
     },
     "documentação da raiz": {
       "files": 180,
-      "size_bytes": 2488681
+      "size_bytes": 2490388
     },
     "documentação técnica": {
       "files": 71,
@@ -47,7 +47,7 @@
     },
     "evidência de execução": {
       "files": 79,
-      "size_bytes": 3748766
+      "size_bytes": 3749138
     },
     "frontend": {
       "files": 126,
@@ -59,7 +59,7 @@
     },
     "frontend: código": {
       "files": 65,
-      "size_bytes": 1208835
+      "size_bytes": 1208727
     },
     "frontend: estático": {
       "files": 18,
@@ -103,7 +103,7 @@
     },
     "outro": {
       "files": 4,
-      "size_bytes": 76228
+      "size_bytes": 78087
     },
     "raiz do projeto": {
       "files": 3,
@@ -119,7 +119,7 @@
     },
     "teste": {
       "files": 130,
-      "size_bytes": 2431434
+      "size_bytes": 2431683
     }
   },
   "files": [
@@ -161,8 +161,8 @@
     },
     {
       "file": ".gitleaksignore",
-      "sha256": "a8e2f71695fbe5e100c4527a578fc2aba764e60ff5482ebb58a0ed1f7c9639f0",
-      "size_bytes": 3373,
+      "sha256": "9d19de2f6e465dc3f7c5bc1c20a56fe6bafd4871dd75184c658d87c17325d02e",
+      "size_bytes": 5232,
       "category": "outro"
     },
     {
@@ -425,14 +425,14 @@
     },
     {
       "file": "FINAL_EXECUTION_AUDIT.md",
-      "sha256": "022d435268cf9845fb3815fa01bd22c8528ced792a0db3e64c780aed77de5047",
-      "size_bytes": 19705,
+      "sha256": "2591db8148f70cad2f21cf45e05034695ccaf2e9568096301f2fa08896901a1c",
+      "size_bytes": 21113,
       "category": "documentação da raiz"
     },
     {
       "file": "FINAL_EXECUTION_REPORT.md",
-      "sha256": "3cfead37c2921c6d7a0ed507839b9b805dc10b83f89ebb8ec4f78fbe403fbe60",
-      "size_bytes": 16040,
+      "sha256": "e302a2e99afbbf98cae810fcbbe43e3430600ea15ae6a8899b9cdcb2b22ccd10",
+      "size_bytes": 16339,
       "category": "documentação da raiz"
     },
     {
@@ -473,7 +473,7 @@
     },
     {
       "file": "FINAL_RELEASE_MANIFEST.json",
-      "sha256": "0dbc4b054a0199074f8b8368ae89dfcf25b8c7798042b0e5ab6eade9fb9ad18d",
+      "sha256": "3cde3ec4d41a6362407e62d5e9b01a255281d01b9ca79f1a1f0a0f3ae17d582b",
       "size_bytes": 7220,
       "category": "manifesto de versão anterior"
     },
@@ -3725,8 +3725,8 @@
     },
     {
       "file": "backend/tests/test_v0230_security_gate.py",
-      "sha256": "1e79d482cb01f53d3b10187b06e57d26ad02458a78be75ab356a5e119c780eef",
-      "size_bytes": 28013,
+      "sha256": "68f5533dc25ec361ec8e043299e2da3a6c3c5cdff64e6b4bef8f261ee99bd6b2",
+      "size_bytes": 28262,
       "category": "teste"
     },
     {
@@ -3869,7 +3869,7 @@
     },
     {
       "file": "backend/tests/test_v0290_knowledge_base.py",
-      "sha256": "fcf78ba24baf103b3e3d03bed4ecb3921d19f7bdd5ab7c6695e4885da2c37a8d",
+      "sha256": "3f18a7f57aceb35f235aa0b59ae0f7f3ab67c2b18d93877ceda5b6243842e75a",
       "size_bytes": 29358,
       "category": "teste"
     },
@@ -3899,7 +3899,7 @@
     },
     {
       "file": "config/concepts.json",
-      "sha256": "916d5017cd625f899a23fbd37f0fc2c71fe165bdfb880a014f0de75f6751bdc6",
+      "sha256": "d1a76fb2854266d119d7f5f1a105a3b3de23a024ad2b36c4761496c4a5f0745a",
       "size_bytes": 45995,
       "category": "configuração versionada"
     },
@@ -4649,8 +4649,8 @@
     },
     {
       "file": "docs/evidence/test_run_v0.29.0.log",
-      "sha256": "826b8ad2cd8d54eeec18bc1c2cf4e726eaea260c020bbae9638453e34a80c4d8",
-      "size_bytes": 3944,
+      "sha256": "10e7c3d68ecfcd873935b366deaf46d3c905c8b2760a4a052331dbb11930a81b",
+      "size_bytes": 4316,
       "category": "evidência de execução"
     },
     {
@@ -19949,7 +19949,7 @@
     },
     {
       "file": "scripts/sync_concepts.py",
-      "sha256": "0200ab6534b696c0043a9cbcae8af5efbda03ef4314aec89deaf7a5543707755",
+      "sha256": "de5e63bdfbc3253e78c736b37e4b92a4122350d87b88c0ce148260d40aebd9d6",
       "size_bytes": 5940,
       "category": "operação"
     },
@@ -20686,8 +20686,8 @@
       "category": "frontend"
     },
     {
-      "file": "web/dist/assets/app-RMOJDTEG.js",
-      "sha256": "368dd07fe4a8260f4b4c9254fe33bb0dcfce83a82068d4a2521ad93e41991388",
+      "file": "web/dist/assets/app-VMFOHEVK.js",
+      "sha256": "64957e5c94b1cf9e7bf6b1cd7e8ee74be161ea088935d24dd99bc99ffa4688ef",
       "size_bytes": 1154610,
       "category": "frontend: build"
     },
@@ -20741,7 +20741,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "13123ab5939f4db21fb82525a61a1f86dbd84633860b5e1104917d5f1fd3e46d",
+      "sha256": "6fbd1cb6aacf065c72069422e7ea2f6ba1ae8fe294a74099682e8453b80d28eb",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -20795,7 +20795,7 @@
     },
     {
       "file": "web/dist/index.html",
-      "sha256": "ebe8562e16826c5bfb1ca479e38a43ba72a23ce97c4e1a675b3514b178745f0c",
+      "sha256": "02355a0810659c842062b0b72c0237a49a3b263b37f7135ec660cf1e4ffd6a55",
       "size_bytes": 1127,
       "category": "frontend: build"
     },
@@ -20819,7 +20819,7 @@
     },
     {
       "file": "web/dist/sw.js",
-      "sha256": "fca3918ec1f850f9db1748533eb93ac8812b79b96452468b752f368f991d6bc2",
+      "sha256": "048234e3836799deb2b15ad9b7c0b9a8fea1e60e14e9a1a9fbd284edfba5ef9a",
       "size_bytes": 1923,
       "category": "frontend: build"
     },
@@ -20969,7 +20969,7 @@
     },
     {
       "file": "web/src/concepts.ts",
-      "sha256": "c0577afe51a742720b796556561994cc41ea467fdd24d8b7e242ef6a1ed15bce",
+      "sha256": "b889949cdf863a0a63a3f24112a5cbc116f04f23faba5d45cbaf6cfd8dc16a18",
       "size_bytes": 40048,
       "category": "frontend: código"
     },
@@ -21017,8 +21017,8 @@
     },
     {
       "file": "web/src/pages/calls.tsx",
-      "sha256": "a674fe10ca2c627cf2ac8b195b290ed573cf70df79fb396020a7b9b8b4c49ec2",
-      "size_bytes": 25093,
+      "sha256": "a083e3df9924f4398a817338f0c35a2fb4c024ac2141bae3320ae71afcf91c82",
+      "size_bytes": 25077,
       "category": "frontend: código"
     },
     {
@@ -21029,8 +21029,8 @@
     },
     {
       "file": "web/src/pages/core.tsx",
-      "sha256": "18ae060400b444588f6177a8d0d457fcdc93ef57dc0a4b5754eaf40fff870f2a",
-      "size_bytes": 53106,
+      "sha256": "ba5beea87ce4cf98dcb2a140c2f44737cc05fab882c14a3732022943e510a24c",
+      "size_bytes": 53092,
       "category": "frontend: código"
     },
     {
@@ -21041,8 +21041,8 @@
     },
     {
       "file": "web/src/pages/documents.tsx",
-      "sha256": "1ce861b64edfc534be323b006dc148f762f369c17eb737bf10634c26b3bbf51e",
-      "size_bytes": 22135,
+      "sha256": "7d0fc6a12f398fac078bfe06c7773365977ccdfc8f595f7123601e8a8532d4cc",
+      "size_bytes": 22121,
       "category": "frontend: código"
     },
     {
@@ -21053,8 +21053,8 @@
     },
     {
       "file": "web/src/pages/funding.tsx",
-      "sha256": "b456b63f896a86d351908ed027b51aa1d90020ea59a0d6ba1293b6f893323481",
-      "size_bytes": 11662,
+      "sha256": "3e3434df4bc21b821e49bf8b8ec725b92bd5191081447f83a370cbc4be97f519",
+      "size_bytes": 11648,
       "category": "frontend: código"
     },
     {
@@ -21083,8 +21083,8 @@
     },
     {
       "file": "web/src/pages/impactlayer.tsx",
-      "sha256": "a913e8fdf5c801b9246e3d2254023929875b72cbb245ac721f70ec778d87d9fe",
-      "size_bytes": 20882,
+      "sha256": "7b723b859e2e66fcf6d2f85b89d1b555d957788d8a55770deafb1a6d7a326453",
+      "size_bytes": 20868,
       "category": "frontend: código"
     },
     {
@@ -21107,8 +21107,8 @@
     },
     {
       "file": "web/src/pages/internal.tsx",
-      "sha256": "5f1b2759adc9f6ef6f5ad6a24475de2631a6196e854c0750714c90b764ccede5",
-      "size_bytes": 60354,
+      "sha256": "ef274317fa83617eccefe93acc40358c9b7240c1ae22c5958b4aa1e938b838a8",
+      "size_bytes": 60340,
       "category": "frontend: código"
     },
     {
@@ -21143,8 +21143,8 @@
     },
     {
       "file": "web/src/pages/org.tsx",
-      "sha256": "a9665ffa44d031b4cf3d452221f197a51cd233f47e817e03b08d97518be3eda5",
-      "size_bytes": 44781,
+      "sha256": "22251897732c302a4488c32926e5e3d06b67721ac22762f1192da28ef60738fa",
+      "size_bytes": 44767,
       "category": "frontend: código"
     },
     {
@@ -21299,8 +21299,8 @@
     },
     {
       "file": "web/src/ui/help.tsx",
-      "sha256": "194cf40d3a2252184a0904014dd469169186b277bda14b8184dbfd9659b935ad",
-      "size_bytes": 11926,
+      "sha256": "7dcbb493a4d488143160c29d764e8d1981ed2cc6130d1beb89a660fe84ec6676",
+      "size_bytes": 11918,
       "category": "frontend: código"
     },
     {

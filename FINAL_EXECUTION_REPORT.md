@@ -1,126 +1,119 @@
-# Relatório final de execução — IMPACTO v0.28.0
+# Relatório final de execução — IMPACTO v0.29.0
 
-**Data:** 09/10/2026 · **Ramo:** `main` · **Tag:** `v0.28.0` (a criar no GitHub pelo proprietário no
+**Data:** 09/10/2026 · **Ramo:** `main` · **Tag:** `v0.29.0` (a criar no GitHub pelo proprietário no
 commit indicado em §3 — o proxy deste ambiente recusa envio de tag) · **Pacote:**
-`IMPACTO_TRUST_FINAL_RELEASE_0.28.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:**
-`FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.28.0_RELATORIO_TECNICO.docx`
+`IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:**
+`FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.29.0_RELATORIO_TECNICO.docx`
 (entregue ao lado do pacote; conteúdo derivado deste relatório e da auditoria)
 
 ## 1. Executive Summary
 
-A rodada tornou a IA do IMPACTO **governável e financeiramente sustentável** e entregou o **motor de
-originalidade, complementaridade, sobreposição territorial e integridade do financiamento** — sem
-assinatura (ADR-341), sem fintech dentro do produto (ADR-284), sem inventar preço, parecer,
-integração ou publicação:
+A rodada incorporou a **base de conhecimento v0.26.0** à release mais nova **sem retroceder nada** e deu à
+Central de Conhecimento governança de ponta a ponta — fonte → direitos → citação → quatro olhos →
+publicação imutável → retirada → busca → assistente → interface — mais um **sistema global de ajuda
+contextual** (tooltip, popover, glossário) alimentado por um único catálogo de conceitos:
 
-- **Inventário antes de construir** (`docs/execution/AI_INVENTORY.md`): a camada de IA já tinha prompt
-  versionado, faixa de risco, uso registrado, tabela de preço (vazia), orçamento em dinheiro e razão
-  de créditos — mas **nenhuma chamada consumia crédito**, a cota era fixa no pacote e não havia prévia,
-  fonte de custeio, patrocínio, pedido de crédito, execução com estado nem conciliação.
-- **Camada central de uso e custo** (`engines/ai/usage_control.py`, migração 0068): catálogo
-  versionado de 12 operações (categorias A–F; 9 executáveis, 3 declaradas → 501); execução com máquina
-  de estados `created → authorized → reserved → running → succeeded/failed/partial/cancelled →
-  reconciled` guardada pelo banco; **débito só em sucesso**; idempotência; concorrência sem
-  ultrapassar saldo; prévia obrigatória com custo, fonte, saldo e critério de conclusão.
-- **Quatro fontes de custeio, nesta ordem:** gratuito → patrocínio institucional → cota promocional
-  (boas-vindas 60, uma vez por organização E por pessoa; mensal leve 10) → crédito comprado → recusa
-  `402` com opções. Razão por lote, com validade, escrito só por função com portão.
-- **Créditos pré-pagos via PIX, sem venda real ainda:** pedidos em **modo piloto** (aprovação manual,
-  crédito promocional, R$ 0,00) enquanto a regra `ai.credits_prepaid` (11ª do catálogo, carta amarela)
-  estiver inativa e não houver provedor; **modo real** exige webhook HMAC idempotente (ou conciliação
-  manual com referência) E regra ativa — cobrança simulada **nunca** credita.
-- **Claude API × assinatura verificadas na documentação oficial:** a assinatura Claude.ai de ninguém
-  paga nem autoriza chamadas do IMPACTO; o sistema nunca pede senha/sessão/token de assinatura.
-  **BYOK não liberado** (requisitos documentados, ADR-351). Escolha: híbrido A + C + D-local.
-- **Similaridade por dimensões, local, explicável, contestável, sem bloqueio e sem efeito
-  reputacional** (`similarity@1.0`): texto, escopo, público, território, tempo, orçamento,
-  financiamento, indicadores — leituras separadas (reprodução textual ≠ sobreposição de escopo ≠
-  duplicidade territorial ≠ duplicidade de despesa ≠ complementaridade), recomendações, confiança,
-  cache por versão, trilha de autoria; outra organização só vê contagem k-anônima (k ≥ 3). Conjunto
-  de avaliação rotulado (6 pares; P/R = 1,0 nas duas leituras de alto impacto) — **pequeno e
-  sintético, não é desempenho em base real**.
-- **Painel financeiro** medido × NÃO MEDIDO (créditos vendidos ≠ receita; GMV ≠ receita); **modelo de
-  custo derivado** de hipóteses declaradas e de medição real do piloto local (par 0,75 ms; 200
-  candidatos 153 ms), 3 cenários × 12 meses, doze perguntas, teto de subsídio declarado.
-- **Limpeza:** 19 manifestos antigos (5,3 MB) para `history/manifests/`; consumo de crédito unificado;
-  inventário do que ficou e por quê.
-- Tudo provado por HTTP e PostgreSQL reais (45 testes novos em 4 módulos), por 3 jornadas no
-  navegador, pela jornada demo "Central de IA" (16 jornadas, 256 passos, 0 falha), pelas 225 telas no Chromium por
-  perfil (825 visitas, 0 falha) e pela regressão completa, cuja primeira passagem acusou 14 falhas — todas com causa e
-  correção escritas (auditoria §7), nenhuma resolvida afrouxando teste. **Receita real de IA desta
-  instalação: R$ 0,00.**
+- **Reconciliação, não cópia** (`knowledge-base/` + `CONTROL-RECONCILIATION.json`): os 58 controles
+  O/A/V/H/D classificados contra o código com os testes que os provam — IMPLEMENTED_TESTED 6 · PARTIAL
+  27 · BLOCKED_EXTERNAL 13 · NOT_IMPLEMENTED 12 (237 referências de teste conferidas por AST). Nenhum
+  controle foi declarado "em conformidade".
+- **Fontes com direitos de uso** (migração 0069): classe O/A/V/H/D, jurisdição, vigência, licença,
+  direitos por operação (allowed/denied/**unknown = bloqueado**), verificação por pessoa diferente de
+  quem registrou (gatilho), revisão marcada. 11 fontes semeadas, **0 conferidas** — a interface diz
+  "fonte ainda não conferida por outra pessoa" em cada citação.
+- **Citação, retirada e fila editorial:** citação só em rascunho, trecho só com direito permitido e
+  hash conferido pelo banco; retirada terminal com motivo que some da busca, do assistente e do
+  sitemap no mesmo instante; buscas sem resultado, "não ajudou", vencidos, relatos de erro e fontes a
+  revisar viram itens de trabalho deduplicados — **só hash e tópicos, nunca o texto** (ADR-043).
+- **Assistente que cita e se abstém:** extrativo (sem modelo), só publicado + oficial/educacional +
+  não DEMO + não vencido; devolve a **única** fonte usada com citações, o que excluiu e por quê;
+  em empate pergunta; sem base diz "Não encontrei informação suficiente na base publicada da
+  plataforma." Nunca se chama "base oficial".
+- **Busca medida antes de mudada:** 35 consultas rotuladas, 8 métricas, baseline gravado como piso
+  que reprova regressão (hit@1 0,875 · MRR 0,94 · nDCG@5 0,93 · abstenção 3/3 · p95 ≈ 25 ms). A única
+  mudança (tesauro 1.1) foi feita porque a medição mostrou ganho. **Sem embeddings** — sem ganho
+  demonstrado, não entra. Conjunto pequeno e sintético: o arquivo de evidência diz isso.
+- **Ajuda contextual:** 33 conceitos definidos UMA vez (`config/concepts.json`: definição, por que
+  importa, como o IMPACTO usa, limites, fontes) → `concepts.ts` gerado → `Tooltip`/`InfoPopover`/
+  `GlossaryTerm`/`ContextualHelp` sem biblioteca nova → `/ajuda/glossario`; aplicado em 11 telas;
+  mouse, teclado e toque; claro/escuro; movimento reduzido; `GET /v1/public/concepts`. As 33
+  definições estão **`needs_review`** (escritas a partir do código; revisão por área pendente) e a
+  interface avisa.
+- **Contagens** (ADR-340): 936 operações (+13), 238 de plataforma, 54 públicas, 226 telas (+1), 69
+  migrações, 50 motores (nenhum novo).
+- Tudo provado por HTTP e PostgreSQL reais (38 testes novos em 3 módulos), por 7 jornadas no
+  Chromium (mouse, teclado, toque, escuro, movimento reduzido, a11y, contraste), pelas 226 telas por
+  perfil e pela regressão completa, cuja primeira passagem acusou 10 falhas e 1 erro — todas com
+  causa e correção escritas (auditoria §7), nenhuma resolvida afrouxando teste; duas eram **achados
+  reais** (nome acessível de título com termos; medição da busca dependente da ordem dos testes).
 
-**Decisão: GO WITH CONDITIONS** (§27) — piloto com medição real antes de qualquer cobrança real.
+**Decisão: GO WITH CONDITIONS** (§27) — as condições são editoriais (conferir fontes, revisar
+definições, escrever conteúdo oficial) e externas (parecer, DPO, provedores), não técnicas.
 
 ## 2. Version
 
-0.28.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`,
-`README.md`, `docs/openapi.json`. Documentos da v0.27.0 preservados em `history/v0.27.0/` (164
-arquivos de `227c9aa`); manifestos de todas as versões anteriores em `history/manifests/`.
+0.29.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`,
+`README.md`, `docs/openapi.json`. Documentos da v0.28.0 preservados em `history/v0.28.0/` (166
+arquivos de `1c3114f`); manifestos anteriores em `history/manifests/`.
 
 ## 3. Commit
 
-Commits da rodada (sobre `227c9aa`, v0.27.0): `1e56233` (F2–F4: migração 0068, camada de uso,
-similaridade, rotas da Central de IA, 38 testes), `a86a566` (F5: Central de IA no front, painel na
-ficha do projeto, E2E, jornada demo), `128b50a` (F6: modelo de custo, inventário da IA, avaliação de
-provedores/BYOK, ADR-347..352, limpeza), `a8c358e` (versão 0.28.0, snapshot `history/v0.27.0/`,
-matrizes regeneradas), `82dec72` (correções da primeira regressão, matrizes), o commit de fechamento
-(auditoria, relatório, checklist, rollback, guia de monitoramento, evidência da regressão) e o
-**commit final dos manifestos**, para o qual a tag `v0.28.0` deve apontar e do qual o pacote é
-construído byte a byte (`verify_package_against_git.py`); o hash desse commit é registrado no
-`.sha256` do pacote e não cabe dentro do próprio commit. `FINAL_RELEASE_MANIFEST.json` registra o
-último commit de conteúdo.
+Commits da rodada (sobre `1c3114f`, v0.28.0): `aa2785c` (F1–F3: versão, snapshot, base de
+conhecimento versionada e reconciliada, migração 0069, serviço e rotas de proveniência, assistente
+reescrito, 22 testes), `bf0c3e4` (F4: conjunto de avaliação da busca, métricas, baseline, tesauro 1.1,
+4 testes), `4107b08` (F5: catálogo de conceitos, componentes de ajuda, glossário, 11 telas, E2E,
+contagens), `859efdc` (documentos: ADR-353..359, changelog, notas, KNOWLEDGE_*, checklist, rollback,
+rastreabilidade, segurança, limpeza; correções da 1ª regressão), o commit de fechamento (auditoria,
+relatório, evidência da regressão) e o **commit final dos manifestos**, para o qual a tag `v0.29.0`
+deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`); o hash
+desse commit é registrado no `.sha256` do pacote e não cabe dentro do próprio commit.
+`FINAL_RELEASE_MANIFEST.json` registra o último commit de conteúdo.
 
-**GitHub Actions:** run do commit final `ff31622` (`37884629991`): `auditoria`, `docker` (typecheck
-oficial), `pilha-do-zero` (banco vazio → imagem → migrações → seed → jornadas → telas → axe → reinício) e
-`backend` (suíte oficial completa) — **os quatro verdes** na primeira tentativa. Este parágrafo foi
-acrescentado depois da run, no commit seguinte; a tag `v0.28.0` aponta para `ff31622`.
+**GitHub Actions:** o resultado da run do commit final é registrado no commit seguinte (mesmo
+procedimento da v0.28.0, cuja run `37884629991` foi 4/4 verde); ver o parágrafo "CI" no fim desta
+seção quando existir.
 
 ## 4. Architecture Status
 
 Starlette + PostgreSQL 16 com RLS em toda tabela (exceção: `schema_migrations`; nenhuma FORCE), hash
-encadeado em auditoria/razão/valor/confiança, sem custódia. Mudanças: 11 tabelas novas de IA e
-similaridade; `ai_credit_ledger` ganha lote/validade/execução e passa a ser escrito só por função com
-portão; `platform_charges.kind` ganha `ai_credits`; `charge_requires_authorization` v3;
-`engines/ai/usage_control.py`, `engines/similarity/`, `services/similarity.py`,
-`services/ai_center.py`, `api/ai_center_routes.py` (28 rotas) novos; gateway de IA passa pela camada
-de uso. Documentos canônicos: `docs/execution/AI_INVENTORY.md`, `AI_PROVIDERS_EVALUATION.md`,
-`AI_COST_MODEL.md`, `docs/execution/CLEANUP_INVENTORY_v0280.md`.
+encadeado em auditoria/razão/valor/confiança, sem custódia. Mudanças: 4 tabelas novas
+(`kb_sources`, `kb_citations`, `kb_work_items` + funções), estado `retracted` em 3 tabelas da Central;
+`services/kb_provenance.py`, `api/kb_provenance_routes.py` (12 rotas), `GET /v1/public/concepts`,
+`engines/knowledge/evaluation.py` novos; `services/knowledge.py` (busca abre lacuna; assistente
+reescrito); `knowledge-base/` versionada; `config/concepts.json`, `config/search_eval.json`;
+`web/src/ui/help.tsx`, `web/src/concepts.ts` (gerado). Documentos canônicos:
+`docs/execution/KNOWLEDGE_ARCHITECTURE_v0290.md`, `CONTENT_GOVERNANCE.md`, `KNOWLEDGE_DATA_MODEL.md`,
+`AI_SEARCH_ARCHITECTURE.md`, `docs/execution/TRACEABILITY_MATRIX_v0290.md`.
 
 ## 5. Engines Status
 
-50 motores (48 + `ai_usage_control`, `similarity`): implemented/integrated/tested 50/50;
-`MOTOR_COVERAGE_MATRIX.md` (gerado) VERDE 37 · AMARELO 13 (motores de leitura sem rastro durável ou
-sem rota própria, por desenho, com motivo listado) · VERMELHO 0; 45 determinísticos.
-`ENGINE_COVERAGE.md`, `docs/execution/ENGINE_VALIDATION_MATRIX.csv`, `docs/AI_ENGINES.md`.
+50 motores: implemented/integrated/tested 50/50; `MOTOR_COVERAGE_MATRIX.md` (gerado) VERDE 37 ·
+AMARELO 13 · VERMELHO 0. Nenhum motor novo: a avaliação da busca é módulo de métricas, não decide
+nada em produção. `ENGINE_COVERAGE.md`, `docs/execution/ENGINE_VALIDATION_MATRIX.csv`, `docs/AI_ENGINES.md`.
 
 ## 6. Contract Intelligence
 
-PASS (inalterado da v0.26.0/v0.27.0): o acordo de financiamento recebe percentuais do catálogo; mudar
-o contrato cria versão nova e estorna instruções abertas. A similaridade **não lê nem escreve** no
-contrato; a leitura "integridade do financiamento" só declara múltiplas fontes, nunca acusa
-(`test_multiple_funding_sources_are_declared_not_accused`).
+PASS (inalterado da v0.26.0–v0.28.0). A camada de conhecimento não lê nem escreve no contrato.
 
 ## 7. Match
 
-PASS (inalterado): nenhum pacote, voucher, convênio, contrato, crédito, patrocínio ou análise de
-similaridade altera match, elegibilidade ou ranking
-(`test_similarity_touches_neither_match_nor_reputation_nor_funding`, `test_architecture`). Sem
-pay-to-rank. A complementaridade é **sugestão** ao proponente, não critério de ranking.
+PASS (inalterado): a busca da Central e o assistente **não leem** reputação, planos, pagamento nem
+match (`test_knowledge_search_and_match_never_read_reputation_or_plans`, guarda por AST). O conceito
+"compatibilidade" do glossário diz, em cada tela, que não é aprovação nem elegibilidade.
 
 ## 8. Diagnostic
 
-PASS (inalterado): `diagnostic-engine@1.0.0`, 8 dimensões. Não tocado.
+PASS (inalterado): `diagnostic-engine@1.0.0`, 8 dimensões — agora nomeadas no conceito
+`diagnostico_prontidao` do glossário, com o aviso de que "IMPACTO Ready" é estado, não selo.
 
 ## 9. Equity
 
-PASS (inalterado): sem nota única, denominador com fonte. Não tocado.
+PASS (inalterado): sem nota única, denominador com fonte. Conceito `equidade` aplicado nas telas.
 
 ## 10. Evidence
 
-PASS (inalterado): quitação exige entrega aceita E repasse confirmado. A análise de similaridade é
-registro append-only com hash dos insumos e versão do motor — serve como **evidência de
-originalidade do próprio projeto** para quem a pediu; nunca como prova contra terceiro.
+PASS (inalterado). Novo: evidência **editorial** — citação com hash de trecho e fonte verificada por
+outra pessoa é o mesmo princípio aplicado ao conteúdo da Central.
 
 ## 11. Responsibility
 
@@ -128,100 +121,91 @@ PARTIAL (inalterado): atribuição formal continua opcional.
 
 ## 12. Reputation
 
-PASS: inalterada — e **blindada** desta rodada: nenhuma leitura de similaridade produz efeito
-reputacional, selo negativo, bloqueio ou alerta a terceiros (`test_textual_reproduction_is_an_indication_never_a_verdict`).
+PASS (inalterado). A fila editorial e as retiradas não produzem efeito reputacional.
 
 ## 13. Seals
 
-PASS (inalterado): selos só na quitação. Nenhum selo por comprar crédito, patrocinar ou usar IA.
+PASS (inalterado): selos só na quitação.
 
 ## 14. Government Data
 
-Inalterado: torre territorial com k-anonimato ≥ 3; a sobreposição territorial oculta da similaridade
-usa o **mesmo limiar** (`similarity_hidden_overlap`, k ≥ 3). Dados IBGE/ODS oficiais continuam fora.
+Inalterado: torre territorial com k-anonimato ≥ 3. Dados IBGE/ODS oficiais continuam fora — e o
+conceito `ods` do glossário diz que as **metas** numeradas não estão carregadas até haver fonte,
+versão e licença registradas (controle LEG-024 continua PARTIAL).
 
 ## 15. Marketplace
 
-Inalterado: comissão recusada. Patrocínio de IA não é marketplace: o patrocinador compra créditos da
-plataforma (regra `ai.credits_prepaid`) e os aponta a beneficiários; nenhum repasse entre organizações.
+Inalterado.
 
 ## 16. Payments
 
-PASS / BLOCKED_EXTERNAL: pedidos de crédito com `platform_charges.kind = 'ai_credits'` (PIX com
-validade de 2 dias); webhook `POST /v1/webhooks/payments/{provider}` com HMAC sobre o corpo cru,
-idempotente por evento, 404 sem segredo; modo real exige referência de pagamento E regra ativa; modo
-piloto não movimenta dinheiro. **Nenhum pagamento real**: sem provedor, `PAYMENT_WEBHOOK_SECRET`
-vazio, regra inativa. Camada 3,5% / 1,5% da v0.27.0 **inalterada e independente** (ADR-350).
+Inalterado (PASS / BLOCKED_EXTERNAL): nenhum pagamento real; camada 3,5 % / 1,5 % independente e
+inativa; o glossário explica "não custodial", "quitação" e "taxa de serviço" com os limites.
 
 ## 17. Distribution
 
-PASS (inalterado): matriz de distribuição imutável, soma fechada por CHECK. Créditos de IA não
-entram na matriz (são serviço próprio da plataforma, fora da operação financiada).
+PASS (inalterado).
 
 ## 18. Billing
 
-MIGRATE (inalterado) + novo: **créditos pré-pagos por operação** como único modelo de cobrança da IA —
-sem assinatura, sem plano de IA, sem cobrança por capacidade. Preços e pacotes são hipóteses marcadas
-`hypothesis` no catálogo e `[PREMISSA]` no modelo; a interface diz "preço de teste". GET `/v1/ai/center`
-mostra saldo por lote, cotas, operações, pedidos, patrocínios, regras.
+Inalterado: sem assinatura (ADR-341); créditos de IA em modo piloto (ADR-349).
 
 ## 19. Fiscal
 
-BLOCKED_EXTERNAL: NFS-e não implementada. A carta `ai.credits_prepaid` lista as perguntas fiscais
-abertas (natureza do crédito pré-pago, ISS × software, estorno de crédito não usado, validade) —
-`MONETIZATION_LEGAL_MATRIX.md`.
+BLOCKED_EXTERNAL (inalterado): NFS-e não implementada; a reconciliação da base lista os controles
+fiscais como BLOCKED_EXTERNAL/NOT_IMPLEMENTED com o teste que falta.
 
 ## 20. Vouchers
 
-Inalterado: vouchers de concessão continuam; de desconto aposentados. Crédito promocional de IA **não
-é voucher**: é lançamento no razão com validade, concedido por política de cota ou aprovação de
-piloto.
+Inalterado.
 
 ## 21. Identity
 
-PARTIAL (inalterado): biometria, KYC, gov.br BLOCKED_EXTERNAL. Novo: a cota de boas-vindas é uma por
-pessoa (anti-abuso de contas) — limite por identidade interna, não KYC.
+PARTIAL (inalterado): biometria, KYC, gov.br BLOCKED_EXTERNAL.
 
 ## 22. Security
 
-Revisada: RLS em toda tabela nova; razão de créditos só por SECURITY DEFINER com portão por motivo;
-débito só em sucesso; webhook HMAC idempotente; pedido/confirmação exigem `billing.write` com
-confirmação de identidade; contestação admin exige `support.write` (endurecimento desta rodada);
-contexto de sistema restrito; nenhum segredo em código/documento/pacote (`secrets_scan.py`, gitleaks
-no CI); nenhum uso de credencial de assinatura Claude.ai; similaridade local (nada sai). **Nenhum
-sistema ligado à internet é "impossível de invadir", e este não é exceção.**
+Revisada (`docs/execution/SECURITY_PRIVACY_REPORT_v0290.md`): RLS nas 4 tabelas novas; quatro olhos
+na verificação de fonte e na publicação **no banco**; citações append-only com hash; retirada
+terminal; rotas editoriais com papel + MFA; 3 rotas públicas de referência revisadas e limitadas por
+taxa; texto de busca/pergunta nunca guardado; assistente sem modelo (sem superfície de injeção nesta
+versão; revisão obrigatória se um modelo for ligado); nenhum segredo em código, catálogo, documento
+ou pacote (`secrets_scan.py`, gitleaks no CI); sem `innerHTML`; URL de fonte imutável após o
+registro. **Nenhum sistema ligado à internet é "impossível de invadir", e este não é exceção.**
 
 ## 23. LGPD
 
-`config/data_retention.json` cobre `ai_credit_orders`, `ai_executions`, `ai_quota_grants` (retidas
-por organização, anonimizáveis por pessoa) e `similarity_analyses`/`similarity_disputes` (retidas);
-a similaridade roda em faixa 3 (nada sai da instalação); o resumo de IA passa pela redação de dado
-pessoal já existente; a prestação de contas de patrocínio é agregada, sem texto dos projetos
-beneficiados; outra organização nunca vê texto, só contagem k-anônima.
+As tabelas novas não guardam dado do titular além de referências editoriais (quem registrou,
+verificou, retirou, relatou); nada a declarar em `config/data_retention.json`;
+`test_v0190_lgpd_deletion` verde. A fila editorial guarda só `q_hash` + tópicos. Os direitos
+`embed/send_external/train` das fontes legais estão `unknown` de propósito: se um provedor externo
+for ligado, a operação fica bloqueada até conferência. Controles LGPD da base (ROPA, RIPD, DPO)
+continuam BLOCKED_EXTERNAL na reconciliação.
 
 ## 24. Tests
 
 ```text
-PRIMEIRA REGRESSÃO COMPLETA (código novo, antes das correções, scratchpad/suite/full_v0280_a.log):
-  Ran 2342 tests — 14 falhas, 0 erro, 29 pulados
-  → causas e correções em FINAL_EXECUTION_AUDIT.md §7 (1 endurecimento real: contestação admin exige
-    support.write; 1 defeito de ferramenta: sed do bump de versão alterou o package-lock; o resto:
-    retenção declarada, mapas, matrizes, documentos de fechamento e dois testes novos que dependiam
-    do estado de outros testes na mesma base — corrigidos para ler o banco, sem afrouxar a prova)
-SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.28.0.log):
-  Ran 2342 tests in 1953.844s — 0 erro, 29 pulados (dependem de credencial), 5 falhas, TODAS de fechamento:
-    4× test_v0270_release_docs (lê auditoria, relatório e manifesto no início da execução — ainda os da v0.27.0
-       naquele instante; reescritos durante a execução; reexecutado depois: 11/12, só o manifesto faltava),
-    test_v0230_release_gate.test_the_manifest_exists_for_this_version (manifesto é gerado no fechamento).
-  Manifestos gerados em seguida; os portões de fechamento reexecutados verdes (saída anexada ao fim do mesmo log).
-MÓDULOS NOVOS: test_v0280_ai_usage_control (25) · test_v0280_similarity (13) · test_v0280_ai_cost_model (4) · test_e2e_v0280_ai_center (3)
-JORNADAS: 16 jornadas, 256 passos, 0 falha (nova: Central de IA) · TELAS: 825 visitas, 225 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
-LINT: ruff 0 · BUILD: esbuild ok · TYPECHECK: no CI (npm ci); local sem @types/react, sem aviso nos arquivos tocados
+PRIMEIRA REGRESSÃO COMPLETA (código novo, antes das correções, scratchpad/suite/full_v0290_a.log):
+  Ran 2379 tests in 1915.199s — 10 falhas, 1 erro, 29 pulados
+  → causas e correções em FINAL_EXECUTION_AUDIT.md §7 (2 achados reais: nome acessível de título com termos
+    de glossário; medição da busca dependente da ordem dos testes — ambos corrigidos no produto/medição, não
+    no teste; 1 cartão 2 px fora da janela no celular; o resto: contagem 226, matrizes, openapi, documentos de
+    fechamento e manifesto gerados no fechamento)
+SEGUNDA REGRESSÃO COMPLETA (após correções, docs/evidence/test_run_v0.29.0.log):
+  Ran 2380 tests in 1953.947s — 0 erro, 29 pulados (dependem de credencial), 5 falhas, TODAS de fechamento:
+    4× test_v0270_release_docs (lê auditoria, relatório e manifesto no início da execução — ainda os da v0.28.0
+       naquele instante; reescritos durante a execução), test_v0230_release_gate.test_the_manifest_exists_for_this_version
+       (manifesto é gerado no fechamento). Manifestos gerados em seguida; portões de fechamento reexecutados (saída
+       anexada ao fim do mesmo log).
+MÓDULOS NOVOS: test_v0290_knowledge_base (27) · test_v0290_search_eval (4) · test_e2e_v0290_contextual_help (7)
+JORNADAS: 16 jornadas, 256 passos, 0 falha · TELAS: 226 rotas, 0 falha · TELEFONE: no CI (pilha do zero)
+LINT: ruff 0 · BUILD: esbuild ok · SYNC: concepts.ts em sincronia · TYPECHECK: no CI (npm ci)
 ```
 
-Testes que fixam contagem foram atualizados com a razão escrita ao lado (923 operações, 229 de
-plataforma, 94 com permissão, 51 públicas, 225 telas, 50 motores, 11 regras): ADR-340. Nenhum teste
-foi removido ou enfraquecido.
+Testes que fixam contagem foram atualizados com a razão escrita ao lado (936 operações, 238 de
+plataforma, 54 públicas, 226 telas): ADR-340. Expectativas atualizadas com motivo: mensagem de
+abstenção do assistente (`test_v0120_knowledge`, `test_e2e_knowledge`), lista de rotas públicas
+revisadas (`test_architecture`). Nenhum teste foi removido ou enfraquecido.
 
 ## 25. External Dependencies
 
@@ -229,28 +213,25 @@ BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTER
 
 | Dependência | Exige | Efeito hoje |
 |---|---|---|
-| Parecer jurídico e contábil da regra `ai.credits_prepaid` (e da taxa de serviço 3,5%) | advogado(a) e contador(a): natureza do crédito pré-pago, ISS, NFS-e, estorno, validade | regra desligada; pedidos só em modo piloto; **nenhuma venda** |
-| Provedor de pagamento PIX com webhook | contrato + `PAYMENT_WEBHOOK_SECRET` | webhook responde 404; nada creditado por pagamento |
-| Provedor de modelo + tabela de preço | `AI_API_KEY`, `AI_MODEL`, linhas em `ai_price_table` | `AI_PROVIDER=local`; custo externo zero MEDIDO porque não há chamada externa; com provedor e sem preço: NÃO MEDIDO |
-| BYOK | decisão do proprietário + cofre por tenant | não existe; a interface não promete |
-| Piloto com medição real | 30 dias com cota + patrocínio + pedidos piloto | preços, cotas e teto de subsídio continuam hipóteses |
-| Chave PIX da plataforma, banco, nota fiscal, assinatura qualificada, gov.br, biometria, KYC, SMS/WhatsApp, minutas, hospedagem | como na v0.27.0 | inalterado |
-| Tag `v0.28.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |
+| Conferência das 11 fontes (vigência, licença, direitos) | pessoa com papel `reviewer`, diferente de quem registrou | todas `unverified`; a interface avisa em cada citação; direitos `embed/send_external/train` bloqueados |
+| Revisão das 33 definições do glossário | jurídico, contábil, especialista em impacto | todas `needs_review`; a interface avisa em cada cartão |
+| Conteúdo oficial com citações | equipe editorial (editor + reviewer) | a semente continua DEMO/educacional; o assistente responde com origem "educacional" e avisa |
+| Decisão sobre 13 controles BLOCKED_EXTERNAL e 12 NOT_IMPLEMENTED da reconciliação | parecer jurídico, DPO, provedores (fiscal, pagamento, identidade) | continuam P0/P1 na matriz; nada declarado conforme |
+| Conjunto de avaliação com consultas reais | piloto + rotulagem por mais de uma pessoa | piso atual vale para o corpus sintético |
+| Parecer, provedores, minutas, hospedagem, chave PIX, tag no GitHub | como na v0.27.0/v0.28.0 | inalterado |
 
 ## 26. Known Limitations
 
-- Receita real de IA R$ 0,00 por construção até parecer + provedor + regra ativa.
-- Conjunto de avaliação da similaridade: 6 pares sintéticos; precisão/recall de 1,0 ali **não** é
-  desempenho em base real; alertas de alto impacto exigem revisão humana (o resultado diz isso).
-- Motor de similaridade é léxico/estrutural (shingles, Jaccard, dimensões declaradas) — sem
-  embeddings; paráfrase profunda pode escapar da leitura textual e cair só em escopo/público.
-- Lote, monitoramento recorrente e relatório institucional: declarados `planned`, rota 501.
-- Cache do resumo de IA por versão de projeto: parcial (hash de entrada em `ai_usage`).
-- Custo de infraestrutura, tarifa de PIX e impostos: NÃO MEDIDOS (painel diz).
-- Documentos SUPERADO da assinatura continuam no repositório com banner (movê-los exige atualizar
-  60+ referências — rodada dedicada).
-- Typecheck oficial do front só no CI.
-- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.
+- 0 de 11 fontes conferidas; 33 de 33 definições em revisão; nenhum conteúdo `official` — tudo dito
+  na interface.
+- A busca é léxica (FTS + trigram + tesauro); sem embeddings: paráfrase profunda pode não ser
+  encontrada. O conjunto de avaliação é pequeno, sintético e rotulado por uma pessoa.
+- O assistente é extrativo: responde com trechos de UM conteúdo; não sintetiza vários.
+- Retirar uma fonte não retira o conteúdo que a cita (decisão editorial por desenho).
+- Conceitos só em pt-BR; não aplicados em telas administrativas internas.
+- `examples` por conceito não foi incluído (as definições usam "como o IMPACTO usa").
+- Documentos SUPERADO da assinatura continuam com banner; typecheck oficial do front só no CI;
+  defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) fora do escopo.
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO
 
@@ -258,27 +239,24 @@ BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTER
 GO WITH CONDITIONS
 ```
 
-Nenhuma falha técnica interna crítica em aberto: catálogo versionado, execução com estado e débito só
-em sucesso, razão por lote com portão, cotas com anti-abuso, patrocínio, pedidos piloto × real, webhook
-idempotente, similaridade por dimensão sem bloqueio e sem efeito reputacional, isolamento k-anônimo,
-painel medido × não medido, projeção derivada, autorização, tenancy, persistência e fluxo completo têm
-teste executado e verde na segunda regressão. As condições são externas ou de piloto (§25): parecer,
-provedor de pagamento, provedor de modelo com preço, **medição real do piloto antes de cobrança real**,
-tag no GitHub. Nenhuma falha crítica foi convertida em "condição". Checklist operacional:
-`docs/execution/PRODUCTION_CHECKLIST_v0280.md`; rollback: `docs/execution/ROLLBACK_v0280.md`;
-monitoramento: `docs/execution/AI_COST_MONITORING_GUIDE.md`.
+Nenhuma falha técnica interna crítica em aberto: base reconciliada sem retrocesso, fontes com direitos
+e verificação por outra pessoa, citações com hash só em rascunho, retirada terminal que propaga, fila
+editorial sem texto livre, assistente que cita e se abstém, busca medida com piso, catálogo único de
+conceitos com ajuda acessível, autorização, tenancy, persistência e regressão têm teste executado e
+verde na segunda rodada. As condições são **editoriais e externas** (§25): conferir fontes, revisar
+definições, escrever conteúdo oficial, decidir os controles bloqueados, tag no GitHub. Nenhuma falha
+crítica foi convertida em "condição". Checklist operacional:
+`docs/execution/PRODUCTION_CHECKLIST_v0290.md`; rollback: `docs/execution/ROLLBACK_v0290.md`.
 
 ## 28. Exact Next Step
 
-1. Criar a tag `v0.28.0` no GitHub (Releases → nova tag no commit de fechamento) e anexar
-   `IMPACTO_TRUST_FINAL_RELEASE_0.28.0.zip` + `.sha256` + o relatório DOCX.
-2. Iniciar o piloto (checklist §D): cota + patrocínio + pedidos em modo piloto, `AI_PROVIDER=local`,
-   30 dias, rotina do guia de monitoramento; ao fim, atualizar `config/ai_economics.json` com a
-   medição e regenerar `AI_COST_MODEL.md`.
-3. Levar `MONETIZATION_LEGAL_MATRIX.md` (carta `ai.credits_prepaid`) a advogado(a) e contador(a) com a
-   pergunta exata: "crédito pré-pago consumido por operação de software é serviço (ISS) ou
-   licença/software? como se fatura, estorna e trata o crédito vencido?". Só com a resposta a regra
-   pode ficar verde — e só então contratar o provedor de PIX e configurar o segredo do webhook.
-4. Próxima rodada técnica (sem dependência externa): ampliar o conjunto de avaliação com casos reais
-   rotulados; cache do resumo por versão de projeto; fila para lote quando houver volume; mover
-   documentos SUPERADO para `history/`.
+1. Criar a tag `v0.29.0` no GitHub (Releases → nova tag no commit de fechamento) e anexar
+   `IMPACTO_TRUST_FINAL_RELEASE_0.29.0.zip` + `.sha256` + o relatório DOCX.
+2. Nomear editor(a) e reviewer (papéis `staff_roles` com MFA) e conferir as 11 fontes
+   (`POST /v1/admin/content/sources/{key}/verify`) — a primeira tarefa editorial, sem a qual nada é
+   "oficial".
+3. Revisar as 33 definições do glossário por área (`config/concepts.json` → `status = published`,
+   `scripts/sync_concepts.py`) e escrever os primeiros guias `official` com citações.
+4. Próxima rodada técnica (sem dependência externa): ampliar o conjunto de avaliação com consultas
+   reais (só hash/tópicos da fila `search_gap`) rotuladas por mais de uma pessoa; tela interna da fila
+   editorial; conceitos nas telas administrativas; tradução en/es do catálogo.

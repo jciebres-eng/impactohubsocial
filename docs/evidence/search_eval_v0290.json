@@ -12,9 +12,9 @@
  "eval_set": "search-eval@1.0 (v0.29.0)",
  "queries": 35,
  "corpus": {
-  "articles_published": 28,
+  "articles_published": 38,
   "faqs_published": 11,
-  "resources_published": 8
+  "resources_published": 9
  },
  "profile": "osc autenticada",
  "metrics": {
@@ -31,8 +31,8 @@
   "correct_abstention_rate": 1.0,
   "unanswerable_with_results": 0,
   "latency_ms": {
-   "p50": 17.0,
-   "p95": 21.4,
+   "p50": 17.8,
+   "p95": 24.7,
    "n": 35
   },
   "by_kind": {
@@ -100,8 +100,8 @@
   "correct_abstention_rate": 1.0,
   "unanswerable_with_results": 0,
   "latency_ms": {
-   "p50": 12.7,
-   "p95": 15.9,
+   "p50": 13.1,
+   "p95": 18.3,
    "n": 35
   },
   "by_kind": {
@@ -155,7 +155,7 @@
    }
   }
  },
- "unjudged_removed_total": 134,
+ "unjudged_removed_total": 164,
  "scoring_note": "só itens do corpus rotulado (semente) entram no ranking pontuado; conteúdo criado por outros testes no mesmo banco é removido antes de pontuar",
  "per_query": [
   {
@@ -561,5 +561,5 @@
   "julgamento por mais de uma pessoa (rótulos feitos à mão por quem escreveu o conjunto)",
   "medida de embeddings ou de modelo (não existem; a busca é determinística)"
  ],
- "measured_at": "2026-10-09T12:12:09Z"
+ "measured_at": "2026-10-09T12:45:44Z"
 }

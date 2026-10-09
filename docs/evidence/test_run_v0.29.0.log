@@ -1,0 +1,35 @@
+# Regressão completa — v0.29.0 (PostgreSQL 16 local, Chromium; suíte inteira por discover)
+
+## 1ª passagem (código novo, antes das correções) — 10 falhas, 1 erro; causas e correções em FINAL_EXECUTION_AUDIT.md §7
+----------------------------------------------------------------------
+Ran 2379 tests in 1915.199s
+FAILED (failures=10, errors=1, skipped=29)
+
+ERROR: test_originality_from_the_project_page_with_confirmation_then_dispute_and_center (test_e2e_v0280_ai_center.AiCenterE2E.test_originality_from_the_project_page_with_confirmation_then_dispute_and_center)
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_matrix_reproduces_what_is_committed) [ENGINE_VALIDATION_MATRIX.csv]
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_matrix_reproduces_what_is_committed) [PERSONA_E2E_MATRIX.csv]
+FAIL: test_the_manifest_exists_for_this_version (test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_the_openapi_document_carries_the_same_version (test_v0230_release_gate.ThereIsOneVersionAndEverybodyAgreesWithItTests.test_the_openapi_document_carries_the_same_version)
+FAIL: test_every_screen_in_the_router_opens_with_real_data (test_v0250_todas_as_telas.EveryScreenOpensForEveryPersonaTests.test_every_screen_in_the_router_opens_with_real_data)
+FAIL: test_no_fail_is_left_open_and_every_row_has_evidence (test_v0270_release_docs.FinalExecutionAuditTests.test_no_fail_is_left_open_and_every_row_has_evidence)
+FAIL: test_no_placeholder_was_left_behind_and_the_version_is_current (test_v0270_release_docs.FinalExecutionReportTests.test_no_placeholder_was_left_behind_and_the_version_is_current)
+FAIL: test_the_tests_section_reports_a_real_run_with_a_log (test_v0270_release_docs.FinalExecutionReportTests.test_the_tests_section_reports_a_real_run_with_a_log)
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+FAIL: test_the_metrics_do_not_fall_below_the_recorded_baseline (test_v0290_search_eval.SearchEvaluationTests.test_the_metrics_do_not_fall_below_the_recorded_baseline)
+
+
+## 2ª passagem (após as correções; antes do fechamento — os documentos de fechamento foram reescritos DURANTE a execução e o manifesto é gerado depois dela)
+----------------------------------------------------------------------
+Ran 2380 tests in 1953.947s
+FAILED (failures=5, skipped=29)
+
+FAIL: test_the_manifest_exists_for_this_version (test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_no_fail_is_left_open_and_every_row_has_evidence (test_v0270_release_docs.FinalExecutionAuditTests.test_no_fail_is_left_open_and_every_row_has_evidence)
+FAIL: test_no_placeholder_was_left_behind_and_the_version_is_current (test_v0270_release_docs.FinalExecutionReportTests.test_no_placeholder_was_left_behind_and_the_version_is_current)
+FAIL: test_the_tests_section_reports_a_real_run_with_a_log (test_v0270_release_docs.FinalExecutionReportTests.test_the_tests_section_reports_a_real_run_with_a_log)
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+
+# As 5 falhas da 2ª passagem são de fechamento: test_v0270_release_docs lê FINAL_EXECUTION_AUDIT.md, FINAL_EXECUTION_REPORT.md e
+# FINAL_RELEASE_MANIFEST.json no início da execução (ainda os da v0.28.0 naquele instante); o manifesto é gerado no fechamento.
+# Nenhuma falha de código, banco, interface ou autorização (0 erro). Documentos reescritos e manifestos gerados; portões reexecutados abaixo.
+

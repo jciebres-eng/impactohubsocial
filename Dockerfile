@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1.7
-# Imagem única: API + SPA compilada. O mesmo artefato roda como api, worker e job de migração (comandos diferentes).
+# Imagem única: API + SPA compilada. O mesmo artefato roda como api (CMD padrão: start_container.sh, que migra)
+# e worker (sh /app/start_worker.sh, que NÃO migra e espera o esquema ficar em dia) — v0.31.0.
 # NÃO testada neste ambiente de build (sem daemon Docker) — validar no CI (job docker) antes do primeiro deploy.
 
 FROM node:22-bookworm-slim AS web
@@ -24,6 +25,7 @@ COPY infra/db/ infra/db/
 COPY backend/impacto/ backend/impacto/
 COPY backend/migrations/ backend/migrations/
 COPY backend/start_container.sh /app/start_container.sh
+COPY backend/start_worker.sh /app/start_worker.sh
 COPY --from=web /web/dist web/dist
 USER impacto
 WORKDIR /app/backend

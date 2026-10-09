@@ -17,20 +17,29 @@ name: supabase
 #              exige SMTP — vem de um Mailpit descartável do próprio job —, chaves ≥32, cookie
 #              seguro, nenhum seed). O entrypoint cria/rotaciona impacto_app e APLICA AS MIGRAÇÕES:
 #              isso muda o schema do banco e não se desfaz. Exige a frase de confirmação.
+#   backup-restaurar  (v0.31.0) SOMENTE LEITURA na origem: pg_dump do schema `public` e restauração num
+#              PostgreSQL 17 DESCARTÁVEL deste job, com os verificadores do CI (hash do dump, cadeias de
+#              hash, camada econômica desligada, travas de impacto) e comparação de contagem de TODAS as
+#              tabelas. Mede o tempo (RTO). O dump é apagado; nenhum artefato é publicado (pode haver
+#              dado pessoal real). Não substitui o backup gerenciado do Supabase: prova que ele RESTAURA.
+#   contas-demo-listar / -desativar / -reativar  (v0.32.0) contas `@demo.impacto.local` no banco: listar é
+#              somente leitura; desativar faz o que a tela de administração faz (conta `disabled`, sessões
+#              encerradas, organização só de demonstração `suspended`, auditoria) e NÃO apaga nada; reativar
+#              desfaz. Frases: DESATIVAR CONTAS DEMO / REATIVAR CONTAS DEMO. Ver scripts/demo_accounts.py.
 on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "verificar (somente leitura) ou aplicar (migra o banco — irreversível)"
+        description: "verificar (somente leitura), aplicar (migra o banco — irreversível) ou backup-restaurar (leitura + restauração descartável)"
         type: choice
-        options: [verificar, aplicar]
+        options: [verificar, aplicar, backup-restaurar, contas-demo-listar, contas-demo-desativar, contas-demo-reativar]
         default: verificar
       rotacionar_senha_app:
         description: "aplicar: trocar a senha de impacto_app por IMPACTO_APP_PASSWORD (derruba quem use a antiga)"
         type: boolean
         default: false
       confirmacao:
-        description: "aplicar: digite exatamente APLICAR NO SUPABASE"
+        description: "aplicar: APLICAR NO SUPABASE · contas-demo-desativar: DESATIVAR CONTAS DEMO · contas-demo-reativar: REATIVAR CONTAS DEMO"
         type: string
         default: ""
 permissions: { contents: read }
@@ -135,3 +144,57 @@ jobs:
       - name: Derrubar o contêiner
         if: always()
         run: docker rm -f impacto >/dev/null 2>&1 || true
+
+  backup-restaurar:
+    needs: verificar
+    if: inputs.modo == 'backup-restaurar'
+    runs-on: ubuntu-24.04
+    services:
+      alvo:   # PostgreSQL DESCARTÁVEL: morre com o job. Mesma versão principal do Supabase (17).
+        image: postgres:17
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ["55432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cliente PostgreSQL 17 (pg_dump precisa ser >= servidor)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-common >/dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y -qq postgresql-client-17 >/dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+      - name: Backup do Supabase e restauração verificada em banco descartável
+        env:
+          SOURCE_DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          TARGET_ADMIN_URL: postgresql://postgres:postgres@127.0.0.1:55432/postgres
+        run: |
+          set -o pipefail
+          bash scripts/managed_backup_restore.sh 2>&1 | tee resultado.txt
+          grep -q '^BACKUP_RESTORE_OK$' resultado.txt
+          resumo=$(grep '^\[backup-restore\]' resultado.txt | sed 's/^\[backup-restore\] //' | paste -sd'|' -)
+          echo "::notice title=Backup e restauração (Supabase → descartável)::$resumo"
+          { echo "## Backup e restauração"; grep -v '^NOTICE' resultado.txt | sed 's/^/    /'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Nada sai deste job
+        if: always()
+        run: rm -f resultado.txt; ls -la "$RUNNER_TEMP" | grep -c dump || true
+
+  contas-demo:
+    needs: verificar
+    if: startsWith(inputs.modo, 'contas-demo-')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libpq5
+      - name: Antes (somente leitura)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: python3 scripts/demo_accounts.py listar
+      - name: Desativar ou reativar
+        if: inputs.modo != 'contas-demo-listar'
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          CONFIRMACAO: ${{ inputs.confirmacao }}
+          MODO: ${{ inputs.modo }}
+        run: python3 scripts/demo_accounts.py "${MODO#contas-demo-}"

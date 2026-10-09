@@ -185,9 +185,11 @@ class RowLevelSecurityCoversEveryTableTests(unittest.TestCase):
     def setUpClass(cls):
         server()
 
-    #: `schema_migrations` é a única tabela sem RLS, e o motivo é escrito: ela é lida pelo
-    #: `/readyz` e pelo migrador antes de existir qualquer sessão de organização.
-    SEM_RLS = {"schema_migrations"}
+    #: Até a v0.30.0, `schema_migrations` era a única tabela sem RLS (lida pelo `/readyz` e pelo migrador
+    #: antes de existir sessão de organização). A migração 0071 (v0.30.1) LIGOU RLS nela, com política só de
+    #: leitura para `impacto_app` — o `/readyz` continua lendo, o migrador é o dono da tabela, e a API pública do
+    #: Supabase deixou de enxergá-la (era um dos 3 alertas críticos do Security Advisor). Exceção agora: nenhuma.
+    SEM_RLS: set[str] = set()
 
     def test_every_table_but_the_declared_exception_has_rls_enabled(self):
         with db_system() as c:

@@ -12,9 +12,13 @@ name: monitor
 # workflows agendados de repositório público são pausados após 60 dias sem nenhum commit — para
 # monitoramento minuto a minuto, use um serviço dedicado (UptimeRobot, Better Stack) além deste.
 
+# v0.32.0: DE HORA EM HORA. Com o repositório privado (decisão do responsável), cada execução consome a cota
+# de minutos do GitHub Actions; a cada 10 min seriam ~4.300 min/mês, acima da cota gratuita (2.000). E o
+# agendamento de 10 min não chegou a disparar nas primeiras horas. O monitor PRINCIPAL deve ser externo
+# (UptimeRobot/Better Stack, verificação a cada 5 min, gratuito); este fica como segunda linha.
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "23 * * * *"
   workflow_dispatch:
 
 permissions: { contents: read }

@@ -7,7 +7,9 @@ sha256sum -c "$F.sha256"
 DB="impacto_restore_$(date +%s)"
 psql "$ADMIN_DATABASE_URL" -v ON_ERROR_STOP=1 -q -c "CREATE DATABASE $DB OWNER impacto_owner"
 TARGET="${ADMIN_DATABASE_URL%/*}/$DB"
-pg_restore --no-owner --role=impacto_owner -d "$TARGET" "$F"
+# v0.31.0: RESTORE_TOC_LIST (opcional) restringe a restauração a uma lista de entradas — usada no dump
+# só de `public` de um banco gerenciado, para não recriar o schema que todo banco já tem.
+pg_restore --no-owner --role=impacto_owner ${RESTORE_TOC_LIST:+-L "$RESTORE_TOC_LIST"} -d "$TARGET" "$F"
 psql "$TARGET" -tA -c "SELECT count(*) || ' migrations' FROM schema_migrations"
 BROKEN=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT p.id FROM projects p CROSS JOIN LATERAL ledger_verify(p.id) v WHERE NOT v.valid")
 AUDIT=$(psql "$TARGET" -v ON_ERROR_STOP=1 -tA -c "SELECT count(*) FROM (SELECT DISTINCT org_id FROM audit_events) o CROSS JOIN LATERAL audit_verify(o.org_id) v WHERE NOT v.valid")
@@ -56,5 +58,11 @@ if [ "$OPSJOBS" != "2" ] || [ "$MAILDELIV" != "0" ] || [ "$MAILADDR" != "0" ] ||
   exit 1
 fi
 echo "camada de operação restaurada ÍNTEGRA: $GLOSS namespaces de glossário, registro de tarefa e de e-mail presentes, nenhum endereço guardado, nenhum estado de entrega inventado"
-psql "$ADMIN_DATABASE_URL" -q -c "DROP DATABASE $DB WITH (FORCE)"
+# v0.31.0: RESTORE_KEEP_DB=1 deixa o banco restaurado para quem chamou comparar contagens com a origem
+# (scripts/managed_backup_restore.sh) — e quem chamou fica responsável por apagá-lo. Padrão: apaga.
+if [ "${RESTORE_KEEP_DB:-0}" = "1" ]; then
+  [ -n "${RESTORE_DB_NAME_FILE:-}" ] && printf '%s' "$DB" > "$RESTORE_DB_NAME_FILE"
+else
+  psql "$ADMIN_DATABASE_URL" -q -c "DROP DATABASE $DB WITH (FORCE)"
+fi
 echo "restore OK"

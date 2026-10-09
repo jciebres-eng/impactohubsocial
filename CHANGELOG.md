@@ -1,6 +1,90 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.32.0] — 2026-10-09
+
+### Correções da auditoria inicial: produção limpa, backup que restaura, worker com menor privilégio, CI verde (ADR-368 a ADR-371)
+
+Decisões do responsável (09/10/2026): desativar as 15 contas de demonstração da produção; demo aberto a quem tiver o link;
+código privado; trazer a branch `infra/v0.31.0` e resolver os achados da auditoria.
+
+**Feito na produção (com autorização, pelo workflow `supabase`):** 15 contas `@demo.impacto.local` desativadas (sessões
+encerradas na hora), 5 organizações só de demonstração suspensas, 11 itens de conteúdo público fictício fora do ar
+(1 projeto, 7 soluções, 1 material, 2 editais); nada apagado; reversível (`contas-demo-reativar`). Execuções 37996712177,
+37997211737, 37997481695.
+
+**Backup:** o backup cifrado do R2 (20:43 UTC) foi baixado, conferido, decifrado e **restaurado** num PostgreSQL 17 descartável
+com os verificadores de integridade (execução 37997867650). Novo job `ensaio-restauracao` (todo dia 1º e à mão); as instruções
+de restauração do `backup-supabase.yml` foram corrigidas (um `pg_restore` direto falha); `managed_backup_restore.sh` aceita
+`DUMP_FILE`.
+
+**Código:** `scripts/demo_accounts.py` (listar/desativar/reativar, igual à tela de administração, auditoria, uma transação);
+faixa "Ambiente de demonstração" no site quando o servidor está em `development` (`web/src/ui/demobanner.tsx`).
+
+**CI:** teste de RLS reconhece a 0071 (nenhuma tabela sem RLS); matriz de integrações regenerada; manifesto da versão inclui a
+análise econômica e os documentos novos. Para o repositório privado: suíte completa só em pull request; monitor de hora em hora.
+
+**Operação:** `CLAUDE.md` com o novo comando do worker (`sh /app/start_worker.sh`), as ferramentas de operação e as regras
+novas. Documentos `docs/ops/*_v0310.md` marcados como superados onde a realidade mudou.
+
+**Testes novos:** `test_v0320_demo_accounts` (2), `test_v0320_release_docs`.
+
+## v0.1 – auditoria inicial — 2026-10-09
+
+> Numeração própria da série de documentos de auditoria (`docs/01` a `docs/04`). **Não muda a versão do produto**, que
+> continua 0.30.0 no arquivo `VERSION` (o último commit da `main` se chama "v0.30.1"; ver `docs/02-auditoria.md`, M5).
+
+Somente documentação, na branch `auditoria-inicial`. Nenhum código, configuração de deploy, variável ou chave alterado.
+
+- `docs/01-estado-atual.md`: o que a plataforma faz hoje, o que está desligado de propósito, tecnologias, onde roda,
+  estrutura de pastas e o resultado da suíte de testes executada nesta auditoria.
+- `docs/02-auditoria.md`: problemas por gravidade — 2 críticos (contas de demonstração no banco de produção; chaves do
+  backup expostas num chat), 6 altos, 11 médios, 4 baixos — cada um com prova e correção. Nenhum segredo no repositório.
+- `docs/03-checklist-demo.md`: o demo já está no ar; passos para deixá-lo seguro para mostrar e separado da produção.
+- `docs/04-roadmap.md`: 19 incrementos em ordem de urgência e 5 decisões do responsável.
+## [0.31.0] — 2026-10-09
+
+### Infraestrutura Railway Pro + Supabase Pro + Cloudflare R2 + Cloudflare: auditoria, prova de backup e preparação — sem publicar (ADR-364 a ADR-367)
+
+Pedido do proprietário (pacote `IMPACTO_FINAL_FULL_RAILWAY_SUPABASE_R2_CLOUDFLARE_CLAUDE`): auditar o estado real antes de
+alterar, provar o que puder, preparar staging e deixar produção bloqueada até aprovação humana.
+
+**Comprovado:** baseline do pacote = tag v0.29.0 byte a byte (`docs/release/REPO_BASELINE_DIFF.md`); estado do Supabase por
+leitura (runs 37974779816, 37975067994); **backup + restauração** do Supabase num banco descartável (run 37975650545: 341
+tabelas, 2.577 linhas idênticas, RTO 15,1 s); imagem com o worker constrói no CI; adaptador S3 contra servidor S3 real.
+**Não comprovado (sem acesso):** Railway, R2, DNS/Cloudflare, SMTP.
+
+**Código**: `backend/start_worker.sh` (worker: `migrate --check` em laço, `impacto_app`, `jobs loop`; não migra nem rotaciona);
+`config.validate` recusa região AWS com endpoint R2 e http em produção; `config.storage_is_ephemeral` → `/readyz`
+`storage_durable` + aviso no log; `/healthz` → `commit` (`RAILWAY_GIT_COMMIT_SHA` / `IMPACTO_GIT_SHA`); Dockerfile copia o worker.
+
+**Scripts**: `managed_backup_restore.sh` (dump de `public`, extensões recriadas no schema da origem, restauração com
+`restore_test.sh`, contagem de todas as tabelas, recusa destino = origem); `restore_test.sh` ganha `RESTORE_KEEP_DB` e
+`RESTORE_TOC_LIST` (padrão inalterado); `storage_smoke.py` (8 verificações com o adaptador do produto);
+`supabase_check.py` mostra a linha do tempo dos lotes de migração e as sessões por papel/aplicação.
+
+**Workflows**: `supabase` modo `backup-restaurar`; `ci` com job `armazenamento` (servidor S3 que valida SigV4 — as imagens
+públicas do MinIO deixaram de ser baixáveis) e disparo manual; `armazenamento` (bucket R2 real, por ambiente); `pos-deploy`
+substitui `deploy.yml` (que era modelo terminando em `echo`). Sem `railway.json`: Config as Code do Railway descontinuado.
+
+**Documentos**: `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md` (estado comprovado, configuração por serviço, variáveis,
+16 achados P0/P1/P2, gates), `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`, `docs/release/REPO_BASELINE_DIFF.md`; a análise
+econômica de 120 meses (`docs/analysis/economia_v0300/`, proposta) entra no manifesto desta versão.
+
+**Testes novos**: `test_v0310_storage` (7 + 1 de protocolo no CI), `test_v0310_release_docs` (11), `test_v0300_economic_analysis` (6).
+
+**O que NÃO foi feito** (declarado): deploy, DNS, criação de bucket, troca de senha, migração em produção — dependem do
+proprietário; separação staging/produção do Supabase (decisão P0 do proprietário).
+
+## [0.30.1] — 2026-10-09
+
+### Feita em outra conversa, sem entrada no changelog na época (registrada aqui na v0.32.0)
+
+- Migração 0071: revoga de `anon`/`authenticated` tudo no esquema `public` e liga RLS em `schema_migrations` (leitura para
+  `impacto_app`) — resolve os 3 alertas críticos do Security Advisor do Supabase. PR #1.
+- `jobs.pending_scans`: arquivo ausente no armazenamento não derruba a rotina (fica em quarentena como ilegível). PR #1.
+- Workflows `backup-supabase` (diário, cifrado, R2) e `monitor`. PR #2. `CLAUDE.md` com a infraestrutura em uso. PR #3.
+
 ## [0.30.0] — 2026-10-09
 
 ### Pacote "Superprompts Master": baseline, evidência de primeira classe, dossiê longitudinal, mudança metodológica, economia do SaaS (ADR-360 a ADR-363)

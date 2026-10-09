@@ -4,8 +4,8 @@
  "rotas_abertas_com_sucesso": 227,
  "persona_sem_registro_proprio": 65,
  "estados": {
-  "OK": 539,
-  "VAZIA": 134,
+  "OK": 548,
+  "VAZIA": 125,
   "RECUSA_CORRETA": 95,
   "SEM_REGISTRO": 65
  },

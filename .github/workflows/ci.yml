@@ -2,9 +2,13 @@ name: ci
 on:
   push: { branches: [main] }
   pull_request:
+  workflow_dispatch:   # v0.31.0: validar um branch de trabalho sem publicá-lo no main (o Railway publica o main)
 permissions: { contents: read }
 jobs:
   backend:
+    # v0.32.0: a suíte completa (~30 min) roda no pull request e à mão; no merge na main não roda de novo —
+    # com o repositório privado, cada minuto sai da cota do GitHub Actions. A main só recebe o que passou no PR.
+    if: github.event_name != 'push'
     runs-on: ubuntu-24.04
     services:
       postgres:
@@ -98,6 +102,51 @@ jobs:
           echo "restore_test.sh recusa dump adulterado, como deve"
   # AUDITORIA DE VULNERABILIDADES em job próprio: resposta em ~1 min, sem esperar a suíte (~15 min),
   # e sem ser escondida por ela. Nunca tinha rodado até a v0.24.1 — e achou vulnerabilidades reais.
+  # ARMAZENAMENTO (v0.31.0): o adaptador S3 do produto contra um servidor S3 que VALIDA assinatura
+  # (MinIO, versão fixada). Até aqui a assinatura só era conferida contra o vetor de teste da AWS; nunca
+  # tinha falado com um servidor. Não prova o R2 — isso é o workflow `armazenamento`, com o bucket real.
+  armazenamento:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r backend/requirements-dev.txt
+      - name: Servidor S3 descartável (valida assinatura)
+        run: |
+          # As imagens públicas do MinIO deixaram de ser baixáveis (Docker Hub e quay.io negam acesso — run
+          # 37978…, v0.31.0). Servidores S3 que validam SigV4, em ordem; o usado e o digest vão para o resumo.
+          K=impactoteste; S=impactoteste-descartavel-0123
+          sobe() {  # $1 nome  $2 imagem  $3 porta  resto: argumentos do docker run
+            nome=$1; img=$2; porta=$3; shift 3
+            docker pull -q "$img" >/dev/null 2>pull.err || { echo "::warning title=indisponível::$img — $(tail -c 200 pull.err | tr '\n' ' ')"; return 1; }
+            docker run -d --name s3 -p "$porta:$porta" "$@" >/dev/null || return 1
+            for i in $(seq 1 40); do curl -s -o /dev/null "http://127.0.0.1:$porta/" && break; sleep 1; done
+            echo "S3_TEST_ENDPOINT=http://127.0.0.1:$porta" >> "$GITHUB_ENV"
+            echo "::notice title=Servidor S3 de teste::$nome · $(docker inspect --format '{{index .RepoDigests 0}}' "$img")"
+          }
+          printf '{"identities":[{"name":"t","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' "$K" "$S" > /tmp/s3.json
+          sobe cloudserver zenko/cloudserver:latest 8000 -e S3BACKEND=mem -e REMOTE_MANAGEMENT_DISABLE=1 \
+               -e SCALITY_ACCESS_KEY_ID=$K -e SCALITY_SECRET_ACCESS_KEY=$S zenko/cloudserver:latest \
+          || { docker rm -f s3 >/dev/null 2>&1; sobe seaweedfs chrislusf/seaweedfs:latest 8333 -v /tmp/s3.json:/s3.json:ro \
+               chrislusf/seaweedfs:latest server -s3 -s3.config=/s3.json; } \
+          || { docker rm -f s3 >/dev/null 2>&1; sobe versitygw versity/versitygw:latest 7070 -e ROOT_ACCESS_KEY=$K -e ROOT_SECRET_KEY=$S \
+               versity/versitygw:latest --port :7070 posix /tmp; } \
+          || { echo "::error::nenhum servidor S3 de teste disponível"; exit 1; }
+          sleep 3; docker logs s3 2>&1 | tail -5
+      - name: Adaptador S3 contra servidor real (assinatura, URL pré-assinada, expiração, adulteração, exclusão)
+        env:
+          S3_TEST_BUCKET: impacto-teste
+          S3_TEST_ACCESS_KEY_ID: impactoteste
+          S3_TEST_SECRET_ACCESS_KEY: impactoteste-descartavel-0123
+        run: |
+          set -o pipefail
+          cd backend && python -m unittest tests.test_v0310_storage -v 2>&1 | tee ../armazenamento.log
+          ! grep -q "skipped 'sem servidor S3" ../armazenamento.log || { echo "::error::o teste de protocolo PULOU — servidor não configurado"; exit 1; }
+          cd .. && S3_ENDPOINT=$S3_TEST_ENDPOINT S3_REGION=us-east-1 S3_BUCKET=$S3_TEST_BUCKET S3_ACCESS_KEY_ID=$S3_TEST_ACCESS_KEY_ID \
+            S3_SECRET_ACCESS_KEY=$S3_TEST_SECRET_ACCESS_KEY python3 scripts/storage_smoke.py | tee smoke.txt
+          echo "::notice title=Adaptador S3 × servidor real::$(grep -E 'PASS|FAIL|AVISO|VEREDITO' smoke.txt | sed 's/^ *//' | paste -sd'|' -)"
+
   auditoria:
     runs-on: ubuntu-24.04
     steps:
@@ -133,6 +182,9 @@ jobs:
   # aplicação → os dados continuam lá. Nada aqui usa o servidor de teste: é o mesmo artefato que iria
   # para um servidor. Segredos gerados na hora, mascarados, descartados com a máquina.
   pilha-do-zero:
+    # v0.32.0: a suíte completa (~30 min) roda no pull request e à mão; no merge na main não roda de novo —
+    # com o repositório privado, cada minuto sai da cota do GitHub Actions. A main só recebe o que passou no PR.
+    if: github.event_name != 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

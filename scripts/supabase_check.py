@@ -136,6 +136,22 @@ def main() -> int:
             diz(f"  - aplicada e desconhecida aqui: `{v}`")
         if mudadas:
             alerta(f"migração aplicada com conteúdo diferente do repositório (o runner recusa): {mudadas}")
+        # Linha do tempo (v0.31.0): QUANDO cada lote foi aplicado. Responde "quem migrou o banco?" —
+        # um lote aplicado sem execução do modo `aplicar` deste workflow veio de outro lugar (p.ex. o
+        # entrypoint do contêiner num deploy do Railway). Só versões e horários; nada de dado.
+        if aplicadas:
+            lotes = c.query("SELECT date_trunc('minute', applied_at) AS quando, count(*) AS n, min(version) AS de,"
+                            " max(version) AS ate FROM schema_migrations GROUP BY 1 ORDER BY 1 DESC LIMIT 6")
+            diz("- lotes de migração (mais recentes): " + "; ".join(
+                f"{r['quando']:%Y-%m-%d %H:%M} UTC → {r['n']} ({r['de'][:4]}…{r['ate'][:4]})" for r in lotes))
+            if estranhas:
+                diz("- aplicadas e desconhecidas aqui: " + ", ".join(f"`{v}`" for v in estranhas))
+        # Sessões abertas por papel e aplicação (v0.31.0): sem IP, sem consulta, sem dado — só contagem.
+        # Uma sessão de impacto_app que não seja deste job prova que há uma aplicação no ar usando o banco.
+        sess = c.query("SELECT usename, coalesce(nullif(application_name, ''), '(sem nome)') AS app, count(*) AS n"
+                       " FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid()"
+                       " AND usename IS NOT NULL GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 10")
+        diz("- sessões abertas por papel/aplicação: " + ("; ".join(f"{r['usename']}/{r['app']}={r['n']}" for r in sess) or "nenhuma"))
 
         # ---- papel da aplicação
         app = c.one("SELECT rolcanlogin, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'impacto_app'")

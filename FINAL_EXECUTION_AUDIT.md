@@ -1,129 +1,93 @@
-# Auditoria final de execução — IMPACTO v0.30.0
+# Auditoria final de execução — IMPACTO v0.32.0
 
-**Data:** 09/10/2026 · **Ramo:** `main` · **Ponto de partida:** `79a326d` (v0.29.0; tag `dd2f8c3`) · **Versão:** 0.30.0
+**Data:** 09/10/2026 · **Ramo:** `correcoes-auditoria` (PR #5 para a `main`) · **Ponto de partida:** `906d383` (main: v0.30.1 +
+backup/monitor + `CLAUDE.md`) + `infra/v0.31.0` + `auditoria-inicial` · **Versão:** 0.32.0
 
-Estados: **PASS** (implementado, integrado e provado por teste executado nesta rodada) · **PARTIAL** (existe e funciona; o que falta
-está escrito) · **BLOCKED_EXTERNAL** (depende de conta, credencial, parecer, pessoa ou decisão de terceiro; nada simulado) · **FAIL**
-(falhou e não foi corrigido — não há nenhum neste relatório; os que apareceram na regressão estão em §7 com a correção).
+Estados: **PASS** (feito e provado por execução nesta rodada) · **PARTIAL** (feito; o que falta está escrito) ·
+**BLOCKED_EXTERNAL** (depende de painel, conta ou decisão do responsável; nada simulado) · **FAIL** (falhou e não foi
+corrigido — não há nenhum; os que apareceram estão em §7). Nada aqui afirma "100% impossível de invadir".
 
-Cada linha traz evidência, arquivo, teste, resultado, risco e ação restante. Número citado sem arquivo gerado ou execução registrada
-não entra. Nada aqui afirma "100% impossível de invadir".
+## 1. O pedido → o que virou software e prova
 
-## 1. O pedido → o que virou software
+Pedido do responsável (09/10, depois da auditoria inicial): desativar as 15 contas de demonstração da produção; demo aberto a
+quem tiver o link; código privado; trazer a branch `infra/v0.31.0` e "resolver tudo".
 
-Pedido do proprietário (pacote "IMPACTO_SUPERPROMPTS_MASTER": orquestrador, arquitetura/roadmap, monetização, governança/evidências/
-financiamento por marcos, jornadas por perfil, testes/segurança, versionamento, checklist de aceite, contexto original): inspecionar a
-base real antes de alterar; inventário em quatro estados; plano P0/P1/P2 com evidência; evidência como objeto de primeira classe;
-indicadores longitudinais com metodologia; dossiê para financiadores; estados do financiamento por marcos com separação decisão/
-instrução/confirmação; economia do SaaS e simulação de take rate; matriz perfil × jornada; testes E2E e segurança; versão, ZIP, relatório.
-
-| Item | Estado | Evidência (arquivo · teste) | Resultado | Risco | Ação restante |
+| Item | Estado | Evidência (arquivo · teste · execução) | Resultado | Risco | Ação restante |
 |---|---|---|---|---|---|
-| Inspeção e baseline ANTES de alterar; inventário em 4 estados por contexto; conflitos do pacote com ADRs registrados | PASS | `docs/execution/BASELINE_v0300.md` · `test_v0300_release_docs.test_the_baseline_classifies_in_four_states_and_names_the_conflicts` | 18 contextos classificados; 4 conflitos (escrow, retenção, assinatura, selo pago) recusados por ADR-284/337/341 | — | decisão formal do proprietário se quiser reabrir (checklist D1) |
-| Evidência: origem e uso (método, acesso, consentimento, retenção), `unknown` visível | PASS | 0070 · `test_origin_and_use_are_declared_and_unknown_is_a_visible_gap` | lacunas listadas em `gaps`; nunca "ok" por omissão | — | prazos de retenção por classe (DPO) |
-| Hash do documento exposto com "integridade ≠ veracidade" | PASS | `GET /v1/evidences/{id}` · `test_document_hash_is_exposed_and_the_notice_says_what_it_proves` | SHA-256 da tabela `documents`; aviso na lista e no detalhe | — | — |
-| Rejeitar exige justificativa (API e banco); contestar exige motivo; só a executora contesta; só evidência rejeitada | PASS | `evidences_rejection_has_reason` (NOT VALID), `evidence_contest_guard` · `test_rejecting_requires_a_written_reason…`, `test_only_the_executing_org_contests…` | 422 `reason_required`; 403 para o financiador; 404 para outra OSC | linhas antigas `rejected` sem nota ficam como estão (declarado) | completar notas com auditoria e `VALIDATE CONSTRAINT` |
-| Contestação decidida por quem revisa com justificativa; máquina de estados no banco; histórico append-only | PASS | `evidence_state_guard`, `evidence_events` · `test_a_contest_is_decided_by_the_reviewer…` | `submitted → rejected → contested → under_review → accepted` no histórico com motivos; DELETE recusado | — | — |
-| Versão e substituição (nunca edição); substituída é terminal e legível | PASS | `version`, `supersedes_id`, `superseded_by` · `test_replacing_creates_a_new_version…` | v2 referencia v1; v1 `superseded`; revisar/substituir de novo → 409; editar conteúdo → recusado pelo gatilho | — | — |
-| Outra organização não vê; aceitar evidência não move dinheiro | PASS | RLS existente + `test_another_org_never_sees_the_evidence_and_accepting_moves_no_money` | 404/401; `payout_transfers` inalterado | — | — |
-| Dossiê longitudinal: composição com origem, atualidade e lacunas; sem nota; só para as partes; mesma leitura para dona e financiador | PASS | `services/dossier.py`, `GET /v1/projects/{id}/dossier` · `test_v0300_dossier` (4) | blocos prontidão/marcos/evidências/indicadores/aportes/diligências/trilha; `what_this_is_not`; empresa sem relação → 404; anônimo → 401 | — | — |
-| Tela do dossiê acessível, claro/escuro, sem erro de console | PASS | `web/src/pages/impact.tsx::ProjectDossier`, `/projetos/:id/dossie` · `test_e2e_v0300_dossier` | A11Y_JS e contraste vazios nos dois temas; números iguais para os dois lados | — | — |
-| Mudança metodológica de indicador registrada (motivo obrigatório, append-only, série marca descontinuidade) | PASS | `indicator_method_changes`, `PATCH …/indicators/{pi}/method` · `test_changing_the_measurement_method…` | 422 sem motivo; recusa no banco; `comparable = false` | — | — |
-| Estados do financiamento por marcos mapeados ao código (decisão ≠ instrução ≠ confirmação) | PASS (documental, conferido) | `docs/execution/MILESTONE_FUNDING_STATES_v0300.md` · `test_every_cited_table_and_column_exists`, `test_cited_state_values_exist_in_the_checks`, `test_no_escrow_or_balance_table_exists…` | 16 estados pedidos → objeto/coluna/teste; escrow "não existe" provado | — | — |
-| Economia do SaaS (pagador → valor → evento → preço-hipótese → custo → margem → alternativa) e matriz de elegibilidade de cobrança | PASS (documento) / BLOCKED_EXTERNAL (validação) | `docs/SAAS_ECONOMY.md` · `test_every_cited_rule_exists_none_is_active_and_refused_ones_are_marked` | 11 regras, 0 ativas, 5 recusadas marcadas; R$ 0,00 | — | revisão jurídica/contábil (checklist D2) |
-| Simulação de take rate em múltiplos percentuais | PASS | `24_MONTH_FINANCIAL_MODEL.md` §5a (gerado) · `test_the_sensitivity_section_exists_and_the_catalog_rate_is_the_bold_one`, `test_v0270_financial_model` | 2/3/3,5/4/5 % nos dois modos; catálogo inalterado (350/150 bps) | — | — |
-| Matriz perfil × jornada × permissão × dado × ação | PASS (gerada) | `scripts/make_profile_journey_matrix.py` → `PROFILE_JOURNEY_MATRIX_v0300.md` · `test_the_profile_journey_matrix_is_what_the_generator_produces` | 16 jornadas, 256 passos, 0 falhas; 93 passos sem tela direta (fato medido) | — | — |
-| Autorização no backend para as 4 rotas novas; RLS nas 2 tabelas novas | PASS | matriz de autorização (940) · `test_v0230_api_sweep`, `test_every_table_has_rls` | classes: `GET evidência` org/investidor/parte; `contest` osc member; `method` osc member; `dossier` partes | — | — |
-| Documentação, changelog, notas, ADR-360..363, checklist de produção, rollback, aceite, limpeza | PASS | arquivos citados · `test_v0270_release_docs`, `test_v0230_frontend_gate` (números citados = gerados) | — | — | — |
-| Escrow/BaaS, retenção automática, assinatura, selo pago (propostas do pacote) | NÃO FEITO por decisão | ADR-363 | — | — | decisão do proprietário |
-| Conflito de interesse por serviço profissional; versão das regras de elegibilidade no match | PARTIAL (P2, registrado) | baseline §3 | — | — | próxima rodada |
+| Contas de demonstração desativadas na produção | PASS | `scripts/demo_accounts.py` · `test_v0320_demo_accounts` · execução 37996712177 | 15 contas `disabled`, sessões encerradas, 5 organizações `suspended`, auditoria | nenhum (reversível) | — |
+| Conteúdo público fictício fora do ar na produção | PASS | execuções 37997211737 e 37997481695 | 11 itens (1 projeto, 7 soluções, 1 material, 2 editais); 0 em 10 tipos de conteúdo depois | conteúdo de nível "rede" (não público) continua visível a membros logados — o cadastro em produção está bloqueado pela trava jurídica | — |
+| Restauração do backup cifrado do R2 | PASS | job `ensaio-restauracao` · execução 37997867650 | arquivo de 20:43 UTC conferido, decifrado, restaurado: 341 tabelas, verificadores íntegros, 4,1 s | — | — |
+| Ensaio mensal de restauração | PASS | `backup-supabase.yml` (cron do dia 1º) · `test_v0320_release_docs.BackupDrillTests` | agendado | depende do agendamento do GitHub | conferir em 01/11 |
+| Instruções de restauração corrigidas | PASS | cabeçalho do `backup-supabase.yml` · `BackupDrillTests` | apontam para o script que funciona | — | — |
+| Worker com menor privilégio | PARTIAL | `backend/start_worker.sh` (ensaiado na v0.31.0: 18 tarefas OK) · `CLAUDE.md` | código na imagem | até a troca, o worker segue com a conexão administrativa | trocar o Start Command no Railway |
+| Aviso de demonstração | PASS | `web/src/ui/demobanner.tsx` · `DemoBannerTests` · capturas claro/escuro em `development` | faixa em toda tela, só em `development` | — | conferir no demo depois do merge |
+| CI de volta ao verde | PASS | teste de RLS atualizado; matriz regenerada; manifesto | ver §6 | — | — |
+| Branch `infra/v0.31.0` trazida | PASS | merge `dc03db1` (só o CHANGELOG conflitou; resolvido mantendo as duas entradas) | — | — | — |
+| Repositório privado | BLOCKED_EXTERNAL | o ambiente das sessões recusa alterar configurações do repositório (HTTP 403) | rotinas já ajustadas à cota | minutos de Actions | clique do responsável |
+| Rotinas dentro da cota do Actions | PASS | `monitor.yml` horário; `backend`/`pilha-do-zero` só fora de push · `PrivateRepoBudgetTests` | — | plano da conta não verificado | — |
+| Proteção 0071 na produção | BLOCKED_EXTERNAL | diagnóstico: 1 migração pendente | depende do "Deploy latest commit" | 3 alertas do Security Advisor seguem abertos até lá | publicar a produção |
 
 ## 2. Motores
 
-50 motores registrados — nenhum novo (`dossier@1.0` é composição somente-leitura, não decide; `evaluation` idem). `MOTOR_COVERAGE_MATRIX.md`
-(gerado): implemented/integrated/tested 50/50 · **VERDE 37 · AMARELO 13 · VERMELHO 0**. Matrizes regeneradas; `test_v0230_execution_matrices`.
+50 motores, inalterados. `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0.
 
 ## 3. Perfis, rotas e jornadas
 
-| Prova | Resultado | Fonte |
+Inalterados: 940 operações, 227 telas. A faixa de demonstração não é tela nova.
+
+## 4. Banco de dados
+
+71 migrações (nenhuma nova nesta versão). Escritas feitas na produção, todas autorizadas e registradas na trilha de auditoria:
+`users.status`, `sessions.revoked_at`, `organizations.status` e a visibilidade de 11 itens das organizações fictícias.
+
+## 5. Segurança e LGPD
+
+| Item | Estado | Evidência | Resultado | Risco | Ação |
+|---|---|---|---|---|---|
+| Nenhum segredo no repositório | PASS | `secrets_scan.py`; gitleaks no CI | 0 achados | — | — |
+| Backup e ensaio não publicam artefato | PASS | `BackupDrillTests`, `test_v0310_release_docs.BackupRestoreTests` | — | — | — |
+| Desativação não apaga e não toca conta real | PASS | `test_v0320_demo_accounts` | conta real de administração segue entrando | — | — |
+| Chaves do backup expostas num chat | BLOCKED_EXTERNAL | informação do responsável | — | quem tiver as chaves lê/apaga backups | trocar o token |
+
+## 6. CI
+
+| Job | Estado | Evidência |
 |---|---|---|
-| Jornadas pela API real | **16 jornadas, 256 passos, 0 falha** | `docs/evidence/jornadas_v0250/relatorio.json`, `test_v0250_jornadas` |
-| Telas no Chromium, por perfil | **227 rotas** (+`/projetos/:id/dossie`), 0 falha | `test_v0250_todas_as_telas` (contagem 227 com razão) |
-| Varredura de autorização | **940 operações** (+4), 238 de plataforma, 94 com permissão, 54 públicas | `API_AUTHORIZATION_MATRIX.csv`, `test_v0230_api_sweep` |
-| Matriz por jornada | gerada | `PROFILE_JOURNEY_MATRIX_v0300.md` |
+| CI do PR #5 (suíte completa, pilha do zero, imagem, auditoria, armazenamento) | PASS | execução 38002549412 no commit candidato `8aec7d1`: os cinco verdes |
 
-## 4. Evidências (matriz de estados)
-
-| De | Para | Quem | Garantia |
-|---|---|---|---|
-| submitted | accepted / rejected (motivo) / needs_info / superseded | revisor (financiador/governo) · OSC (substituir) | `guard_self_review`, `evidence_state_guard`, CHECK de motivo |
-| needs_info | submitted / accepted / rejected / superseded | OSC · revisor | idem |
-| rejected | contested (motivo) / superseded | OSC | `evidence_contest_guard` |
-| contested | under_review / superseded | revisor (via decisão) | API passa por `under_review` |
-| under_review | accepted / rejected (motivo) | revisor | CHECK |
-| accepted | superseded | OSC | — |
-| superseded | — (terminal) | — | gatilho |
-
-## 5. Economia (matriz)
-
-Catálogo: 11 regras, 0 ativas; recusadas: `marketplace.take_rate`, `success_fee.funding`, `saas.institutional.funder`,
-`b2g.territorial_governance`, `data.territorial_intelligence`. Taxa 3,5 % + 1,5 %: catálogo inalterado; sensibilidade 2–5 % é simulação.
-Receita real: R$ 0,00. Nenhuma tabela de saldo/escrow (teste).
-
-## 6. Banco de dados
-
-Migração **0070**: +2 tabelas (`evidence_events`, `indicator_method_changes`; desenvolvimento 329 → 331), ambas RLS e append-only;
-+11 colunas em `evidences`, +1 em `project_indicators`; 5 funções/gatilhos; CHECK de status ampliado em `evidences`; CHECK de
-`ledger_entries` reescrito com 2 tipos a mais; 1 CHECK `NOT VALID` (rejeição com motivo). Dry-run `impacto_m70` (template de m69 +
-0069; 0070 em BEGIN/ROLLBACK) e aplicação do zero na suíte. Nenhuma tabela/coluna removida (`test_v0230_data_infra_gate`).
-Retenção: `evidence_events`/`indicator_method_changes` não guardam dado do titular além de referências; `test_v0190_lgpd_deletion` verde
-(expectativa atualizada: evidência deixou de ser apagável — consequência do histórico append-only, com a razão escrita no teste).
-
-## 7. Regressão — o que a primeira rodada completa encontrou e o que foi feito
-
-Primeira execução completa com o código novo (`scratchpad/suite/full_v0300_a.log`): **2.400 testes, 10 falhas, 0 erro, 30 pulados**.
-Nenhuma foi "resolvida" afrouxando teste (ADR-340). Causa e correção:
+## 7. Regressão — o que esta rodada encontrou e o que foi feito
 
 | Falha | Causa real | Correção |
 |---|---|---|
-| `test_e2e_v0300_dossier.test_owner_and_funder_open_the_same_dossier…` | o teste lia o texto da página assim que o título aparecia; na suíte completa o servidor está carregado e o dado do dossiê ainda não tinha chegado (em isolamento passava) | o teste espera o painel "O que este dossiê é" (prova de que o dado chegou) antes de ler — a tela não mudou |
-| `test_v0200_engines.test_every_module_with_its_own_engine_version_is_declared` | `services/dossier.py` tinha `ENGINE_VERSION`; o guarda de registro acusou módulo "com cara de motor" fora do registro | renomeado `DOSSIER_VERSION`: o dossiê é composição, não decide — e por isso não entra no registro de motores (declarado no relatório §5) |
-| `test_v0230_data_infra_gate.test_every_applied_migration_matches_the_file_sha256` [0070] | a 0070 foi editada DURANTE a rodada (CHECK de rejeição passou a `NOT VALID` para não bloquear instalações com rejeições antigas sem nota) | 2ª passagem com o arquivo final: verde |
-| `test_v0250_todas_as_telas.test_every_screen_in_the_router_opens_with_real_data` | `/projetos/:id/dossie` sem resolvedor no robô; depois (2ª passagem) o resolvedor genérico dava ao financiador um projeto publicado que ele NÃO financia → 404 correto do dossiê lido como erro de tela | resolvedor próprio por RELAÇÃO (dona ou financiadora com compromisso); quem não tem relação fica "sem registro próprio"; robô reexecutado: 227 rotas OK |
-| `test_v0300_release_docs.test_the_profile_journey_matrix_is_what_the_generator_produces` | a matriz era função de slugs e códigos de verificação gerados a cada rodada (`…-5b00a4`, `IMP-XXXX-…`) | o gerador normaliza (`-{slug}`, `IMP-{code}`): a matriz é função da estrutura, não da rodada |
-| `test_v0250_cobertura.test_the_committed_matrix_is_what_the_evidence_produces` (2ª passagem) | a matriz de cobertura é derivada da evidência que a própria rodada reescreve | regenerada no fechamento (`make_coverage_matrix.py`), como nas versões anteriores |
-| `test_v0230_release_gate.test_the_manifest_exists_for_this_version` | manifesto é gerado no fechamento | gerado no fechamento |
-| `test_v0270_release_docs` (4: auditoria, relatório, log de testes, manifesto/notas) | documentos de fechamento ainda eram os da v0.29.0 | reescritos para a v0.30.0 |
+| `test_every_table_but_the_declared_exception_has_rls_enabled` (main) | a 0071 ligou RLS na tabela que o teste listava como exceção | exceção declarada passa a ser nenhuma, com o motivo escrito |
+| `test_regenerating_each_matrix_reproduces_what_is_committed` (main) | teste novo da v0.30.1 sem regenerar a matriz de integrações | `make_integration_matrix.py` |
+| `test_every_tracked_file_is_either_in_the_manifest_or_excluded_with_a_reason` (main) | arquivos novos desde a análise econômica fora de qualquer manifesto | manifesto da v0.32.0 |
+| `test_disable_is_complete_reversible_and_never_touches_real_accounts` (1ª versão: 16 ≠ 15) | o seed atual cria 16 contas de demonstração (as 15 personas + "coletivo"); a produção foi semeada antes | o teste usa a contagem do banco |
+| `test_disable_is_complete_reversible_and_never_touches_real_accounts` (404) | eu usei uma rota inexistente para "quem sou eu" | `/v1/me` |
+| `demo_accounts.py` contava 0 soluções públicas | eu usei `visibility = 'public'`; soluções usam `'published'` | tabela de conteúdo com os valores reais de cada tipo, conferidos no esquema; a recontagem achou 7 soluções, 1 material e 2 editais |
+| `CHANGELOG.md` em conflito no merge | as duas branches acrescentaram uma entrada no topo | as duas mantidas, em ordem |
+| `contas-demo.yml` com disparo respondendo 404 | o GitHub só dispara workflow que já existe na `main` | modos acrescentados ao workflow `supabase`, que existe na `main` |
+| `gh api PATCH visibility` respondendo 403 | o ambiente das sessões não altera configurações do repositório | clique do responsável; rotinas ajustadas antes |
+| `test_regenerating_the_map_reproduces_what_is_committed` (CI do PR #5) | a faixa do demo chama `/v1/meta/config` a partir de um arquivo novo do front; o mapa tela × API não foi regenerado | `make_screen_backend_map.py` |
+| `pkill` derrubou o próprio terminal | o padrão casava com o comando em execução | servidor de teste parado e commit refeito separadamente |
 
-Achado de desenho registrado durante a construção: o CHECK "rejeição exige motivo" passou a `NOT VALID` — linhas antigas `rejected`
-sem nota (instalações anteriores) não bloqueiam a migração nem são reescritas; completar é trabalho editorial com auditoria
-(`PRODUCTION_CHECKLIST_v0300.md` B1).
-
-## 8. Build limpo e pacote
+## 8. Build e pacote
 
 | Passo | Resultado |
 |---|---|
-| `ruff check impacto tests scripts/make_profile_journey_matrix.py` | 0 avisos |
-| `node build.mjs` (esbuild) | ok; nenhum pacote npm adicionado |
-| `tsc --noEmit` (tipos do DefinitelyTyped no scratchpad; `node_modules` = lockfile) | 0 erros |
-| `IMPACTO_TRUST_FINAL_RELEASE_0.30.0.zip` | `make_release.py` (REQUIRED += 19 arquivos da rodada); `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; sem ZIP aninhado; SHA-256 ao lado |
+| `ruff check impacto tests` | 0 avisos |
+| `tsc --noEmit` (tipos oficiais do React, removidos após a checagem) | 0 erros |
+| `node build.mjs` | ok |
+| `IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip` | `make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; SHA-256 no `.sha256` |
 
-## 9. Segurança revisada
+## 9. BLOCKED_EXTERNAL
 
-4 rotas novas com classe de autorização conferida pelo sweep; dossiê só para as partes (projeto publicado não basta); 2 tabelas novas
-com RLS e append-only; quatro olhos preservado (quem envia não revisa; só a executora contesta; quem revisa decide); conteúdo da evidência
-imutável depois de enviado; nenhum segredo em código/documento/pacote; nenhum dado novo sai da instalação. Nada aqui afirma "100%
-impossível de invadir".
+Publicar a produção (aplica a 0071 e o worker novo); trocar o Start Command do `pleasing-trust`; trocar o token do backup;
+tornar o repositório privado; monitor externo; senha de `impacto_app` no GitHub; domínio; e-mail autenticado; revisão jurídica e
+encarregado de dados; tags v0.31.0/v0.32.0 no GitHub.
 
-## 10. BLOCKED_EXTERNAL
+## 10. Veredito desta auditoria
 
-Parceiro de pagamento e modelo de repasse (não há escrow nem haverá dentro do produto); parecer jurídico/contábil da matriz de
-elegibilidade de cobrança; prazos de retenção por classe de evidência (DPO); decisão formal sobre as propostas recusadas por ADR; tag
-no GitHub (proxy recusa). Tudo o que já era externo nas versões anteriores continua: `EXTERNAL_INTEGRATIONS.md`.
-
-## 11. Veredito desta auditoria
-
-Nenhum FAIL em aberto. Os P0 do baseline (evidência de primeira classe; dossiê longitudinal) e os P1 (mudança metodológica; matriz;
-economia do SaaS; take rate; estados do financiamento) têm teste executado e verde na segunda rodada. O que impede "GO" puro é
-externo e decisório (parecer, parceiro, DPO, decisão sobre as propostas recusadas). **Recomendação: GO WITH CONDITIONS** —
-detalhado em `FINAL_EXECUTION_REPORT.md` §27.
+Nenhum FAIL em aberto. Os dois críticos internos da auditoria inicial (contas de demonstração na produção; backup sem
+restauração provada) estão resolvidos com prova na própria produção. O que falta é clique ou decisão do responsável.
+Detalhado em `FINAL_EXECUTION_REPORT.md` §27.

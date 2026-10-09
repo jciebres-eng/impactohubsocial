@@ -1,0 +1,23 @@
+# Regressão completa — v0.32.0 (PostgreSQL 16 local, Chromium; suíte inteira por discover)
+
+## Passagem local (código da versão; documentos de fechamento escritos durante a execução)
+----------------------------------------------------------------------
+Ran 2434 tests in 1945.779s
+FAILED (failures=5, skipped=31)
+
+FAIL: test_regenerating_the_map_reproduces_what_is_committed (tests.test_v0230_frontend_gate.TheScreenBackendMapTellsTheTruthAboutCoverageTests.test_regenerating_the_map_reproduces_what_is_committed)
+FAIL: test_the_manifest_exists_for_this_version (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_no_placeholder_was_left_behind_and_the_version_is_current (tests.test_v0270_release_docs.FinalExecutionReportTests.test_no_placeholder_was_left_behind_and_the_version_is_current)
+FAIL: test_the_tests_section_reports_a_real_run_with_a_log (tests.test_v0270_release_docs.FinalExecutionReportTests.test_the_tests_section_reports_a_real_run_with_a_log)
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+
+# 0 erro. As 5 falhas: mapa tela × API (a faixa do demo lê /v1/meta/config — regenerado no commit ace7415),
+# manifesto (gerado no fechamento) e 3 verificações do relatório final (seção de testes e manifesto, completados no fechamento).
+# CI do PR #5 (execução 37998628082, mesmo código): Ran 2434 tests in 1797.986s — 6 falhas: as mesmas 5 + a auditoria final,
+# que ainda era a da v0.31.0 naquele commit. Causas e correções: FINAL_EXECUTION_AUDIT.md §7.
+
+
+## Portões de fechamento reexecutados após gerar os manifestos
+----------------------------------------------------------------------
+Ran 217 tests in 30.187s
+OK (skipped=2)

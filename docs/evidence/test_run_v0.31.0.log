@@ -1,0 +1,37 @@
+# Regressão completa — v0.31.0 (PostgreSQL 16 local, Chromium; suíte inteira por discover)
+
+## 1ª passagem (código novo, antes do fechamento) — causas e correções em FINAL_EXECUTION_AUDIT.md §7
+----------------------------------------------------------------------
+Ran 2425 tests in 1874.719s
+FAILED (failures=6, skipped=31)
+
+FAIL: test_the_manifest_exists_for_this_version (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_the_frontend_package_metadata_matches (tests.test_v0230_release_gate.ThereIsOneVersionAndEverybodyAgreesWithItTests.test_the_frontend_package_metadata_matches)
+FAIL: test_no_fail_is_left_open_and_every_row_has_evidence (tests.test_v0270_release_docs.FinalExecutionAuditTests.test_no_fail_is_left_open_and_every_row_has_evidence)
+FAIL: test_no_placeholder_was_left_behind_and_the_version_is_current (tests.test_v0270_release_docs.FinalExecutionReportTests.test_no_placeholder_was_left_behind_and_the_version_is_current)
+FAIL: test_the_tests_section_reports_a_real_run_with_a_log (tests.test_v0270_release_docs.FinalExecutionReportTests.test_the_tests_section_reports_a_real_run_with_a_log)
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+
+
+## 2ª passagem (documentos de fechamento já escritos; manifesto gerado depois dela)
+----------------------------------------------------------------------
+Ran 2425 tests in 1874.551s
+FAILED (failures=5, skipped=31)
+
+FAIL: test_the_manifest_exists_for_this_version (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+FAIL: test_the_committed_matrix_is_what_the_evidence_produces (tests.test_v0250_cobertura.TheCoverageMatrixMatchesTheEvidenceTests.test_the_committed_matrix_is_what_the_evidence_produces)
+FAIL: test_no_fail_is_left_open_and_every_row_has_evidence (tests.test_v0270_release_docs.FinalExecutionAuditTests.test_no_fail_is_left_open_and_every_row_has_evidence)
+FAIL: test_the_regression_section_names_a_cause_and_a_fix_for_every_failure (tests.test_v0270_release_docs.FinalExecutionAuditTests.test_the_regression_section_names_a_cause_and_a_fix_for_every_failure)
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+
+# 0 erro nas duas passagens. Das 5 falhas da 2ª: manifesto (gerado no fechamento), manifesto/notas, COVERAGE_MATRIX (derivada da
+# evidência que a suíte reescreve — regenerada) e 2 defeitos REAIS de forma na auditoria que eu escrevi (sintaxe de expressão do
+# Actions citada no texto; linhas da tabela de regressão sem o identificador entre crases) — corrigidos.
+# CI do ramo (run 37977204420, código antes do fechamento): Ran 2414 tests in 1651.243s — 3 falhas (manifesto ×2, segredo — corrigida).
+
+
+## Portões de fechamento reexecutados após gerar os manifestos e regenerar a matriz de cobertura
+## (release_gate, release_docs, cobertura, v0310_release_docs, v0310_storage, v0300_release_docs, economic_analysis, security_gate, execution_matrices, authorization_matrix, frontend_gate, ai_cost_model, architecture, financial_model)
+----------------------------------------------------------------------
+Ran 194 tests in 28.112s
+OK (skipped=2)

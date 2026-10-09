@@ -172,7 +172,19 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "docs/SAAS_ECONOMY.md", "scripts/make_profile_journey_matrix.py", "backend/migrations/0070_v0300_evidence_object.sql",
             "backend/impacto/services/dossier.py", "backend/tests/test_v0300_evidence_object.py", "backend/tests/test_v0300_dossier.py",
             "backend/tests/test_v0300_release_docs.py", "backend/tests/test_e2e_v0300_dossier.py", "docs/evidence/test_run_v0.30.0.log",
-            "history/v0.29.0/VERSION", "docs/execution/CLEANUP_INVENTORY_v0300.md", "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
+            "history/v0.29.0/VERSION", "docs/execution/CLEANUP_INVENTORY_v0300.md",
+            # v0.31.0 — infraestrutura (Railway/Supabase/R2), backup e restauração de banco gerenciado, análise econômica
+            "docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md", "docs/ops/CHECKLIST_PROPRIETARIO_v0310.md", "docs/ops/BACKUP_RESTORE_RUNBOOK.md",
+            "docs/ops/ROLLBACK_v0310.md", "docs/release/REPO_BASELINE_DIFF.md", "backend/start_worker.sh",
+            "scripts/managed_backup_restore.sh", "scripts/storage_smoke.py", ".github/workflows/pos-deploy.yml",
+            ".github/workflows/armazenamento.yml", "backend/tests/test_v0310_storage.py", "backend/tests/test_v0310_release_docs.py",
+            "docs/analysis/economia_v0300/IMPACTO_MODELO_120M.xlsx", "docs/analysis/economia_v0300/RELATORIO_EXECUTIVO_ECONOMIA_v0300.md",
+            "scripts/analysis/economic_model_120m.py", "docs/evidence/test_run_v0.31.0.log",
+            # v0.32.0 — auditoria inicial, contas de demonstração, ensaio de restauração, aviso do demo
+            "CLAUDE.md", "docs/01-estado-atual.md", "docs/02-auditoria.md", "docs/03-checklist-demo.md", "docs/04-roadmap.md",
+            "scripts/demo_accounts.py", "web/src/ui/demobanner.tsx", ".github/workflows/backup-supabase.yml",
+            ".github/workflows/monitor.yml", "backend/tests/test_v0320_demo_accounts.py", "backend/tests/test_v0320_release_docs.py",
+            "docs/evidence/test_run_v0.32.0.log", "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
             "docs/execution/ROLLBACK_v0300.md", "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md"]
 
 

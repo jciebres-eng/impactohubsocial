@@ -1,58 +1,46 @@
-# Relatório final de execução — IMPACTO v0.31.0
+# Relatório final de execução — IMPACTO v0.32.0
 
-**Data:** 09/10/2026 · **Ramo:** `infra/v0.31.0` · **Tag:** `v0.31.0` (a criar no GitHub pelo proprietário no commit indicado em §3 —
-o proxy deste ambiente recusa envio de tag) · **Pacote:** `IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip` (SHA-256 no `.sha256` ao lado) ·
-**Auditoria:** `FINAL_EXECUTION_AUDIT.md` · **Relatório técnico (DOCX):** `IMPACTO_v0.31.0_RELATORIO_TECNICO.docx`
+**Data:** 09/10/2026 · **Ramo:** `correcoes-auditoria` (PR #5 para a `main`) · **Tag:** `v0.32.0` (a criar no GitHub pelo
+responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**
+`IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·
+**Relatório técnico (DOCX):** `IMPACTO_v0.32.0_RELATORIO_TECNICO.docx`
 
 ## 1. Executive Summary
 
-A rodada executou o pacote de infraestrutura (Railway Pro + Supabase Pro + Cloudflare R2 + Cloudflare Pro + GitHub) do jeito que
-ele manda: **auditoria read-only primeiro**, prova de tudo o que dava para provar sem as contas do proprietário, correções seguras
-com teste, e **nenhuma** publicação, migração em produção, mudança de DNS, troca de senha ou cobrança.
+Depois da auditoria inicial (`docs/01`–`04`), o responsável decidiu: desativar as contas de demonstração da produção, deixar o
+demo aberto a quem tiver o link, tornar o código privado e trazer a branch `infra/v0.31.0` resolvendo os achados. Feito:
 
-- **Identidade:** a "baseline 0.29.01" do pacote é, byte a byte, a tag v0.29.0 (`dd2f8c3`); o repositório está à frente
-  (`docs/release/REPO_BASELINE_DIFF.md`). Nada dela foi copiado — regrediria o código.
-- **Supabase comprovado por leitura:** PostgreSQL 17.11, `impacto_app` sem superusuário e sem bypass de RLS, 71 migrações em dia,
-  cadeia de auditoria válida. Achados: **15 contas de demonstração e 1 real no mesmo projeto** (P0: separar staging e produção);
-  o lote 0064–0070 foi aplicado em 09/10 18:24 UTC **fora** do GitHub, junto com a troca da senha de `impacto_app` — o padrão do
-  entrypoint do contêiner (hipótese: primeira implantação do Railway), a confirmar com o proprietário.
-- **Backup com restauração real** (o pacote declara NO-GO sem isso): dump do Supabase restaurado num PostgreSQL 17 descartável com
-  os verificadores de integridade do CI — **341 tabelas, 2.577 linhas idênticas, RTO medido 15,1 s**, nada exportado.
-- **Correções no código:** serviço `worker` próprio (`start_worker.sh`: não migra, espera o esquema, roda como `impacto_app`);
-  validação do R2 (região `auto`); disco local efêmero sinalizado em `/readyz` e no log; commit implantado em `/healthz`;
-  adaptador S3 provado contra servidor S3 real no CI; `deploy.yml` (modelo com `echo`) substituído por `pos-deploy` (só verifica);
-  workflows `armazenamento` (bucket R2 real) e `backup-restaurar`.
-- **Sem `railway.json`, de propósito:** o Config as Code do Railway está descontinuado (corte em 2026-12-01).
-- **Não comprovado (sem acesso):** Railway, R2, ClamAV, SMTP, Cloudflare. Tudo com passo exato em
-  `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`.
+- **Produção limpa (na própria produção, com autorização):** 15 contas `@demo.impacto.local` desativadas — as sessões abertas
+  caíram na hora —, 5 organizações fictícias suspensas, 11 itens públicos fictícios fora do ar (1 projeto, 7 soluções,
+  1 material, 2 editais). Nada apagado; reversível; tudo na trilha de auditoria.
+- **Backup que restaura:** o backup cifrado do R2 foi baixado, conferido, decifrado e restaurado num banco descartável com os
+  verificadores de integridade; o ensaio passa a rodar todo dia 1º; as instruções de restauração (que falhariam) foram corrigidas.
+- **Worker com menor privilégio:** início próprio (`start_worker.sh`) que usa o usuário limitado do banco — falta trocar o
+  comando no Railway.
+- **Demo com aviso** em toda tela; **CI de volta ao verde**; rotinas do GitHub ajustadas para o repositório privado.
+- Junta v0.30.1 (proteção 0071, backup diário, monitor — feitos em outra conversa e agora registrados no CHANGELOG), v0.31.0
+  (infraestrutura) e a auditoria inicial.
 
-**Decisão: NO-GO para produção hoje** (§27) — dois P0 abertos que dependem do proprietário. Staging pode ser montado já.
+**Decisão: GO WITH CONDITIONS** (§27) — para juntar na `main` e publicar a produção; as condições são cliques e decisões do
+responsável, não defeitos.
 
 ## 2. Version
 
-0.31.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
-Documentos da v0.30.0 preservados em `history/v0.30.0/` (166 arquivos); manifestos anteriores em `history/manifests/`.
+0.32.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
+Documentos da v0.31.0 preservados em `history/v0.31.0/`; manifestos anteriores em `history/manifests/`.
 
 ## 3. Commit
 
-Commits da rodada (sobre `171d8b4`), no ramo `infra/v0.31.0`: diagnóstico estendido do Supabase; backup e restauração de banco
-gerenciado; worker, R2, `/healthz`/`/readyz`, workflows; correções do job `armazenamento`; versão/ADRs/documentos; e o commit final
-dos manifestos, para o qual a tag `v0.31.0` deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`).
-O hash desse commit é registrado no `.sha256` do pacote. A junção no `main` **não foi feita**: o Railway publica o `main`, e publicar
-depende da aprovação do proprietário.
-
-**GitHub Actions (ramo):** `supabase` (37974779816, 37975067994: verificar; 37975650545: backup-restaurar). **Run `37988786394` do
-commit candidato à tag `4f7f469`: `auditoria`, `docker`, `armazenamento` (8/8 verificações do adaptador S3 contra servidor real,
-`Content-Disposition` presente), `pilha-do-zero` e `backend` (suíte oficial completa) — os cinco verdes na primeira tentativa.**
-Este parágrafo foi acrescentado depois da run, no commit seguinte; a tag `v0.31.0` aponta para `4f7f469`. Pacote:
-`IMPACTO_TRUST_FINAL_RELEASE_0.31.0.zip`, SHA-256 `98399a267bee45a9e3033c77bf0f9b263aa4d0e6c7e75ec3975751f4e1c40637`.
+Ramo `correcoes-auditoria` sobre `906d383` (main) + `auditoria-inicial` + merge da `infra/v0.31.0` (`dc03db1`). Commits: contas de
+demonstração (script, modos do workflow, testes), CI (RLS, matriz), backup (ensaio e instruções), faixa do demo, rotinas para
+repositório privado, versão e documentos, e o commit final dos manifestos, para o qual a tag `v0.32.0` deve apontar e do qual o
+pacote é construído byte a byte (`verify_package_against_git.py`). PR #5. Execuções na produção: 37996712177, 37997211737,
+37997481695 (contas e conteúdo), 37997867650 (ensaio de restauração).
 
 ## 4. Architecture Status
 
-Inalterada no produto (Starlette + PostgreSQL com RLS em toda tabela, hash encadeado, sem custódia). Topologia de publicação
-documentada: Railway com `api` (entrypoint que migra com lock e troca para `impacto_app`), `worker` (novo entrypoint) e `clamav`;
-Supabase só como PostgreSQL (nenhum uso de Auth/Storage/Realtime/Functions); R2 como armazenamento S3 privado com URL assinada;
-Cloudflare como DNS/TLS/WAF. Documento canônico: `docs/ops/INFRA_RAILWAY_SUPABASE_R2_v0310.md`.
+Inalterada no produto. Operação documentada no `CLAUDE.md`: Railway (`impactohubsocial`, `pleasing-trust`, `clamav`; demo
+`ideal-delight`), Supabase só como PostgreSQL, R2 para arquivos e backups, Cloudflare, Brevo.
 
 ## 5. Engines Status
 
@@ -76,7 +64,7 @@ PASS (inalterado).
 
 ## 10. Evidence
 
-PASS (inalterado desde a v0.30.0). Armazenamento dos arquivos de evidência: alvo R2 privado; não comprovado no bucket real.
+PASS (inalterado).
 
 ## 11. Responsibility
 
@@ -96,7 +84,7 @@ Inalterado.
 
 ## 15. Marketplace
 
-Inalterado (comissão recusada).
+Inalterado (comissão recusada). Soluções fictícias fora do ar na produção.
 
 ## 16. Payments
 
@@ -108,8 +96,7 @@ PASS (inalterado).
 
 ## 18. Billing
 
-Inalterado: sem assinatura (ADR-341); 0 regras ativas. A análise econômica de 120 meses (`docs/analysis/economia_v0300/`) é
-proposta e não alterou regra, catálogo, planos ou banco.
+Inalterado: sem assinatura (ADR-341); 0 regras ativas.
 
 ## 19. Fiscal
 
@@ -121,81 +108,62 @@ Inalterado.
 
 ## 21. Identity
 
-PARTIAL (inalterado).
+PARTIAL (inalterado). Contas de demonstração da produção desativadas pelo mesmo caminho da tela de administração.
 
 ## 22. Security
 
-Revisada para o ambiente hospedado: nenhum segredo em código, workflow, documento ou pacote (`secrets_scan.py`, gitleaks no CI);
-dump com dado pessoal nunca sai do job; restauração recusa destino igual à origem; worker com menor privilégio e sem rotação de
-senha; `impacto_app` sem superusuário e sem bypass de RLS no Supabase (lido); contas de demonstração no banco que tem dado real
-registradas como P0. **Nenhum sistema ligado à internet é "impossível de invadir", e este não é exceção.**
+Nenhum segredo em código, workflow, documento ou pacote (`secrets_scan.py`, gitleaks no CI). Contas com senha conhecida (as de
+demonstração) sem acesso à produção. Backup e ensaio sem artefato publicado. Pendentes do responsável: trocar o token do backup
+exposto num chat; publicar a produção (aplica a 0071); trocar o comando do worker; tornar o repositório privado. **Nenhum sistema
+ligado à internet é "impossível de invadir", e este não é exceção.**
 
 ## 23. LGPD
 
-O backup restaurado não gera artefato; o diagnóstico conta usuários sem ler conteúdo; nenhum endereço, IP ou consulta é impresso.
-Retenção LGPD só roda com o `worker` no ar (antes desta rodada nenhum serviço a executaria no Railway). DPO continua pendente.
+Produção sem contas fictícias ativas e sem conteúdo fictício público; o backup tem dado pessoal e por isso é cifrado e nunca vira
+artefato. Revisão jurídica dos termos e da política e encarregado de dados continuam pendentes (bloqueiam dados reais).
 
 ## 24. Tests
 
 ```text
-PRIMEIRA REGRESSÃO COMPLETA LOCAL (código novo, antes do fechamento, scratchpad/full_v0310_a.log):
-  Ran 2425 tests in 1874.719s — 6 falhas, 0 erro, 31 pulados
-  → 1 real (web/package.json e package-lock em 0.30.0 — corrigido) e 5 de fechamento (manifesto e documentos finais gerados no
-    fechamento); causas e correções em FINAL_EXECUTION_AUDIT.md §7
-CI DO RAMO (run 37977204420): Ran 2414 tests in 1651.243s — 3 falhas (2 do manifesto, 1 da varredura de segredo — corrigida)
-SEGUNDA REGRESSÃO COMPLETA LOCAL (documentos de fechamento já escritos, docs/evidence/test_run_v0.31.0.log):
-  Ran 2425 tests in 1874.551s — 5 falhas, 0 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
-  → manifesto (gerado no fechamento), COVERAGE_MATRIX (regenerada), manifesto/notas, e 2 defeitos reais de forma na auditoria
-    (corrigidos; FINAL_EXECUTION_AUDIT.md §7). Portões de fechamento reexecutados após gerar os manifestos (fim do mesmo log)
-MÓDULOS NOVOS: test_v0310_storage (8, 1 deles de protocolo S3 que roda no CI) · test_v0310_release_docs (11) ·
-               test_v0300_economic_analysis (6)
-PROVAS FORA DA SUÍTE: backup+restauração do Supabase (run 37975650545) · adaptador S3 × CloudServer (job armazenamento)
-LINT: ruff 0 · IMAGEM: job docker verde
+Ver docs/evidence/test_run_v0.32.0.log
 ```
-
-Nenhum teste foi removido ou enfraquecido; nenhuma contagem fixada mudou (940 operações, 227 telas, 70 migrações, 50 motores).
 
 ## 25. External Dependencies
 
 | Dependência | Exige | Efeito hoje |
 |---|---|---|
-| Separar staging × produção no Supabase (G1) | decisão do proprietário | produção bloqueada |
-| URL e configuração do Railway (G2) | proprietário (`railway config pull`) | Railway não comprovado |
-| Senha de `impacto_app` igual no Railway e no GitHub | proprietário | modo `aplicar` do workflow recusaria/derrubaria |
-| Buckets e tokens R2 | conta Cloudflare | armazenamento em disco efêmero ou indefinido |
-| Serviço ClamAV | Railway | uploads em quarentena |
-| Provedor SMTP + SPF/DKIM/DMARC | proprietário | sem e-mail transacional |
-| Domínio e Cloudflare | proprietário | sem domínio próprio |
-| Tag `v0.31.0` e junção no `main` | proxy recusa tag; junção publica no Railway | aguardam o proprietário |
+| Publicar a produção ("Deploy latest commit" no `impactohubsocial` e no `pleasing-trust`) | responsável | 0071 e worker novo fora da produção |
+| Start Command do `pleasing-trust` = `sh /app/start_worker.sh` | responsável | worker com conexão administrativa |
+| Token novo do backup (o antigo foi exposto num chat) | responsável (Cloudflare + GitHub) | risco sobre os backups |
+| Repositório privado | responsável (Settings) | código público |
+| Monitor externo (UptimeRobot/Better Stack) | responsável | só o monitor horário do GitHub |
+| Senha de `impacto_app` igual no GitHub | responsável | modo `aplicar` do workflow recusaria |
+| Domínio, e-mail autenticado, revisão jurídica, encarregado de dados | responsável e terceiros | sem domínio próprio; sem dados reais |
+| Tags v0.31.0 e v0.32.0 | o ambiente não envia tags | criar no GitHub |
 
 ## 26. Known Limitations
 
-- Railway, R2, ClamAV, SMTP e Cloudflare não foram tocados nem verificados por dentro.
-- O servidor S3 de teste do CI não é o R2: `response-content-disposition` e *path-style* no R2 só o workflow `armazenamento` prova.
-- RTO medido é do volume atual (2,3 MB); RPO não definido (depende do plano do Supabase).
-- O backup gerenciado do Supabase não foi conferido (só pelo painel).
-- Credencial administrativa no ambiente da `api` (o entrypoint migra com ela) — P2.
-- Ações do GitHub em Node 20 (aviso de descontinuação) — P2.
+- Conteúdo de nível "rede" (visível só a membros logados) das organizações fictícias não foi alterado — o cadastro em produção
+  está bloqueado pela trava jurídica, então não há membros externos para vê-lo.
+- O plano do GitHub da conta não foi verificado (cota de minutos estimada pelo plano gratuito).
+- O monitor agendado do GitHub não disparou nas primeiras horas; por isso o externo é o principal.
+- RPO do banco depende do plano do Supabase e não foi conferido no painel.
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO
 
 ```text
-NO-GO
+GO WITH CONDITIONS
 ```
 
-**Para publicação em produção hoje.** Dois P0 dependem do proprietário: (G1) o único projeto Supabase mistura 15 contas de
-demonstração com 1 conta real — produção precisa de um projeto próprio ou das contas de demonstração desativadas; (G2) o Railway não
-foi verificado — não se sabe com que ambiente, armazenamento e e-mail a instância de 09/10 subiu. O critério do pacote ("backup sem
-restauração testada resulta em NO-GO") **está satisfeito**: a restauração foi feita e conferida. Nenhuma falha técnica interna fica
-aberta. **Staging pode ser montado agora** com `docs/ops/CHECKLIST_PROPRIETARIO_v0310.md`; com G1 e G2 resolvidos e o `pos-deploy`
-verde em produção, a decisão passa a GO WITH CONDITIONS (condições: SMTP, R2 e domínio verificados). Rollback:
-`docs/ops/ROLLBACK_v0310.md`; backup: `docs/ops/BACKUP_RESTORE_RUNBOOK.md`.
+Para juntar o PR #5 na `main` (o demo publica sozinho) e, depois de conferido o demo, publicar a produção. Os críticos internos
+da auditoria inicial estão resolvidos com prova na própria produção (contas e conteúdo fictícios; restauração do backup real).
+Condições: trocar o comando do worker na mesma publicação; trocar o token do backup; tornar o repositório privado; monitor
+externo. Dados reais continuam bloqueados até a revisão jurídica. Nenhuma falha crítica foi convertida em "condição".
 
 ## 28. Exact Next Step
 
-1. Responder: foi você que ligou o Railway por volta de 14:20 de 09/10? E enviar a URL pública (e, se puder, a saída de
-   `railway config pull`).
-2. Decidir G1: este projeto Supabase vira **staging** e cria-se um projeto de **produção** (recomendado).
-3. Igualar `IMPACTO_APP_PASSWORD` no GitHub ao valor do Railway; `IMPACTO_APP_ROTATE_PASSWORD=false`.
-4. Autorizar a junção de `infra/v0.31.0` no `main` (o Railway publica o `main`) e criar a tag `v0.31.0` no commit de fechamento.
-5. Criar os serviços `worker` e `clamav`, os buckets R2 e rodar `armazenamento` e `pos-deploy`.
+1. Juntar o PR #5 (eu faço com o seu "pode juntar", ou você clica em "Merge").
+2. Abrir o demo e conferir a faixa "Ambiente de demonstração" e o login.
+3. Railway → produção → `impactohubsocial` → Ctrl+K → "Deploy latest commit"; no `pleasing-trust`, trocar o Start Command para
+   `sh /app/start_worker.sh` e publicar. Depois eu rodo o diagnóstico ("0 pendentes") e confiro os logs do worker.
+4. Trocar o token do backup; tornar o repositório privado; criar o monitor externo.

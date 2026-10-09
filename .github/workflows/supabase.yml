@@ -22,20 +22,24 @@ name: supabase
 #              hash, camada econômica desligada, travas de impacto) e comparação de contagem de TODAS as
 #              tabelas. Mede o tempo (RTO). O dump é apagado; nenhum artefato é publicado (pode haver
 #              dado pessoal real). Não substitui o backup gerenciado do Supabase: prova que ele RESTAURA.
+#   contas-demo-listar / -desativar / -reativar  (v0.32.0) contas `@demo.impacto.local` no banco: listar é
+#              somente leitura; desativar faz o que a tela de administração faz (conta `disabled`, sessões
+#              encerradas, organização só de demonstração `suspended`, auditoria) e NÃO apaga nada; reativar
+#              desfaz. Frases: DESATIVAR CONTAS DEMO / REATIVAR CONTAS DEMO. Ver scripts/demo_accounts.py.
 on:
   workflow_dispatch:
     inputs:
       modo:
         description: "verificar (somente leitura), aplicar (migra o banco — irreversível) ou backup-restaurar (leitura + restauração descartável)"
         type: choice
-        options: [verificar, aplicar, backup-restaurar]
+        options: [verificar, aplicar, backup-restaurar, contas-demo-listar, contas-demo-desativar, contas-demo-reativar]
         default: verificar
       rotacionar_senha_app:
         description: "aplicar: trocar a senha de impacto_app por IMPACTO_APP_PASSWORD (derruba quem use a antiga)"
         type: boolean
         default: false
       confirmacao:
-        description: "aplicar: digite exatamente APLICAR NO SUPABASE"
+        description: "aplicar: APLICAR NO SUPABASE · contas-demo-desativar: DESATIVAR CONTAS DEMO · contas-demo-reativar: REATIVAR CONTAS DEMO"
         type: string
         default: ""
 permissions: { contents: read }
@@ -173,3 +177,24 @@ jobs:
       - name: Nada sai deste job
         if: always()
         run: rm -f resultado.txt; ls -la "$RUNNER_TEMP" | grep -c dump || true
+
+  contas-demo:
+    needs: verificar
+    if: startsWith(inputs.modo, 'contas-demo-')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libpq5
+      - name: Antes (somente leitura)
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: python3 scripts/demo_accounts.py listar
+      - name: Desativar ou reativar
+        if: inputs.modo != 'contas-demo-listar'
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+          CONFIRMACAO: ${{ inputs.confirmacao }}
+          MODO: ${{ inputs.modo }}
+        run: python3 scripts/demo_accounts.py "${MODO#contas-demo-}"

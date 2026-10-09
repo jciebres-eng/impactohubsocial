@@ -1,0 +1,115 @@
+name: backup-supabase
+# CÓPIA EXTERNA DIÁRIA DO BANCO DE PRODUÇÃO (Supabase → Cloudflare R2), cifrada.
+#
+# Por que existe: o Supabase Pro guarda backups diários por 7 dias, mas DENTRO do próprio Supabase.
+# Um incidente na conta, um erro humano descoberto depois de uma semana ou a perda do projeto levam
+# o banco e os backups juntos. Esta cópia fica em outro provedor (R2), em bucket separado do bucket
+# de arquivos da aplicação, e é cifrada antes de sair do runner — o dump contém dados pessoais (LGPD).
+#
+# Por que no GitHub e não no worker: a rotina `backup` do worker usa o pg_dump da imagem (Debian
+# bookworm = PostgreSQL 15), que recusa servidor 17 (Supabase). Aqui instalamos o cliente 17.
+#
+# SEGREDOS (Settings → Secrets and variables → Actions):
+#   SUPABASE_ADMIN_URL           string do POOLER DE SESSÃO (Supabase → Connect → Session pooler).
+#                                O GitHub Actions não tem IPv6; a conexão direta db.<ref>.supabase.co é IPv6.
+#   R2_BACKUP_ACCESS_KEY_ID      token R2 com "Object Read & Write" SÓ no bucket impacto-backups.
+#   R2_BACKUP_SECRET_ACCESS_KEY  idem (chave secreta).
+#   BACKUP_PASSPHRASE            frase longa (≥ 32 caracteres) que cifra o arquivo. Guarde-a num
+#                                gerenciador de senhas: SEM ELA O BACKUP NÃO PODE SER RESTAURADO.
+#
+# RETENÇÃO: regra de ciclo de vida no bucket (Cloudflare → R2 → impacto-backups → Settings →
+# Object lifecycle rules): apagar objetos com mais de 30 dias.
+#
+# RESTAURAR (num banco novo/vazio, nunca por cima da produção sem decisão):
+#   aws s3 cp s3://impacto-backups/supabase/<arquivo>.dump.enc . --endpoint-url "$R2_ENDPOINT"
+#   openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in <arquivo>.dump.enc -out impacto.dump
+#   pg_restore --no-owner --no-privileges --dbname "$DESTINO" impacto.dump
+
+on:
+  schedule:
+    - cron: "17 6 * * *"   # todo dia às 06:17 UTC (03:17 em Brasília, 02:17 em Cuiabá)
+  workflow_dispatch:
+
+permissions: { contents: read }
+concurrency: { group: backup-supabase, cancel-in-progress: false }
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      R2_ENDPOINT: https://a3be721284ccd50cd9a7514140f7b85a.r2.cloudflarestorage.com
+      R2_BUCKET: impacto-backups
+    steps:
+      - name: Segredos cadastrados?
+        env:
+          ADMIN: ${{ secrets.SUPABASE_ADMIN_URL }}
+          KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          KEY_SECRET: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          falta=0
+          test -n "$ADMIN"      || { echo "::error title=Segredo ausente::SUPABASE_ADMIN_URL"; falta=1; }
+          test -n "$KEY_ID"     || { echo "::error title=Segredo ausente::R2_BACKUP_ACCESS_KEY_ID"; falta=1; }
+          test -n "$KEY_SECRET" || { echo "::error title=Segredo ausente::R2_BACKUP_SECRET_ACCESS_KEY"; falta=1; }
+          test -n "$PASSPHRASE" || { echo "::error title=Segredo ausente::BACKUP_PASSPHRASE"; falta=1; }
+          if [ -n "$PASSPHRASE" ] && [ "${#PASSPHRASE}" -lt 32 ]; then
+            echo "::error title=Frase curta::BACKUP_PASSPHRASE precisa de pelo menos 32 caracteres"; falta=1
+          fi
+          exit $falta
+
+      - name: Cliente PostgreSQL 17
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -q && sudo apt-get install -y -q postgresql-client-17
+          /usr/lib/postgresql/17/bin/pg_dump --version
+
+      - name: Dump do esquema da aplicação
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
+        run: |
+          set -euo pipefail
+          # Só o esquema `public` (o da aplicação). Os esquemas internos do Supabase (auth, storage,
+          # realtime…) não são da plataforma e o usuário administrativo não tem como despejá-los.
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
+            --schema=public --format=custom --compress=9 --no-owner --no-privileges \
+            --file=impacto.dump
+          # O arquivo precisa ser legível pelo pg_restore antes de ser enviado: um dump truncado
+          # que "subiu com sucesso" é pior que backup nenhum, porque ninguém desconfia dele.
+          objetos=$(/usr/lib/postgresql/17/bin/pg_restore --list impacto.dump | grep -vc '^;')
+          echo "objetos no dump: $objetos"
+          test "$objetos" -gt 100 || { echo "::error title=Dump suspeito::só $objetos objetos"; exit 1; }
+          ls -l impacto.dump
+
+      - name: Cifrar
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          TS=$(date -u +%Y%m%dT%H%M%SZ)
+          echo "ARQ=impacto-$TS.dump.enc" >> "$GITHUB_ENV"
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass env:BACKUP_PASSPHRASE \
+            -in impacto.dump -out "impacto-$TS.dump.enc"
+          # Prova de que a frase abre o arquivo antes de apagar o original.
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE \
+            -in "impacto-$TS.dump.enc" | cmp - impacto.dump
+          sha256sum "impacto-$TS.dump.enc" > "impacto-$TS.dump.enc.sha256"
+          rm -f impacto.dump
+
+      - name: Enviar para o R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          set -euo pipefail
+          aws s3 cp "$ARQ"        "s3://$R2_BUCKET/supabase/$ARQ"        --endpoint-url "$R2_ENDPOINT" --only-show-errors
+          aws s3 cp "$ARQ.sha256" "s3://$R2_BUCKET/supabase/$ARQ.sha256" --endpoint-url "$R2_ENDPOINT" --only-show-errors
+          aws s3 ls "s3://$R2_BUCKET/supabase/$ARQ" --endpoint-url "$R2_ENDPOINT"
+          echo "### Backup enviado: \`supabase/$ARQ\`" >> "$GITHUB_STEP_SUMMARY"
+          rm -f "$ARQ" "$ARQ.sha256"

@@ -1,0 +1,45 @@
+name: monitor
+# MONITOR DE QUEDA sem serviço externo: a cada 10 minutos testa o /healthz da produção (e do demo).
+# Se falhar, o job fica vermelho e o GitHub manda e-mail para quem administra o repositório
+# (configurável em github.com/settings/notifications → Actions → "Send notifications for failed
+# workflows only").
+#
+# Endereços: variável do repositório MONITOR_URLS (Settings → Secrets and variables → Actions →
+# Variables), separados por espaço. Sem ela, usa os endereços padrão abaixo. Depois que o domínio
+# próprio estiver ativo, troque para https://www.impactohubsocial.com.br/healthz.
+#
+# Limites honestos: o agendamento do GitHub pode atrasar alguns minutos em horário de pico, e
+# workflows agendados de repositório público são pausados após 60 dias sem nenhum commit — para
+# monitoramento minuto a minuto, use um serviço dedicado (UptimeRobot, Better Stack) além deste.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: { contents: read }
+concurrency: { group: monitor, cancel-in-progress: true }
+
+jobs:
+  healthz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      URLS: ${{ vars.MONITOR_URLS || 'https://impactohubsocial-production.up.railway.app/healthz https://ideal-delight-demo-76bb.up.railway.app/healthz' }}
+    steps:
+      - name: Testar /healthz
+        run: |
+          falha=0
+          for url in $URLS; do
+            # 3 tentativas com 20 s de intervalo: um deploy em andamento não deve virar alarme falso.
+            if corpo=$(curl -fsS --retry 3 --retry-delay 20 --retry-all-errors --max-time 15 "$url"); then
+              if echo "$corpo" | grep -q '"status":"ok"'; then
+                echo "OK   $url  $corpo"
+              else
+                echo "::error title=Resposta inesperada::$url respondeu: ${corpo:0:200}"; falha=1
+              fi
+            else
+              echo "::error title=Fora do ar::$url não respondeu"; falha=1
+            fi
+          done
+          exit $falha

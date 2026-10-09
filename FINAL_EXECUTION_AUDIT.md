@@ -68,6 +68,7 @@ Inalterados: 940 operações, 227 telas. A faixa de demonstração não é tela 
 | `CHANGELOG.md` em conflito no merge | as duas branches acrescentaram uma entrada no topo | as duas mantidas, em ordem |
 | `contas-demo.yml` com disparo respondendo 404 | o GitHub só dispara workflow que já existe na `main` | modos acrescentados ao workflow `supabase`, que existe na `main` |
 | `gh api PATCH visibility` respondendo 403 | o ambiente das sessões não altera configurações do repositório | clique do responsável; rotinas ajustadas antes |
+| `test_regenerating_the_map_reproduces_what_is_committed` (CI do PR #5) | a faixa do demo chama `/v1/meta/config` a partir de um arquivo novo do front; o mapa tela × API não foi regenerado | `make_screen_backend_map.py` |
 | `pkill` derrubou o próprio terminal | o padrão casava com o comando em execução | servidor de teste parado e commit refeito separadamente |
 
 ## 8. Build e pacote

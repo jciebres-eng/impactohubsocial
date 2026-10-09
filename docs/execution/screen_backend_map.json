@@ -19,7 +19,7 @@
   "sem chamada direta": 64
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 64,
+ "arquivos_do_front_varridos": 65,
  "operacoes_que_nenhuma_tela_chama": 256,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",

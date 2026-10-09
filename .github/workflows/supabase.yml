@@ -148,7 +148,7 @@ jobs:
     services:
       alvo:   # PostgreSQL DESCARTÁVEL: morre com o job. Mesma versão principal do Supabase (17).
         image: postgres:17
-        env: { POSTGRES_PASSWORD: descartavel }
+        env: { POSTGRES_PASSWORD: postgres }
         ports: ["55432:5432"]
         options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
     steps:
@@ -162,7 +162,7 @@ jobs:
       - name: Backup do Supabase e restauração verificada em banco descartável
         env:
           SOURCE_DATABASE_URL: ${{ secrets.SUPABASE_ADMIN_URL }}
-          TARGET_ADMIN_URL: postgresql://postgres:descartavel@127.0.0.1:55432/postgres
+          TARGET_ADMIN_URL: postgresql://postgres:postgres@127.0.0.1:55432/postgres
         run: |
           set -o pipefail
           bash scripts/managed_backup_restore.sh 2>&1 | tee resultado.txt

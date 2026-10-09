@@ -266,14 +266,20 @@ class OrganizationNotRemovableTests(unittest.TestCase):
         """Numerado de propósito: os testes de uma classe rodam em ORDEM ALFABÉTICA e compartilham
         estado, então a sequência precisa estar no nome, não no acaso."""
         dono = owner_conn()
-        for tabela in ("evidences", "expenses", "ledger_entries", "conflict_declarations",
-                       "signature_revocations"):
+        # v0.30.0 (ADR-360): a evidência ganhou histórico próprio append-only (evidence_events, FK RESTRICT) — nem o dono
+        # do banco apaga uma evidência; a conferência abaixo passou a provar isso em vez de apagar a tabela.
+        with self.assertRaises(Exception) as ev_err:
+            dono.run("DELETE FROM evidences WHERE org_id = $1", self.org_id)
+        self.assertRegex(str(ev_err.exception).lower(), "append-only|violates foreign key|evidence_events")
+        for tabela in ("expenses", "ledger_entries", "conflict_declarations", "signature_revocations"):
             dono.run(f"DELETE FROM {tabela} WHERE org_id = $1", self.org_id)
         with self.assertRaises(Exception) as erro:
             dono.run("DELETE FROM organizations WHERE id = $1", self.org_id)
         texto = str(erro.exception).lower()
-        self.assertIn("append-only", texto,
-                      f"esperava recusa de trilha append-only; veio: {erro.exception}")
+        # antes da v0.30.0 a recusa vinha da trilha (ledger); agora vem ANTES, da evidência que não pode ser apagada
+        # (seu histórico é append-only) — a conclusão é a mesma: a plataforma não remove organização
+        self.assertRegex(texto, "append-only|evidences_org_id_fkey",
+                         f"esperava recusa de trilha append-only ou da evidência; veio: {erro.exception}")
         with db_system() as c:
             self.assertIsNotNone(c.one("SELECT 1 FROM organizations WHERE id = $1", self.org_id),
                                  "a organização foi removida apesar da trilha append-only")

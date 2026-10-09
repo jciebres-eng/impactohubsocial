@@ -88,10 +88,41 @@ def list_evidences(ctx: Ctx, q: S.Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT e.id::text AS id, e.kind, e.title, e.description, e.occurred_on, e.status, e.indicator_name,"
                        " e.indicator_value::float AS indicator_value, e.review_note, e.reviewed_at, e.milestone_id::text AS milestone_id,"
-                       " e.document_id::text AS document_id, m.title AS milestone_title, e.created_at"
-                       " FROM evidences e LEFT JOIN milestones m ON m.id = e.milestone_id WHERE e.project_id = $1"
-                       " ORDER BY e.created_at DESC LIMIT $2 OFFSET $3", ctx.path["project_id"], q.limit + 1, q.offset)
-    return page(rows, q.limit, q.offset)
+                       " e.document_id::text AS document_id, m.title AS milestone_title, e.created_at,"
+                       " e.method, e.access_level, e.consent_basis, e.retention_class, e.version, e.supersedes_id::text AS supersedes_id,"
+                       " e.superseded_by::text AS superseded_by, e.contest_reason, d.sha256 AS document_sha256"
+                       " FROM evidences e LEFT JOIN milestones m ON m.id = e.milestone_id LEFT JOIN documents d ON d.id = e.document_id"
+                       " WHERE e.project_id = $1 ORDER BY e.created_at DESC LIMIT $2 OFFSET $3", ctx.path["project_id"], q.limit + 1, q.offset)
+    out = page(rows, q.limit, q.offset)
+    out["notice"] = EVIDENCE_NOTICE
+    return out
+
+
+EVIDENCE_NOTICE = ("O hash prova a integridade do arquivo referenciado, não a veracidade do fato. 'Aceita' significa conferida por quem "
+                   "financia ou acompanha, no escopo registrado; não é auditoria independente. Campos 'unknown' são lacunas declaradas.")
+
+
+@route("GET", "/v1/evidences/{evidence_id}", min_role="viewer", tags=T,
+       summary="Uma evidência com origem, uso, versão, hash do documento e histórico de estados (v0.30.0)")
+def get_evidence(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        e = c.one("SELECT e.id::text AS id, e.project_id::text AS project_id, e.org_id::text AS org_id, e.kind, e.title, e.description,"
+                  " e.occurred_on, e.status, e.indicator_name, e.indicator_value::float AS indicator_value, e.review_note, e.reviewed_at,"
+                  " e.reviewed_by_org::text AS reviewed_by_org, e.milestone_id::text AS milestone_id, e.document_id::text AS document_id,"
+                  " e.created_at, e.updated_at, e.method, e.access_level, e.consent_basis, e.retention_class, e.version,"
+                  " e.supersedes_id::text AS supersedes_id, e.superseded_by::text AS superseded_by, e.contest_reason, e.contested_at,"
+                  " d.sha256 AS document_sha256, d.mime_type AS document_mime"
+                  " FROM evidences e LEFT JOIN documents d ON d.id = e.document_id WHERE e.id = $1", ctx.path["evidence_id"])
+        if not e:
+            raise not_found("Evidência")
+        hist = c.query("SELECT from_status, to_status, actor_org_id::text AS actor_org_id, reason, created_at FROM evidence_events"
+                       " WHERE evidence_id = $1 ORDER BY created_at, id", e["id"])
+    e["history"] = hist
+    e["classification"] = ("validated" if e["status"] == "accepted" else "contested" if e["status"] in ("contested", "under_review")
+                           else "superseded" if e["status"] == "superseded" else "declared")
+    e["gaps"] = [k for k in ("method", "consent_basis") if e[k] == "unknown"] + ([] if e["document_id"] else ["document"])
+    e["notice"] = EVIDENCE_NOTICE
+    return e
 
 
 @route("POST", "/v1/projects/{project_id}/evidences", body=S.EvidenceIn, kinds=("osc",), min_role="member", status=201, tags=T,
@@ -102,10 +133,27 @@ def add_evidence(ctx: Ctx, body: S.EvidenceIn):
         _doc_ok(c, ctx, body.document_id)
         if body.milestone_id and not c.one("SELECT 1 FROM milestones WHERE id = $1 AND project_id = $2", body.milestone_id, p["id"]):
             raise not_found("Marco")
+        version, prev = 1, None
+        if body.supersedes_id:
+            prev = c.one("SELECT id::text AS id, version, status FROM evidences WHERE id = $1 AND project_id = $2 AND org_id = $3",
+                         body.supersedes_id, p["id"], ctx.org_id)
+            if not prev:
+                raise not_found("Evidência anterior")
+            if prev["status"] == "superseded":
+                raise ApiError(409, "evidence_already_superseded", "Essa evidência já foi substituída; substitua a versão mais recente")
+            version = int(prev["version"]) + 1
         evid = c.scalar("INSERT INTO evidences(project_id, org_id, milestone_id, application_id, kind, title, description, occurred_on,"
-                        " document_id, indicator_name, indicator_value, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9,$10,$11::numeric,$12)"
+                        " document_id, indicator_name, indicator_value, created_by, method, access_level, consent_basis, retention_class,"
+                        " version, supersedes_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::date,$9,$10,$11::numeric,$12,$13,$14,$15,$16,$17,$18)"
                         " RETURNING id::text", p["id"], ctx.org_id, body.milestone_id, body.application_id, body.kind, body.title,
-                        body.description, body.occurred_on, body.document_id, body.indicator_name, body.indicator_value, ctx.user_id)
+                        body.description, body.occurred_on, body.document_id, body.indicator_name, body.indicator_value, ctx.user_id,
+                        body.method, body.access_level, body.consent_basis, body.retention_class, version, body.supersedes_id)
+        if prev:
+            # a anterior vira 'superseded' (terminal) e continua legível com o seu histórico — nada é apagado
+            c.run("UPDATE evidences SET status = 'superseded', superseded_by = $2 WHERE id = $1", prev["id"], evid)
+            ledger(c, project_id=p["id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="evidence_superseded", ref_type="evidence",
+                   ref_id=prev["id"], payload={"by": evid, "version": version})
+            ctx.audit(c, "execution.evidence_superseded", "evidence", prev["id"], {"by": evid, "version": version})
         if body.milestone_id:
             c.run("UPDATE milestones SET status = 'evidence_submitted' WHERE id = $1 AND status IN ('funded','in_progress','open')", body.milestone_id)
         ledger(c, project_id=p["id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="evidence_submitted", ref_type="evidence", ref_id=evid,
@@ -120,11 +168,19 @@ def add_evidence(ctx: Ctx, body: S.EvidenceIn):
 def review_evidence(ctx: Ctx, body: S.ReviewDecisionIn):
     if body.status not in ("accepted", "rejected", "needs_info"):
         raise ApiError(422, "validation_error", "Use accepted, rejected ou needs_info")
+    if body.status == "rejected" and len((body.note or "").strip()) < 10:
+        raise ApiError(422, "reason_required", "Rejeitar exige justificativa escrita (mínimo 10 caracteres)")   # v0.30.0, ADR-360
     with ctx.tx() as c:
-        e = c.one("SELECT id::text AS id, project_id::text AS project_id, org_id::text AS org_id, milestone_id::text AS milestone_id"
+        e = c.one("SELECT id::text AS id, project_id::text AS project_id, org_id::text AS org_id, milestone_id::text AS milestone_id, status"
                   " FROM evidences WHERE id = $1", ctx.path["evidence_id"])
         if not e or not c.scalar("SELECT app_project_investor($1)", e["project_id"]):
             raise not_found("Evidência")
+        if e["status"] == "superseded":
+            raise ApiError(409, "evidence_superseded", "Evidência substituída: revise a versão mais recente")
+        if e["status"] == "contested":
+            if body.status == "needs_info":
+                raise ApiError(409, "contest_needs_decision", "Contestação se decide com accepted ou rejected")
+            c.run("UPDATE evidences SET status = 'under_review' WHERE id = $1", e["id"])   # a decisão fica registrada como resposta à contestação
         c.run("UPDATE evidences SET status = $2, review_note = $3, reviewed_by = $4, reviewed_by_org = $5, reviewed_at = now() WHERE id = $1",
               e["id"], body.status, body.note, ctx.user_id, ctx.org_id)
         ledger(c, project_id=e["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="evidence_reviewed", ref_type="evidence",
@@ -149,6 +205,26 @@ def review_evidence(ctx: Ctx, body: S.ReviewDecisionIn):
                     payload={"evidence_id": e["id"]},
                     dedupe_parts=("Milestone.completed", e["milestone_id"]))
     return {"id": e["id"], "status": body.status}
+
+
+@route("POST", "/v1/evidences/{evidence_id}/contest", body=S.EvidenceContestIn, kinds=("osc",), min_role="member", tags=T,
+       summary="A executora contesta uma evidência rejeitada, com motivo; quem revisa decide de novo com justificativa (v0.30.0)")
+def contest_evidence(ctx: Ctx, body: S.EvidenceContestIn):
+    with ctx.tx() as c:
+        e = c.one("SELECT id::text AS id, project_id::text AS project_id, org_id::text AS org_id, status FROM evidences WHERE id = $1 AND org_id = $2",
+                  ctx.path["evidence_id"], ctx.org_id)
+        if not e:
+            raise not_found("Evidência")
+        if e["status"] != "rejected":
+            raise ApiError(409, "evidence_not_rejected", "Só uma evidência rejeitada pode ser contestada")
+        c.run("UPDATE evidences SET status = 'contested', contest_reason = $2, contested_at = now(), contested_by = $3 WHERE id = $1",
+              e["id"], body.reason, ctx.user_id)
+        ledger(c, project_id=e["project_id"], org_id=ctx.org_id, actor=ctx.user_id, entry_type="evidence_contested", ref_type="evidence",
+               ref_id=e["id"], payload={"reason_len": len(body.reason)})
+        for f in c.query("SELECT DISTINCT funder_org_id::text AS id FROM commitments WHERE project_id = $1 AND status <> 'cancelled'", e["project_id"]):
+            c.scalar("SELECT app_notify($1, NULL, 'evidence', $2, $3, $4)", f["id"], "Evidência contestada", body.reason[:200], f"/projetos/{e['project_id']}")
+        ctx.audit(c, "execution.evidence_contested", "evidence", e["id"])
+    return {"id": e["id"], "status": "contested"}
 
 
 @route("GET", "/v1/projects/{project_id}/feedbacks", min_role="viewer", tags=T, summary="Devolutivas e relatórios")

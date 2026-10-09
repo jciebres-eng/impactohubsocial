@@ -395,6 +395,16 @@ class EvidenceIn(In):
     document_id: Uuid | None = None
     indicator_name: Annotated[str | None, Field(max_length=120)] = None
     indicator_value: float | None = None
+    # v0.30.0 — origem e uso (ADR-360). 'unknown' é estado válido e visível; nunca vira "ok" por omissão.
+    method: Literal["direct_observation", "document", "self_report", "third_party", "sensor_or_system", "interview", "sample", "unknown"] = "unknown"
+    access_level: Literal["public", "parties", "restricted"] = "parties"
+    consent_basis: Literal["not_personal", "consent", "legal_obligation", "public_interest", "legitimate_interest", "unknown"] = "unknown"
+    retention_class: Literal["project", "accountability", "legal_hold"] = "project"
+    supersedes_id: Uuid | None = None   # nova versão de uma evidência anterior (a anterior vira 'superseded', sem apagar)
+
+
+class EvidenceContestIn(In):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
 
 
 class FeedbackIn(In):

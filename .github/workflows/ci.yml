@@ -6,6 +6,9 @@ on:
 permissions: { contents: read }
 jobs:
   backend:
+    # v0.32.0: a suíte completa (~30 min) roda no pull request e à mão; no merge na main não roda de novo —
+    # com o repositório privado, cada minuto sai da cota do GitHub Actions. A main só recebe o que passou no PR.
+    if: github.event_name != 'push'
     runs-on: ubuntu-24.04
     services:
       postgres:
@@ -179,6 +182,9 @@ jobs:
   # aplicação → os dados continuam lá. Nada aqui usa o servidor de teste: é o mesmo artefato que iria
   # para um servidor. Segredos gerados na hora, mascarados, descartados com a máquina.
   pilha-do-zero:
+    # v0.32.0: a suíte completa (~30 min) roda no pull request e à mão; no merge na main não roda de novo —
+    # com o repositório privado, cada minuto sai da cota do GitHub Actions. A main só recebe o que passou no PR.
+    if: github.event_name != 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

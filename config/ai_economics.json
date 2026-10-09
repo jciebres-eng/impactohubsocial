@@ -1,0 +1,34 @@
+{
+  "version": "2027.02-ai-pilot",
+  "note": "HIPÓTESES DECLARADAS para a simulação de sustentabilidade da IA (v0.28.0). Nenhum número aqui é medição: onde há medição ela vem de docs/evidence/ai_pilot_v0280.json e do painel /v1/admin/ai/finance. Preços são hipóteses do proprietário para TESTE (ADR-349).",
+  "external_provider_configured": false,
+  "external_provider_note": "MEDIDO: nenhum provedor externo configurado nesta instalação (AI_PROVIDER=local); os cenários de 12 meses usam este estado. A tabela de margem com provedor é [PREMISSA].",
+  "credit_price_cents_hypothesis": 10,
+  "pack_prices_cents": {"pack.100": 1000, "pack.500": 4500, "pack.2000": 16000},
+  "operations": {
+    "assist.summarize_project": {"category": "A", "credits": 1, "external": true, "tokens_in": 1200, "tokens_out": 300, "free_share": 0.9},
+    "assist.structure_need": {"category": "B", "credits": 5, "external": true, "tokens_in": 2500, "tokens_out": 900, "free_share": 0.7},
+    "assist.draft_document": {"category": "B", "credits": 10, "external": true, "tokens_in": 5000, "tokens_out": 1800, "free_share": 0.5},
+    "similarity.single": {"category": "D", "credits": 49, "external": false, "tokens_in": 0, "tokens_out": 0, "free_share": 0.4},
+    "similarity.pair": {"category": "D", "credits": 49, "external": false, "tokens_in": 0, "tokens_out": 0, "free_share": 0.3},
+    "similarity.complementarity": {"category": "D", "credits": 29, "external": false, "tokens_in": 0, "tokens_out": 0, "free_share": 0.4},
+    "similarity.set": {"category": "D", "credits": 129, "external": false, "tokens_in": 0, "tokens_out": 0, "free_share": 0.0},
+    "similarity.expense_overlap": {"category": "D", "credits": 149, "external": false, "tokens_in": 0, "tokens_out": 0, "free_share": 0.0}
+  },
+  "external_price_per_mtok_cents_hypothesis": {"input": 1500, "output": 7500, "note": "ordem de grandeza de um modelo de custo médio em R$ (câmbio e tabela do provedor NÃO medidos; a tabela ai_price_table nasce vazia)"},
+  "infra_cents_per_operation_hypothesis": {"local": 2, "external": 5},
+  "retry_rate_hypothesis": 0.05,
+  "pix_fee_pct_hypothesis": 1.0,
+  "tax_pct_hypothesis": 8.65,
+  "support_cents_per_active_user_month_hypothesis": 30,
+  "welcome_quota_credits": 60,
+  "monthly_light_quota_credits": 10,
+  "horizon_months": 12,
+  "scenarios": {
+    "conservador": {"label": "Conservador", "active_users_month1": 40, "growth_per_month": 8, "ai_user_share": 0.35, "ops_per_ai_user_month": 2.0, "paid_share_of_non_free": 0.25, "sponsored_share_of_non_free": 0.25, "category_mix": {"A": 0.45, "B": 0.25, "D": 0.30}},
+    "base": {"label": "Base", "active_users_month1": 80, "growth_per_month": 20, "ai_user_share": 0.5, "ops_per_ai_user_month": 3.0, "paid_share_of_non_free": 0.4, "sponsored_share_of_non_free": 0.3, "category_mix": {"A": 0.4, "B": 0.25, "D": 0.35}},
+    "agressivo": {"label": "Agressivo", "active_users_month1": 150, "growth_per_month": 60, "ai_user_share": 0.65, "ops_per_ai_user_month": 5.0, "paid_share_of_non_free": 0.5, "sponsored_share_of_non_free": 0.35, "category_mix": {"A": 0.35, "B": 0.25, "D": 0.40}}
+  },
+  "subsidy_cap_cents_month": 50000,
+  "sensitivity_doubling": true
+}

@@ -15,7 +15,7 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 
 `n/a` = motor sem rota própria: herda a barreira de quem o chama. Não é falha.
 
-**48 motores.** implemented: 48 sim / 0 não · integrated: 48 sim / 0 não · tested: 48 sim / 0 não · e2e: 43 sim / 2 não / 3 n/a · security: 45 sim / 0 não / 3 n/a · observability: 36 sim / 12 não
+**50 motores.** implemented: 50 sim / 0 não · integrated: 50 sim / 0 não · tested: 50 sim / 0 não · e2e: 45 sim / 2 não / 3 n/a · security: 47 sim / 0 não / 3 n/a · observability: 38 sim / 12 não
 
 ## busca
 
@@ -98,6 +98,8 @@ ganha uma coluna sendo descrito como completo — ganha quando o fato existe.
 | `ai_draft` — Reescrita de rascunho (IA) | llm_assisted | — | sim | sim | sim | sim | sim | sim |
 | `ai_structure_need` — Estruturação de necessidade (IA) | llm_assisted | — | sim | sim | sim | sim | sim | sim |
 | `ai_summarize` — Resumo de projeto (IA) | llm_assisted | — | sim | sim | sim | sim | sim | sim |
+| `ai_usage_control` — Controle de uso e custo da IA (autoriza → reserva → executa → liquida) | deterministic | usage-control@1.0 | sim | sim | sim | sim | sim | sim |
+| `similarity` — Originalidade, similaridade, complementaridade e integridade do financiamento | deterministic | similarity@1.0 | sim | sim | sim | sim | sim | sim |
 
 ## impacto
 

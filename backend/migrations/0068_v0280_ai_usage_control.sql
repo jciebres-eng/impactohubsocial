@@ -241,6 +241,14 @@ END $$;
 REVOKE ALL ON FUNCTION ai_credit_consume_bucket(uuid,text,int,uuid,text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION ai_credit_consume_bucket(uuid,text,int,uuid,text) TO impacto_app;
 
+-- LIMPEZA (v0.28.0): a função da 0058 vira invólucro de compatibilidade da função por lote (uma implementação só;
+-- consome do lote promocional, sem execução — só contexto privilegiado/sistema a usa, como os testes de atomicidade).
+CREATE OR REPLACE FUNCTION ai_credit_consume(
+  p_org uuid, p_credits int, p_ref_type text, p_ref_id text, p_idempotency text)
+RETURNS TABLE(charged int, balance_after bigint, outcome text) LANGUAGE sql AS $$
+  SELECT * FROM ai_credit_consume_bucket(p_org, 'promotional', p_credits, NULL, p_idempotency)
+$$;
+
 -- ============================================================================ 4. cotas configuráveis
 CREATE TABLE ai_quota_policies (
   id            bigserial PRIMARY KEY,

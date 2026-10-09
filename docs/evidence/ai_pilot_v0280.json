@@ -1,0 +1,37 @@
+{
+ "measured_on": "2026-10-08",
+ "engine_version": "similarity@1.0",
+ "what_is_measured": "latência de CPU do motor LOCAL com perfis sintéticos nesta máquina; tamanho de entrada; aproximação de tokens",
+ "what_is_not_measured": [
+  "custo de provedor externo (nenhum configurado; tabela de preço vazia)",
+  "infraestrutura por operação",
+  "tarifa de pagamento",
+  "impostos",
+  "qualidade em base real"
+ ],
+ "input_chars_subject": 1304,
+ "approx_tokens_subject": 326,
+ "pair_compare_ms": {
+  "p50": 0.75,
+  "p95": 0.97,
+  "n": 50
+ },
+ "originality_50_ms": {
+  "p50": 37.5,
+  "max": 42.2,
+  "n": 5
+ },
+ "originality_200_ms": {
+  "p50": 153.4,
+  "max": 203.6,
+  "n": 3
+ },
+ "assist_ops_estimated_tokens": {
+  "summarize_project": {
+   "chars_in": 1304,
+   "tokens_in_approx": 326,
+   "max_tokens_out_policy": 2000
+  },
+  "note": "operações de assistência: tokens de entrada = caracteres/4 (aproximação declarada); saída limitada pela faixa de risco"
+ }
+}

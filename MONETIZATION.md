@@ -10,9 +10,9 @@
 (`monetization_rule_gate()`), não na interface, e a mensagem de erro dele cita a decisão que o
 fundamenta.
 
-## 2. As dez regras e a situação de cada uma
+## 2. As onze regras e a situação de cada uma
 
-`monetization_rules` traz dez linhas (nove até a v0.25.0; a décima chegou na v0.26.0), ordenadas por `engine_rank` — a prioridade do produto:
+`monetization_rules` traz onze linhas (nove até a v0.25.0; a décima chegou na v0.26.0; a décima primeira, crédito pré-pago de IA, na v0.28.0), ordenadas por `engine_rank` — a prioridade do produto:
 
 | # | Chave | Motor | Situação |
 |---|---|---|---|
@@ -26,8 +26,9 @@ fundamenta.
 | 7 | `premium.document_preparation` | `proponent_premium` | ⚠️ `review_required` |
 | 8 | `data.territorial_intelligence` | `data_intelligence` | ⛔ `refused` |
 | 3 | `contract.platform_service_fee` | `enterprise` | ⚠️ `review_required` (v0.26.0) |
+| 7 | `ai.credits_prepaid` | `proponent_premium` | ⚠️ `review_required` (v0.28.0, ADR-349: créditos de operações de IA, venda em modo piloto) |
 
-**Zero verdes, e nenhuma ativa** (`active = false` nas dez). Cinco amarelas (falta parecer), cinco
+**Zero verdes, e nenhuma ativa** (`active = false` nas onze). Seis amarelas (falta parecer), cinco
 vermelhas (recusadas — a quinta, `saas.institutional.funder`, por decisão comercial do proprietário na
 v0.27.0: a assinatura saiu do modelo econômico, ADR-341). O cartão legal de cada uma, com texto literal de fonte oficial e data de consulta,
 está em `MONETIZATION_LEGAL_MATRIX.md`.
@@ -167,4 +168,17 @@ parcelados**. A arquitetura de assinatura (tabelas, rotas, job, telas, textos) f
 ocorrência a ocorrência e removida, migrada ou aposentada — `docs/execution/SUBSCRIPTION_INVENTORY.md`.
 O que a v0.26.0 provava com 3% fixado no contrato continua valendo com 3,5% vindo do catálogo:
 `test_v0260_contract_rules.py` (atualizado) e `test_v0270_economy.py`.
+
+## 10. v0.28.0 — créditos pré-pagos de operações de IA (ADR-347 a ADR-352)
+
+A décima primeira regra, `ai.credits_prepaid`, cobra por OPERAÇÃO DE INTELIGÊNCIA executada — nunca por acesso:
+cada operação do catálogo versionado (`ai_operations`) tem custo em créditos mostrado ANTES de executar, com a
+fonte de custeio (gratuita → patrocínio → cota → crédito comprado) e débito só em sucesso. Crédito comprado é
+obrigação com o cliente até ser consumido (passivo, não receita); crédito promocional é custo da gratuidade;
+patrocínio é crédito comprado por quem pode pagar para quem não pode. A regra nasce `review_required` com
+carta amarela (reconhecimento de receita, CDC para expiração/devolução, NFS-e, não enquadramento como arranjo
+de pagamento), e por isso os pedidos correm em modo PILOTO (sem pagamento) até parecer e provedor real.
+Preços de pacote e de operação são hipóteses de teste do proprietário (`status = hypothesis`), modeladas em
+`AI_COST_MODEL.md` com o achado honesto de que `assist.summarize_project` a 1 crédito é deficitária com provedor
+externo. Pagar mais não altera resultado, match, reputação ou elegibilidade (teste de arquitetura).
 

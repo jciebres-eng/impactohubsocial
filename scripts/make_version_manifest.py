@@ -52,7 +52,7 @@ def category(rel: str) -> str:
         return DOC_ROOT
     if rel in ("VERSION", ".env.example", "Makefile"):
         return "raiz do projeto"
-    if rel.endswith("_MANIFEST.json"):
+    if rel.endswith("_MANIFEST.json") or rel.startswith("history/manifests/"):
         return "manifesto de versão anterior"
     if rel.startswith(".github/"):
         return "integração contínua"
@@ -97,4 +97,4 @@ def main(out_path: str) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else "V0.15.0_FINAL_MANIFEST.json"))
+    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else "IMPACTO_vX_TRACEABILITY.json"))

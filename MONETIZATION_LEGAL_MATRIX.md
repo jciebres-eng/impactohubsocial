@@ -32,6 +32,7 @@ As cartas vivem no banco (`monetization_legal_cards`, append-only) e são legív
 | 7 | Premium — preparação de documento | organização que propõe | 🟡 | revisão necessária | fronteira com profissão regulamentada |
 | 8 | Inteligência territorial | órgão público, empresa | 🔴 | **recusada** | reidentificação; LGPD art. 12 |
 | 3 | Taxa de serviço contratada no acordo (v0.26.0) | financiador (ou quem o acordo indicar) | 🟡 | revisão necessária | parecer de não configuração de arranjo de pagamento (Lei 12.865/2013); ISS; nota fiscal |
+| 7 | Créditos pré-pagos de operações de IA (v0.28.0, ADR-349) | organização compradora ou patrocinador | 🟡 | revisão necessária — venda em modo PILOTO até parecer e provedor real | reconhecimento de receita (compra × consumo); CDC para expiração/devolução; NFS-e; crédito NÃO é moeda eletrônica nem saldo resgatável (desenho para ficar fora da Lei 12.865/2013) |
 
 `refused` é mais forte que `review_required`: não significa "ainda não analisado", significa
 **"analisado, e não implementar assim"**.

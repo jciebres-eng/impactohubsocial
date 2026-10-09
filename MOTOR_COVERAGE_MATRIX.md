@@ -4,7 +4,7 @@ Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/
 (`tests/demo_journeys.py`, `tests/test_e2e_*.py`). **Nenhuma coluna é escrita à mão.** Conferida por
 `backend/tests/test_v0270_release_docs.py`.
 
-**48 motores** — VERDE 35 · AMARELO 13 · VERMELHO 0.
+**50 motores** — VERDE 37 · AMARELO 13 · VERMELHO 0.
 
 | Coluna | O que afirma |
 | --- | --- |
@@ -51,6 +51,8 @@ Gerada por `scripts/make_motor_coverage_matrix.py` a partir de `impacto/engines/
 | `ai_draft` — Reescrita de rascunho (IA) | ia | llm_assisted | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `ai_structure_need` — Estruturação de necessidade (IA) | ia | llm_assisted | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `ai_summarize` — Resumo de projeto (IA) | ia | llm_assisted | 1 | sim | sim | sim | sim | não | sim | sim | VERDE |
+| `ai_usage_control` — Controle de uso e custo da IA (autoriza → reserva → executa → liquida) | ia | deterministic | 21 | sim | sim | sim | sim | sim | sim | sim | VERDE |
+| `similarity` — Originalidade, similaridade, complementaridade e integridade do financiamento | ia | deterministic | 6 | sim | sim | sim | sim | sim | sim | sim | VERDE |
 | `claim_integrity` — Integridade de afirmação de impacto | impacto | deterministic | 4 | sim | sim | sim | sim | sim | sim | sim | VERDE |
 | `data_quality` — Qualidade do dado declarado | impacto | deterministic | 2 | sim | sim | sim | sim | não | sim | sim | VERDE |
 | `equity_context` — Contexto de equidade e normalização | impacto | deterministic | 4 | sim | sim | sim | sim | sim | sim | sim | VERDE |

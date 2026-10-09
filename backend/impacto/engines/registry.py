@@ -330,6 +330,35 @@ ENGINES: tuple[Engine, ...] = (
         never="Não inventa saldo: banco é 'DADO FINANCEIRO NÃO CONECTADO'; GMV nunca se soma à receita; razão de captura "
               "sem denominador é NÃO MEDIDO, não zero; não há MRR porque não há assinatura."),
     Engine(
+        key="ai_usage_control", name="Controle de uso e custo da IA (autoriza → reserva → executa → liquida)",
+        module="impacto.engines.ai.usage_control", entrypoint="preview", kind="deterministic",
+        version="usage-control@1.0", group="ia",
+        routes=("/v1/ai/center", "/v1/ai/operations", "/v1/ai/preview", "/v1/ai/executions", "/v1/ai/executions/{execution_id}",
+                "/v1/ai/executions/{execution_id}/cancel", "/v1/ai/credit-packs", "/v1/ai/credit-orders", "/v1/ai/credit-orders/{order_id}",
+                "/v1/ai/credit-orders/{order_id}/cancel", "/v1/ai/sponsorships", "/v1/ai/sponsorships/{sponsorship_id}",
+                "/v1/ai/sponsorships/{sponsorship_id}/close", "/v1/webhooks/payments/{provider}", "/v1/admin/ai/finance",
+                "/v1/admin/ai/credit-orders", "/v1/admin/ai/credit-orders/{order_id}/confirm", "/v1/admin/ai/credit-orders/{order_id}/approve-pilot",
+                "/v1/admin/ai/operations", "/v1/admin/ai/credit-packs", "/v1/admin/ai/quota-policies/{key}"),
+        public_routes=("/v1/webhooks/payments/{provider}",),
+        produces="Prévia com custo em créditos, custo externo estimado ou 'sem preço', fonte de custeio (gratuita → patrocínio → cota → "
+                 "comprado) e saldo; execução com estados e trilha; débito só em sucesso; pedidos de crédito (piloto/real), patrocínio "
+                 "com prestação de contas agregada; painel financeiro medido × NÃO MEDIDO.",
+        never="Nunca debita sem execução concluída; nunca credita compra sem pagamento confirmado por webhook assinado ou conciliação "
+              "com referência; nunca migra patrocínio esgotado para cobrança do beneficiário; o frontend nunca decide preço, saldo ou fonte.",
+        config=("PAYMENT_WEBHOOK_SECRET", "PLATFORM_PIX_KEY")),
+    Engine(
+        key="similarity", name="Originalidade, similaridade, complementaridade e integridade do financiamento",
+        module="impacto.engines.similarity.engine", entrypoint="compare", kind="deterministic",
+        version="similarity@1.0", group="ia",
+        routes=("/v1/projects/{project_id}/similarity", "/v1/similarity/analyses", "/v1/similarity/analyses/{analysis_id}",
+                "/v1/similarity/analyses/{analysis_id}/dispute", "/v1/admin/ai/disputes", "/v1/admin/ai/disputes/{dispute_id}/review"),
+        produces="Oito dimensões separadas (texto, escopo, público, território, período, orçamento, financiamento, indicadores) com score, "
+                 "fatores, qualidade do dado e limitação; leituras separadas (textual ≠ escopo ≠ territorial ≠ duplicidade de despesa ≠ "
+                 "complementaridade ≠ reprodução textual como INDÍCIO); confiança; recomendações; contestação com revisão humana; cache por "
+                 "insumo e versão; contagem k-anônima do que o solicitante não enxerga.",
+        never="Nunca conclui plágio, fraude ou duplicidade; nunca bloqueia financiamento, altera reputação, match ou ranking; nunca compara "
+              "projeto invisível ao solicitante; nunca sai da instalação (faixa 3); o custo da análise não altera o resultado."),
+    Engine(
         key="today_cards", name="Para você hoje (cartões e contadores do menu)",
         module="impacto.network.today", entrypoint="today", kind="deterministic",
         version=None, group="rede",

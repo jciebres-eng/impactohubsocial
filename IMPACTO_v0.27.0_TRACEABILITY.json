@@ -1,9 +1,9 @@
 {
   "version": "0.27.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-08T23:43:09+00:00",
+  "generated_at": "2026-10-09T00:01:21+00:00",
   "files_total": 3147,
-  "size_bytes_total": 53765440,
+  "size_bytes_total": 53770037,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 60,
@@ -31,11 +31,11 @@
     },
     "documentação da raiz": {
       "files": 163,
-      "size_bytes": 1791629
+      "size_bytes": 1793350
     },
     "documentação técnica": {
       "files": 60,
-      "size_bytes": 2426474
+      "size_bytes": 2426547
     },
     "documento legal": {
       "files": 11,
@@ -55,11 +55,11 @@
     },
     "frontend: build": {
       "files": 23,
-      "size_bytes": 1411056
+      "size_bytes": 1412635
     },
     "frontend: código": {
       "files": 62,
-      "size_bytes": 1106291
+      "size_bytes": 1107047
     },
     "frontend: estático": {
       "files": 18,
@@ -83,7 +83,7 @@
     },
     "manifesto de versão anterior": {
       "files": 12,
-      "size_bytes": 1695238
+      "size_bytes": 1695305
     },
     "mobile": {
       "files": 8,
@@ -103,7 +103,7 @@
     },
     "outro": {
       "files": 8,
-      "size_bytes": 3793686
+      "size_bytes": 3793971
     },
     "raiz do projeto": {
       "files": 3,
@@ -119,7 +119,7 @@
     },
     "teste": {
       "files": 123,
-      "size_bytes": 2309937
+      "size_bytes": 2310053
     }
   },
   "files": [
@@ -161,8 +161,8 @@
     },
     {
       "file": ".gitleaksignore",
-      "sha256": "07337081d448fa5614cc213739f695711baac2ec3cd1c38855be3f6aabba1906",
-      "size_bytes": 3088,
+      "sha256": "a8e2f71695fbe5e100c4527a578fc2aba764e60ff5482ebb58a0ed1f7c9639f0",
+      "size_bytes": 3373,
       "category": "outro"
     },
     {
@@ -233,8 +233,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "9eeabb3f9f87b6c77442e461d467f74cb0edb8da2d8a89067c915757ed5718d1",
-      "size_bytes": 153323,
+      "sha256": "2ecb5943eb339430e5c5d587e364e255d340adb77ab69e9f4ab00208bc354698",
+      "size_bytes": 153437,
       "category": "documentação da raiz"
     },
     {
@@ -413,14 +413,14 @@
     },
     {
       "file": "FINAL_EXECUTION_AUDIT.md",
-      "sha256": "75561aa4a891eb2293777f8ddb5119082fde95ac44d217874e7f9e91783b57e9",
-      "size_bytes": 20314,
+      "sha256": "f54b708417ba37fef28189c3149ea1ed637d0c3b9a97af30541fc02d0ec26d0d",
+      "size_bytes": 21535,
       "category": "documentação da raiz"
     },
     {
       "file": "FINAL_EXECUTION_REPORT.md",
-      "sha256": "a31ebfe01e198188db934e3059a37cc2149b90e1f7daa26206991083cb071553",
-      "size_bytes": 15805,
+      "sha256": "dcdf973368d59cc73395ba33b25c4c300e484099a56bd18c3aca89838a29103b",
+      "size_bytes": 16191,
       "category": "documentação da raiz"
     },
     {
@@ -473,8 +473,8 @@
     },
     {
       "file": "FINAL_RELEASE_MANIFEST.json",
-      "sha256": "bf47a8bc9ef24b566894a391f28ae051cade4a73b4c904d58646993ed33d29f9",
-      "size_bytes": 6664,
+      "sha256": "dae15ca6bfca2ae4c4e2df95a109bcebbe72f3bc569025499070df8fecb3cd66",
+      "size_bytes": 6731,
       "category": "manifesto de versão anterior"
     },
     {
@@ -3743,8 +3743,8 @@
     },
     {
       "file": "backend/tests/test_v0230_security_gate.py",
-      "sha256": "066401e7544fbef42fdf437328df30fbb8bf9b64974c4f42f65b6795060bc49d",
-      "size_bytes": 27897,
+      "sha256": "1e79d482cb01f53d3b10187b06e57d26ad02458a78be75ab356a5e119c780eef",
+      "size_bytes": 28013,
       "category": "teste"
     },
     {
@@ -4763,8 +4763,8 @@
     },
     {
       "file": "docs/execution/painel_de_telas.html",
-      "sha256": "12661245662031673c0a5a958f97699d79a06e98752964c3f5b3ada61117c8bc",
-      "size_bytes": 64102,
+      "sha256": "60186d4a2bfcfe1a07d3c586e4b48f8ac05ec41dd9b2cd39a60e6434649c2582",
+      "size_bytes": 64136,
       "category": "documentação técnica"
     },
     {
@@ -4775,8 +4775,8 @@
     },
     {
       "file": "docs/execution/screen_backend_map.json",
-      "sha256": "b201db845ceae432ee18b43a55d068846b06b45840cfcc8bf070d1a8be1bedbc",
-      "size_bytes": 66782,
+      "sha256": "978439db0178ed878ab6f33ae03865984040db86692f969e2f0dca1e4eb31e63",
+      "size_bytes": 66821,
       "category": "documentação técnica"
     },
     {
@@ -18334,9 +18334,9 @@
       "category": "frontend"
     },
     {
-      "file": "web/dist/assets/app-RNQB7LJL.js",
-      "sha256": "8355fd311080de2cc5abc0b6fc811f783849ce3cc117c0ab5db2b228136605ea",
-      "size_bytes": 1066056,
+      "file": "web/dist/assets/app-IJMOXKPF.js",
+      "sha256": "75d9a3437423a89d9e4cec3bfe731e6b56f5a04f5061798ec184afbe9f1b2ab4",
+      "size_bytes": 1067635,
       "category": "frontend: build"
     },
     {
@@ -18389,7 +18389,7 @@
     },
     {
       "file": "web/dist/build-info.json",
-      "sha256": "35b885b6744bbbdcc43aaed5d4302bcce4f325d55a08a237e0bba54fb2822095",
+      "sha256": "91959ff039c599006c6f322a608e4d99ea2beba6bea801ad5128c7a94f1223d5",
       "size_bytes": 142,
       "category": "frontend: build"
     },
@@ -18443,7 +18443,7 @@
     },
     {
       "file": "web/dist/index.html",
-      "sha256": "ab9f276a9c4ce280e05b3c6b3e1862dbf4a2cacd9ec07f70732ec30fb75be0de",
+      "sha256": "4db1f4a6a49dd804093697e686717e84fe6b537374792c7c5f19e372243e0316",
       "size_bytes": 1127,
       "category": "frontend: build"
     },
@@ -18467,7 +18467,7 @@
     },
     {
       "file": "web/dist/sw.js",
-      "sha256": "1ca5ed034b30e59ae59555948d0f4c92efbd3c5e344494d7657aab4aa3a6c741",
+      "sha256": "3044605b3de01a7cac38f54eb8320013c0cc5fbd98015f22c6e93c2f6442a18a",
       "size_bytes": 1923,
       "category": "frontend: build"
     },
@@ -18701,8 +18701,8 @@
     },
     {
       "file": "web/src/pages/helpAdmin.tsx",
-      "sha256": "569b150684bf89835279029c0a4e766cd03f042846c25f547f63d9e5f60e6048",
-      "size_bytes": 34779,
+      "sha256": "b827596e919f816874ede3856c42f5ee9546d566a82084312c377dc058de29f2",
+      "size_bytes": 35535,
       "category": "frontend: código"
     },
     {

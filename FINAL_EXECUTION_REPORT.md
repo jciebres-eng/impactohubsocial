@@ -50,10 +50,10 @@ assinatura, camada econômica, torre MASTER, cartões do dia, telas, testes, doc
 (correções da primeira regressão, matrizes regeneradas, snapshot `history/v0.26.0/`, versão 0.27.0,
 CHANGELOG), `0a44b31` (fechamento: auditoria, relatório, notas de versão, `test_v0270_release_docs`,
 evidência da regressão), `a94475c` (manifestos), `881ece9` (empacotador passa a incluir toda evidência
-`.log` versionada) e o **commit final dos manifestos**, para o qual a tag `v0.27.0` deve apontar e do
+`.log` versionada), `3b19aff` (correções da primeira run do CI) e o **commit final dos manifestos**, para o qual a tag `v0.27.0` deve apontar e do
 qual o pacote é construído byte a byte (`verify_package_against_git.py`); o hash desse commit é
 registrado no `.sha256` do pacote e não cabe dentro do próprio commit. `FINAL_RELEASE_MANIFEST.json`
-registra `881ece9` como último commit de conteúdo.
+registra `3b19aff` como último commit de conteúdo.
 
 **GitHub Actions:** primeira run no commit `ec0e926` (`37861052570`): `auditoria` verde; `backend`,
 `docker` e `pilha-do-zero` vermelhos por duas causas, ambas corrigidas no commit seguinte — um achado do

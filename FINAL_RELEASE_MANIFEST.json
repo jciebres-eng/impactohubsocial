@@ -1,8 +1,8 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.27.0",
  "version": "0.27.0",
- "commit": "881ece9",
- "date": "2026-10-08T23:43:08+00:00",
+ "commit": "3b19aff",
+ "date": "2026-10-09T00:01:20+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
   "tracked_total": 3150,
@@ -117,7 +117,7 @@
   }
  ],
  "external_dependencies": "BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTERNAL_INTEGRATIONS.md`):\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico e contábil da taxa de serviço (3,5%) | advogado(a) e contador(a): arranjo de pagamento (Lei 12.865/2013), ISS, cláusula, NFS-e | regra desligada; camada registrada e instruída, **nada devido, nada cobrado** |\n| Chave PIX real da plataforma | pessoa jurídica titular | `PLATFORM_PIX_KEY` vazia → instrução \"NÃO CONFIGURADA\" |\n| Banco / provedor de pagamento | integração bancária ou provedor homologado | conciliação manual, registrada e confirmada pelas partes; torre diz \"DADO FINANCEIRO NÃO CONECTADO\" |\n| Nota fiscal | provedor fiscal | não emitida |\n| Assinatura qualificada, gov.br, ICP-Brasil, biometria, KYC, SMS/WhatsApp | credenciais e contratos | não simulados; a interface diz \"não ligado\" |\n| Aceite de termos | minutas por advogado(a) | cadastro em produção bloqueado (503) |\n| Endereço público | conta de hospedagem do dono | pilha do zero provada no CI, sem URL |\n| Tag `v0.27.0` no GitHub | o proxy recusa push de tag e API de escrita | criar manualmente no commit de fechamento |",
- "known_limitations": "- Receita real R$ 0,00 por construção até a regra `contract.platform_service_fee` ficar ativa.\n- Conciliação bancária manual; `value_capture_ratio` NÃO MEDIDO sem recursos de projeto confirmados.\n- Preço de contrato avulso/parcelado é negociado (piso publicado não é preço); nenhuma tabela.\n- `economic_rules` 2027.01 não tem `effective_until` fechado (CHECK impede data futura); a vigente é\n  escolhida pela maior versão com `effective_from <= now()`.\n- Documentos de assinatura permanecem no repositório marcados SUPERADO (histórico), e em `history/`.\n- Motores de leitura (13) sem rastro durável — por desenho.\n- Typecheck oficial do front só no CI (registro npm indisponível aqui).\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
+ "known_limitations": "- Receita real R$ 0,00 por construção até a regra `contract.platform_service_fee` ficar ativa.\n- Conciliação bancária manual; `value_capture_ratio` NÃO MEDIDO sem recursos de projeto confirmados.\n- Preço de contrato avulso/parcelado é negociado (piso publicado não é preço); nenhuma tabela.\n- `economic_rules` 2027.01 não tem `effective_until` fechado (CHECK impede data futura); a vigente é\n  escolhida pela maior versão com `effective_from <= now()`.\n- Documentos de assinatura permanecem no repositório marcados SUPERADO (histórico), e em `history/`.\n- Motores de leitura (13) sem rastro durável — por desenho.\n- Typecheck oficial do front só no CI; a reprodução local usa o `tsc` da máquina sem `@types/react` (ruído de tipos ausentes filtrado).\n- Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.",
  "decision": "```text\nGO WITH CONDITIONS\n```\n\nNenhuma falha técnica interna crítica em aberto: nenhuma assinatura; integridade econômica (3,5 +\n1,5 do catálogo, distribuição fechada, instrução ≠ custódia, confirmação por quem recebe, GMV ≠\nreceita, reconhecimento só na quitação), autorização, tenancy, persistência e fluxo de negócio\ncompleto têm teste executado e verde na segunda regressão. As condições são todas externas (§25):\nparecer da taxa, chave PIX real, banco/provedor, nota fiscal, minutas, hospedagem, tag no GitHub.\nNenhuma falha crítica foi convertida em \"condição\".",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",

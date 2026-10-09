@@ -7,7 +7,7 @@ import { date, dateTime, label } from "../format";
 import { Bars, Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Pager, Select, StateView, TextArea, useAction, useForm, useLoad, Chips } from "../ui/kit";
 
 const TABS: [string, string][] = [["/admin/central", "Visão geral"], ["/admin/central/artigos", "Guias"], ["/admin/central/recursos", "Biblioteca"], ["/admin/central/faqs", "FAQ"],
-  ["/admin/central/cursos", "Cursos"], ["/admin/central/eventos", "Eventos"], ["/admin/central/suporte", "Suporte"], ["/admin/central/parcerias", "Parcerias"],
+  ["/admin/central/cursos", "Cursos"], ["/admin/central/eventos", "Eventos"], ["/admin/central/suporte", "Suporte"], ["/admin/central/parcerias", "Parcerias e demonstrações"],
   ["/admin/central/analytics", "Indicadores"], ["/admin/central/equipe", "Equipe editorial"]];
 
 function Frame({ title, children, actions }: { title: string; children: ReactNode; actions?: ReactNode }) {
@@ -339,13 +339,23 @@ export function Partnerships() {
   const one = useLoad(sel ? `/v1/admin/hub/partnerships/${sel}` : null);
   const [note, setNote] = useState("");
   const { run } = useAction();
+  // v0.27.0 (ADR-341): a tela "Testes e demonstrações" saiu com o trial; os pedidos de DEMONSTRAÇÃO (KEEP)
+  // continuam aqui, ao lado das parcerias — são as duas entradas de quem quer conhecer a plataforma.
+  const demos = useLoad("/v1/admin/hub/demo-requests");
   return (
-    <Frame title="Parcerias">
-      <Select aria-label="Etapa" value={status} onChange={(v) => { setStatus(v); setOffset(0); }} placeholder="Todas as etapas" options={STAGES} />
-      <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length && "Nenhuma proposta."}>
-        <ul className="rows">{(data?.items || []).map((p: any) => <li key={p.id}><div><strong>{p.org_name}</strong><p className="muted">{p.contact_name} · {label(p.kind)} · {dateTime(p.created_at)}</p></div><span className="row-actions"><Pill tone="muted">{STAGES.find((s) => s[0] === p.status)?.[1] || p.status}</Pill><Button variant="ghost" onClick={() => setSel(p.id)}>Abrir</Button></span></li>)}</ul>
-        <Pager data={data} offset={offset} setOffset={setOffset} />
-      </StateView>
+    <Frame title="Parcerias e demonstrações">
+      <Panel title="Propostas de parceria">
+        <Select aria-label="Etapa" value={status} onChange={(v) => { setStatus(v); setOffset(0); }} placeholder="Todas as etapas" options={STAGES} />
+        <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length && "Nenhuma proposta."}>
+          <ul className="rows">{(data?.items || []).map((p: any) => <li key={p.id}><div><strong>{p.org_name}</strong><p className="muted">{p.contact_name} · {label(p.kind)} · {dateTime(p.created_at)}</p></div><span className="row-actions"><Pill tone="muted">{STAGES.find((s) => s[0] === p.status)?.[1] || p.status}</Pill><Button variant="ghost" onClick={() => setSel(p.id)}>Abrir</Button></span></li>)}</ul>
+          <Pager data={data} offset={offset} setOffset={setOffset} />
+        </StateView>
+      </Panel>
+      <Panel title="Demonstrações">
+        <StateView loading={demos.loading} error={demos.error} onRetry={demos.reload} empty={demos.data && !demos.data.items.length && "Nenhum pedido de demonstração."}>
+          <ul className="rows">{(demos.data?.items || []).map((d: any) => <DemoRow key={d.id} d={d} onDone={demos.reload} />)}</ul>
+        </StateView>
+      </Panel>
       <Modal open={!!sel} title={one.data?.org_name || "Proposta"} onClose={() => setSel(null)}>
         <StateView loading={one.loading} error={one.error}>
           {one.data && (

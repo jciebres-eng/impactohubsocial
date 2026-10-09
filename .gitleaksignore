@@ -32,8 +32,10 @@ d9f3077eeba153c7aa27fcf5238bbde78b667c31:backend/tests/test_v080.py:generic-api-
 d9f3077eeba153c7aa27fcf5238bbde78b667c31:backend/impacto/security/passwords.py:generic-api-key:20
 
 # [texto-da-matriz] linha da matriz de homologação que DESCREVE a falta de credencial do SMTP; não
-# contém valor algum.
+# contém valor algum. A mesma linha reaparece a cada regeneração da matriz (v0.27.0: a coluna de
+# testes passou a citar test_v0270_release_docs.py); o achado é o mesmo texto, revisado de novo.
 9ca75f16fe212963476e8a02015759a1b5fbe838:docs/execution/INTEGRATION_HOMOLOGATION_MATRIX.csv:generic-api-key:2
+0a44b31d675bacb4feee5fcc36005260adb8f0ed:docs/execution/INTEGRATION_HOMOLOGATION_MATRIX.csv:generic-api-key:2
 
 # [comentario-deste-arquivo] o próprio comentário acima, na primeira versão deste arquivo, citava o
 # literal do placeholder e o gitleaks o achou (como devia). O commit já está no histórico publicado;

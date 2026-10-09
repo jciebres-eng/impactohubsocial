@@ -53,7 +53,8 @@ confirmação, recusa, conciliação) exigem `OWNER`; ledger/reconhecimentos ref
 **Interface:** `/conta/acesso` ("Acesso e concessões", sem checkout; `/conta/plano` redireciona),
 `/controladoria/torre` (Torre MASTER), cartões do dia na página inicial (`TodayCards`, dispensa por
 pessoa), trajetória no perfil público, "Como o IMPACTO se sustenta" na área comercial, painel de licença
-na administração; `/ajuda/teste` e `/admin/central/testes` removidos; namespaces i18n
+na administração; `/ajuda/teste` e `/admin/central/testes` removidos (o painel de **demonstrações**, KEEP, passou para
+`/admin/central/parcerias` — "Parcerias e demonstrações"); namespaces i18n
 `subscription/checkout/cancellation` removidos. 221 telas.
 
 **Testes:** `test_v0270_no_subscription.py` (nenhuma assinatura em lugar nenhum; torre master; cartões

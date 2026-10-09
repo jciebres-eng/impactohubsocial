@@ -55,9 +55,12 @@ qual o pacote é construído byte a byte (`verify_package_against_git.py`); o ha
 registrado no `.sha256` do pacote e não cabe dentro do próprio commit. `FINAL_RELEASE_MANIFEST.json`
 registra `881ece9` como último commit de conteúdo.
 
-**GitHub Actions:** o envio do ramo é feito ao final; o resultado da run não é conhecido no momento
-em que este relatório é escrito e **não é afirmado aqui**. A suíte oficial (`python -m unittest
-discover -s tests -t . -v`), o typecheck do front e a pilha do zero correm lá.
+**GitHub Actions:** primeira run no commit `ec0e926` (`37861052570`): `auditoria` verde; `backend`,
+`docker` e `pilha-do-zero` vermelhos por duas causas, ambas corrigidas no commit seguinte — um achado do
+gitleaks já revisado (texto da matriz de homologação, sem valor) e um `DemoRow` sem uso que escondia uma
+regressão real (painel de demonstrações sem tela; restaurado em `/admin/central/parcerias`). Detalhe em
+`FINAL_EXECUTION_AUDIT.md` §7. O resultado da run do commit final **não é afirmado aqui**: é conferido no
+GitHub depois do envio.
 
 ## 4. Architecture Status
 
@@ -230,7 +233,7 @@ BLOCKED_EXTERNAL_DEPENDENCY, com o que cada uma exige (tabela completa em `EXTER
   escolhida pela maior versão com `effective_from <= now()`.
 - Documentos de assinatura permanecem no repositório marcados SUPERADO (histórico), e em `history/`.
 - Motores de leitura (13) sem rastro durável — por desenho.
-- Typecheck oficial do front só no CI (registro npm indisponível aqui).
+- Typecheck oficial do front só no CI; a reprodução local usa o `tsc` da máquina sem `@types/react` (ruído de tipos ausentes filtrado).
 - Defeitos pré-existentes B1/B2 (`TECHNICAL_BASELINE_BEFORE_EXECUTION.md` §4) continuam fora do escopo.
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO

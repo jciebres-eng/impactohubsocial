@@ -867,6 +867,7 @@
    "componente": "HelpA.Partnerships",
    "arquivo": "web/src/pages/helpAdmin.tsx",
    "operacoes": [
+    "GET /v1/admin/hub/demo-requests",
     "GET /v1/admin/hub/partnerships{}",
     "POST /v1/admin/hub/demo-requests/{}/handle",
     "POST /v1/admin/hub/partnerships/{}/move",

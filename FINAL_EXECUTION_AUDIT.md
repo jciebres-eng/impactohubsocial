@@ -126,13 +126,25 @@ teste por nome e não conheciam `test_v0270_release_docs.py`; manifesto de relea
 regeneradas em seguida com os portões reexecutados verdes (saída anexada ao fim do mesmo log). Detalhe em
 `FINAL_EXECUTION_REPORT.md` §24.
 
+**Primeira run do GitHub Actions** (commit `ec0e926`, run `37861052570`): `auditoria` verde; `backend` parou na
+varredura de segredo (gitleaks: a mesma linha da matriz de homologação que DESCREVE a falta de credencial do
+SMTP, já revisada na v0.24.0, reapareceu porque a coluna de testes mudou — fingerprint único liberado em
+`.gitleaksignore`, contagem do teste atualizada com a razão); `docker` e `pilha-do-zero` pararam no typecheck
+oficial: `DemoRow` sem uso em `helpAdmin.tsx` — atrás do aviso havia uma **regressão real**: ao retirar a tela
+"Testes e demonstrações" com o trial, o painel de pedidos de DEMONSTRAÇÃO (classificado KEEP) ficou sem
+interface. Restaurado em `/admin/central/parcerias` ("Parcerias e demonstrações"). O typecheck foi reproduzido
+localmente com o `tsc` disponível na máquina (sem `@types/react`, que o registro não entrega aqui): os únicos
+avisos fora do ruído de tipos ausentes eram esse e dois pré-existentes em arquivos não tocados, verdes no CI da
+v0.26.0. Os logs da run não são legíveis deste ambiente (armazenamento do GitHub bloqueado pelo proxy); o que
+está escrito acima vem das anotações da run e da reprodução local.
+
 ## 8. Build limpo e pacote
 
 | Passo | Resultado |
 |---|---|
 | `ruff check impacto tests scripts/make_24_month_model.py` | 0 avisos |
 | `node build.mjs` (esbuild) | ok; `dist/` regenerado |
-| typecheck oficial (`tsconfig.json`) | roda no CI (`npm ci`; registro npm indisponível neste ambiente, como desde a v0.24.0) |
+| typecheck oficial (`tsconfig.json`) | roda no CI (`npm ci`); reproduzido localmente com o `tsc` da máquina, sem `@types/react` (ver §7, primeira run) |
 | `IMPACTO_TRUST_FINAL_RELEASE_0.27.0.zip` | `scripts/make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; sem ZIP aninhado; SHA-256 ao lado |
 
 ## 9. Segurança revisada

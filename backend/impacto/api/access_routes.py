@@ -55,6 +55,8 @@ STAFF_MENU: tuple[tuple[str, str, str, str | None], ...] = (
     ("/controladoria/conciliacao", "Conciliação", "Controladoria", "finance.read"),
     # v0.27.0 — torre MASTER: GMV × camada da plataforma, sem saldo inventado (ADR-341)
     ("/controladoria/torre", "Torre financeira (master)", "Controladoria", "finance.read"),
+    # v0.28.0 — IA: custos medidos, créditos vendidos/concedidos/consumidos, pedidos, contestações (ADR-347)
+    ("/admin/ia/financeiro", "IA: custos e créditos", "Controladoria", "finance.read"),
     ("/aprovacoes", "Aprovações", "Controladoria", "finance.read"),
     ("/financeiro", "Recebíveis e pagáveis", "Financeiro", "finance.read"),
     ("/financeiro/despesas", "Despesas da plataforma", "Financeiro", "finance.read"),

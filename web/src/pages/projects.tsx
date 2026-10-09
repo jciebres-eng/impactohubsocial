@@ -10,6 +10,7 @@ import { ContextHelp } from "./help";
 import { MatchVerdict } from "../ui/trail";
 import { UploadButton } from "./documents";
 import { ReadyPanel } from "./tower";
+import { SimilarityPanel } from "./aicenter";
 import { ProposeParticipation } from "./participations";
 
 export function Projects() {
@@ -178,6 +179,7 @@ function Overview({ p }: { p: any }) {
           </ul>
         </Panel>
         <ReadyPanel projectId={p.id} />
+        <SimilarityPanel projectId={p.id} isOwner={!!p.is_owner} />
         {p.match && <MatchVerdict m={p.match} />}
         {p.match?.match_run_id && <MatchFeedbackBox matchRunId={p.match.match_run_id} />}
         <Panel title="O projeto">

@@ -626,3 +626,12 @@ fieldset.group legend { padding: 0; margin-bottom: 6px; }
 .btn-sm { padding: 4px 10px; font-size: 13px; }
 @media (prefers-reduced-motion: no-preference) { .deck-card { transition: transform .15s ease; } .deck-card.deck-open { transform: translateY(-2px); } }
 
+
+/* v0.28.0 — Central de IA e análises de similaridade */
+.stack-row.wrap { flex-wrap: wrap; }
+.bar { display: inline-block; height: 8px; max-width: 100px; background: var(--ipe); border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+ul.plain { list-style: none; margin: 0; padding: 0; }
+ul.plain li { padding: 2px 0; }
+ul.plain li.warn { border-left: 3px solid var(--alerta); padding-left: 8px; }
+.note.warn { border-left: 3px solid var(--alerta); padding-left: 10px; }
+strong.ok { color: var(--ipe-escuro); }

@@ -623,6 +623,47 @@ class Jornadas:
             self.passo(J, "OSC aceita com autorização de cobrança → pacote concedido pelo contrato", osc, "POST", f"/v1/commercial/offers/{of['id']}/accept", {"consent_status": "authorized"})
             self.passo(J, "estado comercial: CONTRATADO", osc, "GET", "/v1/commercial/state")
 
+    def central_de_ia(self):
+        """v0.28.0 — IA sustentável: cota de boas-vindas, prévia com custo e fonte ANTES de executar, originalidade do projeto
+        (motor local, oito dimensões), complementaridade, patrocínio do financiador a OSCs, pedido de crédito em modo piloto
+        aprovado pela administração como concessão, e o painel financeiro que diz o que NÃO está medido."""
+        J, osc, emp, adm, pid = "Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel", \
+            self.c["osc"], self.c["company"], self.c["admin"], self.ids["projeto"]
+        self.passo(J, "OSC abre a Central de IA: cota de boas-vindas concedida, operações com preço e quem paga", osc, "GET", "/v1/ai/center")
+        pv = self.passo(J, "prévia da originalidade: 49 créditos, pagos pela cota gratuita, motor local", osc, "POST", "/v1/ai/preview",
+                        {"operation_code": "similarity.single", "project_id": pid}) or {}
+        self.ids["ia_previa_fonte"] = pv.get("funding_source")
+        an = self.passo(J, "OSC confirma: originalidade do projeto em oito dimensões (cobra só em sucesso)", osc, "POST",
+                        f"/v1/projects/{pid}/similarity", {"kind": "single"}) or {}
+        if an:
+            self.ids["ia_analise"] = an["id"]
+            self.passo(J, "lê a análise: leituras separadas, recomendações, revisão humana, contagem k-anônima do invisível", osc, "GET", f"/v1/similarity/analyses/{an['id']}")
+            self.passo(J, "mesmos dados → resultado já calculado, sem nova cobrança", osc, "POST", f"/v1/projects/{pid}/similarity", {"kind": "single"})
+            self.passo(J, "OSC contesta um ponto (vai para revisão humana)", osc, "POST", f"/v1/similarity/analyses/{an['id']}/dispute",
+                       {"reason": "A comparação com o projeto vizinho ignora que os públicos são de faixas etárias diferentes (exemplo)."}, esperado=(201,))
+        self.passo(J, "sem fonte de custeio (cota restante 21 < 29): a plataforma RECUSA e lista as opções; nada executa", osc, "POST",
+                   f"/v1/projects/{pid}/similarity", {"kind": "complementarity"}, esperado=(402,))
+        self.passo(J, "financiador abre a Central de IA (sem patrocínio ainda)", emp, "GET", "/v1/ai/center")
+        pat = self.passo(J, "financiador patrocina uso de IA para OSCs: compromete créditos do próprio saldo", emp, "POST", "/v1/ai/sponsorships", {
+            "name": "Diagnóstico e originalidade para OSCs (exemplo)", "budget_credits": 60, "ends_on": _d(365), "eligible_kinds": ["osc"],
+            "operations": ["similarity.single", "similarity.pair", "similarity.complementarity", "assist.summarize_project"],
+            "accountability": "Relatório agregado mensal: operações custeadas e créditos usados, sem conteúdo dos projetos."}, esperado=(201, 402))
+        if pat:
+            self.ids["ia_patrocinio"] = pat["id"]
+            self.passo(J, "agora a complementaridade é custeada pelo patrocínio: a OSC não paga nada", osc, "POST",
+                       f"/v1/projects/{pid}/similarity", {"kind": "complementarity"})
+            self.passo(J, "prestação de contas agregada ao patrocinador", emp, "GET", f"/v1/ai/sponsorships/{pat['id']}")
+        ped = self.passo(J, "OSC faz um pedido de créditos: modo PILOTO (regra comercial inativa), nenhum pagamento", osc, "POST", "/v1/ai/credit-orders",
+                         {"pack_code": "pack.100", "accept_terms": True}, esperado=(201, 409)) or {}
+        self.passo(J, "catálogo de pacotes e modo de venda", osc, "GET", "/v1/ai/credit-packs")
+        self.confirmar_identidade(adm, J)
+        if ped:
+            self.passo(J, "administração aprova o pedido piloto como concessão PROMOCIONAL (nunca compra)", adm, "POST",
+                       f"/v1/admin/ai/credit-orders/{ped['id']}/approve-pilot", {"note": "Piloto de medição de custo (exemplo)."})
+        self.passo(J, "painel financeiro da IA: medido × NÃO MEDIDO, obrigações com clientes, alertas", adm, "GET", "/v1/admin/ai/finance")
+        self.passo(J, "contestações aguardando revisão humana", adm, "GET", "/v1/admin/ai/disputes")
+        self.passo(J, "OSC vê o histórico de execuções e o extrato", osc, "GET", "/v1/ai/executions")
+
     def mercado_e_perfis(self):
         J, osc, pro, pid = "Marketplace, soluções e perfis públicos", self.c["osc"], self.c["provider"], self.ids["projeto"]
         lst = self.passo(J, "OSC anuncia o projeto no marketplace", osc, "POST", "/v1/marketplace/listings", {
@@ -748,7 +789,7 @@ class Jornadas:
     def run(self) -> dict:
         self.preparar()
         for etapa in (self.osc_projeto_e_diagnostico, self.financiador, self.rede, self.profissional, self.governo,
-                      self.captacao, self.documentos, self.contrato_como_regra, self.mercado_e_perfis, self.caminho_dourado, self.suporte_e_conhecimento,
+                      self.captacao, self.documentos, self.contrato_como_regra, self.mercado_e_perfis, self.caminho_dourado, self.central_de_ia, self.suporte_e_conhecimento,
                       self.banco_de_ideias, self.administracao, self.pendencias):
             try:
                 etapa()

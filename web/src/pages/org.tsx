@@ -273,6 +273,7 @@ export function Account() {
   const sessions = useLoad<any>("/v1/auth/sessions");
   const [setup, setSetup] = useState<any>(null);
   const [code, setCode] = useState("");
+  const [emailCode, setEmailCode] = useState("");
   const [codes, setCodes] = useState<string[] | null>(null);
   const pw = useForm({ current_password: "", new_password: "" });
   const [del, setDel] = useState(false);
@@ -293,11 +294,13 @@ export function Account() {
             <>
               <p className="muted">{me.user.is_platform_admin ? "Obrigatória para a área administrativa." : "Recomendada para quem aprova, assina ou administra."}</p>
               {!setup ? <Button variant="ink" busy={busy} onClick={() => run(() => api.post("/v1/auth/mfa/setup")).then(setSetup)}>Configurar</Button> : (
-                <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/auth/mfa/enable", { code }), "Verificação em duas etapas ativada").then((r: any) => { if (r) { setCodes(r.recovery_codes); setSetup(null); reload(); } }); }}>
+                <form className="form" onSubmit={(e: any) => { e.preventDefault(); run(() => api.post("/v1/auth/mfa/enable", setup.email_code_required ? { code, email_code: emailCode } : { code }), "Verificação em duas etapas ativada").then((r: any) => { if (r) { setCodes(r.recovery_codes); setSetup(null); reload(); } }); }}>
                   <p>No aplicativo autenticador, adicione uma conta com a chave abaixo (ou abra o link no celular):</p>
                   <code className="secret">{setup.secret.match(/.{1,4}/g).join(" ")}</code>
                   <a href={setup.otpauth_uri}>Abrir no aplicativo autenticador</a>
                   <Field label="Código de 6 dígitos"><Input inputMode="numeric" value={code} onChange={setCode} /></Field>
+                  {setup.email_code_required && <Field label="Código enviado ao seu e-mail" hint="Para a equipe da plataforma: prova de que o e-mail da conta é seu. Vale 15 minutos.">
+                    <Input inputMode="numeric" value={emailCode} onChange={setEmailCode} /></Field>}
                   <Button type="submit" variant="primary" busy={busy}>Ativar</Button>
                 </form>
               )}

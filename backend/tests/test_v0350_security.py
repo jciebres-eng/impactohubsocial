@@ -174,6 +174,7 @@ def _fin_setup(cls):
     st["state"].settings.payment_webhook_secret = SECRET
     cls.osc = new_account("osc", compliance="approved")
     cls.reviewer = make_staff("compliance")
+    reauth(cls.reviewer)
     cls.finance = make_staff("finance")
     cls.ctl1, cls.ctl2 = make_staff("controller"), make_staff("controller")
     for s in (cls.finance, cls.ctl1, cls.ctl2):
@@ -367,8 +368,9 @@ class BeneficiaryVerificationIsRevocableAndFourEyesTests(unittest.TestCase):
         self.assertEqual((r.status, r.json["code"]), (422, "evidence_invalid"))
 
     def test_a_reviewer_from_the_organization_has_a_conflict_of_interest(self):
-        from tests.support import make_staff
+        from tests.support import make_staff, reauth
         de_dentro = make_staff("compliance")
+        reauth(de_dentro)
         with db_system() as c:
             c.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'member')", de_dentro.user["id"], self.osc.org_id)
         r = de_dentro.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification",
@@ -397,3 +399,207 @@ class BeneficiaryVerificationIsRevocableAndFourEyesTests(unittest.TestCase):
             with self.assertRaises(Exception) as err:
                 c.run("UPDATE org_kyb_verifications SET confirmed_by = reviewed_by WHERE id = $1", vid)
         self.assertIn("kyb_four_eyes", str(err.exception))
+
+
+# ================================================================================================ lote C
+class StaffWriteRoutesNeedFreshIdentityTests(unittest.TestCase):
+    """AUTH-05 — antes: 68 rotas de escrita da administração sem permissão nomeada (mudar status de usuário, confirmar
+    recebimento, decidir identidade…) não exigiam reautenticação; e compliance.write (verificar beneficiário, decidir caso
+    de risco) também não."""
+
+    def test_an_administrator_without_fresh_reauth_cannot_change_a_user_status(self):
+        from tests.support import PASSWORD, fresh_totp, make_admin_without_reauth
+        server()
+        adm = make_admin_without_reauth()
+        alvo = new_account("osc")
+        r = adm.post(f"/v1/admin/users/{alvo.user['id']}/status", {"status": "disabled", "reason": "Teste de reautenticação"})
+        self.assertEqual((r.status, r.json["code"]), (401, "step_up_required"), "escrita administrativa sem identidade confirmada")
+        self.assertEqual(adm.post("/v1/auth/reauth", {"password": PASSWORD, "mfa_code": fresh_totp(adm.mfa_secret)}).status, 200)
+        r = adm.post(f"/v1/admin/users/{alvo.user['id']}/status", {"status": "disabled", "reason": "Teste de reautenticação"})
+        self.assertEqual(r.status, 200, r)
+
+    def test_compliance_write_needs_fresh_identity(self):
+        from tests.support import make_staff, reauth
+        server()
+        rev = make_staff("compliance")
+        osc = new_account("osc")
+        corpo = {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True}
+        r = rev.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", corpo)
+        self.assertEqual((r.status, r.json["code"]), (401, "step_up_required"))
+        reauth(rev)
+        self.assertEqual(rev.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", corpo).status, 200)
+
+
+class StaffSecondFactorTests(unittest.TestCase):
+    """AUTH-03/AUTH-04 — antes: quem tivesse a senha de um administrador sem MFA ativava o PRÓPRIO aplicativo e entrava;
+    a equipe sem `is_platform_admin` podia desligar o MFA e a sessão seguia 'verificada'."""
+
+    def test_staff_needs_the_email_code_to_enable_the_second_factor(self):
+        from tests.support import fresh_totp, last_mfa_setup_code
+        server()
+        c = new_account("osc")
+        with db_system() as d:
+            d.run("UPDATE users SET is_platform_admin = true WHERE id = $1", c.user["id"])
+        setup = c.post("/v1/auth/mfa/setup").json
+        self.assertTrue(setup["email_code_required"])
+        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(setup["secret"])})
+        self.assertEqual((r.status, r.json["code"]), (400, "invalid_email_code"), "só a senha bastava para cadastrar o TOTP do admin")
+        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(setup["secret"]), "email_code": "000000"})
+        self.assertEqual(r.json["code"], "invalid_email_code")
+        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(setup["secret"]), "email_code": last_mfa_setup_code(c.email)})
+        self.assertEqual(r.status, 200, r)
+
+    def test_a_regular_person_does_not_need_the_email_code(self):
+        from tests.support import fresh_totp
+        server()
+        c = new_account("osc")
+        setup = c.post("/v1/auth/mfa/setup").json
+        self.assertFalse(setup["email_code_required"])
+        self.assertEqual(c.post("/v1/auth/mfa/enable", {"code": fresh_totp(setup["secret"])}).status, 200)
+
+    def test_staff_cannot_disable_and_disabling_ends_other_sessions(self):
+        from tests.support import PASSWORD, enable_mfa, fresh_totp, make_staff
+        server()
+        staff = make_staff("support")
+        r = staff.post("/v1/auth/mfa/disable", {"password": PASSWORD, "code": fresh_totp(staff.mfa_secret)})
+        self.assertEqual((r.status, r.json["code"]), (403, "mfa_required_for_admin"), "equipe desligava o MFA")
+        pessoa = new_account("osc")
+        segredo = enable_mfa(pessoa)
+        outra = Client()
+        r = outra.post("/v1/auth/login", {"email": pessoa.email, "password": PASSWORD})
+        r = outra.post("/v1/auth/mfa/verify", {"mfa_token": r.json["mfa_token"], "code": fresh_totp(segredo)})
+        self.assertEqual(r.status, 200, r)
+        outra._absorb(r.json)
+        self.assertEqual(outra.get("/v1/me").status, 200)
+        self.assertEqual(pessoa.post("/v1/auth/mfa/disable", {"password": PASSWORD, "code": fresh_totp(segredo)}).status, 200)
+        self.assertEqual(outra.get("/v1/me").status, 401, "desligar o MFA não encerrou a outra sessão")
+        with db_system() as d:
+            self.assertFalse(d.scalar("SELECT bool_or(mfa_verified) FROM sessions WHERE user_id = $1 AND revoked_at IS NULL", pessoa.user["id"]))
+
+
+class SecondFactorBruteForceAndTrailTests(unittest.TestCase):
+    """AUTH-02/AUTH-11/AUTH-09 — antes: a senha certa zerava o contador e cada desafio dava 5 tentativas de TOTP; falhas de
+    MFA e de reautenticação não ficavam na trilha; trocar a senha não avisava o titular."""
+
+    def test_wrong_codes_lock_the_account_across_challenges_and_are_audited(self):
+        from impacto.services.auth import LOCK_AFTER
+        from tests.support import PASSWORD, enable_mfa
+        server()
+        pessoa = new_account("osc")
+        enable_mfa(pessoa)
+        atacante = Client()
+        erros = 0
+        for _ in range(4):                     # desafios novos a cada 2 erros: antes, cada um zerava o jogo
+            tok = atacante.post("/v1/auth/login", {"email": pessoa.email, "password": PASSWORD}).json.get("mfa_token")
+            if not tok:
+                break
+            for _ in range(2):
+                if atacante.post("/v1/auth/mfa/verify", {"mfa_token": tok, "code": "000000"}).status == 401:
+                    erros += 1
+        self.assertEqual(erros, LOCK_AFTER)
+        r = atacante.post("/v1/auth/login", {"email": pessoa.email, "password": PASSWORD})
+        self.assertEqual((r.status, r.json["code"]), (429, "account_locked"), "TOTP adivinhável sem limite por conta")
+        with db_system() as d:
+            self.assertEqual(d.scalar("SELECT count(*) FROM audit_events WHERE action = 'auth.mfa_failed' AND actor_user_id = $1",
+                                      pessoa.user["id"]), LOCK_AFTER)
+
+    def test_a_failed_reauth_is_audited(self):
+        server()
+        c = new_account("osc")
+        r = c.post("/v1/auth/reauth", {"password": "senha-errada-de-proposito"})
+        self.assertEqual(r.status, 401)
+        with db_system() as d:
+            self.assertEqual(d.scalar("SELECT count(*) FROM audit_events WHERE action = 'auth.step_up_failed' AND actor_user_id = $1",
+                                      c.user["id"]), 1)
+
+    def test_changing_the_password_warns_the_owner(self):
+        from tests.support import PASSWORD, outbox_messages, subject_of
+        server()
+        c = new_account("osc")
+        self.assertEqual(c.post("/v1/auth/change-password", {"current_password": PASSWORD, "new_password": "Outra-Senha-Forte-2026"}).status, 200)
+        assuntos = [subject_of(m) for m in outbox_messages() if m["To"] == c.email]
+        self.assertTrue(any("Aviso de segurança" in (s or "") for s in assuntos), "troca de senha sem aviso ao titular")
+
+
+class ClientIpComesFromTheTrustedEndTests(unittest.TestCase):
+    """AUTH-02 — antes: o IP dos limites era o PRIMEIRO valor do X-Forwarded-For, escrito por quem faz o pedido."""
+
+    def _ip(self, headers: dict, **cfg) -> str:
+        from dataclasses import replace
+        from types import SimpleNamespace
+
+        from impacto.http import Ctx
+        settings = replace(server()["state"].settings, **cfg)
+        req = SimpleNamespace(headers={k.lower(): v for k, v in headers.items()}, client=SimpleNamespace(host="10.0.0.9"))
+        ctx = Ctx.__new__(Ctx)
+        ctx.app, ctx.request = SimpleNamespace(settings=settings), req
+        return ctx.ip
+
+    def test_the_forged_leftmost_value_is_ignored(self):
+        h = {"X-Forwarded-For": "6.6.6.6, 200.10.10.10"}
+        self.assertEqual(self._ip(h, trust_proxy_headers=True, trusted_proxy_hops=1), "200.10.10.10")
+        self.assertEqual(self._ip({"X-Forwarded-For": "6.6.6.6, 200.10.10.10, 172.70.0.1"}, trust_proxy_headers=True, trusted_proxy_hops=2),
+                         "200.10.10.10")
+        self.assertEqual(self._ip(h, trust_proxy_headers=True, client_ip_header="cf-connecting-ip"), "200.10.10.10",
+                         "sem o cabeçalho da borda, volta ao X-Forwarded-For pela direita")
+        self.assertEqual(self._ip({**h, "CF-Connecting-IP": "201.1.1.1"}, trust_proxy_headers=True, client_ip_header="cf-connecting-ip"), "201.1.1.1")
+        self.assertEqual(self._ip(h, trust_proxy_headers=False), "10.0.0.9")
+
+    def test_the_start_script_no_longer_trusts_every_forwarded_header(self):
+        from tests.support import ROOT
+        s = (ROOT / "backend" / "start_container.sh").read_text(encoding="utf-8")
+        codigo = "\n".join(linha for linha in s.splitlines() if not linha.lstrip().startswith("#"))
+        self.assertNotIn("--forwarded-allow-ips='*'", codigo)
+        self.assertIn('FWD_IPS="${FORWARDED_ALLOW_IPS:-127.0.0.1}"', s)
+
+
+class ProductionRefusesStaffWithoutSecondFactorTests(unittest.TestCase):
+    def test_require_mfa_for_admins_false_is_refused_in_production(self):
+        from tests.test_v0310_storage import _base
+
+        from impacto import config as C
+        s = _base(env="production", require_mfa_for_admins=False)
+        with self.assertRaises(C.ConfigError) as err:
+            C.validate(s)
+        self.assertIn("REQUIRE_MFA_FOR_ADMINS", str(err.exception))
+
+
+class RemunerationFourEyesTests(unittest.TestCase):
+    """AUTHZ-06 — antes: a mesma pessoa com finance.approve registrava o recebimento e liquidava/reembolsava/dispensava."""
+
+    def test_who_registered_the_receipt_cannot_settle_it(self):
+        from impacto.http import ApiError
+        from impacto.services import remuneration as REM
+        from tests.support import make_staff
+        server()
+        osc = new_account("osc")
+        a, b = make_staff("controller"), make_staff("controller")
+        with db_system() as c:
+            oid = c.scalar("INSERT INTO remuneration_obligations(org_id, source_kind, source_id, rule_key, basis_cents, amount_cents, state,"
+                           " funding_source) VALUES ($1,'manual',$2,'donation.platform_fee',10000,300,'calculated','private') RETURNING id::text",
+                           osc.org_id, str(uuid.uuid4()))
+            REM._set(c, oid, "due", actor=None, trigger_code="manual_test")
+            REM._set(c, oid, "received", actor=a.user["id"], received_cents=300, received_reference="TESTE-1")
+            with self.assertRaises(ApiError) as err:
+                REM.mark_settled(c, obligation_id=oid, actor=a.user["id"], note="Conferido com o extrato do banco.")
+            self.assertEqual(err.exception.code, "four_eyes")
+            self.assertEqual(REM.mark_settled(c, obligation_id=oid, actor=b.user["id"], note="Conferido com o extrato do banco.")["state"], "settled")
+
+
+class CreateAdminNeverSilentlyPromotesTests(unittest.TestCase):
+    """AUTH-04 — antes: create-admin num e-mail já cadastrado promovia a conta MANTENDO a senha de quem a cadastrou."""
+
+    def test_an_existing_account_is_refused_and_explicit_promotion_replaces_the_password(self):
+        from tests.support import PASSWORD
+        from tests.test_v0231_cli import _cli
+        server()
+        pre = new_account("osc")          # quem pré-cadastrou o e-mail do futuro administrador
+        r = _cli("create-admin", "--email", pre.email, "--name", "Futura Administradora")
+        self.assertEqual(r.returncode, 1)
+        with db_system() as c:
+            self.assertFalse(c.scalar("SELECT is_platform_admin FROM users WHERE id = $1", pre.user["id"]), "promovida em silêncio")
+        r = _cli("create-admin", "--email", pre.email, "--name", "Futura Administradora", "--promote-existing", senha="Senha-Nova-Do-Admin-2026")
+        self.assertEqual(r.returncode, 0, r.stderr[-500:])
+        self.assertEqual(Client().post("/v1/auth/login", {"email": pre.email, "password": PASSWORD}).status, 401,
+                         "a senha de quem pré-cadastrou continuou valendo")
+        self.assertEqual(pre.get("/v1/me").status, 401, "sessão anterior à promoção continuou aberta")

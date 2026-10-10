@@ -151,10 +151,21 @@ class Ctx:
 
     @property
     def ip(self) -> str:
-        if self.app.settings.trust_proxy_headers:
-            fwd = self.request.headers.get("x-forwarded-for")
+        """IP do cliente para limite de tentativas e trilha.
+
+        v0.35.0 (auditoria, AUTH-02): antes vinha do PRIMEIRO valor do X-Forwarded-For — o único que quem faz o pedido
+        escreve; trocando o cabeçalho a cada tentativa, os limites por IP de login, cadastro, recuperação e IA eram
+        contornados. Agora: o cabeçalho que a borda sobrescreve (se configurado) ou o N-ésimo valor a partir da DIREITA
+        (N = TRUSTED_PROXY_HOPS, os proxies confiáveis que acrescentam ao cabeçalho)."""
+        s = self.app.settings
+        if s.trust_proxy_headers:
+            if s.client_ip_header:
+                v = (self.request.headers.get(s.client_ip_header) or "").strip()
+                if v:
+                    return v[:64]
+            fwd = [x.strip() for x in (self.request.headers.get("x-forwarded-for") or "").split(",") if x.strip()]
             if fwd:
-                return fwd.split(",")[0].strip()[:64]
+                return fwd[max(0, len(fwd) - s.trusted_proxy_hops)][:64]
         return (self.request.client.host if self.request.client else "unknown")[:64]
 
     @property
@@ -399,6 +410,13 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
             raise forbidden("Área restrita à administração da plataforma", "admin_only")
         if ctx.settings.require_mfa_for_admins and not p.mfa_verified:
             raise forbidden("Administração exige MFA ativo e verificado nesta sessão", "mfa_required")
+        if not spec.permission and not spec.staff and ctx.request.method in UNSAFE and not ACCESS.of(ctx)._reauth_fresh():
+            # v0.35.0 (auditoria, AUTH-05): escrita da administração SEM permissão nomeada (só administrador da plataforma)
+            # também exige identidade confirmada há menos de 15 minutos — antes, 68 rotas (mudar status de usuário,
+            # confirmar recebimento, decidir identidade, medidas de moderação…) passavam só com a sessão.
+            # Rotas editoriais da equipe (`staff=`: base de conhecimento, revisão de conteúdo) ficam como antes.
+            raise ApiError(401, "step_up_required", "Confirme sua identidade para esta operação",
+                           {"allowed": False, "reason": "permission_denied", "source": "step_up", "step_up_required": True})
         if spec.permission:
             # Segunda conferência, ANTES de `admin_mode` ser ligado. Não é redundante com a porta:
             # é aqui que entram o papel somente-leitura e a exigência de reautenticação recente.

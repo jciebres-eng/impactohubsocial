@@ -18,8 +18,10 @@ except ImportError:  # pragma: no cover
 def _publish_campaign(osc, campaign_id: str) -> None:
     """v0.33.0 (ADR-374): publicar exige envio para revisão, aprovação por outra pessoa da equipe e beneficiário
     verificado. O atalho `PATCH status=published` responde 409 de propósito; os testes antigos passam por aqui."""
-    from tests.support import make_staff, verify_beneficiary
+    from tests.support import make_staff, reauth, verify_beneficiary
     rev = make_staff("compliance")
+    # v0.35.0: compliance.write exige identidade confirmada há menos de 15 min (step-up); quem começa a trabalhar confirma
+    reauth(rev)
     assert osc.post(f"/v1/campaigns/{campaign_id}/submit").status == 200
     r = rev.post(f"/v1/admin/donation-campaigns/{campaign_id}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."})
     assert r.status == 200, r

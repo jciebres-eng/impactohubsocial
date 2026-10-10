@@ -24,7 +24,7 @@ import unittest.mock
 import uuid
 from dataclasses import replace
 
-from tests.support import Client, db_system, make_admin, make_staff, new_account, server
+from tests.support import Client, db_system, make_admin, make_staff, new_account, reauth, server
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 
@@ -45,6 +45,8 @@ class DonationsEndToEndTests(unittest.TestCase):
         cls.osc = new_account("osc", compliance="approved")
         cls.outra = new_account("osc", compliance="approved")
         cls.reviewer = make_staff("compliance")
+        # v0.35.0: compliance.write exige identidade confirmada há menos de 15 min (step-up); quem começa a trabalhar confirma
+        reauth(cls.reviewer)
         cls.admin, _ = make_admin()
         pr = cls.osc.post("/v1/projects", {"title": "Horta comunitária do bairro", "summary": "Projeto para a campanha de doações.",
                                            "causes": ["educacao"], "territory": "BR-MT", "ods": [2], "beneficiaries_count": 40,
@@ -80,7 +82,9 @@ class DonationsEndToEndTests(unittest.TestCase):
         self.assertEqual((r2.status, r2.json["code"]), (422, "beneficiary_not_verified"), "verificação sem segunda pessoa publicou")
         self.assertEqual(self.reviewer.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 403,
                          "quem verificou confirmou a si mesmo")
-        self.assertEqual(make_staff("compliance").post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 200)
+        segunda = make_staff("compliance")
+        reauth(segunda)
+        self.assertEqual(segunda.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 200)
         r = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
         self.assertEqual(r.status, 200, r.body)
         self.assertEqual(r.json["url"], f"https://impacto.teste/campanha/{self.slug}?v=1")

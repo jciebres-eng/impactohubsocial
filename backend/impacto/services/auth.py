@@ -6,7 +6,9 @@ Respostas não revelam se um e-mail existe (anti-enumeração).
 """
 from __future__ import annotations
 
+import hmac
 import logging
+import secrets
 import uuid
 from datetime import datetime, UTC
 
@@ -257,7 +259,10 @@ def login(ctx: Ctx, body):
             # resposta idêntica para usuário inexistente, desativado e senha errada
             error = ApiError(401, "invalid_credentials", "E-mail ou senha inválidos")
         else:
-            c.run("UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1", u["id"])
+            if not u["mfa_enabled_at"]:
+                # v0.35.0 (auditoria, AUTH-02): com segundo fator, o contador de falhas só zera depois do código certo —
+                # antes zerava com a senha, e cada desafio novo dava mais 5 tentativas de TOTP.
+                c.run("UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1", u["id"])
             if passwords.needs_rehash(u["password_hash"]):
                 c.run("UPDATE users SET password_hash = $2 WHERE id = $1", u["id"], passwords.hash_password(body.password))
             if u["mfa_enabled_at"]:
@@ -301,13 +306,22 @@ def mfa_login(ctx: Ctx, body):
                 c.run("UPDATE users SET mfa_recovery_hashes = array_remove(mfa_recovery_hashes, $2) WHERE id = $1", row["user_id"], h)
         if not ok and not error:
             c.run("UPDATE auth_tokens SET attempts = attempts + 1 WHERE id = $1", row["id"])
+            # v0.35.0 (auditoria, AUTH-02/AUTH-11): código errado conta para o bloqueio da CONTA (não só do desafio) e fica na trilha
+            n = c.scalar("UPDATE users SET failed_login_count = failed_login_count + 1, locked_until = CASE WHEN failed_login_count + 1 >= $2::int"
+                         " THEN now() + make_interval(mins => $3::int) ELSE locked_until END WHERE id = $1 RETURNING failed_login_count",
+                         row["user_id"], LOCK_AFTER, LOCK_MINUTES)
+            from .audit import record
+            record(c, org_id=None, actor=row["user_id"], action="auth.mfa_failed", object_type="user", object_id=row["user_id"],
+                   payload={"attempt": int(n or 0)}, ip=ctx.ip, request_id=ctx.request_id)
+            if int(n or 0) >= LOCK_AFTER:
+                c.run("UPDATE auth_tokens SET used_at = now() WHERE id = $1", row["id"])
             error = ApiError(401, "invalid_mfa_code", "Código inválido")
         if error:
             tokens = None
         else:
             c.run("UPDATE auth_tokens SET used_at = now() WHERE id = $1", row["id"])
             org_id = default_org(c, row["user_id"], None)
-            c.run("UPDATE users SET last_login_at = now() WHERE id = $1", row["user_id"])
+            c.run("UPDATE users SET last_login_at = now(), failed_login_count = 0, locked_until = NULL WHERE id = $1", row["user_id"])
             tokens = issue_session(c, ctx, row["user_id"], org_id, mfa_verified=True)
             from .audit import record
             record(c, org_id=org_id, actor=row["user_id"], action="auth.login", object_type="session", object_id=tokens["session_id"],
@@ -456,6 +470,7 @@ def reset_password(ctx: Ctx, token: str, new_password: str) -> dict:
         from .audit import record
         record(c, org_id=None, actor=row["user_id"], action="auth.password_reset", object_type="user", object_id=row["user_id"],
                payload={}, ip=ctx.ip, request_id=ctx.request_id)
+    security_notice(ctx, email, "sua senha foi redefinida pelo link de recuperação e todas as sessões foram encerradas")
     return {"status": "ok"}
 
 
@@ -474,7 +489,22 @@ def change_password(ctx: Ctx, current: str, new: str) -> dict:
         from .audit import record
         record(c, org_id=p.org_id, actor=p.user_id, action="auth.password_changed", object_type="user", object_id=p.user_id,
                payload={}, ip=ctx.ip, request_id=ctx.request_id)
+    security_notice(ctx, p.email, "sua senha foi trocada e as outras sessões foram encerradas")
     return {"status": "ok"}
+
+
+def security_notice(ctx: Ctx, email: str | None, what: str) -> None:
+    """Aviso de segurança ao titular (auditoria, AUTH-09): troca/redefinição de senha e ligar/desligar o segundo fator.
+    Quem não reconhece a mudança sabe na hora — antes, a tomada de conta era silenciosa."""
+    if email:
+        _send_after(ctx, email, "Aviso de segurança — Plataforma Impacto",
+                    f"Olá. Registramos agora uma mudança de segurança na sua conta: {what}.\n\n"
+                    "Se foi você, não precisa fazer nada. Se não foi, redefina sua senha imediatamente pela opção "
+                    "\"Esqueci minha senha\" e avise o suporte.")
+
+
+def _is_staff(c, user_id: str) -> bool:
+    return bool(c.scalar("SELECT is_platform_admin OR EXISTS (SELECT 1 FROM staff_roles WHERE user_id = $1) FROM users WHERE id = $1", user_id))
 
 
 def mfa_setup(ctx: Ctx) -> dict:
@@ -482,19 +512,38 @@ def mfa_setup(ctx: Ctx) -> dict:
     if p.mfa_enabled:
         raise ApiError(409, "mfa_already_enabled", "MFA já está ativo")
     secret = totp.new_secret()
+    email_code = None
     with ctx.system_tx() as c:
         c.run("UPDATE users SET mfa_secret_enc = $2 WHERE id = $1", p.user_id, ctx.app.cipher.encrypt(secret))
-    return {"secret": secret, "otpauth_uri": totp.provisioning_uri(secret, p.email)}
+        if _is_staff(c, p.user_id):
+            # v0.35.0 (auditoria, AUTH-04): para a EQUIPE, ativar o segundo fator exige também um código enviado ao e-mail
+            # da conta. Quem só tem a senha de um administrador que ainda não ativou o MFA não consegue cadastrar o
+            # próprio aplicativo e entrar na área administrativa.
+            email_code = f"{secrets.randbelow(10 ** 6):06d}"
+            c.run("UPDATE users SET mfa_setup_code_hash = $2, mfa_setup_code_expires_at = now() + interval '15 minutes' WHERE id = $1",
+                  p.user_id, sha256_hex(email_code))
+    if email_code:
+        _send_after(ctx, p.email, "Código para ativar a verificação em duas etapas — Plataforma Impacto",
+                    f"Código para ativar a verificação em duas etapas na área da equipe: {email_code}\n\n"
+                    "Vale por 15 minutos. Se não foi você que pediu, troque sua senha e avise o suporte.")
+    return {"secret": secret, "otpauth_uri": totp.provisioning_uri(secret, p.email), "email_code_required": bool(email_code)}
 
 
-def mfa_enable(ctx: Ctx, code: str) -> dict:
+def mfa_enable(ctx: Ctx, code: str, email_code: str | None = None) -> dict:
     p = ctx.principal
     with ctx.system_tx() as c:
-        enc = c.scalar("SELECT mfa_secret_enc FROM users WHERE id = $1 AND mfa_enabled_at IS NULL", p.user_id)
+        row = c.one("SELECT mfa_secret_enc, mfa_setup_code_hash, mfa_setup_code_expires_at > now() AS code_valid FROM users"
+                    " WHERE id = $1 AND mfa_enabled_at IS NULL", p.user_id)
+        enc = row["mfa_secret_enc"] if row else None
         if not enc:
             raise ApiError(409, "mfa_not_pending", "Inicie a configuração do MFA primeiro")
+        if _is_staff(c, p.user_id):
+            if not (email_code and row["mfa_setup_code_hash"] and row["code_valid"]
+                    and hmac.compare_digest(sha256_hex(email_code.strip()), row["mfa_setup_code_hash"])):
+                raise ApiError(400, "invalid_email_code", "Informe o código enviado ao seu e-mail (vale 15 minutos)")
         if not totp.verify_once(c, p.user_id, ctx.app.cipher.decrypt(enc), code):
             raise ApiError(400, "invalid_mfa_code", "Código inválido")
+        c.run("UPDATE users SET mfa_setup_code_hash = NULL, mfa_setup_code_expires_at = NULL WHERE id = $1", p.user_id)
         codes = totp.recovery_codes()
         c.run("UPDATE users SET mfa_enabled_at = now(), mfa_recovery_hashes = $2::text[] WHERE id = $1",
               p.user_id, [sha256_hex(x) for x in codes])
@@ -502,6 +551,7 @@ def mfa_enable(ctx: Ctx, code: str) -> dict:
         from .audit import record
         record(c, org_id=p.org_id, actor=p.user_id, action="auth.mfa_enabled", object_type="user", object_id=p.user_id,
                payload={}, ip=ctx.ip, request_id=ctx.request_id)
+    security_notice(ctx, p.email, "a verificação em duas etapas foi ativada")
     return {"enabled": True, "recovery_codes": codes, "message": "Guarde os códigos de recuperação em local seguro. Eles não serão exibidos novamente."}
 
 
@@ -509,7 +559,8 @@ def mfa_disable(ctx: Ctx, password: str, code: str) -> dict:
     p = ctx.principal
     with ctx.system_tx() as c:
         u = c.one("SELECT password_hash, mfa_secret_enc, is_platform_admin FROM users WHERE id = $1", p.user_id)
-        if u["is_platform_admin"] and ctx.settings.require_mfa_for_admins:
+        # v0.35.0 (auditoria, AUTH-03): vale para TODA a equipe, não só para o administrador da plataforma
+        if (u["is_platform_admin"] or _is_staff(c, p.user_id)) and ctx.settings.require_mfa_for_admins:
             raise forbidden_admin_mfa()
         if not passwords.verify_password(password, u["password_hash"]) or not u["mfa_secret_enc"] \
                 or not totp.verify_once(c, p.user_id, ctx.app.cipher.decrypt(u["mfa_secret_enc"]), code):
@@ -517,14 +568,19 @@ def mfa_disable(ctx: Ctx, password: str, code: str) -> dict:
         # Desligar o MFA zera o contador: religar depois não pode herdar a trava do segredo antigo.
         c.run("UPDATE users SET mfa_enabled_at = NULL, mfa_secret_enc = NULL, mfa_recovery_hashes = '{}',"
               " mfa_last_counter = NULL WHERE id = $1", p.user_id)
+        # sem segundo fator, nenhuma sessão continua "verificada" e as outras são encerradas (AUTH-03)
+        c.run("UPDATE sessions SET mfa_verified = false WHERE user_id = $1", p.user_id)
+        c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = 'mfa_disabled' WHERE user_id = $1 AND id <> $2 AND revoked_at IS NULL",
+              p.user_id, p.session_id)
         from .audit import record
         record(c, org_id=p.org_id, actor=p.user_id, action="auth.mfa_disabled", object_type="user", object_id=p.user_id,
                payload={}, ip=ctx.ip, request_id=ctx.request_id)
+    security_notice(ctx, p.email, "a verificação em duas etapas foi DESATIVADA e as outras sessões foram encerradas")
     return {"enabled": False}
 
 
 def forbidden_admin_mfa() -> ApiError:
-    return ApiError(403, "mfa_required_for_admin", "Administradores não podem desativar o MFA")
+    return ApiError(403, "mfa_required_for_admin", "A equipe da plataforma não pode desativar o MFA")
 
 
 def switch_org(ctx: Ctx, org_id: str) -> dict:

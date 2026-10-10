@@ -66,6 +66,9 @@ STEP_UP_PERMISSIONS = frozenset({
     # a operação mais destrutiva alcançável sem acesso ao banco, e a mais atraente para quem
     # sequestrou uma sessão interna — negação de serviço com as credenciais da própria vítima.
     "security.kill_switch",
+    # v0.35.0 (auditoria, KYC-03/AUTHZ-06): verificar beneficiário, decidir caso de risco e tirar campanha do ar são decisões
+    # que liberam ou bloqueiam dinheiro de terceiros.
+    "compliance.write",
 })
 
 # Papéis que NÃO alteram nada. Usado para recusar, por desenho, qualquer permissão de escrita
@@ -376,12 +379,13 @@ def verify_identity(ctx, *, password: str | None = None, mfa_code: str | None = 
     from ..db.pool import DbContext
     from ..security import totp
     from ..security.passwords import verify_password
+    falha: ApiError | None = None
     with ctx.pool.tx(DbContext(system=True)) as c:
         u = c.one("SELECT password_hash, mfa_enabled_at IS NOT NULL AS mfa, mfa_secret_enc"
                   " FROM users WHERE id = $1", ctx.user_id)
         if not u or not verify_password(password, u["password_hash"]):
-            raise ApiError(401, "reauth_failed", "Senha incorreta.")
-        if u["mfa"]:
+            falha = ApiError(401, "reauth_failed", "Senha incorreta.")
+        elif u["mfa"]:
             # Quem tem segundo fator precisa usá-lo. Aceitar só a senha aqui ofereceria o fator
             # mais fraco justamente na operação mais perigosa.
             if not mfa_code:
@@ -389,7 +393,15 @@ def verify_identity(ctx, *, password: str | None = None, mfa_code: str | None = 
                                "Sua conta tem segundo fator: informe o código do aplicativo.")
             if not totp.verify_once(c, ctx.principal.user_id,
                                     ctx.app.cipher.decrypt(u["mfa_secret_enc"]), mfa_code):
-                raise ApiError(401, "reauth_failed", "Código de verificação incorreto.")
-        if stamp:
+                falha = ApiError(401, "reauth_failed", "Código de verificação incorreto.")
+        if stamp and not falha:
             c.run("UPDATE sessions SET reauth_at = now() WHERE id = $1", ctx.principal.session_id)
+    if falha:
+        # v0.35.0 (auditoria, AUTH-11): reautenticação recusada fica na trilha (antes só o sucesso era registrado) —
+        # quem tenta adivinhar a senha de uma sessão sequestrada deixa rastro.
+        from ..services.audit import record
+        with ctx.pool.tx(DbContext(system=True)) as c:
+            record(c, org_id=None, actor=ctx.user_id, action="auth.step_up_failed", object_type="user", object_id=ctx.user_id,
+                   payload={"motivo": falha.code}, ip=ctx.ip, request_id=ctx.request_id)
+        raise falha
     ctx._access = None     # o contexto em cache não sabe do carimbo novo

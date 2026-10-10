@@ -82,6 +82,7 @@ class OpenScenariosTests(unittest.TestCase):
         cls.osc = new_account("osc", compliance="approved")
         cls.donor = new_account("individual")
         cls.reviewer = make_staff("compliance")
+        reauth(cls.reviewer)   # v0.35.0: compliance.write exige step-up
         cls.finance = make_staff("finance")
         cls.controller = make_staff("controller")
         reauth(cls.finance)

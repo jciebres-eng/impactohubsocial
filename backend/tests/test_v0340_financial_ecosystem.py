@@ -84,6 +84,7 @@ class EcosystemTests(unittest.TestCase):
         cls.other = new_account("osc", compliance="approved")
         cls.company = new_account("company", compliance="approved")
         cls.reviewer = make_staff("compliance")
+        reauth(cls.reviewer)   # v0.35.0: compliance.write exige step-up
         cls.finance = make_staff("finance")
         cls.controller = make_staff("controller")
         reauth(cls.finance)     # finance.write e finance.approve exigem confirmação de identidade (step-up)

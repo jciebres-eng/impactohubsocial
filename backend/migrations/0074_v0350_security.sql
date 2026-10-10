@@ -96,3 +96,9 @@ ALTER TABLE reconciliation_runs
   ADD COLUMN approved_at timestamptz,
   ADD CONSTRAINT recon_run_four_eyes CHECK (approved_by IS NULL OR approved_by IS DISTINCT FROM run_by),
   ADD CONSTRAINT recon_manual_has_snapshot CHECK (snapshot_source <> 'manual_statement' OR snapshot_sha256 IS NOT NULL);
+
+-- ============================================================================ AUTH-04 (lote C) — cadastro do segundo fator da equipe
+-- Para a equipe da plataforma, ativar o TOTP exige também um código enviado ao e-mail da conta (só o hash fica aqui).
+ALTER TABLE users
+  ADD COLUMN mfa_setup_code_hash text CHECK (mfa_setup_code_hash IS NULL OR mfa_setup_code_hash ~ '^[0-9a-f]{64}$'),
+  ADD COLUMN mfa_setup_code_expires_at timestamptz;

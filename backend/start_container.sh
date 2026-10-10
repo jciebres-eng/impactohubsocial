@@ -39,6 +39,16 @@ if [ "${IMPACTO_SEED_DEMO:-false}" = "true" ]; then
   python3 -m impacto.cli seed-demo
 fi
 
+# v0.35.0 (auditoria, AUTH-02): com `--forwarded-allow-ips='*'` o uvicorn troca o IP do cliente pelo PRIMEIRO valor do
+# X-Forwarded-For — o único que quem faz o pedido escreve. Com TRUST_PROXY_HEADERS=true (o recomendado atrás do proxy do
+# Railway), o uvicorn deixa o cabeçalho em paz e a aplicação escolhe o valor certo (a partir da DIREITA, ver
+# impacto/http.py `Ctx.ip`). Sem a variável, fica como antes — e o log de início avisa.
+if [ "${TRUST_PROXY_HEADERS:-false}" = "true" ]; then
+  FWD_IPS="${FORWARDED_ALLOW_IPS:-127.0.0.1}"
+else
+  FWD_IPS="${FORWARDED_ALLOW_IPS:-*}"
+  log "AVISO: TRUST_PROXY_HEADERS desligado — o IP do cliente vem do uvicorn (primeiro valor do X-Forwarded-For, forjável)"
+fi
 log "servidor ASGI em IMPACTO_ENV=${IMPACTO_ENV:-?}"
 exec python3 -m uvicorn impacto.main:app --host 0.0.0.0 --port "${PORT}" \
-  --proxy-headers --forwarded-allow-ips='*' --no-server-header --workers "${WEB_CONCURRENCY:-2}"
+  --proxy-headers --forwarded-allow-ips="${FWD_IPS}" --no-server-header --workers "${WEB_CONCURRENCY:-2}"

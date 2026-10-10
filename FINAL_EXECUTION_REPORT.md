@@ -1,6 +1,6 @@
 # Relatório final de execução — IMPACTO v0.33.0
 
-**Data:** 10/10/2026 · **Ramo:** `doacoes-v0330` (sobre `correcoes-auditoria`, PR #5 ainda aberto) · **Tag:** `v0.33.0` (a criar no
+**Data:** 10/10/2026 · **Ramo:** `doacoes-v0330` (PR #6, sobre `correcoes-auditoria` / PR #5 ainda aberto) · **Tag:** `v0.33.0` (a criar no
 GitHub pelo responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**
 `IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·
 **Relatório técnico (DOCX):** `IMPACTO_v0.33.0_RELATORIO_TECNICO.docx`

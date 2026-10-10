@@ -1,6 +1,65 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.34.0] — 2026-10-10
+
+### Ecossistema financeiro: gratuito até gerar valor, obrigações de remuneração, recurso público, conciliação com exceções (ADR-377 a ADR-384)
+
+- **Obrigações de remuneração** (`remuneration_obligations`): uma por fato × regra, valor congelado, cadeia calculada → devida →
+  faturada → cobrada → recebida → liquidada (desvios: estornada, vencida, em disputa, dispensada, isenta), histórico só-inserção;
+  liquidar/decidir/dispensar/autorizar exigem `finance.approve`. Receita prevista × devida × recebida × liquidada nunca somadas.
+- **Gratuito até gerar valor** (`monetization_policy_versions` v1, hipótese): franquia de R$ 20.000 LIQUIDADOS em 12 meses, aviso
+  prévio de 30 dias registrado (`remuneration_notices`), mínimo de fatura R$ 20, teto de 5 % do liquidado; `evaluate` só torna
+  devida com regra ativa + franquia + aviso + teto, e registra o motivo de cada obrigação que não virou devida.
+- **Recurso público** (`funding_source`, `public_instrument_ref`): obrigação nasce isenta; elegível só com instrumento e
+  autorização registrada por `finance.approve` (correção do responsável: depende do instrumento, não é proibição universal).
+- **Reserva institucional** (1,5 %) e fundo (4 %): destinação contábil da organização; motor `success_fee`, que o banco recusa
+  ativar — nunca receita da plataforma. Taxa de serviço (1 % e 3,5 % institucional) reclassificada para `enterprise`
+  (fatura à parte), INATIVA.
+- **Estado comercial separado da prestação de contas**: `never_blocks`; vencida não bloqueia nada; teste varre as rotas.
+- **Liquidado ≠ confirmado** (`settled_at`), **estorno parcial** (`refunded_cents`, `partially_refunded`), **compromissos de
+  doação** (`donation_pledges`) e **recursos declarados fora da plataforma** (`external_resources`) — nunca na barra nem no razão;
+  **painel do financiador** (`/v1/org/contributions`, doação em nome da organização).
+- **Conciliação com fila de exceções** (`reconciliation_exceptions`, 9 tipos, prioridade, responsável, histórico; índice único por
+  fato aberto; snapshot do provedor; sandbox deriva dos eventos assinados). Webhook recebido ≠ conciliado.
+- **Totais por estado** na página pública e na gestão (pendente, confirmado, liquidado, em análise, estornado, compromissos,
+  declarado fora), política de contagem e data da última atualização financeira válida.
+- Telas: `/remuneracao`, `/contribuicoes`, `/admin/remuneracao`, `/admin/conciliacao`; gestão e página pública ampliadas.
+- Documentos em `docs/finance/`: arquitetura (diagramas SVG/PNG), fluxos, razão e estados, política, matriz de monetização,
+  matriz de riscos, jurídico/fiscal com as três correções do responsável, API/webhooks, cobertura dos 40 cenários, inventário,
+  checklist de publicação/reversão, modelo de 24 meses em 3 cenários com sensibilidade (planilha + gráficos).
+- **Etapa E6 — os 40 cenários com teste** (ADR-384, `test_v0340_open_scenarios`, 8 testes):
+  - **cartão no sandbox**: faltava a tabela de tarifa do sandbox para cartão e toda doação por cartão era recusada
+    (`provider_fee_unknown`) — achado do próprio teste; corrigido;
+  - **falha temporária do provedor**: 503 `provider_unavailable`, nada gravado, a mesma chave repete com sucesso;
+  - **webhook em duas fases**: o evento é gravado antes de ser aplicado; erro interno deixa o evento `failed`, abre exceção
+    `event_processing_failed` e responde 500 (o provedor reenvia); a rotina reaplica; reentrega posterior é `duplicate`;
+  - **liquidação acumulada** (`settled_cents`): parcial ≠ total, com exceção `settlement_partial` (esperado × observado);
+    **falha de liquidação** vira exceção `settlement_failed` sem desconfirmar o pagamento;
+  - **contribuição voluntária do doador** (`donation.platform_contribution`, hipótese INATIVA): valor A MAIS, começa em zero,
+    separado no total e fora da arrecadação da campanha; é a única operação elegível a split (nada sai da doação); com split
+    confirmado no evento a obrigação nasce recebida; sem split vira obrigação devida da organização, faturada à parte;
+  - **recorrência**: autorização com consentimento por hash ≠ tentativa ≠ confirmado ≠ falha; pausa após 3 falhas seguidas;
+    cancelamento pelo doador; rota de autorização desligada pela configuração até instrumento homologado;
+  - **reembolso** do que a plataforma recebeu (integral, `finance.approve`; parcial é ajuste) e devolução da cobrança pelo
+    provedor revertem a obrigação; **a organização não move a fatura da plataforma** (403 `platform_invoice`) — antes ela
+    podia, pela rota de cobranças, marcar como paga ou devolvida a própria fatura;
+  - **rotina `financial_ops`** no worker: reprocessa eventos, marca vencidas, concilia campanhas com movimento recente e cria as
+    tentativas de recorrência (só com a recorrência ligada).
+- **Etapa E7 — CI do pull request** (depois da primeira entrega do pacote, antes da tag): o job `pilha-do-zero` (pilha Docker do
+  zero + jornadas + 218 telas + axe) estava **vermelho desde a v0.33.0** sem causa visível. Causa: na jornada "Captação" a
+  pessoa anônima que doa era `Client()` — o cliente que sobe o servidor DE TESTE —, que não existe na pilha; a jornada parava
+  no meio. Correção: `Http(self.base)`; teste-guarda (`test_the_journeys_never_start_the_test_server`, falha no código antigo);
+  `scripts/demo_stack.py` põe cada falha de jornada/tela nas anotações do job (o log do job não é legível pela API aqui).
+  Ao refazer o pacote: `FINAL_RELEASE_MANIFEST.json` listava como "novas" a migração e os módulos de teste da v0.30.0 (listas
+  escritas à mão no gerador desde a v0.30.0); agora são derivadas da versão, com teste.
+  Só código de teste/CI e o gerador do manifesto mudaram; o produto é o mesmo. O pacote 0.34.0 foi refeito e o anterior está
+  registrado como substituído.
+- Migração `0073_v0340_financial_ecosystem.sql`; +26 operações (962 → 988); `test_v0340_financial_ecosystem` (13),
+  `test_v0340_open_scenarios` (8), `test_v0340_release_docs`.
+- **Não feito, de propósito**: provedor real, split real, recorrência cobrada de verdade, cobrança ativa, NFS-e, assinaturas de
+  plano (ADR-341), marketplace com take rate (recusado pelo responsável).
+
 ## [0.33.0] — 2026-10-10
 
 ### Doações, vaquinha e QR Pix como módulo isolado — sem custódia, sem provedor real, taxas inativas (ADR-372 a ADR-376)

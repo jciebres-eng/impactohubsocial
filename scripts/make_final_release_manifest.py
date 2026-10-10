@@ -3,6 +3,10 @@ integrações, dependências externas, limitações conhecidas e situação do r
 repositório e dos artefatos gerados, nunca escrito à mão.
 
 Uso: python3 scripts/make_final_release_manifest.py <commit> <status> <log-da-regressão>
+
+v0.34.0 (E7): "migrações novas", "módulos de teste novos" e "documentos" estavam ESCRITOS À MÃO com os da v0.30.0 e
+saíram assim nos manifestos da v0.31.0 à v0.34.0 (primeiro pacote). Agora são derivados: marca da versão no nome do
+arquivo (0.34.0 → `v0340`) e os documentos que o próprio relatório cita entre crases.
 """
 from __future__ import annotations
 
@@ -29,10 +33,24 @@ def main() -> int:
     completas = [x for x in ms if int(x[0]) >= 1000]
     m = (completas or ms)[-1] if ms else None
     testes = {"total": int(m[0]), "seconds": float(m[1]), "result": m[2], "detail": m[3] or "", "runs_in_log": len(ms)} if m else None
+    if testes and m in ms:
+        # reexecuções DEPOIS da completa (módulos corrigidos e portões de fechamento): o resultado final não é só o da completa
+        testes["after_full_run"] = [{"total": int(x[0]), "result": x[2], "detail": x[3] or ""}
+                                    for x in ms[len(ms) - 1 - ms[::-1].index(m) + 1:]]
     with (ROOT / "docs" / "execution" / "INTEGRATION_HOMOLOGATION_MATRIX.csv").open(encoding="utf-8") as fh:
         integ = [{"provider": r["provider"], "capability": r["capability"], "state": r["state"], "credentials": r["credentials"]}
                  for r in csv.DictReader(fh)]
     report = (ROOT / "FINAL_EXECUTION_REPORT.md").read_text(encoding="utf-8")
+    marca = "v" + "".join(version.split("."))          # 0.34.0 → v0340, como nos nomes de migração e de teste
+    rastreados = set(files)
+    novos_testes = sorted(f for f in files if re.match(rf"backend/tests/test_(e2e_)?{marca}_\w+\.py$", f))
+    citados = []
+    for ref in ["FINAL_EXECUTION_AUDIT.md", "RELEASE_NOTES.md", "CHANGELOG.md", "DECISIONS.md"] + \
+            re.findall(r"`([\w./-]+\.(?:md|csv|xlsx|docx))`", report):
+        for cand in (ref, f"docs/{ref}", f"docs/finance/{ref}", f"docs/execution/{ref}"):
+            if cand in rastreados and cand not in citados:
+                citados.append(cand)
+                break
     def secao(n: int) -> str:
         m2 = re.search(rf"^## {n}\. .*?\n(.*?)(?=^## \d+\. )", report, re.DOTALL | re.MULTILINE)
         return m2.group(1).strip() if m2 else ""
@@ -42,20 +60,14 @@ def main() -> int:
         "release_status": status,
         "files": {"tracked_total": len(files), "traceability": f"IMPACTO_v{version}_TRACEABILITY.json",
                   "package": f"IMPACTO_TRUST_FINAL_RELEASE_{version}.zip"},
-        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if "v0300" in x]},
+        "migrations": {"total": len(migrations), "last": migrations[-1], "new_in_this_version": [x for x in migrations if f"_{marca}_" in x]},
         "tests": testes,
-        "new_test_modules": ["backend/tests/test_v0300_evidence_object.py", "backend/tests/test_v0300_dossier.py",
-                             "backend/tests/test_v0300_release_docs.py", "backend/tests/test_e2e_v0300_dossier.py"],
+        "new_test_modules": novos_testes,
         "integrations": integ,
         "external_dependencies": secao(25),
         "known_limitations": secao(26),
         "decision": secao(27),
-        "documents": ["FINAL_EXECUTION_REPORT.md", "FINAL_EXECUTION_AUDIT.md", "RELEASE_NOTES.md",
-                      "MOTOR_COVERAGE_MATRIX.md", "EXTERNAL_INTEGRATIONS.md", "docs/ECONOMIC_MODEL.md",
-                      "docs/execution/BASELINE_v0300.md", "docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md",
-                      "docs/execution/MILESTONE_FUNDING_STATES_v0300.md", "docs/SAAS_ECONOMY.md", "24_MONTH_FINANCIAL_MODEL.md",
-                      "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md", "docs/execution/CLEANUP_INVENTORY_v0300.md",
-                      "docs/execution/PRODUCTION_CHECKLIST_v0300.md", "docs/execution/ROLLBACK_v0300.md"],
+        "documents": ["FINAL_EXECUTION_REPORT.md"] + [d for d in citados if d != "FINAL_EXECUTION_REPORT.md"],
     }
     (ROOT / "FINAL_RELEASE_MANIFEST.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"FINAL_RELEASE_MANIFEST.json: {version} @ {commit[:7]} — {status}; testes: {testes}")

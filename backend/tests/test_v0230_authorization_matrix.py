@@ -103,17 +103,17 @@ class EveryOperationIsClassifiedTests(unittest.TestCase):
 
     def test_the_counts_match_what_the_report_states(self):
         """Número citado em relatório que ninguém confere é número que envelhece."""
-        self.assertEqual(962, len(self.linhas))   # v0.33.0 (ADR-372..376): +22 rotas de doações (6 públicas, 6 da organização, 2 de pessoa, 8 de equipe) — antes 940. v0.30.0 (ADR-360..362): +4 rotas — GET evidência, POST contestação, PATCH método do indicador, GET dossiê (antes 936). v0.29.0 (ADR-353..357): +13 rotas da camada de conhecimento (3 públicas: fontes, fonte, conceitos; 1 de usuário: relato de erro; 9 de equipe editorial) — antes 923 (v0.28.0, +28 da Central de IA)
+        self.assertEqual(988, len(self.linhas))   # v0.34.0 (E6, ADR-384): +2 — autorização de doação recorrente (pessoa) e reembolso de obrigação (equipe, finance.approve); v0.34.0 (ADR-377..383): +24 rotas do ecossistema financeiro (1 pessoa, 6 organização, 17 equipe) — antes 962. v0.33.0 (ADR-372..376): +22 rotas de doações (6 públicas, 6 da organização, 2 de pessoa, 8 de equipe) — antes 940. v0.30.0 (ADR-360..362): +4 rotas — GET evidência, POST contestação, PATCH método do indicador, GET dossiê (antes 936). v0.29.0 (ADR-353..357): +13 rotas da camada de conhecimento (3 públicas: fontes, fonte, conceitos; 1 de usuário: relato de erro; 9 de equipe editorial) — antes 923 (v0.28.0, +28 da Central de IA)
         # v0.27.0: −6 rotas de plataforma de assinatura/trial (trial, manual-subscription, preço de plano, trial-requests ×2,
         # painel de testes) +4 (proposta de contrato, licença, confirmação e conciliação de repasse pela administração);
         # +1 permissão nomeada líquida (torre master, proposta de contrato; −preço, −trial); −2 públicas (preço, webhook).
-        self.assertEqual(246, sum(1 for l in self.linhas if l["class"].startswith("plataforma")))   # v0.33.0: +8 rotas /v1/admin/donation-* e /v1/admin/beneficiaries (compliance.read/write, finance.read/write); v0.29.0: +9 rotas /v1/admin/content/* da camada de conhecimento (papéis editoriais editor/reviewer/support com MFA; antes 229 na v0.28.0)
-        self.assertEqual(102, sum(1 for l in self.linhas if l["permission"]))   # v0.33.0: +8 permissões nomeadas das rotas de doações; v0.28.0: +9 permissões das rotas administrativas da IA
+        self.assertEqual(263, sum(1 for l in self.linhas if l["class"].startswith("plataforma")))   # v0.34.0 (E6): +1 /v1/admin/remuneration/{id}/refund; v0.34.0: +16 rotas /v1/admin/remuneration e /v1/admin/reconciliation (finance.read/write/approve); v0.33.0: +8 rotas /v1/admin/donation-* e /v1/admin/beneficiaries (compliance.read/write, finance.read/write); v0.29.0: +9 rotas /v1/admin/content/* da camada de conhecimento (papéis editoriais editor/reviewer/support com MFA; antes 229 na v0.28.0)
+        self.assertEqual(119, sum(1 for l in self.linhas if l["permission"]))   # v0.34.0 (E6): +1 permissão nomeada (reembolso, finance.approve); v0.34.0: +16 permissões nomeadas (remuneração e conciliação); v0.33.0: +8 permissões nomeadas das rotas de doações; v0.28.0: +9 permissões das rotas administrativas da IA
         self.assertEqual(60, sum(1 for l in self.linhas if l["class"] == "publica"))   # v0.33.0: +6 públicas de doações (campanha, QR, doar, situação, comprovante, webhook — revisadas em test_architecture); v0.29.0: +GET /v1/help/sources, /v1/help/sources/{key}, /v1/public/concepts (referências e catálogo estático; antes 51 na v0.28.0)
 
 
 class ThePlatformDoorIsClosedToEveryClientOrganizationTests(unittest.TestCase):
-    """As 246 rotas de plataforma, a 100% — não por amostra."""
+    """As 263 rotas de plataforma, a 100% — não por amostra."""
 
     @classmethod
     def setUpClass(cls):

@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.33.0",
+  "version": "0.34.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -39807,7 +39807,7 @@
   },
   "/v1/webhooks/donations/{provider}": {
    "post": {
-    "summary": "Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação",
+    "summary": "Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada",
     "operationId": "post_donation_routes_donation_webhook",
     "tags": [
      "donations"
@@ -40091,6 +40091,52 @@
      },
      "4XX": {
       "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/public/donation-campaigns/{slug}/recurring": {
+   "post": {
+    "summary": "Autoriza doação recorrente (consentimento guardado por hash). Desligada até instrumento homologado no provedor",
+    "operationId": "post_donation_routes_start_recurring",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 10/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecurringDonationIn"
+       }
+      }
      }
     }
    }
@@ -40429,6 +40475,993 @@
     "parameters": [
      {
       "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/external-resources": {
+   "post": {
+    "summary": "Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra)",
+    "operationId": "post_donation_routes_external_resource_declare",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExternalResourceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/public/donation-campaigns/{slug}/pledge": {
+   "post": {
+    "summary": "Registra um compromisso de doação futura (não é doação, não é dinheiro)",
+    "operationId": "post_donation_routes_pledge",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 20/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DonationPledgeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/me/pledges/{pledge_id}/cancel": {
+   "post": {
+    "summary": "Cancela o próprio compromisso",
+    "operationId": "post_donation_routes_pledge_cancel",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "pledge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/pledges/{pledge_id}/fulfill": {
+   "post": {
+    "summary": "Liga um compromisso à doação CONFIRMADA que o cumpriu",
+    "operationId": "post_donation_routes_pledge_fulfill",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "pledge_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PledgeFulfillIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/org/contributions": {
+   "get": {
+    "summary": "Painel do financiador: doações e compromissos feitos em nome da organização",
+    "operationId": "get_donation_routes_org_contributions",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/org/remuneration": {
+   "get": {
+    "summary": "Obrigações de remuneração da organização, política vigente, franquia e avisos — nada aqui bloqueia nada",
+    "operationId": "get_donation_routes_org_remuneration",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer"
+   }
+  },
+  "/v1/org/remuneration/{obligation_id}/dispute": {
+   "post": {
+    "summary": "Contesta uma obrigação (fica em disputa até decisão registrada)",
+    "operationId": "post_donation_routes_org_remuneration_dispute",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationDisputeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/org/remuneration/notices/{notice_id}/ack": {
+   "post": {
+    "summary": "Registra ciência de um aviso",
+    "operationId": "post_donation_routes_org_notice_ack",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "notice_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/remuneration": {
+   "get": {
+    "summary": "Obrigações por estado (previsto × devido × faturado × recebido × liquidado) — nunca somadas num número só",
+    "operationId": "get_donation_routes_admin_remuneration",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/remuneration/orgs/{org_id}/evaluate": {
+   "post": {
+    "summary": "Aplica a política 'gratuito até gerar valor' à organização: o que virou devido e por que o resto não virou",
+    "operationId": "post_donation_routes_admin_remuneration_evaluate",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/remuneration/orgs/{org_id}/notices": {
+   "post": {
+    "summary": "Envia (registra) um aviso prévio da política à organização",
+    "operationId": "post_donation_routes_admin_remuneration_notice",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NoticeIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/invoice": {
+   "post": {
+    "summary": "Fatura obrigações DEVIDAS numa cobrança própria da plataforma (nunca desconto de doação)",
+    "operationId": "post_donation_routes_admin_remuneration_invoice",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationInvoiceIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/charged": {
+   "post": {
+    "summary": "Marca como cobrada (enviada ao pagador)",
+    "operationId": "post_donation_routes_admin_remuneration_charged",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/receipt": {
+   "post": {
+    "summary": "Registra pagamento RECEBIDO (parcial ou total) com referência",
+    "operationId": "post_donation_routes_admin_remuneration_receipt",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationReceiptIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/refund": {
+   "post": {
+    "summary": "Reembolso integral do que a plataforma recebeu (ex.: serviço cancelado) — a obrigação vira estornada; segregado",
+    "operationId": "post_donation_routes_admin_remuneration_refund",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationRefundIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/settle": {
+   "post": {
+    "summary": "Marca como LIQUIDADA (conciliada com extrato) — segregado: exige finance.approve",
+    "operationId": "post_donation_routes_admin_remuneration_settle",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationSettleIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/decide": {
+   "post": {
+    "summary": "Decide uma disputa (manter, dispensar, isentar) com justificativa",
+    "operationId": "post_donation_routes_admin_remuneration_decide",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/waive": {
+   "post": {
+    "summary": "Dispensa uma obrigação com justificativa registrada",
+    "operationId": "post_donation_routes_admin_remuneration_waive",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationWaiveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/authorize-public": {
+   "post": {
+    "summary": "Recurso público: registra instrumento e autorização que tornam a taxa elegível (ADR-379)",
+    "operationId": "post_donation_routes_admin_remuneration_authorize_public",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PublicFeeAuthorizationIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/mark-overdue": {
+   "post": {
+    "summary": "Marca vencidas as faturadas além do prazo (rotina)",
+    "operationId": "post_donation_routes_admin_remuneration_overdue",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/reconciliation/campaigns/{campaign_id}/run": {
+   "post": {
+    "summary": "Executa a conciliação da campanha contra o snapshot do provedor (sandbox: derivado dos eventos assinados) e abre exceções",
+    "operationId": "post_donation_routes_admin_reconciliation_run",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReconciliationSnapshotIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/reconciliation/exceptions": {
+   "get": {
+    "summary": "Fila de exceções de conciliação",
+    "operationId": "get_donation_routes_admin_reconciliation_exceptions",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/reconciliation/exceptions/{exception_id}/assign": {
+   "post": {
+    "summary": "Assume uma exceção",
+    "operationId": "post_donation_routes_admin_reconciliation_assign",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "exception_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/reconciliation/exceptions/{exception_id}/resolve": {
+   "post": {
+    "summary": "Resolve ou descarta uma exceção com justificativa (fica no histórico)",
+    "operationId": "post_donation_routes_admin_reconciliation_resolve",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "exception_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReconciliationResolveIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/reconciliation/exceptions/{exception_id}/history": {
+   "get": {
+    "summary": "Histórico de uma exceção",
+    "operationId": "get_donation_routes_admin_reconciliation_history",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "exception_id",
       "in": "path",
       "required": true,
       "schema": {
@@ -55607,6 +56640,29 @@
       "title": "Allow Recurring",
       "type": "boolean"
      },
+     "funding_source": {
+      "default": "private",
+      "enum": [
+       "private",
+       "public",
+       "mixed"
+      ],
+      "title": "Funding Source",
+      "type": "string"
+     },
+     "public_instrument_ref": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Public Instrument Ref"
+     },
      "slug": {
       "pattern": "^[a-z0-9-]{4,80}$",
       "title": "Slug",
@@ -64056,6 +65112,35 @@
       ],
       "default": null,
       "title": "Idempotency Key"
+     },
+     "as_organization": {
+      "default": false,
+      "title": "As Organization",
+      "type": "boolean"
+     },
+     "funding_source": {
+      "anyOf": [
+       {
+        "enum": [
+         "private",
+         "public",
+         "mixed"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Funding Source"
+     },
+     "platform_contribution_cents": {
+      "default": 0,
+      "maximum": 50000,
+      "minimum": 0,
+      "title": "Platform Contribution Cents",
+      "type": "integer"
      }
     },
     "required": [
@@ -64153,6 +65238,39 @@
      "body"
     ],
     "title": "CampaignUpdateIn",
+    "type": "object"
+   },
+   "RecurringDonationIn": {
+    "additionalProperties": false,
+    "description": "Autorização de doação recorrente (v0.34.0). Autorizar não é pagar: cada ciclo é uma tentativa confirmada pelo provedor.",
+    "properties": {
+     "amount_cents": {
+      "maximum": 10000000,
+      "minimum": 100,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "method": {
+      "default": "card",
+      "enum": [
+       "card",
+       "pix_automatic"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "consent_text": {
+      "maxLength": 2000,
+      "minLength": 40,
+      "title": "Consent Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount_cents",
+     "consent_text"
+    ],
+    "title": "RecurringDonationIn",
     "type": "object"
    },
    "CampaignReviewIn": {
@@ -64270,6 +65388,448 @@
      "note"
     ],
     "title": "RiskDecisionIn",
+    "type": "object"
+   },
+   "ExternalResourceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "kind": {
+      "enum": [
+       "public_transfer",
+       "grant",
+       "offline_donation",
+       "sponsorship",
+       "in_kind",
+       "own_funds",
+       "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "source_name": {
+      "maxLength": 200,
+      "minLength": 2,
+      "title": "Source Name",
+      "type": "string"
+     },
+     "funding_source": {
+      "enum": [
+       "private",
+       "public",
+       "mixed"
+      ],
+      "title": "Funding Source",
+      "type": "string"
+     },
+     "instrument_ref": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Instrument Ref"
+     },
+     "amount_cents": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 100000000000,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Amount Cents"
+     },
+     "in_kind_description": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "In Kind Description"
+     },
+     "received_on": {
+      "format": "date",
+      "title": "Received On",
+      "type": "string"
+     },
+     "evidence_document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Evidence Document Id"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     }
+    },
+    "required": [
+     "kind",
+     "source_name",
+     "funding_source",
+     "received_on"
+    ],
+    "title": "ExternalResourceIn",
+    "type": "object"
+   },
+   "DonationPledgeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "amount_cents": {
+      "maximum": 100000000,
+      "minimum": 100,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "display": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Display"
+     },
+     "expected_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Expected On"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 500,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Note"
+     },
+     "as_organization": {
+      "default": false,
+      "title": "As Organization",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "amount_cents"
+    ],
+    "title": "DonationPledgeIn",
+    "type": "object"
+   },
+   "PledgeFulfillIn": {
+    "additionalProperties": false,
+    "properties": {
+     "donation_id": {
+      "pattern": "^[0-9a-fA-F-]{36}$",
+      "title": "Donation Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "donation_id"
+    ],
+    "title": "PledgeFulfillIn",
+    "type": "object"
+   },
+   "ObligationDisputeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "ObligationDisputeIn",
+    "type": "object"
+   },
+   "NoticeIn": {
+    "additionalProperties": false,
+    "properties": {
+     "kind": {
+      "enum": [
+       "free_until_value_intro",
+       "allowance_approaching",
+       "charging_starts"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "body": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "minLength": 20,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Body"
+     },
+     "channel": {
+      "default": "in_app",
+      "enum": [
+       "in_app",
+       "email",
+       "both"
+      ],
+      "title": "Channel",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind"
+    ],
+    "title": "NoticeIn",
+    "type": "object"
+   },
+   "ObligationInvoiceIn": {
+    "additionalProperties": false,
+    "properties": {
+     "obligation_ids": {
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "title": "Obligation Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "obligation_ids"
+    ],
+    "title": "ObligationInvoiceIn",
+    "type": "object"
+   },
+   "ObligationReceiptIn": {
+    "additionalProperties": false,
+    "properties": {
+     "received_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000000000,
+      "title": "Received Cents",
+      "type": "integer"
+     },
+     "reference": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Reference",
+      "type": "string"
+     }
+    },
+    "required": [
+     "received_cents",
+     "reference"
+    ],
+    "title": "ObligationReceiptIn",
+    "type": "object"
+   },
+   "ObligationRefundIn": {
+    "additionalProperties": false,
+    "properties": {
+     "refunded_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000000000,
+      "title": "Refunded Cents",
+      "type": "integer"
+     },
+     "reference": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Reference",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "refunded_cents",
+     "reference",
+     "note"
+    ],
+    "title": "ObligationRefundIn",
+    "type": "object"
+   },
+   "ObligationSettleIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "note"
+    ],
+    "title": "ObligationSettleIn",
+    "type": "object"
+   },
+   "ObligationDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "outcome": {
+      "enum": [
+       "uphold",
+       "waive",
+       "exempt"
+      ],
+      "title": "Outcome",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "outcome",
+     "note"
+    ],
+    "title": "ObligationDecisionIn",
+    "type": "object"
+   },
+   "ObligationWaiveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "reason": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "reason"
+    ],
+    "title": "ObligationWaiveIn",
+    "type": "object"
+   },
+   "PublicFeeAuthorizationIn": {
+    "additionalProperties": false,
+    "properties": {
+     "instrument_ref": {
+      "maxLength": 300,
+      "minLength": 5,
+      "title": "Instrument Ref",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "instrument_ref",
+     "note"
+    ],
+    "title": "PublicFeeAuthorizationIn",
+    "type": "object"
+   },
+   "ReconciliationSnapshotIn": {
+    "additionalProperties": false,
+    "description": "Snapshot do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API.",
+    "properties": {
+     "charges": {
+      "default": [],
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Charges",
+      "type": "array"
+     }
+    },
+    "title": "ReconciliationSnapshotIn",
+    "type": "object"
+   },
+   "ReconciliationResolveIn": {
+    "additionalProperties": false,
+    "properties": {
+     "outcome": {
+      "enum": [
+       "resolved",
+       "dismissed"
+      ],
+      "title": "Outcome",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "outcome",
+     "note"
+    ],
+    "title": "ReconciliationResolveIn",
     "type": "object"
    }
   },

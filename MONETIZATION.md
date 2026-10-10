@@ -27,10 +27,13 @@ fundamenta.
 | 8 | `data.territorial_intelligence` | `data_intelligence` | ⛔ `refused` |
 | 3 | `contract.platform_service_fee` | `enterprise` | ⚠️ `review_required` (v0.26.0) |
 | 7 | `ai.credits_prepaid` | `proponent_premium` | ⚠️ `review_required` (v0.28.0, ADR-349: créditos de operações de IA, venda em modo piloto) |
-| 6 | `donation.platform_fee` | `success_fee` | ⚠️ `review_required` (v0.33.0, ADR-373: hipótese de 1 % sobre doação confirmada; devido R$ 0,00 até parecer) |
+| 3 | `donation.platform_fee` | `enterprise` | ⚠️ `review_required` (v0.33.0, ADR-373; reclassificada na v0.34.0, ADR-378: taxa de serviço faturada à parte sobre doação confirmada; devida só por obrigação com gatilho) |
 | 6 | `donation.beneficiary_fund` | `success_fee` | ⚠️ `review_required` (v0.33.0, ADR-373: reserva de até 4 % DA ORGANIZAÇÃO beneficiária; não é receita da plataforma) |
+| 3 | `donation.institutional_fee` | `enterprise` | ⚠️ `review_required` (v0.34.0, ADR-378/379: hipótese de 3,5 % sobre aporte institucional confirmado, faturada à parte; recurso público isento salvo instrumento) |
+| 6 | `donation.institutional_reserve` | `success_fee` | ⚠️ `review_required` (v0.34.0, ADR-380: reserva de até 1,5 % DA ORGANIZAÇÃO; destinação contábil, nunca custódia — o motor `success_fee` é inativável por desenho) |
+| 3 | `donation.platform_contribution` | `enterprise` | ⚠️ `review_required` (v0.34.0 E6, ADR-384: contribuição VOLUNTÁRIA do doador à plataforma, valor a mais que começa em zero e nunca é sugerido; única operação elegível a split; sem split vira fatura à organização) |
 
-**Zero verdes, e nenhuma ativa** (`active = false` nas treze; as duas de doação da v0.33.0 são hipóteses do pacote de monetização). Oito amarelas (falta parecer), cinco
+**Zero verdes, e nenhuma ativa** (`active = false` nas dezesseis; as cinco de doação/aporte são hipóteses do pacote de monetização). Onze amarelas (falta parecer), cinco
 vermelhas (recusadas — a quinta, `saas.institutional.funder`, por decisão comercial do proprietário na
 v0.27.0: a assinatura saiu do modelo econômico, ADR-341). O cartão legal de cada uma, com texto literal de fonte oficial e data de consulta,
 está em `MONETIZATION_LEGAL_MATRIX.md`.

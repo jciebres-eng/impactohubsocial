@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.33.0
+# Plataforma Impacto — v0.34.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,15 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.34.0 (ecossistema financeiro: gratuito até gerar valor — ADR-377 a ADR-384):** toda remuneração da plataforma é
+uma obrigação registrada (calculada → devida → faturada → cobrada → recebida → liquidada) e **nada é devido sem gatilho
+auditável** (regra ativa, franquia de valor liquidado, aviso prévio registrado, teto); recurso público isento salvo instrumento
+autorizado; reserva do beneficiário nunca é receita da plataforma (o banco recusa); estado comercial separado da prestação de
+contas; liquidado ≠ confirmado; estorno parcial; compromissos e recursos externos fora da barra; conciliação com fila de exceções;
+painel do financiador; os 40 cenários de teste do pacote com teste (split e recorrência simulados no teste); webhook em duas fases
+com reprocessamento; rotina `financial_ops` no worker. **Nenhuma regra ativa, nenhum provedor real, nenhuma custódia.** Documentos
+em `docs/finance/`.
 
 **Novo no v0.33.0 (doações, vaquinha e QR Pix como módulo isolado — ADR-372 a ADR-376):** campanhas de doação com
 revisão a quatro olhos e beneficiário verificado, página pública com QR que aponta para a própria página (nunca para

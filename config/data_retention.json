@@ -134,6 +134,14 @@
    "class": "anonymizable",
    "reason": "Retorno sobre conteúdo tem valor coletivo e deixa de ser pessoal sem o vínculo."
   },
+  "remuneration_obligations.org_id": {
+   "class": "retainable",
+   "reason": "Obrigação de remuneração do IMPACTO (v0.34.0, ADR-377): crédito financeiro com versão de regra congelada, aviso prévio e trilha de cobrança; apagar em cascata faria sumir dívida ou isenção sem rastro. A organização devedora só sai depois de a obrigação ser liquidada, dispensada ou baixada por decisão registrada."
+  },
+  "reconciliation_exceptions.org_id": {
+   "class": "anonymizable",
+   "reason": "Exceção de conciliação (v0.34.0, ADR-380) é trilha operacional da plataforma (divergência entre razão e provedor, quem resolveu e como); sobrevive à saída da organização com o vínculo anulado, para a conciliação continuar auditável."
+  },
   "ledger_entries.org_id": {
    "class": "retainable",
    "reason": "Lançamento contábil. Guarda obrigatória; apagar reescreveria o histórico financeiro."

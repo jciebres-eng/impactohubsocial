@@ -42,6 +42,20 @@ def codigo_por_pasta(pasta: Path):
     return ler
 
 
+def anotar(titulo: str, texto: str) -> None:
+    """No GitHub Actions, põe a falha nas ANOTAÇÕES do job (`check-runs/{id}/annotations`).
+
+    v0.34.0: o log do job não é legível pela API neste ambiente, e o job `pilha-do-zero` só mostrava
+    "exit code 1" — uma jornada quebrada desde a v0.33.0 passou sem causa visível. Fora do Actions, nada muda.
+    """
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    def esc(t: str, prop: bool = False) -> str:
+        t = t.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        return t.replace(":", "%3A").replace(",", "%2C") if prop else t
+    print(f"::error title={esc(titulo[:120], prop=True)}::{esc(texto[:1500])}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", required=True)
@@ -81,6 +95,7 @@ def main() -> int:
     print(f"jornadas: {len(por)} · passos: {len(res['passos'])} · falhas: {len(res['falhas'])}")
     for p in res["falhas"]:
         print(f"  FALHA [{p['jornada']}] {p['passo']}: {p['metodo']} {p['rota']} → {p['status']} {p['erro'][:200]}")
+        anotar(f"jornada {p['jornada']}", f"{p['passo']}: {p['metodo']} {p['rota']} → {p['status']} {p['erro'][:600]}")
     falhou = bool(res["falhas"])
 
     if a.telas:
@@ -120,6 +135,11 @@ def main() -> int:
               f"estados {dict(Counter(x['estado'] for x in linhas))}")
         for x in falhas:
             print(f"  FALHA {x['estado']} {x['persona']} {x['url'] or x['rota']} {x['detalhe'][:160]}")
+            anotar(f"tela {x['rota']} ({x['estado']})", f"{x['persona']} {x['url'] or x['rota']} {x['detalhe'][:600]}")
+        sem_dado = sorted(rotas - ok)
+        if sem_dado:
+            print(f"  FALHA {len(sem_dado)} rota(s) sem nenhuma visita com dado real: {', '.join(sem_dado[:20])}")
+            anotar("telas sem visita com dado real", ", ".join(sem_dado[:40]))
         falhou = falhou or bool(falhas) or rotas != ok
         if a.axe:
             auditadas = [x for x in linhas if x.get("axe") is not None]

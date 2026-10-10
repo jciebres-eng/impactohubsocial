@@ -1,0 +1,29 @@
+PILHA DO ZERO — ensaio local do job `pilha-do-zero` (v0.34.0, E7), 10/10/2026
+
+Por que local: o job do CI estava vermelho e o log do job não é legível pela API neste ambiente (só as anotações, que
+não diziam a causa). O Docker daqui não alcança registro de imagens, então a pilha foi montada sem contêiner, com o mesmo desenho:
+  - banco NOVO com o desenho do Supabase (infra/compose/demo/db-init-supabase-like.sh): administrador LOGIN CREATEROLE sem
+    superusuário, pgcrypto no esquema extensions com GRANT OPTION;
+  - backend/start_container.sh passo a passo: bootstrap externo do papel impacto_app, migrações como administrador (0001–0073),
+    aplicação conectada como impacto_app, seed de demonstração (IMPACTO_ENV=development, e-mail na pasta outbox);
+  - servidor ASGI com 2 workers; o MESMO roteiro do CI: scripts/demo_stack.py --outbox --dsn --telas (sem --axe: o axe-core
+    real não é baixável aqui, o registro npm é bloqueado; no CI ele roda com --axe-trava).
+Senhas geradas na hora, só nesta máquina; nenhuma aparece abaixo.
+
+ANTES DA CORREÇÃO (Client() na jornada "Captação"):
+  jornadas: 17 · passos: 265 · falhas: 1
+    FALHA [captacao] exceção no roteiro: CalledProcessError(2, ['psql', 'postgresql://naousado@127.0.0.1:1/naousado', ...
+    'DROP DATABASE IF EXISTS "impacto_test_…" WITH (FORCE)'])
+  (a "17ª jornada" é a própria exceção; a Captação parou depois de publicar a campanha)
+
+DEPOIS DA CORREÇÃO (Http(self.base)), banco novo de novo:
+  jornadas: 16 · passos: 275 · falhas: 0
+  telas: 235 rotas · 857 visitas · 235 abertas com dado real · estados {'OK': 548, 'VAZIA': 143, 'RECUSA_CORRETA': 101, 'SEM_REGISTRO': 65}
+  código de saída: 0
+
+PERSISTÊNCIA (passo seguinte do job: contar, reiniciar a aplicação, contar de novo):
+  antes:  projetos=4 candidaturas=3 rascunhos=3 diagnosticos=1 conversas=1 propostas=2 ideias=1
+  depois: projetos=4 candidaturas=3 rascunhos=3 diagnosticos=1 conversas=1 propostas=2 ideias=1
+  iguais
+
+O nome do passo no CI diz "218 telas" (número da v0.25.0); o robô de hoje visita 235 rotas.

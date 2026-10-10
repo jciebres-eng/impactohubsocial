@@ -1,3 +1,42 @@
+# Notas da versão — v0.34.0 (Ecossistema financeiro: gratuito até gerar valor)
+
+**Uma regra:** a plataforma calcula e mostra o que seria dela, mas só cobra quando um gatilho auditável fecha — e nunca condiciona a
+prestação de contas a pagamento. Nenhuma regra está ativa; nenhum real entra ou sai.
+
+1. **Obrigações** — cada taxa calculada vira um registro com estados claros (calculada, devida, faturada, cobrada, recebida,
+   liquidada; estornada, vencida, em disputa, dispensada, isenta). Valor congelado; histórico que não se apaga.
+2. **Gratuito até gerar valor** — franquia de R$ 20.000 liquidados por ano (hipótese), aviso prévio de 30 dias registrado,
+   mínimo de fatura, teto de 5 % do liquidado. Sem isso, nada é devido — e a tela diz por quê.
+3. **Recurso público** — isento por padrão; só vira elegível quando alguém com alçada registra o instrumento e a justificativa.
+4. **Reserva e fundo** — são da organização beneficiária; o banco recusa ativá-los como receita da plataforma.
+5. **Nada bloqueia a prestação de contas** — fatura vencida não fecha nenhuma porta; um teste vigia isso.
+6. **Estados do dinheiro** — pendente, confirmado, liquidado, em análise, estornado (total ou parcial), compromisso e recurso
+   declarado fora da plataforma aparecem separados, com a data da última atualização válida.
+7. **Conciliação** — fila de exceções tipada (só no provedor, só no sistema, valor/tarifa divergente, estorno sem lançamento,
+   duplicidade, taxa errada, prazo), com responsável e histórico.
+8. **Painel do financiador** e doação em nome da organização.
+9. **Os 40 cenários de teste do pacote têm teste** — inclusive os que dependem do provedor: falha temporária, evento que falha e
+   é reprocessado, liquidação parcial e falha de liquidação, split e doação mensal (estes dois simulados no teste, e ditos como tal).
+   O teste de cartão revelou que **doação por cartão nunca tinha funcionado no sandbox** — corrigido.
+10. **Contribuição voluntária do doador para a plataforma** — um valor A MAIS, que começa em zero e nunca é sugerido; não sai da
+    doação; é a única coisa que pode ser dividida direto pelo provedor (quando houver contrato). Desligada até parecer.
+11. **Doação mensal** — autorizar não é pagar: cada mês é uma tentativa; só o que o provedor confirma conta; três falhas seguidas
+    pausam; o doador cancela quando quiser. Desligada até o provedor oferecer o instrumento.
+12. **Rotina financeira no worker** — reprocessa eventos, marca vencidas e concilia sozinha. Por isso, **publique também o
+    `pleasing-trust`**.
+13. **Brecha fechada** — a organização conseguia, pela tela de cobranças, marcar como paga ou devolvida a fatura que ela deve à
+    plataforma. Agora só a administração ou o provedor mudam essa fatura.
+14. **Documentos** — arquitetura e fluxos (diagramas), razão e estados, política, matrizes de monetização e de riscos,
+   jurídico/fiscal (com as três correções do responsável), API/webhooks, cobertura dos 40 cenários, modelo de 24 meses em 3 cenários.
+
+15. **Teste de ponta a ponta do CI de volta ao trabalho** — o teste que sobe o sistema do zero e percorre as jornadas e as 218
+    telas estava falhando desde a v0.33.0 por um erro no próprio roteiro de teste (não no produto). Corrigido, com um teste que
+    impede a volta, e agora o GitHub mostra a causa de cada falha.
+
+O que falta para ser real continua fora do código: contrato com provedor, parecer, cartas legais verdes, termos, NFS-e.
+
+---
+
 # Notas da versão — v0.33.0 (Doações, vaquinha e QR Pix — módulo isolado, sem custódia)
 
 **Uma regra:** a plataforma mostra, confere e registra; quem recebe o dinheiro é o beneficiário pelo provedor de pagamento.

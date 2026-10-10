@@ -192,7 +192,19 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "config/donation_risk_rules.json", "docs/donations/BASELINE_REPORT.md", "docs/donations/IMPLEMENTATION_REPORT.md",
             "docs/donations/SECURITY_REVIEW.md", "docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md", "docs/donations/RUNBOOK.md",
             "docs/donations/DONATIONS_PROVIDER_MATRIX.md", "docs/donations/24_MONTH_DONATIONS_NOTE.md",
-            "docs/evidence/test_run_v0.33.0.log", "history/v0.32.0/VERSION"]
+            "docs/evidence/test_run_v0.33.0.log", "history/v0.32.0/VERSION",
+            # v0.34.0 — ecossistema financeiro: gratuito até gerar valor, obrigações, recurso público, conciliação com exceções
+            "backend/migrations/0073_v0340_financial_ecosystem.sql", "backend/impacto/services/remuneration.py",
+            "backend/impacto/services/reconciliation.py", "backend/tests/test_v0340_financial_ecosystem.py", "backend/tests/test_v0340_release_docs.py",
+            "scripts/analysis/financial_model_24m_v0340.py", "docs/finance/FINANCIAL_ARCHITECTURE.md", "docs/finance/FREE_UNTIL_VALUE_POLICY.md",
+            "docs/finance/LEDGER_AND_FINANCIAL_STATES.md", "docs/finance/MONETIZATION_MATRIX.md", "docs/finance/RISK_MATRIX.md",
+            "docs/finance/LEGAL_FISCAL_MATRIX.md", "docs/finance/DONATIONS_API.md", "docs/finance/TEST_SCENARIO_COVERAGE.md",
+            "docs/finance/MODULE_INVENTORY.md", "docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md", "docs/finance/modelo_24m/MODELO_24M_v0340.md",
+            "docs/finance/modelo_24m/IMPACTO_MODELO_24M_v0340.xlsx", "docs/finance/diagramas/arquitetura_financeira.svg",
+            "docs/finance/diagramas/fluxo_pagamento_conciliacao.svg", "docs/evidence/test_run_v0.34.0.log", "history/v0.33.0/VERSION",
+            # v0.34.0 (E6) — os 40 cenários com teste
+            "backend/tests/test_v0340_open_scenarios.py", "scripts/make_donations_api_doc.py",
+            "docs/evidence/screens_v0340/07_doacao_mensal_doador.png"]
 
 
 def sha256(p: Path) -> str:

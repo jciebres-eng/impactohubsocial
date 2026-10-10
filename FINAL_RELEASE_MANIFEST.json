@@ -1,33 +1,39 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.33.0",
- "version": "0.33.0",
- "commit": "3481e18",
- "date": "2026-10-10T03:36:35+00:00",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0",
+ "version": "0.34.0",
+ "commit": "64a13ac",
+ "date": "2026-10-10T13:40:46+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 4294,
-  "traceability": "IMPACTO_v0.33.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip"
+  "tracked_total": 4498,
+  "traceability": "IMPACTO_v0.34.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip"
  },
  "migrations": {
-  "total": 72,
-  "last": "0072_v0330_donations.sql",
+  "total": 73,
+  "last": "0073_v0340_financial_ecosystem.sql",
   "new_in_this_version": [
-   "0070_v0300_evidence_object.sql"
+   "0073_v0340_financial_ecosystem.sql"
   ]
  },
  "tests": {
-  "total": 2451,
-  "seconds": 1807.781,
+  "total": 2478,
+  "seconds": 2257.161,
   "result": "FAILED",
-  "detail": "failures=8, skipped=31",
-  "runs_in_log": 3
+  "detail": "failures=8, errors=1, skipped=31",
+  "runs_in_log": 2,
+  "after_full_run": [
+   {
+    "total": 126,
+    "result": "OK",
+    "detail": ""
+   }
+  ]
  },
  "new_test_modules": [
-  "backend/tests/test_v0300_evidence_object.py",
-  "backend/tests/test_v0300_dossier.py",
-  "backend/tests/test_v0300_release_docs.py",
-  "backend/tests/test_e2e_v0300_dossier.py"
+  "backend/tests/test_v0340_financial_ecosystem.py",
+  "backend/tests/test_v0340_open_scenarios.py",
+  "backend/tests/test_v0340_release_docs.py"
  ],
  "integrations": [
   {
@@ -115,24 +121,22 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Contrato com provedor de pagamento (Pix) e tarifa escrita | responsável | só sandbox |\n| Modelo de titularidade da cobrança (conta do beneficiário × plataforma com split) | responsável + jurídico | código só suporta conta do beneficiário |\n| Parecer sobre taxa de serviço, fundo, comprovante/dedutibilidade, termos | jurídico/contábil | taxas inativas; termos em rascunho |\n| LGPD do doador e dados exigidos pelo provedor | DPO/jurídico | anônimo pode não ser possível com certos provedores |\n| Processo de KYB do beneficiário | compliance | só o registro existe |\n| Juntar PR #5 (v0.32.0) e este ramo; publicar demo e produção | responsável | módulo fora do ar |\n| Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |\n| Tag v0.33.0 | o ambiente não envia tags | criar no GitHub |",
- "known_limitations": "- Doação recorrente: só tabela e cancelamento; cobrança recorrente desligada.\n- Taxa institucional 3,5 %/1,5 % do pacote: sem definição de \"institucional\" nem de base — ficou como texto, não como regra.\n- E-mail ao doador não é enviado nesta versão (entra com o provedor real).\n- Validação documental de gastos (`evidence_status = validated`) sem rotina de revisão.\n- A assinatura do sandbox não tem carimbo de tempo; o adaptador real deve validar janela temporal (SECURITY_REVIEW #15).\n- Modelo de 24 meses sem linha de doações, de propósito (`docs/donations/24_MONTH_DONATIONS_NOTE.md`).",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nPara o módulo em sandbox: juntar na `main` (o demo publica sozinho), testar o fluxo do `RUNBOOK.md` §1 no demo e, depois\nde conferido, publicar a produção — onde nenhuma doação real é possível e nenhuma variável nova é obrigatória. Condições:\nas da v0.32.0 continuam; nenhuma falha crítica foi convertida em \"condição\". **Provedor real, split, recorrência cobrada e\ntaxa ativa: NO-GO** até o checklist jurídico/provedor e uma ADR nova que remova a recusa em `config.validate()`.",
+ "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico/contábil → cartas legais verdes → regras validadas | jurídico/contábil + responsável | nenhuma obrigação pode virar devida |\n| Contrato com provedor de pagamento; modelo de titularidade | responsável + provedor | só sandbox |\n| Termos (campanha, doador, política, contrato institucional, autorização de despesa pública) | jurídico | textos em rascunho |\n| NFS-e | contábil + integração | não implementada |\n| Publicar o worker (`pleasing-trust`) junto | responsável | sem a publicação, a rotina `financial_ops` (reprocessamento, vencidas, conciliação periódica) não roda |\n| Instrumento recorrente homologado (Pix Automático/cartão) e split no provedor | responsável + provedor | recorrência e split ficam desligados pela configuração |\n| Juntar PRs #5, #6 e este ramo; publicar demo e produção | responsável | módulo fora do ar |\n| Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |\n| Tag v0.34.0 | o ambiente não envia tags | criar no GitHub |",
+ "known_limitations": "- Obrigações nascem de doações (taxa e contribuição voluntária); acordo, serviço e crédito de IA têm `source_kind` previsto mas\n  não ligado.\n- O snapshot do provedor no sandbox deriva dos próprios eventos — prova o mecanismo, não a API de um provedor real.\n- Split e recorrência: caminhos testados com o provedor SIMULADO no teste; continuam recusados pela configuração até contrato e\n  homologação.\n- Reembolso parcial do que a plataforma recebeu é ajuste por decisão humana, não automático.\n- Modelo de 24 meses: premissas sem histórico; a taxa sobre doações não sustenta a operação em nenhum cenário.\n- Textos dos avisos e termos são rascunhos.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nPara juntar e publicar no demo e, depois de conferido, na produção — onde nenhuma cobrança é possível e nenhuma variável nova é\nobrigatória. Condições: as da v0.32.0 e v0.33.0 continuam. **Cobrança real, split, recorrência cobrada, regra ativa: NO-GO** até\nparecer, contrato, cartas verdes e ADR nova.",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
   "RELEASE_NOTES.md",
+  "CHANGELOG.md",
+  "DECISIONS.md",
+  "README.md",
+  "CLAUDE.md",
   "MOTOR_COVERAGE_MATRIX.md",
-  "EXTERNAL_INTEGRATIONS.md",
-  "docs/ECONOMIC_MODEL.md",
-  "docs/execution/BASELINE_v0300.md",
-  "docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md",
-  "docs/execution/MILESTONE_FUNDING_STATES_v0300.md",
-  "docs/SAAS_ECONOMY.md",
-  "24_MONTH_FINANCIAL_MODEL.md",
-  "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md",
-  "docs/execution/CLEANUP_INVENTORY_v0300.md",
-  "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
-  "docs/execution/ROLLBACK_v0300.md"
+  "docs/finance/DONATIONS_API.md",
+  "docs/finance/LEGAL_FISCAL_MATRIX.md",
+  "docs/finance/RISK_MATRIX.md",
+  "docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md",
+  "docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md"
  ]
 }

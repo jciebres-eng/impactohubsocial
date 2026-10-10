@@ -277,6 +277,8 @@ def pledge_confirm(ctx: Ctx, body: TSch.RevokeIn):
 @route("POST", "/v1/campaigns", body=TSch.CampaignIn, min_role=WRITE, status=201, tags=("funding",),
        summary="Cria a campanha de divulgação do projeto (rascunho; publicar é um passo separado)")
 def campaign_create(ctx: Ctx, body: TSch.CampaignIn):
+    if body.funding_source in ("public", "mixed") and not body.public_instrument_ref:
+        raise ApiError(422, "validation_error", "Campanha com recurso público exige o instrumento (termo, convênio, edital)")
     if body.kind in ("project_crowdfunding", "emergency") and not body.project_id:
         raise ApiError(422, "validation_error", "Campanha de projeto exige project_id")
     if body.project_id:
@@ -291,11 +293,12 @@ def campaign_create(ctx: Ctx, body: TSch.CampaignIn):
             raise ApiError(409, "campaign_exists", "Este projeto já tem campanha")
         cid = c.scalar("INSERT INTO campaigns(project_id, org_id, beneficiary_org_id, slug, title, summary, story, cover_document_id,"
                        " show_backers, created_by, kind, target_cents, starts_on, ends_on, purpose, contingency_policy, refund_policy,"
-                       " min_donation_cents, allow_recurring)"
-                       " VALUES ($1,$2,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id::text",
+                       " min_donation_cents, allow_recurring, funding_source, public_instrument_ref)"
+                       " VALUES ($1,$2,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING id::text",
                        body.project_id, ctx.org_id, body.slug, body.title, body.summary, body.story,
                        body.cover_document_id, body.show_backers, ctx.user_id, body.kind, body.target_cents, body.starts_on,
-                       body.ends_on, body.purpose, body.contingency_policy, body.refund_policy, body.min_donation_cents, body.allow_recurring)
+                       body.ends_on, body.purpose, body.contingency_policy, body.refund_policy, body.min_donation_cents, body.allow_recurring,
+                       body.funding_source, body.public_instrument_ref)
         ctx.audit(c, "campaign.created", "campaign", cid, {"slug": body.slug, "kind": body.kind})
     return {"id": cid, "slug": body.slug, "status": "draft", "public_path": f"/campanha/{body.slug}"}
 

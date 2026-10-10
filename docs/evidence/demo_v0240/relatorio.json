@@ -1,10 +1,10 @@
 {
- "gerado_em": "2026-10-10T01:23:13.917300+00:00",
+ "gerado_em": "2026-10-10T11:39:33.547705+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 50,
+   "telas_do_menu": 51,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -34,6 +34,7 @@
     "/cotas",
     "/campanha-gestao",
     "/minhas-doacoes",
+    "/remuneracao",
     "/documentos",
     "/documentos/montagens",
     "/documentos/modelos",
@@ -65,11 +66,12 @@
   "company": {
    "email": "empresa@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 38,
+   "telas_do_menu": 39,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/torre",
+    "/contribuicoes",
     "/area",
     "/reputacao",
     "/selos",
@@ -196,11 +198,12 @@
   "government": {
    "email": "governo@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 35,
+   "telas_do_menu": 36,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
     "/torre-territorial",
+    "/contribuicoes",
     "/area",
     "/reputacao",
     "/selos",
@@ -242,7 +245,7 @@
   "admin": {
    "email": "admin@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 57,
+   "telas_do_menu": 59,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -263,6 +266,8 @@
     "/solucoes",
     "/admin/doacoes",
     "/admin/doacoes/risco",
+    "/admin/remuneracao",
+    "/admin/conciliacao",
     "/admin/contribuicao",
     "/dados-territoriais",
     "/admin/linha-do-tempo",
@@ -573,5 +578,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 340
+ "total_telas_de_menu_visitadas": 345
 }

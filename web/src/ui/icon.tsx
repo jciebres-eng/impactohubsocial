@@ -103,7 +103,7 @@ export const ICONE_DA_ROTA: Record<string, NomeIcone> = {
   "/admin/fiscal": "fiscal/tax", "/admin/institucional": "nav/organizations", "/admin/vouchers": "finance/funding",
   "/admin/convenios": "documents/document", "/admin/cobranca": "nav/finance", "/admin/organizacoes": "nav/organizations",
   "/admin/usuarios": "nav/users", "/admin/denuncias": "status/alert", "/admin/medidas": "status/blocked",
-  "/admin/solucoes": "projects/replicable", "/admin/risco": "compliance/risk", "/admin/doacoes": "finance/funding", "/admin/doacoes/risco": "compliance/risk", "/minhas-doacoes": "finance/funding", "/admin/contribuicao": "finance/funding",
+  "/admin/solucoes": "projects/replicable", "/admin/risco": "compliance/risk", "/admin/doacoes": "finance/funding", "/admin/doacoes/risco": "compliance/risk", "/minhas-doacoes": "finance/funding", "/remuneracao": "finance/funding", "/contribuicoes": "finance/funding", "/admin/remuneracao": "finance/funding", "/admin/conciliacao": "compliance/audit", "/admin/contribuicao": "finance/funding",
   "/admin/erros": "status/alert", "/admin/chaves": "nav/lock", "/admin/auditoria": "compliance/audit",
   "/admin/linha-do-tempo": "admin/logs", "/admin/rastro": "admin/logs", "/admin/proveniencia": "documents/evidence",
   "/admin/integridade": "admin/security", "/admin/interruptor": "status/blocked",

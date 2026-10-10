@@ -410,7 +410,10 @@ class Jornadas:
             self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
             # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
             # só viria de um evento assinado do provedor, que a demonstração não forja.
-            anon = Client()
+            # Http(self.base), não Client(): Client() sobe o servidor DE TESTE (banco descartável via psql) e quebrava a
+            # jornada na pilha Docker do CI (pilha-do-zero vermelho desde a v0.33.0); aqui a pessoa anônima fala com a
+            # mesma base das outras contas.
+            anon = Http(self.base)
             d = self.passo(J, "pessoa anônima inicia uma doação Pix (sandbox, não pagável)", anon, "POST",
                            f"/v1/public/donation-campaigns/{slug}/donate",
                            {"amount_cents": 5000, "method": "pix", "donor_display": "Apoiadora (exemplo)",
@@ -418,6 +421,19 @@ class Jornadas:
             if d:
                 self.ids["doacao"] = d["id"]
                 self.passo(J, "pessoa anônima consulta a situação da doação", anon, "GET", f"/v1/public/donations/{d['id']}")
+            # v0.34.0 (ADR-377..383): empresa doa em nome da organização e registra um compromisso; organização declara recurso
+            # externo; cada um vê o seu painel; a administração vê obrigações (nenhuma devida) e a fila de conciliação.
+            self.passo(J, "empresa inicia doação em nome da organização (sandbox)", emp, "POST", f"/v1/public/donation-campaigns/{slug}/donate",
+                       {"amount_cents": 20000, "method": "pix", "as_organization": True, "donor_display": "Empresa Exemplo", "idempotency_key": "demo-" + uuid.uuid4().hex[:8]})
+            self.passo(J, "empresa registra compromisso de doação futura", emp, "POST", f"/v1/public/donation-campaigns/{slug}/pledge",
+                       {"amount_cents": 50000, "as_organization": True, "display": "Empresa Exemplo"})
+            self.passo(J, "OSC declara recurso recebido fora da plataforma", osc, "POST", f"/v1/campaigns/{cp['id']}/external-resources",
+                       {"kind": "offline_donation", "source_name": "Bazar beneficente (exemplo)", "funding_source": "private", "amount_cents": 120000, "received_on": "2026-10-01"})
+            self.passo(J, "OSC abre a prestação de contas com os estados do dinheiro", osc, "GET", f"/v1/campaigns/{cp['id']}/accountability")
+            self.passo(J, "OSC vê a política 'gratuito até gerar valor' e suas obrigações", osc, "GET", "/v1/org/remuneration")
+            self.passo(J, "empresa vê o painel do financiador", emp, "GET", "/v1/org/contributions")
+            self.passo(J, "administração vê obrigações por estado (nenhuma devida)", adm, "GET", "/v1/admin/remuneration")
+            self.passo(J, "administração vê a fila de conciliação", adm, "GET", "/v1/admin/reconciliation/exceptions")
             self.passo(J, "visitante sem login abre a campanha", Http(self.base), "GET", f"/v1/public/campaigns/{slug}")
 
     def documentos(self):

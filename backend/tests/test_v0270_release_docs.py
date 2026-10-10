@@ -154,3 +154,17 @@ class ManifestAndNotesTests(unittest.TestCase):
         self.assertTrue(m["commit"])
         notas = (ROOT / "RELEASE_NOTES.md").read_text(encoding="utf-8")
         self.assertIn(f"v{VERSION}", notas.splitlines()[0])
+
+    def test_the_release_manifest_lists_what_is_new_in_this_version(self):
+        """v0.34.0 (E7): migrações e módulos "novos" estavam escritos à mão com os da v0.30.0 e saíram assim da v0.31.0 à
+        v0.34.0 (primeiro pacote). O que o manifesto chama de novo tem de ter a marca DESTA versão; documento citado existe."""
+        m = json.loads((ROOT / "FINAL_RELEASE_MANIFEST.json").read_text(encoding="utf-8"))
+        marca = "v" + "".join(VERSION.split("."))
+        for nome in m["migrations"]["new_in_this_version"]:
+            self.assertIn(f"_{marca}_", nome)
+        self.assertTrue(m["new_test_modules"], "nenhum módulo de teste novo listado")
+        for mod in m["new_test_modules"]:
+            self.assertRegex(mod, rf"test_(e2e_)?{marca}_")
+            self.assertTrue((ROOT / mod).exists(), mod)
+        for doc in m["documents"]:
+            self.assertTrue((ROOT / doc).exists(), f"documento citado no manifesto não existe: {doc}")

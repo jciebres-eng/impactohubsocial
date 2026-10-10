@@ -500,8 +500,9 @@ export function AgreementDetail({ id }: { id: string }) {
                 <span>{p.legal_name}<br /><span className="muted small">
                   {PARTY_ROLE.find(([k]) => k === p.role)?.[1] || p.role}{p.required ? " · obrigatória" : " · opcional"}
                 </span>{p.decline_reason && <><br /><span className="muted small">Recusou: {p.decline_reason}</span></>}
-                  <br /><span className="muted small">PIX: {p.pix_key ? <code className="small">{p.pix_key}</code> : p.pix_key_masked ? <code className="small">{p.pix_key_masked}</code> : "não informada"}{p.pix_key_type ? ` (${p.pix_key_type})` : ""}</span>
-                  {p.org_id === myOrg && !["canceled", "superseded", "completed"].includes(data.status) && (
+                  <br /><span className="muted small">PIX: {p.pix_key ? <code className="small">{p.pix_key}</code> : p.pix_key_masked ? <code className="small">{p.pix_key_masked}</code> : "não informada"}{p.pix_key_type ? ` (${p.pix_key_type})` : ""}
+                    {p.pix_cooling_until ? ` · informada depois da assinatura: em carência até ${dateTime(p.pix_cooling_until)} — confirme com a parte por outro canal antes de pagar` : ""}</span>
+                  {p.org_id === myOrg && !["canceled", "superseded", "completed", "expired"].includes(data.status) && (!p.pix_key || !data.parties.some((x: any) => x.signed_at)) && (
                     <span className="small"> · <button type="button" className="linklike" onClick={() => { setPixParty(p.id); setPixKey(""); setPixType("cnpj"); }}>{p.pix_key ? "alterar" : "informar minha chave"}</button></span>
                   )}</span>
                 <Pill tone={p.signed_at ? "good" : p.declined_at ? "bad" : "warn"}>
@@ -589,6 +590,7 @@ export function AgreementDetail({ id }: { id: string }) {
                 <li key={po.id}>
                   <span>{PAYOUT_LINE[po.line_kind] || po.line_kind}: <strong>{po.recipient_label}</strong> · {money(po.amount_cents)}
                     <br /><span className="muted small">chave PIX: {po.pix_key ? <code className="small">{po.pix_key}</code> : po.pix_key_masked ? <code className="small">{po.pix_key_masked}</code> : (po.line_kind === "platform_fee" ? "NÃO CONFIGURADA" : "não informada no contrato")}
+                      {po.pix_cooling_until ? ` · em carência até ${dateTime(po.pix_cooling_until)}: confirme com quem recebe antes de pagar` : ""}
                       {po.confirmed_cents > 0 ? ` · confirmado ${money(po.confirmed_cents)}` : ""}{po.paid_cents > po.confirmed_cents ? ` · registrado ${money(po.paid_cents)}` : ""}</span>
                     {po.transfers?.length > 0 && <ul className="small">{po.transfers.map((t: any) => (
                       <li key={t.id}>{money(t.amount_cents)} · ref. {t.reference} · {date(t.paid_on)} · {t.status === "confirmed" ? "confirmada" : t.status === "rejected" ? `recusada: ${t.rejection_reason}` : "registrada"}
@@ -658,6 +660,9 @@ export function AgreementDetail({ id }: { id: string }) {
                            onClick={() => act(() => api.put(`/v1/signed-agreements/${id}/parties/${pixParty}/pix`, { pix_key: pixKey, pix_key_type: pixType }),
                                               "Chave PIX registrada no acordo.").then(() => setPixParty(null))}>Registrar chave</Button></>}>
             <p>A chave fica no contrato e aparece na instrução de repasse para quem paga. A plataforma nunca a usa para mover dinheiro.</p>
+            <p className="muted small">Por segurança: vamos pedir que você confirme sua identidade; todas as partes do acordo recebem um aviso;
+              depois da primeira assinatura a chave não muda mais (só por nova versão do acordo), e uma chave informada depois de alguma
+              assinatura fica 24 horas em carência.</p>
             <Field label="Tipo"><Select value={pixType} onChange={setPixType} options={PIX_TYPES} /></Field>
             <Field label="Chave"><Input value={pixKey} onChange={setPixKey} placeholder={pixType === "cnpj" ? "somente números" : pixType === "phone" ? "+55 DDD número" : ""} /></Field>
           </Modal>

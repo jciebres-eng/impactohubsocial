@@ -405,8 +405,15 @@ class Jornadas:
             self.passo(J, "OSC envia a campanha para revisão (aceita os termos)", osc, "POST", f"/v1/campaigns/{cp['id']}/submit")
             self.passo(J, "administração aprova a campanha com justificativa", adm, "POST", f"/v1/admin/donation-campaigns/{cp['id']}/review",
                        {"approve": True, "note": "Finalidade, contingência e estorno conferidos (demonstração)."})
-            self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
-                       {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
+            ver = self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
+                             {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
+            # v0.35.0 (auditoria, KYC-03): a verificação só vale com a confirmação de OUTRA pessoa da equipe (controladoria,
+            # que no demo também tem o papel de compliance)
+            if ver:
+                ctl = self.c.get("controller") or self.entrar("controller")
+                self.confirmar_identidade(ctl, J)
+                self.passo(J, "controladoria confirma a verificação (segunda pessoa, quatro olhos)", ctl, "POST",
+                           f"/v1/admin/beneficiaries/{osc.org_id}/verification/{ver['id']}/confirm")
             self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
             # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
             # só viria de um evento assinado do provedor, que a demonstração não forja.
@@ -536,11 +543,13 @@ class Jornadas:
             return
         aid = self.ids["acordo_financiamento"] = ac["id"]
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.confirmar_identidade(osc, J)   # v0.35.0 (auditoria, PAY-09): informar a chave PIX pede identidade confirmada
         self.passo(J, "quem recebe informa a própria chave PIX no contrato", osc, "PUT",
                    f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix", {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
         if part:
             self.passo(J, "inclui a apoiadora como proponente (parte opcional)", osc, "POST", f"/v1/signed-agreements/{aid}/parties",
                        {"org_id": apo.org_id, "role": "proponent", "required": False})
+            self.confirmar_identidade(apo, J)
             self.passo(J, "apoiadora informa a própria chave PIX", apo, "PUT",
                        f"/v1/signed-agreements/{aid}/parties/{self._party(apo, aid)}/pix", {"pix_key": "elisa@demo.impacto.local", "pix_key_type": "email"})
         marcos = []
@@ -618,6 +627,7 @@ class Jornadas:
             return
         aid = self.ids["acordo_complementar"] = ac["id"]
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.confirmar_identidade(osc, J)   # v0.35.0 (auditoria, PAY-09)
         self.passo(J, "OSC informa a chave PIX no contrato", osc, "PUT", f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix",
                    {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
         m = self.passo(J, "define o único marco", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",

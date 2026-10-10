@@ -49,8 +49,8 @@ jobs:
   verificar:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
       - run: sudo apt-get update && sudo apt-get install -y libpq5
       - name: Segredos cadastrados?
@@ -89,8 +89,8 @@ jobs:
         env: { CONFIRMACAO: "${{ inputs.confirmacao }}" }
         run: |
           test "$CONFIRMACAO" = "APLICAR NO SUPABASE" || { echo "::error title=Sem confirmação::digite exatamente APLICAR NO SUPABASE"; exit 1; }
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
       - run: sudo apt-get update && sudo apt-get install -y libpq5
       - run: docker build -t impacto:${{ github.sha }} .
@@ -156,7 +156,7 @@ jobs:
         ports: ["55432:5432"]
         options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
       - name: Cliente PostgreSQL 17 (pg_dump precisa ser >= servidor)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-common >/dev/null
@@ -183,8 +183,8 @@ jobs:
     if: startsWith(inputs.modo, 'contas-demo-')
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
       - run: sudo apt-get update -q && sudo apt-get install -y -q libpq5
       - name: Antes (somente leitura)

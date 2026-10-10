@@ -14,3 +14,26 @@ backups/
 # v0.25.0 — pilha de demonstração local (infra/compose/demo)
 dist-stack/
 backend/.tmp_entry_storage*/
+
+# v0.35.0 (auditoria, SDLC-06): arquivos que costumam carregar segredo ou dado pessoal nunca entram no repositório.
+# (O `.gitignore` é a primeira barreira; a varredura do gitleaks no CI é a segunda.)
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+*.kdbx
+credentials*.json
+service-account*.json
+*.dump.enc
+*.dump.aead
+*.sql.gz
+*.tfstate
+*.tfstate.*
+.npmrc
+.pypirc

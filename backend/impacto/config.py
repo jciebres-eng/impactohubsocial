@@ -61,6 +61,11 @@ class Settings:
     cookie_secure: bool = True
     cors_origins: list[str] = field(default_factory=list)
     trust_proxy_headers: bool = False
+    # v0.35.0 (auditoria, AUTH-02): quantos proxies CONFIÁVEIS acrescentam ao X-Forwarded-For (o IP do cliente é o
+    # N-ésimo a partir da DIREITA; o primeiro valor é quem faz o pedido que escreve). E, opcionalmente, um cabeçalho
+    # que a borda sobrescreve (ex.: cf-connecting-ip) — só se a origem não for alcançável sem passar pela borda.
+    trusted_proxy_hops: int = 1
+    client_ip_header: str = ""
     max_body_bytes: int = 1_048_576
     max_upload_bytes: int = 15 * 1_048_576
     login_max_attempts: int = 8
@@ -105,6 +110,12 @@ class Settings:
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     payment_webhook_secret: str = ""      # v0.28.0: HMAC dos webhooks de pagamento em /v1/webhooks/payments/{provider}
+    # v0.35.0 (auditoria, PAY-01): segredo PRÓPRIO do webhook de doações (/v1/webhooks/donations/{provider}). Antes o mesmo
+    # segredo servia aos dois endpoints: quem tivesse um assinava eventos do outro.
+    donation_webhook_secret: str = ""
+    # v0.35.0 (auditoria, PAY-01): o provedor SANDBOX (não move dinheiro) só existe fora de produção. Em produção é recusado
+    # sempre; em staging, só com PAYMENT_SANDBOX_ENABLED=true (ambiente de teste com dados sintéticos).
+    payment_sandbox_enabled: bool = True
     # v0.33.0 — doações e campanhas: padrões SEGUROS. Nada de cobrança real, split, recorrência ou retenção sem decisão.
     donations_enabled: bool = True                 # módulo ligado (só provedor sandbox existe)
     campaign_publication_enabled: bool = True      # publicar campanhas (exige revisão + beneficiário verificado)
@@ -163,6 +174,8 @@ def load_settings() -> Settings:
         cookie_secure=_bool("COOKIE_SECURE", hardened),
         cors_origins=_list("CORS_ORIGINS"),
         trust_proxy_headers=_bool("TRUST_PROXY_HEADERS", False),
+        trusted_proxy_hops=max(1, int(_env("TRUSTED_PROXY_HOPS", "1") or "1")),
+        client_ip_header=(_env("CLIENT_IP_HEADER", "") or "").strip().lower(),
         max_body_bytes=_int("MAX_BODY_BYTES", 1_048_576),
         max_upload_bytes=_int("MAX_UPLOAD_BYTES", 15 * 1_048_576),
         login_max_attempts=_int("LOGIN_MAX_ATTEMPTS", 8),
@@ -197,6 +210,8 @@ def load_settings() -> Settings:
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
         payment_webhook_secret=_env("PAYMENT_WEBHOOK_SECRET", "") or "",
+        donation_webhook_secret=_env("DONATION_WEBHOOK_SECRET", "") or "",
+        payment_sandbox_enabled=_bool("PAYMENT_SANDBOX_ENABLED", not hardened),
         donations_enabled=_bool("DONATIONS_ENABLED", True),
         campaign_publication_enabled=_bool("CAMPAIGN_PUBLICATION_ENABLED", True),
         live_payment_provider_enabled=_bool("LIVE_PAYMENT_PROVIDER_ENABLED", False),
@@ -270,6 +285,9 @@ def validate(s: Settings) -> None:
             errors.append("CNPJ_LOOKUP_URL deve usar https")
         if not s.public_base_url.startswith("https://"):
             errors.append("PUBLIC_BASE_URL deve usar https em staging/production")
+        if not s.require_mfa_for_admins:
+            # v0.35.0 (auditoria, AUTH-03): a variável existia e podia desligar o MFA da equipe em produção sem aviso
+            errors.append("REQUIRE_MFA_FOR_ADMINS=false não é permitido em staging/production")
     if s.storage_provider == "s3" and not (s.s3_bucket and s.s3_access_key_id and s.s3_secret_access_key):
         errors.append("STORAGE_PROVIDER=s3 exige S3_BUCKET, S3_ACCESS_KEY_ID e S3_SECRET_ACCESS_KEY")
     # v0.31.0 — Cloudflare R2: a assinatura SigV4 usa a região; o R2 só reconhece `auto` (e aceita
@@ -285,6 +303,9 @@ def validate(s: Settings) -> None:
         errors.append("AI_PROVIDER externo exige AI_API_KEY e AI_MODEL")
     if s.mail_provider == "smtp" and not s.smtp_host:
         errors.append("MAIL_PROVIDER=smtp exige SMTP_HOST")
+    if s.env == "production" and s.payment_sandbox_enabled:
+        # v0.35.0 (auditoria, PAY-01): "não simule pagamentos em produção" — o sandbox não move dinheiro
+        errors.append("PAYMENT_SANDBOX_ENABLED=true não é permitido em production (o provedor sandbox não move dinheiro)")
     if s.live_payment_provider_enabled:
         errors.append("LIVE_PAYMENT_PROVIDER_ENABLED=true sem adaptador real: nenhum provedor de doações existe nesta versão (ADR-375)")
     if s.split_enabled or s.recurring_donations_enabled or s.risk_hold_enabled:

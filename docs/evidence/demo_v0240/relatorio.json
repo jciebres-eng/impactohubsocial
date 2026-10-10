@@ -1,5 +1,5 @@
 {
- "gerado_em": "2026-10-10T11:39:33.547705+00:00",
+ "gerado_em": "2026-10-10T17:15:18.028145+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
@@ -376,7 +376,7 @@
   "controller": {
    "email": "controladoria@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 17,
+   "telas_do_menu": 19,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -393,6 +393,8 @@
     "/contabilidade/plano-de-contas",
     "/tesouraria",
     "/administrativo/orcamento",
+    "/admin/compliance",
+    "/admin/organizacoes",
     "/ajuda",
     "/notificacoes",
     "/conta"
@@ -578,5 +580,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 345
+ "total_telas_de_menu_visitadas": 347
 }

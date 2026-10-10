@@ -360,9 +360,15 @@ def campaign_public(ctx: Ctx):
                           " ORDER BY created_at", camp["project_id"])]
         backers = []
         if camp["show_backers"]:
+            # v0.35.0 (auditoria, ID-01): pessoa física só aparece pelo nome civil com opt-in (`funder_profiles.public_name`),
+            # a mesma regra de `org_display()`. A regra vai escrita aqui porque esta rota roda em contexto de SISTEMA, e
+            # `org_display()` mostra o nome a contexto privilegiado. Antes, `legal_name` entrava como último recurso.
             backers = c.query("SELECT CASE WHEN p.is_anonymous THEN coalesce(p.display_name, 'Apoiador anônimo')"
+                              " WHEN o.kind = 'individual' THEN coalesce(p.display_name,"
+                              "      CASE WHEN coalesce(fp.public_name, false) THEN o.legal_name ELSE 'Apoiador pessoa física' END)"
                               " ELSE coalesce(p.display_name, o.trade_name, o.legal_name) END AS name, p.quantity,"
                               " p.created_at FROM quota_pledges p LEFT JOIN organizations o ON o.id = p.backer_org_id"
+                              " LEFT JOIN funder_profiles fp ON fp.org_id = o.id"
                               " WHERE p.project_id = $1 AND p.status = 'confirmed' ORDER BY p.created_at DESC LIMIT 50",
                               camp["project_id"])
         tags = c.query("SELECT t.taxonomy, t.code, coalesce(g.name, pl.name_pt, d.name_pt) AS name, g.color_hex"

@@ -28,16 +28,16 @@ PROVEDORES AVALIADOS (documentação oficial, lida em 09/10/2026; ver DONATIONS_
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_FLOOR, ROUND_HALF_EVEN, Decimal
+from pathlib import Path
 from typing import Any, Protocol
 
-from ..db.pq import Connection
+from ..db.pq import Connection, UniqueViolation
 from ..http import ApiError, forbidden, not_found, unprocessable
 
 #: Provedores que cobram de verdade (espelha o gatilho `donation_simulated_flag`). Vazio de propósito
@@ -161,7 +161,8 @@ class SandboxProvider:
     supports_split = False
 
     def __init__(self, secret: str):
-        self.secret = secret or "sandbox-sem-segredo"
+        # v0.35.0 (auditoria, PAY-01): sem segredo de reserva fixo. Segredo vazio = nenhuma assinatura confere.
+        self.secret = secret or ""
 
     def create_charge(self, *, donation_id: str, amount_cents: int, method: str, description: str, expires_in_minutes: int,
                       split: list[dict] | None = None) -> Charge:
@@ -173,12 +174,18 @@ class SandboxProvider:
         return Charge(cid, method, amount_cents, exp, payload, None if method == "pix" else f"/doar/checkout-sandbox/{cid}")
 
     def verify_signature(self, headers: dict, body: bytes) -> bool:
-        given = headers.get("x-impacto-signature", "")
-        expected = hmac.new(self.secret.encode(), body, hashlib.sha256).hexdigest()
-        return bool(given) and hmac.compare_digest(given, expected)
+        """v0.35.0 (auditoria, PAY-01): `X-Impacto-Signature: t=<unix>,v1=<HMAC-SHA256(segredo, "t." + corpo)>`, com janela
+        de 300 s — o mesmo formato dos webhooks que a plataforma envia (integrations/events.py). Antes a assinatura cobria só
+        o corpo: um evento capturado continuava válido para sempre (barrado apenas pela deduplicação do `event_id`)."""
+        if not self.secret:
+            return False
+        return verify_timestamped(self.secret, body, headers.get("x-impacto-signature", ""))
 
     def parse_event(self, body: bytes) -> dict:
-        data = json.loads(body or b"{}")
+        from ..http import parse_json_body
+        data = parse_json_body(body or b"{}")
+        if not isinstance(data, dict):
+            raise ValueError("evento não é objeto JSON")
         return {"event_id": str(data.get("event_id") or "")[:120], "event_type": str(data.get("type") or "")[:60],
                 "provider_charge_id": (str(data.get("charge_id")) if data.get("charge_id") else None),
                 "amount_cents": data.get("amount_cents"), "currency": data.get("currency", "BRL"), "raw": data}
@@ -187,13 +194,46 @@ class SandboxProvider:
         return None   # sandbox não tem consulta: um evento ambíguo fica em `under_review`
 
 
+WEBHOOK_TOLERANCE_SECONDS = 300
+MIN_WEBHOOK_SECRET = 32
+
+
+def verify_timestamped(secret: str, body: bytes, header: str) -> bool:
+    from ..integrations.events import verify
+    return bool(secret) and verify(secret, body or b"", header or "", tolerance=WEBHOOK_TOLERANCE_SECONDS)
+
+
+def webhook_secret(settings: Any, name: str) -> str:
+    """O segredo de UM endpoint de webhook, ou "" quando ele não pode ser usado. Em staging/produção, segredo com menos de
+    32 caracteres não serve (o endpoint responde "não configurado" em vez de aceitar assinatura fraca); o de doações não pode
+    ser igual ao de pagamentos (v0.35.0, auditoria PAY-01)."""
+    secret = getattr(settings, name, "") or ""
+    if not secret:
+        return ""
+    if getattr(settings, "is_hardened", False) and len(secret) < MIN_WEBHOOK_SECRET:
+        return ""
+    if name == "donation_webhook_secret" and secret == (getattr(settings, "payment_webhook_secret", "") or ""):
+        return ""
+    return secret
+
+
+def sandbox_allowed(settings: Any) -> bool:
+    """O sandbox não move dinheiro: nunca em produção; em staging, só ligado explicitamente (v0.35.0, auditoria PAY-01)."""
+    if getattr(settings, "env", "") == "production":
+        return False
+    return bool(getattr(settings, "payment_sandbox_enabled", True))
+
+
 def provider_for(settings: Any, name: str | None = None) -> PaymentProvider:
     name = name or SANDBOX
     if name in LIVE_PROVIDERS and getattr(settings, "live_payment_provider_enabled", False):
         raise NotImplementedError("adaptador real entra por ADR, com credencial no cofre")   # pragma: no cover
     if name != SANDBOX:
         raise unprocessable(f"provedor '{name}' não disponível: só o sandbox existe nesta versão", code="provider_unavailable")
-    return SandboxProvider(getattr(settings, "payment_webhook_secret", "") or "")
+    if not sandbox_allowed(settings):
+        raise unprocessable("doações indisponíveis neste ambiente: não há provedor de pagamento real, e o provedor de teste "
+                            "(sandbox) não funciona em produção", code="provider_unavailable")
+    return SandboxProvider(webhook_secret(settings, "donation_webhook_secret"))
 
 
 def redact(payload: dict) -> dict:
@@ -345,9 +385,15 @@ def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_c
                  " title, funding_source FROM campaigns WHERE slug = $1", campaign_slug)
     if not camp or camp["status"] not in ("published", "target_reached"):
         raise not_found("Campanha aberta a doações")
+    if not c.scalar("SELECT beneficiary_verified($1::uuid)", camp["beneficiary_org_id"]):
+        # v0.35.0 (auditoria, KYC-03): verificação vencida ou desfeita fecha a entrada de doações, não só a publicação
+        raise ApiError(409, "beneficiary_not_verified", "O beneficiário desta campanha está sem verificação válida; doações pausadas")
     if funding_source not in (None, "private", "public", "mixed"):
         raise unprocessable("origem do recurso desconhecida", code="funding_source")
-    funding_source = funding_source or camp["funding_source"]
+    # v0.35.0 (auditoria, PAY-08): a origem declarada pelo doador só pode ENDURECER a da campanha (ex.: órgão público que doa
+    # recurso público a uma campanha privada), nunca aliviá-la. Antes, `private` numa campanha pública fazia a taxa nascer
+    # calculada sobre recurso público — contra a regra de recurso público isento por padrão (ADR-379).
+    funding_source = effective_funding_source(camp["funding_source"], funding_source)
     if amount_cents < int(camp["min_donation_cents"]):
         raise unprocessable(f"doação mínima desta campanha: {camp['min_donation_cents']} centavos", code="below_minimum")
     if method not in ("pix", "card"):
@@ -361,10 +407,13 @@ def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_c
             raise unprocessable("contribuição voluntária à plataforma não está disponível (regra inativa)", code="contribution_unavailable")
         if contribution > min(int(amount_cents), CONTRIBUTION_CAP_CENTS):
             raise unprocessable("contribuição acima do teto: o menor entre o valor doado e R$ 500,00", code="contribution_above_cap")
+        if funding_source != "private":
+            # PAY-08: contribuição (e o split que ela permite) nunca em recurso público ou misto
+            raise unprocessable("contribuição à plataforma não se aplica a recurso público ou misto", code="contribution_public_funds")
     if idempotency_key:
-        dup = c.one("SELECT id::text AS id FROM donations WHERE campaign_id = $1 AND idempotency_key = $2", camp["id"], idempotency_key)
+        dup = _idempotent_replay(c, camp["id"], idempotency_key, amount_cents=amount_cents, method=method, contribution=contribution)
         if dup:
-            return get_donation(c, dup["id"], settings=settings) | {"duplicate": True}
+            return get_donation(c, dup, settings=settings) | {"duplicate": True}
     prov = provider_for(settings)
     # Destinação ao fundo declarada na campanha: nesta versão, 0 (a organização ainda não declara na tela); o teto é a regra.
     fund_bps_declared = 0
@@ -372,17 +421,21 @@ def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_c
                                   fund_bps_declared=fund_bps_declared)
     # Split só para a contribuição VOLUNTÁRIA (nada sai do valor doado) e só com a trava ligada e um provedor que divida.
     split_cents = contribution if (contribution > 0 and getattr(settings, "split_enabled", False) and getattr(prov, "supports_split", False)) else 0
-    did = c.scalar(
-        "INSERT INTO donations(campaign_id, beneficiary_org_id, donor_user_id, donor_display, donor_contact_enc, public_anonymous,"
-        " amount_cents, method, provider, status, fee_rule_version_id, fund_rule_version_id, provider_fee_schedule_id,"
-        " platform_fee_cents, beneficiary_fund_cents, provider_fee_cents, cover_costs_opt_in, cover_costs_cents, qr_version, idempotency_key,"
-        " donor_org_id, funding_source, platform_contribution_cents, split_platform_cents, recurring_agreement_id)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'created',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) RETURNING id::text",
-        camp["id"], camp["beneficiary_org_id"], donor_user_id, (donor_display or None), (cipher.encrypt(donor_email) if donor_email else None),
-        public_anonymous, amount_cents, method, prov.name, frozen["fee_rule_version_id"], frozen["fund_rule_version_id"],
-        frozen["provider_fee_schedule_id"], b.platform_fee_cents, b.beneficiary_fund_cents, b.provider_fee_cents, cover_costs,
-        b.cover_costs_cents, camp["qr_version"], idempotency_key, donor_org_id, funding_source or "private", contribution, split_cents,
-        recurring_agreement_id)
+    if idempotency_key:
+        c.run("SAVEPOINT donation_insert")
+    try:
+        did = _insert_donation(c, camp, donor_user_id=donor_user_id, donor_display=donor_display, donor_email=donor_email, cipher=cipher,
+                               public_anonymous=public_anonymous, amount_cents=amount_cents, method=method, prov=prov, frozen=frozen, b=b,
+                               cover_costs=cover_costs, idempotency_key=idempotency_key, donor_org_id=donor_org_id,
+                               funding_source=funding_source, contribution=contribution, split_cents=split_cents,
+                               recurring_agreement_id=recurring_agreement_id)
+    except UniqueViolation:
+        if not idempotency_key:
+            raise
+        # PAY-02: dois pedidos simultâneos com a mesma chave — o segundo devolve a doação do primeiro (antes: erro 500)
+        c.run("ROLLBACK TO SAVEPOINT donation_insert")
+        dup = _idempotent_replay(c, camp["id"], idempotency_key, amount_cents=amount_cents, method=method, contribution=contribution)
+        return get_donation(c, dup, settings=settings) | {"duplicate": True}
     split = [{"receiver": "platform", "amount_cents": split_cents, "reason": CONTRIBUTION_RULE}] if split_cents else None
     try:
         ch = prov.create_charge(donation_id=did, amount_cents=amount_cents + b.cover_costs_cents + contribution, method=method,
@@ -393,6 +446,45 @@ def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_c
     c.run("UPDATE donations SET status = 'awaiting_payment', provider_charge_id = $2, expires_at = $3 WHERE id = $1", did, ch.provider_charge_id, ch.expires_at)
     _risk_screen(c, donation_id=did, campaign_id=camp["id"], amount_cents=amount_cents, donor_user_id=donor_user_id)
     return get_donation(c, did, settings=settings) | {"pix_payload": ch.pix_payload, "checkout_url": ch.checkout_url}
+
+
+FUNDING_RANK = {"private": 0, "mixed": 1, "public": 2}
+
+
+def effective_funding_source(campaign_source: str | None, declared: str | None) -> str:
+    """A origem que vale para a doação: a MAIS restritiva entre a da campanha e a declarada (privado < misto < público)."""
+    base = campaign_source or "private"
+    if declared is None:
+        return base
+    return declared if FUNDING_RANK[declared] > FUNDING_RANK.get(base, 0) else base
+
+
+def _idempotent_replay(c: Connection, campaign_id: str, key: str, *, amount_cents: int, method: str, contribution: int) -> str | None:
+    """Mesma chave = mesmo pedido. Chave repetida com valor, meio ou contribuição diferentes é recusada (409): devolver a
+    doação antiga em silêncio faria o doador pagar um valor que não pediu (auditoria, PAY-02)."""
+    dup = c.one("SELECT id::text AS id, amount_cents, method, platform_contribution_cents FROM donations"
+                " WHERE campaign_id = $1 AND idempotency_key = $2", campaign_id, key)
+    if not dup:
+        return None
+    if (int(dup["amount_cents"]), dup["method"], int(dup["platform_contribution_cents"])) != (int(amount_cents), method, int(contribution)):
+        raise ApiError(409, "idempotency_conflict", "Esta chave de idempotência já foi usada para outro pedido (valor ou meio diferente)")
+    return dup["id"]
+
+
+def _insert_donation(c: Connection, camp: dict, *, donor_user_id, donor_display, donor_email, cipher, public_anonymous, amount_cents, method,
+                     prov, frozen, b, cover_costs, idempotency_key, donor_org_id, funding_source, contribution, split_cents,
+                     recurring_agreement_id) -> str:
+    return c.scalar(
+        "INSERT INTO donations(campaign_id, beneficiary_org_id, donor_user_id, donor_display, donor_contact_enc, public_anonymous,"
+        " amount_cents, method, provider, status, fee_rule_version_id, fund_rule_version_id, provider_fee_schedule_id,"
+        " platform_fee_cents, beneficiary_fund_cents, provider_fee_cents, cover_costs_opt_in, cover_costs_cents, qr_version, idempotency_key,"
+        " donor_org_id, funding_source, platform_contribution_cents, split_platform_cents, recurring_agreement_id)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'created',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24) RETURNING id::text",
+        camp["id"], camp["beneficiary_org_id"], donor_user_id, (donor_display or None), (cipher.encrypt(donor_email) if donor_email else None),
+        public_anonymous, amount_cents, method, prov.name, frozen["fee_rule_version_id"], frozen["fund_rule_version_id"],
+        frozen["provider_fee_schedule_id"], b.platform_fee_cents, b.beneficiary_fund_cents, b.provider_fee_cents, cover_costs,
+        b.cover_costs_cents, camp["qr_version"], idempotency_key, donor_org_id, funding_source or "private", contribution, split_cents,
+        recurring_agreement_id)
 
 
 def get_donation(c: Connection, donation_id: str, *, settings: Any) -> dict:
@@ -422,15 +514,20 @@ def record_provider_event(c: Connection, *, provider: str, event: dict, signatur
     `duplicate` com o estado do processamento — e um evento ainda não aplicado (`received`/`failed`) pode ser reaplicado."""
     sha = hashlib.sha256(raw or b"").hexdigest()
     status = "received" if signature_verified else "rejected"
+    # v0.35.0 (auditoria, PAY-01): evento SEM assinatura válida fica guardado para auditoria sob um identificador próprio
+    # (`unverified:` + hash do corpo), nunca sob o `event_id` que ele alega. Antes, quem conhecesse o id de um evento
+    # futuro podia mandá-lo primeiro, sem assinatura: o verdadeiro chegava depois como "duplicado" e não era aplicado.
+    stored_event_id = event["event_id"] if signature_verified else f"unverified:{sha[:40]}"
     row_id = c.scalar(
         "INSERT INTO payment_provider_events(provider, event_id, event_type, provider_charge_id, amount_cents, signature_verified,"
         " payload_redacted, payload_sha256, processing_status, processing_note)"
         " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10) ON CONFLICT (provider, event_id) DO NOTHING RETURNING id",
-        provider, event["event_id"], event["event_type"], event.get("provider_charge_id"), event.get("amount_cents"), signature_verified,
-        json.dumps(redact(event.get("raw") or {})), sha, status, (None if signature_verified else "assinatura inválida: nenhum efeito"))
+        provider, stored_event_id, event["event_type"], event.get("provider_charge_id"), event.get("amount_cents"), signature_verified,
+        json.dumps(redact(event.get("raw") or {})), sha, status,
+        (None if signature_verified else f"assinatura inválida ou fora da janela: nenhum efeito (event_id alegado: {event['event_id'][:80]})"))
     if row_id is None:
         existing = c.one("SELECT id, processing_status, signature_verified FROM payment_provider_events WHERE provider = $1 AND event_id = $2",
-                         provider, event["event_id"])
+                         provider, stored_event_id)
         c.run("UPDATE payment_provider_events SET attempts = attempts + 1 WHERE id = $1", existing["id"])
         return {"event_row_id": existing["id"], "duplicate": True, "applied": False, "status": existing["processing_status"],
                 "reapplicable": bool(existing["signature_verified"]) and existing["processing_status"] in ("received", "failed")}
@@ -453,7 +550,7 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
     travada: duas entregas simultâneas não aplicam duas vezes); valor conferido; transição atômica."""
     lock = c.one("SELECT processing_status, signature_verified FROM payment_provider_events WHERE id = $1 FOR UPDATE", row_id)
     rec = {"event_row_id": row_id, "duplicate": False, "applied": True}
-    if not lock or not lock["signature_verified"] or lock["processing_status"] not in ("received", "failed"):
+    if not lock or not lock["signature_verified"] or lock["processing_status"] not in ("received", "failed", "deferred"):
         return rec | {"effect": "none", "duplicate": True, "status": lock["processing_status"] if lock else None}
     et = event["event_type"]
     raw = event.get("raw") or {}
@@ -472,14 +569,17 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
     expected_settlement = expected_total - int(d["provider_fee_cents"]) - int(d["split_platform_cents"]) - int(d["refunded_cents"])
     if et in SETTLEMENT_FAILED_EVENTS:
         if d["status"] not in ("confirmed", "reconciled", "partially_refunded"):
-            _close(c, row_id, "ignored", "falha de liquidação sem confirmação prévia")
-            return rec | {"effect": "ignored", "note": "falha de liquidação sem confirmação prévia"}
+            return rec | _defer(c, row_id, d, "falha de liquidação antes da confirmação")
         from . import reconciliation as RECON
         RECON.open_from_event(c, kind="settlement_failed", campaign_id=d["campaign_id"], org_id=d["beneficiary_org_id"], donation_id=d["id"],
                               provider=provider, provider_ref=cid, expected=expected_settlement, observed=int(d["settled_cents"]),
                               detail="o provedor informou falha na liquidação ao beneficiário: " + str(raw.get("reason") or "sem motivo informado")[:300])
         _close(c, row_id, "applied", "falha de liquidação: exceção aberta; o pagamento continua confirmado")
         return rec | {"effect": "settlement_failed", "donation_id": d["id"]}
+    # v0.35.0 (auditoria, PAY-03): liquidação que chega ANTES da confirmação fica adiada e é reaplicada depois dela
+    # (antes caía em "tipo sem efeito" e se perdia). PAYMENT_RECEIVED confirma e liquida, então não entra aqui.
+    if et in SETTLE_EVENTS and et not in CONFIRMING_EVENTS and d["status"] in ("awaiting_payment", "under_review"):
+        return rec | _defer(c, row_id, d, "liquidação antes da confirmação")
     # Liquidação de doação já confirmada (pode ser PARCIAL: `settled_cents` no evento). Nunca "desliquida".
     if et in SETTLE_EVENTS and d["status"] in ("confirmed", "reconciled", "partially_refunded"):
         if d["settled_at"] is not None:
@@ -488,6 +588,8 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
         return rec | _apply_settlement(c, d, row_id=row_id, provider=provider, raw=raw, expected=expected_settlement)
     if et in PARTIAL_REFUND_EVENTS:
         amt = int(event.get("amount_cents") or 0)
+        if amt > 0 and d["status"] in ("awaiting_payment", "under_review"):
+            return rec | _defer(c, row_id, d, "estorno parcial antes da confirmação")
         if d["status"] not in ("confirmed", "reconciled", "partially_refunded") or amt <= 0:
             _close(c, row_id, "ignored", "estorno parcial sem confirmação ou sem valor")
             return rec | {"effect": "ignored", "note": "estorno parcial sem confirmação ou sem valor"}
@@ -510,11 +612,14 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
         _close(c, row_id, "applied")
         return rec | {"effect": effect, "donation_id": d["id"], "refunded_cents": new_total}
     if et in CONFIRMING_EVENTS:
-        if event.get("amount_cents") is not None and int(event["amount_cents"]) != expected_total or (event.get("currency") or "BRL") != d["currency"]:
+        # v0.35.0 (auditoria, PAY-05): confirmação SEM valor não confirma — antes pulava a conferência do valor.
+        missing = event.get("amount_cents") is None
+        if missing or int(event["amount_cents"]) != expected_total or (event.get("currency") or "BRL") != d["currency"]:
             c.run("UPDATE donations SET status = 'under_review' WHERE id = $1 AND status = 'awaiting_payment'", d["id"])
-            open_risk_case(c, campaign_id=d["campaign_id"], donation_id=d["id"], reason_codes=["amount_mismatch"], level="high",
-                           explanation=f"evento do provedor com valor/moeda diferente da cobrança: {event.get('amount_cents')} {event.get('currency')} ≠ {expected_total} {d['currency']}")
-            _close(c, row_id, "applied", "divergência: doação em revisão")
+            open_risk_case(c, campaign_id=d["campaign_id"], donation_id=d["id"], reason_codes=["amount_missing" if missing else "amount_mismatch"], level="high",
+                           explanation=("evento de confirmação sem valor: nada é confirmado sem conferir o valor" if missing else
+                                        f"evento do provedor com valor/moeda diferente da cobrança: {event.get('amount_cents')} {event.get('currency')} ≠ {expected_total} {d['currency']}"))
+            _close(c, row_id, "applied", "sem valor: doação em revisão" if missing else "divergência: doação em revisão")
             return rec | {"effect": "under_review"}
         if d["status"] in ("confirmed", "reconciled"):
             _close(c, row_id, "ignored", "já confirmada")
@@ -535,6 +640,7 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
             out["settlement"] = settle.get("effect")
         _close(c, row_id, "applied")
         _maybe_target_reached(c, d["campaign_id"])
+        out["deferred_applied"] = _replay_deferred(c, provider=provider, donation_id=d["id"])
         return out
     if et in REFUND_EVENTS or et in CHARGEBACK_EVENTS:
         kind = "chargeback" if et in CHARGEBACK_EVENTS else "refund"
@@ -543,6 +649,8 @@ def apply_recorded_event(c: Connection, *, provider: str, row_id: int, event: di
         if d["status"] in ("refunded", "chargeback") or int(d["refunded_cents"]) >= expected_total:
             _close(c, row_id, "ignored", "reversão já lançada")
             return rec | {"effect": "already_reversed"}
+        if d["status"] in ("awaiting_payment", "under_review"):
+            return rec | _defer(c, row_id, d, "reversão antes da confirmação")
         if d["status"] not in ("confirmed", "reconciled", "refund_pending", "partially_refunded"):
             _close(c, row_id, "ignored", "reversão sem confirmação prévia")
             return rec | {"effect": "ignored", "note": "reversão sem confirmação prévia"}
@@ -579,8 +687,14 @@ def _apply_settlement(c: Connection, d: dict, *, row_id: int, provider: str, raw
     c.run("UPDATE donations SET settled_cents = $2 WHERE id = $1", d["id"], cumulative)
     if cumulative >= expected:
         c.run("UPDATE donations SET settled_at = now() WHERE id = $1 AND settled_at IS NULL", d["id"])
+        if cumulative > expected:
+            # v0.35.0 (auditoria, PAY-05): liquidar MAIS do que o esperado também é divergência (antes passava calado)
+            from . import reconciliation as RECON
+            RECON.open_from_event(c, kind="amount_mismatch", campaign_id=d["campaign_id"], org_id=d["beneficiary_org_id"], donation_id=d["id"],
+                                  provider=provider, provider_ref=None, expected=expected, observed=cumulative,
+                                  detail=f"liquidação acima do esperado: {cumulative} de {expected} centavos")
         if close:
-            _close(c, row_id, "applied", "liquidação")
+            _close(c, row_id, "applied", "liquidação" if informed is not None else "liquidação sem valor informado: considerada total")
         return {"effect": "settled", "donation_id": d["id"], "settled_cents": cumulative}
     from . import reconciliation as RECON
     RECON.open_from_event(c, kind="settlement_partial", campaign_id=d["campaign_id"], org_id=d["beneficiary_org_id"], donation_id=d["id"],
@@ -591,10 +705,64 @@ def _apply_settlement(c: Connection, d: dict, *, row_id: int, provider: str, raw
     return {"effect": "settled_partial", "donation_id": d["id"], "settled_cents": cumulative}
 
 
+MAX_EVENT_ATTEMPTS = 10
+
+
+def _defer(c: Connection, row_id: int, d: dict, why: str) -> dict:
+    """Evento que depende de uma confirmação que ainda não chegou: fica 'deferred' (nunca perdido) e é reaplicado por
+    `_replay_deferred` logo depois da confirmação (auditoria, PAY-03)."""
+    c.run("UPDATE payment_provider_events SET processing_status = 'deferred', processing_note = $2 WHERE id = $1", row_id,
+          ("adiado: " + why)[:500])
+    return {"effect": "deferred", "donation_id": d["id"], "note": why}
+
+
+def _replay_deferred(c: Connection, *, provider: str, donation_id: str) -> int:
+    """Reaplica, na ordem de chegada, os eventos adiados desta doação. Devolve quantos produziram efeito."""
+    n = 0
+    for r in c.query("SELECT id, provider, event_id, event_type, provider_charge_id, amount_cents, payload_redacted FROM payment_provider_events"
+                     " WHERE donation_id = $1 AND provider = $2 AND processing_status = 'deferred' ORDER BY id", donation_id, provider):
+        out = apply_recorded_event(c, provider=provider, row_id=int(r["id"]), event=event_from_row(r))
+        n += 0 if out.get("effect") in ("deferred", "ignored", "none") else 1
+    return n
+
+
+def release_after_review(c: Connection, *, case_id: str) -> list[str]:
+    """Decisão humana "permitir" num caso de risco: a doação retida só vira confirmada pelo MESMO caminho de uma confirmação
+    normal — razão em partidas dobradas, obrigações e comprovante (auditoria, PAY-05: antes era um UPDATE de estado, sem
+    lançamento). Só libera doação com evento de confirmação ASSINADO; a diferença de valor, se houve, vira exceção de
+    conciliação com o valor esperado e o informado."""
+    released = []
+    for d in c.query("SELECT id::text AS id, campaign_id::text AS campaign_id, beneficiary_org_id::text AS beneficiary_org_id, status, amount_cents,"
+                     " cover_costs_cents, provider_fee_cents, platform_fee_cents, beneficiary_fund_cents, is_simulated, currency, settled_at, refunded_cents,"
+                     " fee_rule_version_id, funding_source, platform_contribution_cents, split_platform_cents, settled_cents, provider, provider_charge_id,"
+                     " recurring_agreement_id::text AS recurring_agreement_id FROM donations WHERE risk_case_id = $1 AND status = 'under_review' FOR UPDATE",
+                     case_id):
+        ev = c.one("SELECT id, event_id, amount_cents, payload_redacted FROM payment_provider_events WHERE donation_id = $1 AND signature_verified"
+                   " AND event_type = ANY($2::text[]) ORDER BY id DESC LIMIT 1", d["id"], sorted(CONFIRMING_EVENTS))
+        if not ev:
+            continue
+        c.run("UPDATE donations SET status = 'confirmed' WHERE id = $1", d["id"])
+        _post_confirmation(c, d, source_event_id=int(ev["id"]))
+        payload = ev["payload_redacted"] if isinstance(ev["payload_redacted"], dict) else json.loads(ev["payload_redacted"] or "{}")
+        _register_obligations(c, d, split_event=payload.get("split"), event_id=ev["event_id"])
+        issue_receipt(c, d["id"])
+        expected_total = int(d["amount_cents"]) + int(d["cover_costs_cents"]) + int(d["platform_contribution_cents"])
+        if ev["amount_cents"] is None or int(ev["amount_cents"]) != expected_total:
+            from . import reconciliation as RECON
+            RECON.open_from_event(c, kind="amount_mismatch", campaign_id=d["campaign_id"], org_id=d["beneficiary_org_id"], donation_id=d["id"],
+                                  provider=d["provider"], provider_ref=d["provider_charge_id"], expected=expected_total,
+                                  observed=None if ev["amount_cents"] is None else int(ev["amount_cents"]),
+                                  detail="confirmada por decisão humana com valor do provedor diferente (ou ausente): conferir no extrato")
+        _maybe_target_reached(c, d["campaign_id"])
+        _replay_deferred(c, provider=d["provider"], donation_id=d["id"])
+        released.append(d["id"])
+    return released
+
+
 def mark_event_failed(c: Connection, *, row_id: int, error: str) -> None:
     """Erro interno ao aplicar um evento já gravado: o evento fica `failed` (nunca perdido) e entra na fila de exceções."""
-    c.run("UPDATE payment_provider_events SET processing_status = 'failed', processing_note = $2, processed_at = now()"
-          " WHERE id = $1 AND processing_status IN ('received','failed')", row_id, ("erro ao aplicar: " + error)[:500])
+    c.run("UPDATE payment_provider_events SET processing_status = 'failed', processing_note = $2, processed_at = now(), apply_attempts = apply_attempts + 1"
+          " WHERE id = $1 AND processing_status IN ('received','failed','deferred')", row_id, ("erro ao aplicar: " + error)[:500])
     from . import reconciliation as RECON
     row = c.one("SELECT provider, event_id, provider_charge_id FROM payment_provider_events WHERE id = $1", row_id)
     if row:
@@ -606,9 +774,11 @@ def mark_event_failed(c: Connection, *, row_id: int, error: str) -> None:
 def reprocess_pending_events(c: Connection, *, older_than_seconds: int = 60, limit: int = 200) -> dict:
     """Rotina (cenário 35): reaplica eventos ASSINADOS que ficaram `failed` ou `received` (o processo caiu entre gravar e
     aplicar). Cada um numa savepoint: um evento ruim não impede os outros. Idempotente pela trava da linha do evento."""
+    # v0.35.0 (auditoria, PAY-12): no máximo MAX_EVENT_ATTEMPTS tentativas — depois o evento fica na fila de exceções
+    # (aberta por mark_event_failed) para uma pessoa, em vez de ser reaplicado para sempre.
     rows = c.query("SELECT id, provider, event_id, event_type, provider_charge_id, amount_cents, payload_redacted FROM payment_provider_events"
-                   " WHERE signature_verified AND processing_status IN ('failed','received')"
-                   " AND received_at < now() - make_interval(secs => $1) ORDER BY id LIMIT $2", older_than_seconds, limit)
+                   " WHERE signature_verified AND processing_status IN ('failed','received') AND apply_attempts < $3"
+                   " AND received_at < now() - make_interval(secs => $1) ORDER BY id LIMIT $2", older_than_seconds, limit, MAX_EVENT_ATTEMPTS)
     done = failed = 0
     for r in rows:
         c.run("SAVEPOINT reprocess_event")
@@ -801,58 +971,103 @@ def _maybe_target_reached(c: Connection, campaign_id: str) -> None:
             c.run("UPDATE campaigns SET status = 'target_reached' WHERE id = $1", campaign_id)
 
 
-def reconcile_campaign(c: Connection, campaign_id: str, *, provider_confirmed_ids: set[str] | None = None) -> dict:
-    """Marca `reconciled` o que o provedor confirma (lista vinda da consulta ao provedor) e aponta divergências.
-    No sandbox a lista vem da ferramenta de operação (não há consulta): o que não estiver nela fica como exceção."""
-    rows = c.query("SELECT id::text AS id, provider_charge_id, status FROM donations WHERE campaign_id = $1 AND status = 'confirmed'", campaign_id)
-    ok, exceptions = 0, []
-    for r in rows:
-        if provider_confirmed_ids is None or r["provider_charge_id"] in provider_confirmed_ids:
-            c.run("UPDATE donations SET status = 'reconciled' WHERE id = $1", r["id"])
-            ok += 1
-        else:
-            exceptions.append(r["id"])
-    return {"reconciled": ok, "exceptions": exceptions, "at": datetime.now(UTC).isoformat()}
-
-
 # ============================================================================ risco (graduado, explicável, humano)
-RISK_RULES_VERSION = "donation-risk-2026-10.1"   # ver config/donation_risk_rules.json
+RISK_RULES_FILE = Path(__file__).resolve().parents[3] / "config" / "donation_risk_rules.json"
 
 
-def _risk_screen(c: Connection, *, donation_id: str, campaign_id: str, amount_cents: int, donor_user_id: str | None) -> None:
-    """Regras simples e declaradas. Nenhuma é limite legal. Resultado: caso para revisão humana, nunca bloqueio de dinheiro."""
+def load_risk_rules(path: Path | None = None) -> dict:
+    """v0.35.0 (auditoria, FRAUD-02): os limiares vêm do arquivo versionado — antes estavam no código e o arquivo só os
+    espelhava (dava para mudar um sem o outro). Regra desconhecida no arquivo é ignorada; regra conhecida que falta no
+    arquivo fica DESLIGADA (e o teste de versão reprova a mudança sem nova versão)."""
+    data = json.loads((path or RISK_RULES_FILE).read_text(encoding="utf-8"))
+    return {"version": data["version"], "rules": {r["code"]: r for r in data["rules"]}}
+
+
+RISK_RULES = load_risk_rules()
+RISK_RULES_VERSION = RISK_RULES["version"]
+
+
+def _risk_screen(c: Connection, *, donation_id: str, campaign_id: str, amount_cents: int, donor_user_id: str | None,
+                 rules: dict | None = None) -> list[str]:
+    """Regras declaradas no arquivo de regras. Nenhuma é limite legal. Resultado: caso para revisão humana, nunca bloqueio
+    de dinheiro nem acusação."""
+    cfg = rules or RISK_RULES
+    r = cfg["rules"]
     reasons = []
-    if amount_cents >= 10_000_00:
+    big = r.get("large_single_donation")
+    if big and amount_cents >= int(big["threshold_cents"]):
         reasons.append("large_single_donation")
-    n_recent = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND created_at > now() - interval '10 minutes'", campaign_id)
-    if int(n_recent or 0) >= 20:
-        reasons.append("burst_attempts")
-    age_days = c.scalar("SELECT extract(epoch FROM now() - coalesce(published_at, created_at)) / 86400 FROM campaigns WHERE id = $1", campaign_id)
-    if age_days is not None and float(age_days) < 1 and amount_cents >= 2_000_00:
-        reasons.append("new_campaign_large_inflow")
+    burst = r.get("burst_attempts")
+    if burst:
+        n_recent = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND created_at > now() - make_interval(mins => $2)",
+                            campaign_id, int(burst["window_minutes"]))
+        if int(n_recent or 0) >= int(burst["threshold_count"]):
+            reasons.append("burst_attempts")
+    new = r.get("new_campaign_large_inflow")
+    if new:
+        age_days = c.scalar("SELECT extract(epoch FROM now() - coalesce(published_at, created_at)) / 86400 FROM campaigns WHERE id = $1", campaign_id)
+        if age_days is not None and float(age_days) < float(new["campaign_age_days_less_than"]) and amount_cents >= int(new["threshold_cents"]):
+            reasons.append("new_campaign_large_inflow")
+    st = r.get("structuring")
+    if st and donor_user_id and big and amount_cents < int(big["threshold_cents"]):
+        # FRAUD-03: várias doações da mesma conta, cada uma abaixo do limite de doação grande, que juntas o alcançam
+        agg = c.one("SELECT count(*) AS n, coalesce(sum(amount_cents), 0) AS total FROM donations WHERE campaign_id = $1 AND donor_user_id = $2"
+                    " AND amount_cents < $3 AND created_at > now() - make_interval(hours => $4) AND status NOT IN ('cancelled','failed','expired')",
+                    campaign_id, donor_user_id, int(big["threshold_cents"]), int(st["window_hours"]))
+        if int(agg["n"]) >= int(st["min_count"]) and int(agg["total"]) >= int(st["sum_at_least_cents"]):
+            reasons.append("structuring")
     if reasons:
-        level = "high" if "large_single_donation" in reasons else "medium"
+        level = "high" if any((r.get(x) or {}).get("level") == "high" for x in reasons) else "medium"
         open_risk_case(c, campaign_id=campaign_id, donation_id=donation_id, reason_codes=reasons, level=level,
-                       explanation="sinais de risco configurados (" + ", ".join(reasons) + "); revisão humana; nenhum valor é retido pela plataforma")
+                       explanation="sinais de risco configurados (" + ", ".join(reasons) + "); revisão humana; nenhum valor é retido pela plataforma",
+                       rule_version=cfg["version"])
+    return reasons
 
 
-def open_risk_case(c: Connection, *, campaign_id: str | None, donation_id: str | None, reason_codes: list[str], level: str, explanation: str) -> str:
+def open_risk_case(c: Connection, *, campaign_id: str | None, donation_id: str | None, reason_codes: list[str], level: str, explanation: str,
+                   rule_version: str | None = None) -> str:
     rid = c.scalar("INSERT INTO donation_risk_cases(campaign_id, donation_id, reason_codes, level, action, rule_version, explanation)"
-                   " VALUES ($1,$2,$3,$4,'review',$5,$6) RETURNING id::text", campaign_id, donation_id, reason_codes, level, RISK_RULES_VERSION, explanation)
+                   " VALUES ($1,$2,$3,$4,'review',$5,$6) RETURNING id::text", campaign_id, donation_id, reason_codes, level,
+                   rule_version or RISK_RULES_VERSION, explanation)
     if donation_id:
         c.run("UPDATE donations SET risk_case_id = $2 WHERE id = $1 AND risk_case_id IS NULL", donation_id, rid)
     return rid
 
 
-def decide_risk_case(c: Connection, *, case_id: str, decided_by: str, action: str, note: str) -> dict:
+def decide_risk_case(c: Connection, *, case_id: str, decided_by: str, action: str, note: str,
+                     evidence: list[dict] | None = None) -> dict:
+    """Primeira decisão (aberto → decidido) ou decisão do RECURSO (recorrido → encerrado). O recurso é decidido por OUTRA
+    pessoa — não por quem decidiu da primeira vez (v0.35.0, auditoria FRAUD-05; conferido também pelo banco)."""
     if action not in ("allow", "request_information", "reject", "report_to_provider"):
         raise unprocessable("ação não permitida nesta versão (payout_hold exige contrato com o provedor)", code="risk_action")
     if len(note or "") < 10:
         raise unprocessable("decisão exige justificativa", code="decision_note_required")
-    if not c.run("UPDATE donation_risk_cases SET status = 'decided', action = $2, decided_by = $3, decided_at = now(), decision_note = $4"
-                 " WHERE id = $1 AND status = 'open'", case_id, action, decided_by, note):
-        raise not_found("Caso de risco aberto")
-    return {"id": case_id, "action": action}
+    case = c.one("SELECT status, decided_by::text AS decided_by FROM donation_risk_cases WHERE id = $1 FOR UPDATE", case_id)
+    if not case or case["status"] not in ("open", "appealed"):
+        raise not_found("Caso de risco aberto ou em recurso")
+    refs = json.dumps(evidence or [])
+    if case["status"] == "open":
+        c.run("UPDATE donation_risk_cases SET status = 'decided', action = $2, decided_by = $3, decided_at = now(), decision_note = $4,"
+              " evidence_refs = evidence_refs || $5::jsonb WHERE id = $1", case_id, action, decided_by, note, refs)
+        return {"id": case_id, "action": action, "status": "decided"}
+    if case["decided_by"] == decided_by:
+        raise ApiError(403, "four_eyes", "O recurso é decidido por outra pessoa, não por quem tomou a primeira decisão")
+    c.run("UPDATE donation_risk_cases SET status = 'closed', action = $2, appeal_decided_by = $3, appeal_decision_note = $4, closed_at = now(),"
+          " evidence_refs = evidence_refs || $5::jsonb WHERE id = $1", case_id, action, decided_by, note, refs)
+    return {"id": case_id, "action": action, "status": "closed", "appeal": True}
+
+
+def appeal_risk_case(c: Connection, *, case_id: str, campaign_id: str, org_id: str, user_id: str, note: str) -> dict:
+    """Recurso da organização beneficiária contra a decisão (pedido de informação, recusa, comunicação ao provedor)."""
+    case = c.one("SELECT r.status, r.action FROM donation_risk_cases r JOIN campaigns k ON k.id = r.campaign_id"
+                 " WHERE r.id = $1 AND r.campaign_id = $2 AND k.beneficiary_org_id = $3 FOR UPDATE OF r", case_id, campaign_id, org_id)
+    if not case:
+        raise not_found("Caso desta campanha")
+    if case["status"] != "decided" or case["action"] == "allow":
+        raise ApiError(409, "not_appealable", "Só cabe recurso contra decisão que restringiu algo (e uma vez)")
+    c.run("UPDATE donation_risk_cases SET status = 'appealed', appeal_note = $2, appealed_by = $3, appealed_at = now() WHERE id = $1",
+          case_id, note, user_id)
+    return {"id": case_id, "status": "appealed"}
 
 
 # ============================================================================ comprovante

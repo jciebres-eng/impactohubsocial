@@ -217,10 +217,20 @@ def register_receipt(c: Connection, *, obligation_id: str, actor: str, received_
     return {"state": o["state"], "received_cents": total, "partial": True}
 
 
+def _four_eyes(c: Connection, obligation_id: str, actor: str, handled: tuple[str, ...]) -> None:
+    """v0.35.0 (auditoria, AUTHZ-06): quem operou a cobrança (faturou, cobrou, registrou o recebimento) não decide sozinho o
+    desfecho dela (liquidar, reembolsar, dispensar, decidir disputa) — antes, uma pessoa com finance.approve fazia tudo."""
+    if actor and c.scalar("SELECT 1 FROM remuneration_obligation_events WHERE obligation_id = $1 AND actor_id = $2"
+                          " AND to_state = ANY($3::text[]) LIMIT 1", obligation_id, actor, list(handled)):
+        from ..http import ApiError
+        raise ApiError(403, "four_eyes", "Quem operou esta cobrança não pode decidir o desfecho dela: é preciso outra pessoa")
+
+
 def mark_settled(c: Connection, *, obligation_id: str, actor: str, note: str) -> dict:
     o = _get(c, obligation_id)
     if o["state"] != "received":
         raise unprocessable("liquidação exige obrigação recebida", code="obligation_state")
+    _four_eyes(c, obligation_id, actor, ("received",))
     _set(c, obligation_id, "settled", actor=actor, settled_at=datetime.now(UTC), received_reference=(o["received_reference"] or "") )
     c.run("INSERT INTO remuneration_obligation_events(obligation_id, from_state, to_state, actor_id, note) VALUES ($1,'settled','settled',$2,$3)",
           obligation_id, actor, "conciliação: " + note[:1900])
@@ -257,6 +267,7 @@ def decide_dispute(c: Connection, *, obligation_id: str, actor: str, outcome: st
         raise unprocessable("obrigação não está em disputa", code="obligation_state")
     if len(note or "") < 10:
         raise unprocessable("decisão exige justificativa", code="reason_required")
+    _four_eyes(c, obligation_id, actor, ("invoiced", "charged", "received"))
     if outcome == "uphold":
         target = "invoiced" if o["platform_charge_id"] else "due"
         _set(c, obligation_id, target, actor=actor)
@@ -278,6 +289,7 @@ def waive(c: Connection, *, obligation_id: str, actor: str, reason: str) -> dict
         raise unprocessable("não se dispensa obrigação recebida/liquidada/estornada", code="obligation_state")
     if len(reason or "") < 10:
         raise unprocessable("dispensa exige justificativa", code="reason_required")
+    _four_eyes(c, obligation_id, actor, ("invoiced", "charged", "received"))
     _set(c, obligation_id, "waived", actor=actor, waived_reason=reason[:2000])
     send_notice(c, org_id=o["org_id"], kind="waived", created_by=actor)
     return {"state": "waived"}
@@ -340,6 +352,7 @@ def refund_received(c: Connection, *, obligation_id: str, actor: str, refunded_c
         raise unprocessable("só obrigação recebida/liquidada é reembolsada", code="obligation_state")
     if int(refunded_cents) != int(o["received_cents"]):
         raise unprocessable("reembolso parcial é ajuste: registre a decisão e use o valor integral recebido aqui", code="partial_refund")
+    _four_eyes(c, obligation_id, actor, ("received",))
     _set(c, obligation_id, "reversed", actor=actor)
     c.run("INSERT INTO remuneration_obligation_events(obligation_id, from_state, to_state, actor_id, note) VALUES ($1,$2,'reversed',$3,$4)",
           obligation_id, o["state"], actor, (f"reembolso de {refunded_cents} centavos (ref. {reference[:80]}): " + note)[:2000])

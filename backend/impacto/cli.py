@@ -24,6 +24,8 @@ def main(argv: list[str]) -> int:
     a = sub.add_parser("create-admin")
     a.add_argument("--email", required=True)
     a.add_argument("--name", required=True)
+    a.add_argument("--promote-existing", action="store_true",
+                   help="promove uma conta JÁ existente (troca a senha pela informada e encerra as sessões dela)")
     sub.add_parser("seed-demo")
     k = sub.add_parser("kb-import", help="importa o conteúdo inicial da Central como RASCUNHOS (demo) para revisão editorial")
     k.add_argument("--author-email", required=True)
@@ -90,9 +92,23 @@ def main(argv: list[str]) -> int:
             if not org:
                 org = c.scalar("INSERT INTO organizations(kind, legal_name, compliance_status) VALUES ('platform','Administração da Plataforma','approved')"
                                " RETURNING id::text")
-            uid = c.scalar("INSERT INTO users(email, full_name, password_hash, is_platform_admin, email_verified_at) VALUES ($1,$2,$3,true, now())"
-                           " ON CONFLICT (email) DO UPDATE SET is_platform_admin = true RETURNING id::text",
-                           args.email.lower(), args.name, passwords.hash_password(pw))
+            # v0.35.0 (auditoria, AUTH-04): antes, um e-mail já cadastrado era promovido a administrador MANTENDO a senha que
+            # tinha — quem cadastrasse antes o e-mail do futuro administrador entrava como administrador. Agora conta
+            # existente é recusada; com --promote-existing, a senha passa a ser a informada aqui e as sessões são encerradas.
+            existente = c.one("SELECT id::text AS id FROM users WHERE email = $1", args.email.lower())
+            if existente and not args.promote_existing:
+                print("Já existe uma conta com este e-mail. Para promovê-la (a senha passa a ser a informada agora e as sessões"
+                      " dela são encerradas), repita com --promote-existing.", file=sys.stderr)
+                return 1
+            if existente:
+                uid = existente["id"]
+                c.run("UPDATE users SET is_platform_admin = true, password_hash = $2, failed_login_count = 0, locked_until = NULL,"
+                      " mfa_enabled_at = NULL, mfa_secret_enc = NULL, mfa_recovery_hashes = '{}', mfa_last_counter = NULL WHERE id = $1",
+                      uid, passwords.hash_password(pw))
+                c.run("UPDATE sessions SET revoked_at = now(), revoke_reason = 'promoted_to_admin' WHERE user_id = $1 AND revoked_at IS NULL", uid)
+            else:
+                uid = c.scalar("INSERT INTO users(email, full_name, password_hash, is_platform_admin, email_verified_at) VALUES ($1,$2,$3,true, now())"
+                               " RETURNING id::text", args.email.lower(), args.name, passwords.hash_password(pw))
             c.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'owner') ON CONFLICT DO NOTHING", uid, org)
             # `$2` DUAS VEZES COM TIPOS DIFERENTES NÃO FUNCIONA.
             #

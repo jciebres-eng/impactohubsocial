@@ -100,6 +100,12 @@ class CodeIn(In):
     code: Annotated[str, Field(min_length=6, max_length=10)]
 
 
+class MfaEnableIn(In):
+    code: Annotated[str, Field(min_length=6, max_length=10)]
+    # v0.35.0 (auditoria, AUTH-04): obrigatório para a equipe da plataforma (código enviado ao e-mail no mfa/setup)
+    email_code: Annotated[str, Field(min_length=6, max_length=10)] | None = None
+
+
 class MfaDisableIn(In):
     password: Annotated[str, Field(min_length=1, max_length=256)]
     code: Annotated[str, Field(min_length=6, max_length=10)]

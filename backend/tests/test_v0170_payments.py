@@ -280,14 +280,19 @@ class WebhookTests(PayBase):
         from impacto.economics import payments as PAY
         oc = owner_conn()
         try:
+            import uuid
             out = PAY.record_webhook(oc, provider="sandbox", event_id="evt_sem_assinatura",
-                                     event_type="charge.paid", payload={}, signature_verified=False)
+                                     event_type="charge.paid", payload={"event_id": "evt_sem_assinatura", "n": uuid.uuid4().hex},
+                                     signature_verified=False)
             self.assertFalse(out["applied"])
             self.assertIn("assinatura", out["note"].lower())
-            row = oc.one("SELECT status, signature_verified FROM billing_events"
-                         " WHERE event_id = 'evt_sem_assinatura'")
+            # v0.35.0 (auditoria, PAY-13): o evento sem assinatura é guardado sob identificador próprio (`unverified:` + hash),
+            # nunca sob o `event_id` que alega — senão ocuparia o lugar do evento verdadeiro. Procura-se pela linha devolvida.
+            row = oc.one("SELECT status, signature_verified, event_id FROM billing_events WHERE id = $1::bigint", out["id"])
             self.assertFalse(row["signature_verified"])
             self.assertEqual(row["status"], "rejected_signature")
+            self.assertTrue(row["event_id"].startswith("unverified:"))
+            self.assertIsNone(oc.scalar("SELECT 1 FROM billing_events WHERE event_id = 'evt_sem_assinatura'"))
         finally:
             oc.close()
 

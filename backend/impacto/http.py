@@ -78,6 +78,15 @@ def unprocessable(msg: str, details: Any = None, code: str = "unprocessable") ->
     return ApiError(422, code, msg, details)
 
 
+def require_fresh_identity(ctx: Any) -> None:
+    """Identidade confirmada (senha + segundo fator, se ativo) há menos de 15 minutos — o mesmo critério das permissões de
+    `STEP_UP_PERMISSIONS`. A tela recebe `step_up_required`, pede a confirmação e repete a chamada (web/src/api.ts)."""
+    from .core import access as ACCESS
+    if not ACCESS.of(ctx)._reauth_fresh():
+        raise ApiError(401, "step_up_required", "Confirme sua identidade para esta operação",
+                       {"allowed": False, "reason": "permission_denied", "source": "step_up", "step_up_required": True})
+
+
 def _default(o):
     if isinstance(o, (datetime, date)):
         return o.isoformat()
@@ -151,10 +160,21 @@ class Ctx:
 
     @property
     def ip(self) -> str:
-        if self.app.settings.trust_proxy_headers:
-            fwd = self.request.headers.get("x-forwarded-for")
+        """IP do cliente para limite de tentativas e trilha.
+
+        v0.35.0 (auditoria, AUTH-02): antes vinha do PRIMEIRO valor do X-Forwarded-For — o único que quem faz o pedido
+        escreve; trocando o cabeçalho a cada tentativa, os limites por IP de login, cadastro, recuperação e IA eram
+        contornados. Agora: o cabeçalho que a borda sobrescreve (se configurado) ou o N-ésimo valor a partir da DIREITA
+        (N = TRUSTED_PROXY_HOPS, os proxies confiáveis que acrescentam ao cabeçalho)."""
+        s = self.app.settings
+        if s.trust_proxy_headers:
+            if s.client_ip_header:
+                v = (self.request.headers.get(s.client_ip_header) or "").strip()
+                if v:
+                    return v[:64]
+            fwd = [x.strip() for x in (self.request.headers.get("x-forwarded-for") or "").split(",") if x.strip()]
             if fwd:
-                return fwd.split(",")[0].strip()[:64]
+                return fwd[max(0, len(fwd) - s.trusted_proxy_hops)][:64]
         return (self.request.client.host if self.request.client else "unknown")[:64]
 
     @property
@@ -399,6 +419,12 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
             raise forbidden("Área restrita à administração da plataforma", "admin_only")
         if ctx.settings.require_mfa_for_admins and not p.mfa_verified:
             raise forbidden("Administração exige MFA ativo e verificado nesta sessão", "mfa_required")
+        if not spec.permission and not spec.staff and ctx.request.method in UNSAFE:
+            # v0.35.0 (auditoria, AUTH-05): escrita da administração SEM permissão nomeada (só administrador da plataforma)
+            # também exige identidade confirmada há menos de 15 minutos — antes, 68 rotas (mudar status de usuário,
+            # confirmar recebimento, decidir identidade, medidas de moderação…) passavam só com a sessão.
+            # Rotas editoriais da equipe (`staff=`: base de conhecimento, revisão de conteúdo) ficam como antes.
+            require_fresh_identity(ctx)
         if spec.permission:
             # Segunda conferência, ANTES de `admin_mode` ser ligado. Não é redundante com a porta:
             # é aqui que entram o papel somente-leitura e a exigência de reautenticação recente.
@@ -428,9 +454,52 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
 # ------------------------------------------------------------------------------------------------
 # Construção do endpoint Starlette
 # ------------------------------------------------------------------------------------------------
-async def _read_json(request: Request, limit: int) -> Any:
+MAX_JSON_DEPTH = 64
+
+
+def _content_length(request: Request) -> int | None:
+    """v0.35.0 (auditoria, WEB-06): Content-Length que não é número virava `ValueError` e erro 500."""
     cl = request.headers.get("content-length")
-    if cl and int(cl) > limit:
+    if cl is None:
+        return None
+    try:
+        n = int(cl)
+    except ValueError:
+        raise ApiError(400, "invalid_content_length", "Cabeçalho Content-Length inválido") from None
+    if n < 0:
+        raise ApiError(400, "invalid_content_length", "Cabeçalho Content-Length inválido")
+    return n
+
+
+def _json_depth_ok(obj: Any, limit: int = MAX_JSON_DEPTH) -> bool:
+    """Profundidade sem recursão (a conferência não pode ela mesma estourar a pilha)."""
+    stack = [(obj, 1)]
+    while stack:
+        cur, depth = stack.pop()
+        if depth > limit:
+            return False
+        if isinstance(cur, dict):
+            stack.extend((v, depth + 1) for v in cur.values())
+        elif isinstance(cur, list):
+            stack.extend((v, depth + 1) for v in cur)
+    return True
+
+
+def parse_json_body(raw: bytes) -> Any:
+    """JSON do corpo: inválido, profundo demais (o decodificador estoura a pilha com ~100 mil níveis em 200 KB) ou com
+    mais de 64 níveis vira 400 — antes, `RecursionError` virava erro 500 (auditoria, WEB-06)."""
+    try:
+        data = json.loads(raw)
+    except (ValueError, RecursionError) as exc:
+        raise ApiError(400, "invalid_json", "JSON inválido ou aninhado demais") from exc
+    if not _json_depth_ok(data):
+        raise ApiError(400, "invalid_json", f"JSON aninhado demais (máximo {MAX_JSON_DEPTH} níveis)")
+    return data
+
+
+async def _read_json(request: Request, limit: int) -> Any:
+    cl = _content_length(request)
+    if cl is not None and cl > limit:
         raise ApiError(413, "payload_too_large", "Corpo da requisição excede o limite")
     ctype = request.headers.get("content-type", "")
     raw = b""
@@ -442,10 +511,7 @@ async def _read_json(request: Request, limit: int) -> Any:
         return {}
     if "application/json" not in ctype:
         raise ApiError(415, "unsupported_media_type", "Use Content-Type: application/json")
-    try:
-        return json.loads(raw)
-    except ValueError as exc:
-        raise ApiError(400, "invalid_json", "JSON inválido") from exc
+    return parse_json_body(raw)
 
 
 def _validation_details(e: ValidationError) -> list[dict]:
@@ -468,12 +534,15 @@ def make_endpoint(spec: RouteSpec, app_state):
                 _check_origin(ctx)
             payload = None
             if spec.multipart:
-                cl = request.headers.get("content-length")
-                if cl and int(cl) > app_state.settings.max_upload_bytes + 65536:
+                cl = _content_length(request)
+                if cl is not None and cl > app_state.settings.max_upload_bytes + 65536:
                     raise ApiError(413, "payload_too_large", "Arquivo excede o limite")
                 form = await request.form(max_files=1, max_fields=20, max_part_size=app_state.settings.max_upload_bytes + 1)
                 payload = form
             elif spec.raw_body:
+                cl = _content_length(request)
+                if cl is not None and cl > app_state.settings.max_body_bytes:
+                    raise ApiError(413, "payload_too_large", "Corpo da requisição excede o limite")
                 payload = b""
                 async for chunk in request.stream():
                     payload += chunk
@@ -529,7 +598,10 @@ def make_endpoint(spec: RouteSpec, app_state):
             return problem(e.status, e.code, e.message, e.details)
         except pq.UniqueViolation as e:
             status = 409
-            return problem(409, "conflict", "Registro duplicado", {"constraint": e.constraint})
+            # v0.35.0 (auditoria, WEB-06): o nome da restrição (estrutura interna do banco) fica no log, com `error_id`
+            eid = uuid.uuid4().hex[:12]
+            log(logger, logging.INFO, "unique_conflict", error_id=eid, route=spec.path, constraint=getattr(e, "constraint", None))
+            return problem(409, "conflict", "Registro duplicado", None, error_id=eid)
         except (pq.CheckViolation, pq.ForeignKeyViolation, pq.NotNullViolation, pq.RaiseException) as e:
             status = 422
             msg = str(e).split("\n")[0][:300]

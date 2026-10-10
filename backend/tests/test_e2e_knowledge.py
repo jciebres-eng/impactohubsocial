@@ -201,8 +201,9 @@ class KnowledgeE2E(unittest.TestCase):
         from tests.support import db_system
         with db_system() as d:
             d.run("INSERT INTO staff_roles(user_id, role) VALUES ($1,'editor') ON CONFLICT DO NOTHING", ed.user["id"])
-        secret = ed.post("/v1/auth/mfa/setup").json["secret"]
-        self.assertEqual(ed.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)}).status, 200)
+        # v0.35.0 (auditoria, AUTH-04): a equipe ativa o MFA com o código do aplicativo E o código enviado ao e-mail
+        from tests.support import enable_mfa
+        secret = enable_mfa(ed)
         p = self.page()
         p.goto(self.base + "/entrar")
         p.get_by_label("E-mail").fill(ed.email)

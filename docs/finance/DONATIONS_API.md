@@ -27,9 +27,13 @@
 | `POST` | `/v1/admin/donation-campaigns/{campaign_id}/review` | compliance.write | Aprova ou rejeita a campanha com justificativa (quem criou não revisa) |
 | `POST` | `/v1/admin/donation-campaigns/{campaign_id}/suspend` | compliance.write | Tira do ar (em análise) ou devolve ao ar uma campanha publicada, com justificativa |
 | `POST` | `/v1/admin/beneficiaries/{org_id}/verification` | compliance.write | Registra o estado da verificação do beneficiário (KYB): quem verifica e com que documentos depende do provedor e do parecer |
+| `POST` | `/v1/admin/beneficiaries/{org_id}/verification/{verification_id}/confirm` | compliance.write | Segunda pessoa da equipe confirma a verificação do beneficiário (quatro olhos, conferido pelo banco) |
 | `GET` | `/v1/admin/donation-risk-cases` | compliance.read | Casos de risco abertos (revisão humana) |
 | `POST` | `/v1/admin/donation-risk-cases/{case_id}/decide` | compliance.write | Decide um caso de risco com justificativa; fica na trilha |
-| `POST` | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | finance.write | Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções |
+| `POST` | `/v1/admin/donation-risk-cases/{case_id}/assign` | compliance.write | Assume a revisão de um caso de risco (revisor atribuído fica no caso) |
+| `GET` | `/v1/campaigns/{campaign_id}/risk-cases` | organização (gestor) | Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso |
+| `POST` | `/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal` | organização (gestor) | Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe) |
+| `POST` | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | finance.write | Conciliação da campanha (atalho da v0.33.0): mesma regra da execução com fila de exceções — sandbox contra os eventos assinados; provedor real exige extrato |
 | `GET` | `/v1/admin/donation-ledger/{campaign_id}` | finance.read | Razão de conciliação da campanha (partidas dobradas, append-only) e totais com definição |
 | `POST` | `/v1/campaigns/{campaign_id}/external-resources` | organização (gestor) | Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra) |
 | `POST` | `/v1/public/donation-campaigns/{slug}/pledge` | pessoa com conta | Registra um compromisso de doação futura (não é doação, não é dinheiro) |
@@ -52,6 +56,7 @@
 | `POST` | `/v1/admin/remuneration/{obligation_id}/authorize-public` | finance.approve | Recurso público: registra instrumento e autorização que tornam a taxa elegível (ADR-379) |
 | `POST` | `/v1/admin/remuneration/mark-overdue` | finance.write | Marca vencidas as faturadas além do prazo (rotina) |
 | `POST` | `/v1/admin/reconciliation/campaigns/{campaign_id}/run` | finance.write | Executa a conciliação da campanha contra o snapshot do provedor (sandbox: derivado dos eventos assinados) e abre exceções |
+| `POST` | `/v1/admin/reconciliation/runs/{run_id}/approve` | finance.approve | Segunda pessoa aprova o extrato manual: reexecuta com o mesmo extrato (hash conferido) e só então concilia |
 | `GET` | `/v1/admin/reconciliation/exceptions` | finance.read | Fila de exceções de conciliação |
 | `POST` | `/v1/admin/reconciliation/exceptions/{exception_id}/assign` | finance.write | Assume uma exceção |
 | `POST` | `/v1/admin/reconciliation/exceptions/{exception_id}/resolve` | finance.write | Resolve ou descarta uma exceção com justificativa (fica no histórico) |

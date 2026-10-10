@@ -113,6 +113,14 @@ class WebV0101(unittest.TestCase):
         row = pa.locator("tr", has_text="CG-ADM-1")
         row.get_by_label("Nota da decisão").fill("Tentativa sem comprovante válido")
         row.get_by_role("button", name="Verificar").click()
+        # v0.35.0 (auditoria, AUTHZ-06): escrita administrativa sem permissão nomeada pede identidade confirmada há menos de
+        # 15 minutos — a administradora confirma (senha + código) como faria na tela; a recusa por falta de comprovante vem depois.
+        su = pa.get_by_role("dialog").filter(has_text="Confirme sua identidade")
+        su.wait_for()
+        su.get_by_label("Senha").fill(PASSWORD)
+        su.get_by_label("Código do aplicativo autenticador").fill(fresh_totp(secret))
+        su.get_by_role("button", name="Confirmar").click()
+        su.wait_for(state="hidden")
         pa.wait_for_timeout(600)
         with db_system() as d:
             self.assertEqual(d.scalar("SELECT verification_status FROM organization_agreements WHERE id = $1", ag["id"]), "declared")

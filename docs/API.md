@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.34.0)
+# API REST /v1 — referência gerada do código (v0.35.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (988)
+## Operações (994)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -39,6 +39,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/audit/trail` | admin da plataforma + MFA | — | Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id |
 | GET | `/v1/admin/audit/verify` | admin da plataforma + MFA | — | Verifica a cadeia de hashes da trilha de auditoria |
 | POST | `/v1/admin/beneficiaries/{org_id}/verification` | admin da plataforma + MFA | — | Registra o estado da verificação do beneficiário (KYB): quem verifica e com que documentos depende do provedor e do parecer |
+| POST | `/v1/admin/beneficiaries/{org_id}/verification/{verification_id}/confirm` | admin da plataforma + MFA | — | Segunda pessoa da equipe confirma a verificação do beneficiário (quatro olhos, conferido pelo banco) |
 | GET | `/v1/admin/billing/organizations/{org_id}` | admin da plataforma + MFA | — | Visão de suporte: acesso, licenças, convênios, contratos, vouchers e faturas da organização |
 | GET | `/v1/admin/call-sources` | admin da plataforma + MFA | — | list sources |
 | POST | `/v1/admin/call-sources` | admin da plataforma + MFA | — | Cadastra fonte de importação (exige registro da verificação de termos de uso/licença da fonte) |
@@ -96,11 +97,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/credentials/{credential_id}/verify` | admin da plataforma + MFA | — | Verifica credencial profissional (registre a fonte consultada, ex.: cadastro público do conselho, e a data) |
 | POST | `/v1/admin/datasets` | admin da plataforma + MFA | — | Registra a procedência de um conjunto de dados externo (licença obrigatória) |
 | GET | `/v1/admin/donation-campaigns` | admin da plataforma + MFA | — | Campanhas aguardando revisão e campanhas publicadas |
-| POST | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | admin da plataforma + MFA | — | Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções |
+| POST | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | admin da plataforma + MFA | — | Conciliação da campanha (atalho da v0.33.0): mesma regra da execução com fila de exceções — sandbox contra os eventos assinados; provedor real exige extrato |
 | POST | `/v1/admin/donation-campaigns/{campaign_id}/review` | admin da plataforma + MFA | — | Aprova ou rejeita a campanha com justificativa (quem criou não revisa) |
 | POST | `/v1/admin/donation-campaigns/{campaign_id}/suspend` | admin da plataforma + MFA | — | Tira do ar (em análise) ou devolve ao ar uma campanha publicada, com justificativa |
 | GET | `/v1/admin/donation-ledger/{campaign_id}` | admin da plataforma + MFA | — | Razão de conciliação da campanha (partidas dobradas, append-only) e totais com definição |
 | GET | `/v1/admin/donation-risk-cases` | admin da plataforma + MFA | — | Casos de risco abertos (revisão humana) |
+| POST | `/v1/admin/donation-risk-cases/{case_id}/assign` | admin da plataforma + MFA | — | Assume a revisão de um caso de risco (revisor atribuído fica no caso) |
 | POST | `/v1/admin/donation-risk-cases/{case_id}/decide` | admin da plataforma + MFA | — | Decide um caso de risco com justificativa; fica na trilha |
 | GET | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Inventário de chaves por impressão digital (a chave nunca é gravada) |
 | POST | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Registra no inventário as chaves em uso para uma finalidade |
@@ -195,6 +197,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/reconciliation/exceptions/{exception_id}/assign` | admin da plataforma + MFA | — | Assume uma exceção |
 | GET | `/v1/admin/reconciliation/exceptions/{exception_id}/history` | admin da plataforma + MFA | — | Histórico de uma exceção |
 | POST | `/v1/admin/reconciliation/exceptions/{exception_id}/resolve` | admin da plataforma + MFA | — | Resolve ou descarta uma exceção com justificativa (fica no histórico) |
+| POST | `/v1/admin/reconciliation/runs/{run_id}/approve` | admin da plataforma + MFA | — | Segunda pessoa aprova o extrato manual: reexecuta com o mesmo extrato (hash conferido) e só então concilia |
 | GET | `/v1/admin/remuneration` | admin da plataforma + MFA | — | Obrigações por estado (previsto × devido × faturado × recebido × liquidado) — nunca somadas num número só |
 | POST | `/v1/admin/remuneration/invoice` | admin da plataforma + MFA | — | Fatura obrigações DEVIDAS numa cobrança própria da plataforma (nunca desconto de doação) |
 | POST | `/v1/admin/remuneration/mark-overdue` | admin da plataforma + MFA | — | Marca vencidas as faturadas além do prazo (rotina) |
@@ -217,7 +220,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/reputation/disputes/{dispute_id}/resolution` | admin da plataforma + MFA | — | Resolve a contestação; corrigir produz ponto NOVO, nunca reescreve o antigo |
 | GET | `/v1/admin/risk-levels` | admin da plataforma + MFA | — | Inventário de risco por operação (§40): nível, controle humano exigido e se ele existe |
 | GET | `/v1/admin/risk/assessments` | admin da plataforma + MFA | — | list assessments |
-| POST | `/v1/admin/risk/orgs/{org_id}/block` | admin da plataforma + MFA | — | Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível |
+| POST | `/v1/admin/risk/orgs/{org_id}/block` | admin da plataforma + MFA | — | Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA de duas pessoas: uma propõe, outra confirma; reversível |
 | POST | `/v1/admin/risk/orgs/{org_id}/unblock` | admin da plataforma + MFA | — | unblock org |
 | POST | `/v1/admin/risk/scan` | admin da plataforma + MFA | — | Executa os detectores agora (todas as organizações ou uma) |
 | GET | `/v1/admin/risk/signals` | admin da plataforma + MFA | — | Sinais de risco (para revisão humana; não são acusações) |
@@ -248,8 +251,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/trust/credentials/queue` | admin da plataforma + MFA | — | Credenciais profissionais com documento aguardando conferência |
 | POST | `/v1/admin/trust/credentials/{credential_id}/decide` | admin da plataforma + MFA | — | Confere a credencial; aprovar eleva a identidade da pessoa ao nível profissional |
 | POST | `/v1/admin/trust/credentials/{credential_id}/revoke` | admin da plataforma + MFA | — | Revoga uma credencial verificada (motivo obrigatório; entra na cadeia de custódia) |
-| GET | `/v1/admin/trust/identity/queue` | admin da plataforma + MFA | — | Fila de verificações de identidade aguardando conferência humana |
+| GET | `/v1/admin/trust/identity/queue` | admin da plataforma + MFA | — | Fila de verificações de identidade aguardando conferência humana (ou as já decididas, para suspender/revogar) |
 | POST | `/v1/admin/trust/identity/{verification_id}/decide` | admin da plataforma + MFA | — | Decide um pedido de verificação de identidade (decisão humana registrada na cadeia de custódia) |
+| POST | `/v1/admin/trust/identity/{verification_id}/status` | admin da plataforma + MFA | — | Suspende, revoga ou restabelece uma verificação de identidade já decidida (com motivo; nunca a própria) |
 | GET | `/v1/admin/users` | admin da plataforma + MFA | — | users |
 | POST | `/v1/admin/users/{user_id}/status` | admin da plataforma + MFA | — | Ativa/desativa usuário (revoga sessões ao desativar) |
 | POST | `/v1/admin/value/baselines` | admin da plataforma + MFA | — | Declara a linha de referência de um tipo de evento (cria versão; não reescreve) |
@@ -300,7 +304,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/auth/logout` | usuário autenticado | — | Encerra a sessão atual |
 | POST | `/v1/auth/logout-all` | usuário autenticado | — | Encerra todas as sessões do usuário |
 | POST | `/v1/auth/mfa/disable` | usuário autenticado | — | mfa disable |
-| POST | `/v1/auth/mfa/enable` | usuário autenticado | — | Confirma TOTP e devolve códigos de recuperação |
+| POST | `/v1/auth/mfa/enable` | usuário autenticado | limite 10/900s | Confirma TOTP (e, para a equipe, o código do e-mail) e devolve códigos de recuperação |
 | POST | `/v1/auth/mfa/setup` | usuário autenticado | — | Gera segredo TOTP (pendente até confirmar) |
 | POST | `/v1/auth/mfa/verify` | pública | limite 30/900s | Conclui login com TOTP ou código de recuperação |
 | GET | `/v1/auth/oidc/callback` | pública | limite 60/900s | Retorno do provedor de identidade: valida id_token (JWKS, iss, aud, nonce) e cria a sessão |
@@ -329,6 +333,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/campaigns/{campaign_id}/external-resources` | membro da organização ativa | papel ≥ manager | Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra) |
 | POST | `/v1/campaigns/{campaign_id}/pledges/{pledge_id}/fulfill` | membro da organização ativa | papel ≥ manager | Liga um compromisso à doação CONFIRMADA que o cumpriu |
 | POST | `/v1/campaigns/{campaign_id}/publish` | membro da organização ativa | papel ≥ manager | Publica a campanha aprovada (exige beneficiário verificado; o banco recusa sem isso) |
+| GET | `/v1/campaigns/{campaign_id}/risk-cases` | membro da organização ativa | papel ≥ manager | Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso |
+| POST | `/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal` | membro da organização ativa | papel ≥ manager | Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe) |
 | POST | `/v1/campaigns/{campaign_id}/rotate-qr` | membro da organização ativa | papel ≥ manager | Regenera QR/link (versão nova; a anterior deixa de ser a canônica) — para QR comprometido ou substituído |
 | POST | `/v1/campaigns/{campaign_id}/submit` | membro da organização ativa | papel ≥ manager | Envia a campanha para revisão (aceita os termos de campanha na versão vigente) |
 | POST | `/v1/campaigns/{campaign_id}/updates` | membro da organização ativa | papel ≥ manager | Atualização pública da campanha, com referências a evidências |
@@ -342,10 +348,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/claims/{claim_id}/review-requests` | membro da organização ativa | papel ≥ manager | Convida uma organização nomeada a revisar a rodada (é o convite que abre a leitura) |
 | POST | `/v1/claims/{claim_id}/withdraw` | membro da organização ativa | papel ≥ manager | Retira a alegação (o histórico de verificação permanece legível) |
 | GET | `/v1/commercial/acceptances` | membro da organização ativa | — | Histórico de aceites desta organização |
-| POST | `/v1/commercial/consent/revoke` | membro da organização ativa | — | Revoga a autorização de cobrança (o aceite permanece registrado) |
+| POST | `/v1/commercial/consent/revoke` | membro da organização ativa | papel ≥ owner | Revoga a autorização de cobrança (o aceite permanece registrado) |
 | GET | `/v1/commercial/offers` | membro da organização ativa | — | Ofertas desta organização |
-| POST | `/v1/commercial/offers/{offer_id}/accept` | membro da organização ativa | limite 60/3600s | Aceita a oferta — acesso gratuito OU autorização de cobrança |
-| PUT | `/v1/commercial/spend-limit` | membro da organização ativa | — | Define o teto de gasto mensal e o que fazer ao atingi-lo (avisar ou parar) |
+| POST | `/v1/commercial/offers/{offer_id}/accept` | membro da organização ativa | papel ≥ owner; limite 60/3600s | Aceita a oferta — acesso gratuito OU autorização de cobrança |
+| PUT | `/v1/commercial/spend-limit` | membro da organização ativa | papel ≥ owner | Define o teto de gasto mensal e o que fazer ao atingi-lo (avisar ou parar) |
 | GET | `/v1/commercial/state` | membro da organização ativa | — | Estado comercial da conta: de onde vem o acesso (FREE_ACCESS/FREE_GRANT/GRANT_EXPIRING/CONTRACTED), fim da concessão e se há cobrança autorizada |
 | GET | `/v1/commercial/usage` | membro da organização ativa | — | Consumo do período por métrica, com percentual e limite do pacote |
 | POST | `/v1/commitments/{commitment_id}/payments` | membro da organização ativa | tipos: company, government, individual; papel ≥ manager | Registra um pagamento (parcela) do aporte — declarado pelo financiador; a plataforma não movimenta dinheiro |

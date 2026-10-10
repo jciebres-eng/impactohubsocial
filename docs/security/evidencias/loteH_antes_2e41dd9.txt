@@ -1,0 +1,22 @@
+ERROR: test_the_large_donation_rule_fires_at_the_threshold_and_not_just_below (tests.test_v0350_security.RiskRulesComeFromTheFileTests.test_the_large_donation_rule_fires_at_the_threshold_and_not_just_below)
+AttributeError: module 'impacto.services.donations' has no attribute 'RISK_RULES'
+ERROR: test_thresholds_are_read_from_the_file (tests.test_v0350_security.RiskRulesComeFromTheFileTests.test_thresholds_are_read_from_the_file)
+AttributeError: module 'impacto.services.donations' has no attribute 'RISK_RULES_FILE'. Did you mean: 'RISK_RULES_VERSION'?
+ERROR: test_assign_decide_with_evidence_appeal_and_a_different_person_closes (tests.test_v0350_security.RiskCaseLifecycleTests.test_assign_decide_with_evidence_appeal_and_a_different_person_closes)
+AttributeError: module 'impacto.services.donations' has no attribute 'RISK_RULES'
+ERROR: test_one_proposes_another_confirms (tests.test_v0350_security.OrganizationBlockNeedsTwoPeopleTests.test_one_proposes_another_confirms)
+KeyError: 'status'
+ERROR: test_a_decision_is_not_rewritten_and_suspension_is_reversible_but_revocation_is_not (tests.test_v0350_security.IdentityVerificationStatesTests.test_a_decision_is_not_rewritten_and_suspension_is_reversible_but_revocation_is_not)
+KeyError: 'code'
+ERROR: test_an_expired_verification_is_marked_expired (tests.test_v0350_security.IdentityVerificationStatesTests.test_an_expired_verification_is_marked_expired)
+AttributeError: module 'impacto.trust.identity' has no attribute 'expire_due'
+ERROR: test_nobody_decides_their_own_verification (tests.test_v0350_security.IdentityVerificationStatesTests.test_nobody_decides_their_own_verification)
+KeyError: 'code'
+FAIL: test_structuring_by_the_same_account_is_flagged_and_two_donations_are_not (tests.test_v0350_security.RiskRulesComeFromTheFileTests.test_structuring_by_the_same_account_is_flagged_and_two_donations_are_not)
+AssertionError: 'structuring' not found in ['new_campaign_large_inflow']
+FAIL: test_signals_for_a_recent_destination_and_none_once_it_is_old (tests.test_v0350_security.NewReviewSignalsTests.test_signals_for_a_recent_destination_and_none_once_it_is_old)
+AssertionError: [] is not true : repasse aberto com chave informada agora não gerou sinal
+FAIL: test_the_same_pix_key_on_two_organizations_is_a_signal_without_the_key (tests.test_v0350_security.NewReviewSignalsTests.test_the_same_pix_key_on_two_organizations_is_a_signal_without_the_key)
+AssertionError: [] is not true : 994d6bc5-f333-4bf4-90ae-8041e8ad2038
+Ran 10 tests in 51.154s
+FAILED (failures=3, errors=7)

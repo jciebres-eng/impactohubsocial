@@ -399,9 +399,16 @@ export function DonationReview() {
     await api.post(`/v1/admin/donation-campaigns/${id}/suspend`, { note: note[id] || "", reinstate });
     reload(); return reinstate ? "Campanha de volta ao ar." : "Campanha fora do ar, em análise.";
   });
-  const verify = (orgId: string, status2: string) => run(async () => {
-    await api.post(`/v1/admin/beneficiaries/${orgId}/verification`, { status: status2, note: note[orgId] || "" });
-    reload(); return "Verificação do beneficiário registrada.";
+  const [holder, setHolder] = useState<Record<string, boolean>>({});
+  // v0.35.0 (auditoria, KYC-03): "verificado" exige a titularidade da conta conferida e só vale depois que OUTRA pessoa
+  // da equipe confirma. Quem registrou não vê o botão de confirmar (o servidor recusa de qualquer jeito).
+  const verify = (orgId: string, status2: string, campaignId: string) => run(async () => {
+    await api.post(`/v1/admin/beneficiaries/${orgId}/verification`, { status: status2, note: note[campaignId] || "", account_holder_matches: !!holder[campaignId] });
+    reload(); return "Verificação registrada. Ela passa a valer quando outra pessoa da equipe confirmar.";
+  });
+  const confirm = (orgId: string, verificationId: string) => run(async () => {
+    await api.post(`/v1/admin/beneficiaries/${orgId}/verification/${verificationId}/confirm`, {});
+    reload(); return "Verificação confirmada pela segunda pessoa.";
   });
   return (
     <>
@@ -418,7 +425,13 @@ export function DonationReview() {
                 <Button busy={busy} disabled={(note[c.id] || "").length < 10} onClick={() => decide(c.id, "reject")}>Recusar</Button>{" "}</>}
               {["published", "paused", "target_reached"].includes(c.status) && <><Button busy={busy} disabled={(note[c.id] || "").length < 10} onClick={() => suspend(c.id, false)}>Tirar do ar (em análise)</Button>{" "}</>}
               {c.status === "under_review" && <><Button variant="primary" busy={busy} disabled={(note[c.id] || "").length < 10} onClick={() => suspend(c.id, true)}>Devolver ao ar</Button>{" "}</>}
-              {!c.beneficiary_verified && <Button busy={busy} disabled={(note[c.id] || "").length < 10} onClick={() => { note[c.beneficiary_org_id] = note[c.id]; verify(c.beneficiary_org_id, "verified"); }}>Registrar beneficiário como verificado</Button>}
+              {!c.beneficiary_verified && !c.verification_awaiting_confirmation && <>
+                <label><input type="checkbox" checked={!!holder[c.id]} onChange={(e) => setHolder({ ...holder, [c.id]: e.target.checked })} />{" "}
+                  A titularidade da conta de recebimento confere com a organização</label>{" "}
+                <Button busy={busy} disabled={(note[c.id] || "").length < 10 || !holder[c.id]} onClick={() => verify(c.beneficiary_org_id, "verified", c.id)}>Registrar beneficiário como verificado</Button></>}
+              {c.verification_awaiting_confirmation && (c.verification_reviewed_by === data?.me
+                ? <span>Verificação registrada por você: aguarda a confirmação de outra pessoa da equipe.</span>
+                : <Button variant="primary" busy={busy} onClick={() => confirm(c.beneficiary_org_id, c.verification_awaiting_confirmation)}>Confirmar verificação (segunda pessoa)</Button>)}
             </p>
           </Panel>
         ))}

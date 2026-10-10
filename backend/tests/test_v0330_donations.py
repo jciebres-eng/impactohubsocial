@@ -15,8 +15,6 @@ O que estes testes PROVAM, contra HTTP e PostgreSQL reais:
   * outra organização não vê a prestação de contas (404); comprovante existe e não se chama recibo dedutível;
   * flags de cobrança real recusam subir sem adaptador (config.validate).
 """
-import hashlib
-import hmac
 import json
 import os
 import unittest
@@ -24,14 +22,16 @@ import unittest.mock
 import uuid
 from dataclasses import replace
 
-from tests.support import Client, db_system, make_admin, make_staff, new_account, server
+from impacto.integrations.events import sign
+from tests.support import Client, db_system, make_admin, make_staff, new_account, reauth, server
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 
 
 def _signed(client: Client, path: str, body: dict) -> object:
     raw = json.dumps(body).encode()
-    sig = hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    # v0.35.0 (auditoria, PAY-01): assinatura `t=<unix>,v1=<hmac(t.corpo)>` com janela de 300 s (antes: hmac só do corpo)
+    sig, _ = sign(SECRET, raw)
     return client.request("POST", path, raw=raw, ctype="application/json", headers={"X-Impacto-Signature": sig})
 
 
@@ -40,11 +40,14 @@ class DonationsEndToEndTests(unittest.TestCase):
     def setUpClass(cls):
         st = server()
         cls.base, cls.state = st["base"], st["state"]
-        cls.state.settings.payment_webhook_secret = SECRET
+        # v0.35.0 (auditoria, PAY-01): o webhook de doações tem segredo PRÓPRIO (DONATION_WEBHOOK_SECRET)
+        cls.state.settings.donation_webhook_secret = SECRET
         cls.state.settings.public_base_url = "https://impacto.teste"
         cls.osc = new_account("osc", compliance="approved")
         cls.outra = new_account("osc", compliance="approved")
         cls.reviewer = make_staff("compliance")
+        # v0.35.0: compliance.write exige identidade confirmada há menos de 15 min (step-up); quem começa a trabalhar confirma
+        reauth(cls.reviewer)
         cls.admin, _ = make_admin()
         pr = cls.osc.post("/v1/projects", {"title": "Horta comunitária do bairro", "summary": "Projeto para a campanha de doações.",
                                            "causes": ["educacao"], "territory": "BR-MT", "ods": [2], "beneficiaries_count": 40,
@@ -75,6 +78,14 @@ class DonationsEndToEndTests(unittest.TestCase):
         r = self.reviewer.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification",
                                {"status": "verified", "note": "Documentos conferidos no sandbox de teste.", "account_holder_matches": True})
         self.assertEqual(r.status, 200, r.body)
+        # v0.35.0 (auditoria, KYC-03): uma pessoa só não basta — a verificação vale depois da confirmação de outra
+        r2 = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
+        self.assertEqual((r2.status, r2.json["code"]), (422, "beneficiary_not_verified"), "verificação sem segunda pessoa publicou")
+        self.assertEqual(self.reviewer.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 403,
+                         "quem verificou confirmou a si mesmo")
+        segunda = make_staff("compliance")
+        reauth(segunda)
+        self.assertEqual(segunda.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 200)
         r = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
         self.assertEqual(r.status, 200, r.body)
         self.assertEqual(r.json["url"], f"https://impacto.teste/campanha/{self.slug}?v=1")

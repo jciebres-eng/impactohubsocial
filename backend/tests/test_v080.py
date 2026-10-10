@@ -441,7 +441,15 @@ class RiskTests(unittest.TestCase):
         pid = osc.post("/v1/projects", {"title": "Projeto bloqueável", "summary": "Resumo", "territory": "BR-MT", "causes": ["educacao"], "beneficiaries_count": 5}).json["id"]
         osc.post(f"/v1/projects/{pid}/budget-items", {"description": "Item", "quantity": 1, "unit_cost_cents": 1000})
         self.assertEqual(osc.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "tentativa indevida pela própria OSC"}).status, 403)
-        self.assertEqual(self.admin.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Revisão documental em andamento"}).status, 200)
+        # v0.35.0 (auditoria, FRAUD-04): restrição operacional precisa de DUAS pessoas — uma propõe, outra confirma
+        prop = self.admin.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Revisão documental em andamento"})
+        self.assertEqual((prop.status, prop.json["status"]), (200, "awaiting_second_approval"), prop)
+        self.assertEqual(osc.post(f"/v1/projects/{pid}/publish").status, 200, "só a proposta ainda não restringe nada")
+        pid = osc.post("/v1/projects", {"title": "Projeto bloqueável 2", "summary": "Resumo", "territory": "BR-MT", "causes": ["educacao"],
+                                        "beneficiaries_count": 5}).json["id"]
+        osc.post(f"/v1/projects/{pid}/budget-items", {"description": "Item", "quantity": 1, "unit_cost_cents": 1000})
+        outro, _ = make_admin()
+        self.assertEqual(outro.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Confirmo a restrição durante a revisão"}).json["level"], "blocked")
         r = osc.post(f"/v1/projects/{pid}/publish")
         self.assertEqual((r.status, r.json["code"]), (423, "org_blocked"))
         # o scan automático nunca remove um bloqueio humano

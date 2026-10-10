@@ -1,4 +1,6 @@
-# Runbook — backup, restauração e recuperação (v0.31.0)
+# Runbook — backup, restauração e recuperação (v0.31.0; cópia externa atualizada na v0.35.0)
+
+Incidente em andamento? Veja também [RB-07 — perda do banco](../security/runbooks/RB-07-perda-do-banco.md).
 
 ## Camadas de backup (e o que cada uma cobre)
 
@@ -6,6 +8,7 @@
 |---|---|---|---|
 | Backup gerenciado do Supabase (diário / PITR conforme o plano) | o banco inteiro, incluindo schemas internos do Supabase | Supabase; restauração pelo painel | **não verificado nesta rodada** — conferir em *Database → Backups*: frequência, retenção, PITR |
 | `supabase` → `backup-restaurar` (GitHub Actions) | schema `public` do IMPACTO; **prova que restaura** | proprietário dispara | **PASS** em 09/10 (run 37975650545) |
+| `backup-supabase` (GitHub Actions, diário 06:17 UTC) | cópia EXTERNA cifrada do schema `public` no R2 (`impacto-backups/supabase/`), 30 dias | agendado; ensaio de restauração todo dia 1º | v0.35.0: cifra **autenticada** (`.dump.aead`, `scripts/backup_crypt.py`, AES-256-GCM em blocos, chave por scrypt da mesma `BACKUP_PASSPHRASE`); arquivo alterado/truncado ou frase errada **falha**; SHA-256 também no resumo da execução (fora do bucket). Os `.dump.enc` antigos (openssl) seguem legíveis até sair da retenção |
 | Tarefa `backup` do worker (`BACKUP_DIR`) | dump lógico periódico para um diretório | worker | não configurado (precisa `BACKUP_DIR` num volume ou destino externo) |
 | Arquivos (R2) | contratos, evidências, documentos | Cloudflare R2 | **não configurado** — ativar versionamento/cópia do bucket de produção |
 

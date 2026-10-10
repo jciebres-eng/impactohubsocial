@@ -75,9 +75,10 @@ def mfa_setup(ctx: Ctx):
     return auth.mfa_setup(ctx)
 
 
-@route("POST", "/v1/auth/mfa/enable", auth="user", body=S.CodeIn, tags=T, summary="Confirma TOTP e devolve códigos de recuperação")
-def mfa_enable(ctx: Ctx, body: S.CodeIn):
-    return auth.mfa_enable(ctx, body.code)
+@route("POST", "/v1/auth/mfa/enable", auth="user", body=S.MfaEnableIn, rate=("mfa_enable", 10, 900), tags=T,
+       summary="Confirma TOTP (e, para a equipe, o código do e-mail) e devolve códigos de recuperação")
+def mfa_enable(ctx: Ctx, body: S.MfaEnableIn):
+    return auth.mfa_enable(ctx, body.code, body.email_code)
 
 
 @route("POST", "/v1/auth/mfa/disable", auth="user", body=S.MfaDisableIn, tags=T)

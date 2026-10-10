@@ -1,0 +1,17 @@
+test_kyc03_rejection_after_verified_does_not_revoke (tests.probe_loteB_old.Probe.test_kyc03_rejection_after_verified_does_not_revoke) ... verificado (uma pessoa só): True
+registrar recusa: 200
+verificado DEPOIS da recusa: True
+campanha: published
+doação depois da recusa: 201
+ok
+test_pay07_legacy_reconcile_marks_without_comparing (tests.probe_loteB_old.Probe.test_pay07_legacy_reconcile_marks_without_comparing) ... rota antiga de conciliação: 200 {"reconciled": 1, "exceptions": [], "at": "2026-10-10T16:49:00.612249+00:00"}
+doação sem evento ficou: (sem coluna)
+ok
+test_pay08_donor_turns_public_money_private (tests.probe_loteB_old.Probe.test_pay08_donor_turns_public_money_private) ... doação em campanha de recurso público declarada privada: 201
+origem gravada na doação: private
+ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.476s
+
+OK

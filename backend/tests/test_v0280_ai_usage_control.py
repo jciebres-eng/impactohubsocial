@@ -15,14 +15,13 @@ O que se prova, contra HTTP e PostgreSQL reais (motor local; nenhum provedor ext
 """
 from __future__ import annotations
 
-import hashlib
-import hmac
 import json
 import os
 import threading
 import unittest
 import uuid
 
+from impacto.integrations.events import sign
 from tests.support import Client, db_system, grant_premium, make_admin, make_staff, new_account
 
 WELCOME = 60   # welcome.v1 (migração 0068): uma vez por organização e por pessoa
@@ -326,7 +325,8 @@ class WebhookWithSecretTests(unittest.TestCase):
 
     def _post(self, body: dict, sig: str | None = None):
         raw = json.dumps(body).encode()
-        s = sig if sig is not None else hmac.new(self.secret.encode(), raw, hashlib.sha256).hexdigest()
+        # v0.35.0 (auditoria, PAY-01): assinatura com carimbo de tempo (t=…,v1=…), janela de 300 s
+        s = sig if sig is not None else sign(self.secret, raw)[0]
         return Client().request("POST", "/v1/webhooks/payments/pix", raw=raw, headers={"x-impacto-signature": s, "content-type": "application/json"})
 
     def test_signature_duplicates_and_single_credit(self):
@@ -370,7 +370,11 @@ class WebhookWithSecretTests(unittest.TestCase):
                 self.assertEqual(d.scalar("SELECT state FROM ai_credit_orders WHERE id = $1", oid), "credited")
                 self.assertEqual(d.scalar("SELECT state FROM platform_charges WHERE id = $1", ch), "paid")
                 self.assertEqual(d.scalar("SELECT duplicate_count FROM billing_events WHERE provider='pix' AND event_id='evt-ok'"), 1)
-                self.assertEqual(d.scalar("SELECT status FROM billing_events WHERE provider='pix' AND event_id='evt-bad'"), "rejected_signature")
+                # v0.35.0 (auditoria, PAY-01): o evento SEM assinatura válida fica guardado sob identificador próprio (`unverified:`),
+                # nunca sob o `event_id` que alega — senão ocuparia o lugar do evento verdadeiro. Procura-se pelo id alegado no corpo.
+                self.assertEqual(d.scalar("SELECT status FROM billing_events WHERE provider='pix' AND payload->>'event_id' = 'evt-bad'"
+                                          " AND NOT signature_verified"), "rejected_signature")
+                self.assertIsNone(d.scalar("SELECT 1 FROM billing_events WHERE provider='pix' AND event_id='evt-bad'"))
         finally:
             own.run("UPDATE monetization_rules SET active = false, legal_status = $1, legal_card_id = $2::uuid, amount_cents = NULL WHERE key = 'ai.credits_prepaid'",
                     original["legal_status"], original["legal_card_id"])

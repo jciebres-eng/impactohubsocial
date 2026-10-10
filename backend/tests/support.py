@@ -138,6 +138,33 @@ def last_signature_code(to: str) -> str:
     raise AssertionError(f"código de assinatura não encontrado para {to}")
 
 
+def subject_of(msg: email.message.Message) -> str:
+    """Assunto decodificado (com acento, o cabeçalho vem em RFC 2047)."""
+    from email.header import decode_header, make_header
+    return str(make_header(decode_header(msg["Subject"] or "")))
+
+
+def last_mfa_setup_code(to: str) -> str:
+    """v0.35.0 (auditoria, AUTH-04): código enviado ao e-mail da EQUIPE para ativar o segundo fator."""
+    for msg in reversed(outbox_messages()):
+        if msg["To"] == to and "ativar a verificação" in subject_of(msg).lower():
+            m = re.search(r"\b(\d{6})\b", msg.get_payload(decode=True).decode())
+            if m:
+                return m.group(1)
+    raise AssertionError(f"código de ativação do MFA não encontrado para {to}")
+
+
+def enable_mfa(c: Client) -> str:
+    """Liga o segundo fator pela API, como o produto: para a equipe, também com o código enviado ao e-mail."""
+    setup = c.post("/v1/auth/mfa/setup").json
+    corpo = {"code": fresh_totp(setup["secret"])}
+    if setup.get("email_code_required"):
+        corpo["email_code"] = last_mfa_setup_code(c.email)
+    r = c.post("/v1/auth/mfa/enable", corpo)
+    assert r.status == 200, f"mfa/enable recusou: {r.status} {r.json}"
+    return setup["secret"]
+
+
 def last_token_for(to: str, path: str) -> str:
     for msg in reversed(outbox_messages()):
         if msg["To"] == to:
@@ -350,9 +377,7 @@ def make_admin(mfa: bool = True) -> tuple[Client, str | None]:
         db.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'owner') ON CONFLICT DO NOTHING", c.user["id"], plat)
     secret = None
     if mfa:
-        secret = c.post("/v1/auth/mfa/setup").json["secret"]
-        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(secret)})
-        assert r.status == 200, f"mfa/enable recusou: {r.status} {r.json}"
+        secret = enable_mfa(c)
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     # v0.22.0 — ADMINISTRADOR TRABALHANDO. A partir desta versão, as permissões de
     # `core/access.py::STEP_UP_PERMISSIONS` exigem identidade confirmada há menos de 15 minutos:
@@ -402,13 +427,25 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
             db.run("INSERT INTO staff_roles(user_id, role, granted_by) VALUES ($1,$2,$1)"
                    " ON CONFLICT DO NOTHING", c.user["id"], papel)
     if mfa:
-        segredo = c.post("/v1/auth/mfa/setup").json["secret"]
-        r = c.post("/v1/auth/mfa/enable", {"code": fresh_totp(segredo)})
-        assert r.status == 200, f"mfa/enable recusou: {r.status} {r.json}"
-        c.mfa_secret = segredo
+        c.mfa_secret = enable_mfa(c)
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     c.staff_roles = tuple(roles)
     return c
+
+
+def verify_beneficiary(org_id: str, reviewer: Client | None = None) -> str:
+    """v0.35.0 (auditoria, KYC-03): beneficiário verificado = decisão 'verificado' com titularidade conferida + CONFIRMAÇÃO
+    de outra pessoa da equipe. Duas pessoas de compliance, como no produto. Devolve o id da verificação."""
+    rev = reviewer or make_staff("compliance")
+    reauth(rev)            # v0.35.0: compliance.write exige identidade confirmada há menos de 15 min (step-up)
+    r = rev.post(f"/v1/admin/beneficiaries/{org_id}/verification",
+                 {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
+    assert r.status == 200, r
+    second = make_staff("compliance")
+    reauth(second)
+    c = second.post(f"/v1/admin/beneficiaries/{org_id}/verification/{r.json['id']}/confirm")
+    assert c.status == 200, c
+    return r.json["id"]
 
 
 def reauth(c: Client) -> None:
@@ -423,7 +460,6 @@ def reauth(c: Client) -> None:
 
 def make_admin_without_reauth() -> Client:
     """Administrador com MFA e SEM identidade confirmada — para provar que o step-up é real."""
-    from impacto.security import totp
     c = new_account("osc")
     with db_system() as db:
         plat = db.scalar("SELECT id::text FROM organizations WHERE kind = 'platform' LIMIT 1") or db.scalar(
@@ -432,8 +468,6 @@ def make_admin_without_reauth() -> Client:
         db.run("UPDATE users SET is_platform_admin = true WHERE id = $1", c.user["id"])
         db.run("INSERT INTO memberships(user_id, org_id, role) VALUES ($1,$2,'owner')"
                " ON CONFLICT DO NOTHING", c.user["id"], plat)
-    segredo = c.post("/v1/auth/mfa/setup").json["secret"]
-    assert c.post("/v1/auth/mfa/enable", {"code": totp.totp(segredo)}).status == 200
-    c.mfa_secret = segredo
+    c.mfa_secret = enable_mfa(c)    # v0.35.0: equipe ativa o MFA também com o código do e-mail (AUTH-04)
     assert c.post("/v1/me/switch-org", {"org_id": plat}).status == 200
     return c

@@ -178,8 +178,16 @@ def _infra_routes(state: AppState) -> list[Route]:
         except Exception as exc:  # noqa: BLE001
             log(logger, logging.ERROR, "readiness_failed", error_type=type(exc).__name__)
             return JSONResponse({"status": "unavailable", "database": "down"}, status_code=503)
+        # v0.35.0 (auditoria, WEB-06): em staging/produção, sem o token de métricas, a resposta pública diz só o que o
+        # monitor e o `pos-deploy` precisam (pronto? banco? arquivos duráveis? antivírus ligado?) — sem nomes de provedor
+        # nem a lista de migrações pendentes.
+        resumido = s.is_hardened and not (s.metrics_token and hmac.compare_digest(
+            request.headers.get("authorization", "").removeprefix("Bearer ").strip(), s.metrics_token))
         if pending:
-            return JSONResponse({"status": "unavailable", "pending_migrations": pending}, status_code=503)
+            return JSONResponse({"status": "unavailable", "pending_migrations": len(pending) if resumido else pending}, status_code=503)
+        if resumido:
+            return JSONResponse({"status": "ready", "database": "ok", "storage_durable": not config_mod.storage_is_ephemeral(s),
+                                 "antivirus": "none" if state.antivirus.name == "none" else "configured"})
         return JSONResponse({"status": "ready", "database": "ok", "storage": state.storage.kind,
                              # v0.31.0: false = arquivos em disco de contêiner sem volume declarado (somem no redeploy)
                              "storage_durable": not config_mod.storage_is_ephemeral(s),

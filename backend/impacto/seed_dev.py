@@ -266,6 +266,9 @@ def _seed_internal_finance(c, plat: str, user, now) -> None:
         c.run("INSERT INTO staff_roles(user_id, role, granted_by) VALUES ($1,$2,$1)"
               " ON CONFLICT DO NOTHING", uid, papel)
         ids[papel] = uid
+    # v0.35.0 (auditoria, KYC-03): a verificação do beneficiário exige a confirmação de uma SEGUNDA pessoa com compliance.
+    # No demo, a controladoria acumula o papel de compliance para que a jornada de captação mostre os quatro olhos.
+    c.run("INSERT INTO staff_roles(user_id, role, granted_by) VALUES ($1,'compliance',$1) ON CONFLICT DO NOTHING", ids["controller"])
 
     # ----------------------------------------------------------------- contabilidade por competência
     from .economics import engine as ENG

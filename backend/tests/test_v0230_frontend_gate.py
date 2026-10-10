@@ -434,7 +434,7 @@ class TheScreenBackendMapTellsTheTruthAboutCoverageTests(unittest.TestCase):
         inv = json.loads((ROOT / "docs" / "execution" / "screen_inventory.json")
                          .read_text(encoding="utf-8"))
         self.assertEqual({t["rota"] for t in self.mapa["lista"]}, {t["rota"] for t in inv["lista"]})
-        self.assertEqual(self.mapa["operacoes_no_backend"], 988 + 6)   # v0.34.0 (E6, ADR-384): +2 operações (recorrência e reembolso). v0.34.0: +24 operações do ecossistema financeiro (ADR-377..383). v0.33.0: +22 operações de doações (ADR-372..376). v0.30.0: 940 operações (+4 de evidência/dossiê/método, ADR-360..362). v0.29.0: 936 operações registradas (+13 da camada de conhecimento, ADR-353..357; antes 923 na v0.28.0)
+        self.assertEqual(self.mapa["operacoes_no_backend"], 994 + 6)   # v0.35.0 (ADR-385..392): +6 operações (4 da equipe, 2 da organização — ver test_v0230_authorization_matrix). v0.34.0 (E6, ADR-384): +2 operações (recorrência e reembolso). v0.34.0: +24 operações do ecossistema financeiro (ADR-377..383). v0.33.0: +22 operações de doações (ADR-372..376). v0.30.0: 940 operações (+4 de evidência/dossiê/método, ADR-360..362). v0.29.0: 936 operações registradas (+13 da camada de conhecimento, ADR-353..357; antes 923 na v0.28.0)
 
     def test_most_screens_resolve_to_a_registered_operation(self):
         """Contraprova do defeito do `useLoad`: com ele fora, só 138 das 218 'chamavam o backend'."""

@@ -153,6 +153,55 @@ def quotes_below_policy(c: Connection, org: str | None) -> int:
     return n
 
 
+@detector
+def pix_key_shared_across_orgs(c: Connection, org: str | None) -> int:
+    """v0.35.0 (auditoria, FRAUD-03): a mesma chave PIX de repasse informada por organizações DIFERENTES. Pode ser legítimo
+    (mantenedora que recebe por outra entidade, contador comum) — por isso é sinal de revisão, e a chave não vai no sinal."""
+    import hashlib
+    n = 0
+    rows = c.query("SELECT pix_key, pix_key_type, array_agg(DISTINCT org_id::text) AS orgs FROM signed_agreement_parties"
+                   " WHERE pix_key IS NOT NULL GROUP BY pix_key, pix_key_type HAVING count(DISTINCT org_id) > 1")
+    for r in rows:
+        digest = hashlib.sha256(f"{r['pix_key_type']}:{r['pix_key']}".encode()).hexdigest()[:24]
+        for o in r["orgs"]:
+            if org and o != org:
+                continue
+            n += _emit(c, org_id=o, project_id=None, signal_type="pix_key_shared_across_orgs", severity="high",
+                       key=f"pix_shared:{digest}:{o}",
+                       summary="A mesma chave PIX de repasse foi informada por outra organização",
+                       details={"other_orgs": len(r["orgs"]) - 1, "pix_key_type": r["pix_key_type"],
+                                "note": "pode ser legítimo (mantenedora, contador comum); confirmar com as organizações antes de pagar"})
+    return n
+
+
+@detector
+def payout_destination_changed_recently(c: Connection, org: str | None) -> int:
+    """v0.35.0 (auditoria, FRAUD-03): repasse em aberto para organização que ganhou pessoa DONA nova ou informou a chave PIX
+    há menos de 7 dias. É o desenho clássico de desvio por conta tomada; também acontece por troca legítima de diretoria.
+    (Nesta versão o papel de dona só nasce no cadastro da organização — `memberships.created_at` cobre esse caso.)"""
+    n = 0
+    rows = c.query(
+        "SELECT p.id::text AS payout_id, p.recipient_org_id::text AS org_id, a.project_id::text AS project_id,"
+        " EXISTS (SELECT 1 FROM memberships m WHERE m.org_id = p.recipient_org_id AND m.role = 'owner'"
+        "         AND m.created_at > now() - interval '7 days') AS new_owner,"
+        " EXISTS (SELECT 1 FROM signed_agreement_parties s WHERE s.agreement_id = p.agreement_id AND s.org_id = p.recipient_org_id"
+        "         AND s.pix_key_set_at > now() - interval '7 days') AS recent_key"
+        " FROM allocation_payouts p JOIN signed_agreements a ON a.id = p.agreement_id"
+        " WHERE p.state IN ('instruction_created', 'payment_pending') AND p.recipient_org_id IS NOT NULL")
+    for r in rows:
+        if org and r["org_id"] != org:
+            continue
+        motivos = [m for m, on in (("pessoa dona nova", r["new_owner"]), ("chave PIX recente", r["recent_key"])) if on]
+        if not motivos:
+            continue
+        n += _emit(c, org_id=r["org_id"], project_id=r["project_id"], signal_type="payout_destination_changed_recently", severity="medium",
+                   key=f"payout_change:{r['payout_id']}:{'+'.join(motivos)}",
+                   summary="Repasse em aberto para organização com mudança recente (" + ", ".join(motivos) + ")",
+                   details={"payout_id": r["payout_id"], "reasons": motivos,
+                            "note": "confirme o destino com a organização por outro canal antes de transferir"})
+    return n
+
+
 def level_for(open_by_sev: dict) -> tuple[str, str]:
     high, med, low = (open_by_sev.get(k, 0) for k in ("high", "medium", "low"))
     if high:
@@ -178,7 +227,8 @@ def recompute(c: Connection, org: str | None = None) -> int:
             continue
         lvl, why = level_for(by.get(oid, {}))
         c.run("INSERT INTO risk_assessments(org_id, level, rationale, open_signals, updated_at) VALUES ($1,$2,$3,$4,now())"
-              " ON CONFLICT (org_id) DO UPDATE SET level = EXCLUDED.level, rationale = EXCLUDED.rationale, open_signals = EXCLUDED.open_signals,"
+              " ON CONFLICT (org_id) DO UPDATE SET level = CASE WHEN risk_assessments.block_proposed_at > now() - interval '72 hours'"
+              " THEN 'manual_review' ELSE EXCLUDED.level END, rationale = EXCLUDED.rationale, open_signals = EXCLUDED.open_signals,"
               " updated_at = now() WHERE risk_assessments.level <> 'blocked'", oid, lvl, why, sum(by.get(oid, {}).values()))
         cnt += 1
     return cnt

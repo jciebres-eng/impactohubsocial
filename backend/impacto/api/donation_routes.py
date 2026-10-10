@@ -27,6 +27,8 @@ def public_campaign(ctx: Ctx):
         out = DON.public_campaign(c, ctx.path["slug"])
     out["canonical_url"] = DON.canonical_url(ctx.settings, ctx.path["slug"], out["campaign"]["qr_version"])
     out["recurring_available"] = bool(getattr(ctx.settings, "recurring_donations_enabled", False) and out["campaign"].get("allow_recurring"))
+    if out.get("payment_mode") == "sandbox" and not DON.sandbox_allowed(ctx.settings):
+        out["payment_mode"] = "unavailable"   # v0.35.0 (PAY-01): produção não simula pagamento
     return out
 
 
@@ -83,9 +85,9 @@ def donation_receipt(ctx: Ctx):
        summary="Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada")
 def donation_webhook(ctx: Ctx, payload: bytes):
     provider = ctx.path["provider"][:40]
-    if not ctx.settings.payment_webhook_secret:
+    if not DON.webhook_secret(ctx.settings, "donation_webhook_secret"):
         return JSONResponse({"status": "rejected", "code": "webhook_not_configured",
-                             "note": "PAYMENT_WEBHOOK_SECRET ausente: nenhum evento é aceito"}, status_code=404)
+                             "note": "DONATION_WEBHOOK_SECRET ausente, curto ou igual ao de pagamentos: nenhum evento é aceito"}, status_code=404)
     try:
         prov = DON.provider_for(ctx.settings, provider)
     except ApiError:
@@ -93,7 +95,7 @@ def donation_webhook(ctx: Ctx, payload: bytes):
     verified = prov.verify_signature(dict(ctx.request.headers), payload)
     try:
         event = prov.parse_event(payload)
-    except (ValueError, json.JSONDecodeError):
+    except (ValueError, json.JSONDecodeError, ApiError):
         return JSONResponse({"status": "rejected", "code": "bad_json"}, status_code=400)
     if not event["event_id"]:
         return JSONResponse({"status": "rejected", "code": "missing_event_id"}, status_code=400)
@@ -218,10 +220,16 @@ def admin_campaigns(ctx: Ctx):
         statuses = [wanted] if wanted in allowed else list(allowed[:-1])
         rows = c.query("SELECT c.id::text AS id, c.slug, c.title, c.kind, c.status, c.target_cents, c.created_at, c.purpose, c.accepted_terms_at,"
                        " c.created_by::text AS created_by, c.beneficiary_org_id::text AS beneficiary_org_id, o.legal_name AS org,"
-                       " beneficiary_verified(c.beneficiary_org_id) AS beneficiary_verified"
+                       " beneficiary_verified(c.beneficiary_org_id) AS beneficiary_verified,"
+                       # v0.35.0 (KYC-03): decisão 'verificado' ainda sem a confirmação da segunda pessoa
+                       " (SELECT k.id::text FROM org_kyb_verifications k WHERE k.org_id = c.beneficiary_org_id"
+                       "   AND k.id = (SELECT k2.id FROM org_kyb_verifications k2 WHERE k2.org_id = c.beneficiary_org_id ORDER BY k2.created_at DESC, k2.id DESC LIMIT 1)"
+                       "   AND k.status = 'verified' AND k.confirmed_by IS NULL) AS verification_awaiting_confirmation,"
+                       " (SELECT k.reviewed_by::text FROM org_kyb_verifications k WHERE k.org_id = c.beneficiary_org_id"
+                       "   ORDER BY k.created_at DESC, k.id DESC LIMIT 1) AS verification_reviewed_by"
                        " FROM campaigns c JOIN organizations o ON o.id = c.beneficiary_org_id"
                        " WHERE c.status = ANY($1) ORDER BY c.status, c.created_at", statuses)
-    return {"items": rows}
+    return {"items": rows, "me": ctx.user_id}
 
 
 @route("POST", "/v1/admin/donation-campaigns/{campaign_id}/review", auth="admin", permission="compliance.write", body=TSch.CampaignReviewIn, tags=T,
@@ -245,14 +253,51 @@ def admin_suspend(ctx: Ctx, body: TSch.CampaignSuspendIn):
 @route("POST", "/v1/admin/beneficiaries/{org_id}/verification", auth="admin", permission="compliance.write", body=TSch.BeneficiaryVerificationIn, tags=T,
        summary="Registra o estado da verificação do beneficiário (KYB): quem verifica e com que documentos depende do provedor e do parecer")
 def admin_beneficiary_verification(ctx: Ctx, body: TSch.BeneficiaryVerificationIn):
+    # v0.35.0 (auditoria, KYC-03): 'verified' exige titularidade conferida e documentos de evidência da PRÓPRIA organização;
+    # quem verifica não pode ser membro dela; e só vale depois da confirmação de OUTRA pessoa da equipe (rota abaixo).
+    # Uma decisão que não seja 'verified' tira do ar as campanhas abertas da organização.
+    org = ctx.path["org_id"]
     with ctx.system_tx() as c:
-        if not c.scalar("SELECT 1 FROM organizations WHERE id = $1", ctx.path["org_id"]):
+        if not c.scalar("SELECT 1 FROM organizations WHERE id = $1", org):
             raise not_found("Organização")
+        if c.scalar("SELECT 1 FROM memberships WHERE org_id = $1 AND user_id = $2", org, ctx.user_id):
+            raise ApiError(403, "conflict_of_interest", "Quem verifica não pode ser membro da organização verificada")
+        if body.status == "verified" and body.account_holder_matches is not True:
+            raise ApiError(422, "account_holder_required", "Verificado exige a titularidade da conta de recebimento conferida")
+        ids = [str(d) for d in body.evidence_document_ids]
+        if ids and int(c.scalar("SELECT count(*) FROM documents WHERE id = ANY($1::uuid[]) AND org_id = $2 AND deleted_at IS NULL", ids, org)) != len(set(ids)):
+            raise ApiError(422, "evidence_invalid", "Documento de evidência inexistente ou de outra organização")
         vid = c.scalar("INSERT INTO org_kyb_verifications(org_id, status, provider, evidence_document_ids, account_holder_matches, reviewed_by, reviewed_at, review_note, expires_at)"
                        " VALUES ($1,$2,'manual',$3,$4,$5,now(),$6, CASE WHEN $2 = 'verified' THEN now() + interval '12 months' END) RETURNING id::text",
                        ctx.path["org_id"], body.status, [str(d) for d in body.evidence_document_ids], body.account_holder_matches, ctx.user_id, body.note)
-        ctx.audit(c, "beneficiary.verification", "organization", ctx.path["org_id"], {"status": body.status}, org_id=ctx.path["org_id"])
-    return {"id": vid, "status": body.status}
+        paused = 0
+        if body.status != "verified":
+            # 'published' → 'under_review' (a máquina de estados não leva 'target_reached' a revisão; ali a doação para
+            # pela checagem de verificação em start_donation)
+            paused = c.run("UPDATE campaigns SET status = 'under_review' WHERE beneficiary_org_id = $1 AND status = 'published'", org)
+        ctx.audit(c, "beneficiary.verification", "organization", org, {"status": body.status, "campaigns_paused": paused}, org_id=org)
+    return {"id": vid, "status": body.status, "needs_second_confirmation": body.status == "verified", "campaigns_paused": paused}
+
+
+@route("POST", "/v1/admin/beneficiaries/{org_id}/verification/{verification_id}/confirm", auth="admin", permission="compliance.write",
+       tags=T, summary="Segunda pessoa da equipe confirma a verificação do beneficiário (quatro olhos, conferido pelo banco)")
+def admin_beneficiary_confirm(ctx: Ctx):
+    org = ctx.path["org_id"]
+    with ctx.system_tx() as c:
+        v = c.one("SELECT id::text AS id, status, reviewed_by::text AS reviewed_by, confirmed_by FROM org_kyb_verifications"
+                  " WHERE id = $1 AND org_id = $2 FOR UPDATE", ctx.path["verification_id"], org)
+        if not v:
+            raise not_found("Verificação")
+        latest = c.scalar("SELECT id::text FROM org_kyb_verifications WHERE org_id = $1 ORDER BY created_at DESC, id DESC LIMIT 1", org)
+        if v["status"] != "verified" or v["confirmed_by"] or latest != v["id"]:
+            raise ApiError(409, "not_confirmable", "Só a decisão 'verificado' mais recente, ainda não confirmada, pode ser confirmada")
+        if v["reviewed_by"] == ctx.user_id:
+            raise ApiError(403, "four_eyes", "Quem verificou não pode confirmar a própria verificação")
+        if c.scalar("SELECT 1 FROM memberships WHERE org_id = $1 AND user_id = $2", org, ctx.user_id):
+            raise ApiError(403, "conflict_of_interest", "Quem confirma não pode ser membro da organização verificada")
+        c.run("UPDATE org_kyb_verifications SET confirmed_by = $2, confirmed_at = now() WHERE id = $1", v["id"], ctx.user_id)
+        ctx.audit(c, "beneficiary.verification_confirmed", "organization", org, {"verification_id": v["id"]}, org_id=org)
+    return {"id": v["id"], "status": "verified", "confirmed": True}
 
 
 @route("GET", "/v1/admin/donation-risk-cases", auth="admin", permission="compliance.read", tags=T, summary="Casos de risco abertos (revisão humana)")
@@ -260,8 +305,10 @@ def admin_risk_cases(ctx: Ctx):
     with ctx.system_tx() as c:
         rows = c.query("SELECT r.id::text AS id, r.campaign_id::text AS campaign_id, r.donation_id::text AS donation_id, r.reason_codes, r.level, r.action,"
                        " r.rule_version, r.explanation, r.status, r.created_at, d.amount_cents, d.status AS donation_status, c.title AS campaign_title"
+                       ", r.assigned_to::text AS assigned_to, user_display_name(r.assigned_to) AS assigned_name, r.appeal_note, r.appealed_at,"
+                       " r.decided_by::text AS decided_by, r.evidence_refs"
                        " FROM donation_risk_cases r LEFT JOIN donations d ON d.id = r.donation_id LEFT JOIN campaigns c ON c.id = r.campaign_id"
-                       " WHERE r.status = 'open' ORDER BY r.level DESC, r.created_at")
+                       " WHERE r.status IN ('open', 'appealed') ORDER BY r.status = 'appealed' DESC, r.level DESC, r.created_at")
     return {"items": rows, "rules_version": DON.RISK_RULES_VERSION,
             "note": "Nenhum limiar aqui é obrigação legal; payout_hold não existe nesta versão (depende do contrato com o provedor)."}
 
@@ -270,22 +317,60 @@ def admin_risk_cases(ctx: Ctx):
        summary="Decide um caso de risco com justificativa; fica na trilha")
 def admin_risk_decide(ctx: Ctx, body: TSch.RiskDecisionIn):
     with ctx.system_tx() as c:
-        out = DON.decide_risk_case(c, case_id=ctx.path["case_id"], decided_by=ctx.user_id, action=body.action, note=body.note)
+        out = DON.decide_risk_case(c, case_id=ctx.path["case_id"], decided_by=ctx.user_id, action=body.action, note=body.note,
+                                   evidence=[e.model_dump() for e in body.evidence])
         if body.action == "reject":
             c.run("UPDATE donations SET status = 'cancelled' WHERE risk_case_id = $1 AND status IN ('awaiting_payment','under_review')", ctx.path["case_id"])
         if body.action == "allow":
-            c.run("UPDATE donations SET status = 'confirmed' WHERE risk_case_id = $1 AND status = 'under_review'"
-                  " AND EXISTS (SELECT 1 FROM payment_provider_events e WHERE e.donation_id = donations.id AND e.signature_verified"
-                  "             AND e.event_type IN ('payment.confirmed','PAYMENT_RECEIVED','PAYMENT_CONFIRMED','charge.paid'))", ctx.path["case_id"])
-        ctx.audit(c, "donation.risk_decided", "donation_risk_case", ctx.path["case_id"], {"action": body.action}, org_id=None)
+            # v0.35.0 (auditoria, PAY-05): "permitir" confirma pelo caminho normal (razão, obrigações, comprovante);
+            # antes era um UPDATE de estado sem lançamento.
+            out = {**out, "released": DON.release_after_review(c, case_id=ctx.path["case_id"])}
+        ctx.audit(c, "donation.risk_decided", "donation_risk_case", ctx.path["case_id"],
+                  {"action": body.action, "appeal": bool(out.get("appeal")), "evidence": len(body.evidence)}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/donation-risk-cases/{case_id}/assign", auth="admin", permission="compliance.write", tags=T,
+       summary="Assume a revisão de um caso de risco (revisor atribuído fica no caso)")
+def admin_risk_assign(ctx: Ctx):
+    with ctx.system_tx() as c:
+        if not c.run("UPDATE donation_risk_cases SET assigned_to = $2 WHERE id = $1 AND status IN ('open', 'appealed')",
+                     ctx.path["case_id"], ctx.user_id):
+            raise not_found("Caso de risco aberto ou em recurso")
+        ctx.audit(c, "donation.risk_assigned", "donation_risk_case", ctx.path["case_id"], {}, org_id=None)
+    return {"id": ctx.path["case_id"], "assigned_to": ctx.user_id}
+
+
+@route("GET", "/v1/campaigns/{campaign_id}/risk-cases", min_role=WRITE, tags=T,
+       summary="Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso")
+def campaign_risk_cases(ctx: Ctx):
+    with ctx.system_tx() as c:
+        if not c.scalar("SELECT 1 FROM campaigns WHERE id = $1 AND beneficiary_org_id = $2", ctx.path["campaign_id"], ctx.org_id):
+            raise not_found("Campanha")
+        # Caso ainda ABERTO não aparece (a revisão em andamento não é anunciada); decidido, em recurso e encerrado aparecem,
+        # com a decisão e a justificativa — sem as regras internas que o originaram.
+        rows = c.query("SELECT id::text AS id, donation_id::text AS donation_id, action, status, decision_note, decided_at, appeal_note,"
+                       " appealed_at, appeal_decision_note, closed_at FROM donation_risk_cases WHERE campaign_id = $1"
+                       " AND status IN ('decided', 'appealed', 'closed') ORDER BY created_at DESC LIMIT 200", ctx.path["campaign_id"])
+    return {"items": rows, "note": "Revisão não é acusação. Cabe um recurso contra decisão que restringiu algo; outra pessoa decide o recurso."}
+
+
+@route("POST", "/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal", body=TSch.RiskAppealIn, min_role=WRITE, tags=T,
+       summary="Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe)")
+def campaign_risk_appeal(ctx: Ctx, body: TSch.RiskAppealIn):
+    with ctx.system_tx() as c:
+        out = DON.appeal_risk_case(c, case_id=ctx.path["case_id"], campaign_id=ctx.path["campaign_id"], org_id=ctx.org_id,
+                                   user_id=ctx.user_id, note=body.note)
+        ctx.audit(c, "donation.risk_appealed", "donation_risk_case", ctx.path["case_id"], {}, org_id=ctx.org_id)
     return out
 
 
 @route("POST", "/v1/admin/donation-campaigns/{campaign_id}/reconcile", auth="admin", permission="finance.write", tags=T,
-       summary="Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções")
+       summary="Conciliação da campanha (atalho da v0.33.0): mesma regra da execução com fila de exceções — sandbox contra os eventos assinados; provedor real exige extrato")
 def admin_reconcile(ctx: Ctx):
+    # v0.35.0 (auditoria, PAY-07): antes marcava TODAS as confirmadas como conciliadas, sem comparar nada.
     with ctx.system_tx() as c:
-        out = DON.reconcile_campaign(c, ctx.path["campaign_id"])
+        out = RECON.run_for_campaign(c, campaign_id=ctx.path["campaign_id"], run_by=ctx.user_id)
         ctx.audit(c, "donation.reconciled", "campaign", ctx.path["campaign_id"], out, org_id=None)
     return out
 
@@ -491,8 +576,21 @@ def admin_remuneration_overdue(ctx: Ctx):
        summary="Executa a conciliação da campanha contra o snapshot do provedor (sandbox: derivado dos eventos assinados) e abre exceções")
 def admin_reconciliation_run(ctx: Ctx, body: TSch.ReconciliationSnapshotIn):
     with ctx.system_tx() as c:
-        out = RECON.run_for_campaign(c, campaign_id=ctx.path["campaign_id"], provider_snapshot=body.charges or None, run_by=ctx.user_id)
-        ctx.audit(c, "reconciliation.run", "campaign", ctx.path["campaign_id"], {"opened": out["opened"], "reconciled": out["reconciled"]}, org_id=None)
+        if body.charges:
+            out = RECON.propose_manual_run(c, campaign_id=ctx.path["campaign_id"], snapshot=[x.model_dump() for x in body.charges], run_by=ctx.user_id)
+        else:
+            out = RECON.run_for_campaign(c, campaign_id=ctx.path["campaign_id"], run_by=ctx.user_id)
+        ctx.audit(c, "reconciliation.run", "campaign", ctx.path["campaign_id"],
+                  {"opened": out["opened"], "reconciled": out["reconciled"], "source": out["snapshot_source"]}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/reconciliation/runs/{run_id}/approve", auth="admin", permission="finance.approve", tags=T,
+       summary="Segunda pessoa aprova o extrato manual: reexecuta com o mesmo extrato (hash conferido) e só então concilia")
+def admin_reconciliation_approve(ctx: Ctx):
+    with ctx.system_tx() as c:
+        out = RECON.approve_manual_run(c, run_id=ctx.path["run_id"], approver=ctx.user_id)
+        ctx.audit(c, "reconciliation.approved", "reconciliation_run", ctx.path["run_id"], {"reconciled": out["reconciled"]}, org_id=None)
     return out
 
 

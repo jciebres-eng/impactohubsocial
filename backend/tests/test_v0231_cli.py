@@ -102,9 +102,16 @@ class CreateAdminActuallyCreatesAnAdministratorTests(unittest.TestCase):
         self.assertGreaterEqual(n, 1, "criar administrador não deixou rastro de auditoria")
 
     def test_running_it_twice_is_safe(self):
-        """O operador vai rodar de novo — por engano, ou para promover alguém que já existe."""
+        """O operador vai rodar de novo — por engano, ou para promover alguém que já existe.
+
+        v0.35.0 (auditoria, AUTH-04): a segunda execução SEM `--promote-existing` é recusada com instrução clara (antes
+        devolvia 0 e promovia a conta mantendo a senha antiga — o caminho de quem pré-cadastra o e-mail do administrador).
+        Com a opção, promove trocando a senha. Em nenhum caso duplica o usuário."""
         r = _cli("create-admin", "--email", self.EMAIL, "--name", "Primeira Administradora")
-        self.assertEqual(r.returncode, 0, f"segunda execução falhou: {r.stderr[-800:]}")
+        self.assertEqual(r.returncode, 1, f"segunda execução sem --promote-existing foi aceita: {r.stdout}")
+        self.assertIn("--promote-existing", r.stderr)
+        r = _cli("create-admin", "--email", self.EMAIL, "--name", "Primeira Administradora", "--promote-existing")
+        self.assertEqual(r.returncode, 0, f"promoção explícita falhou: {r.stderr[-800:]}")
         with db_system() as c:
             self.assertEqual(c.scalar("SELECT count(*) FROM users WHERE email = $1", self.EMAIL), 1,
                              "a segunda execução duplicou o usuário")

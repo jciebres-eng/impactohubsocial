@@ -32,6 +32,8 @@ muda de preço com aviso de 30 dias.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from typing import Any
 
 from ..db.pq import Connection
@@ -341,6 +343,11 @@ def record_webhook(conn: Connection, *, provider: str, event_id: str, event_type
     assinatura válida é gravado para auditoria e marcado, mas não deve produzir efeito — a decisão de
     aplicar fica com quem chama, e `signature_verified` é a informação que ela precisa.
     """
+    if not signature_verified:
+        # v0.35.0 (auditoria, PAY-01): evento sem assinatura válida fica guardado sob identificador próprio, nunca sob o
+        # `event_id` que alega — senão quem o enviasse primeiro faria o evento verdadeiro chegar como "duplicado".
+        digest = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+        event_id = f"unverified:{digest[:40]}"
     existing = conn.one("SELECT id::text AS id, status FROM billing_events"
                         " WHERE provider = $1 AND event_id = $2", provider, event_id)
     if existing:

@@ -62,14 +62,37 @@ def error_fingerprint(route: str, exc: BaseException) -> tuple[str, str]:
     fp = hashlib.sha256(f"{route}|{type(exc).__name__}|{where}".encode()).hexdigest()[:32]
     return fp, _PII.sub("[x]", str(exc))[:300]
 _SERVICE = {"service": "impacto-api"}
-_REDACT_KEYS = {"password", "token", "access_token", "refresh_token", "authorization", "secret", "code", "cookie", "api_key"}
+_REDACT_KEYS = {"password", "token", "access_token", "refresh_token", "authorization", "secret", "code", "cookie", "api_key",
+                "mfa_code", "email_code", "otp", "totp", "cpf"}
+# v0.35.0 (auditoria, WEB-07): a redação era por nome EXATO de chave — `new_password`, `senha`, `client_secret`,
+# `x-api-key`, `pix_key` passavam. Agora também por PEDAÇO do nome (para valores de texto) e por PADRÃO do valor
+# (e-mail mascarado, CPF), inclusive no texto de exceção. Números (contagem de tokens, valores) não são tocados.
+_REDACT_FRAGMENTS = ("password", "passwd", "senha", "secret", "token", "authorization", "cookie", "api_key", "apikey",
+                     "api-key", "private_key", "pix_key", "signature", "credential")
+_EMAIL = re.compile(r"\b([A-Za-z0-9._%+-])[A-Za-z0-9._%+-]*@([A-Za-z0-9.-]+\.[A-Za-z]{2,})\b")
+_CPF = re.compile(r"(?<![\d.])\d{3}\.?\d{3}\.?\d{3}-?\d{2}(?![\d.])")
 
 
-def _redact(obj):
+def redact_text(text: str) -> str:
+    return _CPF.sub("[cpf]", _EMAIL.sub(r"\1***@\2", text))
+
+
+def _sensitive_key(k: str) -> bool:
+    kl = k.lower()
+    return kl in _REDACT_KEYS or any(f in kl for f in _REDACT_FRAGMENTS)
+
+
+def _redact(obj, key: str = ""):
     if isinstance(obj, dict):
-        return {k: ("[REDACTED]" if k.lower() in _REDACT_KEYS else _redact(v)) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [_redact(x) for x in obj]
+        return {k: _redact(v, str(k)) for k, v in obj.items()}
+    if isinstance(obj, list | tuple):
+        return [_redact(x, key) for x in obj]
+    if isinstance(obj, str | bytes):
+        if key and _sensitive_key(key):
+            return "[REDACTED]"
+        return redact_text(obj if isinstance(obj, str) else obj.decode("utf-8", "replace"))
+    if key and key.lower() in _REDACT_KEYS and obj is not None and not isinstance(obj, bool):
+        return "[REDACTED]"
     return obj
 
 
@@ -85,8 +108,9 @@ class JsonFormatter(logging.Formatter):
         extra = getattr(record, "fields", None)
         if extra:
             base.update(_redact(extra))
+        base["msg"] = redact_text(base["msg"])
         if record.exc_info:
-            base["exc"] = self.formatException(record.exc_info)
+            base["exc"] = redact_text(self.formatException(record.exc_info))
         return json.dumps(base, ensure_ascii=False, default=str)
 
 

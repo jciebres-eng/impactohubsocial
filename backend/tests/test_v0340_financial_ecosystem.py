@@ -5,22 +5,22 @@ receita devida ≠ recebida, fatura paga parcialmente, cobrança vencida, compro
 divergente, divergência razão × provedor, mudança de tarifa com operações antigas, valor fora dos limites, concorrência de
 eventos, acesso de outra organização, e a regra ADR-381 (nada de prestação de contas consulta o estado comercial).
 """
-import hashlib
-import hmac
 import json
 import re
 import threading
 import unittest
 import uuid
 
-from tests.support import ROOT, Client, db_system, make_admin, make_staff, new_account, reauth, server
+from impacto.integrations.events import sign
+from tests.support import ROOT, Client, db_system, make_admin, make_staff, new_account, reauth, server, verify_beneficiary
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 
 
 def _signed(client: Client, body: dict):
     raw = json.dumps(body).encode()
-    sig = hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    # v0.35.0 (auditoria, PAY-01): assinatura `t=<unix>,v1=<hmac(t.corpo)>` com janela de 300 s (antes: hmac só do corpo)
+    sig, _ = sign(SECRET, raw)
     return client.request("POST", "/v1/webhooks/donations/sandbox", raw=raw, ctype="application/json", headers={"X-Impacto-Signature": sig})
 
 
@@ -50,7 +50,7 @@ def _set_rule_active(key: str, active: bool) -> None:
 def _publish(osc: Client, reviewer: Client, campaign_id: str) -> None:
     assert osc.post(f"/v1/campaigns/{campaign_id}/submit").status == 200
     assert reviewer.post(f"/v1/admin/donation-campaigns/{campaign_id}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."}).status == 200
-    assert reviewer.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True}).status == 200
+    verify_beneficiary(osc.org_id, reviewer)   # v0.35.0: decisão + confirmação por outra pessoa (KYC-03)
     assert osc.post(f"/v1/campaigns/{campaign_id}/publish").status == 200
 
 
@@ -79,11 +79,13 @@ class EcosystemTests(unittest.TestCase):
     def setUpClass(cls):
         st = server()
         cls.base, cls.state = st["base"], st["state"]
-        cls.state.settings.payment_webhook_secret = SECRET
+        # v0.35.0 (auditoria, PAY-01): o webhook de doações tem segredo PRÓPRIO (DONATION_WEBHOOK_SECRET)
+        cls.state.settings.donation_webhook_secret = SECRET
         cls.osc = new_account("osc", compliance="approved")
         cls.other = new_account("osc", compliance="approved")
         cls.company = new_account("company", compliance="approved")
         cls.reviewer = make_staff("compliance")
+        reauth(cls.reviewer)   # v0.35.0: compliance.write exige step-up
         cls.finance = make_staff("finance")
         cls.controller = make_staff("controller")
         reauth(cls.finance)     # finance.write e finance.approve exigem confirmação de identidade (step-up)
@@ -316,10 +318,15 @@ class EcosystemTests(unittest.TestCase):
         ]
         run = self.finance.post(f"/v1/admin/reconciliation/campaigns/{camp}/run", {"charges": snapshot})
         self.assertEqual(run.status, 200, run.body)
-        self.assertEqual(run.json["reconciled"], 1)
+        # v0.35.0 (auditoria, PAY-07): extrato digitado por UMA pessoa não concilia sozinho — abre as exceções e aguarda a
+        # aprovação de outra (antes este teste exigia reconciled == 1 já aqui, que era a falha).
+        self.assertEqual((run.json["reconciled"], run.json["would_reconcile"], run.json["awaiting_approval"]), (0, 1, True))
         self.assertEqual(run.json["opened"], 2)
         again = self.finance.post(f"/v1/admin/reconciliation/campaigns/{camp}/run", {"charges": snapshot}).json
         self.assertEqual(again["opened"], 0, "reexecutar não duplica exceções abertas")
+        self.assertEqual(self.anon.get(f"/v1/public/donations/{d1}").json["status"], "confirmed", "sem aprovação, nada concilia")
+        ok = self.controller.post(f"/v1/admin/reconciliation/runs/{run.json['run_id']}/approve")
+        self.assertEqual((ok.status, ok.json["reconciled"], ok.json["opened"]), (200, 1, 0), ok.body)
         items = self.finance.get("/v1/admin/reconciliation/exceptions?status=open").json["items"]
         kinds = {i["kind"] for i in items if i["campaign_id"] == camp}
         self.assertEqual(kinds, {"amount_mismatch", "provider_only"})

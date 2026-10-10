@@ -1,0 +1,12 @@
+ERROR: test_a_viewer_cannot_authorize_billing_revoke_or_change_the_spend_limit (tests.test_v0350_security.CommercialActsNeedTheOwnerTests.test_a_viewer_cannot_authorize_billing_revoke_or_change_the_spend_limit)
+KeyError: 'code'
+FAIL: test_access_ends_when_the_application_closes (tests.test_v0350_security.DiligenceSeesOnlyInstitutionalDocumentsTests.test_access_ends_when_the_application_closes)
+AssertionError: 200 != 404 : candidatura encerrada ainda abria os documentos
+FAIL: test_private_export_personal_and_identity_documents_are_refused (tests.test_v0350_security.DiligenceSeesOnlyInstitutionalDocumentsTests.test_private_export_personal_and_identity_documents_are_refused)
+AssertionError: 200 != 404 : interno
+FAIL: test_every_organization_write_route_declares_a_minimum_role (tests.test_v0350_security.CommercialActsNeedTheOwnerTests.test_every_organization_write_route_declares_a_minimum_role)
+AssertionError: Lists differ: ['POST /v1/commercial/consent/revoke', 'PO[73 chars]mit'] != []
+FAIL: test_an_individual_backer_appears_masked_until_they_opt_in (tests.test_v0350_security.PublicBackersNeverShowACivilNameWithoutOptInTests.test_an_individual_backer_appears_masked_until_they_opt_in)
+AssertionError: 'Maria Civil 2948f4' unexpectedly found in ['Maria Civil 2948f4'] : nome civil exposto sem opt-in
+Ran 7 tests in 7.517s
+FAILED (failures=4, errors=1)

@@ -326,6 +326,7 @@
    "recusa quando o titular é o único proprietário de organização com outras pessoas (409 transfer_ownership_first)",
    "fecha a organização quando o titular é o único membro (status closed), sem apagar o histórico dela",
    "anonimiza users: e-mail substituído, nome trocado, senha e segredo de MFA removidos",
+   "apaga os ARQUIVOS pessoais (v0.35.0, FILE-09): documento anexado a verificação de identidade da pessoa, documento_dirigente e exportacao_dados enviados por ela ou gerados para a organização que fecha com ela — registro marcado como excluído e objeto removido do armazenamento; documento assinado fica (prova de integridade)",
    "revoga sessões e limpa IP e agente de usuário",
    "apaga auth_tokens",
    "limpa IP e agente dos aceites legais, mantendo a prova (gatilho acceptance_anonymize_only)",
@@ -334,7 +335,8 @@
   "does_not": [
    "não apaga a organização nem o histórico institucional dela: organização é pessoa jurídica e seus registros servem a terceiros (quem financiou, quem revisou, quem replicou)",
    "não apaga trilha de auditoria nem registro financeiro",
-   "não remove a linha da organização: além das guardas legais (evidência, financeiro), a camada de impacto é append-only e recusa remoção — e é essa a decisão de arquitetura, não um efeito colateral"
+   "não remove a linha da organização: além das guardas legais (evidência, financeiro), a camada de impacto é append-only e recusa remoção — e é essa a decisão de arquitetura, não um efeito colateral",
+   "não apaga os documentos institucionais da organização (estatuto, certidões, prestação de contas…): são da pessoa jurídica, servem a terceiros e podem ter guarda obrigatória — o prazo por tipo de documento é pergunta aberta ao jurídico/DPO"
   ]
  },
  "scope_note": "A conferência cobre as colunas org_id e user_id. Vínculos com nome próprio (claim_review_requests.requested_org_id, framework_mappings.reviewer_org_id, indicator_values.validated_by_org) são de ORGANIZAÇÃO TERCEIRA, não do titular do dado: estão cobertos pelos testes de isolamento entre organizações, não por esta política de retenção.",

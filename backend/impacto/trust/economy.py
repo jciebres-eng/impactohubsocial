@@ -60,9 +60,20 @@ def mask_pix(key: str | None, kind: str | None) -> str | None:
 
 
 # ------------------------------------------------------------------ chave PIX da parte
+PIX_COOLING_HOURS = 24
+
+
 def set_party_pix(conn: Connection, *, agreement_id: str, party_id: str, org_id: str, user_id: str,
                   pix_key: str, pix_key_type: str) -> dict:
-    """Só a própria parte informa a própria chave. O formato é conferido pelo banco (CHECK pix_key_shape)."""
+    """Só a própria parte informa a própria chave. O formato é conferido pelo banco (CHECK pix_key_shape).
+
+    v0.35.0 (auditoria, PAY-09) — a chave é para onde o dinheiro vai; quem tomasse a conta da dona trocava a chave antes do
+    repasse, sem ninguém saber. Agora (além da confirmação de identidade e do aviso a todas as partes, na rota):
+      * depois da PRIMEIRA assinatura (ou com o acordo em vigor) a chave já informada NÃO muda — troca só por nova versão do
+        acordo (aditivo). O banco confere isso também (gatilho `trg_party_pix_lock`);
+      * chave informada pela primeira vez depois de alguma assinatura entra em CARÊNCIA de 24 h: até lá, quem paga vê só a
+        chave mascarada e o aviso para confirmar com a parte por outro canal;
+      * acordo encerrado (concluído, cancelado, vencido, substituído) não recebe chave."""
     if pix_key_type not in PIX_TYPES:
         raise ApiError(422, "pix_type_invalid", "Tipo de chave PIX inválido", {"possiveis": list(PIX_TYPES)})
     key = pix_key.strip()
@@ -72,15 +83,49 @@ def set_party_pix(conn: Connection, *, agreement_id: str, party_id: str, org_id:
         key = "+55" + "".join(ch for ch in key if ch.isdigit())
     if pix_key_type == "email":
         key = key.lower()
-    p = conn.one("SELECT id::text AS id, org_id::text AS org_id FROM signed_agreement_parties WHERE id = $1 AND agreement_id = $2",
-                 party_id, agreement_id)
+    p = conn.one("SELECT p.id::text AS id, p.org_id::text AS org_id, p.pix_key, p.pix_key_type, a.status AS agreement_status,"
+                 " EXISTS (SELECT 1 FROM signed_agreement_parties x WHERE x.agreement_id = p.agreement_id AND x.signed_at IS NOT NULL) AS any_signed"
+                 " FROM signed_agreement_parties p JOIN signed_agreements a ON a.id = p.agreement_id"
+                 " WHERE p.id = $1 AND p.agreement_id = $2", party_id, agreement_id)
     if not p:
         raise ApiError(404, "not_found", "Parte não encontrada")
     if p["org_id"] != org_id:
         raise ApiError(403, "not_your_party", "Cada parte informa a própria chave PIX")
-    conn.run("UPDATE signed_agreement_parties SET pix_key = $2, pix_key_type = $3, pix_key_set_by = $4, pix_key_set_at = now() WHERE id = $1",
-             party_id, key, pix_key_type, user_id)
-    return {"party_id": party_id, "pix_key_masked": mask_pix(key, pix_key_type), "pix_key_type": pix_key_type}
+    conn.run("SELECT 1 FROM signed_agreement_parties WHERE id = $1 FOR UPDATE", party_id)   # duas trocas simultâneas: uma espera a outra
+    if p["agreement_status"] in ("completed", "canceled", "expired", "superseded"):
+        raise ApiError(409, "agreement_closed", "Acordo encerrado: a chave PIX não muda mais")
+    locked = bool(p["any_signed"]) or p["agreement_status"] not in ("draft", "awaiting_signatures")
+    base = {"party_id": party_id, "pix_key_masked": mask_pix(key, pix_key_type), "pix_key_type": pix_key_type}
+    if p["pix_key"] == key and p["pix_key_type"] == pix_key_type:
+        return base | {"unchanged": True, "changed": False, "notify": False}
+    if p["pix_key"] and locked:
+        raise ApiError(409, "pix_locked_after_signature",
+                       "A chave PIX deste acordo não muda depois da assinatura. Para trocar, faça uma nova versão do acordo (aditivo), "
+                       "que todas as partes assinam de novo.")
+    cooling = conn.scalar("SELECT now() + make_interval(hours => $1)", PIX_COOLING_HOURS) if locked else None
+    conn.run("UPDATE signed_agreement_parties SET pix_key = $2, pix_key_type = $3, pix_key_set_by = $4, pix_key_set_at = now(),"
+             " pix_key_cooling_until = $5 WHERE id = $1", party_id, key, pix_key_type, user_id, cooling)
+    return base | {"changed": p["pix_key"] is not None, "cooling_until": cooling, "notify": True}
+
+
+def pix_change_notice(conn: Connection, *, agreement_id: str, party_org_id: str, masked: str | None, changed: bool,
+                      cooling_until: Any = None) -> list[str]:
+    """Aviso dentro da plataforma a TODAS as partes do acordo e a lista de e-mails das pessoas donas de cada uma (contexto de
+    sistema: avisar a outra organização). Quem não reconhece a mudança sabe na hora."""
+    title = "Chave PIX de repasse alterada" if changed else "Chave PIX de repasse informada"
+    org_name = conn.scalar("SELECT legal_name FROM organizations WHERE id = $1", party_org_id) or "Uma das partes"
+    body = (f"{org_name} {'alterou' if changed else 'informou'} a chave PIX que recebe repasses deste acordo: {masked or '—'}. "
+            + (f"Por segurança, a chave fica em carência até {cooling_until:%d/%m/%Y %H:%M} (UTC): confirme com a parte por outro canal "
+               "antes de pagar. " if cooling_until else "")
+            + "Se ninguém da organização reconhece esta mudança, avise o suporte antes de qualquer pagamento.")
+    orgs = [r["org_id"] for r in conn.query("SELECT DISTINCT org_id::text AS org_id FROM signed_agreement_parties WHERE agreement_id = $1",
+                                            agreement_id)]
+    for o in orgs:
+        conn.scalar("SELECT app_notify($1, NULL, 'agreement', $2, $3, $4)", o, title, body, f"/acordos/{agreement_id}")
+    emails = [r["email"] for r in conn.query(
+        "SELECT DISTINCT u.email FROM memberships m JOIN users u ON u.id = m.user_id"
+        " WHERE m.org_id = ANY($1::uuid[]) AND m.role = 'owner' AND u.status = 'active' ORDER BY u.email", orgs)]
+    return [title, body, *emails]
 
 
 # ------------------------------------------------------------------ participação de autoria
@@ -268,8 +313,15 @@ def payouts(conn: Connection, agreement_id: str, *, viewer_org_id: str | None) -
                       " p.platform_charge_id::text AS platform_charge_id, p.created_at, p.updated_at"
                       " FROM allocation_payouts p WHERE p.agreement_id = $1 ORDER BY CASE p.line_kind WHEN 'project' THEN 0"
                       " WHEN 'proponent' THEN 1 WHEN 'platform_fee' THEN 2 ELSE 3 END", agreement_id)
+    cooling = {x["org_id"]: x["until"] for x in conn.query(
+        "SELECT org_id::text AS org_id, pix_key_cooling_until AS until FROM signed_agreement_parties"
+        " WHERE agreement_id = $1 AND pix_key_cooling_until > now()", agreement_id)}
     for r in rows:
         full = viewer_org_id is not None and viewer_org_id in (r["payer_org_id"], r["recipient_org_id"])
+        until = cooling.get(r["recipient_org_id"]) if r["recipient_org_id"] else None
+        if until and viewer_org_id != r["recipient_org_id"]:
+            full = False   # v0.35.0 (PAY-09): chave em carência — quem paga vê mascarada
+        r["pix_cooling_until"] = until
         r["pix_key"] = r.pop("pix_key_snapshot") if full else None
         r["pix_key_masked"] = mask_pix(r["pix_key"] or None, r["pix_key_type"]) if r["pix_key"] else \
             (mask_pix(conn.scalar("SELECT pix_key_snapshot FROM allocation_payouts WHERE id = $1", r["id"]), r["pix_key_type"]))

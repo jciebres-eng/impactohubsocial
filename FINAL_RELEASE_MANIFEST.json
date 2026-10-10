@@ -1,8 +1,8 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.33.0",
  "version": "0.33.0",
- "commit": "7557266",
- "date": "2026-10-10T02:17:02+00:00",
+ "commit": "3481e18",
+ "date": "2026-10-10T03:36:35+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
   "tracked_total": 4294,
@@ -21,7 +21,7 @@
   "seconds": 1807.781,
   "result": "FAILED",
   "detail": "failures=8, skipped=31",
-  "runs_in_log": 2
+  "runs_in_log": 3
  },
  "new_test_modules": [
   "backend/tests/test_v0300_evidence_object.py",

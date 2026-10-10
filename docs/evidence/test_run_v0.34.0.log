@@ -368,3 +368,51 @@ FAILED (failures=8, errors=1, skipped=31)
 Ran 126 tests in 32.793s
 
 OK
+
+===== E7 — REEXECUÇÃO APÓS A CORREÇÃO DO CI (pilha-do-zero) E DO GERADOR DO MANIFESTO (manifestos do commit 64a13ac, commit 0878027) =====
+CI do PR #7, execução 38054533485 (commit dee05c4): auditoria, armazenamento, docker, backend e pilha-do-zero — todos success
+módulos: release_docs (v0270, v0300, v0330, v0340), release_gate (v0230), pilha_do_zero (v0250), cleanup (v0200)
+............MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+....NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  constraint "expense_approval_is_complete" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_state_needs_approval" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_paid_needs_date" of relation "platform_expenses" does not exist, skipping
+NOTICE:  trigger "trg_approval_applies" for relation "approval_requests" does not exist, skipping
+NOTICE:  trigger "trg_totp_counter" for relation "users" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_append_only" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_apply" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  constraint "indicator_source_kind_known" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_evidence_matches_source" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_validated_needs_evidence" of relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "trg_indicator_provenance" for relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "aa_trg_ledger_correction" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "aa_trg_chain_value_event" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_application_status_graph" for relation "applications" does not exist, skipping
+NOTICE:  constraint "audit_actor_type_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_severity_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_status_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_source_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_text_sizes" of relation "audit_events" does not exist, skipping
+NOTICE:  trigger "aa_trg_audit_parent" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "ab_trg_audit_chain_version" for relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_category_known" of relation "audit_action_categories" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_audit" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ledger" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_value" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_kill_switch" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_privileged" for relation "privileged_access_log" does not exist, skipping
+NOTICE:  trigger "trg_ai_prompt_frozen" for relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_prompt_tier_exists" of relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_usage_status_known" of relation "ai_usage" does not exist, skipping
+NOTICE:  trigger "trg_ai_credit_append_only" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ai_credit" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  constraint "ai_credit_bucket_known" of relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  policy "schema_migrations_read_app" for relation "schema_migrations" does not exist, skipping
+..................................................
+----------------------------------------------------------------------
+Ran 66 tests in 6.801s
+
+OK

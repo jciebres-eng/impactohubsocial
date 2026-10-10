@@ -451,6 +451,30 @@ def deadline_sweep(app) -> dict:
         return DL.sweep(c)
 
 
+def financial_ops(app) -> dict:
+    """v0.34.0 — rotina financeira (cenários 33, 35, 21, 25 e conciliação periódica). Cada parte numa transação própria:
+    uma falha não impede as outras. Nenhuma parte cobra dinheiro, bloqueia acesso ou mexe em recurso de terceiro.
+
+    1. reprocessa eventos assinados que ficaram `failed`/`received` (o processo caiu entre gravar e aplicar);
+    2. marca vencidas as obrigações faturadas além do prazo (vencida não bloqueia nada — ADR-381);
+    3. concilia campanhas com movimento recente (no sandbox, contra os eventos assinados);
+    4. cria as tentativas de doação recorrente vencidas — só se a recorrência estiver ligada (hoje recusada pela configuração)."""
+    from .services import donations as DON
+    from .services import reconciliation as RECON
+    from .services import remuneration as REM
+    out: dict = {}
+    for nome, fn in (("events", lambda c: DON.reprocess_pending_events(c)),
+                     ("overdue", lambda c: {"marked": REM.mark_overdue(c)}),
+                     ("reconciliation", lambda c: RECON.run_periodic(c)),
+                     ("recurring", lambda c: DON.run_recurring_cycle(c, settings=app.settings, cipher=app.cipher))):
+        try:
+            with app.pool.tx(DbContext(system=True)) as c:
+                out[nome] = fn(c)
+        except Exception as exc:  # noqa: BLE001 — registrado no detalhe da execução; a próxima rodada tenta de novo
+            out[nome] = {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+    return out
+
+
 JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), ("integration_ops", integration_ops), ("import_sources", import_all), ("saved_searches", saved_searches_job),
         ("pending_scans", pending_scans), ("document_expiry", document_expiry), ("risk_scan", risk_scan), ("retention", retention), ("commercial_sweep", commercial_sweep), ("usage_alerts", usage_alerts), ("hub_ops", hub_ops), ("reputation_timeline", reputation_timeline),
         # v0.19.0 — operação: as duas tarefas que faltavam para publicar.
@@ -458,7 +482,9 @@ JOBS = [("close_calls", close_calls), ("payment_deadlines", payment_deadlines), 
         ("enforcement_expiry", enforcement_expiry),
         # v0.20.0 — três funções que existiam e nunca eram chamadas. Ver docstrings acima.
         ("proposal_expiry", proposal_expiry), ("listing_expiry", listing_expiry),
-        ("seal_recheck", seal_recheck), ("deadline_sweep", deadline_sweep)]
+        ("seal_recheck", seal_recheck), ("deadline_sweep", deadline_sweep),
+        # v0.34.0 — ecossistema financeiro: reprocessamento, vencimento, conciliação periódica e recorrência.
+        ("financial_ops", financial_ops)]
 
 
 def run_once(app) -> list[dict]:

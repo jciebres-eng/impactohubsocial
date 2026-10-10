@@ -19,7 +19,7 @@ from .donations import apply_bps
 
 PRIORITY = {"provider_only": "high", "system_only": "high", "amount_mismatch": "high", "reversal_missing": "high",
             "duplicate_entry": "high", "fee_mismatch": "medium", "fee_miscalculated": "medium", "settlement_partial": "medium",
-            "unreconciled_overdue": "low"}
+            "unreconciled_overdue": "low", "settlement_failed": "high", "event_processing_failed": "high"}
 
 
 def sandbox_snapshot(c: Connection, campaign_id: str) -> list[dict]:
@@ -34,7 +34,7 @@ def sandbox_snapshot(c: Connection, campaign_id: str) -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def _open(c: Connection, *, run_id: str, kind: str, campaign_id: str | None, org_id: str | None, donation_id: str | None = None,
+def _open(c: Connection, *, run_id: str | None, kind: str, campaign_id: str | None, org_id: str | None, donation_id: str | None = None,
           obligation_id: str | None = None, provider: str | None = None, provider_ref: str | None = None,
           expected: int | None = None, observed: int | None = None, detail: str = "") -> bool:
     try:
@@ -49,6 +49,29 @@ def _open(c: Connection, *, run_id: str, kind: str, campaign_id: str | None, org
         if "ux_recon_open_fact" in str(exc):
             return False
         raise
+
+
+def open_from_event(c: Connection, *, kind: str, campaign_id: str | None, org_id: str | None, donation_id: str | None,
+                    provider: str | None, provider_ref: str | None, expected: int | None, observed: int | None, detail: str) -> bool:
+    """Exceção aberta por um EVENTO (liquidação parcial/falha, evento que falhou ao aplicar), fora de uma execução de
+    conciliação. Usa a mesma unicidade por fato aberto: o mesmo fato não vira duas linhas."""
+    return _open(c, run_id=None, kind=kind, campaign_id=campaign_id, org_id=org_id, donation_id=donation_id, provider=provider,
+                 provider_ref=provider_ref, expected=expected, observed=observed, detail=detail)
+
+
+def run_periodic(c: Connection, *, days: int = 7) -> dict:
+    """Rotina: concilia toda campanha com doação movimentada nos últimos `days` dias (no sandbox, contra os eventos
+    assinados). Uma campanha com erro não impede as outras."""
+    camps = c.query("SELECT DISTINCT campaign_id::text AS id FROM donations WHERE updated_at > now() - make_interval(days => $1)", days)
+    runs = []
+    for row in camps:
+        c.run("SAVEPOINT recon_periodic")
+        try:
+            runs.append(run_for_campaign(c, campaign_id=row["id"], run_by=None))
+            c.run("RELEASE SAVEPOINT recon_periodic")
+        except Exception:  # noqa: BLE001 — registrado pela rotina; a próxima execução tenta de novo
+            c.run("ROLLBACK TO SAVEPOINT recon_periodic")
+    return {"campaigns": len(camps), "opened": sum(r["opened"] for r in runs), "reconciled": sum(r["reconciled"] for r in runs)}
 
 
 def run_for_campaign(c: Connection, *, campaign_id: str, provider_snapshot: list[dict] | None = None, run_by: str | None = None,

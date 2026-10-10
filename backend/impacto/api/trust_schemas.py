@@ -280,6 +280,14 @@ class DonationStartIn(In):
     idempotency_key: Annotated[str | None, Field(max_length=80, pattern=r"^[A-Za-z0-9_-]+$")] = None
     as_organization: bool = False      # v0.34.0: doar em nome da organização ativa (painel do financiador)
     funding_source: Literal["private", "public", "mixed"] | None = None   # v0.34.0: origem declarada pelo doador institucional
+    platform_contribution_cents: Annotated[int, Field(ge=0, le=50_000)] = 0   # v0.34.0 (ADR-384): opcional, começa em zero
+
+
+class RecurringDonationIn(In):
+    """Autorização de doação recorrente (v0.34.0). Autorizar não é pagar: cada ciclo é uma tentativa confirmada pelo provedor."""
+    amount_cents: Annotated[int, Field(ge=100, le=10_000_000)]
+    method: Literal["card", "pix_automatic"] = "card"
+    consent_text: Annotated[str, Field(min_length=40, max_length=2000)]
 
 
 class RiskDecisionIn(In):
@@ -421,6 +429,12 @@ class ObligationReceiptIn(In):
 
 class ObligationSettleIn(In):
     note: Annotated[str, Field(min_length=3, max_length=2000)]
+
+
+class ObligationRefundIn(In):
+    refunded_cents: Annotated[int, Field(gt=0, le=100_000_000_000)]
+    reference: Annotated[str, Field(min_length=3, max_length=120)]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
 
 
 class PublicFeeAuthorizationIn(In):

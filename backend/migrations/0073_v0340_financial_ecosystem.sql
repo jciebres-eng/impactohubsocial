@@ -43,7 +43,30 @@ ALTER TABLE donations DROP CONSTRAINT donations_status_check;
 ALTER TABLE donations ADD CONSTRAINT donations_status_check CHECK (status IN (
   'created','awaiting_payment','confirmed','reconciled','expired','failed','cancelled',
   'refund_pending','refunded','partially_refunded','chargeback','under_review'));
-ALTER TABLE donations ADD CONSTRAINT refund_within_amount CHECK (refunded_cents <= amount_cents + cover_costs_cents);
+-- v0.34.0 (E6): contribuição VOLUNTÁRIA do doador à plataforma (nunca pré-marcada, nunca descontada da doação: é um
+-- valor A MAIS que o doador escolhe; ADR-384), liquidação ACUMULADA pelo provedor (parcial ≠ total), parcela que o provedor
+-- dividiu direto para a plataforma (split, só se o contrato e a homologação permitirem) e ciclo de recorrência.
+ALTER TABLE donations
+  ADD COLUMN platform_contribution_cents bigint NOT NULL DEFAULT 0 CHECK (platform_contribution_cents >= 0),
+  ADD COLUMN settled_cents        bigint NOT NULL DEFAULT 0 CHECK (settled_cents >= 0),
+  ADD COLUMN split_platform_cents bigint NOT NULL DEFAULT 0 CHECK (split_platform_cents >= 0);   -- recurring_agreement_id já existe (0072)
+ALTER TABLE donations ADD CONSTRAINT contribution_bounded CHECK (platform_contribution_cents <= amount_cents);
+ALTER TABLE donations ADD CONSTRAINT split_only_contribution CHECK (split_platform_cents <= platform_contribution_cents);
+ALTER TABLE donations ADD CONSTRAINT refund_within_amount CHECK (refunded_cents <= amount_cents + cover_costs_cents + platform_contribution_cents);
+CREATE INDEX ix_donations_recurring ON donations(recurring_agreement_id) WHERE recurring_agreement_id IS NOT NULL;
+
+-- Razão: duas contas para a contribuição voluntária (fora da arrecadação da campanha, que continua só `donor_payment`).
+ALTER TABLE donation_ledger_entries DROP CONSTRAINT donation_ledger_entries_account_check;
+ALTER TABLE donation_ledger_entries ADD CONSTRAINT donation_ledger_entries_account_check CHECK (account IN (
+  'donor_payment', 'beneficiary_receivable', 'provider_fee', 'platform_fee_accrued', 'beneficiary_fund', 'refund', 'chargeback',
+  'donor_platform_contribution',        -- crédito: o que o doador pagou A MAIS, por escolha, à plataforma
+  'platform_contribution_receivable')); -- débito: o que a plataforma tem a receber (pelo split, ou da organização se não houve split)
+
+-- Recorrência: autorização (consent_at) ≠ tentativa ≠ confirmado ≠ falha ≠ cancelado.
+ALTER TABLE recurring_donation_agreements
+  ADD COLUMN attempts        integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  ADD COLUMN failed_attempts integer NOT NULL DEFAULT 0 CHECK (failed_attempts >= 0),
+  ADD COLUMN last_attempt_at timestamptz;
 CREATE INDEX ix_donations_donor_org ON donations(donor_org_id) WHERE donor_org_id IS NOT NULL;
 
 CREATE OR REPLACE FUNCTION donation_state_guard() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -191,7 +214,7 @@ BEGIN
     ok := CASE OLD.state
       WHEN 'calculated' THEN NEW.state IN ('exempt','due','reversed','waived')
       WHEN 'exempt'     THEN NEW.state IN ('calculated','due','reversed','waived')
-      WHEN 'due'        THEN NEW.state IN ('invoiced','reversed','disputed','waived','overdue','exempt')
+      WHEN 'due'        THEN NEW.state IN ('invoiced','received','reversed','disputed','waived','overdue','exempt')   -- received: split confirmado pelo provedor
       WHEN 'invoiced'   THEN NEW.state IN ('charged','received','reversed','disputed','waived','overdue')
       WHEN 'charged'    THEN NEW.state IN ('received','disputed','waived','overdue','reversed')
       WHEN 'overdue'    THEN NEW.state IN ('received','disputed','waived','reversed')
@@ -312,7 +335,9 @@ CREATE TABLE reconciliation_exceptions (
                     'duplicate_entry',      -- lançamento duplicado no razão
                     'fee_miscalculated',    -- obrigação com valor ≠ regra congelada × base
                     'settlement_partial',   -- repasse/liquidação parcial ou atrasada
-                    'unreconciled_overdue')), -- operação sem conciliação dentro do prazo
+                    'unreconciled_overdue',   -- operação sem conciliação dentro do prazo
+                    'settlement_failed',      -- o provedor informou falha na liquidação/repasse ao beneficiário
+                    'event_processing_failed')), -- evento assinado gravado e não aplicado (erro interno); reprocessado pela rotina
   campaign_id     uuid REFERENCES campaigns(id) ON DELETE SET NULL,
   org_id          uuid REFERENCES organizations(id) ON DELETE SET NULL,
   donation_id     uuid REFERENCES donations(id) ON DELETE SET NULL,
@@ -452,12 +477,62 @@ WITH c AS (
   RETURNING id)
 UPDATE monetization_rules r SET legal_card_id = c.id FROM c WHERE r.key = 'donation.institutional_reserve';
 
+-- Cartão no sandbox (E6): sem esta linha, toda doação por cartão era recusada (`provider_fee_unknown`) — achado do teste
+-- do cenário 2. Tarifa zero porque o sandbox não cobra; a tarifa real vem do contrato do provedor.
+INSERT INTO provider_fee_schedules(provider, method, bps, fixed_cents, settlement_days, source) VALUES
+  ('sandbox', 'card', 0, 0, 0, 'Provedor de TESTE (sem tarifa): nenhum valor real; cartão real tem tarifa e prazo do contrato do provedor');
+
+-- ============================================================================ 8b. contribuição voluntária do doador (ADR-384)
+-- Não é taxa sobre a doação: é um valor que o DOADOR escolhe somar, para a plataforma, antes de pagar. Começa em zero,
+-- nunca é sugerido nem pré-marcado, e aparece separado no total. Hipótese INATIVA: o formulário só oferece o campo com a
+-- regra ativa (carta verde). É a única operação elegível a split nesta arquitetura, porque nada sai do valor doado.
+INSERT INTO monetization_rules(
+    key, label_pt, revenue_engine, engine_rank, payer_kind, trigger_kind, value_event_type,
+    pricing_mode, amount_cents, currency, hypothesis_min_cents, hypothesis_max_cents, hypothesis_note, problem_solved, substitution_answer)
+VALUES
+ ('donation.platform_contribution', 'Contribuição voluntária do doador para a manutenção da plataforma (opcional, começa em zero)', 'enterprise', 3,
+  'individual', 'transaction', NULL, 'unit', 0, 'BRL', 0, 50000,
+  'HIPÓTESE do pacote (10/10/2026, §7.1 "contribuição opcional sem indução enganosa"): o doador PODE somar um valor à doação, '
+  'destinado à plataforma. Começa em R$ 0,00, nunca é sugerido nem pré-marcado, aparece separado no total e no comprovante. '
+  'Teto por doação: o menor entre o valor doado e R$ 500,00. Com split homologado, o provedor divide direto; sem split, '
+  'vira obrigação da organização que recebeu o valor (ADR-384).',
+  'Quem quer apoiar a ferramenta além da causa consegue, sem que a organização pague por isso.',
+  'Sem o campo, o apoio à plataforma exigiria uma segunda transação ou uma taxa sobre a doação.');
+WITH c AS (
+  INSERT INTO monetization_legal_cards(rule_key, status, certainty, payer, beneficiary, billing_event, revenue_nature,
+      contractual_relation, required_document, required_terms, cancellation_policy, refund_policy, tax_notes,
+      invoice_notes, regulatory_notes, legal_basis, source_name, source_url, verified_on, open_questions, note)
+  VALUES ('donation.platform_contribution', 'yellow', 'low',
+    'O DOADOR, por escolha explícita, além da doação (nunca descontado do valor doado)',
+    'A plataforma (pessoa jurídica titular do software)',
+    'Pagamento CONFIRMADO pelo provedor com a contribuição informada antes de pagar',
+    'Receita da plataforma de natureza a definir (contribuição/doação à empresa ou serviço) — parecer contábil necessário',
+    'Termos de doação exibidos com a contribuição separada e o total antes de pagar',
+    'Comprovante separado da contribuição; documento fiscal a definir',
+    'Termos de Uso, Política de Doações e Reembolso',
+    'Estorno da doação estorna a contribuição; o doador pode pedir o estorno só da contribuição',
+    'Reversão por lançamento novo; se recebida, abre disputa',
+    'Natureza tributária a definir com contador (pode não ser serviço); não é dedutível para o doador',
+    'Documento fiscal NÃO implementado',
+    'Split depende do provedor (cadastro da plataforma como recebedora) e do enquadramento; sem split, a organização recebe e deve repassar — exige termo aceito pela organização',
+    'CDC (Lei 8.078/1990); Lei 12.865/2013', 'Planalto', 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm', '2026-10-10',
+    'Qual a natureza da receita? O repasse pela organização (sem split) é aceitável? Qual o teto razoável?',
+    'Carta AMARELA: hipótese; INATIVA; o campo não aparece ao doador enquanto a regra não for ativada.')
+  RETURNING id)
+UPDATE monetization_rules r SET legal_card_id = c.id FROM c WHERE r.key = 'donation.platform_contribution';
+
 -- ============================================================================ 9. trilha e privilégios
 INSERT INTO audit_action_categories (prefix, category, note) VALUES
   ('remuneration','FINANCE','obrigações de remuneração da plataforma: calculada/devida/faturada/recebida/disputa/dispensa (v0.34.0)'),
   ('reconciliation','FINANCE','conciliação: execuções e exceções (v0.34.0)'),
   ('pledge','FINANCE','compromisso de doação futura (v0.34.0)'),
   ('external_resource','FINANCE','recurso declarado fora da plataforma (v0.34.0)')
+ON CONFLICT DO NOTHING;
+
+-- Referência polimórfica da obrigação (doação, alocação de acordo, contrato de serviço, crédito de IA, lançamento manual):
+-- catalogada para a verificação de órfãos da v0.23.0 (integrity_catalog_drift) enxergar a coluna.
+INSERT INTO polymorphic_refs (source_table, type_column, id_column, note) VALUES
+  ('remuneration_obligations','source_kind','source_id','operação que originou a obrigação de remuneração (doação, alocação, contrato de serviço, crédito de IA ou manual)')
 ON CONFLICT DO NOTHING;
 
 GRANT SELECT, INSERT ON monetization_policy_versions TO impacto_app;

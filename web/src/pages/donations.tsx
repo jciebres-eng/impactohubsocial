@@ -39,7 +39,11 @@ function Progress({ totals, target }: { totals: any; target?: number | null }) {
 export function PublicDonationCampaign({ data, slug }: { data: any; slug: string }) {
   const d = data;
   const c = d.campaign;
-  const f = useForm<any>({ amount: "", donor_display: "", donor_email: "", public_anonymous: false, cover_costs: false });
+  const f = useForm<any>({ amount: "", method: "pix", contribution: "", donor_display: "", donor_email: "", public_anonymous: false, cover_costs: false });
+  const contribution = d.costs_disclosure?.platform_contribution;
+  const contribCents = contribution?.available ? (parseMoney(f.v.contribution) || 0) : 0;
+  const [recurring, setRecurring] = useState<any>(null);
+  const consentText = `Autorizo a cobrança mensal de ${f.v.amount ? "R$ " + f.v.amount : "o valor informado"} para "${c.title}" até eu cancelar, o que posso fazer a qualquer momento em Minhas doações.`;
   const { busy, run } = useAction();
   const [result, setResult] = useState<any>(null);
   const [pledge, setPledge] = useState("");
@@ -53,7 +57,8 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
     if (!cents || cents < minCents) { return; }
     await run(async () => {
       const out = await api.post(`/v1/public/donation-campaigns/${encodeURIComponent(slug)}/donate`, {
-        amount_cents: cents, method: "pix",
+        amount_cents: cents, method: f.v.method,
+        ...(contribCents > 0 ? { platform_contribution_cents: contribCents } : {}),
         ...(f.v.donor_display ? { donor_display: f.v.donor_display } : {}),
         ...(f.v.donor_email ? { donor_email: f.v.donor_email } : {}),
         public_anonymous: !!f.v.public_anonymous, cover_costs: !!f.v.cover_costs,
@@ -77,16 +82,23 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
       <Panel title="Arrecadação">
         <Progress totals={d.totals} target={c.target_cents} />
         <KeyValue items={[["Confirmado pelo provedor", money(d.totals?.gross_confirmed_cents)], ["Já liquidado ao beneficiário", money(d.totals?.settled_cents)],
+                          ...(d.totals?.settled_partial_cents ? [["Liquidado em parte (restante pendente)", money(d.totals.settled_partial_cents)] as [string, any]] : []),
                           ["Estornado", money(d.totals?.reversed_cents)], ["Falta para a meta", c.target_cents ? money(Math.max(0, c.target_cents - (d.totals?.net_after_reversals_cents || 0))) : "—"],
                           ["Compromissos (não é dinheiro)", money(d.totals?.pledged_cents)], ["Recursos declarados fora da plataforma", money(d.totals?.external_declared_cents)]]} />
         {(c.starts_on || c.ends_on) && <p className="muted small">Período: {date(c.starts_on)} a {date(c.ends_on)}</p>}
         <p className="muted small">{d.totals?.counting_policy}. Última atualização financeira válida: {dateTime(d.last_financial_update_at) || "nenhuma ainda"}.{d.funding_source !== "private" ? ` Campanha com recurso ${d.funding_source === "public" ? "público" : "misto"}.` : ""}</p>
       </Panel>
-      <Panel title="Doar por Pix">
+      <Panel title="Doar">
         {!open && <p className="muted">Esta campanha não está recebendo doações no momento.</p>}
         {open && !result && (
           <form onSubmit={donate}>
             <Field label="Valor (R$)" hint={`Mínimo ${money(minCents)}.`}><Input value={f.v.amount} onChange={f.set("amount")} inputMode="decimal" placeholder="50,00" /></Field>
+            <Field label="Forma de pagamento"><Select value={f.v.method} onChange={f.set("method")} options={[["pix", "Pix"], ["card", "Cartão"]]} /></Field>
+            {contribution?.available && (
+              <Field label="Contribuição para a plataforma (opcional)" hint={`${contribution.note} Até ${money(Math.min(contribution.max_cents, parseMoney(f.v.amount) || 0))}.`}>
+                <Input value={f.v.contribution} onChange={f.set("contribution")} inputMode="decimal" placeholder="0,00" />
+              </Field>
+            )}
             <Field label="Seu nome (opcional)"><Input value={f.v.donor_display} onChange={f.set("donor_display")} /></Field>
             <Field label="E-mail para o comprovante (opcional)" hint="Guardado cifrado; nunca aparece em público."><Input value={f.v.donor_email} onChange={f.set("donor_email")} type="email" /></Field>
             <Field label="Aparecer na lista pública?"><Select value={f.v.public_anonymous ? "1" : "0"} onChange={(v) => f.set("public_anonymous")(v === "1")} options={[["0", "Sim, com meu nome"], ["1", "Não, como anônimo"]]} /></Field>
@@ -99,19 +111,41 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
               {" "}fundo de apoio ao beneficiário até {bps(d.costs_disclosure.beneficiary_fund_max_bps)} (inativo);
               {" "}provedor: {d.costs_disclosure.provider} — {d.costs_disclosure.provider_fee_note}.
             </p>
-            <Button variant="primary" type="submit" busy={busy} disabled={!parseMoney(f.v.amount) || (parseMoney(f.v.amount) || 0) < minCents}>Gerar Pix</Button>
+            {parseMoney(f.v.amount) ? (
+              <KeyValue items={[["Doação para a campanha", money(parseMoney(f.v.amount))],
+                                ...(contribCents > 0 ? [["Contribuição para a plataforma (separada)", money(contribCents)] as [string, any]] : []),
+                                ["Total a pagar", money((parseMoney(f.v.amount) || 0) + contribCents)]]} />
+            ) : null}
+            <Button variant="primary" type="submit" busy={busy} disabled={!parseMoney(f.v.amount) || (parseMoney(f.v.amount) || 0) < minCents}>{f.v.method === "card" ? "Ir para o pagamento com cartão" : "Gerar Pix"}</Button>
           </form>
         )}
         {result && (
           <>
             <KeyValue items={[["Doação", <Link key="l" to={`/doacao/${result.id}`}>{result.id}</Link>], ["Valor", money(result.amount_cents)],
                               ["Situação", st(result.status)], ["Provedor", result.provider], ["Total a pagar", money(result.total_to_pay_cents)], ["Expira em", dateTime(result.expires_at)]]} />
-            <p><strong>Código Pix (sandbox, não pagável):</strong></p>
-            <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{result.pix_payload}</pre>
+            {result.pix_payload && <>
+              <p><strong>Código Pix (sandbox, não pagável):</strong></p>
+              <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{result.pix_payload}</pre>
+            </>}
+            {result.checkout_url && <p><strong>Pagamento com cartão (sandbox):</strong> o provedor abriria o checkout em <code>{result.checkout_url}</code>. Nenhum dado de cartão passa pela plataforma.</p>}
             <p className="muted small">A confirmação chega pelo provedor (webhook). Acompanhe em <Link to={`/doacao/${result.id}`}>/doacao/{result.id}</Link>.</p>
           </>
         )}
       </Panel>
+      {open && d.recurring_available && (
+        <Panel title="Doar todo mês" quiet>
+          {!recurring ? (
+            <>
+              <p className="muted small">Autorizar não é pagar: cada mês o provedor tenta a cobrança e só o que ele confirmar vira doação. Você cancela quando quiser em Minhas doações.</p>
+              <p className="small">{consentText}</p>
+              <Button busy={busy} disabled={!parseMoney(f.v.amount) || (parseMoney(f.v.amount) || 0) < minCents}
+                      onClick={() => run(async () => { setRecurring(await api.post(`/v1/public/donation-campaigns/${encodeURIComponent(slug)}/recurring`, { amount_cents: parseMoney(f.v.amount), method: "card", consent_text: consentText })); return "Autorização registrada. A primeira tentativa de cobrança acontece na próxima rodada."; })}>
+                Autorizar doação mensal
+              </Button>
+            </>
+          ) : <p>Autorização registrada: {money(recurring.amount_cents)} por mês. Situação: {st(recurring.status)}.</p>}
+        </Panel>
+      )}
       {open && (
         <Panel title="Compromisso de doação futura" quiet>
           <p className="muted small">Quem tem conta pode registrar um compromisso de doar depois. Não é doação nem dinheiro: aparece à parte e só vira arrecadação quando a doação for confirmada pelo provedor.</p>
@@ -204,7 +238,7 @@ export function MyDonations() {
   const { run } = useAction();
   return (
     <>
-      <PageHead title="Minhas doações" sub="Doações feitas com este e-mail e acordos recorrentes (recorrência ainda desligada)." />
+      <PageHead title="Minhas doações" sub="Doações feitas com esta conta e autorizações de doação mensal." />
       <StateView loading={loading} error={error} onRetry={reload} empty={!data?.donations?.length}>
         <ul className="rows">{data?.donations?.map((x: any) => (
           <li key={x.id}><span><Link to={`/doacao/${x.id}`}>{x.title}</Link> — {money(x.amount_cents)} · {dateTime(x.created_at)}</span><Pill tone="muted">{st(x.status)}</Pill></li>
@@ -212,9 +246,9 @@ export function MyDonations() {
         {data?.recurring?.length > 0 && (
           <Panel title="Acordos recorrentes">
             <ul className="rows">{data.recurring.map((r: any) => (
-              <li key={r.id}><span>{r.title} — {money(r.amount_cents)} ({r.cadence})</span>
-                {r.status === "active" && <Button onClick={() => run(async () => { await api.post(`/v1/me/recurring-donations/${r.id}/cancel`, {}); reload(); return "Acordo cancelado."; })}>Cancelar</Button>}
-                <Pill tone="muted">{st(r.status)}</Pill></li>
+              <li key={r.id}><span>{r.title} — {money(r.amount_cents)} por mês · autorizado em {date(r.consent_at)} · {r.attempts} tentativa(s), {r.confirmed_n} confirmada(s), {r.failed_n} falha(s) · recebido {money(r.received_cents)}</span>
+                {["active", "paused"].includes(r.status) && <Button onClick={() => run(async () => { await api.post(`/v1/me/recurring-donations/${r.id}/cancel`, {}); reload(); return "Autorização cancelada: nenhuma nova cobrança."; })}>Cancelar</Button>}
+                <Pill tone={r.status === "paused" ? "warn" : "muted"}>{r.status === "paused" ? "pausado (falhas seguidas)" : st(r.status)}</Pill></li>
             ))}</ul>
           </Panel>
         )}
@@ -230,6 +264,8 @@ const EMPTY_U = { title: "", body: "", is_public: true };
 const EMPTY_E = { kind: "offline_donation", funding_source: "private", source_name: "", instrument_ref: "", amount: "", in_kind_description: "", received_on: "", note: "" };
 const EXT_KIND: Record<string, string> = { public_transfer: "Repasse público", grant: "Edital / fomento", offline_donation: "Doação fora da plataforma", sponsorship: "Patrocínio", in_kind: "Apoio não financeiro", own_funds: "Recursos próprios", other: "Outro" };
 const FUNDING: Record<string, string> = { private: "privado", public: "público", mixed: "misto" };
+const OBL_RULE: Record<string, string> = { "donation.platform_fee": "taxa de serviço", "donation.platform_contribution": "contribuição voluntária do doador", "donation.institutional_fee": "taxa institucional" };
+const obligationRuleLabel = (k: string) => OBL_RULE[k] || k;
 const OBL: Record<string, string> = { calculated: "calculada (não devida)", exempt: "isenta", due: "devida", invoiced: "faturada", charged: "cobrada", received: "recebida", settled: "liquidada", reversed: "estornada", overdue: "vencida", disputed: "em disputa", waived: "dispensada" };
 
 export function CampaignAccountability({ campaign, onChange }: { campaign: any; onChange: (c: any) => void }) {
@@ -449,7 +485,7 @@ export function OrgRemuneration() {
               {!data.obligations?.length && <p className="muted">Nenhuma obrigação registrada.</p>}
               <ul className="rows">{data.obligations?.map((o: any) => (
                 <li key={o.id}>
-                  <span>{money(o.amount_cents)} sobre {money(o.basis_cents)} · {o.rule_key} · {dateTime(o.created_at)}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}{o.received_cents ? ` · recebido ${money(o.received_cents)}` : ""}
+                  <span>{money(o.amount_cents)} sobre {money(o.basis_cents)} · {obligationRuleLabel(o.rule_key)} · {dateTime(o.created_at)}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}{o.received_cents ? ` · recebido ${money(o.received_cents)}` : ""}
                     {["due", "invoiced", "charged", "overdue", "received", "settled"].includes(o.state) && (
                       <> <Input value={reason[o.id] || ""} onChange={(v) => setReason({ ...reason, [o.id]: v })} placeholder="Motivo da contestação (mín. 10 caracteres)" />
                         <Button busy={busy} disabled={(reason[o.id] || "").length < 10} onClick={() => run(async () => { await api.post(`/v1/org/remuneration/${o.id}/dispute`, { reason: reason[o.id] }); reload(); return "Contestação registrada."; })}>Contestar</Button></>
@@ -532,12 +568,13 @@ export function AdminRemuneration() {
                 <li key={o.id}>
                   <span>
                     {o.state === "due" && <input type="checkbox" aria-label="Selecionar para faturar" checked={sel.includes(o.id)} onChange={(e) => setSel(e.target.checked ? [...sel, o.id] : sel.filter((x) => x !== o.id))} />}
-                    {" "}{o.org_name} — {money(o.amount_cents)} sobre {money(o.basis_cents)} · {o.rule_key} · {FUNDING[o.funding_source]}{o.public_fee_authorized ? " (autorizado)" : ""}{o.trigger_code ? ` · gatilho ${o.trigger_code}` : ""}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}
+                    {" "}{o.org_name} — {money(o.amount_cents)} sobre {money(o.basis_cents)} · {obligationRuleLabel(o.rule_key)} · {FUNDING[o.funding_source]}{o.public_fee_authorized ? " (autorizado)" : ""}{o.trigger_code ? ` · gatilho ${o.trigger_code}` : ""}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}
                     {" "}<Input value={note[o.id] || ""} onChange={(v) => setNote({ ...note, [o.id]: v })} placeholder="Justificativa / referência" />
                     {" "}<Button busy={busy} onClick={() => act(`/v1/admin/remuneration/orgs/${o.org_id}/evaluate`, {}, "Política aplicada à organização.")}>Avaliar política</Button>
                     {o.state === "invoiced" && <> <Button busy={busy} onClick={() => act(`/v1/admin/remuneration/${o.id}/charged`, {}, "Marcada como cobrada.")}>Cobrada</Button></>}
                     {["invoiced", "charged", "overdue", "disputed"].includes(o.state) && <> <Button busy={busy} disabled={(note[o.id] || "").length < 3} onClick={() => act(`/v1/admin/remuneration/${o.id}/receipt`, { received_cents: o.amount_cents - (o.received_cents || 0), reference: note[o.id] }, "Recebimento registrado.")}>Recebida (restante)</Button></>}
                     {o.state === "received" && <> <Button busy={busy} disabled={(note[o.id] || "").length < 3} onClick={() => act(`/v1/admin/remuneration/${o.id}/settle`, { note: note[o.id] }, "Liquidada.")}>Liquidar</Button></>}
+                    {["received", "settled"].includes(o.state) && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/refund`, { refunded_cents: o.received_cents, reference: note[o.id].slice(0, 120), note: note[o.id] }, "Reembolso integral registrado: obrigação estornada.")}>Reembolsar integral</Button></>}
                     {o.state === "disputed" && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/decide`, { outcome: "uphold", note: note[o.id] }, "Disputa decidida: mantida.")}>Manter</Button> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/decide`, { outcome: "waive", note: note[o.id] }, "Disputa decidida: dispensada.")}>Dispensar</Button></>}
                     {["calculated", "exempt", "due", "invoiced", "charged", "overdue"].includes(o.state) && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/waive`, { reason: note[o.id] }, "Obrigação dispensada.")}>Dispensar</Button></>}
                     {o.funding_source !== "private" && !o.public_fee_authorized && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/authorize-public`, { instrument_ref: note[o.id].slice(0, 300), note: note[o.id] }, "Instrumento e autorização registrados.")}>Autorizar por instrumento</Button></>}
@@ -589,4 +626,4 @@ export function AdminReconciliation() {
   );
 }
 const NEVER_BLOCKS: Record<string, string> = { accountability: "prestação de contas", exports: "exportações", public_page: "página pública", evidence: "evidências", reports: "relatórios" };
-const RECON_KIND: Record<string, string> = { provider_only: "Só no provedor", system_only: "Só no sistema", amount_mismatch: "Valor divergente", fee_mismatch: "Tarifa divergente", reversal_missing: "Estorno sem reversão", duplicate_entry: "Lançamento duplicado", fee_miscalculated: "Taxa calculada errada", settlement_partial: "Liquidação parcial/atrasada", unreconciled_overdue: "Sem conciliação no prazo" };
+const RECON_KIND: Record<string, string> = { provider_only: "Só no provedor", system_only: "Só no sistema", amount_mismatch: "Valor divergente", fee_mismatch: "Tarifa divergente", reversal_missing: "Estorno sem reversão", duplicate_entry: "Lançamento duplicado", fee_miscalculated: "Taxa calculada errada", settlement_partial: "Liquidação parcial/atrasada", unreconciled_overdue: "Sem conciliação no prazo", settlement_failed: "Falha de liquidação", event_processing_failed: "Evento não aplicado (reprocessa)" };

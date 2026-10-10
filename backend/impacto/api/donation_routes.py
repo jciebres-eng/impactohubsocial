@@ -26,6 +26,7 @@ def public_campaign(ctx: Ctx):
     with ctx.system_tx() as c:
         out = DON.public_campaign(c, ctx.path["slug"])
     out["canonical_url"] = DON.canonical_url(ctx.settings, ctx.path["slug"], out["campaign"]["qr_version"])
+    out["recurring_available"] = bool(getattr(ctx.settings, "recurring_donations_enabled", False) and out["campaign"].get("allow_recurring"))
     return out
 
 
@@ -53,7 +54,7 @@ def donate(ctx: Ctx, body: TSch.DonationStartIn):
                                  method=body.method, donor_user_id=donor_user_id, donor_display=body.donor_display,
                                  donor_email=body.donor_email, public_anonymous=body.public_anonymous, cover_costs=body.cover_costs,
                                  idempotency_key=body.idempotency_key, cipher=ctx.app.cipher, donor_org_id=donor_org_id,
-                                 funding_source=body.funding_source)
+                                 funding_source=body.funding_source, platform_contribution_cents=body.platform_contribution_cents)
         ctx.audit(c, "donation.started", "donation", out["id"], {"amount_cents": body.amount_cents, "method": body.method,
                                                                   "provider": out["provider"], "simulated": out["is_simulated"]}, org_id=None)
     return out
@@ -96,11 +97,26 @@ def donation_webhook(ctx: Ctx, payload: bytes):
         return JSONResponse({"status": "rejected", "code": "bad_json"}, status_code=400)
     if not event["event_id"]:
         return JSONResponse({"status": "rejected", "code": "missing_event_id"}, status_code=400)
+    # Fase 1: gravar (commit próprio) — um evento aceito nunca se perde, mesmo que a aplicação falhe a seguir.
     with ctx.system_tx() as c:
-        out = DON.apply_provider_event(c, provider=provider, event=event, signature_verified=verified, raw=payload)
-    status = "duplicate" if out.get("duplicate") else ("rejected_signature" if not verified else out.get("effect", "recorded"))
-    return JSONResponse({"status": status, "effect": out.get("effect"), "donation_id": out.get("donation_id")},
-                        status_code=200 if verified else 202)
+        rec = DON.record_provider_event(c, provider=provider, event=event, signature_verified=verified, raw=payload)
+    if not verified:
+        return JSONResponse({"status": "rejected_signature", "effect": None, "donation_id": None}, status_code=202)
+    if not rec["reapplicable"]:
+        return JSONResponse({"status": "duplicate", "effect": None, "donation_id": None}, status_code=200)
+    # Fase 2: aplicar. Erro interno → evento `failed` + exceção na fila; 500 faz o provedor reenviar (at-least-once),
+    # e a rotina financeira reprocessa mesmo que ele não reenvie (cenários 33 e 35).
+    try:
+        with ctx.system_tx() as c:
+            out = DON.apply_recorded_event(c, provider=provider, row_id=rec["event_row_id"], event=event)
+    except ApiError:
+        raise
+    except Exception as exc:  # noqa: BLE001 — falha interna: registra e devolve 500 para o provedor tentar de novo
+        with ctx.system_tx() as c:
+            DON.mark_event_failed(c, row_id=rec["event_row_id"], error=type(exc).__name__)
+        return JSONResponse({"status": "failed", "retry": True}, status_code=500)
+    status = "duplicate" if (rec["duplicate"] or out.get("duplicate")) else out.get("effect", "recorded")
+    return JSONResponse({"status": status, "effect": out.get("effect"), "donation_id": out.get("donation_id")}, status_code=200)
 
 
 # ============================================================================ organização beneficiária
@@ -165,10 +181,21 @@ def my_donations(ctx: Ctx):
     with ctx.system_tx() as c:
         rows = c.query("SELECT d.id::text AS id, d.status, d.amount_cents, d.method, d.is_simulated, d.confirmed_at, d.created_at, c.slug, c.title"
                        " FROM donations d JOIN campaigns c ON c.id = d.campaign_id WHERE d.donor_user_id = $1 ORDER BY d.created_at DESC LIMIT 100", ctx.user_id)
-        rec = c.query("SELECT r.id::text AS id, r.amount_cents, r.cadence, r.status, r.next_charge_on, c.slug, c.title FROM recurring_donation_agreements r"
-                      " JOIN campaigns c ON c.id = r.campaign_id WHERE r.donor_user_id = $1 ORDER BY r.created_at DESC", ctx.user_id)
+        ids = c.query("SELECT id::text AS id FROM recurring_donation_agreements WHERE donor_user_id = $1 ORDER BY created_at DESC", ctx.user_id)
+        rec = [DON.recurring_view(c, r["id"]) for r in ids]
     return {"donations": rows, "recurring": rec,
             "recurring_note": "Doação recorrente exige instrumento suportado pelo provedor e consentimento explícito; nesta versão nenhum provedor real está ligado."}
+
+
+@route("POST", "/v1/public/donation-campaigns/{slug}/recurring", auth="user", body=TSch.RecurringDonationIn, status=201,
+       rate=("recurring_user", 10, 3600), tags=T,
+       summary="Autoriza doação recorrente (consentimento guardado por hash). Desligada até instrumento homologado no provedor")
+def start_recurring(ctx: Ctx, body: TSch.RecurringDonationIn):
+    with ctx.system_tx() as c:
+        out = DON.start_recurring(c, settings=ctx.settings, campaign_slug=ctx.path["slug"], donor_user_id=ctx.user_id,
+                                  amount_cents=body.amount_cents, method=body.method, consent_text=body.consent_text)
+        ctx.audit(c, "donation.recurring_authorized", "recurring_donation_agreement", out["id"], {"amount_cents": body.amount_cents}, org_id=None)
+    return out
 
 
 @route("POST", "/v1/me/recurring-donations/{agreement_id}/cancel", auth="user", tags=T, summary="Cancela um acordo de doação recorrente (sempre possível pelo doador)")
@@ -402,6 +429,16 @@ def admin_remuneration_receipt(ctx: Ctx, body: TSch.ObligationReceiptIn):
     with ctx.system_tx() as c:
         out = REM.register_receipt(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, received_cents=body.received_cents, reference=body.reference)
         ctx.audit(c, "remuneration.received", "remuneration_obligation", ctx.path["obligation_id"], {"received_cents": body.received_cents}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/refund", auth="admin", permission="finance.approve", body=TSch.ObligationRefundIn, tags=T,
+       summary="Reembolso integral do que a plataforma recebeu (ex.: serviço cancelado) — a obrigação vira estornada; segregado")
+def admin_remuneration_refund(ctx: Ctx, body: TSch.ObligationRefundIn):
+    with ctx.system_tx() as c:
+        out = REM.refund_received(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, refunded_cents=body.refunded_cents,
+                                  reference=body.reference, note=body.note)
+        ctx.audit(c, "remuneration.refunded", "remuneration_obligation", ctx.path["obligation_id"], {"refunded_cents": body.refunded_cents}, org_id=None)
     return out
 
 

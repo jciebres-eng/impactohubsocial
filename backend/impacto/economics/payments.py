@@ -168,6 +168,11 @@ def transition(conn: Connection, *, charge_id: str, to_state: str, org_id: str |
         raise not_found("Cobrança")
     if org_id is not None and not admin and c["org_id"] != org_id:
         raise forbidden("Esta cobrança é de outra organização")
+    # v0.34.0: fatura de remuneração DA PLATAFORMA à organização não é movida pela própria organização (ela poderia
+    # marcar "paga" ou "devolvida" a própria dívida). Quem move é a administração ou o provedor (webhook).
+    if org_id is not None and not admin and conn.scalar(
+            "SELECT 1 FROM remuneration_obligations WHERE platform_charge_id = $1 LIMIT 1", charge_id):
+        raise forbidden("Fatura de remuneração da plataforma: só a administração ou o provedor mudam o estado", "platform_invoice")
     if to_state not in STATES:
         raise unprocessable(f"Estado inválido: {to_state}", {"possiveis": list(STATES)})
     edge = conn.one("SELECT origin FROM charge_state_graph WHERE from_state = $1 AND to_state = $2",
@@ -192,6 +197,13 @@ def transition(conn: Connection, *, charge_id: str, to_state: str, org_id: str |
         " WHERE id = $1 RETURNING id::text AS id, state, is_simulated, paid_at, settled_at,"
         " refunded_cents", charge_id, to_state, provider_charge_id, refunded_cents, failure_code,
         failure_message)
+    # v0.34.0 (cenário 39): devolução de cobrança DA PLATAFORMA reverte as obrigações de remuneração ligadas a ela. Só
+    # por origem de sistema/webhook (org_id nulo) ou administração — nunca pela organização pagadora, que poderia
+    # "devolver" a própria fatura para apagar a dívida.
+    if to_state in ("refunded", "partially_refunded") and (org_id is None or admin):
+        from ..services import remuneration as REM
+        REM.on_platform_charge_refunded(conn, platform_charge_id=charge_id, full=(to_state == "refunded"),
+                                        refunded_cents=int(row["refunded_cents"] or 0))
     # NÃO se escreve a trilha aqui. `charge_record_event()` (migração 0022) grava em
     # `charge_events` por GATILHO, com `app_uid()` como autor — e isso é melhor do que gravar
     # daqui: código de aplicação pode esquecer de registrar uma transição, gatilho não pode.

@@ -25,7 +25,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from ..db.pq import Connection
-from ..http import ApiError, forbidden, not_found, unprocessable
+from ..http import ApiError, not_found, unprocessable
 from .donations import apply_bps
 
 POLICY_KEY = "free_until_value"
@@ -297,6 +297,55 @@ def authorize_public_fee(c: Connection, *, obligation_id: str, actor: str, instr
     return {"state": c.scalar("SELECT state FROM remuneration_obligations WHERE id = $1", obligation_id), "public_fee_authorized": True}
 
 
+def register_donor_contribution(c: Connection, *, org_id: str, donation_id: str, campaign_id: str, amount_cents: int,
+                                split_received_cents: int = 0, reference: str | None = None) -> dict:
+    """Contribuição VOLUNTÁRIA do doador à plataforma (ADR-384). Não é taxa sobre a organização: o doador escolheu e pagou
+    a mais. Por isso nasce DEVIDA (gatilho `donor_opt_in_contribution`) sem passar pela franquia de "gratuito até gerar
+    valor". Se o provedor confirmou o split no próprio evento, nasce RECEBIDA com a referência do evento; senão, a
+    organização que recebeu o valor deve repassá-lo (fatura própria, nunca desconto de doação)."""
+    reg = register(c, org_id=org_id, source_kind="donation", source_id=donation_id, rule_key="donation.platform_contribution",
+                   rule_version_id=None, basis_cents=amount_cents, amount_cents=amount_cents, funding_source="private", campaign_id=campaign_id)
+    if reg.get("duplicate"):
+        return reg
+    pol = policy(c)
+    _set(c, reg["id"], "due", trigger_code="donor_opt_in_contribution", trigger_at=datetime.now(UTC),
+         due_on=datetime.now(UTC).date() + timedelta(days=int(pol.get("due_days_after_invoice", 30))))
+    if split_received_cents and split_received_cents == amount_cents:
+        _set(c, reg["id"], "received", received_cents=amount_cents, received_reference=(reference or "split")[:120], received_at=datetime.now(UTC))
+        return {"id": reg["id"], "state": "received", "via": "split"}
+    return {"id": reg["id"], "state": "due", "via": "invoice"}
+
+
+def on_platform_charge_refunded(c: Connection, *, platform_charge_id: str, full: bool, refunded_cents: int) -> list[str]:
+    """Reembolso da COBRANÇA da plataforma (cenário 39): o que a plataforma cobrou e devolveu deixa de ser receita.
+    Total → obrigações da cobrança viram `reversed` (com evento no histórico). Parcial → fica registrado, sem mudar estado:
+    a diferença é ajuste decidido por pessoa, nunca automático."""
+    rows = c.query("SELECT id::text AS id, state FROM remuneration_obligations WHERE platform_charge_id = $1", platform_charge_id)
+    out = []
+    for r in rows:
+        if full and r["state"] in ("invoiced", "charged", "overdue", "received", "settled", "disputed"):
+            _set(c, r["id"], "reversed")
+            out.append(r["id"])
+        c.run("INSERT INTO remuneration_obligation_events(obligation_id, from_state, to_state, note) VALUES ($1,$2,$3,$4)",
+              r["id"], r["state"], "reversed" if (full and r["id"] in out) else r["state"],
+              (f"cobrança da plataforma reembolsada ({refunded_cents} centavos)" + ("" if full else " — parcial: ajuste por decisão humana"))[:2000])
+    return out
+
+
+def refund_received(c: Connection, *, obligation_id: str, actor: str, refunded_cents: int, reference: str, note: str) -> dict:
+    """A plataforma DEVOLVE o que recebeu (ex.: reembolso de serviço cancelado, cobrança indevida). Só integral: parcial é
+    ajuste com decisão própria. A obrigação vira `reversed`; o histórico guarda referência e motivo."""
+    o = _get(c, obligation_id)
+    if o["state"] not in ("received", "settled"):
+        raise unprocessable("só obrigação recebida/liquidada é reembolsada", code="obligation_state")
+    if int(refunded_cents) != int(o["received_cents"]):
+        raise unprocessable("reembolso parcial é ajuste: registre a decisão e use o valor integral recebido aqui", code="partial_refund")
+    _set(c, obligation_id, "reversed", actor=actor)
+    c.run("INSERT INTO remuneration_obligation_events(obligation_id, from_state, to_state, actor_id, note) VALUES ($1,$2,'reversed',$3,$4)",
+          obligation_id, o["state"], actor, (f"reembolso de {refunded_cents} centavos (ref. {reference[:80]}): " + note)[:2000])
+    return {"state": "reversed", "refunded_cents": int(refunded_cents)}
+
+
 def reverse_for_source(c: Connection, *, source_kind: str, source_id: str, note: str) -> list[str]:
     """Base estornada (doação estornada/chargeback): obrigações não recebidas viram `reversed`; recebidas viram `disputed`."""
     rows = c.query("SELECT id::text AS id, state FROM remuneration_obligations WHERE source_kind = $1 AND source_id = $2", source_kind, source_id)
@@ -356,8 +405,3 @@ def platform_revenue_view(c: Connection) -> dict:
             "settled_cents": by.get("settled", {}).get("cents", 0),
             "note": "Nenhum destes números é receita reconhecida: só 'settled' é dinheiro conciliado na conta da plataforma."}
 
-
-def forbid_blocking_use() -> None:  # pragma: no cover — documentação viva
-    """Este módulo não expõe nenhuma função 'can_access'/'is_blocked'. Qualquer rota que condicione prestação de contas,
-    exportação ou página pública ao estado de uma obrigação viola a ADR-381 — e `test_v0340_remuneration` varre por isso."""
-    raise forbidden("estado comercial não condiciona acesso a registros", "adr_381")

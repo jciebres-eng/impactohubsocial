@@ -351,3 +351,12 @@ FAILED (failures=1)
 Ran 60 tests in 11.108s
 
 OK
+
+===== REEXECUÇÃO DOS PORTÕES DE FECHAMENTO (após o CI do PR #6, commit e4c4d19) =====
+........................................MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+....NOTICE:  extension "pgcrypto" already exists, skipping
+................
+----------------------------------------------------------------------
+Ran 60 tests in 11.291s
+
+OK

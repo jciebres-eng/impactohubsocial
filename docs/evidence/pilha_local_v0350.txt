@@ -1,0 +1,32 @@
+PILHA DO ZERO — ensaio local do job `pilha-do-zero` (v0.35.0), 10/10/2026, commit candidato e9a892d
+
+Como na v0.34.0, sem contêiner (o Docker daqui não alcança registro de imagens), com o mesmo desenho:
+  - banco NOVO com o desenho do Supabase: administrador LOGIN CREATEROLE sem superusuário, pgcrypto no esquema `extensions`
+    com GRANT OPTION (infra/compose/demo/db-init-supabase-like.sh). Diferença local: o papel `impacto_app` já existe neste
+    servidor (criado pela suíte de testes), então o administrador recebeu ADMIN OPTION sobre ele para o bootstrap poder ajustá-lo;
+  - backend/start_container.sh do commit candidato, sem mudança: bootstrap externo do impacto_app, migrações 0001–0074 como
+    administrador (inclui a 0074 desta versão: search_path, EXECUTE, TRUNCATE…), aplicação como impacto_app, seed de demonstração;
+  - servidor ASGI com 2 workers; o MESMO roteiro do CI: scripts/demo_stack.py --outbox --dsn --telas (sem --axe: o axe-core real
+    não é baixável aqui; no CI ele roda com --axe-trava).
+Senhas geradas na hora, só nesta máquina; nenhuma aparece abaixo.
+
+LOG DE INÍCIO (o aviso novo da v0.35.0 aparece, como deve, porque TRUST_PROXY_HEADERS não foi ligado no ensaio):
+  [impacto-start] bootstrap do papel impacto_app no banco gerenciado
+  [impacto-start] migrações (como a conexão administrativa)
+  [impacto-start] migrações concluídas
+  [impacto-start] aplicação conectará como impacto_app
+  [impacto-start] IMPACTO_SEED_DEMO=true: pedindo seed de demonstração (o produto recusa fora de development/test)
+  [impacto-start] AVISO: TRUST_PROXY_HEADERS desligado — o IP do cliente vem do uvicorn (primeiro valor do X-Forwarded-For, forjável)
+  [impacto-start] servidor ASGI em IMPACTO_ENV=development
+
+RESULTADO:
+  jornadas: 16 · passos: 280 · falhas: 0      (275 na v0.34.0; +5 passos da v0.35.0: confirmação de identidade antes de informar
+                                                chave PIX e a confirmação da verificação do beneficiário por uma segunda pessoa)
+  telas: 235 rotas · 857 visitas · 235 abertas com dado real · estados {'OK': 548, 'VAZIA': 143, 'RECUSA_CORRETA': 101, 'SEM_REGISTRO': 65}
+  código de saída do roteiro: 0
+  registro da aplicação: 0 respostas 5xx, 0 erros não tratados (nas duas subidas)
+
+PERSISTÊNCIA (contar, reiniciar a aplicação, contar de novo):
+  antes:  projetos=4 candidaturas=3 rascunhos=3 diagnosticos=1 conversas=1 propostas=2 ideias=1
+  depois: projetos=4 candidaturas=3 rascunhos=3 diagnosticos=1 conversas=1 propostas=2 ideias=1
+  iguais

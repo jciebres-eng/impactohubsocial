@@ -7,14 +7,20 @@ conciliação: só a doação cujo evento assinado bate com o snapshot do proved
 
 No sandbox, o snapshot vem do próprio adaptador (`SandboxProvider.snapshot`), que lê os eventos assinados e aplicados —
 é o que o sandbox "sabe". Um provedor real implementa `snapshot(campaign)` consultando a API dele.
+
+v0.35.0 (auditoria, PAY-07): a execução registra a FONTE do snapshot. Os eventos do próprio sistema só servem ao SANDBOX;
+provedor real sem extrato/API é recusado (409) em vez de "conciliar" contra si mesmo. O extrato manual (lista digitada
+por uma pessoa) não concilia sozinho: abre as exceções e fica aguardando a aprovação de OUTRA pessoa (quatro olhos,
+conferido pelo banco), que reexecuta com o mesmo extrato (o hash prova que é o mesmo).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from datetime import UTC, datetime, timedelta
 from ..db.pq import Connection
-from ..http import not_found, unprocessable
+from ..http import ApiError, not_found, unprocessable
 from .donations import apply_bps
 
 PRIORITY = {"provider_only": "high", "system_only": "high", "amount_mismatch": "high", "reversal_missing": "high",
@@ -62,7 +68,9 @@ def open_from_event(c: Connection, *, kind: str, campaign_id: str | None, org_id
 def run_periodic(c: Connection, *, days: int = 7) -> dict:
     """Rotina: concilia toda campanha com doação movimentada nos últimos `days` dias (no sandbox, contra os eventos
     assinados). Uma campanha com erro não impede as outras."""
-    camps = c.query("SELECT DISTINCT campaign_id::text AS id FROM donations WHERE updated_at > now() - make_interval(days => $1)", days)
+    # só o sandbox concilia sozinho (contra os eventos assinados); provedor real espera extrato (PAY-07)
+    camps = c.query("SELECT DISTINCT campaign_id::text AS id FROM donations WHERE updated_at > now() - make_interval(days => $1)"
+                    " AND provider = 'sandbox'", days)
     runs = []
     for row in camps:
         c.run("SAVEPOINT recon_periodic")
@@ -74,16 +82,30 @@ def run_periodic(c: Connection, *, days: int = 7) -> dict:
     return {"campaigns": len(camps), "opened": sum(r["opened"] for r in runs), "reconciled": sum(r["reconciled"] for r in runs)}
 
 
+def snapshot_digest(snapshot: list[dict]) -> str:
+    return hashlib.sha256(json.dumps(snapshot, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+
+
 def run_for_campaign(c: Connection, *, campaign_id: str, provider_snapshot: list[dict] | None = None, run_by: str | None = None,
-                     overdue_hours: int = 72) -> dict:
+                     overdue_hours: int = 72, source: str | None = None, mark_reconciled: bool = True, status: str = "done") -> dict:
     camp = c.one("SELECT id::text AS id, beneficiary_org_id::text AS org_id FROM campaigns WHERE id = $1", campaign_id)
     if not camp:
         raise not_found("Campanha")
     provider = c.scalar("SELECT provider FROM donations WHERE campaign_id = $1 ORDER BY created_at LIMIT 1", campaign_id) or "sandbox"
-    snapshot = provider_snapshot if provider_snapshot is not None else sandbox_snapshot(c, campaign_id)
+    if provider_snapshot is None:
+        if provider != "sandbox":
+            raise ApiError(409, "provider_statement_required",
+                           "Provedor real: a conciliação exige o extrato ou a consulta à API do provedor — os eventos do próprio "
+                           "sistema não provam que o dinheiro chegou")
+        snapshot, source = sandbox_snapshot(c, campaign_id), "sandbox_signed_events"
+    else:
+        snapshot, source = provider_snapshot, (source or "manual_statement")
+    digest = snapshot_digest(snapshot) if source != "sandbox_signed_events" else None
     by_ref = {s["charge_id"]: s for s in snapshot}
     run_id = str(uuid.uuid4())
-    c.run("INSERT INTO reconciliation_runs(id, scope, provider, run_by) VALUES ($1,$2,$3,$4)", run_id, f"campaign:{campaign_id}", provider, run_by)
+    c.run("INSERT INTO reconciliation_runs(id, scope, provider, run_by, status, snapshot_source, snapshot, snapshot_sha256)"
+          " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8)", run_id, f"campaign:{campaign_id}", provider, run_by, status, source,
+          json.dumps(snapshot) if source == "manual_statement" else None, digest)
     checked = opened = reconciled = 0
     donations = c.query("SELECT id::text AS id, provider_charge_id, status, amount_cents + cover_costs_cents AS total, provider_fee_cents,"
                         " platform_fee_cents, refunded_cents, created_at FROM donations WHERE campaign_id = $1", campaign_id)
@@ -118,7 +140,8 @@ def run_for_campaign(c: Connection, *, campaign_id: str, provider_snapshot: list
                                 provider=provider, provider_ref=ref, observed=int(dup), expected=1, detail="mais de uma confirmação lançada no razão")
                 continue
             if d["status"] == "confirmed":
-                c.run("UPDATE donations SET status = 'reconciled' WHERE id = $1", d["id"])
+                if mark_reconciled:
+                    c.run("UPDATE donations SET status = 'reconciled' WHERE id = $1", d["id"])
                 reconciled += 1
         elif d["status"] == "awaiting_payment" and d["created_at"] < datetime.now(UTC) - timedelta(hours=overdue_hours):
             opened += _open(c, run_id=run_id, kind="unreconciled_overdue", campaign_id=campaign_id, org_id=camp["org_id"], donation_id=d["id"],
@@ -134,10 +157,37 @@ def run_for_campaign(c: Connection, *, campaign_id: str, provider_snapshot: list
         if expected != int(o["amount_cents"]):
             opened += _open(c, run_id=run_id, kind="fee_miscalculated", campaign_id=campaign_id, org_id=camp["org_id"], obligation_id=o["id"],
                             expected=expected, observed=int(o["amount_cents"]), detail="obrigação com valor diferente da regra congelada")
-    summary = {"checked": checked, "opened": opened, "reconciled": reconciled, "snapshot_size": len(snapshot)}
+    summary = {"checked": checked, "opened": opened, "reconciled": reconciled if mark_reconciled else 0, "snapshot_size": len(snapshot),
+               "snapshot_source": source, "independent_source": source != "sandbox_signed_events",
+               **({} if mark_reconciled else {"would_reconcile": reconciled, "awaiting_approval": True})}
     c.run("UPDATE reconciliation_runs SET finished_at = now(), checked = $2, opened = $3, reconciled = $4, summary = $5::jsonb WHERE id = $1",
-          run_id, checked, opened, reconciled, json.dumps(summary))
+          run_id, checked, opened, summary["reconciled"], json.dumps(summary))
     return {"run_id": run_id, **summary, "at": datetime.now(UTC).isoformat()}
+
+
+def propose_manual_run(c: Connection, *, campaign_id: str, snapshot: list[dict], run_by: str) -> dict:
+    """Extrato digitado por uma pessoa: abre as exceções, mas NÃO concilia — fica aguardando outra pessoa (PAY-07)."""
+    return run_for_campaign(c, campaign_id=campaign_id, provider_snapshot=snapshot, run_by=run_by, source="manual_statement",
+                            mark_reconciled=False, status="awaiting_approval")
+
+
+def approve_manual_run(c: Connection, *, run_id: str, approver: str) -> dict:
+    """A segunda pessoa aprova o extrato manual: reexecuta com o MESMO extrato (conferido pelo hash) e então concilia."""
+    run = c.one("SELECT id::text AS id, scope, run_by::text AS run_by, status, snapshot, snapshot_sha256 FROM reconciliation_runs"
+                " WHERE id = $1 FOR UPDATE", run_id)
+    if not run or not str(run["scope"]).startswith("campaign:"):
+        raise not_found("Execução de conciliação")
+    if run["status"] != "awaiting_approval":
+        raise ApiError(409, "not_awaiting_approval", "Esta execução não está aguardando aprovação")
+    if run["run_by"] == approver:
+        raise ApiError(403, "four_eyes", "Quem enviou o extrato não pode aprová-lo: é preciso outra pessoa da equipe")
+    snapshot = run["snapshot"] if isinstance(run["snapshot"], list) else json.loads(run["snapshot"] or "[]")
+    if snapshot_digest(snapshot) != run["snapshot_sha256"]:
+        raise ApiError(409, "snapshot_tampered", "O extrato guardado não confere com o hash registrado")
+    out = run_for_campaign(c, campaign_id=run["scope"].split(":", 1)[1], provider_snapshot=snapshot, run_by=approver,
+                           source="manual_statement", mark_reconciled=True)
+    c.run("UPDATE reconciliation_runs SET status = 'approved', approved_by = $2, approved_at = now() WHERE id = $1", run_id, approver)
+    return out | {"approved_run": run_id}
 
 
 def list_exceptions(c: Connection, *, status: str | None = None, org_id: str | None = None) -> list[dict]:
@@ -179,4 +229,5 @@ def history(c: Connection, exception_id: str) -> list[dict]:
     return c.query("SELECT from_status, to_status, actor_id::text AS actor_id, note, created_at FROM reconciliation_exception_events WHERE exception_id = $1 ORDER BY id", exception_id)
 
 
-__all__ = ["run_for_campaign", "list_exceptions", "assign", "resolve", "history", "sandbox_snapshot"]
+__all__ = ["run_for_campaign", "propose_manual_run", "approve_manual_run", "list_exceptions", "assign", "resolve", "history",
+           "sandbox_snapshot"]

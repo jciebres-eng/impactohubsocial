@@ -405,8 +405,15 @@ class Jornadas:
             self.passo(J, "OSC envia a campanha para revisão (aceita os termos)", osc, "POST", f"/v1/campaigns/{cp['id']}/submit")
             self.passo(J, "administração aprova a campanha com justificativa", adm, "POST", f"/v1/admin/donation-campaigns/{cp['id']}/review",
                        {"approve": True, "note": "Finalidade, contingência e estorno conferidos (demonstração)."})
-            self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
-                       {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
+            ver = self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
+                             {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
+            # v0.35.0 (auditoria, KYC-03): a verificação só vale com a confirmação de OUTRA pessoa da equipe (controladoria,
+            # que no demo também tem o papel de compliance)
+            if ver:
+                ctl = self.c.get("controller") or self.entrar("controller")
+                self.confirmar_identidade(ctl, J)
+                self.passo(J, "controladoria confirma a verificação (segunda pessoa, quatro olhos)", ctl, "POST",
+                           f"/v1/admin/beneficiaries/{osc.org_id}/verification/{ver['id']}/confirm")
             self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
             # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
             # só viria de um evento assinado do provedor, que a demonstração não forja.

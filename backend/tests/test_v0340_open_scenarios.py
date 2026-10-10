@@ -15,7 +15,7 @@ import json
 import unittest
 import uuid
 
-from tests.support import Client, db_system, make_staff, new_account, reauth, server
+from tests.support import Client, db_system, make_staff, new_account, reauth, server, verify_beneficiary
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 CONSENT = "Autorizo a cobrança mensal deste valor no meu cartão até eu cancelar, o que posso fazer a qualquer momento."
@@ -56,7 +56,7 @@ def _publish(osc: Client, reviewer: Client, **extra) -> tuple[str, str]:
     cid = r.json["id"]
     assert osc.post(f"/v1/campaigns/{cid}/submit").status == 200
     assert reviewer.post(f"/v1/admin/donation-campaigns/{cid}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."}).status == 200
-    reviewer.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
+    verify_beneficiary(osc.org_id, reviewer)   # v0.35.0: decisão + confirmação por outra pessoa (KYC-03)
     assert osc.post(f"/v1/campaigns/{cid}/publish").status == 200
     return cid, slug
 

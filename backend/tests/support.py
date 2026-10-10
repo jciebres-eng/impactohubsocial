@@ -411,6 +411,19 @@ def make_staff(*roles: str, mfa: bool = True) -> Client:
     return c
 
 
+def verify_beneficiary(org_id: str, reviewer: Client | None = None) -> str:
+    """v0.35.0 (auditoria, KYC-03): beneficiário verificado = decisão 'verificado' com titularidade conferida + CONFIRMAÇÃO
+    de outra pessoa da equipe. Duas pessoas de compliance, como no produto. Devolve o id da verificação."""
+    rev = reviewer or make_staff("compliance")
+    r = rev.post(f"/v1/admin/beneficiaries/{org_id}/verification",
+                 {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
+    assert r.status == 200, r
+    second = make_staff("compliance")
+    c = second.post(f"/v1/admin/beneficiaries/{org_id}/verification/{r.json['id']}/confirm")
+    assert c.status == 200, c
+    return r.json["id"]
+
+
 def reauth(c: Client) -> None:
     """Confirma a identidade da sessão — exigido pelas permissões de STEP_UP_PERMISSIONS."""
     corpo = {"password": PASSWORD}

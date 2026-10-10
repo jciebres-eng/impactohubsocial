@@ -75,6 +75,12 @@ class DonationsEndToEndTests(unittest.TestCase):
         r = self.reviewer.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification",
                                {"status": "verified", "note": "Documentos conferidos no sandbox de teste.", "account_holder_matches": True})
         self.assertEqual(r.status, 200, r.body)
+        # v0.35.0 (auditoria, KYC-03): uma pessoa só não basta — a verificação vale depois da confirmação de outra
+        r2 = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
+        self.assertEqual((r2.status, r2.json["code"]), (422, "beneficiary_not_verified"), "verificação sem segunda pessoa publicou")
+        self.assertEqual(self.reviewer.post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 403,
+                         "quem verificou confirmou a si mesmo")
+        self.assertEqual(make_staff("compliance").post(f"/v1/admin/beneficiaries/{self.osc.org_id}/verification/{r.json['id']}/confirm").status, 200)
         r = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
         self.assertEqual(r.status, 200, r.body)
         self.assertEqual(r.json["url"], f"https://impacto.teste/campanha/{self.slug}?v=1")

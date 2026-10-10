@@ -453,6 +453,17 @@ class ReconciliationResolveIn(In):
     note: Annotated[str, Field(min_length=10, max_length=2000)]
 
 
+class ProviderChargeLine(In):
+    """Uma linha do extrato do provedor (v0.35.0, auditoria PAY-07: antes era um dicionário livre, sem validação)."""
+    charge_id: Annotated[str, Field(min_length=1, max_length=120)]
+    amount_cents: Annotated[int, Field(ge=0, le=100_000_000_000)]
+    fee_cents: Annotated[int, Field(ge=0, le=100_000_000_000)] | None = None
+    confirmed: bool = False
+    reversed: bool = False
+    settled: bool = False
+
+
 class ReconciliationSnapshotIn(In):
-    """Snapshot do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API."""
-    charges: list[dict] = []
+    """Extrato do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API. Vazio = sandbox
+    (eventos assinados). Com linhas: a execução abre as exceções e fica aguardando a aprovação de OUTRA pessoa."""
+    charges: Annotated[list[ProviderChargeLine], Field(max_length=5000)] = []

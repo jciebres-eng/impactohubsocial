@@ -30,13 +30,12 @@ def sign_document(c: Client, doc_id: str, *, role: str = "legal_representative",
 def _publish_campaign(osc, campaign_id: str) -> None:
     """v0.33.0 (ADR-374): publicar exige envio para revisão, aprovação por outra pessoa da equipe e beneficiário
     verificado. O atalho `PATCH status=published` responde 409 de propósito; os testes antigos passam por aqui."""
-    from tests.support import make_staff
+    from tests.support import make_staff, verify_beneficiary
     rev = make_staff("compliance")
     assert osc.post(f"/v1/campaigns/{campaign_id}/submit").status == 200
     r = rev.post(f"/v1/admin/donation-campaigns/{campaign_id}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."})
     assert r.status == 200, r
-    r = rev.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
-    assert r.status == 200, r
+    verify_beneficiary(osc.org_id, rev)   # v0.35.0: decisão + confirmação por outra pessoa (KYC-03)
     r = osc.post(f"/v1/campaigns/{campaign_id}/publish")
     assert r.status == 200, r
 

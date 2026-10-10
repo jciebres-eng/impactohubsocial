@@ -49,3 +49,50 @@ CREATE POLICY documents_read ON documents FOR SELECT USING (
   org_id = app_org() OR (visibility = 'public' AND app_authenticated())
   OR app_document_access(id, org_id, project_id, application_id, visibility, doc_type) OR app_priv());
 DROP FUNCTION app_document_access(uuid, uuid, uuid, uuid, text);
+
+-- ============================================================================ KYC-03 (lote B) — verificação do beneficiário
+-- Antes: `beneficiary_verified()` aceitava QUALQUER linha 'verified' não vencida — registrar 'rejected' depois não desfazia
+-- nada —; 'verified' podia ser gravado sem a titularidade da conta conferida; uma pessoa só decidia; a função não fixava
+-- `search_path`. Agora: vale a decisão MAIS RECENTE; 'verified' exige titularidade conferida e a CONFIRMAÇÃO de uma
+-- segunda pessoa da equipe (quatro olhos, conferido pelo banco).
+ALTER TABLE org_kyb_verifications
+  ADD COLUMN confirmed_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN confirmed_at timestamptz,
+  ADD CONSTRAINT kyb_four_eyes CHECK (confirmed_by IS NULL OR confirmed_by IS DISTINCT FROM reviewed_by),
+  ADD CONSTRAINT kyb_verified_needs_account_holder CHECK (status <> 'verified' OR account_holder_matches IS TRUE),
+  ADD CONSTRAINT kyb_only_verified_is_confirmed CHECK (confirmed_by IS NULL OR status = 'verified');
+
+CREATE OR REPLACE FUNCTION beneficiary_verified(p_org uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_temp AS $$
+  SELECT coalesce((SELECT k.status = 'verified' AND k.confirmed_by IS NOT NULL AND (k.expires_at IS NULL OR k.expires_at > now())
+                     FROM org_kyb_verifications k WHERE k.org_id = p_org
+                    ORDER BY k.created_at DESC, k.id DESC LIMIT 1), false)
+$$;
+REVOKE ALL ON FUNCTION beneficiary_verified(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION beneficiary_verified(uuid) TO impacto_app;
+
+-- ============================================================================ PAY-03 / PAY-12 (lote B) — eventos do provedor
+-- Evento que chega ANTES da confirmação (estorno, chargeback, liquidação) ficava 'ignored' para sempre. Agora fica
+-- 'deferred' e é reaplicado logo depois da confirmação. Evento que falha ao aplicar conta tentativas: a rotina para
+-- depois de 10 (fica na fila de exceções para uma pessoa), em vez de tentar para sempre.
+ALTER TABLE payment_provider_events DROP CONSTRAINT payment_provider_events_processing_status_check;
+ALTER TABLE payment_provider_events
+  ADD CONSTRAINT payment_provider_events_processing_status_check
+    CHECK (processing_status IN ('received','applied','ignored','rejected','failed','deferred')),
+  ADD COLUMN apply_attempts integer NOT NULL DEFAULT 0 CHECK (apply_attempts >= 0);   -- `attempts` (0072) conta ENTREGAS
+
+-- ============================================================================ PAY-07 (lote B) — conciliação com fonte declarada
+-- Antes: sem extrato informado, o sistema conciliava contra os PRÓPRIOS eventos para qualquer provedor, e o extrato
+-- manual (uma lista livre) marcava 'reconciled' na hora, enviado por uma pessoa só. Agora a execução registra a FONTE
+-- (eventos assinados do sandbox | extrato manual | API do provedor); provedor real exige extrato; extrato manual só concilia
+-- depois da aprovação de OUTRA pessoa (quatro olhos, conferido pelo banco).
+ALTER TABLE reconciliation_runs
+  ADD COLUMN status text NOT NULL DEFAULT 'done' CHECK (status IN ('done','awaiting_approval','approved')),
+  ADD COLUMN snapshot_source text NOT NULL DEFAULT 'sandbox_signed_events'
+    CHECK (snapshot_source IN ('sandbox_signed_events','manual_statement','provider_api')),
+  ADD COLUMN snapshot jsonb,
+  ADD COLUMN snapshot_sha256 text CHECK (snapshot_sha256 ~ '^[0-9a-f]{64}$'),
+  ADD COLUMN approved_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN approved_at timestamptz,
+  ADD CONSTRAINT recon_run_four_eyes CHECK (approved_by IS NULL OR approved_by IS DISTINCT FROM run_by),
+  ADD CONSTRAINT recon_manual_has_snapshot CHECK (snapshot_source <> 'manual_statement' OR snapshot_sha256 IS NOT NULL);

@@ -1,9 +1,9 @@
 {
   "version": "0.34.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-10T12:15:07+00:00",
-  "files_total": 4494,
-  "size_bytes_total": 79921321,
+  "generated_at": "2026-10-10T13:40:46+00:00",
+  "files_total": 4495,
+  "size_bytes_total": 79937691,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 63,
@@ -31,7 +31,7 @@
     },
     "documentação da raiz": {
       "files": 181,
-      "size_bytes": 2537937
+      "size_bytes": 2544422
     },
     "documentação técnica": {
       "files": 128,
@@ -46,8 +46,8 @@
       "size_bytes": 2487
     },
     "evidência de execução": {
-      "files": 95,
-      "size_bytes": 6111002
+      "files": 96,
+      "size_bytes": 6116419
     },
     "frontend": {
       "files": 126,
@@ -83,7 +83,7 @@
     },
     "manifesto de versão anterior": {
       "files": 1,
-      "size_bytes": 6372
+      "size_bytes": 6375
     },
     "mobile": {
       "files": 8,
@@ -99,7 +99,7 @@
     },
     "operação": {
       "files": 54,
-      "size_bytes": 469738
+      "size_bytes": 471526
     },
     "outro": {
       "files": 4,
@@ -119,7 +119,7 @@
     },
     "teste": {
       "files": 145,
-      "size_bytes": 2591408
+      "size_bytes": 2594085
     }
   },
   "files": [
@@ -263,8 +263,8 @@
     },
     {
       "file": "CHANGELOG.md",
-      "sha256": "2e0b0797517e4be3b8000f56dc5100bbb49417710b6d1154aa5deb91d29ad0bd",
-      "size_bytes": 180796,
+      "sha256": "4e0d1da14206ea904a04c27b274d0600cf300a4c490ec42586a23ce275ff7596",
+      "size_bytes": 181826,
       "category": "documentação da raiz"
     },
     {
@@ -449,14 +449,14 @@
     },
     {
       "file": "FINAL_EXECUTION_AUDIT.md",
-      "sha256": "882e5f096a7489b755d7d604d30106873247737c02b63bd4fe743aad98273963",
-      "size_bytes": 12784,
+      "sha256": "fb2dafcd3900040d69e217e6927e6f4457e1b16cbcb7682a2aa33b7edd71319a",
+      "size_bytes": 15930,
       "category": "documentação da raiz"
     },
     {
       "file": "FINAL_EXECUTION_REPORT.md",
-      "sha256": "bd51d83636da699584d3db8b31f5cb9c4732400377a0841b91d811ae653c596e",
-      "size_bytes": 12219,
+      "sha256": "f7ddab911a9a6c202694a02dfe8433febcd060b760eb7e8bf303495b2e7bba75",
+      "size_bytes": 14201,
       "category": "documentação da raiz"
     },
     {
@@ -497,8 +497,8 @@
     },
     {
       "file": "FINAL_RELEASE_MANIFEST.json",
-      "sha256": "337e5c87de0208c4a4e92e76b0c1261bcc398de43c721962c49f85a366889d64",
-      "size_bytes": 6372,
+      "sha256": "6040325b3ec6022a05c38bc1802f8357ca7f057800990c4e7d767a171f15f919",
+      "size_bytes": 6375,
       "category": "manifesto de versão anterior"
     },
     {
@@ -947,8 +947,8 @@
     },
     {
       "file": "RELEASE_NOTES.md",
-      "sha256": "746c70d5798ec4dbbc3ed3f79d2d261fddb48891bce9826ad4fac68784163e9a",
-      "size_bytes": 43103,
+      "sha256": "c410cfcc2d4b5bc585219834211a556548e812e5aceb06768ff120493701f3cd",
+      "size_bytes": 43430,
       "category": "documentação da raiz"
     },
     {
@@ -3203,8 +3203,8 @@
     },
     {
       "file": "backend/tests/demo_journeys.py",
-      "sha256": "bef69aee012859238a3eaba2d55e95487cc0981c98a6553a5c541624a9e05b3e",
-      "size_bytes": 69584,
+      "sha256": "a17e327105d63115458efc20c46102f6428b0d3515dc2cde68bf69773cfb021b",
+      "size_bytes": 69878,
       "category": "teste"
     },
     {
@@ -3887,8 +3887,8 @@
     },
     {
       "file": "backend/tests/test_v0250_pilha_do_zero.py",
-      "sha256": "67be11c70b67e9d78935dc0652d722f691cf2b3216ee786c6986656394554039",
-      "size_bytes": 3108,
+      "sha256": "abab31dd7d908a514ef1632d0767181745532eae6860bbfe7fb09ff48fae0a02",
+      "size_bytes": 4526,
       "category": "teste"
     },
     {
@@ -3935,8 +3935,8 @@
     },
     {
       "file": "backend/tests/test_v0270_release_docs.py",
-      "sha256": "03014ed94ba5974c1bc461b63fe0e33d1d2789601043591fdba92d37f418c61b",
-      "size_bytes": 8615,
+      "sha256": "c1f83742f8587bebe3c3ba4c2e82f8acd52af7b1380cf2e322e00e284d3b962d",
+      "size_bytes": 9580,
       "category": "teste"
     },
     {
@@ -4666,6 +4666,12 @@
       "category": "evidência de execução"
     },
     {
+      "file": "docs/evidence/pilha_local_v0340.txt",
+      "sha256": "7b4fe1eb0015f2cdde2a99822680c80e6415d408020300456801ae9ecfcf4108",
+      "size_bytes": 2107,
+      "category": "evidência de execução"
+    },
+    {
       "file": "docs/evidence/responsivo_v0250/admin_telefone.png",
       "sha256": "b8fd1edbd045f0bd64d70d30e0f3f56521f0d396ae98b34d3d2487f2b3f80ebf",
       "size_bytes": 52449,
@@ -5081,8 +5087,8 @@
     },
     {
       "file": "docs/evidence/test_run_v0.34.0.log",
-      "sha256": "d20526458876bb7dbfacf3178ae17dbd3d3912222738412dfe417d6ea67aefd8",
-      "size_bytes": 58083,
+      "sha256": "2e7424320bf131b9fee9e9c10bf7a21c659414b92d52425d8dc17eeda6a7c93c",
+      "size_bytes": 61393,
       "category": "evidência de execução"
     },
     {
@@ -25427,8 +25433,8 @@
     },
     {
       "file": "scripts/demo_stack.py",
-      "sha256": "df4ad654b21f34927ca9cbf9f2b04f064c45647bb9a6e41180a04215f84ab63e",
-      "size_bytes": 8171,
+      "sha256": "4065168825043e48393f2883f4882d30a33e4afa10539041d97ba0a317e6ac2d",
+      "size_bytes": 9373,
       "category": "operação"
     },
     {
@@ -25517,8 +25523,8 @@
     },
     {
       "file": "scripts/make_final_release_manifest.py",
-      "sha256": "2897876eb966155489f416f178d7d04a528864e6da5098c4e679a7940226592e",
-      "size_bytes": 3999,
+      "sha256": "e93680013153d46825573672244f545bcdf90cf9e356848bf46572a836496af2",
+      "size_bytes": 4585,
       "category": "operação"
     },
     {

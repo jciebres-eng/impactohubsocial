@@ -1,11 +1,11 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0",
  "version": "0.34.0",
- "commit": "9b3c7be",
- "date": "2026-10-10T12:15:07+00:00",
+ "commit": "dee05c4",
+ "date": "2026-10-10T13:09:16+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 4496,
+  "tracked_total": 4498,
   "traceability": "IMPACTO_v0.34.0_TRACEABILITY.json",
   "package": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip"
  },
@@ -13,7 +13,7 @@
   "total": 73,
   "last": "0073_v0340_financial_ecosystem.sql",
   "new_in_this_version": [
-   "0070_v0300_evidence_object.sql"
+   "0073_v0340_financial_ecosystem.sql"
   ]
  },
  "tests": {
@@ -21,13 +21,19 @@
   "seconds": 2257.161,
   "result": "FAILED",
   "detail": "failures=8, errors=1, skipped=31",
-  "runs_in_log": 1
+  "runs_in_log": 2,
+  "after_full_run": [
+   {
+    "total": 126,
+    "result": "OK",
+    "detail": ""
+   }
+  ]
  },
  "new_test_modules": [
-  "backend/tests/test_v0300_evidence_object.py",
-  "backend/tests/test_v0300_dossier.py",
-  "backend/tests/test_v0300_release_docs.py",
-  "backend/tests/test_e2e_v0300_dossier.py"
+  "backend/tests/test_v0340_financial_ecosystem.py",
+  "backend/tests/test_v0340_open_scenarios.py",
+  "backend/tests/test_v0340_release_docs.py"
  ],
  "integrations": [
   {
@@ -122,17 +128,15 @@
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
   "RELEASE_NOTES.md",
+  "CHANGELOG.md",
+  "DECISIONS.md",
+  "README.md",
+  "CLAUDE.md",
   "MOTOR_COVERAGE_MATRIX.md",
-  "EXTERNAL_INTEGRATIONS.md",
-  "docs/ECONOMIC_MODEL.md",
-  "docs/execution/BASELINE_v0300.md",
-  "docs/execution/PROFILE_JOURNEY_MATRIX_v0300.md",
-  "docs/execution/MILESTONE_FUNDING_STATES_v0300.md",
-  "docs/SAAS_ECONOMY.md",
-  "24_MONTH_FINANCIAL_MODEL.md",
-  "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md",
-  "docs/execution/CLEANUP_INVENTORY_v0300.md",
-  "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
-  "docs/execution/ROLLBACK_v0300.md"
+  "docs/finance/DONATIONS_API.md",
+  "docs/finance/LEGAL_FISCAL_MATRIX.md",
+  "docs/finance/RISK_MATRIX.md",
+  "docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md",
+  "docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md"
  ]
 }

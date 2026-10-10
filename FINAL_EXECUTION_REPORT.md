@@ -30,7 +30,9 @@ reter prestação de contas; reserva sem custódia) e o modelo "gratuito até ge
 - **Etapa E7 — CI do pull request**: o job `pilha-do-zero` (pilha Docker do zero, jornadas, 218 telas, axe) estava vermelho
   **desde a v0.33.0** — o relatório daquela versão dava o CI como corrigido, e a última execução do PR #6 mostra que não estava.
   Causa: uma conta de teste mal ligada na jornada "Captação" (código de teste, não do produto). Corrigido, com teste-guarda, e o
-  job agora escreve a causa de cada falha nas anotações. O pacote 0.34.0 foi refeito (§3).
+  job agora escreve a causa de cada falha nas anotações. Ao refazer o pacote, outro achado: o manifesto final da versão listava
+  como "novas" a migração e os testes da v0.30.0 (gerador com listas fixas desde então) — corrigido, com teste. O pacote 0.34.0
+  foi refeito (§3).
 - Documentos, matrizes, diagramas, modelo de 24 meses em 3 cenários e cobertura dos 40 cenários de teste em `docs/finance/`.
 
 **Decisão: GO WITH CONDITIONS** (§27) para o sandbox. **Qualquer cobrança real: NO-GO** até parecer, contrato e cartas verdes —
@@ -45,13 +47,15 @@ Documentos da v0.33.0 preservados em `history/v0.33.0/`; manifestos anteriores e
 
 Ramo `ecossistema-v0340` sobre `103c643` (v0.33.0). Commits por etapa: E1 backend (`47e2564`), E2 testes (`dfd3a54`), E3 telas
 (`761de0f`), E4 documentos (`696e220`), E5 portões (`d646a71`), E6 cenários pendentes (`5e380b8`) e documentos/portões da E6
-(`b14c6e7`), E6c (`9b3c7be`), E7 correção do CI (commit da correção, logo após `813a052`), e o commit final dos manifestos,
+(`b14c6e7`), E6c (`9b3c7be`), E7 correção do CI (`dee05c4`, CI do PR inteiro verde) e documentos/gerador do manifesto da E7,
+e o commit final dos manifestos,
 para o qual a tag `v0.34.0` deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`). Nenhuma
 operação na produção. O CI do pull request é a evidência externa (ver `FINAL_EXECUTION_AUDIT.md` §6).
 
 **Pacote substituído antes da tag.** O primeiro pacote 0.34.0 (commit `7e549d0`, SHA-256
 `e2f12d0b624ac9b438ea40e0f8650044295d1b0789ccab0299285e71ef64f6ec`) foi entregue antes de o CI do PR #7 terminar; o CI
-reprovou o `pilha-do-zero` (E7). Este pacote o substitui: mesmo produto, código de teste/CI corrigido, documentos atualizados.
+reprovou o `pilha-do-zero` (E7). Este pacote o substitui: mesmo produto, código de teste/CI e gerador do manifesto corrigidos,
+documentos atualizados.
 Nenhuma tag tinha sido criada e nada foi juntado ou publicado com o anterior.
 
 ## 4. Architecture Status
@@ -167,7 +171,8 @@ LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok
 TELAS: capturas reais em docs/evidence/screens_v0340/ (6 telas, fluxo completo no servidor de teste, sandbox)
 E7 — CI DO PR #7 (execução 38051432373, commit 813a052): auditoria, armazenamento, docker e backend (suíte completa, E2E, backup
   e restauração) VERDES; pilha-do-zero VERMELHO (vermelho também na última execução do PR #6, 38021228652). Causa e correção em
-  FINAL_EXECUTION_AUDIT.md §6–§7. Pilha local montada como a do CI, com o roteiro do job: 16 jornadas, 275 passos, 0 falha; 235 rotas de tela, 857 visitas, todas as 235 abertas com dado real, 0 falha; persistência após reiniciar a aplicação: contagens iguais (`docs/evidence/pilha_local_v0340.txt`)
+  FINAL_EXECUTION_AUDIT.md §6–§7. DEPOIS DA CORREÇÃO (execução 38054533485, commit dee05c4): os 5 jobs VERDES, inclusive
+  pilha-do-zero com axe-core 4.10.2 travando violação crítica/grave. Pilha local montada como a do CI, com o roteiro do job: 16 jornadas, 275 passos, 0 falha; 235 rotas de tela, 857 visitas, todas as 235 abertas com dado real, 0 falha; persistência após reiniciar a aplicação: contagens iguais (`docs/evidence/pilha_local_v0340.txt`)
 COBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md — 40 com teste (split e recorrência SIMULADOS no
   teste, ditos como tal; nenhum finge provedor real). Primeira rodada: 32 ✅ · 4 🟡 · 4 ⛔ — fechados na E6
 ```

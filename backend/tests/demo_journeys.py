@@ -418,6 +418,19 @@ class Jornadas:
             if d:
                 self.ids["doacao"] = d["id"]
                 self.passo(J, "pessoa anônima consulta a situação da doação", anon, "GET", f"/v1/public/donations/{d['id']}")
+            # v0.34.0 (ADR-377..383): empresa doa em nome da organização e registra um compromisso; organização declara recurso
+            # externo; cada um vê o seu painel; a administração vê obrigações (nenhuma devida) e a fila de conciliação.
+            self.passo(J, "empresa inicia doação em nome da organização (sandbox)", emp, "POST", f"/v1/public/donation-campaigns/{slug}/donate",
+                       {"amount_cents": 20000, "method": "pix", "as_organization": True, "donor_display": "Empresa Exemplo", "idempotency_key": "demo-" + uuid.uuid4().hex[:8]})
+            self.passo(J, "empresa registra compromisso de doação futura", emp, "POST", f"/v1/public/donation-campaigns/{slug}/pledge",
+                       {"amount_cents": 50000, "as_organization": True, "display": "Empresa Exemplo"})
+            self.passo(J, "OSC declara recurso recebido fora da plataforma", osc, "POST", f"/v1/campaigns/{cp['id']}/external-resources",
+                       {"kind": "offline_donation", "source_name": "Bazar beneficente (exemplo)", "funding_source": "private", "amount_cents": 120000, "received_on": "2026-10-01"})
+            self.passo(J, "OSC abre a prestação de contas com os estados do dinheiro", osc, "GET", f"/v1/campaigns/{cp['id']}/accountability")
+            self.passo(J, "OSC vê a política 'gratuito até gerar valor' e suas obrigações", osc, "GET", "/v1/org/remuneration")
+            self.passo(J, "empresa vê o painel do financiador", emp, "GET", "/v1/org/contributions")
+            self.passo(J, "administração vê obrigações por estado (nenhuma devida)", adm, "GET", "/v1/admin/remuneration")
+            self.passo(J, "administração vê a fila de conciliação", adm, "GET", "/v1/admin/reconciliation/exceptions")
             self.passo(J, "visitante sem login abre a campanha", Http(self.base), "GET", f"/v1/public/campaigns/{slug}")
 
     def documentos(self):

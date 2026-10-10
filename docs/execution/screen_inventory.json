@@ -1,23 +1,23 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 231,
+ "telas": 235,
  "por_tabela": {
   "PUBLIC": 9,
   "HELP": 31,
-  "ROUTES": 191
+  "ROUTES": 195
  },
  "sem_login": 32,
  "com_parametro": 56,
- "em_algum_menu": 90,
+ "em_algum_menu": 94,
  "so_por_link_direto": 85,
  "sombreadas": [],
  "menus_por_tipo": {
-  "Empresa": 33,
-  "Governo": 30,
+  "Empresa": 34,
+  "Governo": 31,
   "Apoiador": 22,
-  "OSC": 45,
-  "Administração": 34,
+  "OSC": 46,
+  "Administração": 36,
   "Profissional": 28
  },
  "arquivos": [
@@ -1162,6 +1162,27 @@
    "alcance": "menu"
   },
   {
+   "rota": "/admin/conciliacao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.AdminReconciliation",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Conciliação",
+   "alcance": "menu"
+  },
+  {
    "rota": "/admin/contribuicao",
    "tabela": "ROUTES",
    "ordem_de_casamento": 3,
@@ -1636,6 +1657,27 @@
     "Administração"
    ],
    "rotulo": "Cadeia de causa",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/remuneracao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.AdminRemuneration",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Remuneração (obrigações)",
    "alcance": "menu"
   },
   {
@@ -2184,6 +2226,30 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "link direto"
+  },
+  {
+   "rota": "/contribuicoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.OrgContributions",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "company",
+    "government"
+   ],
+   "alcanca": [
+    "Empresa",
+    "Governo"
+   ],
+   "em_menu_de": [
+    "Empresa",
+    "Governo"
+   ],
+   "rotulo": "Contribuições",
+   "alcance": "menu"
   },
   {
    "rota": "/controladoria",
@@ -4097,6 +4163,33 @@
    "em_menu_de": [],
    "rotulo": "",
    "alcance": "parâmetro"
+  },
+  {
+   "rota": "/remuneracao",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.OrgRemuneration",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "osc",
+    "company",
+    "provider",
+    "government"
+   ],
+   "alcanca": [
+    "OSC",
+    "Empresa",
+    "Profissional",
+    "Governo"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Remuneração da plataforma",
+   "alcance": "menu"
   },
   {
    "rota": "/reputacao",

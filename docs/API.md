@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.33.0)
+# API REST /v1 — referência gerada do código (v0.34.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (962)
+## Operações (986)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -190,6 +190,22 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/permissions` | admin da plataforma + MFA | — | Matriz papel → permissão, como está no banco |
 | GET | `/v1/admin/price-benchmark` | admin da plataforma + MFA | — | Benchmark de preço consultado (§47–48, §89) — referência, nunca preço decidido |
 | GET | `/v1/admin/privileged-access` | admin da plataforma + MFA | — | Quem entrou com papel interno, quando, em qual rota e com qual permissão |
+| POST | `/v1/admin/reconciliation/campaigns/{campaign_id}/run` | admin da plataforma + MFA | — | Executa a conciliação da campanha contra o snapshot do provedor (sandbox: derivado dos eventos assinados) e abre exceções |
+| GET | `/v1/admin/reconciliation/exceptions` | admin da plataforma + MFA | — | Fila de exceções de conciliação |
+| POST | `/v1/admin/reconciliation/exceptions/{exception_id}/assign` | admin da plataforma + MFA | — | Assume uma exceção |
+| GET | `/v1/admin/reconciliation/exceptions/{exception_id}/history` | admin da plataforma + MFA | — | Histórico de uma exceção |
+| POST | `/v1/admin/reconciliation/exceptions/{exception_id}/resolve` | admin da plataforma + MFA | — | Resolve ou descarta uma exceção com justificativa (fica no histórico) |
+| GET | `/v1/admin/remuneration` | admin da plataforma + MFA | — | Obrigações por estado (previsto × devido × faturado × recebido × liquidado) — nunca somadas num número só |
+| POST | `/v1/admin/remuneration/invoice` | admin da plataforma + MFA | — | Fatura obrigações DEVIDAS numa cobrança própria da plataforma (nunca desconto de doação) |
+| POST | `/v1/admin/remuneration/mark-overdue` | admin da plataforma + MFA | — | Marca vencidas as faturadas além do prazo (rotina) |
+| POST | `/v1/admin/remuneration/orgs/{org_id}/evaluate` | admin da plataforma + MFA | — | Aplica a política 'gratuito até gerar valor' à organização: o que virou devido e por que o resto não virou |
+| POST | `/v1/admin/remuneration/orgs/{org_id}/notices` | admin da plataforma + MFA | — | Envia (registra) um aviso prévio da política à organização |
+| POST | `/v1/admin/remuneration/{obligation_id}/authorize-public` | admin da plataforma + MFA | — | Recurso público: registra instrumento e autorização que tornam a taxa elegível (ADR-379) |
+| POST | `/v1/admin/remuneration/{obligation_id}/charged` | admin da plataforma + MFA | — | Marca como cobrada (enviada ao pagador) |
+| POST | `/v1/admin/remuneration/{obligation_id}/decide` | admin da plataforma + MFA | — | Decide uma disputa (manter, dispensar, isentar) com justificativa |
+| POST | `/v1/admin/remuneration/{obligation_id}/receipt` | admin da plataforma + MFA | — | Registra pagamento RECEBIDO (parcial ou total) com referência |
+| POST | `/v1/admin/remuneration/{obligation_id}/settle` | admin da plataforma + MFA | — | Marca como LIQUIDADA (conciliada com extrato) — segregado: exige finance.approve |
+| POST | `/v1/admin/remuneration/{obligation_id}/waive` | admin da plataforma + MFA | — | Dispensa uma obrigação com justificativa registrada |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
 | GET | `/v1/admin/reports/queue` | admin da plataforma + MFA | — | Fila de apuração, com a distinção entre arquivada e não procedente |
 | POST | `/v1/admin/reports/{report_id}/conclude` | admin da plataforma + MFA | — | Conclusão fundamentada. Só 'substantiated' autoriza medida |
@@ -309,6 +325,8 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | PATCH | `/v1/campaigns/{campaign_id}` | membro da organização ativa | papel ≥ manager | Altera ou publica/fecha a campanha |
 | GET | `/v1/campaigns/{campaign_id}/accountability` | membro da organização ativa | papel ≥ viewer | Prestação de contas: totais conciliados (com definição de cada número), doações, gastos declarados × validados, casos de risco |
 | POST | `/v1/campaigns/{campaign_id}/expenses` | membro da organização ativa | papel ≥ manager | Declara um gasto da campanha (declarado ≠ validado; documento vira evidência) |
+| POST | `/v1/campaigns/{campaign_id}/external-resources` | membro da organização ativa | papel ≥ manager | Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra) |
+| POST | `/v1/campaigns/{campaign_id}/pledges/{pledge_id}/fulfill` | membro da organização ativa | papel ≥ manager | Liga um compromisso à doação CONFIRMADA que o cumpriu |
 | POST | `/v1/campaigns/{campaign_id}/publish` | membro da organização ativa | papel ≥ manager | Publica a campanha aprovada (exige beneficiário verificado; o banco recusa sem isso) |
 | POST | `/v1/campaigns/{campaign_id}/rotate-qr` | membro da organização ativa | papel ≥ manager | Regenera QR/link (versão nova; a anterior deixa de ser a canônica) — para QR comprometido ou substituído |
 | POST | `/v1/campaigns/{campaign_id}/submit` | membro da organização ativa | papel ≥ manager | Envia a campanha para revisão (aceita os termos de campanha na versão vigente) |
@@ -600,6 +618,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/me` | usuário autenticado | — | Usuário, organizações, direitos do plano e token CSRF |
 | GET | `/v1/me/context` | usuário autenticado | — | AccessContext: identidade, organização, papéis, plano, período gratuito, permissões |
 | GET | `/v1/me/donations` | usuário autenticado | — | Minhas doações (com conta) e acordos recorrentes |
+| POST | `/v1/me/pledges/{pledge_id}/cancel` | usuário autenticado | — | Cancela o próprio compromisso |
 | GET | `/v1/me/preferences` | usuário autenticado | — | Idioma e tema da pessoa (tema: system, light ou dark) |
 | PUT | `/v1/me/preferences` | usuário autenticado | — | Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso) |
 | POST | `/v1/me/recurring-donations/{agreement_id}/cancel` | usuário autenticado | — | Cancela um acordo de doação recorrente (sempre possível pelo doador) |
@@ -644,6 +663,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/operacoes/health` | admin da plataforma + MFA | — | HEALTH CENTER: banco, migrações, tarefas, backup, integrações e cobrança presa |
 | GET | `/v1/org` | membro da organização ativa | papel ≥ viewer | Perfil completo da organização ativa |
 | PATCH | `/v1/org` | membro da organização ativa | papel ≥ admin | Atualiza o perfil da organização |
+| GET | `/v1/org/contributions` | membro da organização ativa | papel ≥ viewer | Painel do financiador: doações e compromissos feitos em nome da organização |
 | GET | `/v1/org/credentials` | membro da organização ativa | tipos: provider; papel ≥ viewer | list credentials |
 | POST | `/v1/org/credentials` | membro da organização ativa | tipos: provider; papel ≥ member | Registra credencial profissional (CRC, OAB...). Nasce 'autodeclarada' até verificação pela administração. |
 | POST | `/v1/org/credentials/{credential_id}/document` | membro da organização ativa | papel ≥ manager | Anexa o documento do conselho à credencial e a coloca na fila de conferência |
@@ -659,6 +679,9 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | DELETE | `/v1/org/members/{user_id}` | membro da organização ativa | papel ≥ admin | remove member |
 | PATCH | `/v1/org/members/{user_id}` | membro da organização ativa | papel ≥ admin | change role |
 | PUT | `/v1/org/provider-profile` | membro da organização ativa | tipos: provider; papel ≥ manager | put provider profile |
+| GET | `/v1/org/remuneration` | membro da organização ativa | papel ≥ viewer | Obrigações de remuneração da organização, política vigente, franquia e avisos — nada aqui bloqueia nada |
+| POST | `/v1/org/remuneration/notices/{notice_id}/ack` | membro da organização ativa | papel ≥ viewer | Registra ciência de um aviso |
+| POST | `/v1/org/remuneration/{obligation_id}/dispute` | membro da organização ativa | papel ≥ manager | Contesta uma obrigação (fica em disputa até decisão registrada) |
 | GET | `/v1/org/tax-profile` | membro da organização ativa | tipos: company; papel ≥ analyst | get tax profile |
 | PUT | `/v1/org/tax-profile` | membro da organização ativa | tipos: company; papel ≥ manager | put tax profile |
 | GET | `/v1/organizations/{org_id}` | membro da organização ativa | papel ≥ viewer | Perfil público de outra organização |
@@ -807,6 +830,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/public/concepts` | pública | limite 120/3600s | Catálogo central de conceitos da ajuda contextual (tooltip, popover e glossário): origem config/concepts.json |
 | GET | `/v1/public/donation-campaigns/{slug}` | pública | limite 240/3600s | Campanha de arrecadação pública: beneficiário verificado, meta, totais confirmados, custos, atualizações e gastos declarados |
 | POST | `/v1/public/donation-campaigns/{slug}/donate` | pública | limite 30/3600s | Inicia uma doação: cria a cobrança no provedor e devolve o Pix copia-e-cola/checkout com o preço total — não confirma nada |
+| POST | `/v1/public/donation-campaigns/{slug}/pledge` | usuário autenticado | limite 20/3600s | Registra um compromisso de doação futura (não é doação, não é dinheiro) |
 | GET | `/v1/public/donation-campaigns/{slug}/qr.svg` | pública | limite 120/3600s | QR Code da campanha: aponta para a URL HTTPS canônica (nunca para um payload Pix estático) |
 | GET | `/v1/public/donations/{donation_id}` | pública | limite 600/3600s | Estado da doação (pendente/confirmada/expirada), como o provedor informou; nunca muda pelo navegador |
 | GET | `/v1/public/donations/{donation_id}/receipt` | pública | limite 120/3600s | Comprovante da doação confirmada (não é recibo dedutível nem nota fiscal) |

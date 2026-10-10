@@ -5,15 +5,15 @@
 > Cada linha é um passo REALMENTE executado pela API na última regressão (status HTTP registrado), com o que a autorização exige
 > para aquele passo e as telas que o alcançam. 'sem tela' é fato medido, não falha.
 
-Jornadas: **16** · passos: **261** · falhas: **0**
+Jornadas: **16** · passos: **269** · falhas: **0**
 
 ## Perfis e o que cada um percorre
 
 | Perfil | Passos executados | Jornadas em que aparece |
 | --- | ---: | --- |
-| OSC / executora | 155 | 15 |
-| Financiador (empresa/instituto) | 47 | 8 |
-| Administração / auditoria | 23 | 6 |
+| OSC / executora | 158 | 15 |
+| Financiador (empresa/instituto) | 50 | 8 |
+| Administração / auditoria | 25 | 6 |
 | Profissional / prestador | 12 | 4 |
 | Apoiador (pessoa física) | 10 | 3 |
 | Governo / órgão | 9 | 1 |
@@ -52,14 +52,14 @@ Jornadas: **16** · passos: **261** · falhas: **0**
 | 12 | OSC / executora | alinha ODS (declarado) | `PUT /v1/projects/{id}/ods-targets` | 200 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/ods |
 | 13 | OSC / executora | consulta catálogo de indicadores | `GET /v1/indicators/catalog` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
 | 14 | OSC / executora | cria indicador com linha de base e fonte | `POST /v1/projects/{id}/indicators` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
-| 15 | OSC / executora | registra evidência (2026-05-12) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
-| 16 | OSC / executora | registra medição 8 em 2026-05-12 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
-| 17 | OSC / executora | registra evidência (2026-07-01) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
-| 18 | OSC / executora | registra medição 17 em 2026-07-01 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
-| 19 | OSC / executora | registra evidência (2026-08-20) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
-| 20 | OSC / executora | registra medição 26 em 2026-08-20 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
-| 21 | OSC / executora | registra evidência (2026-10-04) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
-| 22 | OSC / executora | registra medição 33 em 2026-10-04 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
+| 15 | OSC / executora | registra evidência (2026-05-13) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
+| 16 | OSC / executora | registra medição 8 em 2026-05-13 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
+| 17 | OSC / executora | registra evidência (2026-07-02) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
+| 18 | OSC / executora | registra medição 17 em 2026-07-02 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
+| 19 | OSC / executora | registra evidência (2026-08-21) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
+| 20 | OSC / executora | registra medição 26 em 2026-08-21 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
+| 21 | OSC / executora | registra evidência (2026-10-05) | `POST /v1/projects/{id}/evidences` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id |
+| 22 | OSC / executora | registra medição 33 em 2026-10-05 | `POST /v1/project-indicators/{id}/values` | 201 | organizacao_tipo_e_papel · papel ≥ member · tipos: osc | — | /projetos/:id/impacto |
 | 23 | OSC / executora | registra risco | `POST /v1/projects/{id}/risks` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | /projetos/:id/riscos |
 | 24 | OSC / executora | grava retrato do projeto | `POST /v1/projects/{id}/snapshots` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | /projetos/:id/retratos |
 | 25 | OSC / executora | consulta os papéis de responsabilidade | `GET /v1/responsibility/roles` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
@@ -179,7 +179,15 @@ Jornadas: **16** · passos: **261** · falhas: **0**
 | 11 | OSC / executora | OSC publica a campanha | `POST /v1/campaigns/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
 | 12 | Visitante | pessoa anônima inicia uma doação Pix (sandbox, não pagável) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
 | 13 | Visitante | pessoa anônima consulta a situação da doação | `GET /v1/public/donations/{id}` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
-| 14 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 14 | Financiador (empresa/instituto) | empresa inicia doação em nome da organização (sandbox) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 15 | Financiador (empresa/instituto) | empresa registra compromisso de doação futura | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/pledge` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 16 | OSC / executora | OSC declara recurso recebido fora da plataforma | `POST /v1/campaigns/{id}/external-resources` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
+| 17 | OSC / executora | OSC abre a prestação de contas com os estados do dinheiro | `GET /v1/campaigns/{id}/accountability` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 18 | OSC / executora | OSC vê a política 'gratuito até gerar valor' e suas obrigações | `GET /v1/org/remuneration` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 19 | Financiador (empresa/instituto) | empresa vê o painel do financiador | `GET /v1/org/contributions` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 20 | Administração / auditoria | administração vê obrigações por estado (nenhuma devida) | `GET /v1/admin/remuneration` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
+| 21 | Administração / auditoria | administração vê a fila de conciliação | `GET /v1/admin/reconciliation/exceptions` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
+| 22 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Documentos: montagem → acordo assinado → registro verificável
 
@@ -363,7 +371,7 @@ Jornadas: **16** · passos: **261** · falhas: **0**
 
 ## Leitura
 
-* Passos sem tela que os alcance diretamente: **97** de 261 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
+* Passos sem tela que os alcance diretamente: **105** de 269 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
 * A autorização é aplicada no backend (classe + papel + tipo + permissão), provada por `test_v0230_api_sweep` para TODAS as operações — a coluna aqui é a mesma matriz, lida por jornada.
 * Dado tocado: cada rota nomeia o recurso (projects, evidences, indicator-values, agreements, payouts…); a classe de retenção de cada tabela está em `config/data_retention.json` e é conferida por `test_v0190_lgpd_deletion`.
 * Estados vazios, erros e bloqueios por perfil: cobertos pelo robô de telas (`test_v0250_todas_as_telas`: OK · vazia · recusa correta · sem registro) e pela jornada 'Pendências'.

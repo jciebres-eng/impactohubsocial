@@ -109,7 +109,7 @@ O usuário existe e não tem organização ativa. Quase toda rota exige uma.
 ### `403 wrong_org_kind` — "Recurso indisponível para este tipo de organização"
 
 A rota declara os tipos que a alcançam, e o seu não está na lista. **Confira no painel de telas antes
-de abrir chamado**: 36 telas são só de Administração, e isso é desenho.
+de abrir chamado**: 38 telas são só de Administração, e isso é desenho.
 
 ### `403 insufficient_role` / `403 permission_denied`
 
@@ -145,7 +145,7 @@ entrypoint do contêiner de verdade (`test_v0240_container_entrypoint.py`) e viu
 
 Antes de chamar de defeito, veja no painel de telas o que aquele componente chama:
 
-- **"sem chamada direta"** (64 telas): o componente não chama a API por conta própria. Pode ser tela
+- **"sem chamada direta"** (65 telas): o componente não chama a API por conta própria. Pode ser tela
   estática, pode buscar por um auxiliar compartilhado — a leitura por componente não distingue.
 - **"chama backend"**: aí sim, vazio é suspeito. Abra o console do navegador e veja a resposta.
 

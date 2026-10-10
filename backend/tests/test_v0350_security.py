@@ -7,6 +7,7 @@ sintéticos.
 from __future__ import annotations
 
 import json
+import os
 import unittest
 import uuid
 
@@ -1368,3 +1369,166 @@ class IdentityVerificationStatesTests(unittest.TestCase):
             c.run("UPDATE identity_verifications SET expires_at = now() - interval '1 day' WHERE id = $1", vid)
             self.assertGreaterEqual(identity.expire_due(c), 1)
             self.assertEqual(c.scalar("SELECT status FROM identity_verifications WHERE id = $1", vid), "expired")
+
+
+# ================================================================================================ lote I
+def _backup_crypt():
+    import importlib.util
+
+    from tests.support import ROOT
+    spec = importlib.util.spec_from_file_location("backup_crypt", ROOT / "scripts" / "backup_crypt.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class BackupCipherIsAuthenticatedTests(unittest.TestCase):
+    """BCP-01 (autorizado pelo responsável) — antes: `openssl enc -aes-256-cbc` sem autenticação: um backup alterado
+    decifrava em lixo (ou num dump plausível) sem erro, e o hash ficava no mesmo bucket."""
+
+    FRASE = "frase-de-teste-com-mais-de-trinta-e-dois-caracteres"
+
+    def setUp(self):
+        import io
+        self.io = io
+        self.bc = _backup_crypt()
+        self.bc.CHUNK = 1024          # blocos pequenos: o teste cobre vários blocos com poucos bytes
+        self.plain = os.urandom(5000)
+
+    def _enc(self, data=None, frase=None) -> bytes:
+        out = self.io.BytesIO()
+        self.bc.encrypt(self.io.BytesIO(self.plain if data is None else data), out, frase or self.FRASE)
+        return out.getvalue()
+
+    def _dec(self, blob: bytes, frase=None) -> bytes:
+        out = self.io.BytesIO()
+        self.bc.decrypt(self.io.BytesIO(blob), out, frase or self.FRASE)
+        return out.getvalue()
+
+    def test_round_trip_including_an_empty_dump(self):
+        self.assertEqual(self._dec(self._enc()), self.plain)
+        self.assertEqual(self._dec(self._enc(b"")), b"")
+
+    def test_any_change_truncation_reordering_or_wrong_passphrase_fails(self):
+        blob = self._enc()
+        head = len(self.bc.MAGIC) + 26
+        bloco = 4 + 1024 + 16
+        casos = {
+            "bit trocado no meio": blob[:3000] + bytes([blob[3000] ^ 1]) + blob[3001:],
+            "cabeçalho mexido": blob[:head - 1] + bytes([blob[head - 1] ^ 1]) + blob[head:],
+            "último bloco removido inteiro": blob[:head + 4 * bloco],
+            "dois blocos trocados de ordem": blob[:head] + blob[head + bloco:head + 2 * bloco] + blob[head:head + bloco] + blob[head + 2 * bloco:],
+        }
+        for nome, adulterado in casos.items():
+            with self.subTest(nome), self.assertRaises(self.bc.BackupCryptError):
+                self._dec(adulterado)
+        with self.assertRaises(self.bc.BackupCryptError):
+            self._dec(blob, frase="outra-frase-com-mais-de-trinta-e-dois-caracteres!!")
+
+    def test_short_passphrase_is_refused_and_a_failed_decrypt_leaves_no_partial_file(self):
+        import tempfile
+        from pathlib import Path
+        with self.assertRaises(self.bc.BackupCryptError):
+            self._enc(frase="curta")
+        with tempfile.TemporaryDirectory() as d:
+            src, alvo = Path(d) / "x.aead", Path(d) / "x.dump"
+            blob = self._enc()
+            src.write_bytes(blob[:2000] + bytes([blob[2000] ^ 1]) + blob[2001:])
+            old = os.environ.get("BACKUP_PASSPHRASE")
+            os.environ["BACKUP_PASSPHRASE"] = self.FRASE
+            try:
+                self.assertEqual(self.bc.main(["backup_crypt.py", "decrypt", str(src), str(alvo)]), 1)
+            finally:
+                if old is None:
+                    os.environ.pop("BACKUP_PASSPHRASE", None)
+                else:
+                    os.environ["BACKUP_PASSPHRASE"] = old
+            self.assertEqual(sorted(p.name for p in Path(d).iterdir()), ["x.aead"], "sobrou dump parcial")
+
+    def test_the_backup_workflow_uses_the_authenticated_format_and_publishes_the_hash_outside_the_bucket(self):
+        from tests.support import ROOT
+        wf = (ROOT / ".github" / "workflows" / "backup-supabase.yml").read_text(encoding="utf-8")
+        codigo = "\n".join(linha for linha in wf.splitlines() if not linha.lstrip().startswith("#"))
+        self.assertIn("scripts/backup_crypt.py encrypt", codigo)
+        self.assertNotIn("openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt", codigo, "o backup NOVO ainda sai sem autenticação")
+        self.assertIn("GITHUB_STEP_SUMMARY", codigo.split("Cifrar (autenticada)", 1)[1].split("Enviar para o R2", 1)[0])
+        self.assertIn(".dump.aead", codigo.split("ensaio-restauracao:", 1)[1], "o ensaio não lê o formato novo")
+
+
+class SupplyChainTests(unittest.TestCase):
+    """SDLC-05/06/07/08 — antes: actions por tag (tag reapontada executaria código de terceiro ao lado dos segredos);
+    gitleaks só no pull request; `.gitignore` cobria só `.env`; sem Dependabot; sem SBOM nem varredura da imagem."""
+
+    def _workflows(self):
+        import yaml
+
+        from tests.support import ROOT
+        return {f.name: (f.read_text(encoding="utf-8"), yaml.safe_load(f.read_text(encoding="utf-8")))
+                for f in sorted((ROOT / ".github" / "workflows").glob("*.yml"))}
+
+    def test_every_action_is_pinned_to_a_full_commit_sha(self):
+        import re
+        soltas = []
+        for nome, (texto, _) in self._workflows().items():
+            for m in re.finditer(r"uses:\s*([^\s#]+)", texto):
+                ref = m.group(1)
+                if ref.startswith("./"):
+                    continue
+                if not re.fullmatch(r"[\w.-]+/[\w./-]+@[0-9a-f]{40}", ref):
+                    soltas.append(f"{nome}: {ref}")
+        self.assertEqual(soltas, [], "action referida por tag ou branch")
+
+    def test_secret_scanning_runs_on_push_too(self):
+        _, ci = self._workflows()["ci.yml"]
+        jobs = [n for n, j in ci["jobs"].items() if "gitleaks" in str(j.get("steps"))]
+        self.assertTrue(jobs)
+        for n in jobs:
+            self.assertNotIn("push", str(ci["jobs"][n].get("if", "")), f"o job {n} com gitleaks não roda no push")
+
+    def test_the_image_gets_an_sbom_and_a_vulnerability_scan_with_a_verified_binary(self):
+        _, ci = self._workflows()["ci.yml"]
+        trivy = [p for p in ci["jobs"]["docker"]["steps"] if "trivy" in str(p.get("run", "")).lower()]
+        self.assertEqual(len(trivy), 1)
+        run = trivy[0]["run"]
+        self.assertIn("cyclonedx", run)
+        self.assertIn("trivy image", run)
+        self.assertLess(run.index("sha256sum -c"), run.index("tar -xzf"), "binário do Trivy usado sem conferir o checksum")
+
+    def test_dependabot_covers_every_ecosystem_in_use(self):
+        import yaml
+
+        from tests.support import ROOT
+        cfg = yaml.safe_load((ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8"))
+        self.assertEqual({u["package-ecosystem"] for u in cfg["updates"]}, {"github-actions", "pip", "npm", "docker"})
+
+    def test_gitignore_keeps_secret_shaped_files_out(self):
+        import subprocess
+
+        from tests.support import ROOT
+        for caminho in (".env.production", "infra/x/.env.local", "chave.pem", "certificado.p12", "id_ed25519", "backup.dump.aead",
+                        "conta-de-servico/credentials.json", ".npmrc", "senhas.kdbx"):
+            r = subprocess.run(["git", "check-ignore", "-q", caminho], cwd=ROOT)
+            self.assertEqual(r.returncode, 0, f"{caminho} não é ignorado")
+        r = subprocess.run(["git", "check-ignore", "-q", "infra/compose/demo/.env.example"], cwd=ROOT)
+        self.assertEqual(r.returncode, 1, "o modelo .env.example (sem segredo) tem de continuar versionável")
+
+
+class IncidentRunbooksTests(unittest.TestCase):
+    """IR-01 / BCP-05 — antes: os links de runbook dos alertas apontavam para arquivos que não existiam e não havia runbook
+    de tomada de conta, ransomware, abuso de pagamento, queda de provedor nem perda de banco."""
+
+    def test_every_alert_link_resolves_and_the_seven_runbooks_exist(self):
+        import yaml
+
+        from tests.support import ROOT
+        doc = yaml.safe_load((ROOT / "infra" / "monitoring" / "alerts.yml").read_text(encoding="utf-8"))
+        grupos = doc["groups"] if isinstance(doc, dict) else doc
+        links = [r["annotations"]["runbook"] for g in grupos for r in g["rules"] if "runbook" in r.get("annotations", {})]
+        self.assertGreaterEqual(len(links), 9)
+        for link in links:
+            self.assertTrue((ROOT / link.split("#")[0]).is_file(), link)
+        pasta = ROOT / "docs" / "security" / "runbooks"
+        self.assertEqual(len(sorted(pasta.glob("RB-0*.md"))), 7)
+        indice = (pasta / "README.md").read_text(encoding="utf-8")
+        for rb in pasta.glob("RB-0*.md"):
+            self.assertIn(rb.name, indice)

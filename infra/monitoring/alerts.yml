@@ -45,19 +45,23 @@ groups:
     labels: { severity: page }
     annotations:
       summary: "Reuso de refresh token detectado — família de sessão revogada automaticamente"
-      runbook: "SECURITY.md#reuso-de-token-de-renovacao"
+      runbook: "docs/security/runbooks/RB-03-tomada-de-conta.md"
   - alert: PicoDeLoginFalho
     expr: sum(increase(impacto_security_events_total{action="auth.login_failed"}[10m])) > 50
     for: 5m
     labels: { severity: page }
-    annotations: { summary: "Mais de 50 falhas de login em 10 min — possível força bruta ou vazamento de credenciais" }
+    annotations:
+      summary: "Mais de 50 falhas de login em 10 min — possível força bruta ou vazamento de credenciais"
+      runbook: "docs/security/runbooks/RB-03-tomada-de-conta.md"
   - alert: EntradaPrivilegiadaRecusadaEmSerie
     # Alguém da equipe sondando rotas internas e levando 403 em todas. Cada recusa é gravada em
     # `privileged_access_log` com DENIED; em série, é varredura, não erro de navegação.
     expr: sum(increase(impacto_security_events_total{action="security.privileged_access_denied"}[15m])) > 10
     for: 5m
     labels: { severity: page }
-    annotations: { summary: "Mais de 10 entradas privilegiadas recusadas em 15 min — sondagem de rota interna" }
+    annotations:
+      summary: "Mais de 10 entradas privilegiadas recusadas em 15 min — sondagem de rota interna"
+      runbook: "docs/security/runbooks/RB-03-tomada-de-conta.md"
   - alert: SessoesExpirandoEmMassa
     expr: sum(increase(impacto_security_events_total{action=~"auth.session_too_old|auth.session_idle"}[1h])) > 200
     for: 15m
@@ -67,13 +71,17 @@ groups:
     expr: sum(increase(impacto_security_events_total{action="auth.mfa_disabled"}[1h])) > 3
     for: 0m
     labels: { severity: page }
-    annotations: { summary: "MFA desligado em mais de 3 contas em 1 h — desligar MFA é passo clássico de tomada de conta" }
+    annotations:
+      summary: "MFA desligado em mais de 3 contas em 1 h — desligar MFA é passo clássico de tomada de conta"
+      runbook: "docs/security/runbooks/RB-03-tomada-de-conta.md"
   - alert: PapelInternoConcedido
     # Concessão de papel interno é rara e consequente. O alerta não acusa: dá ciência imediata.
     expr: increase(impacto_security_events_total{action="staff.role_granted"}[10m]) > 0
     for: 0m
     labels: { severity: ticket }
-    annotations: { summary: "Papel interno concedido — conferir se houve pedido correspondente" }
+    annotations:
+      summary: "Papel interno concedido — conferir se houve pedido correspondente"
+      runbook: "docs/security/runbooks/RB-03-tomada-de-conta.md"
   - alert: InterruptorDeEmergenciaAcionado
     # Não é alarme de defeito: é ciência imediata de que alguém parou a plataforma. Se o
     # acionamento não foi coordenado, esta é a primeira notícia — e o escopo diz o que parou.
@@ -82,14 +90,16 @@ groups:
     labels: { severity: page }
     annotations:
       summary: "Interruptor de emergência ACIONADO — conferir incidente em /v1/admin/kill-switch"
-      runbook: "SECURITY.md#interruptor-de-emergencia"
+      runbook: "docs/security/runbooks/RB-06-queda-de-provedor-e-interruptor.md"
   - alert: OperacoesRecusadasPeloInterruptor
     # Mede o custo do bloqueio enquanto ele dura: quantas operações estão sendo recusadas. Serve
     # para decidir quando liberar, e para notar um interruptor esquecido ligado.
     expr: sum(rate(impacto_kill_switch_blocked_total[15m])) > 0
     for: 30m
     labels: { severity: ticket }
-    annotations: { summary: "Interruptor de emergência recusando operações há mais de 30 min (escopo {{ $labels.scope }})" }
+    annotations:
+      summary: "Interruptor de emergência recusando operações há mais de 30 min (escopo {{ $labels.scope }})"
+      runbook: "docs/security/runbooks/RB-06-queda-de-provedor-e-interruptor.md"
 - name: impacto_operacao
   rules:
   - alert: BackupFalhou
@@ -98,14 +108,16 @@ groups:
     labels: { severity: page }
     annotations:
       summary: "Backup falhou — `due()` conta do ÚLTIMO SUCESSO, então a janela reabre, mas não há cópia nova"
-      runbook: "DISASTER_RECOVERY.md"
+      runbook: "docs/security/runbooks/RB-07-perda-do-banco.md"
   - alert: BackupSemSucessoEm26h
     # O contrário do alerta acima: a tarefa que PARA de rodar não emite falha nenhuma. Silêncio
     # também é defeito — `absent()` é o que separa "rodou e falhou" de "ninguém chamou".
     expr: increase(impacto_job_runs_total{job="backup",status="ok"}[26h]) == 0 or absent(impacto_job_runs_total{job="backup",status="ok"})
     for: 30m
     labels: { severity: page }
-    annotations: { summary: "Nenhum backup bem-sucedido em 26 h" }
+    annotations:
+      summary: "Nenhum backup bem-sucedido em 26 h"
+      runbook: "docs/security/runbooks/RB-07-perda-do-banco.md"
   - alert: TarefaOperacionalFalhando
     expr: sum by (job) (increase(impacto_job_runs_total{status="failed"}[1h])) > 2
     for: 10m

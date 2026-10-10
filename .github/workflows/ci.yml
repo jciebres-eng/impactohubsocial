@@ -19,36 +19,11 @@ jobs:
     env:
       TEST_ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
         with: { fetch-depth: 0 }   # a varredura de segredo precisa do histórico
-      # VARREDURA DE SEGREDO. Até a v0.22.0 não havia nenhuma, em lugar nenhum: nem no CI, nem em
-      # pre-commit, nem na suíte. O fail-fast de `config.py` recusa subir sem segredo configurado —
-      # isso protege o BOOT, não o histórico do git. Um segredo commitado por engano ficava lá.
-      #
-      # A ACTION `gitleaks/gitleaks-action` exige licença paga (GITLEAKS_LICENSE) em conta de
-      # organização, e falhava em TODO push — antes de qualquer outro passo. A suíte de testes
-      # nunca chegou a rodar no GitHub por causa disso. O BINÁRIO do gitleaks é livre (MIT): mesma
-      # varredura, sem a action. Versão fixada; o tarball é conferido contra o arquivo de checksums
-      # oficial da MESMA release (íntegro em trânsito — não protege contra release comprometida).
-      - name: Varredura de segredo (gitleaks, binário oficial fixado)
-        id: gitleaks
-        env: { GITLEAKS_VERSION: "8.30.1" }
-        run: |
-          set -euo pipefail
-          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
-          tgz="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          sums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          curl -fsSLO "$base/$tgz"
-          curl -fsSLO "$base/$sums"
-          grep " ${tgz}\$" "$sums" | sha256sum -c -
-          tar -xzf "$tgz" gitleaks
-          ./gitleaks git --redact --no-banner --report-format json --report-path "$RUNNER_TEMP/gitleaks.json" .
-      - name: Achados do gitleaks como anotação
-        if: failure() && steps.gitleaks.outcome == 'failure'
-        run: python3 scripts/ci_annotate_gitleaks.py "$RUNNER_TEMP/gitleaks.json"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4 (resolvida em 2026-10-10 por git ls-remote)
         with: { node-version: "22" }
       - run: sudo apt-get update && sudo apt-get install -y libpq5 postgresql-client tesseract-ocr
       - run: pip install -r backend/requirements-dev.txt
@@ -91,6 +66,17 @@ jobs:
           bash scripts/backup.sh "${{ runner.temp }}/backups"
           DUMP=$(ls -t "${{ runner.temp }}"/backups/impacto-*.dump | head -1)
           bash scripts/restore_test.sh "$DUMP"
+          # v0.35.0 (auditoria, BCP-01): a cifra AUTENTICADA do backup externo, no mesmo ciclo — cifra, decifra, compara
+          # byte a byte; e um arquivo cifrado ALTERADO tem de ser recusado (nunca decifrar em dado errado).
+          pip install --quiet "cryptography==50.0.1"
+          export BACKUP_PASSPHRASE="ci-$(python3 -c 'import secrets;print(secrets.token_urlsafe(32))')"
+          echo "::add-mask::$BACKUP_PASSPHRASE"
+          python3 scripts/backup_crypt.py encrypt "$DUMP" "$DUMP.aead"
+          python3 scripts/backup_crypt.py decrypt "$DUMP.aead" "$DUMP.volta"
+          cmp "$DUMP" "$DUMP.volta"
+          cp "$DUMP.aead" "$DUMP.aead.x"; printf 'x' | dd of="$DUMP.aead.x" bs=1 seek=4000 conv=notrunc 2>/dev/null
+          if python3 scripts/backup_crypt.py decrypt "$DUMP.aead.x" "$DUMP.x"; then echo "FALHA: backup cifrado adulterado foi aceito"; exit 1; fi
+          echo "backup_crypt.py recusa arquivo cifrado adulterado, como deve"
           # Um restore que confere o hash de um dump que ninguém alterou prova pouco. Aqui o dump é
           # corrompido de propósito: o teste TEM de falhar. Se passar, a verificação é decorativa.
           cp "$DUMP" "$DUMP.adulterado"; printf 'x' >> "$DUMP.adulterado"
@@ -100,6 +86,38 @@ jobs:
             echo "FALHA: restore_test.sh aceitou um dump adulterado"; exit 1
           fi
           echo "restore_test.sh recusa dump adulterado, como deve"
+  # SEGREDOS (v0.35.0, auditoria SDLC-06): a varredura do gitleaks saiu do job `backend` (que só roda no pull request)
+  # para este job leve, que roda TAMBÉM no push na `main` — um segredo que entrasse por push direto passava sem varredura.
+  segredos:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+        with: { fetch-depth: 0 }   # a varredura de segredo precisa do histórico
+      # VARREDURA DE SEGREDO. Até a v0.22.0 não havia nenhuma, em lugar nenhum: nem no CI, nem em
+      # pre-commit, nem na suíte. O fail-fast de `config.py` recusa subir sem segredo configurado —
+      # isso protege o BOOT, não o histórico do git. Um segredo commitado por engano ficava lá.
+      #
+      # A ACTION `gitleaks/gitleaks-action` exige licença paga (GITLEAKS_LICENSE) em conta de
+      # organização, e falhava em TODO push — antes de qualquer outro passo. A suíte de testes
+      # nunca chegou a rodar no GitHub por causa disso. O BINÁRIO do gitleaks é livre (MIT): mesma
+      # varredura, sem a action. Versão fixada; o tarball é conferido contra o arquivo de checksums
+      # oficial da MESMA release (íntegro em trânsito — não protege contra release comprometida).
+      - name: Varredura de segredo (gitleaks, binário oficial fixado)
+        id: gitleaks
+        env: { GITLEAKS_VERSION: "8.30.1" }
+        run: |
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tgz="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          sums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          curl -fsSLO "$base/$tgz"
+          curl -fsSLO "$base/$sums"
+          grep " ${tgz}\$" "$sums" | sha256sum -c -
+          tar -xzf "$tgz" gitleaks
+          ./gitleaks git --redact --no-banner --report-format json --report-path "$RUNNER_TEMP/gitleaks.json" .
+      - name: Achados do gitleaks como anotação
+        if: failure() && steps.gitleaks.outcome == 'failure'
+        run: python3 scripts/ci_annotate_gitleaks.py "$RUNNER_TEMP/gitleaks.json"
   # AUDITORIA DE VULNERABILIDADES em job próprio: resposta em ~1 min, sem esperar a suíte (~15 min),
   # e sem ser escondida por ela. Nunca tinha rodado até a v0.24.1 — e achou vulnerabilidades reais.
   # ARMAZENAMENTO (v0.31.0): o adaptador S3 do produto contra um servidor S3 que VALIDA assinatura
@@ -108,8 +126,8 @@ jobs:
   armazenamento:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
       - run: pip install -r backend/requirements-dev.txt
       - name: Servidor S3 descartável (valida assinatura)
@@ -150,10 +168,10 @@ jobs:
   auditoria:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4 (resolvida em 2026-10-10 por git ls-remote)
         with: { node-version: "22" }
       - run: pip install pip-audit
       - name: Auditoria de vulnerabilidades (pip-audit + npm audit)
@@ -163,6 +181,10 @@ jobs:
           (cd web && npm audit --omit=dev --audit-level=high --json > "$RUNNER_TEMP/npm-audit.json"); js=$?
           python3 scripts/ci_annotate_audit.py "$RUNNER_TEMP/pip-audit.json" "$RUNNER_TEMP/npm-audit.json"
           echo "pip-audit saiu com $py; npm audit saiu com $js"
+          # v0.35.0 (auditoria, SDLC-07): também a árvore COMPLETA (com as dependências de desenvolvimento, que rodam no
+          # build e no CI). Informativo: aparece no resumo; o bloqueio continua sendo a árvore que vai para produção.
+          (cd web && npm audit --audit-level=high > "$RUNNER_TEMP/npm-audit-completo.txt" 2>&1); full=$?
+          { echo "## npm audit — árvore completa (inclui desenvolvimento): saída $full"; echo '```'; tail -n 30 "$RUNNER_TEMP/npm-audit-completo.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           [ "$py" -eq 0 ] && [ "$js" -eq 0 ]
   # Sem `needs: backend`: a imagem construir é uma prova independente de a suíte passar. Com a
   # dependência, qualquer teste quebrado escondia se o Dockerfile funcionava — e escondeu, em todo
@@ -170,11 +192,39 @@ jobs:
   docker:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
       - run: docker build -t impacto:${{ github.sha }} .
       - name: Configuração de produção recusa segredos ausentes (fail-fast)
         run: |
           ! docker run --rm -e IMPACTO_ENV=production -e DATABASE_URL=postgresql://x@y/z impacto:${{ github.sha }} python3 -c "from impacto.config import load_settings; load_settings()"
+      # v0.35.0 (auditoria, SDLC-05/08). As imagens de base vêm por TAG no Dockerfile (o digest não pôde ser resolvido no
+      # ambiente de desenvolvimento, que não alcança o Docker Hub — fixar sem conferir seria inventar). Aqui fica REGISTRADO
+      # qual digest cada build usou, e o Dependabot (docker) propõe as atualizações.
+      - name: Digest das imagens de base usadas neste build
+        run: |
+          for img in $(grep -E '^FROM ' Dockerfile | awk '{print $2}'); do
+            echo "- \`$img\` → \`$(docker image inspect --format '{{index .RepoDigests 0}}' "$img" 2>/dev/null || echo 'não registrado')\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+      # SBOM (CycloneDX) e varredura de vulnerabilidades da IMAGEM com Trivy — binário oficial com versão fixada e
+      # tarball conferido contra o arquivo de checksums da MESMA release (como o gitleaks). Nesta versão é INFORMATIVO
+      # (resumo + artefato): a primeira execução mede a linha de base; tornar bloqueante é decisão registrada no relatório.
+      - name: SBOM e varredura da imagem (Trivy, binário oficial fixado)
+        env: { TRIVY_VERSION: "0.74.0" }
+        run: |
+          set -euo pipefail
+          base="https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}"
+          tgz="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"; sums="trivy_${TRIVY_VERSION}_checksums.txt"
+          curl -fsSLO "$base/$tgz"; curl -fsSLO "$base/$sums"
+          grep " ${tgz}\$" "$sums" | sha256sum -c -
+          tar -xzf "$tgz" trivy
+          mkdir -p sbom
+          ./trivy image --quiet --format cyclonedx --output sbom/impacto-sbom.cdx.json impacto:${{ github.sha }}
+          ./trivy image --quiet --severity HIGH,CRITICAL --ignore-unfixed --format table --output sbom/vulnerabilidades.txt impacto:${{ github.sha }}
+          { echo "## Varredura da imagem (HIGH/CRITICAL com correção disponível)"; echo '```'; tail -n 60 sbom/vulnerabilidades.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: SBOM como artefato
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4 (resolvida em 2026-10-10 por git ls-remote)
+        with: { name: sbom, path: sbom, if-no-files-found: warn }
   # PILHA DO ZERO (v0.25.0). O critério de "funciona" desta versão é ponta a ponta: banco VAZIO com o
   # desenho do Supabase (administrador sem superusuário, pgcrypto em `extensions`) → imagem do
   # produto → bootstrap do impacto_app → migrações → seed de demonstração → aplicação como
@@ -188,8 +238,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4 (resolvida em 2026-10-10 por git ls-remote)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5 (resolvida em 2026-10-10 por git ls-remote)
         with: { python-version: "3.12" }
       - run: sudo apt-get update && sudo apt-get install -y libpq5
       - run: pip install -r backend/requirements-dev.txt
@@ -235,7 +285,7 @@ jobs:
           test "$antes" = "$depois"
       - name: Evidência da pilha (relatórios de jornadas e telas)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4 (resolvida em 2026-10-10 por git ls-remote)
         with: { name: pilha-do-zero, path: dist-stack/out, if-no-files-found: warn }
       - name: Registro da aplicação em caso de falha
         if: failure()

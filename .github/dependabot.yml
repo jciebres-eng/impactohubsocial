@@ -1,0 +1,23 @@
+# v0.35.0 (auditoria, SDLC-05/07): atualizações de dependências propostas como pull request, toda semana.
+# As actions estão fixadas por SHA de commit; o Dependabot atualiza o SHA e o comentário da versão juntos.
+# As imagens de base do Dockerfile estão por tag: o Dependabot propõe as novas versões (e o job `docker` do CI
+# registra o digest de cada build). Nada aqui faz merge sozinho — toda proposta passa pelo CI e por revisão.
+# Os ALERTAS de vulnerabilidade (Dependabot alerts) são ligados em Settings → Code security, pelo responsável.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+  - package-ecosystem: pip
+    directory: "/backend"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: "/"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 3

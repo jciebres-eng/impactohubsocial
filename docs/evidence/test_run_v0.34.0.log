@@ -353,3 +353,18 @@ AssertionError: '0.33.0' != '0.34.0'
 Ran 2478 tests in 2257.161s
 
 FAILED (failures=8, errors=1, skipped=31)
+
+===== REEXECUÇÃO DOS PORTÕES DE FECHAMENTO E DOS MÓDULOS CORRIGIDOS (após manifestos, commit 1395387) =====
+........................................MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+....NOTICE:  extension "pgcrypto" already exists, skipping
+..................................{"ts": "2026-10-10T12:15:34.363+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "b5ffa952dad34d50", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "b5b04065a0a7b01ddbee88b0e3d33a94", "error_id": "c7b5b304308f", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_needs_evidence", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_needs_evidence\"", "user_id": "4f137a25-24e6-481d-b3c2-87ce18bbc35f"}
+.{"ts": "2026-10-10T12:15:34.375+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "bd84b049a0a54c86", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "92ce95d7dc77a896824c50aecacca458", "error_id": "eb2b1e17cf40", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_has_no_open_questions", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_has_no_open_questions\"", "user_id": "4f137a25-24e6-481d-b3c2-87ce18bbc35f"}
+................{"ts": "2026-10-10T12:15:41.553+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "b167367c7e2a42cc", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "3f784ee6f10cb63990906b67715e97b5", "method": "POST", "route": "/v1/public/donation-campaigns/{slug}/donate", "status": 503, "ms": 10.9, "spans": {"db.tx": {"count": 2, "ms": 10.0}}, "user_id": null, "org_id": null}
+...{"ts": "2026-10-10T12:15:42.058+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "4db3267a71cb4743", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "77a0e5f5339a3378fc5c9df4734268a3", "method": "POST", "route": "/v1/public/donation-campaigns/{slug}/recurring", "status": 503, "ms": 7.1, "spans": {"db.tx": {"count": 3, "ms": 6.3}}, "user_id": "80be4787-4c8f-420d-8113-d13ee6c78b76", "org_id": "3c454b60-6d24-49e4-bcfe-0285ce8ec068"}
+.{"ts": "2026-10-10T12:15:42.532+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "ea22d365118644a1", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "c0b62bb3aa6826de113a9af5018f44a0", "method": "POST", "route": "/v1/webhooks/donations/{provider}", "status": 500, "ms": 10.4, "spans": {"db.tx": {"count": 4, "ms": 9.4}}, "user_id": null, "org_id": null}
+.{"ts": "2026-10-10T12:15:42.591+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "8422d00aca854294", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "e32245cb9583dd097bc9825b4fac9a78", "method": "POST", "route": "/v1/webhooks/donations/{provider}", "status": 500, "ms": 8.0, "spans": {"db.tx": {"count": 4, "ms": 7.3}}, "user_id": null, "org_id": null}
+..........................
+----------------------------------------------------------------------
+Ran 126 tests in 32.793s
+
+OK

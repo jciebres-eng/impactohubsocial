@@ -68,7 +68,8 @@ class DeliverableDocsTests(unittest.TestCase):
             self.assertRegex(txt, rf"(?m)^\| {n} \|", f"ADR-{n} ausente")
 
     def test_changelog_and_version(self):
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "0.33.0")
+        # v0.34.0: a versão corrente avança; o que este teste protege é a ENTRADA da 0.33.0 no CHANGELOG e a versão não regredir.
+        self.assertGreaterEqual(tuple(int(x) for x in (ROOT / "VERSION").read_text(encoding="utf-8").strip().split(".")), (0, 33, 0))
         ch = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertRegex(ch, r"(?m)^## \[0\.33\.0\]")
         self.assertIn("ADR-372", ch)

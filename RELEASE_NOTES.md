@@ -1,3 +1,27 @@
+# Notas da versão — v0.34.0 (Ecossistema financeiro: gratuito até gerar valor)
+
+**Uma regra:** a plataforma calcula e mostra o que seria dela, mas só cobra quando um gatilho auditável fecha — e nunca condiciona a
+prestação de contas a pagamento. Nenhuma regra está ativa; nenhum real entra ou sai.
+
+1. **Obrigações** — cada taxa calculada vira um registro com estados claros (calculada, devida, faturada, cobrada, recebida,
+   liquidada; estornada, vencida, em disputa, dispensada, isenta). Valor congelado; histórico que não se apaga.
+2. **Gratuito até gerar valor** — franquia de R$ 20.000 liquidados por ano (hipótese), aviso prévio de 30 dias registrado,
+   mínimo de fatura, teto de 5 % do liquidado. Sem isso, nada é devido — e a tela diz por quê.
+3. **Recurso público** — isento por padrão; só vira elegível quando alguém com alçada registra o instrumento e a justificativa.
+4. **Reserva e fundo** — são da organização beneficiária; o banco recusa ativá-los como receita da plataforma.
+5. **Nada bloqueia a prestação de contas** — fatura vencida não fecha nenhuma porta; um teste vigia isso.
+6. **Estados do dinheiro** — pendente, confirmado, liquidado, em análise, estornado (total ou parcial), compromisso e recurso
+   declarado fora da plataforma aparecem separados, com a data da última atualização válida.
+7. **Conciliação** — fila de exceções tipada (só no provedor, só no sistema, valor/tarifa divergente, estorno sem lançamento,
+   duplicidade, taxa errada, prazo), com responsável e histórico.
+8. **Painel do financiador** e doação em nome da organização.
+9. **Documentos** — arquitetura e fluxos (diagramas), razão e estados, política, matrizes de monetização e de riscos,
+   jurídico/fiscal (com as três correções do responsável), API/webhooks, cobertura dos 40 cenários, modelo de 24 meses em 3 cenários.
+
+O que falta para ser real continua fora do código: contrato com provedor, parecer, cartas legais verdes, termos, NFS-e.
+
+---
+
 # Notas da versão — v0.33.0 (Doações, vaquinha e QR Pix — módulo isolado, sem custódia)
 
 **Uma regra:** a plataforma mostra, confere e registra; quem recebe o dinheiro é o beneficiário pelo provedor de pagamento.

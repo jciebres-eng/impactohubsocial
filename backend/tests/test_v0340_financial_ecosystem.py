@@ -404,3 +404,30 @@ class EcosystemTests(unittest.TestCase):
         content = content if isinstance(content, dict) else json.loads(content)
         self.assertIn("accountability", content["never_blocks"])
         self.assertEqual(content["public_funding_default"], "exempt")
+
+    # ---------------------------------------------------------------- chargeback e meta atingida/ultrapassada
+    def test_12_chargeback_reverses_once_and_voids_the_receipt(self):
+        did, charge = _donate_and_confirm(self.anon, self.slug, 12_000)
+        r = _signed(self.anon, {"event_id": "evt-" + uuid.uuid4().hex[:8], "type": "PAYMENT_CHARGEBACK_REQUESTED", "charge_id": charge})
+        self.assertEqual(r.json["effect"], "chargeback", r.body)
+        st = self.anon.get(f"/v1/public/donations/{did}").json
+        self.assertEqual(st["status"], "chargeback")
+        with db_system() as c:
+            self.assertEqual(c.scalar("SELECT status FROM donation_receipts WHERE donation_id = $1", did), "voided")
+            self.assertEqual(c.scalar("SELECT count(*) FROM donation_ledger_entries WHERE donation_id = $1 AND account = 'chargeback'", did), 1)
+            self.assertEqual(c.scalar("SELECT state FROM remuneration_obligations WHERE source_kind='donation' AND source_id = $1", did), "reversed")
+        again = _signed(self.anon, {"event_id": "evt-" + uuid.uuid4().hex[:8], "type": "payment.refunded", "charge_id": charge})
+        self.assertEqual(again.json["effect"], "already_reversed")
+
+    def test_13_campaign_reaching_and_exceeding_the_target_keeps_accepting_and_shows_remaining(self):
+        camp, slug = _campaign(self.osc, self.reviewer, target_cents=20_000)
+        _donate_and_confirm(self.anon, slug, 15_000)
+        pub = self.anon.get(f"/v1/public/donation-campaigns/{slug}").json
+        self.assertEqual(pub["campaign"]["status"], "published")
+        _donate_and_confirm(self.anon, slug, 10_000)   # ultrapassa
+        pub = self.anon.get(f"/v1/public/donation-campaigns/{slug}").json
+        self.assertEqual(pub["campaign"]["status"], "target_reached")
+        self.assertEqual(pub["totals"]["net_after_reversals_cents"], 25_000)
+        d = self.anon.post(f"/v1/public/donation-campaigns/{slug}/donate", {"amount_cents": 500, "method": "pix"})
+        self.assertEqual(d.status, 201, "meta atingida continua aceitando: a contingência declarada diz o que acontece com o excedente")
+        self.assertIn("contingency_policy", pub["campaign"])

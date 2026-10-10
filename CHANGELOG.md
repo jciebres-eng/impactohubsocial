@@ -1,6 +1,38 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.34.0] — 2026-10-10
+
+### Ecossistema financeiro: gratuito até gerar valor, obrigações de remuneração, recurso público, conciliação com exceções (ADR-377 a ADR-383)
+
+- **Obrigações de remuneração** (`remuneration_obligations`): uma por fato × regra, valor congelado, cadeia calculada → devida →
+  faturada → cobrada → recebida → liquidada (desvios: estornada, vencida, em disputa, dispensada, isenta), histórico só-inserção;
+  liquidar/decidir/dispensar/autorizar exigem `finance.approve`. Receita prevista × devida × recebida × liquidada nunca somadas.
+- **Gratuito até gerar valor** (`monetization_policy_versions` v1, hipótese): franquia de R$ 20.000 LIQUIDADOS em 12 meses, aviso
+  prévio de 30 dias registrado (`remuneration_notices`), mínimo de fatura R$ 20, teto de 5 % do liquidado; `evaluate` só torna
+  devida com regra ativa + franquia + aviso + teto, e registra o motivo de cada obrigação que não virou devida.
+- **Recurso público** (`funding_source`, `public_instrument_ref`): obrigação nasce isenta; elegível só com instrumento e
+  autorização registrada por `finance.approve` (correção do responsável: depende do instrumento, não é proibição universal).
+- **Reserva institucional** (1,5 %) e fundo (4 %): destinação contábil da organização; motor `success_fee`, que o banco recusa
+  ativar — nunca receita da plataforma. Taxa de serviço (1 % e 3,5 % institucional) reclassificada para `enterprise`
+  (fatura à parte), INATIVA.
+- **Estado comercial separado da prestação de contas**: `never_blocks`; vencida não bloqueia nada; teste varre as rotas.
+- **Liquidado ≠ confirmado** (`settled_at`), **estorno parcial** (`refunded_cents`, `partially_refunded`), **compromissos de
+  doação** (`donation_pledges`) e **recursos declarados fora da plataforma** (`external_resources`) — nunca na barra nem no razão;
+  **painel do financiador** (`/v1/org/contributions`, doação em nome da organização).
+- **Conciliação com fila de exceções** (`reconciliation_exceptions`, 9 tipos, prioridade, responsável, histórico; índice único por
+  fato aberto; snapshot do provedor; sandbox deriva dos eventos assinados). Webhook recebido ≠ conciliado.
+- **Totais por estado** na página pública e na gestão (pendente, confirmado, liquidado, em análise, estornado, compromissos,
+  declarado fora), política de contagem e data da última atualização financeira válida.
+- Telas: `/remuneracao`, `/contribuicoes`, `/admin/remuneracao`, `/admin/conciliacao`; gestão e página pública ampliadas.
+- Documentos em `docs/finance/`: arquitetura (diagramas SVG/PNG), fluxos, razão e estados, política, matriz de monetização,
+  matriz de riscos, jurídico/fiscal com as três correções do responsável, API/webhooks, cobertura dos 40 cenários, inventário,
+  checklist de publicação/reversão, modelo de 24 meses em 3 cenários com sensibilidade (planilha + gráficos).
+- Migração `0073_v0340_financial_ecosystem.sql`; +24 operações (962 → 986); `test_v0340_financial_ecosystem` (13),
+  `test_v0340_release_docs`.
+- **Não feito, de propósito**: provedor real, split, recorrência cobrada, cobrança ativa, NFS-e, rotina agendada de conciliação
+  (à mão nesta versão), assinaturas (ADR-341), marketplace com take rate (recusado pelo responsável).
+
 ## [0.33.0] — 2026-10-10
 
 ### Doações, vaquinha e QR Pix como módulo isolado — sem custódia, sem provedor real, taxas inativas (ADR-372 a ADR-376)

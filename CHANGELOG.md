@@ -1,6 +1,36 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.33.0] — 2026-10-10
+
+### Doações, vaquinha e QR Pix como módulo isolado — sem custódia, sem provedor real, taxas inativas (ADR-372 a ADR-376)
+
+- **Campanhas de doação** (`campaigns.kind = 'donation'`): meta, período, finalidade, "se a meta não for atingida" e política de
+  estorno; fluxo rascunho → revisão (quatro olhos: quem criou não aprova) → aprovada → publicada; publicar exige termos
+  aceitos e beneficiário verificado (`org_kyb_verifications`). O `PATCH status=published` legado responde 409.
+- **Página pública `/campanha/:slug`** com barra de arrecadação só de pagamentos confirmados, formulário Pix com "cobrir
+  custos" desmarcado, preço total e aviso "taxa = hipótese INATIVA" antes de pagar, QR versionado que aponta para a
+  própria página (nunca para chave Pix), atualizações, gastos declarados e "o que esta campanha NÃO é".
+- **Doação** (`donations`): idempotente, e-mail cifrado, anônimo nunca exposto; confirmação **só** por evento assinado do
+  provedor no `POST /v1/webhooks/donations/{provider}` (idempotente por `provider+event_id`, valor conferido, reversão
+  uma vez só); comprovante `IMP-DOA-…` com SHA-256, anulado em estorno — e que diz não ser recibo dedutível.
+- **Razão em partidas dobradas** (`donation_ledger_entries`, só inserção, soma zero por transação): totais são "saldo
+  contábil estimado — não é dinheiro guardado". **Nenhuma coluna de saldo.** `is_simulated` derivado por gatilho.
+- **Provedor**: só `SandboxProvider` (`PIX-SANDBOX-NAO-PAGAVEL|…`). Matriz Asaas × Mercado Pago a partir das docs oficiais
+  em `docs/donations/DONATIONS_PROVIDER_MATRIX.md`. Travas `LIVE_PAYMENT_PROVIDER_ENABLED`, `SPLIT_ENABLED`,
+  `RECURRING_DONATIONS_ENABLED`, `RISK_HOLD_ENABLED` recusam `true` na configuração.
+- **Taxas**: `donation.platform_fee` (1 %) e `donation.beneficiary_fund` (≤ 4 %) no catálogo, INATIVAS, com cartões
+  jurídicos amarelos; versão congelada por doação; devido = R$ 0,00.
+- **Risco (PLD proporcional)**: regras `donation-risk-2026-10.1` (`config/donation_risk_rules.json`), casos com decisão
+  justificada; `payout_hold` não existe. Administração pode tirar do ar uma campanha publicada com justificativa.
+- **Telas**: `/doacao/:id`, `/minhas-doacoes`, gestão em `/campanha-gestao`, `/admin/doacoes`, `/admin/doacoes/risco`.
+- **Documentos** em `docs/donations/`: BASELINE_REPORT, IMPLEMENTATION_REPORT, SECURITY_REVIEW (modelo de ameaças),
+  LEGAL_AND_PROVIDER_CHECKLIST, RUNBOOK, 24_MONTH_DONATIONS_NOTE (sem receita projetada).
+- Migração `0072_v0330_donations.sql` (11 tabelas, 5 funções, GRANTs mínimos); 22 operações novas (940 → 962);
+  testes `test_v0330_donations` (11) e `test_v0330_release_docs`.
+- **Não feito, de propósito**: provedor real, split, recorrência cobrada, cobrança de taxa, recibo fiscal, e-mail ao
+  doador — cada um com o bloqueio nomeado em `LEGAL_AND_PROVIDER_CHECKLIST.md`.
+
 ## [0.32.0] — 2026-10-09
 
 ### Correções da auditoria inicial: produção limpa, backup que restaura, worker com menor privilégio, CI verde (ADR-368 a ADR-371)

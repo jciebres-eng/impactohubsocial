@@ -1,10 +1,10 @@
 {
- "gerado_em": "2026-10-09T22:41:27.266726+00:00",
+ "gerado_em": "2026-10-10T01:23:13.917300+00:00",
  "personas": {
   "osc": {
    "email": "osc@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 49,
+   "telas_do_menu": 50,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -33,6 +33,7 @@
     "/pagamentos",
     "/cotas",
     "/campanha-gestao",
+    "/minhas-doacoes",
     "/documentos",
     "/documentos/montagens",
     "/documentos/modelos",
@@ -241,7 +242,7 @@
   "admin": {
    "email": "admin@demo.impacto.local",
    "tem_menu": true,
-   "telas_do_menu": 55,
+   "telas_do_menu": 57,
    "marca_renderizada": true,
    "telas_ok": [
     "/",
@@ -260,6 +261,8 @@
     "/admin/medidas",
     "/admin/solucoes",
     "/solucoes",
+    "/admin/doacoes",
+    "/admin/doacoes/risco",
     "/admin/contribuicao",
     "/dados-territoriais",
     "/admin/linha-do-tempo",
@@ -570,5 +573,5 @@
    "erros_js": {}
   }
  },
- "total_telas_de_menu_visitadas": 337
+ "total_telas_de_menu_visitadas": 340
 }

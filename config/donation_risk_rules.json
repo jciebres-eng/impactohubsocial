@@ -1,0 +1,33 @@
+{
+  "version": "donation-risk-2026-10.1",
+  "note": "Limiares de triagem do módulo de doações (v0.33.0). Nenhum é obrigação legal. A fonte executável é impacto/services/donations.py::_risk_screen; este arquivo espelha o código e test_v0330_donations confere a versão.",
+  "rules": [
+    {
+      "code": "large_single_donation",
+      "threshold_cents": 1000000,
+      "level": "high",
+      "action": "review",
+      "explanation": "Doação única igual ou acima de R$ 10.000,00: a confirmação segue pelo provedor; o caso vai para revisão humana."
+    },
+    {
+      "code": "burst_attempts",
+      "threshold_count": 20,
+      "window_minutes": 10,
+      "level": "medium",
+      "action": "review",
+      "explanation": "20 ou mais doações iniciadas na mesma campanha em 10 minutos: possível automação ou teste de meios de pagamento."
+    },
+    {
+      "code": "new_campaign_large_inflow",
+      "campaign_age_days_less_than": 1,
+      "threshold_cents": 200000,
+      "level": "medium",
+      "action": "review",
+      "explanation": "Campanha publicada há menos de 1 dia recebendo doação igual ou acima de R$ 2.000,00."
+    }
+  ],
+  "actions_not_available": [
+    "payout_hold"
+  ],
+  "why": "A plataforma não tem custódia nem repasse; reter valores é decisão e capacidade do provedor de pagamento, mediante contrato."
+}

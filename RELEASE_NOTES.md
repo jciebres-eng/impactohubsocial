@@ -1,3 +1,25 @@
+# Notas da versão — v0.33.0 (Doações, vaquinha e QR Pix — módulo isolado, sem custódia)
+
+**Uma regra:** a plataforma mostra, confere e registra; quem recebe o dinheiro é o beneficiário pelo provedor de pagamento.
+Nesta versão o provedor é de mentira (sandbox): nenhum real entra ou sai.
+
+1. **Campanha de doação** — a organização cria, preenche finalidade, "se a meta não for atingida" e política de estorno,
+   envia para revisão; outra pessoa (da plataforma) aprova e registra o beneficiário como verificado; só então publica.
+2. **Página pública** — `/campanha/<slug>` mostra quanto já entrou (só o que o provedor confirmou), o preço total antes de
+   pagar (com a taxa marcada como hipótese INATIVA) e um QR que leva à própria página, nunca a uma chave Pix.
+3. **Doação** — gera um código Pix de teste; a confirmação chega por webhook assinado; comprovante numerado que avisa não
+   ser recibo para dedução; estorno anula o comprovante e lança a reversão no razão.
+4. **Razão e prestação de contas** — partidas dobradas, só inserção; totais rotulados "saldo contábil estimado".
+   Gastos declarados e atualizações aparecem na página pública.
+5. **Risco** — três regras proporcionais abrem casos para revisão humana; ninguém retém dinheiro, porque não há dinheiro
+   na plataforma. Administração pode tirar uma campanha do ar com justificativa.
+6. **O que falta para ser real** (não é código): contrato com provedor, parecer sobre taxas e comprovante, LGPD do
+   doador, KYB do beneficiário. Lista em `docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md`.
+
+Nada muda na operação do Railway: nenhuma variável nova é obrigatória; as travas de dinheiro real ficam em `false`.
+
+---
+
 # Notas da versão — v0.32.0 (Produção limpa, backup que restaura, worker com menor privilégio)
 
 **Uma regra:** o que a auditoria inicial encontrou foi resolvido com prova — e o que depende de um clique seu está listado.

@@ -224,7 +224,16 @@ class PledgeIn(In):
 
 
 class CampaignIn(In):
-    project_id: Uuid
+    project_id: Uuid | None = None   # v0.33.0: campanha de organização/fundo não tem projeto
+    kind: Literal["project_crowdfunding", "emergency", "institutional_fund", "recurring", "organization"] = "project_crowdfunding"
+    target_cents: Annotated[int | None, Field(gt=0)] = None
+    starts_on: date | None = None
+    ends_on: date | None = None
+    purpose: Annotated[str | None, Field(max_length=2000)] = None
+    contingency_policy: Annotated[str | None, Field(max_length=2000)] = None
+    refund_policy: Annotated[str | None, Field(max_length=2000)] = None
+    min_donation_cents: Annotated[int, Field(ge=100)] = 500
+    allow_recurring: bool = False
     slug: Annotated[str, Field(pattern=r"^[a-z0-9-]{4,80}$")]
     title: Annotated[str, Field(min_length=4, max_length=200)]
     summary: Annotated[str, Field(min_length=20, max_length=600)]
@@ -240,6 +249,60 @@ class CampaignPatch(In):
     cover_document_id: Uuid | None = None
     show_backers: bool | None = None
     status: Literal["draft", "published", "closed"] | None = None
+    target_cents: Annotated[int | None, Field(gt=0)] = None
+    ends_on: date | None = None
+    purpose: Annotated[str | None, Field(max_length=2000)] = None
+    contingency_policy: Annotated[str | None, Field(max_length=2000)] = None
+    refund_policy: Annotated[str | None, Field(max_length=2000)] = None
+    min_donation_cents: Annotated[int | None, Field(ge=100)] = None
+
+
+# ---------------------------------------------------------------- doações (v0.33.0)
+class CampaignReviewIn(In):
+    approve: bool
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class CampaignSuspendIn(In):
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+    reinstate: bool = False
+
+
+class DonationStartIn(In):
+    amount_cents: Annotated[int, Field(ge=100, le=100_000_000)]
+    method: Literal["pix", "card"] = "pix"
+    donor_display: Annotated[str | None, Field(max_length=120)] = None
+    donor_email: Annotated[str | None, Field(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")] = None
+    public_anonymous: bool = False
+    cover_costs: bool = False          # NUNCA pré-marcada no front
+    idempotency_key: Annotated[str | None, Field(max_length=80, pattern=r"^[A-Za-z0-9_-]+$")] = None
+
+
+class RiskDecisionIn(In):
+    action: Literal["allow", "request_information", "reject", "report_to_provider"]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class CampaignExpenseIn(In):
+    description: Annotated[str, Field(min_length=3, max_length=500)]
+    budget_line: Annotated[str | None, Field(max_length=120)] = None
+    amount_cents: Annotated[int, Field(gt=0)]
+    spent_on: date
+    document_id: Uuid | None = None
+
+
+class CampaignUpdateIn(In):
+    title: Annotated[str, Field(min_length=3, max_length=200)]
+    body: Annotated[str, Field(min_length=10, max_length=8000)]
+    evidence_ids: list[Uuid] = []
+    is_public: bool = True
+
+
+class BeneficiaryVerificationIn(In):
+    status: Literal["documents_requested", "under_review", "verified", "rejected"]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+    account_holder_matches: bool | None = None
+    evidence_document_ids: list[Uuid] = []
 
 
 # ---------------------------------------------------------------- honorários e serviços

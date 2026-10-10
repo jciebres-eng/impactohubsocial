@@ -1,75 +1,85 @@
-# Auditoria final de execução — IMPACTO v0.32.0
+# Auditoria final de execução — IMPACTO v0.33.0
 
-**Data:** 09/10/2026 · **Ramo:** `correcoes-auditoria` (PR #5 para a `main`) · **Ponto de partida:** `906d383` (main: v0.30.1 +
-backup/monitor + `CLAUDE.md`) + `infra/v0.31.0` + `auditoria-inicial` · **Versão:** 0.32.0
+**Data:** 10/10/2026 · **Ramo:** `doacoes-v0330` · **Ponto de partida:** `24793bb` (`correcoes-auditoria`, v0.32.0) ·
+**Versão:** 0.33.0
 
 Estados: **PASS** (feito e provado por execução nesta rodada) · **PARTIAL** (feito; o que falta está escrito) ·
-**BLOCKED_EXTERNAL** (depende de painel, conta ou decisão do responsável; nada simulado) · **FAIL** (falhou e não foi
-corrigido — não há nenhum; os que apareceram estão em §7). Nada aqui afirma "100% impossível de invadir".
+**BLOCKED_EXTERNAL** (depende de contrato, parecer, painel ou decisão do responsável; nada simulado) · **FAIL** (falhou e não
+foi corrigido — não há nenhum; os que apareceram estão em §7). Nada aqui afirma "100% impossível de invadir".
 
 ## 1. O pedido → o que virou software e prova
 
-Pedido do responsável (09/10, depois da auditoria inicial): desativar as 15 contas de demonstração da produção; demo aberto a
-quem tiver o link; código privado; trazer a branch `infra/v0.31.0` e "resolver tudo".
+Pedido (pacote MASTER FULL, 09/10): doações/vaquinha/QR Pix/recorrência/carteira visual/PLD-KYC/comprovantes/prestação de
+contas como módulo isolado, sandbox apenas, taxas como hipótese inativa, sem fintech dentro do SaaS.
 
-| Item | Estado | Evidência (arquivo · teste · execução) | Resultado | Risco | Ação restante |
+| Item | Estado | Evidência (arquivo · teste) | Resultado | Risco | Ação restante |
 |---|---|---|---|---|---|
-| Contas de demonstração desativadas na produção | PASS | `scripts/demo_accounts.py` · `test_v0320_demo_accounts` · execução 37996712177 | 15 contas `disabled`, sessões encerradas, 5 organizações `suspended`, auditoria | nenhum (reversível) | — |
-| Conteúdo público fictício fora do ar na produção | PASS | execuções 37997211737 e 37997481695 | 11 itens (1 projeto, 7 soluções, 1 material, 2 editais); 0 em 10 tipos de conteúdo depois | conteúdo de nível "rede" (não público) continua visível a membros logados — o cadastro em produção está bloqueado pela trava jurídica | — |
-| Restauração do backup cifrado do R2 | PASS | job `ensaio-restauracao` · execução 37997867650 | arquivo de 20:43 UTC conferido, decifrado, restaurado: 341 tabelas, verificadores íntegros, 4,1 s | — | — |
-| Ensaio mensal de restauração | PASS | `backup-supabase.yml` (cron do dia 1º) · `test_v0320_release_docs.BackupDrillTests` | agendado | depende do agendamento do GitHub | conferir em 01/11 |
-| Instruções de restauração corrigidas | PASS | cabeçalho do `backup-supabase.yml` · `BackupDrillTests` | apontam para o script que funciona | — | — |
-| Worker com menor privilégio | PARTIAL | `backend/start_worker.sh` (ensaiado na v0.31.0: 18 tarefas OK) · `CLAUDE.md` | código na imagem | até a troca, o worker segue com a conexão administrativa | trocar o Start Command no Railway |
-| Aviso de demonstração | PASS | `web/src/ui/demobanner.tsx` · `DemoBannerTests` · capturas claro/escuro em `development` | faixa em toda tela, só em `development` | — | conferir no demo depois do merge |
-| CI de volta ao verde | PASS | teste de RLS atualizado; matriz regenerada; manifesto | ver §6 | — | — |
-| Branch `infra/v0.31.0` trazida | PASS | merge `dc03db1` (só o CHANGELOG conflitou; resolvido mantendo as duas entradas) | — | — | — |
-| Repositório privado | BLOCKED_EXTERNAL | o ambiente das sessões recusa alterar configurações do repositório (HTTP 403) | rotinas já ajustadas à cota | minutos de Actions | clique do responsável |
-| Rotinas dentro da cota do Actions | PASS | `monitor.yml` horário; `backend`/`pilha-do-zero` só fora de push · `PrivateRepoBudgetTests` | — | plano da conta não verificado | — |
-| Proteção 0071 na produção | BLOCKED_EXTERNAL | diagnóstico: 1 migração pendente | depende do "Deploy latest commit" | 3 alertas do Security Advisor seguem abertos até lá | publicar a produção |
+| Campanha de doação com revisão a quatro olhos e beneficiário verificado | PASS | `0072` `campaign_state_guard` · `test_v0330_donations.test_01` | criador não aprova; sem verificação não publica; `PATCH published` → 409 | — | processo de KYB (checklist 9) |
+| Página pública com QR canônico versionado | PASS | `donation_routes` · `test_02` · captura `01_campanha_publica.png` | QR aponta para `/campanha/{slug}?v={n}`; renovar invalida o anterior | — | — |
+| Doação confirmada só por webhook assinado, idempotente, valor conferido | PASS | `apply_provider_event` · `test_03`, `test_04` | assinatura inválida → 202 sem efeito; duplicado → `duplicate`; valor diferente → `under_review` | replay sem carimbo de tempo no sandbox | adaptador real valida `ts` |
+| Razão em partidas dobradas, só inserção | PASS | `donation_ledger_balanced` · `test_03`, `test_06`, `test_07` | soma zero por transação; estorno = lançamento novo; `already_reversed` na repetição | — | — |
+| Sem custódia: nenhuma coluna de saldo; `is_simulated` não gravável | PASS | `test_10` | 0 colunas `balance`; gatilho deriva do provedor | — | — |
+| Taxas inativas, congeladas por doação, devido R$ 0,00 | PASS | `platform_fee_due` · `test_03`, `test_10` · `MONETIZATION.md` | 13 regras no catálogo, 0 ativas | — | parecer (checklist 3) |
+| Doador anônimo nunca exposto; isolamento entre organizações | PASS | `test_05` | nome ausente em público e na gestão; outra organização → 404 | — | — |
+| Comprovante numerado com SHA-256, anulado em estorno, não dedutível | PASS | `issue_receipt` · `test_03`, `test_06` · captura `03_doacao_comprovante.png` | `IMP-DOA-…` | — | parecer contábil (checklist 6) |
+| Prestação de contas (gastos, atualizações) sem condição financeira | PASS | `test_08` · captura `04_gestao_prestacao_contas.png` | entram sempre | — | validação documental |
+| Travas de dinheiro real recusam subir | PASS | `config.validate()` · `test_09` · `.env.example` · `test_v0330_release_docs` | 4 flags `true` → erro de configuração | — | ADR nova quando houver provedor |
+| Risco proporcional, decisão humana, sem `payout_hold` | PASS | `_risk_screen` · `test_04` · `config/donation_risk_rules.json` · `RiskRulesFileTests` | JSON = código | limiares não são obrigação legal | revisar com jurídico (checklist 8) |
+| Suspensão administrativa de campanha publicada | PASS | `suspend` · `test_11` | `under_review` → página 404; organização não republica | — | — |
+| Recorrência | PARTIAL | tabela + cancelamento pelo doador | cobrança desligada | — | instrumento do provedor + consentimento |
+| Provedor real (≥ 2 avaliados) | BLOCKED_EXTERNAL | `docs/donations/DONATIONS_PROVIDER_MATRIX.md` (fontes datadas) | Asaas e Mercado Pago comparados | — | contrato |
+| Modelo de 24 meses | PASS (sem receita) | `docs/donations/24_MONTH_DONATIONS_NOTE.md` | só aritmética; nenhuma projeção | — | 3 meses de dados reais |
 
 ## 2. Motores
 
-50 motores, inalterados. `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0.
+Inalterados (50; VERDE 37 · AMARELO 13 · VERMELHO 0).
 
 ## 3. Perfis, rotas e jornadas
 
-Inalterados: 940 operações, 227 telas. A faixa de demonstração não é tela nova.
+962 operações (+22), 231 telas (+4: `/doacao/:id`, `/minhas-doacoes`, `/admin/doacoes`, `/admin/doacoes/risco`); 60 rotas
+públicas (+6, todas na lista revisada de `test_architecture.py` com a razão); 246 rotas de plataforma (+8, com permissão
+nomeada: leitura `compliance.read`, escrita `compliance.write`/`finance.write`). Jornada "Captação: cotas → apoios →
+campanha pública" passa pela revisão a quatro olhos (`demo_journeys.py`).
 
 ## 4. Banco de dados
 
-71 migrações (nenhuma nova nesta versão). Escritas feitas na produção, todas autorizadas e registradas na trilha de auditoria:
-`users.status`, `sessions.revoked_at`, `organizations.status` e a visibilidade de 11 itens das organizações fictícias.
+Migração `0072_v0330_donations.sql`: 11 tabelas (`org_kyb_verifications`, `fee_rule_versions`, `provider_fee_schedules`,
+`donations`, `recurring_donation_agreements`, `payment_provider_events`, `donation_ledger_entries`, `donation_risk_cases`,
+`donation_receipts`, `campaign_updates`, `campaign_expenses`), 5 funções/gatilhos, RLS em todas, GRANTs mínimos ao
+`impacto_app`, 2 regras no catálogo (inativas), 2 categorias de auditoria (`donation`, `beneficiary`). Aplicada em banco novo
+(72 migrações) e pelo caminho de atualização (`test_v0150_upgrade`). Só acrescenta; reversível por código.
 
 ## 5. Segurança e LGPD
 
-| Item | Estado | Evidência | Resultado | Risco | Ação |
-|---|---|---|---|---|---|
-| Nenhum segredo no repositório | PASS | `secrets_scan.py`; gitleaks no CI | 0 achados | — | — |
-| Backup e ensaio não publicam artefato | PASS | `BackupDrillTests`, `test_v0310_release_docs.BackupRestoreTests` | — | — | — |
-| Desativação não apaga e não toca conta real | PASS | `test_v0320_demo_accounts` | conta real de administração segue entrando | — | — |
-| Chaves do backup expostas num chat | BLOCKED_EXTERNAL | informação do responsável | — | quem tiver as chaves lê/apaga backups | trocar o token |
+Modelo de ameaças com 19 linhas em `docs/donations/SECURITY_REVIEW.md` (15 🟢 com teste, 3 🟡, 1 🔴 dependente do adaptador
+real). Contexto de sistema no módulo revisado linha a linha (público, webhook, pessoa, equipe); rotas da organização com RLS.
+Dados pessoais: e-mail cifrado, anônimo protegido, bruto do webhook redigido. `secrets_scan.py` limpo.
 
 ## 6. CI
 
-| Job | Estado | Evidência |
-|---|---|---|
-| CI do PR #5 (suíte completa, pilha do zero, imagem, auditoria, armazenamento) | PASS | execução 38002549412 no commit candidato `8aec7d1`: os cinco verdes |
+O CI completo roda no pull request (repositório privado, ADR-371). Resultado da execução do PR deste ramo: a registrar no
+PR; local: §7 e `docs/evidence/test_run_v0.33.0.log`.
 
 ## 7. Regressão — o que esta rodada encontrou e o que foi feito
 
 | Falha | Causa real | Correção |
 |---|---|---|
-| `test_every_table_but_the_declared_exception_has_rls_enabled` (main) | a 0071 ligou RLS na tabela que o teste listava como exceção | exceção declarada passa a ser nenhuma, com o motivo escrito |
-| `test_regenerating_each_matrix_reproduces_what_is_committed` (main) | teste novo da v0.30.1 sem regenerar a matriz de integrações | `make_integration_matrix.py` |
-| `test_every_tracked_file_is_either_in_the_manifest_or_excluded_with_a_reason` (main) | arquivos novos desde a análise econômica fora de qualquer manifesto | manifesto da v0.32.0 |
-| `test_disable_is_complete_reversible_and_never_touches_real_accounts` (1ª versão: 16 ≠ 15) | o seed atual cria 16 contas de demonstração (as 15 personas + "coletivo"); a produção foi semeada antes | o teste usa a contagem do banco |
-| `test_disable_is_complete_reversible_and_never_touches_real_accounts` (404) | eu usei uma rota inexistente para "quem sou eu" | `/v1/me` |
-| `demo_accounts.py` contava 0 soluções públicas | eu usei `visibility = 'public'`; soluções usam `'published'` | tabela de conteúdo com os valores reais de cada tipo, conferidos no esquema; a recontagem achou 7 soluções, 1 material e 2 editais |
-| `CHANGELOG.md` em conflito no merge | as duas branches acrescentaram uma entrada no topo | as duas mantidas, em ordem |
-| `contas-demo.yml` com disparo respondendo 404 | o GitHub só dispara workflow que já existe na `main` | modos acrescentados ao workflow `supabase`, que existe na `main` |
-| `gh api PATCH visibility` respondendo 403 | o ambiente das sessões não altera configurações do repositório | clique do responsável; rotinas ajustadas antes |
-| `test_regenerating_the_map_reproduces_what_is_committed` (CI do PR #5) | a faixa do demo chama `/v1/meta/config` a partir de um arquivo novo do front; o mapa tela × API não foi regenerado | `make_screen_backend_map.py` |
-| `pkill` derrubou o próprio terminal | o padrão casava com o comando em execução | servidor de teste parado e commit refeito separadamente |
+| `test_06_refund_is_a_new_reversing_entry_and_voids_the_receipt` (1ª versão) | o serviço checava o estado antes de olhar se já havia reversão no razão; a segunda reversão voltava `ignored` | ordem invertida em `apply_provider_event`: reversão já lançada → `already_reversed` (eu tinha afrouxado a asserção primeiro — desfeito; a regra é não enfraquecer teste) |
+| `test_handlers_declare_auth` | 6 rotas públicas novas fora da lista revisada | listadas com a razão de segurança de cada uma |
+| `test_system_context_only_in_allowed_modules` | `donation_routes.py` usa contexto de sistema | permitido com a razão escrita (público, webhook, pessoa, equipe; organização usa RLS) |
+| `test_no_read_route_requires_a_write_permission` ×2 · `test_the_write_routes_require_a_write_permission` | GETs com `compliance.write`; `reconcile` (escreve) com `finance.read` | `compliance.read` nas leituras; `finance.write` na conciliação |
+| `test_the_platform_does_not_store_individual_beneficiaries…` | tabela chamada `beneficiary_verifications` casava com o guarda de "beneficiário individual" — mas é KYB de organização | tabela renomeada `org_kyb_verifications`; o guarda continua intacto |
+| `test_every_action_prefix_in_the_codebase_has_a_category` | prefixos `donation.` e `beneficiary.` sem categoria | categorias na própria 0072 (FINANCE, ORGS) |
+| `test_09b_the_v0170_layer_arrived_with_its_seeds_and_its_refusals` · `test_the_table_in_the_document_has_one_line_per_rule` | 13 regras ≠ 11; `MONETIZATION.md` sem as duas linhas | contagem com a razão; duas linhas na tabela |
+| `test_public_campaign_shows_remaining_quotas` (API e E2E) · jornada "Captação" | os testes antigos publicavam pelo atalho `PATCH status=published`, fechado pela ADR-374 | passam pela revisão a quatro olhos (`_publish_campaign`), com a razão; a página pública mantém o painel de cotas do projeto |
+| `test_every_route_in_the_static_menus_has_an_icon` | 3 rotas de menu sem ícone | ícones oficiais mapeados |
+| contagens fixadas (962 operações, 246 plataforma, 102 permissões, 60 públicas, 968 no mapa, 231 telas) · `DEMO.md`, `TESTER_GUIDE.md`, `TROUBLESHOOTING.md` | números mudaram com o módulo | atualizados com a razão ao lado (ADR-340) |
+| `test_regenerating_each_matrix_reproduces_what_is_committed` · matriz de jornadas · manifesto · notas da versão | artefatos gerados antes das mudanças finais | regenerados no fechamento; manifesto da v0.33.0 |
+| campanha criada pela interface com `kind: "donation"` | eu inventei um valor que o esquema não aceita | tipos reais (`project_crowdfunding`, `emergency`, `institutional_fund`, `recurring`, `organization`) no formulário; lista de campanhas sem `JOIN` obrigatório em projeto |
+| CI do PR #6: matriz de jornadas (261 ≠ 267 passos) | o relatório das jornadas depende da ordem da suíte: `test_v0120_knowledge` semeia o curso em rascunho antes das jornadas e a jornada "Suporte" pula 6 passos — era assim na v0.32.0 (4 passos); eu havia regenerado a matriz de uma rodada isolada | matriz regenerada na ordem da suíte (261 passos, 0 falhas), igual ao CI; o teste passou a dizer qual jornada divergiu |
+| CI do PR #6: `pilha-do-zero` — `Select` sem nome acessível em `/admin/doacoes` | filtro de situação sem `aria-label` | `aria-label="Filtrar por situação"` |
+| CI do PR #6: manifesto cita bundle antigo | bundle reconstruído depois do manifesto | manifesto regerado no fechamento |
+| captura de tela: `POST …/donate` 403 | origem do navegador ≠ `PUBLIC_BASE_URL` do servidor de teste (proteção de origem) | base pública apontada para o servidor de teste só na captura; nada mudou no produto |
 
 ## 8. Build e pacote
 
@@ -78,16 +88,14 @@ Inalterados: 940 operações, 227 telas. A faixa de demonstração não é tela 
 | `ruff check impacto tests` | 0 avisos |
 | `tsc --noEmit` (tipos oficiais do React, removidos após a checagem) | 0 erros |
 | `node build.mjs` | ok |
-| `IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip` | `make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; SHA-256 no `.sha256` |
+| `IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip` | `make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; SHA-256 no `.sha256` |
 
 ## 9. BLOCKED_EXTERNAL
 
-Publicar a produção (aplica a 0071 e o worker novo); trocar o Start Command do `pleasing-trust`; trocar o token do backup;
-tornar o repositório privado; monitor externo; senha de `impacto_app` no GitHub; domínio; e-mail autenticado; revisão jurídica e
-encarregado de dados; tags v0.31.0/v0.32.0 no GitHub.
+Contrato com provedor; modelo de titularidade; parecer (taxas, comprovante, termos, LGPD); processo de KYB; merge e
+publicação (demo → produção); pendências da v0.32.0; tag v0.33.0.
 
 ## 10. Veredito desta auditoria
 
-Nenhum FAIL em aberto. Os dois críticos internos da auditoria inicial (contas de demonstração na produção; backup sem
-restauração provada) estão resolvidos com prova na própria produção. O que falta é clique ou decisão do responsável.
-Detalhado em `FINAL_EXECUTION_REPORT.md` §27.
+Nenhum FAIL em aberto. O módulo faz o que o pacote pediu dentro do que é permitido sem contrato e sem parecer — e recusa,
+por código, o que não é. Detalhado em `FINAL_EXECUTION_REPORT.md` §27.

@@ -27,8 +27,10 @@ fundamenta.
 | 8 | `data.territorial_intelligence` | `data_intelligence` | ⛔ `refused` |
 | 3 | `contract.platform_service_fee` | `enterprise` | ⚠️ `review_required` (v0.26.0) |
 | 7 | `ai.credits_prepaid` | `proponent_premium` | ⚠️ `review_required` (v0.28.0, ADR-349: créditos de operações de IA, venda em modo piloto) |
+| 6 | `donation.platform_fee` | `success_fee` | ⚠️ `review_required` (v0.33.0, ADR-373: hipótese de 1 % sobre doação confirmada; devido R$ 0,00 até parecer) |
+| 6 | `donation.beneficiary_fund` | `success_fee` | ⚠️ `review_required` (v0.33.0, ADR-373: reserva de até 4 % DA ORGANIZAÇÃO beneficiária; não é receita da plataforma) |
 
-**Zero verdes, e nenhuma ativa** (`active = false` nas onze). Seis amarelas (falta parecer), cinco
+**Zero verdes, e nenhuma ativa** (`active = false` nas treze; as duas de doação da v0.33.0 são hipóteses do pacote de monetização). Oito amarelas (falta parecer), cinco
 vermelhas (recusadas — a quinta, `saas.institutional.funder`, por decisão comercial do proprietário na
 v0.27.0: a assinatura saiu do modelo econômico, ADR-341). O cartão legal de cada uma, com texto literal de fonte oficial e data de consulta,
 está em `MONETIZATION_LEGAL_MATRIX.md`.

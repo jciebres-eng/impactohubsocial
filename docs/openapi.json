@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.32.0",
+  "version": "0.33.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -39649,6 +39649,794 @@
      }
     }
    }
+  },
+  "/v1/public/donation-campaigns/{slug}": {
+   "get": {
+    "summary": "Campanha de arrecadação pública: beneficiário verificado, meta, totais confirmados, custos, atualizações e gastos declarados",
+    "operationId": "get_donation_routes_public_campaign",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 240/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/donation-campaigns/{slug}/qr.svg": {
+   "get": {
+    "summary": "QR Code da campanha: aponta para a URL HTTPS canônica (nunca para um payload Pix estático)",
+    "operationId": "get_donation_routes_campaign_qr",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/donation-campaigns/{slug}/donate": {
+   "post": {
+    "summary": "Inicia uma doação: cria a cobrança no provedor e devolve o Pix copia-e-cola/checkout com o preço total — não confirma nada",
+    "operationId": "post_donation_routes_donate",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 30/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DonationStartIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/public/donations/{donation_id}": {
+   "get": {
+    "summary": "Estado da doação (pendente/confirmada/expirada), como o provedor informou; nunca muda pelo navegador",
+    "operationId": "get_donation_routes_donation_status",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/3600s por IP",
+    "parameters": [
+     {
+      "name": "donation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/public/donations/{donation_id}/receipt": {
+   "get": {
+    "summary": "Comprovante da doação confirmada (não é recibo dedutível nem nota fiscal)",
+    "operationId": "get_donation_routes_donation_receipt",
+    "tags": [
+     "public"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 120/3600s por IP",
+    "parameters": [
+     {
+      "name": "donation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/webhooks/donations/{provider}": {
+   "post": {
+    "summary": "Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação",
+    "operationId": "post_donation_routes_donation_webhook",
+    "tags": [
+     "donations"
+    ],
+    "security": [],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 600/60s por IP",
+    "parameters": [
+     {
+      "name": "provider",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/submit": {
+   "post": {
+    "summary": "Envia a campanha para revisão (aceita os termos de campanha na versão vigente)",
+    "operationId": "post_donation_routes_campaign_submit",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/publish": {
+   "post": {
+    "summary": "Publica a campanha aprovada (exige beneficiário verificado; o banco recusa sem isso)",
+    "operationId": "post_donation_routes_campaign_publish",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/rotate-qr": {
+   "post": {
+    "summary": "Regenera QR/link (versão nova; a anterior deixa de ser a canônica) — para QR comprometido ou substituído",
+    "operationId": "post_donation_routes_campaign_rotate_qr",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/accountability": {
+   "get": {
+    "summary": "Prestação de contas: totais conciliados (com definição de cada número), doações, gastos declarados × validados, casos de risco",
+    "operationId": "get_donation_routes_campaign_accountability",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: viewer",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/expenses": {
+   "post": {
+    "summary": "Declara um gasto da campanha (declarado ≠ validado; documento vira evidência)",
+    "operationId": "post_donation_routes_campaign_expense",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignExpenseIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/campaigns/{campaign_id}/updates": {
+   "post": {
+    "summary": "Atualização pública da campanha, com referências a evidências",
+    "operationId": "post_donation_routes_campaign_update",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignUpdateIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/me/donations": {
+   "get": {
+    "summary": "Minhas doações (com conta) e acordos recorrentes",
+    "operationId": "get_donation_routes_my_donations",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/me/recurring-donations/{agreement_id}/cancel": {
+   "post": {
+    "summary": "Cancela um acordo de doação recorrente (sempre possível pelo doador)",
+    "operationId": "post_donation_routes_cancel_recurring",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "parameters": [
+     {
+      "name": "agreement_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/donation-campaigns": {
+   "get": {
+    "summary": "Campanhas aguardando revisão e campanhas publicadas",
+    "operationId": "get_donation_routes_admin_campaigns",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/donation-campaigns/{campaign_id}/review": {
+   "post": {
+    "summary": "Aprova ou rejeita a campanha com justificativa (quem criou não revisa)",
+    "operationId": "post_donation_routes_admin_review",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignReviewIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/donation-campaigns/{campaign_id}/suspend": {
+   "post": {
+    "summary": "Tira do ar (em análise) ou devolve ao ar uma campanha publicada, com justificativa",
+    "operationId": "post_donation_routes_admin_suspend",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CampaignSuspendIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/beneficiaries/{org_id}/verification": {
+   "post": {
+    "summary": "Registra o estado da verificação do beneficiário (KYB): quem verifica e com que documentos depende do provedor e do parecer",
+    "operationId": "post_donation_routes_admin_beneficiary_verification",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/BeneficiaryVerificationIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/donation-risk-cases": {
+   "get": {
+    "summary": "Casos de risco abertos (revisão humana)",
+    "operationId": "get_donation_routes_admin_risk_cases",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA"
+   }
+  },
+  "/v1/admin/donation-risk-cases/{case_id}/decide": {
+   "post": {
+    "summary": "Decide um caso de risco com justificativa; fica na trilha",
+    "operationId": "post_donation_routes_admin_risk_decide",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RiskDecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/donation-campaigns/{campaign_id}/reconcile": {
+   "post": {
+    "summary": "Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções",
+    "operationId": "post_donation_routes_admin_reconcile",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/admin/donation-ledger/{campaign_id}": {
+   "get": {
+    "summary": "Razão de conciliação da campanha (partidas dobradas, append-only) e totais com definição",
+    "operationId": "get_donation_routes_admin_ledger",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
   }
  },
  "components": {
@@ -54706,9 +55494,118 @@
     "additionalProperties": false,
     "properties": {
      "project_id": {
-      "pattern": "^[0-9a-fA-F-]{36}$",
-      "title": "Project Id",
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Project Id"
+     },
+     "kind": {
+      "default": "project_crowdfunding",
+      "enum": [
+       "project_crowdfunding",
+       "emergency",
+       "institutional_fund",
+       "recurring",
+       "organization"
+      ],
+      "title": "Kind",
       "type": "string"
+     },
+     "target_cents": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Cents"
+     },
+     "starts_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Starts On"
+     },
+     "ends_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ends On"
+     },
+     "purpose": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Purpose"
+     },
+     "contingency_policy": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Contingency Policy"
+     },
+     "refund_policy": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Refund Policy"
+     },
+     "min_donation_cents": {
+      "default": 500,
+      "minimum": 100,
+      "title": "Min Donation Cents",
+      "type": "integer"
+     },
+     "allow_recurring": {
+      "default": false,
+      "title": "Allow Recurring",
+      "type": "boolean"
      },
      "slug": {
       "pattern": "^[a-z0-9-]{4,80}$",
@@ -54760,7 +55657,6 @@
      }
     },
     "required": [
-     "project_id",
      "slug",
      "title",
      "summary"
@@ -54853,6 +55749,84 @@
       ],
       "default": null,
       "title": "Status"
+     },
+     "target_cents": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Target Cents"
+     },
+     "ends_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Ends On"
+     },
+     "purpose": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Purpose"
+     },
+     "contingency_policy": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Contingency Policy"
+     },
+     "refund_policy": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Refund Policy"
+     },
+     "min_donation_cents": {
+      "anyOf": [
+       {
+        "minimum": 100,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Min Donation Cents"
      }
     },
     "title": "CampaignPatch",
@@ -63012,6 +63986,290 @@
      "status"
     ],
     "title": "WorkItemUpdateIn",
+    "type": "object"
+   },
+   "DonationStartIn": {
+    "additionalProperties": false,
+    "properties": {
+     "amount_cents": {
+      "maximum": 100000000,
+      "minimum": 100,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "method": {
+      "default": "pix",
+      "enum": [
+       "pix",
+       "card"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "donor_display": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Donor Display"
+     },
+     "donor_email": {
+      "anyOf": [
+       {
+        "maxLength": 254,
+        "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Donor Email"
+     },
+     "public_anonymous": {
+      "default": false,
+      "title": "Public Anonymous",
+      "type": "boolean"
+     },
+     "cover_costs": {
+      "default": false,
+      "title": "Cover Costs",
+      "type": "boolean"
+     },
+     "idempotency_key": {
+      "anyOf": [
+       {
+        "maxLength": 80,
+        "pattern": "^[A-Za-z0-9_-]+$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Idempotency Key"
+     }
+    },
+    "required": [
+     "amount_cents"
+    ],
+    "title": "DonationStartIn",
+    "type": "object"
+   },
+   "CampaignExpenseIn": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "maxLength": 500,
+      "minLength": 3,
+      "title": "Description",
+      "type": "string"
+     },
+     "budget_line": {
+      "anyOf": [
+       {
+        "maxLength": 120,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Budget Line"
+     },
+     "amount_cents": {
+      "exclusiveMinimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "spent_on": {
+      "format": "date",
+      "title": "Spent On",
+      "type": "string"
+     },
+     "document_id": {
+      "anyOf": [
+       {
+        "pattern": "^[0-9a-fA-F-]{36}$",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Document Id"
+     }
+    },
+    "required": [
+     "description",
+     "amount_cents",
+     "spent_on"
+    ],
+    "title": "CampaignExpenseIn",
+    "type": "object"
+   },
+   "CampaignUpdateIn": {
+    "additionalProperties": false,
+    "properties": {
+     "title": {
+      "maxLength": 200,
+      "minLength": 3,
+      "title": "Title",
+      "type": "string"
+     },
+     "body": {
+      "maxLength": 8000,
+      "minLength": 10,
+      "title": "Body",
+      "type": "string"
+     },
+     "evidence_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+     },
+     "is_public": {
+      "default": true,
+      "title": "Is Public",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "title",
+     "body"
+    ],
+    "title": "CampaignUpdateIn",
+    "type": "object"
+   },
+   "CampaignReviewIn": {
+    "additionalProperties": false,
+    "properties": {
+     "approve": {
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "approve",
+     "note"
+    ],
+    "title": "CampaignReviewIn",
+    "type": "object"
+   },
+   "CampaignSuspendIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     },
+     "reinstate": {
+      "default": false,
+      "title": "Reinstate",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "note"
+    ],
+    "title": "CampaignSuspendIn",
+    "type": "object"
+   },
+   "BeneficiaryVerificationIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "documents_requested",
+       "under_review",
+       "verified",
+       "rejected"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     },
+     "account_holder_matches": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Account Holder Matches"
+     },
+     "evidence_document_ids": {
+      "default": [],
+      "items": {
+       "pattern": "^[0-9a-fA-F-]{36}$",
+       "type": "string"
+      },
+      "title": "Evidence Document Ids",
+      "type": "array"
+     }
+    },
+    "required": [
+     "status",
+     "note"
+    ],
+    "title": "BeneficiaryVerificationIn",
+    "type": "object"
+   },
+   "RiskDecisionIn": {
+    "additionalProperties": false,
+    "properties": {
+     "action": {
+      "enum": [
+       "allow",
+       "request_information",
+       "reject",
+       "report_to_provider"
+      ],
+      "title": "Action",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "action",
+     "note"
+    ],
+    "title": "RiskDecisionIn",
     "type": "object"
    }
   },

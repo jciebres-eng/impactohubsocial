@@ -395,9 +395,29 @@ class Jornadas:
         slug = "orquestra-comunitaria-" + uuid.uuid4().hex[:6]
         cp = self.passo(J, "OSC cria campanha", osc, "POST", "/v1/campaigns", {
             "project_id": pid, "slug": slug, "title": "Uma orquestra para o bairro",
-            "summary": "Ajude 40 crianças a aprender música no contraturno (campanha fictícia de demonstração)."})
+            "summary": "Ajude 40 crianças a aprender música no contraturno (campanha fictícia de demonstração).",
+            "purpose": "Instrumentos e aulas no contraturno.", "contingency_policy": "Sem a meta, o valor vai para as aulas.",
+            "refund_policy": "Estorno pelo provedor de pagamento (demonstração)."})
         if cp:
-            self.passo(J, "OSC publica a campanha", osc, "PATCH", f"/v1/campaigns/{cp['id']}", {"status": "published"})
+            # v0.33.0 (ADR-374): publicar passa por quatro olhos e beneficiário verificado — o atalho
+            # `PATCH status=published` responde 409 de propósito.
+            adm = self.c["admin"]
+            self.passo(J, "OSC envia a campanha para revisão (aceita os termos)", osc, "POST", f"/v1/campaigns/{cp['id']}/submit")
+            self.passo(J, "administração aprova a campanha com justificativa", adm, "POST", f"/v1/admin/donation-campaigns/{cp['id']}/review",
+                       {"approve": True, "note": "Finalidade, contingência e estorno conferidos (demonstração)."})
+            self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
+                       {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
+            self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
+            # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
+            # só viria de um evento assinado do provedor, que a demonstração não forja.
+            anon = Client()
+            d = self.passo(J, "pessoa anônima inicia uma doação Pix (sandbox, não pagável)", anon, "POST",
+                           f"/v1/public/donation-campaigns/{slug}/donate",
+                           {"amount_cents": 5000, "method": "pix", "donor_display": "Apoiadora (exemplo)",
+                            "idempotency_key": "demo-" + uuid.uuid4().hex[:8]})
+            if d:
+                self.ids["doacao"] = d["id"]
+                self.passo(J, "pessoa anônima consulta a situação da doação", anon, "GET", f"/v1/public/donations/{d['id']}")
             self.passo(J, "visitante sem login abre a campanha", Http(self.base), "GET", f"/v1/public/campaigns/{slug}")
 
     def documentos(self):

@@ -14,6 +14,20 @@ except ImportError:  # pragma: no cover
 
 
 @unittest.skipUnless(HAVE_PW and DIST.exists(), "Playwright ou build do frontend indisponível")
+
+def _publish_campaign(osc, campaign_id: str) -> None:
+    """v0.33.0 (ADR-374): publicar exige envio para revisão, aprovação por outra pessoa da equipe e beneficiário
+    verificado. O atalho `PATCH status=published` responde 409 de propósito; os testes antigos passam por aqui."""
+    from tests.support import make_staff
+    rev = make_staff("compliance")
+    assert osc.post(f"/v1/campaigns/{campaign_id}/submit").status == 200
+    r = rev.post(f"/v1/admin/donation-campaigns/{campaign_id}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."})
+    assert r.status == 200, r
+    r = rev.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
+    assert r.status == 200, r
+    r = osc.post(f"/v1/campaigns/{campaign_id}/publish")
+    assert r.status == 200, r
+
 class TrustE2E(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -157,8 +171,10 @@ class TrustE2E(unittest.TestCase):
         funder.post(f"/v1/funding-quotas/{q}/pledges", {"quantity": 4})
         slug = f"campanha-e2e-{pid[:8]}"
         c = osc.post("/v1/campaigns", {"project_id": pid, "slug": slug, "title": "Ajude o projeto da campanha",
-                                        "summary": "Precisamos de apoio para concluir as atividades deste ano."}).json
-        osc.patch(f"/v1/campaigns/{c['id']}", {"status": "published"})
+                                        "summary": "Precisamos de apoio para concluir as atividades deste ano.",
+                                        "purpose": "Atividades deste ano.", "contingency_policy": "Sem a meta, o valor vai para as atividades.",
+                                        "refund_policy": "Estorno pelo provedor."}).json
+        _publish_campaign(osc, c["id"])   # v0.33.0 (ADR-374): quatro olhos + beneficiário verificado
         p = self.page()
         p.goto(f"{self.base}/campanha/{slug}")
         p.get_by_role("heading", name="Faltam 6 cota(s)").wait_for()

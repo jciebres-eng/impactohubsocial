@@ -1,23 +1,23 @@
 {
  "o_que_e": "inventário das telas servidas por web/src/app.tsx, extraído das três tabelas de rota (PUBLIC, HELP, ROUTES) na ordem em que o roteador tenta casar",
  "o_que_nao_e": "não é a aplicação rodando: é a lista do que o roteador serve. Nenhuma linha aqui prova que a tela funciona contra um banco com dados.",
- "telas": 227,
+ "telas": 231,
  "por_tabela": {
   "PUBLIC": 9,
-  "HELP": 30,
-  "ROUTES": 188
+  "HELP": 31,
+  "ROUTES": 191
  },
- "sem_login": 31,
- "com_parametro": 55,
- "em_algum_menu": 87,
+ "sem_login": 32,
+ "com_parametro": 56,
+ "em_algum_menu": 90,
  "so_por_link_direto": 85,
  "sombreadas": [],
  "menus_por_tipo": {
   "Empresa": 33,
   "Governo": 30,
   "Apoiador": 22,
-  "OSC": 44,
-  "Administração": 32,
+  "OSC": 45,
+  "Administração": 34,
   "Profissional": 28
  },
  "arquivos": [
@@ -29,6 +29,7 @@
   "web/src/pages/core.tsx",
   "web/src/pages/diagnosisGuide.tsx",
   "web/src/pages/documents.tsx",
+  "web/src/pages/donations.tsx",
   "web/src/pages/finance.tsx",
   "web/src/pages/funding.tsx",
   "web/src/pages/help.tsx",
@@ -695,6 +696,23 @@
    "alcance": "parâmetro"
   },
   {
+   "rota": "/doacao/:id",
+   "tabela": "HELP",
+   "ordem_de_casamento": 2,
+   "entrada": "Central de Conhecimento",
+   "exige_login": false,
+   "componente": "Don.DonationStatus",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": true,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [],
+   "rotulo": "",
+   "alcance": "parâmetro"
+  },
+  {
    "rota": "/verificar",
    "tabela": "HELP",
    "ordem_de_casamento": 2,
@@ -1246,6 +1264,48 @@
     "Administração"
    ],
    "rotulo": "Denúncias",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/doacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.DonationReview",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Campanhas de doação",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/admin/doacoes/risco",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.DonationRiskCases",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [
+    "platform"
+   ],
+   "alcanca": [
+    "Administração"
+   ],
+   "em_menu_de": [
+    "Administração"
+   ],
+   "rotulo": "Risco em doações",
    "alcance": "menu"
   },
   {
@@ -3041,6 +3101,25 @@
     "Profissional"
    ],
    "rotulo": "Minhas atividades",
+   "alcance": "menu"
+  },
+  {
+   "rota": "/minhas-doacoes",
+   "tabela": "ROUTES",
+   "ordem_de_casamento": 3,
+   "entrada": "dentro da aplicação",
+   "exige_login": true,
+   "componente": "Don.MyDonations",
+   "arquivo": "web/src/pages/donations.tsx",
+   "parametro": false,
+   "tipos_declarados": [],
+   "alcanca": [
+    "todos os tipos"
+   ],
+   "em_menu_de": [
+    "OSC"
+   ],
+   "rotulo": "Minhas doações",
    "alcance": "menu"
   },
   {

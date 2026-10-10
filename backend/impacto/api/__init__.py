@@ -25,7 +25,9 @@ MODULES = ["auth_routes", "org_routes", "call_routes", "project_routes", "applic
            # v0.26.0 — torres de controle (financiador, governo) e o estado "Projeto IMPACTO Ready"
            "tower_routes",
            # v0.28.0 — Central de IA: catálogo, prévia, execuções, créditos por PIX, patrocínio, similaridade
-           "ai_center_routes", "kb_provenance_routes"]
+           "ai_center_routes", "kb_provenance_routes",
+           # v0.33.0 — doações, campanhas de arrecadação, QR, webhook do provedor (sandbox), conciliação, prestação de contas
+           "donation_routes"]
 _loaded = False
 
 

@@ -1,4 +1,4 @@
-# API REST /v1 — referência gerada do código (v0.32.0)
+# API REST /v1 — referência gerada do código (v0.33.0)
 
 Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `docs/openapi.json` ou `GET /v1/openapi.json`.
 
@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (940)
+## Operações (962)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -38,6 +38,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/audit/timeline` | admin da plataforma + MFA | — | Linha do tempo de UMA entidade: tudo o que aconteceu com este documento, projeto ou organização |
 | GET | `/v1/admin/audit/trail` | admin da plataforma + MFA | — | Árvore de causa de um rastro: que acontecimento levou a qual, por parent_event_id |
 | GET | `/v1/admin/audit/verify` | admin da plataforma + MFA | — | Verifica a cadeia de hashes da trilha de auditoria |
+| POST | `/v1/admin/beneficiaries/{org_id}/verification` | admin da plataforma + MFA | — | Registra o estado da verificação do beneficiário (KYB): quem verifica e com que documentos depende do provedor e do parecer |
 | GET | `/v1/admin/billing/organizations/{org_id}` | admin da plataforma + MFA | — | Visão de suporte: acesso, licenças, convênios, contratos, vouchers e faturas da organização |
 | GET | `/v1/admin/call-sources` | admin da plataforma + MFA | — | list sources |
 | POST | `/v1/admin/call-sources` | admin da plataforma + MFA | — | Cadastra fonte de importação (exige registro da verificação de termos de uso/licença da fonte) |
@@ -94,6 +95,13 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/admin/credentials` | admin da plataforma + MFA | — | credentials |
 | POST | `/v1/admin/credentials/{credential_id}/verify` | admin da plataforma + MFA | — | Verifica credencial profissional (registre a fonte consultada, ex.: cadastro público do conselho, e a data) |
 | POST | `/v1/admin/datasets` | admin da plataforma + MFA | — | Registra a procedência de um conjunto de dados externo (licença obrigatória) |
+| GET | `/v1/admin/donation-campaigns` | admin da plataforma + MFA | — | Campanhas aguardando revisão e campanhas publicadas |
+| POST | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | admin da plataforma + MFA | — | Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções |
+| POST | `/v1/admin/donation-campaigns/{campaign_id}/review` | admin da plataforma + MFA | — | Aprova ou rejeita a campanha com justificativa (quem criou não revisa) |
+| POST | `/v1/admin/donation-campaigns/{campaign_id}/suspend` | admin da plataforma + MFA | — | Tira do ar (em análise) ou devolve ao ar uma campanha publicada, com justificativa |
+| GET | `/v1/admin/donation-ledger/{campaign_id}` | admin da plataforma + MFA | — | Razão de conciliação da campanha (partidas dobradas, append-only) e totais com definição |
+| GET | `/v1/admin/donation-risk-cases` | admin da plataforma + MFA | — | Casos de risco abertos (revisão humana) |
+| POST | `/v1/admin/donation-risk-cases/{case_id}/decide` | admin da plataforma + MFA | — | Decide um caso de risco com justificativa; fica na trilha |
 | GET | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Inventário de chaves por impressão digital (a chave nunca é gravada) |
 | POST | `/v1/admin/encryption/keys` | admin da plataforma + MFA | — | Registra no inventário as chaves em uso para uma finalidade |
 | POST | `/v1/admin/encryption/reencrypt` | admin da plataforma + MFA | — | Recifra a coluna com a chave corrente (idempotente, com auditoria do resultado) |
@@ -299,6 +307,12 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | GET | `/v1/campaigns` | membro da organização ativa | papel ≥ viewer | Campanhas da organização, com o endereço público e a situação |
 | POST | `/v1/campaigns` | membro da organização ativa | papel ≥ manager | Cria a campanha de divulgação do projeto (rascunho; publicar é um passo separado) |
 | PATCH | `/v1/campaigns/{campaign_id}` | membro da organização ativa | papel ≥ manager | Altera ou publica/fecha a campanha |
+| GET | `/v1/campaigns/{campaign_id}/accountability` | membro da organização ativa | papel ≥ viewer | Prestação de contas: totais conciliados (com definição de cada número), doações, gastos declarados × validados, casos de risco |
+| POST | `/v1/campaigns/{campaign_id}/expenses` | membro da organização ativa | papel ≥ manager | Declara um gasto da campanha (declarado ≠ validado; documento vira evidência) |
+| POST | `/v1/campaigns/{campaign_id}/publish` | membro da organização ativa | papel ≥ manager | Publica a campanha aprovada (exige beneficiário verificado; o banco recusa sem isso) |
+| POST | `/v1/campaigns/{campaign_id}/rotate-qr` | membro da organização ativa | papel ≥ manager | Regenera QR/link (versão nova; a anterior deixa de ser a canônica) — para QR comprometido ou substituído |
+| POST | `/v1/campaigns/{campaign_id}/submit` | membro da organização ativa | papel ≥ manager | Envia a campanha para revisão (aceita os termos de campanha na versão vigente) |
+| POST | `/v1/campaigns/{campaign_id}/updates` | membro da organização ativa | papel ≥ manager | Atualização pública da campanha, com referências a evidências |
 | GET | `/v1/claims` | membro da organização ativa | papel ≥ viewer | Alegações com a situação DERIVADA da última verificação |
 | POST | `/v1/claims` | membro da organização ativa | papel ≥ manager | Declara a alegação no texto exato em que será publicada |
 | GET | `/v1/claims/review-requests` | membro da organização ativa | papel ≥ viewer | Convites de revisão recebidos pela organização — a fila de quem é convidado |
@@ -585,8 +599,10 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/materials` | membro da organização ativa | tipos: government, platform; papel ≥ manager | create material |
 | GET | `/v1/me` | usuário autenticado | — | Usuário, organizações, direitos do plano e token CSRF |
 | GET | `/v1/me/context` | usuário autenticado | — | AccessContext: identidade, organização, papéis, plano, período gratuito, permissões |
+| GET | `/v1/me/donations` | usuário autenticado | — | Minhas doações (com conta) e acordos recorrentes |
 | GET | `/v1/me/preferences` | usuário autenticado | — | Idioma e tema da pessoa (tema: system, light ou dark) |
 | PUT | `/v1/me/preferences` | usuário autenticado | — | Define idioma e tema (a interface pergunta uma vez, logo depois do primeiro acesso) |
+| POST | `/v1/me/recurring-donations/{agreement_id}/cancel` | usuário autenticado | — | Cancela um acordo de doação recorrente (sempre possível pelo doador) |
 | GET | `/v1/me/security` | usuário autenticado | — | Centro de segurança da conta: sessões, dispositivos, MFA, eventos e alterações de permissão |
 | POST | `/v1/me/switch-org` | usuário autenticado | — | switch org |
 | GET | `/v1/me/today` | usuário autenticado | — | Para você hoje: cartões (pendências, decisões, repasses, participações, recomendações, trajetória) e contadores do menu, derivados de registros reais |
@@ -789,6 +805,11 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/proposals/{proposal_id}/transition` | membro da organização ativa | papel ≥ manager | Envia, analisa, aceita, recusa, pede ajuste ou retira |
 | GET | `/v1/public/campaigns/{slug}` | pública | limite 120/3600s | Campanha pública: história do projeto, meta e QUANTAS COTAS FALTAM |
 | GET | `/v1/public/concepts` | pública | limite 120/3600s | Catálogo central de conceitos da ajuda contextual (tooltip, popover e glossário): origem config/concepts.json |
+| GET | `/v1/public/donation-campaigns/{slug}` | pública | limite 240/3600s | Campanha de arrecadação pública: beneficiário verificado, meta, totais confirmados, custos, atualizações e gastos declarados |
+| POST | `/v1/public/donation-campaigns/{slug}/donate` | pública | limite 30/3600s | Inicia uma doação: cria a cobrança no provedor e devolve o Pix copia-e-cola/checkout com o preço total — não confirma nada |
+| GET | `/v1/public/donation-campaigns/{slug}/qr.svg` | pública | limite 120/3600s | QR Code da campanha: aponta para a URL HTTPS canônica (nunca para um payload Pix estático) |
+| GET | `/v1/public/donations/{donation_id}` | pública | limite 600/3600s | Estado da doação (pendente/confirmada/expirada), como o provedor informou; nunca muda pelo navegador |
+| GET | `/v1/public/donations/{donation_id}/receipt` | pública | limite 120/3600s | Comprovante da doação confirmada (não é recibo dedutível nem nota fiscal) |
 | GET | `/v1/public/glossary` | pública | limite 120/3600s | Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json) |
 | GET | `/v1/public/locales` | pública | limite 120/3600s | Idiomas disponíveis, com a cobertura real de tradução declarada |
 | GET | `/v1/public/profiles/{handle}` | pública | — | Perfil público: lê SÓ a projeção curada (public_fields), nunca tabela privada |
@@ -949,6 +970,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/verifiable-records/{record_id}/revoke` | membro da organização ativa | papel ≥ owner | Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data) |
 | POST | `/v1/verifiable-records/{record_id}/timestamp` | membro da organização ativa | papel ≥ manager | Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível) |
 | POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher de concessão (transação atômica; resposta genérica para códigos inválidos; vouchers de desconto aposentados) |
+| POST | `/v1/webhooks/donations/{provider}` | pública | limite 600/60s | Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação |
 | POST | `/v1/webhooks/payments/{provider}` | pública | limite 600/60s | Webhook do provedor de pagamento: assinatura HMAC conferida, evento deduplicado, pedido de crédito creditado uma vez |
 | GET | `/v1/workspace` | membro da organização ativa | papel ≥ viewer | WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem |
 | GET | `/v1/workspace/personas` | usuário autenticado | — | Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano) |

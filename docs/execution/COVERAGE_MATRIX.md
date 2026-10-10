@@ -4,7 +4,7 @@
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 256 passos em 16 jornadas, 2 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Jornadas pela API** — 267 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
 - **Telas no navegador (Chromium)** — 845 visitas às 231 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
 - **Telefone (390 px)** — 240 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
@@ -12,16 +12,16 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 154 | 1 | 158 | 138 | 11 | 6 | 3 | 0 | 50 | 0 |
+| OSC | 15 | 161 | 0 | 158 | 139 | 10 | 6 | 3 | 0 | 50 | 0 |
 | Empresa (financiador) | 8 | 47 | 0 | 105 | 80 | 19 | 0 | 6 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 99 | 62 | 25 | 1 | 11 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 191 | 63 | 26 | 82 | 20 | 0 | 35 | 0 |
 | Apoiadora (pessoa física) | 3 | 10 | 0 | 100 | 67 | 21 | 0 | 12 | 0 | 27 | 0 |
-| Administração | 5 | 21 | 0 | 152 | 107 | 32 | 0 | 13 | 0 | 57 | 0 |
+| Administração | 6 | 23 | 0 | 152 | 105 | 34 | 0 | 13 | 0 | 57 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Suporte (equipe) | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| Visitante sem login | 2 | 2 | 1 | 40 | 25 | 7 | 8 | 0 | 0 | — | — |
+| Visitante sem login | 2 | 4 | 0 | 40 | 25 | 7 | 8 | 0 | 0 | — | — |
 
 **Como ler.** *Com dado*: a tela abriu com conteúdo vindo da API. *Vazias*: abriu e mostrou o estado
 vazio do produto (lista sem item, busca sem termo). *Recusa correta*: perfil que NÃO deve ver a tela
@@ -39,13 +39,13 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Rede: proposta → conversa → prestação de contas | 12 | 0 |
 | Profissional: necessidade → oferta → revisão técnica | 9 | 0 |
 | Governo: edital público → necessidade do território | 25 | 0 |
-| Captação: cotas → apoios → campanha pública | 9 | 2 |
+| Captação: cotas → apoios → campanha pública | 14 | 0 |
 | Documentos: montagem → acordo assinado → registro verificável | 20 | 0 |
 | Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão | 35 | 0 |
 | Marketplace, soluções e perfis públicos | 6 | 0 |
 | Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 28 | 0 |
 | Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel | 18 | 0 |
-| Suporte e Central de Conhecimento | 4 | 0 |
+| Suporte e Central de Conhecimento | 10 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |
 | Administração: visão geral → verificação → auditoria | 7 | 0 |
 | Pendências: o que espera decisão de alguém | 12 | 0 |
@@ -89,9 +89,9 @@ URL, chamadas de API e tempo, está no CSV).
 | `/admin/editais` | 2 | admin: ok, government: recusa |
 | `/admin/erros` | 2 | admin: ok, government: recusa |
 | `/admin/fiscal` | 2 | admin: ok, government: recusa |
-| `/admin/honorarios` | 2 | admin: ok, government: recusa |
+| `/admin/honorarios` | 2 | admin: vazia, government: recusa |
 | `/admin/ia/financeiro` | 2 | admin: ok, government: recusa |
-| `/admin/identidade` | 2 | admin: ok, government: recusa |
+| `/admin/identidade` | 2 | admin: vazia, government: recusa |
 | `/admin/institucional` | 2 | admin: ok, government: recusa |
 | `/admin/integracoes` | 2 | admin: ok, government: recusa |
 | `/admin/integridade` | 2 | admin: ok, government: recusa |
@@ -197,7 +197,7 @@ URL, chamadas de API e tempo, está no CSV).
 | `/ideias` | 2 | osc: ok, government: recusa |
 | `/identidade` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |
 | `/instituicao` | 5 | osc: ok, company: ok, government: ok, provider: ok, individual: ok |
-| `/instituicoes/:id` | 6 | osc: vazia, company: ok, provider: vazia, government: ok, individual: ok, admin: ok |
+| `/instituicoes/:id` | 6 | osc: ok, company: ok, provider: vazia, government: ok, individual: ok, admin: ok |
 | `/legal/privacidade` | 1 | anônimo: ok |
 | `/legal/termos` | 1 | anônimo: ok |
 | `/mapa` | 6 | osc: ok, company: ok, provider: ok, government: ok, individual: ok, admin: ok |

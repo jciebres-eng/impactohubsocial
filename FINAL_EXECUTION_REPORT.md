@@ -133,11 +133,14 @@ privacidade e dados exigidos pelo provedor estão no checklist jurídico (item 7
 
 ```text
 REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.33.0.log):
-  {{TESTS_LINE}}
-MÓDULOS NOVOS: test_v0330_donations (11) · test_v0330_release_docs (6)
-PRIMEIRA RODADA (docs/evidence/test_run_v0330_full.raw, antes das correções): 2444 testes, 21 falhas + 1 erro — todas em
-  portões de fechamento (listas revisadas, contagens fixadas, matrizes, atalho legado de publicação) — causa e correção em
+  Ran 2451 tests in 1807.781s — 8 falhas, 0 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
+  → as 8: manifesto da versão, marcador de preenchimento e linha de testes deste relatório, notas da versão lidas antes do bump,
+    3 matrizes geradas antes da rodada, e /doacao/:id sem registro na demonstração (a jornada "Captação" ganhou a
+    doação pública em sandbox); corrigidas no fechamento e reexecutadas ao fim do mesmo log
+PRIMEIRA RODADA (antes das correções dos portões): Ran 2444 tests — 21 falhas + 1 erro, todas em portões de fechamento
+  (listas revisadas, contagens fixadas, matrizes, atalho legado de publicação) — causa e correção em
   FINAL_EXECUTION_AUDIT.md §7. Nenhum teste removido ou enfraquecido.
+MÓDULOS NOVOS: test_v0330_donations (11) · test_v0330_release_docs (6)
 LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok
 TELAS: capturas reais em docs/evidence/screens_v0330/ (fluxo completo no servidor de teste, sandbox)
 ```

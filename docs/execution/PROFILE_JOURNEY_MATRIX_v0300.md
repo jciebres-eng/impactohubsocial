@@ -5,19 +5,19 @@
 > Cada linha é um passo REALMENTE executado pela API na última regressão (status HTTP registrado), com o que a autorização exige
 > para aquele passo e as telas que o alcançam. 'sem tela' é fato medido, não falha.
 
-Jornadas: **16** · passos: **256** · falhas: **2**
+Jornadas: **16** · passos: **267** · falhas: **0**
 
 ## Perfis e o que cada um percorre
 
 | Perfil | Passos executados | Jornadas em que aparece |
 | --- | ---: | --- |
-| OSC / executora | 154 | 15 |
+| OSC / executora | 161 | 15 |
 | Financiador (empresa/instituto) | 47 | 8 |
-| Administração / auditoria | 21 | 5 |
+| Administração / auditoria | 23 | 6 |
 | Profissional / prestador | 12 | 4 |
 | Apoiador (pessoa física) | 10 | 3 |
 | Governo / órgão | 9 | 1 |
-| Visitante | 2 | 2 |
+| Visitante | 4 | 2 |
 | Suporte | 1 | 1 |
 
 ## Preparação: contas de demonstração e plano concedido pela administração
@@ -173,8 +173,13 @@ Jornadas: **16** · passos: **256** · falhas: **2**
 | 5 | Apoiador (pessoa física) | apoiadora declara interesse e causas | `PUT /v1/org/funder-profile` | 200 | organizacao_tipo_e_papel · papel ≥ manager · tipos: company|individual | — | /organizacao |
 | 6 | Apoiador (pessoa física) | apoiadora manifesta interesse no projeto da horta | `POST /v1/applications/interest` | 201 | organizacao_tipo_e_papel · papel ≥ analyst · tipos: company|individual | — | /projetos/:id |
 | 7 | OSC / executora | OSC cria campanha | `POST /v1/campaigns` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
-| 8 | OSC / executora | OSC publica a campanha | `PATCH /v1/campaigns/{id}` | 409 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
-| 9 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 404 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 8 | OSC / executora | OSC envia a campanha para revisão (aceita os termos) | `POST /v1/campaigns/{id}/submit` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
+| 9 | Administração / auditoria | administração aprova a campanha com justificativa | `POST /v1/admin/donation-campaigns/{id}/review` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | compliance.write | /admin/doacoes |
+| 10 | Administração / auditoria | administração registra o beneficiário como verificado | `POST /v1/admin/beneficiaries/{id}/verification` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | compliance.write | /admin/doacoes |
+| 11 | OSC / executora | OSC publica a campanha | `POST /v1/campaigns/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
+| 12 | Visitante | pessoa anônima inicia uma doação Pix (sandbox, não pagável) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 13 | Visitante | pessoa anônima consulta a situação da doação | `GET /v1/public/donations/{id}` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
+| 14 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Documentos: montagem → acordo assinado → registro verificável
 
@@ -316,6 +321,12 @@ Jornadas: **16** · passos: **256** · falhas: **2**
 | 2 | Suporte | suporte responde o chamado | `POST /v1/admin/support/tickets/{id}/messages` | 201 | plataforma · papel ≥ — · tipos: todos | MFA | /admin/central/suporte/:id |
 | 3 | OSC / executora | OSC lê a resposta | `GET /v1/support/tickets/{id}` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/suporte/:id |
 | 4 | OSC / executora | OSC lista cursos | `GET /v1/help/courses` | 200 | publica · papel ≥ — · tipos: todos | — | /ajuda/academia |
+| 5 | OSC / executora | OSC se inscreve no curso | `POST /v1/help/courses/primeiros-passos-na-plataforma/enroll` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 6 | OSC / executora | OSC abre o curso | `GET /v1/help/courses/primeiros-passos-na-plataforma` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 7 | OSC / executora | OSC conclui a aula 'O que é a plataforma' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 8 | OSC / executora | OSC conclui a aula 'Documentos e conformidade' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 9 | OSC / executora | OSC conclui a aula 'Quiz de fundamentos' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 10 | OSC / executora | OSC emite certificado | `POST /v1/help/courses/primeiros-passos-na-plataforma/certificate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Banco de Ideias: ideia → amadurecimento → projeto
 
@@ -358,7 +369,7 @@ Jornadas: **16** · passos: **256** · falhas: **2**
 
 ## Leitura
 
-* Passos sem tela que os alcance diretamente: **93** de 256 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
+* Passos sem tela que os alcance diretamente: **100** de 267 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
 * A autorização é aplicada no backend (classe + papel + tipo + permissão), provada por `test_v0230_api_sweep` para TODAS as operações — a coluna aqui é a mesma matriz, lida por jornada.
 * Dado tocado: cada rota nomeia o recurso (projects, evidences, indicator-values, agreements, payouts…); a classe de retenção de cada tabela está em `config/data_retention.json` e é conferida por `test_v0190_lgpd_deletion`.
 * Estados vazios, erros e bloqueios por perfil: cobertos pelo robô de telas (`test_v0250_todas_as_telas`: OK · vazia · recusa correta · sem registro) e pela jornada 'Pendências'.

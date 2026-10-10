@@ -408,6 +408,16 @@ class Jornadas:
             self.passo(J, "administração registra o beneficiário como verificado", adm, "POST", f"/v1/admin/beneficiaries/{osc.org_id}/verification",
                        {"status": "verified", "note": "Cadastro da organização de demonstração conferido.", "account_holder_matches": True})
             self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
+            # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
+            # só viria de um evento assinado do provedor, que a demonstração não forja.
+            anon = Client()
+            d = self.passo(J, "pessoa anônima inicia uma doação Pix (sandbox, não pagável)", anon, "POST",
+                           f"/v1/public/donation-campaigns/{slug}/donate",
+                           {"amount_cents": 5000, "method": "pix", "donor_display": "Apoiadora (exemplo)",
+                            "idempotency_key": "demo-" + uuid.uuid4().hex[:8]})
+            if d:
+                self.ids["doacao"] = d["id"]
+                self.passo(J, "pessoa anônima consulta a situação da doação", anon, "GET", f"/v1/public/donations/{d['id']}")
             self.passo(J, "visitante sem login abre a campanha", Http(self.base), "GET", f"/v1/public/campaigns/{slug}")
 
     def documentos(self):

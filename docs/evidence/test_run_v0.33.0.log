@@ -344,3 +344,10 @@ First extra element 0:
 Ran 60 tests in 11.308s
 
 FAILED (failures=1)
+........................................MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+....NOTICE:  extension "pgcrypto" already exists, skipping
+................
+----------------------------------------------------------------------
+Ran 60 tests in 11.108s
+
+OK

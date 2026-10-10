@@ -5,13 +5,13 @@
 > Cada linha é um passo REALMENTE executado pela API na última regressão (status HTTP registrado), com o que a autorização exige
 > para aquele passo e as telas que o alcançam. 'sem tela' é fato medido, não falha.
 
-Jornadas: **16** · passos: **280** · falhas: **0**
+Jornadas: **16** · passos: **274** · falhas: **0**
 
 ## Perfis e o que cada um percorre
 
 | Perfil | Passos executados | Jornadas em que aparece |
 | --- | ---: | --- |
-| OSC / executora | 166 | 15 |
+| OSC / executora | 160 | 15 |
 | Financiador (empresa/instituto) | 50 | 8 |
 | Administração / auditoria | 25 | 6 |
 | Profissional / prestador | 12 | 4 |
@@ -335,12 +335,6 @@ Jornadas: **16** · passos: **280** · falhas: **0**
 | 2 | Suporte | suporte responde o chamado | `POST /v1/admin/support/tickets/{id}/messages` | 201 | plataforma · papel ≥ — · tipos: todos | MFA | /admin/central/suporte/:id |
 | 3 | OSC / executora | OSC lê a resposta | `GET /v1/support/tickets/{id}` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/suporte/:id |
 | 4 | OSC / executora | OSC lista cursos | `GET /v1/help/courses` | 200 | publica · papel ≥ — · tipos: todos | — | /ajuda/academia |
-| 5 | OSC / executora | OSC se inscreve no curso | `POST /v1/help/courses/primeiros-passos-na-plataforma/enroll` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
-| 6 | OSC / executora | OSC abre o curso | `GET /v1/help/courses/primeiros-passos-na-plataforma` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
-| 7 | OSC / executora | OSC conclui a aula 'O que é a plataforma' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
-| 8 | OSC / executora | OSC conclui a aula 'Documentos e conformidade' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
-| 9 | OSC / executora | OSC conclui a aula 'Quiz de fundamentos' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
-| 10 | OSC / executora | OSC emite certificado | `POST /v1/help/courses/primeiros-passos-na-plataforma/certificate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Banco de Ideias: ideia → amadurecimento → projeto
 
@@ -383,7 +377,7 @@ Jornadas: **16** · passos: **280** · falhas: **0**
 
 ## Leitura
 
-* Passos sem tela que os alcance diretamente: **112** de 280 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
+* Passos sem tela que os alcance diretamente: **109** de 274 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
 * A autorização é aplicada no backend (classe + papel + tipo + permissão), provada por `test_v0230_api_sweep` para TODAS as operações — a coluna aqui é a mesma matriz, lida por jornada.
 * Dado tocado: cada rota nomeia o recurso (projects, evidences, indicator-values, agreements, payouts…); a classe de retenção de cada tabela está em `config/data_retention.json` e é conferida por `test_v0190_lgpd_deletion`.
 * Estados vazios, erros e bloqueios por perfil: cobertos pelo robô de telas (`test_v0250_todas_as_telas`: OK · vazia · recusa correta · sem registro) e pela jornada 'Pendências'.

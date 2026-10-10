@@ -40,7 +40,7 @@ export function IdentityQueue() {
     <>
       <PageHead title="Identidade — conferência humana"
                 sub="A plataforma não faz biometria nem consulta base oficial: a decisão é de uma pessoa da equipe. Ninguém decide a própria verificação."
-                actions={<Select value={state} onChange={setState} options={[["open", "Aguardando decisão"], ["decided", "Já decididas"]]} />} />
+                actions={<Select aria-label="Quais verificações mostrar" value={state} onChange={setState} options={[["open", "Aguardando decisão"], ["decided", "Já decididas"]]} />} />
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length}>
         {data?.items?.length > 0 && (
           <ul className="rows">{data.items.map((v: any) => (

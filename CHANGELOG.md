@@ -37,6 +37,9 @@ no código anterior (`docs/security/evidencias/`). Nada publicado; nenhuma açã
   `DONATION_WEBHOOK_SECRET`, `PAYMENT_SANDBOX_ENABLED` — ver `docs/security/PUBLICATION_CHECKLIST_v0350.md`.
 - **Não feito por decisão do responsável:** recusar a produção sem antivírus; teste de IP no demo; diagnóstico do banco de
   produção. **Não feito por impossibilidade verificável:** imagens por digest e hashes Python.
+- **Fechamento:** o CI do PR #8 (axe-core com trava) achou o filtro da fila de identidade (`/admin/identidade`) sem nome
+  acessível — corrigido, com `test_e2e_v0350_admin_screens` (falha no front anterior). O teste antigo de pagamentos que procurava
+  o evento não assinado pelo id alegado passou a procurá-lo pelo identificador próprio (PAY-13).
 
 ## [0.34.0] — 2026-10-10
 

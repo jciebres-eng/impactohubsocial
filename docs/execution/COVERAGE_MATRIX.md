@@ -4,7 +4,7 @@
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 269 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Jornadas pela API** — 274 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
 - **Telas no navegador (Chromium)** — 857 visitas às 235 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
 - **Telefone (390 px)** — 245 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
@@ -12,11 +12,11 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 158 | 0 | 160 | 139 | 11 | 7 | 3 | 0 | 51 | 0 |
+| OSC | 15 | 160 | 0 | 160 | 139 | 11 | 7 | 3 | 0 | 51 | 0 |
 | Empresa (financiador) | 8 | 50 | 0 | 107 | 83 | 18 | 0 | 6 | 0 | 39 | 0 |
 | Profissional | 4 | 12 | 0 | 100 | 63 | 25 | 1 | 11 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 195 | 64 | 27 | 84 | 20 | 0 | 36 | 0 |
-| Apoiadora (pessoa física) | 3 | 10 | 0 | 101 | 67 | 21 | 1 | 12 | 0 | 27 | 0 |
+| Apoiadora (pessoa física) | 3 | 11 | 0 | 101 | 67 | 21 | 1 | 12 | 0 | 27 | 0 |
 | Administração | 6 | 25 | 0 | 154 | 112 | 29 | 0 | 13 | 0 | 59 | 0 |
 | Editora (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 | Revisor (equipe) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
@@ -39,11 +39,11 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Rede: proposta → conversa → prestação de contas | 12 | 0 |
 | Profissional: necessidade → oferta → revisão técnica | 9 | 0 |
 | Governo: edital público → necessidade do território | 25 | 0 |
-| Captação: cotas → apoios → campanha pública | 22 | 0 |
+| Captação: cotas → apoios → campanha pública | 24 | 0 |
 | Documentos: montagem → acordo assinado → registro verificável | 20 | 0 |
-| Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão | 35 | 0 |
+| Contrato como regra: financiamento → vigência → entrega → aceite → obrigações → nova versão | 37 | 0 |
 | Marketplace, soluções e perfis públicos | 6 | 0 |
-| Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 28 | 0 |
+| Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 29 | 0 |
 | Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel | 18 | 0 |
 | Suporte e Central de Conhecimento | 4 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |

@@ -158,6 +158,9 @@ Estado depois da fase 2: **CORRIGIDO** (implementado + teste que falhava antes) 
    defesa em profundidade. Corrigido para todas as funções.
 3. **Teste que vazava estado.** O teste de quatro olhos da remuneração deixava uma obrigação liquidada que somava na receita
    conferida por outro módulo; passou a desfazer a própria transação.
+4. **Seletor sem nome acessível (achado do CI).** O `pilha-do-zero` do PR #8 (axe-core com trava) reprovou
+   `/admin/identidade`: o filtro da fila de identidade que o lote H criou não tinha rótulo. Corrigido (`aria-label`) e
+   guardado por `test_e2e_v0350_admin_screens` (falha no front de `fd1c86c`; evidência em `evidencias/`).
 
 ---
 

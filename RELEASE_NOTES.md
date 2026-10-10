@@ -22,6 +22,8 @@ de 10/10/2026 achou; não é certificação nem teste de intrusão. Nada foi pub
     decidido por outra pessoa, bloqueio de organização com duas pessoas. Alerta não é acusação.
 11. **Backup** — cifra autenticada: um backup alterado ou com a frase errada falha em vez de abrir errado.
 12. **Operação** — 7 runbooks de incidente (`docs/security/runbooks/`); actions fixadas por SHA; Dependabot; SBOM.
+13. **Acessibilidade** — o filtro da fila de identidade ganhou nome para leitor de tela (achado pelo axe-core no CI do PR #8;
+    agora também com teste local).
 
 **Antes de publicar:** siga `docs/security/PUBLICATION_CHECKLIST_v0350.md` (variáveis novas no Railway; demo primeiro;
 publicar também o `pleasing-trust`; rodar backup e ensaio de restauração depois do merge). Pendências que só você resolve:

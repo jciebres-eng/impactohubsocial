@@ -16,5 +16,11 @@ os mesmos testes passam na suíte (`backend/tests/test_v0350_security.py`, 84 te
 | H | `2e41dd9` (lote G) | 10 de 10 falham | — |
 | I | `3eecfea` (lote H) | 10 de 10 falham | — |
 
+**Achado do CI no fechamento.** O job `pilha-do-zero` do PR #8 (axe-core com trava) reprovou `/admin/identidade`:
+o seletor "Aguardando decisão / Já decididas" que o lote H pôs no cabeçalho da fila não tinha nome acessível
+(`select-name`). O axe-core não é baixável neste ambiente, por isso a suíte local não viu. Teste novo
+`backend/tests/test_e2e_v0350_admin_screens.py` (verificação própria do projeto, no Chromium) rodado contra o front
+construído em `fd1c86c`: falha exatamente nessa tela (`a11y_admin_identidade_antes_fd1c86c.txt`); com o rótulo, passa.
+
 `sondas/probe_file07.py` é a sonda da fase 1 (somente leitura) que provou o acesso do financiador aos documentos privados
 da OSC (FILE-07). As sondas usam só dados sintéticos num banco descartável; nada aqui tocou a produção.

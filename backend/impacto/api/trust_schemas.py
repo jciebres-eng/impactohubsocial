@@ -234,6 +234,8 @@ class CampaignIn(In):
     refund_policy: Annotated[str | None, Field(max_length=2000)] = None
     min_donation_cents: Annotated[int, Field(ge=100)] = 500
     allow_recurring: bool = False
+    funding_source: Literal["private", "public", "mixed"] = "private"     # v0.34.0 (ADR-379)
+    public_instrument_ref: Annotated[str | None, Field(max_length=300)] = None
     slug: Annotated[str, Field(pattern=r"^[a-z0-9-]{4,80}$")]
     title: Annotated[str, Field(min_length=4, max_length=200)]
     summary: Annotated[str, Field(min_length=20, max_length=600)]

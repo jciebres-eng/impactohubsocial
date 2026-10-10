@@ -219,7 +219,7 @@ class UpgradePathTests(unittest.TestCase):
                                           " WHERE status = 'approved'"), 0,
                          "nenhuma minuta pode chegar aprovada por atualização")
         # v0.26.0 acrescentou a décima regra (contract.platform_service_fee), também nascida desligada
-        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules"), 13)   # v0.33.0: + donation.platform_fee e donation.beneficiary_fund, inativas (ADR-373). v0.28.0: + ai.credits_prepaid (ADR-349)
+        self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules"), 15)   # v0.34.0: + donation.institutional_fee e donation.institutional_reserve, inativas (ADR-378/380). v0.33.0: + donation.platform_fee e donation.beneficiary_fund, inativas (ADR-373). v0.28.0: + ai.credits_prepaid (ADR-349)
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_rules WHERE active"), 0,
                          "nenhuma regra de receita pode chegar ativa por atualização")
         self.assertEqual(self.conn.scalar("SELECT count(*) FROM monetization_legal_cards"

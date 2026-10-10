@@ -381,11 +381,16 @@ ALTER TABLE reconciliation_runs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY recon_runs_priv ON reconciliation_runs FOR ALL USING (app_priv()) WITH CHECK (app_priv());
 
 -- ============================================================================ 8. regras institucionais (hipóteses do pacote, INATIVAS)
+-- Reclassificação (ADR-378): a taxa de serviço sobre doação é RECEITA DE SERVIÇO FATURADA À PARTE sobre uma base registrada
+-- (a doação confirmada), exatamente como `contract.platform_service_fee` (v0.26.0) — motor `enterprise`. O motor `success_fee`
+-- é estruturalmente inativável pela ADR-022 (percentual sobre dinheiro que a plataforma não processa), e é ONDE FICAM, de
+-- propósito, o fundo (4 %) e a reserva (1,5 %): o banco recusa que uma destinação do beneficiário vire receita da plataforma.
+UPDATE monetization_rules SET revenue_engine = 'enterprise', engine_rank = 3 WHERE key = 'donation.platform_fee';
 INSERT INTO monetization_rules(
     key, label_pt, revenue_engine, engine_rank, payer_kind, trigger_kind, value_event_type,
     pricing_mode, percentage, currency, hypothesis_note, problem_solved, substitution_answer)
 VALUES
- ('donation.institutional_fee', 'Taxa de serviço sobre aporte institucional confirmado (campanha institucional)', 'success_fee', 6,
+ ('donation.institutional_fee', 'Taxa de serviço sobre aporte institucional confirmado (campanha institucional)', 'enterprise', 3,
   'company', 'transaction', NULL, 'percentage', 3.50, 'BRL',
   'HIPÓTESE do pacote (10/10/2026): 3,5 % sobre aporte CONFIRMADO em campanha de tipo institutional_fund, pago pelo financiador '
   '(empresa/fundação) por contrato, SE o enquadramento permitir. ISENTA por padrão quando a origem do recurso é pública; elegível só com '

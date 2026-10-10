@@ -6,10 +6,12 @@ sintéticos.
 """
 from __future__ import annotations
 
+import json
 import unittest
 import uuid
 
-from tests.support import Client, db_system, grant_premium, new_account, server, set_role
+from tests import test_v0270_economy as ECOT
+from tests.support import Client, db_system, grant_premium, new_account, reauth, server, set_role
 
 PDF = b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n"
 
@@ -171,7 +173,7 @@ def _fin_setup(cls):
     from tests.support import make_staff, reauth
     from tests.test_v0340_open_scenarios import SECRET, _publish
     st = server()
-    st["state"].settings.payment_webhook_secret = SECRET
+    st["state"].settings.donation_webhook_secret = SECRET
     cls.osc = new_account("osc", compliance="approved")
     cls.reviewer = make_staff("compliance")
     reauth(cls.reviewer)
@@ -603,3 +605,184 @@ class CreateAdminNeverSilentlyPromotesTests(unittest.TestCase):
         self.assertEqual(Client().post("/v1/auth/login", {"email": pre.email, "password": PASSWORD}).status, 401,
                          "a senha de quem pré-cadastrou continuou valendo")
         self.assertEqual(pre.get("/v1/me").status, 401, "sessão anterior à promoção continuou aberta")
+
+
+# ================================================================================================ lote D
+class WebhookSignatureHasATimeWindowTests(unittest.TestCase):
+    """PAY-01 — antes: a assinatura cobria só o corpo (evento capturado valia para sempre); o mesmo segredo servia aos dois
+    webhooks; um evento SEM assinatura ocupava o `event_id` e fazia o verdadeiro chegar como "duplicado"; o sandbox valia em
+    produção; havia um segredo de reserva fixo no código."""
+
+    @classmethod
+    def setUpClass(cls):
+        _fin_setup(cls)
+
+    def _body(self, donation: dict, event_id: str | None = None) -> bytes:
+        from tests.test_v0340_open_scenarios import _charge_of
+        return json.dumps({"event_id": event_id or "evt-" + uuid.uuid4().hex[:10], "type": "payment.confirmed",
+                           "charge_id": _charge_of(donation["id"]), "amount_cents": donation["amount_cents"],
+                           "currency": "BRL"}).encode()
+
+    def _post(self, raw: bytes, sig: str):
+        return self.anon.request("POST", "/v1/webhooks/donations/sandbox", raw=raw, ctype="application/json",
+                                 headers={"X-Impacto-Signature": sig})
+
+    def _status(self, donation_id: str) -> str:
+        with db_system() as c:
+            return c.scalar("SELECT status FROM donations WHERE id = $1", donation_id)
+
+    def test_a_correctly_signed_but_old_event_has_no_effect(self):
+        import time
+
+        from impacto.integrations.events import sign
+        from tests.test_v0340_open_scenarios import SECRET
+        d = _donate(self.anon, self.slug, 5_000)
+        raw = self._body(d)
+        old, _ = sign(SECRET, raw, int(time.time()) - 600)        # assinatura certa, dez minutos atrás
+        r = self._post(raw, old)
+        self.assertEqual((r.status, r.json["status"]), (202, "rejected_signature"), r)
+        self.assertNotEqual(self._status(d["id"]), "confirmed", "evento antigo (repetido) confirmou a doação")
+        legacy = __import__("hmac").new(SECRET.encode(), raw, "sha256").hexdigest()   # formato antigo: só o corpo
+        self.assertEqual(self._post(raw, legacy).json["status"], "rejected_signature")
+        fresh, _ = sign(SECRET, raw)
+        self.assertEqual(self._post(raw, fresh).status, 200)
+        self.assertEqual(self._status(d["id"]), "confirmed")
+
+    def test_an_unsigned_event_cannot_squat_the_event_id(self):
+        from impacto.integrations.events import sign
+        from tests.test_v0340_open_scenarios import SECRET
+        d = _donate(self.anon, self.slug, 6_000)
+        raw = self._body(d, event_id="evt-previsivel-" + uuid.uuid4().hex[:6])
+        self.assertEqual(self._post(raw, "t=1,v1=" + "0" * 64).status, 202)     # chega primeiro, sem assinatura
+        good, _ = sign(SECRET, raw)
+        r = self._post(raw, good)
+        self.assertEqual(r.status, 200, r)
+        self.assertNotEqual(r.json["status"], "duplicate", "o evento verdadeiro foi tratado como repetido do falso")
+        self.assertEqual(self._status(d["id"]), "confirmed")
+
+    def test_each_webhook_has_its_own_secret(self):
+        from impacto.integrations.events import sign
+        from tests.test_v0340_open_scenarios import SECRET
+        st = server()["state"].settings
+        old_pay, old_don = st.payment_webhook_secret, st.donation_webhook_secret
+        try:
+            st.payment_webhook_secret = "segredo-do-webhook-de-pagamentos-" + uuid.uuid4().hex
+            d = _donate(self.anon, self.slug, 7_000)
+            raw = self._body(d)
+            other, _ = sign(st.payment_webhook_secret, raw)
+            self.assertEqual(self._post(raw, other).json["status"], "rejected_signature", "o segredo de pagamentos valeu nas doações")
+            st.donation_webhook_secret = ""
+            r = self._post(raw, other)
+            self.assertEqual((r.status, r.json["code"]), (404, "webhook_not_configured"))
+            st.donation_webhook_secret = st.payment_webhook_secret      # o mesmo segredo nos dois: recusado
+            self.assertEqual(self._post(raw, other).status, 404)
+            st.donation_webhook_secret = SECRET
+            self.assertEqual(self._post(raw, sign(SECRET, raw)[0]).status, 200)
+        finally:
+            st.payment_webhook_secret, st.donation_webhook_secret = old_pay, old_don
+
+    def test_an_unsigned_billing_event_does_not_squat_either(self):
+        from impacto.economics import payments as PAY
+        eid = "evt-billing-" + uuid.uuid4().hex[:8]
+        with db_system() as c:
+            fake = PAY.record_webhook(c, provider="pix", event_id=eid, event_type="charge.paid", payload={"event_id": eid}, signature_verified=False)
+            real = PAY.record_webhook(c, provider="pix", event_id=eid, event_type="charge.paid", payload={"event_id": eid}, signature_verified=True)
+        self.assertFalse(fake["applied"])
+        self.assertFalse(real["duplicate"], "o evento assinado virou 'duplicado' do evento sem assinatura")
+        self.assertTrue(real["applied"])
+
+    def test_no_fixed_fallback_secret(self):
+        from impacto.integrations.events import sign
+        from impacto.services.donations import SandboxProvider
+        import hashlib
+        import hmac
+        raw = b'{"event_id":"x"}'
+        for guess in ("sandbox-sem-segredo", ""):
+            # formato atual e formato antigo (HMAC só do corpo, que o código anterior aceitava com o segredo de reserva)
+            for sig in (sign(guess or "a", raw)[0], hmac.new(guess.encode(), raw, hashlib.sha256).hexdigest()):
+                self.assertFalse(SandboxProvider("").verify_signature({"x-impacto-signature": sig}, raw), (guess, sig[:12]))
+
+    def test_the_sandbox_never_runs_in_production(self):
+        from tests.test_v0310_storage import _base
+
+        from impacto import config as C
+        from impacto.http import ApiError
+        from impacto.services import donations as DON
+        prod = _base(env="production", payment_sandbox_enabled=True)
+        with self.assertRaises(C.ConfigError) as err:
+            C.validate(prod)
+        self.assertIn("PAYMENT_SANDBOX_ENABLED", str(err.exception))
+        self.assertFalse(DON.sandbox_allowed(prod), "produção com a variável ligada ainda simularia pagamento")
+        with self.assertRaises(ApiError) as e2:
+            DON.provider_for(prod)
+        self.assertEqual(e2.exception.code, "provider_unavailable")
+        self.assertFalse(DON.sandbox_allowed(_base(env="staging", payment_sandbox_enabled=False)))
+        self.assertTrue(DON.sandbox_allowed(_base(env="staging", payment_sandbox_enabled=True)))
+        self.assertTrue(DON.sandbox_allowed(_base(env="development")))
+
+    def test_short_secrets_do_not_count_in_hardened_mode(self):
+        from tests.test_v0310_storage import _base
+
+        from impacto.services import donations as DON
+        self.assertEqual(DON.webhook_secret(_base(env="staging", donation_webhook_secret="curto-demais"), "donation_webhook_secret"), "")
+        longo = "x" * 40
+        self.assertEqual(DON.webhook_secret(_base(env="staging", donation_webhook_secret=longo), "donation_webhook_secret"), longo)
+
+
+class PixKeyIsProtectedTests(ECOT.EconomyBase):
+    """PAY-09 — antes: a dona trocava a chave PIX de repasse sem confirmar identidade, sem aviso às outras partes, sem
+    carência e mesmo depois de todos assinarem — quem tomasse a conta desviava o próximo repasse em silêncio."""
+
+    def _osc_party(self, aid: str) -> str:
+        d = self.osc.get(f"/v1/signed-agreements/{aid}").json
+        return next(p["id"] for p in d["parties"] if p["org_id"] == self.osc.org_id)
+
+    def _put(self, aid: str, key: str, kind: str = "cnpj"):
+        return self.osc.put(f"/v1/signed-agreements/{aid}/parties/{self._osc_party(aid)}/pix", {"pix_key": key, "pix_key_type": kind})
+
+    def _stale(self, client: Client):
+        with db_system() as c:
+            c.run("UPDATE sessions SET reauth_at = now() - interval '1 hour' WHERE user_id = $1", client.user["id"])
+
+    def test_setting_the_key_needs_fresh_identity(self):
+        aid, _ = self._agreement(self._project(), with_proponent=False)
+        self._stale(self.osc)
+        r = self._put(aid, "12345678000195")
+        self.assertEqual((r.status, r.json["code"]), (401, "step_up_required"), r)
+        reauth(self.osc)
+        self.assertEqual(self._put(aid, "12345678000195").status, 200)
+
+    def test_the_key_locks_after_the_first_signature_and_every_party_is_told(self):
+        from tests.support import outbox_messages, subject_of
+        aid, _ = self._agreement(self._project(), with_proponent=False)
+        reauth(self.osc)
+        self.assertEqual(self._put(aid, "12345678000195").status, 200)
+        antes = len(outbox_messages())
+        self.assertEqual(self._put(aid, "98765432000110").status, 200, "antes de qualquer assinatura a troca é permitida")
+        avisos = [m for m in outbox_messages()[antes:] if "Chave PIX" in subject_of(m)]
+        self.assertIn(self.funder.email, {m["To"] for m in avisos}, "a financiadora não soube da troca")
+        self.assertIn(self.osc.email, {m["To"] for m in avisos}, "a dona da conta não soube da troca")
+        with db_system() as c:
+            n = c.scalar("SELECT count(*) FROM notifications WHERE org_id = $1 AND title LIKE 'Chave PIX%'", self.funder.org_id)
+        self.assertGreaterEqual(n, 1)
+        self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/publish").status, 200)
+        self._sign(aid, self.funder)                       # primeira assinatura
+        r = self._put(aid, "11222333000181")
+        self.assertEqual((r.status, r.json["code"]), (409, "pix_locked_after_signature"), r)
+        with db_system() as c, self.assertRaises(Exception) as err:
+            c.run("UPDATE signed_agreement_parties SET pix_key = '11222333000181' WHERE id = $1", self._osc_party(aid))
+        self.assertIn("pix_locked_after_signature", str(err.exception) + str(getattr(err.exception, "constraint", "")))
+
+    def test_a_key_first_given_after_a_signature_waits_before_the_payer_sees_it(self):
+        aid, _ = self._agreement(self._project(), with_proponent=False)
+        self.assertEqual(self.osc.post(f"/v1/signed-agreements/{aid}/publish").status, 200)
+        self._sign(aid, self.funder)
+        reauth(self.osc)
+        r = self._put(aid, "12345678000195")
+        self.assertEqual(r.status, 200, r)
+        self.assertIsNotNone(r.json["cooling_until"])
+        visto = next(p for p in self.funder.get(f"/v1/signed-agreements/{aid}").json["parties"] if p["org_id"] == self.osc.org_id)
+        self.assertIsNone(visto["pix_key"], "quem paga viu a chave inteira durante a carência")
+        self.assertTrue(visto["pix_key_masked"] and visto["pix_cooling_until"])
+        dona = next(p for p in self.osc.get(f"/v1/signed-agreements/{aid}").json["parties"] if p["org_id"] == self.osc.org_id)
+        self.assertEqual(dona["pix_key"], "12345678000195")

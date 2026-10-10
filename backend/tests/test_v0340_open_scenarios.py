@@ -9,12 +9,11 @@ finge que um provedor real existe.
 * 35 reprocessamento · 38 cancelamento de recorrência (assinatura não existe: ADR-341) · 39 reembolso do que a
   plataforma recebeu, com a fatura protegida contra a própria organização
 """
-import hashlib
-import hmac
 import json
 import unittest
 import uuid
 
+from impacto.integrations.events import sign
 from tests.support import Client, db_system, make_staff, new_account, reauth, server, verify_beneficiary
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
@@ -24,7 +23,8 @@ _CARDS: dict[str, str] = {}
 
 def _signed(client: Client, body: dict):
     raw = json.dumps(body).encode()
-    sig = hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    # v0.35.0 (auditoria, PAY-01): assinatura `t=<unix>,v1=<hmac(t.corpo)>` com janela de 300 s (antes: hmac só do corpo)
+    sig, _ = sign(SECRET, raw)
     return client.request("POST", "/v1/webhooks/donations/sandbox", raw=raw, ctype="application/json", headers={"X-Impacto-Signature": sig})
 
 
@@ -78,7 +78,8 @@ class OpenScenariosTests(unittest.TestCase):
     def setUpClass(cls):
         st = server()
         cls.state = st["state"]
-        cls.state.settings.payment_webhook_secret = SECRET
+        # v0.35.0 (auditoria, PAY-01): o webhook de doações tem segredo PRÓPRIO (DONATION_WEBHOOK_SECRET)
+        cls.state.settings.donation_webhook_secret = SECRET
         cls.osc = new_account("osc", compliance="approved")
         cls.donor = new_account("individual")
         cls.reviewer = make_staff("compliance")

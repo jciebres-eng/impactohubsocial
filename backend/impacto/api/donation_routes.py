@@ -27,6 +27,8 @@ def public_campaign(ctx: Ctx):
         out = DON.public_campaign(c, ctx.path["slug"])
     out["canonical_url"] = DON.canonical_url(ctx.settings, ctx.path["slug"], out["campaign"]["qr_version"])
     out["recurring_available"] = bool(getattr(ctx.settings, "recurring_donations_enabled", False) and out["campaign"].get("allow_recurring"))
+    if out.get("payment_mode") == "sandbox" and not DON.sandbox_allowed(ctx.settings):
+        out["payment_mode"] = "unavailable"   # v0.35.0 (PAY-01): produção não simula pagamento
     return out
 
 
@@ -83,9 +85,9 @@ def donation_receipt(ctx: Ctx):
        summary="Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada")
 def donation_webhook(ctx: Ctx, payload: bytes):
     provider = ctx.path["provider"][:40]
-    if not ctx.settings.payment_webhook_secret:
+    if not DON.webhook_secret(ctx.settings, "donation_webhook_secret"):
         return JSONResponse({"status": "rejected", "code": "webhook_not_configured",
-                             "note": "PAYMENT_WEBHOOK_SECRET ausente: nenhum evento é aceito"}, status_code=404)
+                             "note": "DONATION_WEBHOOK_SECRET ausente, curto ou igual ao de pagamentos: nenhum evento é aceito"}, status_code=404)
     try:
         prov = DON.provider_for(ctx.settings, provider)
     except ApiError:

@@ -31,6 +31,7 @@ def detail(conn: Connection, agreement_id: str, viewer_org_id: str | None = None
     a["parties"] = conn.query(
         "SELECT p.id::text AS id, p.org_id::text AS org_id, o.legal_name, p.role, p.required, p.signed_at, p.declined_at,"
         " p.pix_key_type, (p.pix_key IS NOT NULL) AS pix_informed, p.pix_key,"
+        " CASE WHEN p.pix_key_cooling_until > now() THEN p.pix_key_cooling_until END AS pix_cooling_until,"
         " p.decline_reason, p.signature_id::text AS signature_id, p.user_id::text AS user_id,"
         " user_display_name(p.user_id) AS user_name FROM signed_agreement_parties p"
         " JOIN organizations o ON o.id = p.org_id WHERE p.agreement_id = $1 ORDER BY p.invited_at", agreement_id)
@@ -39,6 +40,8 @@ def detail(conn: Connection, agreement_id: str, viewer_org_id: str | None = None
     funder_ids = {p["org_id"] for p in a["parties"] if p["role"] == "funder"}
     for p in a["parties"]:
         full = viewer_org_id is not None and (viewer_org_id == p["org_id"] or viewer_org_id in funder_ids)
+        if p["pix_cooling_until"] and viewer_org_id != p["org_id"]:
+            full = False   # v0.35.0 (auditoria, PAY-09): chave informada depois da assinatura, em carência de 24 h
         key = p.pop("pix_key", None)
         p["pix_key_masked"] = mask_pix(key, p["pix_key_type"]) if key else None
         p["pix_key"] = key if full else None

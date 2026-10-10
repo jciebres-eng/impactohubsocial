@@ -5,8 +5,6 @@ frontend NUNCA decide preço, saldo ou fonte: pede a prévia, mostra, e confirma
 """
 from __future__ import annotations
 
-import hashlib
-import hmac
 import json
 from datetime import date
 from typing import Annotated, Literal
@@ -213,14 +211,14 @@ def payment_webhook(ctx: Ctx, payload: bytes):
     """Quem confirma pagamento é o provedor, por evento assinado. Sem segredo configurado a rota responde 404
     (como o webhook de integração responde a conexão desconhecida): não existe "aceitar sem conferir". Evento com
     assinatura inválida é gravado para auditoria e NÃO produz efeito."""
-    secret = ctx.settings.payment_webhook_secret
+    from ..services.donations import verify_timestamped, webhook_secret
+    secret = webhook_secret(ctx.settings, "payment_webhook_secret")
     provider = ctx.path["provider"][:40]
     if not secret:
         return JSONResponse({"status": "rejected", "code": "webhook_not_configured",
-                             "note": "PAYMENT_WEBHOOK_SECRET ausente: nenhum evento de pagamento é aceito"}, status_code=404)
-    given = ctx.request.headers.get("x-impacto-signature", "")
-    expected = hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
-    verified = bool(given) and hmac.compare_digest(given, expected)
+                             "note": "PAYMENT_WEBHOOK_SECRET ausente ou curto: nenhum evento de pagamento é aceito"}, status_code=404)
+    # v0.35.0 (auditoria, PAY-01): assinatura com carimbo de tempo (t=…,v1=…) e janela de 300 s; segredo próprio deste endpoint
+    verified = verify_timestamped(secret, payload, ctx.request.headers.get("x-impacto-signature", ""))
     try:
         data = json.loads(payload or b"{}")
     except ValueError:

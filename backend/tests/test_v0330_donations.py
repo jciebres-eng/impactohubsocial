@@ -15,8 +15,6 @@ O que estes testes PROVAM, contra HTTP e PostgreSQL reais:
   * outra organização não vê a prestação de contas (404); comprovante existe e não se chama recibo dedutível;
   * flags de cobrança real recusam subir sem adaptador (config.validate).
 """
-import hashlib
-import hmac
 import json
 import os
 import unittest
@@ -24,6 +22,7 @@ import unittest.mock
 import uuid
 from dataclasses import replace
 
+from impacto.integrations.events import sign
 from tests.support import Client, db_system, make_admin, make_staff, new_account, reauth, server
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
@@ -31,7 +30,8 @@ SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 
 def _signed(client: Client, path: str, body: dict) -> object:
     raw = json.dumps(body).encode()
-    sig = hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    # v0.35.0 (auditoria, PAY-01): assinatura `t=<unix>,v1=<hmac(t.corpo)>` com janela de 300 s (antes: hmac só do corpo)
+    sig, _ = sign(SECRET, raw)
     return client.request("POST", path, raw=raw, ctype="application/json", headers={"X-Impacto-Signature": sig})
 
 
@@ -40,7 +40,8 @@ class DonationsEndToEndTests(unittest.TestCase):
     def setUpClass(cls):
         st = server()
         cls.base, cls.state = st["base"], st["state"]
-        cls.state.settings.payment_webhook_secret = SECRET
+        # v0.35.0 (auditoria, PAY-01): o webhook de doações tem segredo PRÓPRIO (DONATION_WEBHOOK_SECRET)
+        cls.state.settings.donation_webhook_secret = SECRET
         cls.state.settings.public_base_url = "https://impacto.teste"
         cls.osc = new_account("osc", compliance="approved")
         cls.outra = new_account("osc", compliance="approved")

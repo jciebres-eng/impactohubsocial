@@ -28,7 +28,6 @@ PROVEDORES AVALIADOS (documentação oficial, lida em 09/10/2026; ver DONATIONS_
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 import secrets
 import uuid
@@ -161,7 +160,8 @@ class SandboxProvider:
     supports_split = False
 
     def __init__(self, secret: str):
-        self.secret = secret or "sandbox-sem-segredo"
+        # v0.35.0 (auditoria, PAY-01): sem segredo de reserva fixo. Segredo vazio = nenhuma assinatura confere.
+        self.secret = secret or ""
 
     def create_charge(self, *, donation_id: str, amount_cents: int, method: str, description: str, expires_in_minutes: int,
                       split: list[dict] | None = None) -> Charge:
@@ -173,9 +173,12 @@ class SandboxProvider:
         return Charge(cid, method, amount_cents, exp, payload, None if method == "pix" else f"/doar/checkout-sandbox/{cid}")
 
     def verify_signature(self, headers: dict, body: bytes) -> bool:
-        given = headers.get("x-impacto-signature", "")
-        expected = hmac.new(self.secret.encode(), body, hashlib.sha256).hexdigest()
-        return bool(given) and hmac.compare_digest(given, expected)
+        """v0.35.0 (auditoria, PAY-01): `X-Impacto-Signature: t=<unix>,v1=<HMAC-SHA256(segredo, "t." + corpo)>`, com janela
+        de 300 s — o mesmo formato dos webhooks que a plataforma envia (integrations/events.py). Antes a assinatura cobria só
+        o corpo: um evento capturado continuava válido para sempre (barrado apenas pela deduplicação do `event_id`)."""
+        if not self.secret:
+            return False
+        return verify_timestamped(self.secret, body, headers.get("x-impacto-signature", ""))
 
     def parse_event(self, body: bytes) -> dict:
         data = json.loads(body or b"{}")
@@ -187,13 +190,46 @@ class SandboxProvider:
         return None   # sandbox não tem consulta: um evento ambíguo fica em `under_review`
 
 
+WEBHOOK_TOLERANCE_SECONDS = 300
+MIN_WEBHOOK_SECRET = 32
+
+
+def verify_timestamped(secret: str, body: bytes, header: str) -> bool:
+    from ..integrations.events import verify
+    return bool(secret) and verify(secret, body or b"", header or "", tolerance=WEBHOOK_TOLERANCE_SECONDS)
+
+
+def webhook_secret(settings: Any, name: str) -> str:
+    """O segredo de UM endpoint de webhook, ou "" quando ele não pode ser usado. Em staging/produção, segredo com menos de
+    32 caracteres não serve (o endpoint responde "não configurado" em vez de aceitar assinatura fraca); o de doações não pode
+    ser igual ao de pagamentos (v0.35.0, auditoria PAY-01)."""
+    secret = getattr(settings, name, "") or ""
+    if not secret:
+        return ""
+    if getattr(settings, "is_hardened", False) and len(secret) < MIN_WEBHOOK_SECRET:
+        return ""
+    if name == "donation_webhook_secret" and secret == (getattr(settings, "payment_webhook_secret", "") or ""):
+        return ""
+    return secret
+
+
+def sandbox_allowed(settings: Any) -> bool:
+    """O sandbox não move dinheiro: nunca em produção; em staging, só ligado explicitamente (v0.35.0, auditoria PAY-01)."""
+    if getattr(settings, "env", "") == "production":
+        return False
+    return bool(getattr(settings, "payment_sandbox_enabled", True))
+
+
 def provider_for(settings: Any, name: str | None = None) -> PaymentProvider:
     name = name or SANDBOX
     if name in LIVE_PROVIDERS and getattr(settings, "live_payment_provider_enabled", False):
         raise NotImplementedError("adaptador real entra por ADR, com credencial no cofre")   # pragma: no cover
     if name != SANDBOX:
         raise unprocessable(f"provedor '{name}' não disponível: só o sandbox existe nesta versão", code="provider_unavailable")
-    return SandboxProvider(getattr(settings, "payment_webhook_secret", "") or "")
+    if not sandbox_allowed(settings):
+        raise unprocessable("doações indisponíveis neste ambiente: não há provedor de pagamento real, e o provedor de teste "
+                            "(sandbox) não funciona em produção", code="provider_unavailable")
+    return SandboxProvider(webhook_secret(settings, "donation_webhook_secret"))
 
 
 def redact(payload: dict) -> dict:
@@ -474,15 +510,20 @@ def record_provider_event(c: Connection, *, provider: str, event: dict, signatur
     `duplicate` com o estado do processamento — e um evento ainda não aplicado (`received`/`failed`) pode ser reaplicado."""
     sha = hashlib.sha256(raw or b"").hexdigest()
     status = "received" if signature_verified else "rejected"
+    # v0.35.0 (auditoria, PAY-01): evento SEM assinatura válida fica guardado para auditoria sob um identificador próprio
+    # (`unverified:` + hash do corpo), nunca sob o `event_id` que ele alega. Antes, quem conhecesse o id de um evento
+    # futuro podia mandá-lo primeiro, sem assinatura: o verdadeiro chegava depois como "duplicado" e não era aplicado.
+    stored_event_id = event["event_id"] if signature_verified else f"unverified:{sha[:40]}"
     row_id = c.scalar(
         "INSERT INTO payment_provider_events(provider, event_id, event_type, provider_charge_id, amount_cents, signature_verified,"
         " payload_redacted, payload_sha256, processing_status, processing_note)"
         " VALUES ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10) ON CONFLICT (provider, event_id) DO NOTHING RETURNING id",
-        provider, event["event_id"], event["event_type"], event.get("provider_charge_id"), event.get("amount_cents"), signature_verified,
-        json.dumps(redact(event.get("raw") or {})), sha, status, (None if signature_verified else "assinatura inválida: nenhum efeito"))
+        provider, stored_event_id, event["event_type"], event.get("provider_charge_id"), event.get("amount_cents"), signature_verified,
+        json.dumps(redact(event.get("raw") or {})), sha, status,
+        (None if signature_verified else f"assinatura inválida ou fora da janela: nenhum efeito (event_id alegado: {event['event_id'][:80]})"))
     if row_id is None:
         existing = c.one("SELECT id, processing_status, signature_verified FROM payment_provider_events WHERE provider = $1 AND event_id = $2",
-                         provider, event["event_id"])
+                         provider, stored_event_id)
         c.run("UPDATE payment_provider_events SET attempts = attempts + 1 WHERE id = $1", existing["id"])
         return {"event_row_id": existing["id"], "duplicate": True, "applied": False, "status": existing["processing_status"],
                 "reapplicable": bool(existing["signature_verified"]) and existing["processing_status"] in ("received", "failed")}

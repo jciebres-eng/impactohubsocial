@@ -59,6 +59,8 @@ SECURITY_ACTIONS = frozenset({
     "audit.log_exported",
     # v0.35.0 (auditoria, AUTH-11): falhas de segundo fator e de reautenticação; decisões de quatro olhos sobre dinheiro.
     "auth.mfa_failed", "auth.step_up_failed", "beneficiary.verification_confirmed", "reconciliation.approved",
+    # v0.35.0 (auditoria, PAY-09): para onde vai o dinheiro de um acordo
+    "agreement.party_pix_set",
 })
 
 # A entrada privilegiada RECUSADA não passa por `record()`: ela é gravada em `privileged_access_log`

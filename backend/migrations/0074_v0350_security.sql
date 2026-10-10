@@ -102,3 +102,26 @@ ALTER TABLE reconciliation_runs
 ALTER TABLE users
   ADD COLUMN mfa_setup_code_hash text CHECK (mfa_setup_code_hash IS NULL OR mfa_setup_code_hash ~ '^[0-9a-f]{64}$'),
   ADD COLUMN mfa_setup_code_expires_at timestamptz;
+
+-- ============================================================================ PAY-09 (lote D) — chave PIX de repasse
+-- A chave é para onde o dinheiro vai. Antes: a dona trocava a chave a qualquer momento, sem confirmar identidade, sem aviso
+-- às outras partes, sem carência e mesmo depois de todos assinarem. Agora (serviço + este gatilho, que vale para qualquer
+-- caminho): chave JÁ INFORMADA não muda depois da primeira assinatura ou com o acordo fora de rascunho/assinatura — troca só
+-- por nova versão do acordo; chave informada pela primeira vez depois de assinatura fica em carência (`pix_key_cooling_until`).
+ALTER TABLE signed_agreement_parties ADD COLUMN pix_key_cooling_until timestamptz;
+
+CREATE FUNCTION signed_party_pix_lock() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+BEGIN
+  IF OLD.pix_key IS NOT NULL
+     AND (NEW.pix_key IS DISTINCT FROM OLD.pix_key OR NEW.pix_key_type IS DISTINCT FROM OLD.pix_key_type)
+     AND (EXISTS (SELECT 1 FROM signed_agreement_parties p WHERE p.agreement_id = NEW.agreement_id AND p.signed_at IS NOT NULL)
+          OR EXISTS (SELECT 1 FROM signed_agreements a WHERE a.id = NEW.agreement_id AND a.status NOT IN ('draft', 'awaiting_signatures')))
+  THEN
+    RAISE EXCEPTION 'chave PIX travada: o acordo já tem assinatura (troca só por nova versão do acordo)'
+      USING ERRCODE = 'check_violation', CONSTRAINT = 'pix_locked_after_signature';
+  END IF;
+  RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION signed_party_pix_lock() FROM PUBLIC;
+CREATE TRIGGER trg_party_pix_lock BEFORE UPDATE OF pix_key, pix_key_type ON signed_agreement_parties
+  FOR EACH ROW EXECUTE FUNCTION signed_party_pix_lock();

@@ -618,11 +618,25 @@ def _flush_ledger(ctx: Ctx, out: dict) -> dict:
 @route("PUT", "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix", body=TSch.PartyPixIn, min_role=OWNER, tags=("agreements",),
        summary="A própria parte informa a chave PIX que receberá os repasses deste acordo (formato conferido pelo banco)")
 def party_set_pix(ctx: Ctx, body: TSch.PartyPixIn):
+    from ..http import require_fresh_identity
+    from ..services.auth import _send_after
     from ..trust import economy as ECO
+    # v0.35.0 (auditoria, PAY-09): para onde o dinheiro vai só muda com identidade confirmada há menos de 15 minutos
+    require_fresh_identity(ctx)
     with ctx.tx() as c:
         out = ECO.set_party_pix(c, agreement_id=ctx.path["agreement_id"], party_id=ctx.path["party_id"], org_id=ctx.org_id,
                                 user_id=ctx.user_id, pix_key=body.pix_key, pix_key_type=body.pix_key_type)
-        ctx.audit(c, "agreement.party_pix_set", "agreement", ctx.path["agreement_id"], {"party_id": ctx.path["party_id"], "type": body.pix_key_type})
+        if out.get("notify"):
+            ctx.audit(c, "agreement.party_pix_set", "agreement", ctx.path["agreement_id"],
+                      {"party_id": ctx.path["party_id"], "type": body.pix_key_type, "changed": out["changed"],
+                       "cooling_until": out["cooling_until"].isoformat() if out.get("cooling_until") else None})
+    if out.pop("notify", False):
+        with ctx.system_tx() as c:
+            title, text, *emails = ECO.pix_change_notice(c, agreement_id=ctx.path["agreement_id"], party_org_id=ctx.org_id,
+                                                         masked=out["pix_key_masked"], changed=out["changed"],
+                                                         cooling_until=out.get("cooling_until"))
+        for e in emails:
+            _send_after(ctx, e, f"{title} — Plataforma Impacto", text)
     return out
 
 

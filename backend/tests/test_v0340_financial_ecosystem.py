@@ -5,14 +5,13 @@ receita devida ≠ recebida, fatura paga parcialmente, cobrança vencida, compro
 divergente, divergência razão × provedor, mudança de tarifa com operações antigas, valor fora dos limites, concorrência de
 eventos, acesso de outra organização, e a regra ADR-381 (nada de prestação de contas consulta o estado comercial).
 """
-import hashlib
-import hmac
 import json
 import re
 import threading
 import unittest
 import uuid
 
+from impacto.integrations.events import sign
 from tests.support import ROOT, Client, db_system, make_admin, make_staff, new_account, reauth, server, verify_beneficiary
 
 SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
@@ -20,7 +19,8 @@ SECRET = "segredo-webhook-de-teste-nao-e-segredo-real"
 
 def _signed(client: Client, body: dict):
     raw = json.dumps(body).encode()
-    sig = hmac.new(SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    # v0.35.0 (auditoria, PAY-01): assinatura `t=<unix>,v1=<hmac(t.corpo)>` com janela de 300 s (antes: hmac só do corpo)
+    sig, _ = sign(SECRET, raw)
     return client.request("POST", "/v1/webhooks/donations/sandbox", raw=raw, ctype="application/json", headers={"X-Impacto-Signature": sig})
 
 
@@ -79,7 +79,8 @@ class EcosystemTests(unittest.TestCase):
     def setUpClass(cls):
         st = server()
         cls.base, cls.state = st["base"], st["state"]
-        cls.state.settings.payment_webhook_secret = SECRET
+        # v0.35.0 (auditoria, PAY-01): o webhook de doações tem segredo PRÓPRIO (DONATION_WEBHOOK_SECRET)
+        cls.state.settings.donation_webhook_secret = SECRET
         cls.osc = new_account("osc", compliance="approved")
         cls.other = new_account("osc", compliance="approved")
         cls.company = new_account("company", compliance="approved")

@@ -78,6 +78,15 @@ def unprocessable(msg: str, details: Any = None, code: str = "unprocessable") ->
     return ApiError(422, code, msg, details)
 
 
+def require_fresh_identity(ctx: Any) -> None:
+    """Identidade confirmada (senha + segundo fator, se ativo) há menos de 15 minutos — o mesmo critério das permissões de
+    `STEP_UP_PERMISSIONS`. A tela recebe `step_up_required`, pede a confirmação e repete a chamada (web/src/api.ts)."""
+    from .core import access as ACCESS
+    if not ACCESS.of(ctx)._reauth_fresh():
+        raise ApiError(401, "step_up_required", "Confirme sua identidade para esta operação",
+                       {"allowed": False, "reason": "permission_denied", "source": "step_up", "step_up_required": True})
+
+
 def _default(o):
     if isinstance(o, (datetime, date)):
         return o.isoformat()
@@ -410,13 +419,12 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
             raise forbidden("Área restrita à administração da plataforma", "admin_only")
         if ctx.settings.require_mfa_for_admins and not p.mfa_verified:
             raise forbidden("Administração exige MFA ativo e verificado nesta sessão", "mfa_required")
-        if not spec.permission and not spec.staff and ctx.request.method in UNSAFE and not ACCESS.of(ctx)._reauth_fresh():
+        if not spec.permission and not spec.staff and ctx.request.method in UNSAFE:
             # v0.35.0 (auditoria, AUTH-05): escrita da administração SEM permissão nomeada (só administrador da plataforma)
             # também exige identidade confirmada há menos de 15 minutos — antes, 68 rotas (mudar status de usuário,
             # confirmar recebimento, decidir identidade, medidas de moderação…) passavam só com a sessão.
             # Rotas editoriais da equipe (`staff=`: base de conhecimento, revisão de conteúdo) ficam como antes.
-            raise ApiError(401, "step_up_required", "Confirme sua identidade para esta operação",
-                           {"allowed": False, "reason": "permission_denied", "source": "step_up", "step_up_required": True})
+            require_fresh_identity(ctx)
         if spec.permission:
             # Segunda conferência, ANTES de `admin_mode` ser ligado. Não é redundante com a porta:
             # é aqui que entram o papel somente-leitura e a exigência de reautenticação recente.

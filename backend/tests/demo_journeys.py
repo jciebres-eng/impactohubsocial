@@ -543,11 +543,13 @@ class Jornadas:
             return
         aid = self.ids["acordo_financiamento"] = ac["id"]
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.confirmar_identidade(osc, J)   # v0.35.0 (auditoria, PAY-09): informar a chave PIX pede identidade confirmada
         self.passo(J, "quem recebe informa a própria chave PIX no contrato", osc, "PUT",
                    f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix", {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
         if part:
             self.passo(J, "inclui a apoiadora como proponente (parte opcional)", osc, "POST", f"/v1/signed-agreements/{aid}/parties",
                        {"org_id": apo.org_id, "role": "proponent", "required": False})
+            self.confirmar_identidade(apo, J)
             self.passo(J, "apoiadora informa a própria chave PIX", apo, "PUT",
                        f"/v1/signed-agreements/{aid}/parties/{self._party(apo, aid)}/pix", {"pix_key": "elisa@demo.impacto.local", "pix_key_type": "email"})
         marcos = []
@@ -625,6 +627,7 @@ class Jornadas:
             return
         aid = self.ids["acordo_complementar"] = ac["id"]
         self.passo(J, "inclui a empresa como financiadora", osc, "POST", f"/v1/signed-agreements/{aid}/parties", {"org_id": emp.org_id, "role": "funder"})
+        self.confirmar_identidade(osc, J)   # v0.35.0 (auditoria, PAY-09)
         self.passo(J, "OSC informa a chave PIX no contrato", osc, "PUT", f"/v1/signed-agreements/{aid}/parties/{self._party(osc, aid)}/pix",
                    {"pix_key": "12345678000195", "pix_key_type": "cnpj"})
         m = self.passo(J, "define o único marco", osc, "POST", f"/v1/signed-agreements/{aid}/milestones",

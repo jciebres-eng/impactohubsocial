@@ -11,7 +11,7 @@ from __future__ import annotations
 import unittest
 from datetime import date
 
-from tests.support import PASSWORD, db_system, last_signature_code, make_staff, new_account, server
+from tests.support import PASSWORD, db_system, last_signature_code, make_staff, new_account, reauth, server
 from tests.test_v0140_trust import upload
 
 OSC_IDEA = {"kind": "idea", "stage": "idea", "title": "Biblioteca itinerante para bairros sem acervo",
@@ -77,6 +77,7 @@ class EconomyBase(unittest.TestCase):
         d = client.get(f"/v1/signed-agreements/{aid}").json
         party = next(p for p in d["parties"] if p["org_id"] == client.org_id)
         kind, key = ("cnpj", "12345678000195") if client is self.osc else ("email", f"{client.org_id[:8]}@exemplo.test")
+        reauth(client)   # v0.35.0 (auditoria, PAY-09): informar a chave PIX pede identidade confirmada há menos de 15 minutos
         r = client.put(f"/v1/signed-agreements/{aid}/parties/{party['id']}/pix", {"pix_key": key, "pix_key_type": kind})
         self.assertEqual(r.status, 200, r)
         return r.json
@@ -368,6 +369,8 @@ class PixKeyTests(EconomyBase):
         aid, mid = self._agreement(pid, with_proponent=False)
         d = self.osc.get(f"/v1/signed-agreements/{aid}").json
         funder_party = next(p for p in d["parties"] if p["org_id"] == self.funder.org_id)
+        reauth(self.osc)      # v0.35.0 (auditoria, PAY-09): sem a confirmação de identidade a resposta seria 401 antes da regra da parte
+        reauth(self.funder)
         self.assertEqual(self.osc.put(f"/v1/signed-agreements/{aid}/parties/{funder_party['id']}/pix", {"pix_key": "a@b.co", "pix_key_type": "email"}).status, 403)
         bad = self.funder.put(f"/v1/signed-agreements/{aid}/parties/{funder_party['id']}/pix", {"pix_key": "123", "pix_key_type": "cnpj"})
         self.assertIn(bad.status, (422,), bad)

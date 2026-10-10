@@ -110,6 +110,12 @@ class Settings:
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     payment_webhook_secret: str = ""      # v0.28.0: HMAC dos webhooks de pagamento em /v1/webhooks/payments/{provider}
+    # v0.35.0 (auditoria, PAY-01): segredo PRÓPRIO do webhook de doações (/v1/webhooks/donations/{provider}). Antes o mesmo
+    # segredo servia aos dois endpoints: quem tivesse um assinava eventos do outro.
+    donation_webhook_secret: str = ""
+    # v0.35.0 (auditoria, PAY-01): o provedor SANDBOX (não move dinheiro) só existe fora de produção. Em produção é recusado
+    # sempre; em staging, só com PAYMENT_SANDBOX_ENABLED=true (ambiente de teste com dados sintéticos).
+    payment_sandbox_enabled: bool = True
     # v0.33.0 — doações e campanhas: padrões SEGUROS. Nada de cobrança real, split, recorrência ou retenção sem decisão.
     donations_enabled: bool = True                 # módulo ligado (só provedor sandbox existe)
     campaign_publication_enabled: bool = True      # publicar campanhas (exige revisão + beneficiário verificado)
@@ -204,6 +210,8 @@ def load_settings() -> Settings:
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
         payment_webhook_secret=_env("PAYMENT_WEBHOOK_SECRET", "") or "",
+        donation_webhook_secret=_env("DONATION_WEBHOOK_SECRET", "") or "",
+        payment_sandbox_enabled=_bool("PAYMENT_SANDBOX_ENABLED", not hardened),
         donations_enabled=_bool("DONATIONS_ENABLED", True),
         campaign_publication_enabled=_bool("CAMPAIGN_PUBLICATION_ENABLED", True),
         live_payment_provider_enabled=_bool("LIVE_PAYMENT_PROVIDER_ENABLED", False),
@@ -295,6 +303,9 @@ def validate(s: Settings) -> None:
         errors.append("AI_PROVIDER externo exige AI_API_KEY e AI_MODEL")
     if s.mail_provider == "smtp" and not s.smtp_host:
         errors.append("MAIL_PROVIDER=smtp exige SMTP_HOST")
+    if s.env == "production" and s.payment_sandbox_enabled:
+        # v0.35.0 (auditoria, PAY-01): "não simule pagamentos em produção" — o sandbox não move dinheiro
+        errors.append("PAYMENT_SANDBOX_ENABLED=true não é permitido em production (o provedor sandbox não move dinheiro)")
     if s.live_payment_provider_enabled:
         errors.append("LIVE_PAYMENT_PROVIDER_ENABLED=true sem adaptador real: nenhum provedor de doações existe nesta versão (ADR-375)")
     if s.split_enabled or s.recurring_donations_enabled or s.risk_hold_enabled:

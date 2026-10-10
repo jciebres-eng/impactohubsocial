@@ -75,7 +75,7 @@ O CI completo roda no pull request (job a job; o log do job não é legível pel
 | Execução | Commit | Resultado |
 |---|---|---|
 | PR #8, `38070321577` | `e9a892d` | auditoria, armazenamento, docker e segredos verdes; **backend vermelho** com as mesmas 9 falhas e 1 erro da regressão local (2570 testes; §7); **pilha-do-zero vermelho**: axe-core `select-name` em `/admin/identidade` |
-| PR #8, `38071340835` | `fd1c86c` | auditoria, armazenamento, docker e segredos verdes; **pilha-do-zero vermelho** pela mesma tela; backend ainda em execução quando esta auditoria foi escrita (os documentos de fechamento ainda não estavam regenerados nesse commit) |
+| PR #8, `38071340835` | `fd1c86c` | auditoria, armazenamento, docker e segredos verdes; **backend**: 2570 testes, **0 erros** (a correção de `test_v0170_payments` confirmada no CI) e as 9 falhas de fechamento (documentos ainda não regenerados nesse commit); **pilha-do-zero vermelho** pela mesma tela |
 | PR #8, commit da correção e dos documentos de fechamento | seguinte a `fd1c86c` | registrado no PR #8 e no relatório entregue ao responsável |
 
 Reprodução local da pilha (sem Docker, com o MESMO roteiro): 16 jornadas, 280 passos, 0 falha; 235 rotas de tela, 857 visitas, 235
@@ -93,6 +93,7 @@ aqui; por isso o achado de acessibilidade só apareceu no CI — e agora tem tes
 | `test_v0270_release_docs` (5): relatório, auditoria, manifesto e notas | documentos de fechamento ainda os da v0.34.0 | este relatório, esta auditoria e o manifesto final da v0.35.0 |
 | `test_v0300_release_docs` (matriz de jornadas por perfil) | gerada com o relatório do ensaio da pilha (280 passos), a suíte produz 274 (sem os passos da academia que o seed da pilha tem) | regenerada com o relatório da regressão |
 | `pilha-do-zero` (CI do PR #8): axe-core `select-name` em `/admin/identidade` | o filtro "Aguardando decisão / Já decididas" do lote H não tinha nome acessível; o axe não roda aqui | `aria-label`; `test_e2e_v0350_admin_screens` falha no front de `fd1c86c` e passa agora |
+| `test_v0230_execution_matrices` [INTEGRATION_HOMOLOGATION_MATRIX.csv] (portões de fechamento, 246 testes) | a matriz de integrações lista os módulos de teste que exercitam cada integração e foi gerada antes do módulo E2E novo existir | regenerada com `make_integration_matrix.py`; portões reexecutados ao fim do log |
 | `test_v0240_managed_db` (lote E): `digest()` não encontrada no desenho do Supabase | o primeiro laço do DB-03 trocava o `search_path` inteiro e perdia `extensions` | o laço preserva o caminho existente e só acrescenta `pg_temp` |
 | `test_v0340_*` (lote H): receita conferida maior que a esperada | o teste de quatro olhos da remuneração deixava uma obrigação liquidada | a transação do teste é desfeita no fim |
 | `test_e2e_v0101` (lote C): diálogo de identidade bloqueava o clique | escrita administrativa passou a pedir step-up | o teste confirma a identidade no diálogo, como a pessoa faria |

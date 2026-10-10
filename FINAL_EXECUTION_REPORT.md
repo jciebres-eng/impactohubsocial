@@ -166,6 +166,11 @@ CI DO PR #8, mesmo commit e9a892d (execução 38070321577): backend com as MESMA
   regressão local e a do CI concordam; auditoria, armazenamento, docker e segredos VERDES; pilha-do-zero VERMELHO:
   axe-core `select-name` em /admin/identidade (seletor do lote H sem nome acessível). Corrigido; teste novo
   test_e2e_v0350_admin_screens falha no front anterior (docs/security/evidencias/a11y_admin_identidade_antes_fd1c86c.txt)
+CI DO PR #8, commit fd1c86c (execução 38071340835): backend 2570 testes, 0 erros (correção de test_v0170_payments confirmada),
+  as 9 falhas de fechamento ainda presentes (documentos regenerados só no commit seguinte); pilha-do-zero: a mesma tela
+PORTÕES DE FECHAMENTO, 1ª passagem (commit 56ceb6f + manifestos, ao fim do mesmo log): Ran 246 tests — 1 falha: a matriz de
+  integrações não listava o módulo E2E novo (gerada antes dele); regenerada. 2ª passagem ao fim do log (matrizes, manifesto,
+  cobertura, documentos de fechamento, matriz de autorização): Ran 88 tests — OK
 MÓDULOS NOVOS: test_v0350_security (84, 32 classes) · test_v0350_release_docs (5) · test_e2e_v0350_admin_screens (2)
 FALHA ANTES, PASSA DEPOIS: para cada lote A–I, os testes novos rodados no commit anterior ao lote (docs/security/evidencias/)
 LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok

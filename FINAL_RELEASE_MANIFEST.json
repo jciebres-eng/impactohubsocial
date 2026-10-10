@@ -1,39 +1,44 @@
 {
- "name": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0",
- "version": "0.34.0",
- "commit": "64a13ac",
- "date": "2026-10-10T13:40:46+00:00",
+ "name": "IMPACTO_TRUST_FINAL_RELEASE_0.35.0",
+ "version": "0.35.0",
+ "commit": "56ceb6fac00acf24de829bb1f056789ab725efa3",
+ "date": "2026-10-10T18:12:03+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 4498,
-  "traceability": "IMPACTO_v0.34.0_TRACEABILITY.json",
-  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip"
+  "tracked_total": 4700,
+  "traceability": "IMPACTO_v0.35.0_TRACEABILITY.json",
+  "package": "IMPACTO_TRUST_FINAL_RELEASE_0.35.0.zip"
  },
  "migrations": {
-  "total": 73,
-  "last": "0073_v0340_financial_ecosystem.sql",
+  "total": 74,
+  "last": "0074_v0350_security.sql",
   "new_in_this_version": [
-   "0073_v0340_financial_ecosystem.sql"
+   "0074_v0350_security.sql"
   ]
  },
  "tests": {
-  "total": 2478,
-  "seconds": 2257.161,
+  "total": 2570,
+  "seconds": 2757.669,
   "result": "FAILED",
-  "detail": "failures=8, errors=1, skipped=31",
-  "runs_in_log": 2,
+  "detail": "failures=9, errors=1, skipped=31",
+  "runs_in_log": 3,
   "after_full_run": [
    {
-    "total": 126,
+    "total": 246,
+    "result": "FAILED",
+    "detail": "failures=1, skipped=1"
+   },
+   {
+    "total": 88,
     "result": "OK",
     "detail": ""
    }
   ]
  },
  "new_test_modules": [
-  "backend/tests/test_v0340_financial_ecosystem.py",
-  "backend/tests/test_v0340_open_scenarios.py",
-  "backend/tests/test_v0340_release_docs.py"
+  "backend/tests/test_e2e_v0350_admin_screens.py",
+  "backend/tests/test_v0350_release_docs.py",
+  "backend/tests/test_v0350_security.py"
  ],
  "integrations": [
   {
@@ -121,22 +126,21 @@
    "credentials": "ausentes (nenhuma credencial versionada neste repositório)"
   }
  ],
- "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico/contábil → cartas legais verdes → regras validadas | jurídico/contábil + responsável | nenhuma obrigação pode virar devida |\n| Contrato com provedor de pagamento; modelo de titularidade | responsável + provedor | só sandbox |\n| Termos (campanha, doador, política, contrato institucional, autorização de despesa pública) | jurídico | textos em rascunho |\n| NFS-e | contábil + integração | não implementada |\n| Publicar o worker (`pleasing-trust`) junto | responsável | sem a publicação, a rotina `financial_ops` (reprocessamento, vencidas, conciliação periódica) não roda |\n| Instrumento recorrente homologado (Pix Automático/cartão) e split no provedor | responsável + provedor | recorrência e split ficam desligados pela configuração |\n| Juntar PRs #5, #6 e este ramo; publicar demo e produção | responsável | módulo fora do ar |\n| Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |\n| Tag v0.34.0 | o ambiente não envia tags | criar no GitHub |",
- "known_limitations": "- Obrigações nascem de doações (taxa e contribuição voluntária); acordo, serviço e crédito de IA têm `source_kind` previsto mas\n  não ligado.\n- O snapshot do provedor no sandbox deriva dos próprios eventos — prova o mecanismo, não a API de um provedor real.\n- Split e recorrência: caminhos testados com o provedor SIMULADO no teste; continuam recusados pela configuração até contrato e\n  homologação.\n- Reembolso parcial do que a plataforma recebeu é ajuste por decisão humana, não automático.\n- Modelo de 24 meses: premissas sem histórico; a taxa sobre doações não sustenta a operação em nenhum cenário.\n- Textos dos avisos e termos são rascunhos.",
- "decision": "```text\nGO WITH CONDITIONS\n```\n\nPara juntar e publicar no demo e, depois de conferido, na produção — onde nenhuma cobrança é possível e nenhuma variável nova é\nobrigatória. Condições: as da v0.32.0 e v0.33.0 continuam. **Cobrança real, split, recorrência cobrada, regra ativa: NO-GO** até\nparecer, contrato, cartas verdes e ADR nova.",
+ "external_dependencies": "| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Trocar o token do R2 do backup exposto (\"C2\") | responsável (Cloudflare + GitHub Secrets) | P0 independente da versão |\n| Repositório privado; proteger a `main`; alertas do Dependabot | responsável (GitHub) | P0/P1 |\n| Variáveis novas no Railway (`TRUST_PROXY_HEADERS`, `TRUSTED_PROXY_HOPS`, …) e conferência do IP no demo | responsável | sem elas, limites por IP seguem contornáveis por cabeçalho forjado |\n| Juntar PRs #5 → #6 → #7 → #8; publicar demo e produção (com o worker) | responsável | correções fora do ar (produção na v0.30.0) |\n| Backup no formato novo e ensaio de restauração depois do merge | responsável (Actions) | ensaio real pendente |\n| Diagnóstico do banco de produção; antivírus da produção | autorização do responsável | NÃO VERIFICÁVEL |\n| KYC/KYB por provedor, poderes de representação, beneficiário final | contrato + parecer | BLOCKED_EXTERNAL |\n| Prazos de guarda por tipo de documento; comunicação de incidente | jurídico/DPO | perguntas abertas |\n| Tag v0.35.0 | o ambiente não envia tags | criar no GitHub |",
+ "known_limitations": "- Produção recusar subir sem antivírus: **não feito por decisão do responsável**; o `pos-deploy` avisa se estiver desligado.\n- Imagens de base por digest e hashes dos pacotes Python: não feitos (Docker Hub inacessível aqui; nada é fixado sem conferir).\n- SBOM e varredura da imagem não bloqueiam nesta versão (a primeira execução mede a linha de base).\n- Cifra da chave PIX em repouso (SEC-02): versão futura.\n- 35 rotas editoriais da equipe seguem sem confirmação de identidade (não mexem em dinheiro, identidade nem permissão).\n- Fracionamento por doador anônimo não é detectável sem identificar a pessoa (escolha de privacidade).\n- Itens P2/P3 da fase 1 fora dos lotes A–I (CSRF sem Origin em rota anônima, OIDC, índices, rótulos) seguem abertos.\n- Nenhum teste de intrusão externo foi feito.",
+ "decision": "```text\nGO WITH CONDITIONS\n```\n\nPara juntar e publicar no demo e, depois de conferido, na produção. Condições: P0 do responsável (token \"C2\", repositório\nprivado); variáveis do `PUBLICATION_CHECKLIST_v0350.md` antes da produção (`PAYMENT_SANDBOX_ENABLED` e `REQUIRE_MFA_FOR_ADMINS`\nerradas impedem a subida — o Railway mantém o deploy anterior); conferir o IP no demo; publicar o worker junto; backup e ensaio\nno formato novo logo depois. As condições das v0.32.0–v0.34.0 continuam. **Cobrança real: NO-GO** (inalterado). A decisão de\npublicar é humana.",
  "documents": [
   "FINAL_EXECUTION_REPORT.md",
   "FINAL_EXECUTION_AUDIT.md",
   "RELEASE_NOTES.md",
   "CHANGELOG.md",
   "DECISIONS.md",
+  "docs/security/AUDITORIA_SEGURANCA_FASE1.md",
+  "docs/security/RELATORIO_CORRECOES_FASE2.md",
   "README.md",
   "CLAUDE.md",
   "MOTOR_COVERAGE_MATRIX.md",
-  "docs/finance/DONATIONS_API.md",
-  "docs/finance/LEGAL_FISCAL_MATRIX.md",
-  "docs/finance/RISK_MATRIX.md",
-  "docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md",
-  "docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md"
+  "docs/security/runbooks/RB-01-vazamento-de-segredo.md",
+  "docs/security/PUBLICATION_CHECKLIST_v0350.md"
  ]
 }

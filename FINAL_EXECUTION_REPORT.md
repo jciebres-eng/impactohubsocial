@@ -1,6 +1,6 @@
 # Relatório final de execução — IMPACTO v0.34.0
 
-**Data:** 10/10/2026 · **Ramo:** `ecossistema-v0340` (sobre `doacoes-v0330` / PR #6; PR #5 da v0.32.0 ainda aberto) · **Tag:** `v0.34.0`
+**Data:** 10/10/2026 · **Ramo:** `ecossistema-v0340` (PR #7, sobre `doacoes-v0330` / PR #6; PR #5 da v0.32.0 ainda aberto) · **Tag:** `v0.34.0`
 (a criar no GitHub pelo responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**
 `IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·
 **Relatório técnico (DOCX):** `IMPACTO_v0.34.0_RELATORIO_TECNICO.docx`

@@ -1,9 +1,9 @@
 {
   "version": "0.33.0",
   "note": "Lista os arquivos do pacote da versão. O próprio manifesto não aparece aqui (não pode conter o próprio hash), mas vai dentro do ZIP. O conjunto é o MESMO de RELEASE_MANIFEST.sha256, gerado pelo mesmo collect() de scripts/make_release.py.",
-  "generated_at": "2026-10-10T02:16:30+00:00",
-  "files_total": 4293,
-  "size_bytes_total": 74774615,
+  "generated_at": "2026-10-10T02:17:02+00:00",
+  "files_total": 4291,
+  "size_bytes_total": 74619356,
   "by_category": {
     "api: rotas e esquemas": {
       "files": 63,
@@ -46,8 +46,8 @@
       "size_bytes": 2487
     },
     "evidência de execução": {
-      "files": 89,
-      "size_bytes": 4728725
+      "files": 87,
+      "size_bytes": 4573466
     },
     "frontend": {
       "files": 126,
@@ -4997,8 +4997,8 @@
     },
     {
       "file": "docs/evidence/test_run_v0.33.0.log",
-      "sha256": "83592c10a5dbc4a581aa01d9f12286a6db424015dc3763eee3c4aff93e61f526",
-      "size_bytes": 76874,
+      "sha256": "c6edc08ee025917e9ab6e304d83266c3733ae0036e6e72ccd2d63c31eeaae7f4",
+      "size_bytes": 78556,
       "category": "evidência de execução"
     },
     {
@@ -5017,18 +5017,6 @@
       "file": "docs/evidence/test_run_v0.9.0.log",
       "sha256": "06cdcc0ba9ec54c340b4674fb0a9f547f892d68d279c0d8c21c6f48dac146e75",
       "size_bytes": 24711,
-      "category": "evidência de execução"
-    },
-    {
-      "file": "docs/evidence/test_run_v0330_final.raw",
-      "sha256": "6bda2e694a4aca6189bcc1cfb0a31fd760c193ff3e3431057eaf220240880893",
-      "size_bytes": 79174,
-      "category": "evidência de execução"
-    },
-    {
-      "file": "docs/evidence/test_run_v0330_full.raw",
-      "sha256": "3e33dca7ebb37f1251da2631500eda2bc57a1dcec2461112c4d79fbef463851e",
-      "size_bytes": 77767,
       "category": "evidência de execução"
     },
     {

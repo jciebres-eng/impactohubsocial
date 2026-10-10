@@ -315,3 +315,32 @@ Diff is 57141 characters long. Set self.maxDiff to None to see it. : regere com 
 Ran 2451 tests in 1807.781s
 
 FAILED (failures=8, skipped=31)
+
+===== REEXECUÇÃO DOS PORTÕES DE FECHAMENTO (após manifestos, commit 7557266) =====
+...............F........................MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+....NOTICE:  extension "pgcrypto" already exists, skipping
+................
+======================================================================
+FAIL: test_every_manifest_entry_is_a_real_tracked_file (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_every_manifest_entry_is_a_real_tracked_file)
+Manifesto apontando para arquivo que não existe é rastreabilidade de ficção.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0230_release_gate.py", line 133, in test_every_manifest_entry_is_a_real_tracked_file
+    self.assertEqual([], fantasmas,
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+                     f"manifesto cita arquivo que não está no repositório: {fantasmas[:10]}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [] != ['docs/evidence/test_run_v0330_final.raw',[36 chars]raw']
+
+Second list contains 2 additional elements.
+First extra element 0:
+'docs/evidence/test_run_v0330_final.raw'
+
+- []
++ ['docs/evidence/test_run_v0330_final.raw',
++  'docs/evidence/test_run_v0330_full.raw'] : manifesto cita arquivo que não está no repositório: ['docs/evidence/test_run_v0330_final.raw', 'docs/evidence/test_run_v0330_full.raw']
+
+----------------------------------------------------------------------
+Ran 60 tests in 11.308s
+
+FAILED (failures=1)

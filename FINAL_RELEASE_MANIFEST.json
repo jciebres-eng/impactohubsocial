@@ -1,11 +1,11 @@
 {
  "name": "IMPACTO_TRUST_FINAL_RELEASE_0.33.0",
  "version": "0.33.0",
- "commit": "c3e5ea4",
- "date": "2026-10-10T02:16:28+00:00",
+ "commit": "7557266",
+ "date": "2026-10-10T02:17:02+00:00",
  "release_status": "GO WITH CONDITIONS",
  "files": {
-  "tracked_total": 4293,
+  "tracked_total": 4294,
   "traceability": "IMPACTO_v0.33.0_TRACEABILITY.json",
   "package": "IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip"
  },
@@ -21,7 +21,7 @@
   "seconds": 1807.781,
   "result": "FAILED",
   "detail": "failures=8, skipped=31",
-  "runs_in_log": 1
+  "runs_in_log": 2
  },
  "new_test_modules": [
   "backend/tests/test_v0300_evidence_object.py",

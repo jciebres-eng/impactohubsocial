@@ -90,7 +90,7 @@ corrigir acha a requisição no log sem adivinhar.
 | SMS e WhatsApp não chegam | Nenhuma conta de envio ligada |
 | As 14 integrações aparecem como bloqueadas | Todas em `BLOCKED` por falta de credencial do fornecedor |
 | Botão de SSO não aparece na tela de entrar | Não há provedor OIDC configurado (`OIDC_ISSUER` vazio). `GET /v1/meta/config` responde `sso_enabled: false` e o botão fica oculto — comportamento correto. A v0.23.1 chamou isso de defeito; estava errada (a rota sempre existiu, em `app.py`) |
-| 254 operações de API não têm tela | Backend à frente da interface; está medido e documentado |
+| 257 operações de API não têm tela | Backend à frente da interface; está medido e documentado |
 | Administrador e equipe interna só entram com o aplicativo autenticador | Administração exige MFA verificado na sessão. O seed cadastra o segundo fator; peça o segredo TOTP a quem semeou (`DEMO_TOTP_SECRET`) |
 | Perfis internos recebem 403 em sub-chamadas de telas do menu (`/admin/risco`, `/admin/auditoria`, `/financeiro/despesas`) | Permissão granular por papel: a tela combina operações que o papel não tem inteiras. Achado da demo v0.24.0, registrado para o produto |
 | Leitor de tela e navegação por voz com falhas | Pendências declaradas em `ACCESSIBILITY_REPORT.md`; não se fecham por software |

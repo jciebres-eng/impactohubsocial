@@ -1,0 +1,11 @@
+test_replay_has_no_time_limit (tests.probe_pay01_squat_old.Probe.test_replay_has_no_time_limit) ... assinatura sem carimbo de tempo (vale para sempre): {'status': 'confirmed', 'effect': 'confirmed', 'donation_id': '554148ff-5bed-4d09-b7bc-3986ce0fe4cd'}
+ok
+test_squat (tests.probe_pay01_squat_old.Probe.test_squat) ... sem assinatura: {'status': 'rejected_signature', 'effect': None, 'donation_id': None}
+assinado: {'status': 'duplicate', 'effect': None, 'donation_id': None}
+status da doação: awaiting_payment
+ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 10.892s
+
+OK

@@ -1,4 +1,4 @@
-# Plataforma Impacto — v0.34.0
+# Plataforma Impacto — v0.35.0
 
 **Infraestrutura digital de conexão, estruturação, financiamento, execução, acompanhamento e comprovação de
 impacto** para OSCs, empresas e fundações, profissionais e órgãos públicos. Um núcleo, várias experiências: cada
@@ -11,6 +11,14 @@ permissão frouxa.
 > arquitetura que está acima das outras, e `RELEASE_READINESS.md` §5 para o que esta versão **NÃO** entrega.
 > **Não publicado** em nenhuma loja ou domínio. Android/iOS: código pronto, **não construídos**. **Nenhuma
 > cobrança real é possível:** nenhum provedor de pagamento, fiscal, de WhatsApp, de mapas ou de IA está ligado.
+
+**Novo no v0.35.0 (correções de segurança, antifraude e integridade financeira — ADR-385 a ADR-392):** a auditoria de
+segurança de 10/10/2026 (`docs/security/`) virou 84 testes que falhavam no código anterior e passam agora: diligência vê só
+documentos institucionais; só a dona autoriza cobrança; conciliação contra fonte independente e com quatro olhos; verificação do
+beneficiário revogável e a quatro olhos; identidade e MFA da equipe endurecidos; webhooks com carimbo de tempo e sandbox fora de
+produção; chave PIX de repasse travada após assinatura; banco endurecido por catálogo; antifraude com caso, recurso e duas pessoas
+para restringir; backup externo com cifra autenticada; runbooks de incidente. **Nada publicado.** Antes de publicar:
+`docs/security/PUBLICATION_CHECKLIST_v0350.md`.
 
 **Novo no v0.34.0 (ecossistema financeiro: gratuito até gerar valor — ADR-377 a ADR-384):** toda remuneração da plataforma é
 uma obrigação registrada (calculada → devida → faturada → cobrada → recebida → liquidada) e **nada é devido sem gatilho

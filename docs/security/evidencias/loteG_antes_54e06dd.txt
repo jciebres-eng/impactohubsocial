@@ -1,0 +1,18 @@
+ERROR: test_a_non_numeric_content_length_is_a_400 (tests.test_v0350_security.MalformedRequestsAreClientErrorsTests.test_a_non_numeric_content_length_is_a_400)
+ImportError: cannot import name '_content_length' from 'impacto.http' (/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/backend/impacto/http.py)
+FAIL: test_a_duplicate_does_not_reveal_the_constraint_name (tests.test_v0350_security.MalformedRequestsAreClientErrorsTests.test_a_duplicate_does_not_reveal_the_constraint_name)
+AssertionError: 'users_email_key' unexpectedly found in '{"type": "https://impacto.app/errors/conflict", "title": "Registro duplicado", "status": 409, "code": "conflict", "request_id": "c516a025949e41ba", "details": {"constraint": "users_email_key"}}'
+FAIL: test_deeply_nested_json_is_a_400 (tests.test_v0350_security.MalformedRequestsAreClientErrorsTests.test_deeply_nested_json_is_a_400)
+AssertionError: Tuples differ: (500, 'internal_error') != (400, 'invalid_json')
+FAIL: test_public_readiness_is_short_in_production (tests.test_v0350_security.MalformedRequestsAreClientErrorsTests.test_public_readiness_is_short_in_production)
+AssertionError: Items in the first set but not the second:
+FAIL: test_carrier_grade_nat_and_mapped_addresses_are_refused (tests.test_v0350_security.OutboundRequestsOnlyReachThePublicInternetTests.test_carrier_grade_nat_and_mapped_addresses_are_refused)
+AssertionError: ValueError not raised : 100.64.0.1
+FAIL: test_variants_and_value_patterns_are_redacted (tests.test_v0350_security.LogsDoNotCarrySecretsOrPersonalDataTests.test_variants_and_value_patterns_are_redacted)
+AssertionError: 'segredo1' unexpectedly found in '{"ts": "2026-10-10T16:11:50.173+00:00", "level": "warning", "logger": "impacto.teste.redacao", "msg": "evento", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "new_password": "segredo1", "senha": "segredo2", "client_secret": "segredo3", "x_api_key": "segredo4", "detalhe": "CPF 123.456.789-09 de maria.silva@exemplo.org", "input_tokens": 120, "amount_cents": 5000}\n{"ts": "2026-10-10T16:11:50.173+00:00", "level": "error", "logger": "impacto.teste.redacao", "msg": "com exceção", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "exc": "Traceback (most recent call last):\\n  File \\"/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/backend/tests/test_v0350_security.py\\", line 1089, in test_variants_and_value_patterns_are_redacted\\n    raise RuntimeError(\\"falha ao enviar para joao@exemplo.org (CPF 98765432100)\\")\\nRuntimeError: falha ao enviar para joao@exemplo.org (CPF 98765432100)"}\n' : segredo1
+FAIL: test_a_tier_that_requires_a_schema_never_calls_out_without_one (tests.test_v0350_security.AiPolicyIsEnforcedAndWhatLeavesIsRedactedTests.test_a_tier_that_requires_a_schema_never_calls_out_without_one)
+AssertionError: 'ok' != 'blocked_policy'
+FAIL: test_what_leaves_has_identifiers_redacted_and_the_summary_asks_for_review (tests.test_v0350_security.AiPolicyIsEnforcedAndWhatLeavesIsRedactedTests.test_what_leaves_has_identifiers_redacted_and_the_summary_asks_for_review)
+AssertionError: None is not True
+Ran 8 tests in 6.412s
+FAILED (failures=7, errors=1)

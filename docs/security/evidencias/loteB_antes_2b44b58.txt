@@ -1,0 +1,10 @@
+ERROR: setUpClass (tests.test_v0350_security.ReconciliationProvesSomethingTests)
+AssertionError: <405 b'Method Not Allowed'>
+ERROR: setUpClass (tests.test_v0350_security.ConfirmationAndLedgerIntegrityTests)
+AssertionError: <405 b'Method Not Allowed'>
+ERROR: setUpClass (tests.test_v0350_security.PublicMoneyStaysPublicTests)
+AssertionError: <405 b'Method Not Allowed'>
+ERROR: setUpClass (tests.test_v0350_security.BeneficiaryVerificationIsRevocableAndFourEyesTests)
+AssertionError: <405 b'Method Not Allowed'>
+Ran 0 tests in 10.779s
+FAILED (errors=4)

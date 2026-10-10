@@ -30,6 +30,9 @@
 | `POST` | `/v1/admin/beneficiaries/{org_id}/verification/{verification_id}/confirm` | compliance.write | Segunda pessoa da equipe confirma a verificação do beneficiário (quatro olhos, conferido pelo banco) |
 | `GET` | `/v1/admin/donation-risk-cases` | compliance.read | Casos de risco abertos (revisão humana) |
 | `POST` | `/v1/admin/donation-risk-cases/{case_id}/decide` | compliance.write | Decide um caso de risco com justificativa; fica na trilha |
+| `POST` | `/v1/admin/donation-risk-cases/{case_id}/assign` | compliance.write | Assume a revisão de um caso de risco (revisor atribuído fica no caso) |
+| `GET` | `/v1/campaigns/{campaign_id}/risk-cases` | organização (gestor) | Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso |
+| `POST` | `/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal` | organização (gestor) | Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe) |
 | `POST` | `/v1/admin/donation-campaigns/{campaign_id}/reconcile` | finance.write | Conciliação da campanha (atalho da v0.33.0): mesma regra da execução com fila de exceções — sandbox contra os eventos assinados; provedor real exige extrato |
 | `GET` | `/v1/admin/donation-ledger/{campaign_id}` | finance.read | Razão de conciliação da campanha (partidas dobradas, append-only) e totais com definição |
 | `POST` | `/v1/campaigns/{campaign_id}/external-resources` | organização (gestor) | Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra) |

@@ -1,0 +1,14 @@
+ERROR: test_a_decompression_bomb_is_refused_instead_of_inflated (tests.test_v0350_security.PdfActiveContentIsFoundByStructureTests.test_a_decompression_bomb_is_refused_instead_of_inflated)
+ImportError: cannot import name 'pdf_active_content' from 'impacto.services.documents' (/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/backend/impacto/services/documents.py)
+ERROR: test_the_rescan_queue_survives_an_engine_error (tests.test_v0350_security.AntivirusOutageQuarantinesInsteadOfFailingTests.test_the_rescan_queue_survives_an_engine_error)
+ConnectionRefusedError: clamd fora do ar
+FAIL: test_hex_escaped_names_are_decoded (tests.test_v0350_security.PdfActiveContentIsFoundByStructureTests.test_hex_escaped_names_are_decoded)
+AssertionError: Tuples differ: (201, None) != (422, 'active_content')
+FAIL: test_javascript_inside_a_compressed_object_stream_is_found (tests.test_v0350_security.PdfActiveContentIsFoundByStructureTests.test_javascript_inside_a_compressed_object_stream_is_found)
+AssertionError: Tuples differ: (201, None) != (422, 'active_content')
+FAIL: test_upload_goes_to_quarantine_and_download_waits (tests.test_v0350_security.AntivirusOutageQuarantinesInsteadOfFailingTests.test_upload_goes_to_quarantine_and_download_waits)
+AssertionError: 500 != 201 : <500 b'{"type": "https://impacto.app/errors/internal_error", "title": "Erro interno. Informe o c\xc3\xb3digo ao suporte.", "status": 500, "code": "internal_error", "request_id": "86643404530d4b6d", "error_id": "9e4a3c3dcf94"}'>
+FAIL: test_identity_and_personal_documents_go_institutional_ones_stay (tests.test_v0350_security.AccountDeletionRemovesPersonalFilesTests.test_identity_and_personal_documents_go_institutional_ones_stay)
+AssertionError: Items in the second set but not the first:
+Ran 7 tests in 7.697s
+FAILED (failures=4, errors=2)

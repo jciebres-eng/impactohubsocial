@@ -1,0 +1,12 @@
+FAIL: test_a_temporary_table_cannot_change_what_a_definer_function_reads (tests.test_v0350_security.DatabaseCatalogHardeningTests.test_a_temporary_table_cannot_change_what_a_definer_function_reads)
+AssertionError: 'biometric' != 'none'
+FAIL: test_every_append_only_table_also_refuses_truncate (tests.test_v0350_security.DatabaseCatalogHardeningTests.test_every_append_only_table_also_refuses_truncate)
+AssertionError: Lists differ: [{'relname': 'accounting_entries'}, {'reln[1881 chars]ps'}] != []
+FAIL: test_every_security_definer_function_pins_the_search_path_with_pg_temp_last (tests.test_v0350_security.DatabaseCatalogHardeningTests.test_every_security_definer_function_pins_the_search_path_with_pg_temp_last)
+AssertionError: Lists differ: [{'f': 'kill_switch_apply()', 'proconfig':[2856 chars]c']}] != []
+FAIL: test_no_function_of_the_schema_is_executable_by_public (tests.test_v0350_security.DatabaseCatalogHardeningTests.test_no_function_of_the_schema_is_executable_by_public)
+AssertionError: Lists differ: [{'f': 'acceptance_anonymize_only()'}, {'f[6108 chars]()'}] != []
+FAIL: test_the_baselines_view_reapplies_row_level_security (tests.test_v0350_security.DatabaseCatalogHardeningTests.test_the_baselines_view_reapplies_row_level_security)
+AssertionError: 'security_invoker=true' not found in []
+Ran 6 tests in 5.714s
+FAILED (failures=5)

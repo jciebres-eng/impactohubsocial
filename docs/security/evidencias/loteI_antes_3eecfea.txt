@@ -1,0 +1,22 @@
+ERROR: test_any_change_truncation_reordering_or_wrong_passphrase_fails (tests.test_v0350_security.BackupCipherIsAuthenticatedTests.test_any_change_truncation_reordering_or_wrong_passphrase_fails)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/scripts/backup_crypt.py'
+ERROR: test_round_trip_including_an_empty_dump (tests.test_v0350_security.BackupCipherIsAuthenticatedTests.test_round_trip_including_an_empty_dump)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/scripts/backup_crypt.py'
+ERROR: test_short_passphrase_is_refused_and_a_failed_decrypt_leaves_no_partial_file (tests.test_v0350_security.BackupCipherIsAuthenticatedTests.test_short_passphrase_is_refused_and_a_failed_decrypt_leaves_no_partial_file)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/scripts/backup_crypt.py'
+ERROR: test_the_backup_workflow_uses_the_authenticated_format_and_publishes_the_hash_outside_the_bucket (tests.test_v0350_security.BackupCipherIsAuthenticatedTests.test_the_backup_workflow_uses_the_authenticated_format_and_publishes_the_hash_outside_the_bucket)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/scripts/backup_crypt.py'
+ERROR: test_dependabot_covers_every_ecosystem_in_use (tests.test_v0350_security.SupplyChainTests.test_dependabot_covers_every_ecosystem_in_use)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-claude-impactohubsocial/fb9d5e5b-0b91-5b01-9552-aa8afe807116/scratchpad/wt_before/.github/dependabot.yml'
+FAIL: test_every_action_is_pinned_to_a_full_commit_sha (tests.test_v0350_security.SupplyChainTests.test_every_action_is_pinned_to_a_full_commit_sha)
+AssertionError: Lists differ: ['armazenamento.yml: actions/checkout@v4',[837 chars]@v5'] != []
+FAIL: test_gitignore_keeps_secret_shaped_files_out (tests.test_v0350_security.SupplyChainTests.test_gitignore_keeps_secret_shaped_files_out)
+AssertionError: 1 != 0 : .env.production não é ignorado
+FAIL: test_secret_scanning_runs_on_push_too (tests.test_v0350_security.SupplyChainTests.test_secret_scanning_runs_on_push_too)
+AssertionError: 'push' unexpectedly found in "github.event_name != 'push'" : o job backend com gitleaks não roda no push
+FAIL: test_the_image_gets_an_sbom_and_a_vulnerability_scan_with_a_verified_binary (tests.test_v0350_security.SupplyChainTests.test_the_image_gets_an_sbom_and_a_vulnerability_scan_with_a_verified_binary)
+AssertionError: 0 != 1
+FAIL: test_every_alert_link_resolves_and_the_seven_runbooks_exist (tests.test_v0350_security.IncidentRunbooksTests.test_every_alert_link_resolves_and_the_seven_runbooks_exist)
+AssertionError: 3 not greater than or equal to 9
+Ran 10 tests in 0.210s
+FAILED (failures=5, errors=5)

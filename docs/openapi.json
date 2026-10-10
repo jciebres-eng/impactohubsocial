@@ -2,7 +2,7 @@
  "openapi": "3.1.0",
  "info": {
   "title": "Plataforma Impacto API",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "description": "API REST /v1. Erros seguem RFC 7807. Gerado do código (fonte única)."
  },
  "servers": [
@@ -353,7 +353,7 @@
   },
   "/v1/auth/mfa/enable": {
    "post": {
-    "summary": "Confirma TOTP e devolve códigos de recuperação",
+    "summary": "Confirma TOTP (e, para a equipe, o código do e-mail) e devolve códigos de recuperação",
     "operationId": "post_auth_routes_mfa_enable",
     "tags": [
      "auth"
@@ -374,12 +374,13 @@
       "description": "Erro (application/problem+json)"
      }
     },
+    "description": "Rate limit: 10/900s por IP",
     "requestBody": {
      "required": true,
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/CodeIn"
+        "$ref": "#/components/schemas/MfaEnableIn"
        }
       }
      }
@@ -10807,7 +10808,7 @@
   },
   "/v1/admin/risk/orgs/{org_id}/block": {
    "post": {
-    "summary": "Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível",
+    "summary": "Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA de duas pessoas: uma propõe, outra confirma; reversível",
     "operationId": "post_ops_routes_block_org",
     "tags": [
      "admin"
@@ -22174,7 +22175,7 @@
   },
   "/v1/admin/trust/identity/queue": {
    "get": {
-    "summary": "Fila de verificações de identidade aguardando conferência humana",
+    "summary": "Fila de verificações de identidade aguardando conferência humana (ou as já decididas, para suspender/revogar)",
     "operationId": "get_trust_routes_identity_queue",
     "tags": [
      "admin",
@@ -22221,6 +22222,20 @@
        "title": "Offset",
        "type": "integer"
       }
+     },
+     {
+      "name": "state",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "default": "open",
+       "enum": [
+        "open",
+        "decided"
+       ],
+       "title": "State",
+       "type": "string"
+      }
      }
     ]
    }
@@ -22266,6 +22281,53 @@
       "application/json": {
        "schema": {
         "$ref": "#/components/schemas/DecisionIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/trust/identity/{verification_id}/status": {
+   "post": {
+    "summary": "Suspende, revoga ou restabelece uma verificação de identidade já decidida (com motivo; nunca a própria)",
+    "operationId": "post_trust_routes_identity_change_status",
+    "tags": [
+     "admin",
+     "trust"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "verification_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdentityStatusIn"
        }
       }
      }
@@ -27799,7 +27861,7 @@
       "description": "Erro (application/problem+json)"
      }
     },
-    "description": "Requer organização ativa · Rate limit: 60/3600s por IP",
+    "description": "Requer organização ativa · Papel mínimo: owner · Rate limit: 60/3600s por IP",
     "parameters": [
      {
       "name": "offer_id",
@@ -27845,7 +27907,7 @@
       "description": "Erro (application/problem+json)"
      }
     },
-    "description": "Requer organização ativa",
+    "description": "Requer organização ativa · Papel mínimo: owner",
     "requestBody": {
      "required": true,
      "content": {
@@ -28039,7 +28101,7 @@
       "description": "Erro (application/problem+json)"
      }
     },
-    "description": "Requer organização ativa",
+    "description": "Requer organização ativa · Papel mínimo: owner",
     "requestBody": {
      "required": true,
      "content": {
@@ -40340,6 +40402,50 @@
     }
    }
   },
+  "/v1/admin/beneficiaries/{org_id}/verification/{verification_id}/confirm": {
+   "post": {
+    "summary": "Segunda pessoa da equipe confirma a verificação do beneficiário (quatro olhos, conferido pelo banco)",
+    "operationId": "post_donation_routes_admin_beneficiary_confirm",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "org_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "verification_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
   "/v1/admin/donation-risk-cases": {
    "get": {
     "summary": "Casos de risco abertos (revisão humana)",
@@ -40412,9 +40518,135 @@
     }
    }
   },
+  "/v1/admin/donation-risk-cases/{case_id}/assign": {
+   "post": {
+    "summary": "Assume a revisão de um caso de risco (revisor atribuído fica no caso)",
+    "operationId": "post_donation_routes_admin_risk_assign",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/risk-cases": {
+   "get": {
+    "summary": "Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso",
+    "operationId": "get_donation_routes_campaign_risk_cases",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal": {
+   "post": {
+    "summary": "Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe)",
+    "operationId": "post_donation_routes_campaign_risk_appeal",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Requer organização ativa · Papel mínimo: manager",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "name": "case_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RiskAppealIn"
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/admin/donation-campaigns/{campaign_id}/reconcile": {
    "post": {
-    "summary": "Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções",
+    "summary": "Conciliação da campanha (atalho da v0.33.0): mesma regra da execução com fila de exceções — sandbox contra os eventos assinados; provedor real exige extrato",
     "operationId": "post_donation_routes_admin_reconcile",
     "tags": [
      "donations"
@@ -41327,6 +41559,42 @@
     }
    }
   },
+  "/v1/admin/reconciliation/runs/{run_id}/approve": {
+   "post": {
+    "summary": "Segunda pessoa aprova o extrato manual: reexecuta com o mesmo extrato (hash conferido) e só então concilia",
+    "operationId": "post_donation_routes_admin_reconciliation_approve",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "run_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
   "/v1/admin/reconciliation/exceptions": {
    "get": {
     "summary": "Fila de exceções de conciliação",
@@ -41790,7 +42058,7 @@
     "title": "ChangePasswordIn",
     "type": "object"
    },
-   "CodeIn": {
+   "MfaEnableIn": {
     "additionalProperties": false,
     "properties": {
      "code": {
@@ -41798,12 +42066,26 @@
       "minLength": 6,
       "title": "Code",
       "type": "string"
+     },
+     "email_code": {
+      "anyOf": [
+       {
+        "maxLength": 10,
+        "minLength": 6,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Email Code"
      }
     },
     "required": [
      "code"
     ],
-    "title": "CodeIn",
+    "title": "MfaEnableIn",
     "type": "object"
    },
    "MfaDisableIn": {
@@ -55681,6 +55963,32 @@
     "title": "DecisionIn",
     "type": "object"
    },
+   "IdentityStatusIn": {
+    "additionalProperties": false,
+    "properties": {
+     "status": {
+      "enum": [
+       "suspended",
+       "revoked",
+       "verified"
+      ],
+      "title": "Status",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "status",
+     "note"
+    ],
+    "title": "IdentityStatusIn",
+    "type": "object"
+   },
    "CredentialDecisionIn": {
     "additionalProperties": false,
     "properties": {
@@ -65363,6 +65671,35 @@
     "title": "BeneficiaryVerificationIn",
     "type": "object"
    },
+   "EvidenceRefIn": {
+    "additionalProperties": false,
+    "description": "Referência ao que sustenta a decisão (v0.35.0, FRAUD-05): o identificador, nunca o conteúdo.",
+    "properties": {
+     "kind": {
+      "enum": [
+       "document",
+       "donation",
+       "provider_event",
+       "reconciliation_run",
+       "note"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "ref": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Ref",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "ref"
+    ],
+    "title": "EvidenceRefIn",
+    "type": "object"
+   },
    "RiskDecisionIn": {
     "additionalProperties": false,
     "properties": {
@@ -65381,6 +65718,15 @@
       "minLength": 10,
       "title": "Note",
       "type": "string"
+     },
+     "evidence": {
+      "default": [],
+      "items": {
+       "$ref": "#/components/schemas/EvidenceRefIn"
+      },
+      "maxItems": 20,
+      "title": "Evidence",
+      "type": "array"
      }
     },
     "required": [
@@ -65388,6 +65734,22 @@
      "note"
     ],
     "title": "RiskDecisionIn",
+    "type": "object"
+   },
+   "RiskAppealIn": {
+    "additionalProperties": false,
+    "properties": {
+     "note": {
+      "maxLength": 2000,
+      "minLength": 20,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "note"
+    ],
+    "title": "RiskAppealIn",
     "type": "object"
    },
    "ExternalResourceIn": {
@@ -65790,16 +66152,69 @@
     "title": "PublicFeeAuthorizationIn",
     "type": "object"
    },
+   "ProviderChargeLine": {
+    "additionalProperties": false,
+    "description": "Uma linha do extrato do provedor (v0.35.0, auditoria PAY-07: antes era um dicionário livre, sem validação).",
+    "properties": {
+     "charge_id": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Charge Id",
+      "type": "string"
+     },
+     "amount_cents": {
+      "maximum": 100000000000,
+      "minimum": 0,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "fee_cents": {
+      "anyOf": [
+       {
+        "maximum": 100000000000,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "title": "Fee Cents"
+     },
+     "confirmed": {
+      "default": false,
+      "title": "Confirmed",
+      "type": "boolean"
+     },
+     "reversed": {
+      "default": false,
+      "title": "Reversed",
+      "type": "boolean"
+     },
+     "settled": {
+      "default": false,
+      "title": "Settled",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "charge_id",
+     "amount_cents"
+    ],
+    "title": "ProviderChargeLine",
+    "type": "object"
+   },
    "ReconciliationSnapshotIn": {
     "additionalProperties": false,
-    "description": "Snapshot do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API.",
+    "description": "Extrato do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API. Vazio = sandbox\n(eventos assinados). Com linhas: a execução abre as exceções e fica aguardando a aprovação de OUTRA pessoa.",
     "properties": {
      "charges": {
       "default": [],
       "items": {
-       "additionalProperties": true,
-       "type": "object"
+       "$ref": "#/components/schemas/ProviderChargeLine"
       },
+      "maxItems": 5000,
       "title": "Charges",
       "type": "array"
      }

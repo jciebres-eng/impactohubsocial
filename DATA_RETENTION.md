@@ -4,7 +4,7 @@
 
 CLASSIFICAÇÃO DE RETENÇÃO. Para cada tabela com vínculo a organização ou a titular, diz o que acontece quando a conta é excluída e por quê. A origem da verdade é o banco: a classe declarada aqui é CONFERIDA contra a regra real da chave estrangeira por tests/test_v0190_lgpd_deletion.py. Declarar uma coisa e o banco fazer outra reprova.
 
-Conferido em 2026-10-07 · 194 vínculos a organização ou titular.
+Conferido em 2026-10-10 · 205 vínculos a organização ou titular.
 
 ## Classes
 
@@ -20,11 +20,11 @@ Conferido em 2026-10-07 · 194 vínculos a organização ou titular.
 
 | classe | vínculos |
 | --- | --- |
-| `anonymizable` | 21 |
+| `anonymizable` | 25 |
 | `append_only` | 19 |
 | `audit_only` | 3 |
-| `deletable_with_parent` | 138 |
-| `retainable` | 13 |
+| `deletable_with_parent` | 139 |
+| `retainable` | 19 |
 
 Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE ser deletable_with_parent (CASCADE). Uma coluna nova que não seja cascata reprova o teste: é exatamente assim que uma obrigação de guarda, ou um bloqueio de exclusão, entra sem ninguém decidir.
 
@@ -34,6 +34,12 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | --- | --- | --- | --- |
 | `ai_budgets.org_id` | `retainable` | `a` | Orçamento de IA é decisão comercial da organização e sustenta a conferência de cobrança: quanto a organização autorizou gastar num mês é o que explica a fatura daquele mês. Some com a organização, não com a pessoa. |
 | `ai_credit_ledger.org_id` | `retainable` | `a` | Razão de crédito de IA: o saldo é a SOMA dos lançamentos, então apagar um lançamento mudaria o saldo sem deixar rastro. A tabela é append-only por gatilho e o vínculo é NO ACTION — some com a organização por decisão explícita, nunca em cascata. Concessão, consumo e devolução são fatos sobre a ORGANIZAÇÃO. |
+| `ai_credit_orders.org_id` | `retainable` | `a` | Pedido de crédito de IA é registro comercial (consentimento, valor, modo, confirmação): sustenta a conferência de pagamento e de obrigação com o cliente. Some com a organização por decisão explícita, nunca em cascata. |
+| `ai_credit_orders.user_id` | `anonymizable` | `n` | Quem pediu é detalhe pessoal; o pedido continua existindo como fato da organização. |
+| `ai_executions.org_id` | `retainable` | `a` | Execução de IA é a prova de cada débito de crédito (reserva → cobrança) e de cada custo externo; apagar reescreveria o razão. Some com a organização por decisão explícita. |
+| `ai_executions.user_id` | `anonymizable` | `n` | Quem disparou a operação é detalhe pessoal; o consumo é fato da organização. |
+| `ai_quota_grants.org_id` | `retainable` | `a` | Concessão de cota é o antiabuso (uma por organização e por pessoa): apagar permitiria receber de novo. |
+| `ai_quota_grants.user_id` | `anonymizable` | `n` | O vínculo com a pessoa existe só para o antiabuso de boas-vindas; sem a pessoa, a concessão continua como fato da organização. |
 | `ai_usage.user_id` | `anonymizable` | `n` | Contabilidade de uso de IA é agregada; perde o vínculo e continua somando. |
 | `audit_events.org_id` | `audit_only` | `none` | Trilha de auditoria sem FK de propósito: apagar a organização não pode apagar a prova do que ela fez. |
 | `billable_events.org_id` | `append_only` | `c` | Evento faturável: base do que foi cobrado. Append-only por obrigação de prestação de contas. |
@@ -47,6 +53,7 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `demo_requests.user_id` | `anonymizable` | `n` | Idem. |
 | `diagnosis_versions.org_id` | `append_only` | `c` | Versão de diagnóstico: o histórico é o que permite comparar antes e depois. |
 | `domain_events.org_id` | `append_only` | `c` | Fato de domínio registrado; a trilha é o que reconstrói a história. |
+| `economic_events.org_id` | `anonymizable` | `n` | Livro econômico append-only (quem → pagou → quem → quanto → por quê). O vínculo com a organização pode ser anulado (ON DELETE SET NULL) sem apagar o lançamento: o fato econômico sobrevive à conta, como exige a prova de operação; o nome da organização sai com a exclusão. |
 | `eligibility_evaluations.org_id` | `append_only` | `c` | Conferência de elegibilidade lida por quem decidiu. |
 | `equity_assessments.org_id` | `append_only` | `c` | Avaliação de equidade registrada com método e data. |
 | `equity_contexts.org_id` | `deletable_with_parent` | `c` | Contexto declarado é do projeto da organização. |
@@ -64,7 +71,6 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `organization_qualification_events.org_id` | `audit_only` | `none` | Histórico de qualificação institucional, sem FK. |
 | `partnership_requests.org_id` | `anonymizable` | `n` | Pedido de parceria envolve duas partes; a outra conserva o registro. |
 | `partnership_requests.user_id` | `anonymizable` | `n` | Idem. |
-| `price_change_notices.org_id` | `append_only` | `c` | Aviso de reajuste: prova de que a mudança foi comunicada. |
 | `privileged_access_log.user_id` | `anonymizable` | `n` | Trilha de acesso PRIVILEGIADO, inclusive de leitura. Precisa sobreviver à exclusão da conta de quem foi registrado: a pergunta de uma investigação é "quem olhou a receita na semana do vazamento?", e ela deixaria de ter resposta justamente quando a pessoa apagasse a própria conta. ON DELETE SET NULL mantém a linha e derruba o apontamento — o que já basta, porque a trilha também guarda os papéis usados, a rota e o momento. |
 | `professional_experiences.org_id` | `anonymizable` | `n` | Experiência declarada perde o vínculo com a organização encerrada. |
 | `professional_services.user_id` | `anonymizable` | `n` | Serviço anunciado perde o vínculo com o titular. |
@@ -72,6 +78,9 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `project_snapshots.org_id` | `append_only` | `c` | Retrato do projeto num instante; é o que sustenta comparação longitudinal. |
 | `project_transitions.org_id` | `append_only` | `c` | Transição de estado do projeto, com autor e data. |
 | `readiness_snapshots.org_id` | `append_only` | `c` | Retrato de prontidão: a série temporal é a informação. |
+| `recognitions.org_id` | `append_only` | `c` | Reconhecimento de conclusão/quitação, só leitura; cai com a organização (ON DELETE CASCADE) porque é atributo dela e não prova de terceiro — a prova fica no livro econômico e no razão do projeto. |
+| `reconciliation_exceptions.org_id` | `anonymizable` | `n` | Exceção de conciliação (v0.34.0, ADR-380) é trilha operacional da plataforma (divergência entre razão e provedor, quem resolveu e como); sobrevive à saída da organização com o vínculo anulado, para a conciliação continuar auditável. |
+| `remuneration_obligations.org_id` | `retainable` | `r` | Obrigação de remuneração do IMPACTO (v0.34.0, ADR-377): crédito financeiro com versão de regra congelada, aviso prévio e trilha de cobrança; apagar em cascata faria sumir dívida ou isenção sem rastro. A organização devedora só sai depois de a obrigação ser liquidada, dispensada ou baixada por decisão registrada. |
 | `report_responses.org_id` | `append_only` | `c` | Manifestação de quem foi denunciado. A tabela é append-only por gatilho (v0.20.0, migração 0038): o que a parte respondeu na apuração NÃO se apaga, porque é a prova de que ela teve direito de resposta. Se pudesse ser removida, a plataforma perderia exatamente o registro que a protege de ter decidido sem ouvir. |
 | `reputation_disputes.org_id` | `append_only` | `c` | Contestação acompanha a organização contestante. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui. |
 | `reputation_snapshots.org_id` | `append_only` | `c` | Retrato de reputação é derivado; sem a organização não tem sujeito. A trilha é append-only: o gatilho recusa remoção, então a organização também não é removível enquanto houver linha aqui. |
@@ -82,6 +91,8 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `sessions.org_id` | `anonymizable` | `n` | Sessão é revogada e tem IP e agente limpos na exclusão da conta. |
 | `signature_revocations.org_id` | `retainable` | `a` | Revogação de assinatura é prova de que algo deixou de valer. Nunca desaparece. |
 | `signed_agreement_parties.user_id` | `anonymizable` | `n` | Parte de acordo assinado: o acordo permanece, o apontamento pessoal cai. |
+| `similarity_analyses.org_id` | `retainable` | `a` | Análise de similaridade é resultado contestável que outra parte pode ter lido; append-only por gatilho; some com a organização por decisão explícita. |
+| `similarity_disputes.org_id` | `retainable` | `a` | Contestação e revisão humana são trilha de decisão sobre a análise; somem com a organização por decisão explícita. |
 | `solution_adaptations.user_id` | `retainable` | `a` | Adaptação publicada é contribuição para a rede; sobrevive por integridade do que outros replicaram. |
 | `solution_combinations.user_id` | `retainable` | `a` | Idem adaptação. |
 | `solution_events.user_id` | `anonymizable` | `n` | Evento de solução vira histórico sem autor. |
@@ -91,7 +102,6 @@ Regra padrão: Toda coluna org_id/user_id que não esteja declarada abaixo DEVE 
 | `solution_reviews.user_id` | `retainable` | `a` | Avaliação lida por terceiros ao decidir replicar. |
 | `solution_search_log.user_id` | `anonymizable` | `n` | Registro de busca perde o vínculo e continua servindo a métrica agregada. |
 | `support_tickets.org_id` | `anonymizable` | `n` | Atendimento permanece para histórico de suporte. |
-| `trial_claims.org_id` | `anonymizable` | `n` | Controle de uso de teste gratuito, para impedir reuso indevido. |
 | `trust_events.org_id` | `append_only` | `c` | Evento de confiança (verificação, assinatura, revogação) lido por terceiros. |
 | `value_events.org_id` | `append_only` | `c` | Evento de valor entregue, base do ledger de valor. |
 
@@ -105,6 +115,7 @@ Rota: `POST /v1/privacy/delete-account`
 * recusa quando o titular é o único proprietário de organização com outras pessoas (409 transfer_ownership_first)
 * fecha a organização quando o titular é o único membro (status closed), sem apagar o histórico dela
 * anonimiza users: e-mail substituído, nome trocado, senha e segredo de MFA removidos
+* apaga os ARQUIVOS pessoais (v0.35.0, FILE-09): documento anexado a verificação de identidade da pessoa, documento_dirigente e exportacao_dados enviados por ela ou gerados para a organização que fecha com ela — registro marcado como excluído e objeto removido do armazenamento; documento assinado fica (prova de integridade)
 * revoga sessões e limpa IP e agente de usuário
 * apaga auth_tokens
 * limpa IP e agente dos aceites legais, mantendo a prova (gatilho acceptance_anonymize_only)
@@ -115,6 +126,7 @@ Rota: `POST /v1/privacy/delete-account`
 * não apaga a organização nem o histórico institucional dela: organização é pessoa jurídica e seus registros servem a terceiros (quem financiou, quem revisou, quem replicou)
 * não apaga trilha de auditoria nem registro financeiro
 * não remove a linha da organização: além das guardas legais (evidência, financeiro), a camada de impacto é append-only e recusa remoção — e é essa a decisão de arquitetura, não um efeito colateral
+* não apaga os documentos institucionais da organização (estatuto, certidões, prestação de contas…): são da pessoa jurídica, servem a terceiros e podem ter guarda obrigatória — o prazo por tipo de documento é pergunta aberta ao jurídico/DPO
 
 ## Divergências encontradas na conferência
 

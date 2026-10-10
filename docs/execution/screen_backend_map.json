@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 994,
- "operacoes_registradas": 988,
+ "operacoes_no_backend": 1000,
+ "operacoes_registradas": 994,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -20,7 +20,7 @@
  },
  "interface_sem_backend": {},
  "arquivos_do_front_varridos": 66,
- "operacoes_que_nenhuma_tela_chama": 254,
+ "operacoes_que_nenhuma_tela_chama": 257,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -172,6 +172,7 @@
   "POST /v1/admin/content/work-items/{}",
   "POST /v1/admin/content/{}/{}/retract",
   "POST /v1/admin/donation-campaigns/{}/reconcile",
+  "POST /v1/admin/donation-risk-cases/{}/assign",
   "POST /v1/admin/equity/denominators",
   "POST /v1/admin/funding-quotas/pledges/{}/confirm",
   "POST /v1/admin/hub/certificates/{}/revoke",
@@ -190,6 +191,7 @@
   "POST /v1/admin/monetization/pipeline/{}/waive",
   "POST /v1/admin/payout-transfers/{}/confirm",
   "POST /v1/admin/payouts/{}/reconcile",
+  "POST /v1/admin/reconciliation/runs/{}/approve",
   "POST /v1/admin/remuneration/orgs/{}/notices",
   "POST /v1/admin/reputation/disputes/{}/resolution",
   "POST /v1/admin/seals/awards",
@@ -206,6 +208,7 @@
   "POST /v1/ai/summarize-project",
   "POST /v1/auth/mfa/disable",
   "POST /v1/campaigns/{}/pledges/{}/fulfill",
+  "POST /v1/campaigns/{}/risk-cases/{}/appeal",
   "POST /v1/claims/{}/review",
   "POST /v1/claims/{}/review-requests",
   "POST /v1/claims/{}/withdraw",
@@ -1052,6 +1055,7 @@
    "arquivo": "web/src/pages/donations.tsx",
    "operacoes": [
     "POST /v1/admin/beneficiaries/{}/verification",
+    "POST /v1/admin/beneficiaries/{}/verification/{}/confirm",
     "POST /v1/admin/donation-campaigns/{}/review",
     "POST /v1/admin/donation-campaigns/{}/suspend"
    ],
@@ -1129,7 +1133,8 @@
    "componente": "TrustA.IdentityQueue",
    "arquivo": "web/src/pages/trustAdmin.tsx",
    "operacoes": [
-    "POST /v1/admin/trust/identity/{}/decide"
+    "POST /v1/admin/trust/identity/{}/decide",
+    "POST /v1/admin/trust/identity/{}/status"
    ],
    "ausentes": [],
    "estado": "backend presente"

@@ -1,3 +1,34 @@
+# Notas da versão — v0.35.0 (Correções de segurança, antifraude e integridade financeira)
+
+**Uma regra:** nada foi declarado seguro sem um teste que falhava antes e passa agora. Esta versão corrige o que a auditoria
+de 10/10/2026 achou; não é certificação nem teste de intrusão. Nada foi publicado.
+
+1. **Financiador não vê mais documentos internos da OSC** — na diligência, só os institucionais (estatuto, certidões…) ou o que
+   a OSC compartilhar; nunca exportação de dados nem documento de identidade; o acesso termina com a candidatura.
+2. **Só a dona autoriza cobrança** — aceitar oferta com autorização, revogar e mudar teto de gasto.
+3. **Conciliar passou a provar algo** — compara com extrato do provedor; extrato digitado à mão precisa de uma segunda pessoa.
+4. **Verificação do beneficiário** — precisa de duas pessoas e da titularidade da conta; uma recusa posterior tira a campanha do ar.
+5. **Equipe mais protegida** — ação administrativa pede senha (e código) a cada 15 minutos; o segundo fator da equipe é cadastrado
+   com o código do aplicativo e um código no e-mail, e não pode ser desligado; avisos por e-mail quando algo muda na conta.
+6. **Pagamentos** — webhooks com carimbo de tempo e segredo próprio; o provedor de teste nunca roda em produção; um evento falso
+   enviado antes do verdadeiro não consegue mais impedir a confirmação.
+7. **Chave PIX de repasse** — pede identidade, avisa todas as partes, trava depois da primeira assinatura e fica 24 h em carência
+   quando informada depois.
+8. **Banco** — funções privilegiadas não podem mais ser enganadas por tabela temporária; ninguém além da aplicação executa funções;
+   registros só-inclusão não podem ser esvaziados.
+9. **Arquivos** — PDF com JavaScript escondido é recusado; antivírus fora do ar deixa o arquivo em quarentena em vez de dar erro;
+   excluir a conta apaga os arquivos pessoais.
+10. **Antifraude com contraditório** — sinais novos (fracionamento, chave PIX repetida, destino de repasse mudado), caso com recurso
+    decidido por outra pessoa, bloqueio de organização com duas pessoas. Alerta não é acusação.
+11. **Backup** — cifra autenticada: um backup alterado ou com a frase errada falha em vez de abrir errado.
+12. **Operação** — 7 runbooks de incidente (`docs/security/runbooks/`); actions fixadas por SHA; Dependabot; SBOM.
+
+**Antes de publicar:** siga `docs/security/PUBLICATION_CHECKLIST_v0350.md` (variáveis novas no Railway; demo primeiro;
+publicar também o `pleasing-trust`; rodar backup e ensaio de restauração depois do merge). Pendências que só você resolve:
+token do backup exposto, repositório privado, proteção da `main`, alertas do Dependabot.
+
+---
+
 # Notas da versão — v0.34.0 (Ecossistema financeiro: gratuito até gerar valor)
 
 **Uma regra:** a plataforma calcula e mostra o que seria dela, mas só cobra quando um gatilho auditável fecha — e nunca condiciona a

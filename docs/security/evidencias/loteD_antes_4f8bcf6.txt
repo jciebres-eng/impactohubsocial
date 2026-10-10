@@ -1,0 +1,24 @@
+ERROR: test_each_webhook_has_its_own_secret (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_each_webhook_has_its_own_secret)
+KeyError: 'code'
+ERROR: test_short_secrets_do_not_count_in_hardened_mode (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_short_secrets_do_not_count_in_hardened_mode)
+AttributeError: module 'impacto.services.donations' has no attribute 'webhook_secret'
+ERROR: test_the_sandbox_never_runs_in_production (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_the_sandbox_never_runs_in_production)
+TypeError: Settings.__init__() got an unexpected keyword argument 'payment_sandbox_enabled'
+ERROR: test_a_key_first_given_after_a_signature_waits_before_the_payer_sees_it (tests.test_v0350_security.PixKeyIsProtectedTests.test_a_key_first_given_after_a_signature_waits_before_the_payer_sees_it)
+KeyError: 'cooling_until'
+ERROR: test_setting_the_key_needs_fresh_identity (tests.test_v0350_security.PixKeyIsProtectedTests.test_setting_the_key_needs_fresh_identity)
+KeyError: 'code'
+FAIL: test_a_correctly_signed_but_old_event_has_no_effect (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_a_correctly_signed_but_old_event_has_no_effect)
+AssertionError: Tuples differ: (404, 'rejected') != (202, 'rejected_signature')
+FAIL: test_an_unsigned_billing_event_does_not_squat_either (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_an_unsigned_billing_event_does_not_squat_either)
+AssertionError: True is not false : o evento assinado virou 'duplicado' do evento sem assinatura
+FAIL: test_an_unsigned_event_cannot_squat_the_event_id (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_an_unsigned_event_cannot_squat_the_event_id)
+AssertionError: 404 != 202
+FAIL: test_the_key_locks_after_the_first_signature_and_every_party_is_told (tests.test_v0350_security.PixKeyIsProtectedTests.test_the_key_locks_after_the_first_signature_and_every_party_is_told)
+AssertionError: 'company-7a4b6d6e23@teste.org' not found in set() : a financiadora não soube da troca
+Ran 10 tests in 17.772s
+FAILED (failures=4, errors=5)
+FAIL: test_no_fixed_fallback_secret (tests.test_v0350_security.WebhookSignatureHasATimeWindowTests.test_no_fixed_fallback_secret)
+AssertionError: True is not false : ('sandbox-sem-segredo', '286f4bae1c6f')
+Ran 1 test in 28.523s
+FAILED (failures=1)

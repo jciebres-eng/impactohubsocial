@@ -1,6 +1,43 @@
 # Changelog
 Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHANGELOG.md`; snapshot dos documentos do v0.7.0: `history/v0.7.0/`.
 
+## [0.35.0] — 2026-10-10
+
+### Segurança, antifraude e integridade financeira: correções da auditoria (pacote IMPACTO MASTER Security 1.0.0, ADR-385 a ADR-392)
+
+Fase 1 (somente leitura) em `docs/security/AUDITORIA_SEGURANCA_FASE1.md`; fase 2 (correções, lotes A–I, autorizadas pelo
+responsável) em `docs/security/RELATORIO_CORRECOES_FASE2.md`. **84 testes novos** (`test_v0350_security`), cada lote provado
+no código anterior (`docs/security/evidencias/`). Nada publicado; nenhuma ação contra a produção.
+
+- **Documentos na diligência** (FILE-07, provado): financiador vê só os tipos institucionais da OSC (ou o que ela compartilhar);
+  nunca exportação de dados, documento de dirigente ou de identidade; o acesso termina com a candidatura.
+- **Papel mínimo** nas rotas comerciais (só a dona autoriza cobrança, revoga, muda teto) e varredura de toda rota de escrita;
+  **nome civil** de apoiador pessoa física mascarado na página pública sem opt-in.
+- **Integridade financeira**: conciliação com fonte declarada (provedor real exige extrato; extrato manual só concilia com
+  aprovação de outra pessoa); "permitir" após revisão confirma pelo caminho normal; confirmação sem valor não confirma; evento
+  antes da confirmação fica adiado e é reaplicado; teto de 10 tentativas; mesma chave de idempotência com outro valor → 409;
+  origem pública do recurso prevalece sobre o doador; verificação do beneficiário revogável, com titularidade e quatro olhos.
+- **Equipe**: escrita administrativa pede identidade confirmada há < 15 min; MFA da equipe com código do aplicativo + código
+  por e-mail e sem desativação; código errado conta no bloqueio; avisos de segurança por e-mail; produção recusa
+  `REQUIRE_MFA_FOR_ADMINS=false`; `create-admin` não promove conta existente em silêncio; IP do cliente pela ponta confiável.
+- **Webhooks**: assinatura com carimbo de tempo (300 s), segredo por endpoint, sem segredo de reserva, sandbox nunca em produção;
+  **achado novo**: evento sem assinatura não ocupa mais o identificador do verdadeiro.
+- **Chave PIX de repasse**: identidade confirmada, aviso a todas as partes, trava depois da primeira assinatura, carência de 24 h.
+- **Banco**: `search_path` com `pg_temp` em toda função privilegiada (provado: tabela temporária mudava `identity_level()`),
+  EXECUTE só para a aplicação, visão com `security_invoker`, TRUNCATE travado nas tabelas só-inclusão, testes de catálogo.
+- **Arquivos, web e IA**: PDF conferido pela estrutura; antivírus fora do ar vira quarentena; exclusão de conta apaga arquivos
+  pessoais; JSON profundo/Content-Length inválido → 400; 409 sem nome de restrição; `/readyz` público resumido; SSRF por
+  `is_global`; logs sem segredo nem dado pessoal; política da IA aplicada (esquema obrigatório, revisão humana no resumo).
+- **Antifraude e identidade**: limiares lidos do arquivo de regras (2026-10.2); fracionamento; chave PIX repetida; destino de
+  repasse mudado; caso com revisor, evidências, recurso e encerramento; restrição de organização com duas pessoas; verificação de
+  identidade com suspensa/revogada/vencida e sem autodecisão.
+- **Cadeia de entrega**: actions por SHA; gitleaks no push; `.gitignore` amplo; `npm audit` completo; Dependabot; SBOM e varredura
+  da imagem (informativos); **backup externo com cifra autenticada** (`.dump.aead`, autorizado pelo responsável); 7 runbooks.
+- Migração `0074_v0350_security.sql`. Variáveis novas: `TRUST_PROXY_HEADERS`, `TRUSTED_PROXY_HOPS`, `CLIENT_IP_HEADER`,
+  `DONATION_WEBHOOK_SECRET`, `PAYMENT_SANDBOX_ENABLED` — ver `docs/security/PUBLICATION_CHECKLIST_v0350.md`.
+- **Não feito por decisão do responsável:** recusar a produção sem antivírus; teste de IP no demo; diagnóstico do banco de
+  produção. **Não feito por impossibilidade verificável:** imagens por digest e hashes Python.
+
 ## [0.34.0] — 2026-10-10
 
 ### Ecossistema financeiro: gratuito até gerar valor, obrigações de remuneração, recurso público, conciliação com exceções (ADR-377 a ADR-384)

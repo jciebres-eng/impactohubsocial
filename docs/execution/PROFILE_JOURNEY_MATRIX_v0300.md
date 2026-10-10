@@ -5,19 +5,20 @@
 > Cada linha é um passo REALMENTE executado pela API na última regressão (status HTTP registrado), com o que a autorização exige
 > para aquele passo e as telas que o alcançam. 'sem tela' é fato medido, não falha.
 
-Jornadas: **16** · passos: **269** · falhas: **0**
+Jornadas: **16** · passos: **280** · falhas: **0**
 
 ## Perfis e o que cada um percorre
 
 | Perfil | Passos executados | Jornadas em que aparece |
 | --- | ---: | --- |
-| OSC / executora | 158 | 15 |
+| OSC / executora | 166 | 15 |
 | Financiador (empresa/instituto) | 50 | 8 |
 | Administração / auditoria | 25 | 6 |
 | Profissional / prestador | 12 | 4 |
-| Apoiador (pessoa física) | 10 | 3 |
+| Apoiador (pessoa física) | 11 | 3 |
 | Governo / órgão | 9 | 1 |
 | Visitante | 4 | 2 |
+| controller | 2 | 1 |
 | Suporte | 1 | 1 |
 
 ## Preparação: contas de demonstração e plano concedido pela administração
@@ -176,18 +177,20 @@ Jornadas: **16** · passos: **269** · falhas: **0**
 | 8 | OSC / executora | OSC envia a campanha para revisão (aceita os termos) | `POST /v1/campaigns/{id}/submit` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
 | 9 | Administração / auditoria | administração aprova a campanha com justificativa | `POST /v1/admin/donation-campaigns/{id}/review` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | compliance.write | /admin/doacoes |
 | 10 | Administração / auditoria | administração registra o beneficiário como verificado | `POST /v1/admin/beneficiaries/{id}/verification` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | compliance.write | /admin/doacoes |
-| 11 | OSC / executora | OSC publica a campanha | `POST /v1/campaigns/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
-| 12 | Visitante | pessoa anônima inicia uma doação Pix (sandbox, não pagável) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
-| 13 | Visitante | pessoa anônima consulta a situação da doação | `GET /v1/public/donations/{id}` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
-| 14 | Financiador (empresa/instituto) | empresa inicia doação em nome da organização (sandbox) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
-| 15 | Financiador (empresa/instituto) | empresa registra compromisso de doação futura | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/pledge` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
-| 16 | OSC / executora | OSC declara recurso recebido fora da plataforma | `POST /v1/campaigns/{id}/external-resources` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
-| 17 | OSC / executora | OSC abre a prestação de contas com os estados do dinheiro | `GET /v1/campaigns/{id}/accountability` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 18 | OSC / executora | OSC vê a política 'gratuito até gerar valor' e suas obrigações | `GET /v1/org/remuneration` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 19 | Financiador (empresa/instituto) | empresa vê o painel do financiador | `GET /v1/org/contributions` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 20 | Administração / auditoria | administração vê obrigações por estado (nenhuma devida) | `GET /v1/admin/remuneration` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
-| 21 | Administração / auditoria | administração vê a fila de conciliação | `GET /v1/admin/reconciliation/exceptions` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
-| 22 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 11 | controller | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 12 | controller | controladoria confirma a verificação (segunda pessoa, quatro olhos) | `POST /v1/admin/beneficiaries/{id}/verification/{id}/confirm` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | compliance.write | /admin/doacoes |
+| 13 | OSC / executora | OSC publica a campanha | `POST /v1/campaigns/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
+| 14 | Visitante | pessoa anônima inicia uma doação Pix (sandbox, não pagável) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 15 | Visitante | pessoa anônima consulta a situação da doação | `GET /v1/public/donations/{id}` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
+| 16 | Financiador (empresa/instituto) | empresa inicia doação em nome da organização (sandbox) | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/donate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 17 | Financiador (empresa/instituto) | empresa registra compromisso de doação futura | `POST /v1/public/donation-campaigns/orquestra-comunitaria-{slug}/pledge` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 18 | OSC / executora | OSC declara recurso recebido fora da plataforma | `POST /v1/campaigns/{id}/external-resources` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | sem tela |
+| 19 | OSC / executora | OSC abre a prestação de contas com os estados do dinheiro | `GET /v1/campaigns/{id}/accountability` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 20 | OSC / executora | OSC vê a política 'gratuito até gerar valor' e suas obrigações | `GET /v1/org/remuneration` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 21 | Financiador (empresa/instituto) | empresa vê o painel do financiador | `GET /v1/org/contributions` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 22 | Administração / auditoria | administração vê obrigações por estado (nenhuma devida) | `GET /v1/admin/remuneration` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
+| 23 | Administração / auditoria | administração vê a fila de conciliação | `GET /v1/admin/reconciliation/exceptions` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
+| 24 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Documentos: montagem → acordo assinado → registro verificável
 
@@ -225,34 +228,36 @@ Jornadas: **16** · passos: **269** · falhas: **0**
 | 5 | Apoiador (pessoa física) | apoiadora acompanha as próprias participações | `GET /v1/participations` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
 | 6 | OSC / executora | OSC cria acordo de financiamento (camada econômica vem do catálogo 2027.02: 3,5% plataforma + 1,5% autoria, aporte único direcionado) | `POST /v1/signed-agreements` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/novo |
 | 7 | OSC / executora | inclui a empresa como financiadora | `POST /v1/signed-agreements/{id}/parties` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 8 | OSC / executora | quem recebe informa a própria chave PIX no contrato | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 9 | OSC / executora | inclui a apoiadora como proponente (parte opcional) | `POST /v1/signed-agreements/{id}/parties` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 10 | Apoiador (pessoa física) | apoiadora informa a própria chave PIX | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 11 | OSC / executora | define o marco 1: Compra dos instrumentos | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 12 | OSC / executora | define o marco 2: Primeiro semestre de aulas | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 13 | OSC / executora | publica para assinatura (versão 1 congelada) | `POST /v1/signed-agreements/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 14 | Financiador (empresa/instituto) | financiador vê a PRÉVIA da distribuição antes de assinar (95.000 projeto / 3.500 plataforma / 1.500 autoria, nada gravado) | `GET /v1/signed-agreements/{id}/allocation` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 15 | OSC / executora | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
-| 16 | OSC / executora | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
-| 17 | Financiador (empresa/instituto) | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
-| 18 | Financiador (empresa/instituto) | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
-| 19 | OSC / executora | acordo vigente: matriz gravada, obrigações derivadas, taxa registrada e NÃO cobrada (regra desligada) | `GET /v1/signed-agreements/{id}` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 20 | Financiador (empresa/instituto) | financiador abre as instruções de repasse (quem, quanto, por qual chave) | `GET /v1/signed-agreements/{id}/payouts` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 21 | Financiador (empresa/instituto) | financiador registra a transferência PIX feita ao projeto (a qualquer momento) | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 22 | OSC / executora | OSC (quem recebe) confirma o recebimento — quem paga nunca confirma | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 23 | Financiador (empresa/instituto) | financiador tenta confirmar o que ele mesmo pagou → recusado | `POST /v1/payout-transfers/{id}/confirm` | 403 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 24 | Financiador (empresa/instituto) | financiador registra a transferência da participação de autoria à apoiadora | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 25 | Apoiador (pessoa física) | apoiadora confirma o recebimento da participação | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 26 | Financiador (empresa/instituto) | o que o IMPACTO fez nesta operação (por registro) | `GET /v1/signed-agreements/{id}/value` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 27 | OSC / executora | OSC registra a entrega do marco 1 | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 28 | OSC / executora | OSC tenta aceitar a própria entrega → recusado (quatro olhos) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 403 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 29 | Financiador (empresa/instituto) | financiador vê o que precisa da sua decisão | `GET /v1/agreements/pending` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 30 | Financiador (empresa/instituto) | financiador aceita a entrega do marco 1 → obrigação de pagar nasce com prazo | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 31 | OSC / executora | OSC registra a entrega do marco 2 | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 32 | Financiador (empresa/instituto) | financiador recusa o marco 2 com motivo (volta para quem executa) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 33 | OSC / executora | razão do projeto registra ativação, alocação, entrega e aceite em cadeia | `GET /v1/projects/{id}/ledger` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 34 | OSC / executora | mudança no contrato → nova versão em rascunho; a anterior fica substituída e exige nova assinatura | `POST /v1/signed-agreements/{id}/new-version` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 35 | Financiador (empresa/instituto) | versão antiga não recebe assinatura (substituída) | `POST /v1/signed-agreements/{id}/sign` | 409 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
+| 8 | OSC / executora | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 9 | OSC / executora | quem recebe informa a própria chave PIX no contrato | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 10 | OSC / executora | inclui a apoiadora como proponente (parte opcional) | `POST /v1/signed-agreements/{id}/parties` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 11 | Apoiador (pessoa física) | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 12 | Apoiador (pessoa física) | apoiadora informa a própria chave PIX | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 13 | OSC / executora | define o marco 1: Compra dos instrumentos | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 14 | OSC / executora | define o marco 2: Primeiro semestre de aulas | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 15 | OSC / executora | publica para assinatura (versão 1 congelada) | `POST /v1/signed-agreements/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 16 | Financiador (empresa/instituto) | financiador vê a PRÉVIA da distribuição antes de assinar (95.000 projeto / 3.500 plataforma / 1.500 autoria, nada gravado) | `GET /v1/signed-agreements/{id}/allocation` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 17 | OSC / executora | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
+| 18 | OSC / executora | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
+| 19 | Financiador (empresa/instituto) | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
+| 20 | Financiador (empresa/instituto) | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
+| 21 | OSC / executora | acordo vigente: matriz gravada, obrigações derivadas, taxa registrada e NÃO cobrada (regra desligada) | `GET /v1/signed-agreements/{id}` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 22 | Financiador (empresa/instituto) | financiador abre as instruções de repasse (quem, quanto, por qual chave) | `GET /v1/signed-agreements/{id}/payouts` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 23 | Financiador (empresa/instituto) | financiador registra a transferência PIX feita ao projeto (a qualquer momento) | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 24 | OSC / executora | OSC (quem recebe) confirma o recebimento — quem paga nunca confirma | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 25 | Financiador (empresa/instituto) | financiador tenta confirmar o que ele mesmo pagou → recusado | `POST /v1/payout-transfers/{id}/confirm` | 403 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 26 | Financiador (empresa/instituto) | financiador registra a transferência da participação de autoria à apoiadora | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 27 | Apoiador (pessoa física) | apoiadora confirma o recebimento da participação | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 28 | Financiador (empresa/instituto) | o que o IMPACTO fez nesta operação (por registro) | `GET /v1/signed-agreements/{id}/value` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 29 | OSC / executora | OSC registra a entrega do marco 1 | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 30 | OSC / executora | OSC tenta aceitar a própria entrega → recusado (quatro olhos) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 403 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 31 | Financiador (empresa/instituto) | financiador vê o que precisa da sua decisão | `GET /v1/agreements/pending` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 32 | Financiador (empresa/instituto) | financiador aceita a entrega do marco 1 → obrigação de pagar nasce com prazo | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 33 | OSC / executora | OSC registra a entrega do marco 2 | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 34 | Financiador (empresa/instituto) | financiador recusa o marco 2 com motivo (volta para quem executa) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 35 | OSC / executora | razão do projeto registra ativação, alocação, entrega e aceite em cadeia | `GET /v1/projects/{id}/ledger` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 36 | OSC / executora | mudança no contrato → nova versão em rascunho; a anterior fica substituída e exige nova assinatura | `POST /v1/signed-agreements/{id}/new-version` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 37 | Financiador (empresa/instituto) | versão antiga não recebe assinatura (substituída) | `POST /v1/signed-agreements/{id}/sign` | 409 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
 
 ## Marketplace, soluções e perfis públicos
 
@@ -271,32 +276,33 @@ Jornadas: **16** · passos: **269** · falhas: **0**
 | ---: | --- | --- | --- | ---: | --- | --- | --- |
 | 1 | OSC / executora | OSC cria acordo de financiamento complementar (R$ 20.000, um marco) | `POST /v1/signed-agreements` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/novo |
 | 2 | OSC / executora | inclui a empresa como financiadora | `POST /v1/signed-agreements/{id}/parties` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 3 | OSC / executora | OSC informa a chave PIX no contrato | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 4 | OSC / executora | define o único marco | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 5 | OSC / executora | publica para assinatura | `POST /v1/signed-agreements/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 6 | OSC / executora | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
-| 7 | OSC / executora | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
-| 8 | Financiador (empresa/instituto) | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
-| 9 | Financiador (empresa/instituto) | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
-| 10 | Financiador (empresa/instituto) | instruções de repasse: projeto (19.000) e plataforma (700, aguardando regra) | `GET /v1/signed-agreements/{id}/payouts` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 11 | Financiador (empresa/instituto) | financiador registra o aporte ao projeto | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 12 | OSC / executora | OSC confirma o recebimento | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 13 | OSC / executora | OSC concilia o repasse com nota | `POST /v1/payouts/{id}/reconcile` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
-| 14 | OSC / executora | OSC registra a entrega | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 15 | Financiador (empresa/instituto) | financiador aceita a entrega → operação QUITADA (todo repasse devido confirmado) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
-| 16 | OSC / executora | acordo concluído: quitação derivada dos repasses | `GET /v1/signed-agreements/{id}` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 17 | OSC / executora | reconhecimentos nascem da quitação: OSC vê a trajetória crescer em 'Para você hoje' | `GET /v1/me/today` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
-| 18 | Financiador (empresa/instituto) | financiador também: aporte integralmente confirmado | `GET /v1/me/today` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
-| 19 | OSC / executora | perfil público da OSC carrega a trajetória (contagens e datas, nunca valores) | `GET /v1/profiles/mine` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 20 | Financiador (empresa/instituto) | o que o IMPACTO fez nesta operação | `GET /v1/signed-agreements/{id}/value` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 21 | OSC / executora | acesso sem assinatura: de onde vem o direito da OSC | `GET /v1/billing` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 22 | OSC / executora | catálogo público: pacotes e vias de acesso, nenhum preço recorrente | `GET /v1/plans` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
-| 23 | Financiador (empresa/instituto) | regras do catálogo econômico (versão vigente) | `GET /v1/economic-rules` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
-| 24 | Administração / auditoria | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
-| 25 | Administração / auditoria | torre MASTER: GMV × camada da plataforma, banco NÃO CONECTADO, captura de valor | `GET /v1/control-tower/master` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
-| 26 | Administração / auditoria | administração propõe contrato avulso à OSC (valor e motivo de quem tem alçada) | `POST /v1/admin/commercial/offers` | 201 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.approve | sem tela |
-| 27 | OSC / executora | OSC aceita com autorização de cobrança → pacote concedido pelo contrato | `POST /v1/commercial/offers/{id}/accept` | 200 | organizacao · papel ≥ — · tipos: todos | — | /conta/comercial |
-| 28 | OSC / executora | estado comercial: CONTRATADO | `GET /v1/commercial/state` | 200 | organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 3 | OSC / executora | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 4 | OSC / executora | OSC informa a chave PIX no contrato | `PUT /v1/signed-agreements/{id}/parties/{id}/pix` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 5 | OSC / executora | define o único marco | `POST /v1/signed-agreements/{id}/milestones` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 6 | OSC / executora | publica para assinatura | `POST /v1/signed-agreements/{id}/publish` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 7 | OSC / executora | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
+| 8 | OSC / executora | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
+| 9 | Financiador (empresa/instituto) | pede código de assinatura (agreement) | `POST /v1/signatures/challenge` | 201 | organizacao_por_papel · papel ≥ member · tipos: todos | — | sem tela |
+| 10 | Financiador (empresa/instituto) | assina (agreement) | `POST /v1/signed-agreements/{id}/sign` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | sem tela |
+| 11 | Financiador (empresa/instituto) | instruções de repasse: projeto (19.000) e plataforma (700, aguardando regra) | `GET /v1/signed-agreements/{id}/payouts` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 12 | Financiador (empresa/instituto) | financiador registra o aporte ao projeto | `POST /v1/payouts/{id}/transfers` | 201 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 13 | OSC / executora | OSC confirma o recebimento | `POST /v1/payout-transfers/{id}/confirm` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 14 | OSC / executora | OSC concilia o repasse com nota | `POST /v1/payouts/{id}/reconcile` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /acordos/:id |
+| 15 | OSC / executora | OSC registra a entrega | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 16 | Financiador (empresa/instituto) | financiador aceita a entrega → operação QUITADA (todo repasse devido confirmado) | `PATCH /v1/signed-agreements/{id}/milestones/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /acordos/:id |
+| 17 | OSC / executora | acordo concluído: quitação derivada dos repasses | `GET /v1/signed-agreements/{id}` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 18 | OSC / executora | reconhecimentos nascem da quitação: OSC vê a trajetória crescer em 'Para você hoje' | `GET /v1/me/today` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 19 | Financiador (empresa/instituto) | financiador também: aporte integralmente confirmado | `GET /v1/me/today` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 20 | OSC / executora | perfil público da OSC carrega a trajetória (contagens e datas, nunca valores) | `GET /v1/profiles/mine` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 21 | Financiador (empresa/instituto) | o que o IMPACTO fez nesta operação | `GET /v1/signed-agreements/{id}/value` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 22 | OSC / executora | acesso sem assinatura: de onde vem o direito da OSC | `GET /v1/billing` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 23 | OSC / executora | catálogo público: pacotes e vias de acesso, nenhum preço recorrente | `GET /v1/plans` | 200 | publica · papel ≥ — · tipos: todos | — | sem tela |
+| 24 | Financiador (empresa/instituto) | regras do catálogo econômico (versão vigente) | `GET /v1/economic-rules` | 200 | organizacao · papel ≥ viewer · tipos: todos | — | sem tela |
+| 25 | Administração / auditoria | confirma a identidade (operação sensível) | `POST /v1/auth/reauth` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | sem tela |
+| 26 | Administração / auditoria | torre MASTER: GMV × camada da plataforma, banco NÃO CONECTADO, captura de valor | `GET /v1/control-tower/master` | 200 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.read | sem tela |
+| 27 | Administração / auditoria | administração propõe contrato avulso à OSC (valor e motivo de quem tem alçada) | `POST /v1/admin/commercial/offers` | 201 | plataforma_com_permissao · papel ≥ — · tipos: todos | finance.approve | sem tela |
+| 28 | OSC / executora | OSC aceita com autorização de cobrança → pacote concedido pelo contrato | `POST /v1/commercial/offers/{id}/accept` | 200 | organizacao_por_papel · papel ≥ owner · tipos: todos | — | /conta/comercial |
+| 29 | OSC / executora | estado comercial: CONTRATADO | `GET /v1/commercial/state` | 200 | organizacao · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel
 
@@ -329,6 +335,12 @@ Jornadas: **16** · passos: **269** · falhas: **0**
 | 2 | Suporte | suporte responde o chamado | `POST /v1/admin/support/tickets/{id}/messages` | 201 | plataforma · papel ≥ — · tipos: todos | MFA | /admin/central/suporte/:id |
 | 3 | OSC / executora | OSC lê a resposta | `GET /v1/support/tickets/{id}` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/suporte/:id |
 | 4 | OSC / executora | OSC lista cursos | `GET /v1/help/courses` | 200 | publica · papel ≥ — · tipos: todos | — | /ajuda/academia |
+| 5 | OSC / executora | OSC se inscreve no curso | `POST /v1/help/courses/primeiros-passos-na-plataforma/enroll` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 6 | OSC / executora | OSC abre o curso | `GET /v1/help/courses/primeiros-passos-na-plataforma` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 7 | OSC / executora | OSC conclui a aula 'O que é a plataforma' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 8 | OSC / executora | OSC conclui a aula 'Documentos e conformidade' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 9 | OSC / executora | OSC conclui a aula 'Quiz de fundamentos' | `POST /v1/help/lessons/{id}/complete` | 200 | usuario_sem_organizacao · papel ≥ — · tipos: todos | — | /ajuda/academia/aula/:id |
+| 10 | OSC / executora | OSC emite certificado | `POST /v1/help/courses/primeiros-passos-na-plataforma/certificate` | 201 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Banco de Ideias: ideia → amadurecimento → projeto
 
@@ -371,7 +383,7 @@ Jornadas: **16** · passos: **269** · falhas: **0**
 
 ## Leitura
 
-* Passos sem tela que os alcance diretamente: **105** de 269 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
+* Passos sem tela que os alcance diretamente: **112** de 280 — operações que a jornada exercita pela API e que a interface ainda não expõe (ou expõe por auxiliar compartilhado). O número oficial de operações sem tela é o de `screen_backend_map.json`.
 * A autorização é aplicada no backend (classe + papel + tipo + permissão), provada por `test_v0230_api_sweep` para TODAS as operações — a coluna aqui é a mesma matriz, lida por jornada.
 * Dado tocado: cada rota nomeia o recurso (projects, evidences, indicator-values, agreements, payouts…); a classe de retenção de cada tabela está em `config/data_retention.json` e é conferida por `test_v0190_lgpd_deletion`.
 * Estados vazios, erros e bloqueios por perfil: cobertos pelo robô de telas (`test_v0250_todas_as_telas`: OK · vazia · recusa correta · sem registro) e pela jornada 'Pendências'.

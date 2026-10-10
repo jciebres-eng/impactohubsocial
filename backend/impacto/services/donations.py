@@ -181,7 +181,10 @@ class SandboxProvider:
         return verify_timestamped(self.secret, body, headers.get("x-impacto-signature", ""))
 
     def parse_event(self, body: bytes) -> dict:
-        data = json.loads(body or b"{}")
+        from ..http import parse_json_body
+        data = parse_json_body(body or b"{}")
+        if not isinstance(data, dict):
+            raise ValueError("evento não é objeto JSON")
         return {"event_id": str(data.get("event_id") or "")[:120], "event_type": str(data.get("type") or "")[:60],
                 "provider_charge_id": (str(data.get("charge_id")) if data.get("charge_id") else None),
                 "amount_cents": data.get("amount_cents"), "currency": data.get("currency", "BRL"), "raw": data}

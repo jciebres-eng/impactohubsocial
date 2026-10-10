@@ -454,9 +454,52 @@ def authorize(ctx: Ctx, spec: RouteSpec) -> None:
 # ------------------------------------------------------------------------------------------------
 # Construção do endpoint Starlette
 # ------------------------------------------------------------------------------------------------
-async def _read_json(request: Request, limit: int) -> Any:
+MAX_JSON_DEPTH = 64
+
+
+def _content_length(request: Request) -> int | None:
+    """v0.35.0 (auditoria, WEB-06): Content-Length que não é número virava `ValueError` e erro 500."""
     cl = request.headers.get("content-length")
-    if cl and int(cl) > limit:
+    if cl is None:
+        return None
+    try:
+        n = int(cl)
+    except ValueError:
+        raise ApiError(400, "invalid_content_length", "Cabeçalho Content-Length inválido") from None
+    if n < 0:
+        raise ApiError(400, "invalid_content_length", "Cabeçalho Content-Length inválido")
+    return n
+
+
+def _json_depth_ok(obj: Any, limit: int = MAX_JSON_DEPTH) -> bool:
+    """Profundidade sem recursão (a conferência não pode ela mesma estourar a pilha)."""
+    stack = [(obj, 1)]
+    while stack:
+        cur, depth = stack.pop()
+        if depth > limit:
+            return False
+        if isinstance(cur, dict):
+            stack.extend((v, depth + 1) for v in cur.values())
+        elif isinstance(cur, list):
+            stack.extend((v, depth + 1) for v in cur)
+    return True
+
+
+def parse_json_body(raw: bytes) -> Any:
+    """JSON do corpo: inválido, profundo demais (o decodificador estoura a pilha com ~100 mil níveis em 200 KB) ou com
+    mais de 64 níveis vira 400 — antes, `RecursionError` virava erro 500 (auditoria, WEB-06)."""
+    try:
+        data = json.loads(raw)
+    except (ValueError, RecursionError) as exc:
+        raise ApiError(400, "invalid_json", "JSON inválido ou aninhado demais") from exc
+    if not _json_depth_ok(data):
+        raise ApiError(400, "invalid_json", f"JSON aninhado demais (máximo {MAX_JSON_DEPTH} níveis)")
+    return data
+
+
+async def _read_json(request: Request, limit: int) -> Any:
+    cl = _content_length(request)
+    if cl is not None and cl > limit:
         raise ApiError(413, "payload_too_large", "Corpo da requisição excede o limite")
     ctype = request.headers.get("content-type", "")
     raw = b""
@@ -468,10 +511,7 @@ async def _read_json(request: Request, limit: int) -> Any:
         return {}
     if "application/json" not in ctype:
         raise ApiError(415, "unsupported_media_type", "Use Content-Type: application/json")
-    try:
-        return json.loads(raw)
-    except ValueError as exc:
-        raise ApiError(400, "invalid_json", "JSON inválido") from exc
+    return parse_json_body(raw)
 
 
 def _validation_details(e: ValidationError) -> list[dict]:
@@ -494,12 +534,15 @@ def make_endpoint(spec: RouteSpec, app_state):
                 _check_origin(ctx)
             payload = None
             if spec.multipart:
-                cl = request.headers.get("content-length")
-                if cl and int(cl) > app_state.settings.max_upload_bytes + 65536:
+                cl = _content_length(request)
+                if cl is not None and cl > app_state.settings.max_upload_bytes + 65536:
                     raise ApiError(413, "payload_too_large", "Arquivo excede o limite")
                 form = await request.form(max_files=1, max_fields=20, max_part_size=app_state.settings.max_upload_bytes + 1)
                 payload = form
             elif spec.raw_body:
+                cl = _content_length(request)
+                if cl is not None and cl > app_state.settings.max_body_bytes:
+                    raise ApiError(413, "payload_too_large", "Corpo da requisição excede o limite")
                 payload = b""
                 async for chunk in request.stream():
                     payload += chunk
@@ -555,7 +598,10 @@ def make_endpoint(spec: RouteSpec, app_state):
             return problem(e.status, e.code, e.message, e.details)
         except pq.UniqueViolation as e:
             status = 409
-            return problem(409, "conflict", "Registro duplicado", {"constraint": e.constraint})
+            # v0.35.0 (auditoria, WEB-06): o nome da restrição (estrutura interna do banco) fica no log, com `error_id`
+            eid = uuid.uuid4().hex[:12]
+            log(logger, logging.INFO, "unique_conflict", error_id=eid, route=spec.path, constraint=getattr(e, "constraint", None))
+            return problem(409, "conflict", "Registro duplicado", None, error_id=eid)
         except (pq.CheckViolation, pq.ForeignKeyViolation, pq.NotNullViolation, pq.RaiseException) as e:
             status = 422
             msg = str(e).split("\n")[0][:300]

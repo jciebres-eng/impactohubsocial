@@ -975,3 +975,168 @@ class AccountDeletionRemovesPersonalFilesTests(unittest.TestCase):
             with self.assertRaises(Exception, msg="o objeto do arquivo pessoal continuou no armazenamento"):
                 st.storage.get(keys[doc])
         self.assertTrue(st.storage.get(keys[estatuto]), "documento institucional da organização não sai com a conta")
+
+
+# ================================================================================================ lote G
+class MalformedRequestsAreClientErrorsTests(unittest.TestCase):
+    """WEB-06 — antes: JSON com 100 mil níveis (≈200 KB) gerava `RecursionError` → 500; Content-Length que não é número
+    → 500; o 409 de duplicidade devolvia o NOME da restrição do banco; `/readyz` público detalhava a configuração."""
+
+    @classmethod
+    def setUpClass(cls):
+        server()
+
+    def test_deeply_nested_json_is_a_400(self):
+        fundo = b"[" * 100_000 + b"]" * 100_000
+        r = Client().request("POST", "/v1/auth/login", raw=fundo, ctype="application/json")
+        self.assertEqual((r.status, r.json.get("code")), (400, "invalid_json"), r)
+        medio = json.dumps({"email": "a@b.co", "password": "x", "extra": json.loads("[" * 100 + "]" * 100)}).encode()
+        r = Client().request("POST", "/v1/auth/login", raw=medio, ctype="application/json")
+        self.assertEqual((r.status, r.json.get("code")), (400, "invalid_json"), r)
+        r = Client().request("POST", "/v1/webhooks/donations/sandbox", raw=fundo, ctype="application/json",
+                             headers={"X-Impacto-Signature": "t=1,v1=00"})
+        self.assertIn(r.status, (400, 404), r)
+        self.assertNotEqual(r.status, 500)
+
+    def test_a_non_numeric_content_length_is_a_400(self):
+        from impacto.http import ApiError, _content_length
+
+        class _R:
+            headers = {"content-length": "abc"}
+        with self.assertRaises(ApiError) as err:
+            _content_length(_R())
+        self.assertEqual((err.exception.status, err.exception.code), (400, "invalid_content_length"))
+
+    def test_a_duplicate_does_not_reveal_the_constraint_name(self):
+        from impacto import http as H
+        from impacto.db import pq
+        spec = next(s for s in H.ROUTES if s.method == "GET" and s.path == "/v1/public/donation-campaigns/{slug}")
+        original = spec.handler
+
+        def boom(ctx):
+            raise pq.UniqueViolation("duplicate key value violates unique constraint \"users_email_key\"", "23505", "users_email_key")
+        spec.handler = boom
+        try:
+            r = Client().get("/v1/public/donation-campaigns/qualquer")
+        finally:
+            spec.handler = original
+        self.assertEqual(r.status, 409)
+        self.assertNotIn("users_email_key", r.body.decode())
+        self.assertTrue(r.json.get("error_id"))
+
+    def test_public_readiness_is_short_in_production(self):
+        """O endpoint de um app montado com configuração de PRODUÇÃO (sem subir servidor)."""
+        import asyncio
+        from dataclasses import replace as dc_replace
+
+        from starlette.requests import Request
+
+        from impacto import app as A
+        st = server()["state"]
+        prod = dc_replace(st.settings, env="production", metrics_token="token-de-metricas-de-teste-" + "z" * 16)
+        old = st.settings
+        st.settings = prod
+        try:
+            rotas = {r.path: r for r in A._infra_routes(st)}      # a configuração fica capturada nas rotas
+        finally:
+            st.settings = old
+
+        def chamar(headers: dict) -> dict:
+            scope = {"type": "http", "method": "GET", "path": "/readyz", "query_string": b"",
+                     "headers": [(k.lower().encode(), v.encode()) for k, v in headers.items()]}
+            return json.loads(asyncio.run(rotas["/readyz"].endpoint(Request(scope))).body)
+        curto = chamar({})
+        self.assertEqual(set(curto), {"status", "database", "storage_durable", "antivirus"}, curto)
+        self.assertIn(curto["antivirus"], ("none", "configured"))
+        completo = chamar({"Authorization": "Bearer " + prod.metrics_token})
+        self.assertIn("mail", completo, "com o token de métricas a resposta continua completa")
+
+
+class OutboundRequestsOnlyReachThePublicInternetTests(unittest.TestCase):
+    """WEB-05 — antes: a faixa compartilhada de operadora 100.64.0.0/10 (rede interna de nuvem) e endereço IPv6 que
+    embute um IPv4 privado passavam pela conferência de SSRF."""
+
+    def test_carrier_grade_nat_and_mapped_addresses_are_refused(self):
+        import socket
+        import unittest.mock as um
+
+        from impacto.adapters.http_client import check_destination
+        for ip, fam in (("100.64.0.1", socket.AF_INET), ("::ffff:10.0.0.1", socket.AF_INET6), ("192.0.2.10", socket.AF_INET)):
+            with um.patch("socket.getaddrinfo", return_value=[(fam, socket.SOCK_STREAM, 6, "", (ip, 443))]):
+                with self.assertRaises(ValueError, msg=ip):
+                    check_destination("https://provedor.exemplo.com/api")
+        with um.patch("socket.getaddrinfo", return_value=[(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443))]):
+            check_destination("https://provedor.exemplo.com/api")
+
+
+class LogsDoNotCarrySecretsOrPersonalDataTests(unittest.TestCase):
+    """WEB-07 — antes: só chaves com nome EXATO (`password`, `token`…) eram escondidas; `new_password`, `senha`,
+    `client_secret` e e-mail/CPF no texto saíam no log."""
+
+    def test_variants_and_value_patterns_are_redacted(self):
+        import io
+        import logging
+
+        from impacto.observability import JsonFormatter, log
+        buf = io.StringIO()
+        h = logging.StreamHandler(buf)
+        h.setFormatter(JsonFormatter())
+        lg = logging.getLogger("impacto.teste.redacao")
+        lg.handlers, lg.propagate = [h], False
+        log(lg, logging.WARNING, "evento", new_password="segredo1", senha="segredo2", client_secret="segredo3",
+            x_api_key="segredo4", detalhe="CPF 123.456.789-09 de maria.silva@exemplo.org", input_tokens=120, amount_cents=5000)
+        try:
+            raise RuntimeError("falha ao enviar para joao@exemplo.org (CPF 98765432100)")
+        except RuntimeError:
+            lg.exception("com exceção")
+        saida = buf.getvalue()
+        for s in ("segredo1", "segredo2", "segredo3", "segredo4", "123.456.789-09", "maria.silva@", "joao@", "98765432100"):
+            self.assertNotIn(s, saida, s)
+        linha = json.loads(saida.splitlines()[0])
+        self.assertEqual((linha["input_tokens"], linha["amount_cents"]), (120, 5000), "números não são dado pessoal")
+        self.assertIn("@exemplo.org", linha["detalhe"], "o domínio fica (ajuda a investigar sem expor a pessoa)")
+
+
+class AiPolicyIsEnforcedAndWhatLeavesIsRedactedTests(unittest.TestCase):
+    """AI-02/AI-03 — antes: as marcas `requires_schema`/`requires_human_review` da política eram lidas e ignoradas; o resumo
+    não dizia que exige revisão humana; nenhum teste olhava o que de fato sai para o provedor externo."""
+
+    class _Spy:
+        def __init__(self):
+            self.sent: list[str] = []
+
+        def complete(self, system: str, user: str, max_tokens: int):
+            self.sent.append(user)
+            return "Resumo gerado pelo provedor de teste com texto suficiente.", {"tokens_in": 10, "tokens_out": 10}
+
+    def test_a_tier_that_requires_a_schema_never_calls_out_without_one(self):
+        from impacto.engines.ai.gateway import AiGateway
+        st = server()["state"]
+        g = AiGateway(st.settings)
+        g.external, g.provider_name = self._Spy(), "openai_compatible"
+        with db_system() as c:
+            r = g._external(c, {"tier": 2, "output_schema": None, "system_text": "classifique", "prompt_key": "teste_sem_esquema",
+                                "version": 1}, "texto")
+        self.assertEqual(r["status"], "blocked_policy")
+        self.assertEqual(g.external.sent, [], "a chamada saiu mesmo sem o esquema que a faixa exige")
+
+    def test_what_leaves_has_identifiers_redacted_and_the_summary_asks_for_review(self):
+        from tests.test_v0230_ai_governance import _projeto
+        st = server()["state"]
+        spy = self._Spy()
+        old = (st.ai.external, st.ai.provider_name)
+        st.ai.external, st.ai.provider_name = spy, "openai_compatible"
+        try:
+            c = new_account("osc", compliance="approved")
+            pid = _projeto(c)
+            self.assertEqual(c.patch(f"/v1/projects/{pid}", {
+                "problem": "Contato da coordenação: maria@exemplo.org, (65) 99999-8888, CPF 123.456.789-09, CNPJ 11.222.333/0001-81."}).status, 200)
+            r = c.post("/v1/ai/summarize-project", {"project_id": pid})
+            self.assertEqual(r.status, 200, r)
+        finally:
+            st.ai.external, st.ai.provider_name = old
+        self.assertTrue(spy.sent, "o provedor de teste não foi chamado")
+        enviado = "\n".join(spy.sent)
+        for s in ("maria@exemplo.org", "99999-8888", "123.456.789-09", "11.222.333/0001-81"):
+            self.assertNotIn(s, enviado, s)
+        self.assertIs(r.json.get("human_review_required"), True)

@@ -95,7 +95,7 @@ def donation_webhook(ctx: Ctx, payload: bytes):
     verified = prov.verify_signature(dict(ctx.request.headers), payload)
     try:
         event = prov.parse_event(payload)
-    except (ValueError, json.JSONDecodeError):
+    except (ValueError, json.JSONDecodeError, ApiError):
         return JSONResponse({"status": "rejected", "code": "bad_json"}, status_code=400)
     if not event["event_id"]:
         return JSONResponse({"status": "rejected", "code": "missing_event_id"}, status_code=400)

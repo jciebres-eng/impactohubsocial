@@ -5,7 +5,6 @@ frontend NUNCA decide preço, saldo ou fonte: pede a prévia, mostra, e confirma
 """
 from __future__ import annotations
 
-import json
 from datetime import date
 from typing import Annotated, Literal
 
@@ -219,9 +218,12 @@ def payment_webhook(ctx: Ctx, payload: bytes):
                              "note": "PAYMENT_WEBHOOK_SECRET ausente ou curto: nenhum evento de pagamento é aceito"}, status_code=404)
     # v0.35.0 (auditoria, PAY-01): assinatura com carimbo de tempo (t=…,v1=…) e janela de 300 s; segredo próprio deste endpoint
     verified = verify_timestamped(secret, payload, ctx.request.headers.get("x-impacto-signature", ""))
+    from ..http import parse_json_body
     try:
-        data = json.loads(payload or b"{}")
-    except ValueError:
+        data = parse_json_body(payload or b"{}")
+    except ApiError:
+        return JSONResponse({"status": "rejected", "code": "bad_json"}, status_code=400)
+    if not isinstance(data, dict):
         return JSONResponse({"status": "rejected", "code": "bad_json"}, status_code=400)
     event_id = str(data.get("event_id") or "")[:120]
     if not event_id:

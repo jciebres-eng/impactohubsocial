@@ -41,9 +41,14 @@ def check_destination(url: str) -> None:
         raise OSError(f"DNS: {host}") from exc
     for info in infos:
         ip = ipaddress.ip_address(info[4][0].split("%")[0])
+        if ip.version == 6 and ip.ipv4_mapped:
+            ip = ip.ipv4_mapped        # ::ffff:10.0.0.1 é 10.0.0.1
         if ip.is_loopback and dev:
             continue
-        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified:
+        # v0.35.0 (auditoria, WEB-05): `is_global` cobre também o que as outras propriedades deixavam passar — a faixa
+        # compartilhada de operadora 100.64.0.0/10 (RFC 6598), usada em redes internas de nuvem.
+        if (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast or ip.is_unspecified
+                or not ip.is_global):
             raise ValueError("Destino de rede interna não permitido")
 
 

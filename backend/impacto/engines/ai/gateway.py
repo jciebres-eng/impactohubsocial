@@ -186,9 +186,17 @@ class AiGateway:
                     "redactions": 0, "status": "blocked_policy", "schema_valid": None,
                     "problems": [pv.message], "violation": pv}
 
+        revisao = bool(politica.get("requires_human_review"))
         if not tem_externo:
             return {"text": None, "meta": {}, "provider": "local", "redactions": 0,
-                    "status": "local_only", "schema_valid": None, "problems": []}
+                    "status": "local_only", "schema_valid": None, "problems": [], "human_review_required": revisao}
+
+        if politica.get("requires_schema") and prompt.get("output_schema") is None:
+            # v0.35.0 (auditoria, AI-02): a faixa exige esquema (a saída entra em campo estruturado) e este prompt não tem —
+            # antes a marca era lida da política e ignorada. A chamada NÃO sai.
+            return {"text": None, "meta": {"policy": "schema_required"}, "provider": "local", "redactions": 0,
+                    "status": "blocked_policy", "schema_valid": None, "human_review_required": revisao,
+                    "problems": [f"a faixa {politica['tier']} exige esquema de saída e o prompt {prompt.get('prompt_key')} não tem"]}
 
         red, n = redact(conteudo)
         try:
@@ -307,7 +315,9 @@ class AiGateway:
                 "engine": r["provider"] if r["text"] else "local-extractive@1.0",
                 "external_outcome": r["status"],
                 "prompt_version": f'{prompt["prompt_key"]}@{prompt["version"]}',
-                "tier": prompt["tier"], "tier_label": prompt["tier_label"], "draft": True, "execution": execution}
+                "tier": prompt["tier"], "tier_label": prompt["tier_label"], "draft": True,
+                # v0.35.0 (auditoria, AI-02): a faixa 1 exige revisão humana; o resumo era o único sem a marca
+                "human_review_required": bool(r.get("human_review_required", True)), "execution": execution}
 
     # -- orçamento em dinheiro --------------------------------------------------------------------
     def _check_budget(self, conn, ctx) -> None:

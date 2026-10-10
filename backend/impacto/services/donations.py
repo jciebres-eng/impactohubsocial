@@ -49,6 +49,10 @@ CONFIRMING_EVENTS = {"payment.confirmed", "PAYMENT_RECEIVED", "PAYMENT_CONFIRMED
 REFUND_EVENTS = {"payment.refunded", "PAYMENT_REFUNDED", "charge.refunded"}
 CHARGEBACK_EVENTS = {"payment.chargeback", "PAYMENT_CHARGEBACK_REQUESTED"}
 EXPIRE_EVENTS = {"payment.expired", "PAYMENT_OVERDUE", "PAYMENT_DELETED", "checkout.canceled"}
+#: Liquidação: o provedor diz que o dinheiro está DISPONÍVEL ao beneficiário (≠ confirmado). No Asaas, PAYMENT_RECEIVED
+#: já é "recebido na conta"; PAYMENT_CONFIRMED (cartão) é confirmado sem liquidação. `payment.settled` é o nome neutro.
+SETTLE_EVENTS = {"payment.settled", "PAYMENT_RECEIVED", "charge.settled"}
+PARTIAL_REFUND_EVENTS = {"payment.partially_refunded", "PAYMENT_PARTIALLY_REFUNDED", "charge.partially_refunded"}
 REDACT_KEYS = {"cpf", "cpfCnpj", "email", "phone", "ip", "card", "cardNumber", "document", "name", "payer"}
 
 
@@ -188,36 +192,68 @@ def redact(payload: dict) -> dict:
 
 # ============================================================================ campanhas
 def campaign_totals(c: Connection, campaign_id: str) -> dict:
-    """Números da campanha, cada um com definição. Nada aqui é saldo custodiado."""
+    """Números da campanha, cada um com definição e NUNCA somados num número só (pacote §4.2). Nada aqui é saldo custodiado.
+
+    Contas do razão lidas com sinal (D − C), de modo que reversões totais e parciais abatem a conta certa."""
     r = c.one(
         "SELECT"
         " coalesce(sum(amount_cents) FILTER (WHERE account = 'donor_payment' AND side = 'C' AND reversal_of IS NULL), 0) AS gross_confirmed,"
-        " coalesce(sum(amount_cents) FILTER (WHERE account IN ('refund','chargeback')), 0) AS reversed,"
-        " coalesce(sum(amount_cents) FILTER (WHERE account = 'provider_fee' AND side = 'D' AND reversal_of IS NULL), 0) AS provider_fees,"
-        " coalesce(sum(amount_cents) FILTER (WHERE account = 'platform_fee_accrued' AND side = 'D' AND reversal_of IS NULL), 0) AS platform_fee_accrued,"
-        " coalesce(sum(amount_cents) FILTER (WHERE account = 'beneficiary_fund' AND side = 'D' AND reversal_of IS NULL), 0) AS beneficiary_fund,"
-        " coalesce(sum(amount_cents) FILTER (WHERE account = 'beneficiary_receivable' AND side = 'D' AND reversal_of IS NULL), 0) AS beneficiary_net,"
+        " coalesce(sum(amount_cents) FILTER (WHERE account IN ('refund','chargeback') AND side = 'D'), 0) AS reversed,"
+        " coalesce(sum(CASE WHEN side = 'D' THEN amount_cents ELSE -amount_cents END) FILTER (WHERE account = 'provider_fee'), 0) AS provider_fees,"
+        " coalesce(sum(CASE WHEN side = 'D' THEN amount_cents ELSE -amount_cents END) FILTER (WHERE account = 'platform_fee_accrued'), 0) AS platform_fee_accrued,"
+        " coalesce(sum(CASE WHEN side = 'D' THEN amount_cents ELSE -amount_cents END) FILTER (WHERE account = 'beneficiary_fund'), 0) AS beneficiary_fund,"
+        " coalesce(sum(CASE WHEN side = 'D' THEN amount_cents ELSE -amount_cents END) FILTER (WHERE account = 'beneficiary_receivable'), 0) AS beneficiary_net,"
         " bool_or(is_simulated) AS any_simulated, max(created_at) AS last_entry_at"
         " FROM donation_ledger_entries WHERE campaign_id = $1", campaign_id)
-    donors = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND status IN ('confirmed','reconciled')", campaign_id)
-    reconciled = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND status = 'reconciled'", campaign_id)
+    st = c.one(
+        "SELECT count(*) FILTER (WHERE status IN ('confirmed','reconciled','partially_refunded')) AS confirmed_n,"
+        " count(*) FILTER (WHERE status = 'reconciled') AS reconciled_n,"
+        " count(*) FILTER (WHERE status = 'awaiting_payment') AS pending_n,"
+        " coalesce(sum(amount_cents + cover_costs_cents) FILTER (WHERE status = 'awaiting_payment'), 0) AS pending_cents,"
+        " coalesce(sum(amount_cents + cover_costs_cents - refunded_cents) FILTER (WHERE settled_at IS NOT NULL AND status IN ('confirmed','reconciled','partially_refunded')), 0) AS settled_cents,"
+        " count(*) FILTER (WHERE status = 'under_review') AS under_review_n,"
+        " coalesce(sum(amount_cents + cover_costs_cents) FILTER (WHERE status = 'under_review'), 0) AS under_review_cents,"
+        " count(*) FILTER (WHERE status IN ('refunded','chargeback')) AS reversed_n,"
+        " count(*) FILTER (WHERE status = 'partially_refunded') AS partially_refunded_n"
+        " FROM donations WHERE campaign_id = $1", campaign_id)
+    pl = c.one("SELECT count(*) AS n, coalesce(sum(amount_cents),0) AS cents FROM donation_pledges WHERE campaign_id = $1 AND status = 'pledged'", campaign_id)
+    ex = c.one("SELECT count(*) AS n, coalesce(sum(amount_cents),0) AS cents FROM external_resources WHERE campaign_id = $1", campaign_id)
+    sp = c.one("SELECT coalesce(sum(amount_cents),0) AS declared, coalesce(sum(amount_cents) FILTER (WHERE evidence_status = 'validated'),0) AS validated"
+               " FROM campaign_expenses WHERE campaign_id = $1", campaign_id)
     return {
         "gross_confirmed_cents": int(r["gross_confirmed"]),
         "reversed_cents": int(r["reversed"]),
         "net_after_reversals_cents": int(r["gross_confirmed"]) - int(r["reversed"]),
+        "settled_cents": int(st["settled_cents"]),
+        "pending_cents": int(st["pending_cents"]), "pending_donations": int(st["pending_n"]),
+        "under_review_cents": int(st["under_review_cents"]), "under_review_donations": int(st["under_review_n"]),
         "provider_fees_cents": int(r["provider_fees"]),
         "platform_fee_accrued_cents": int(r["platform_fee_accrued"]),
         "beneficiary_fund_cents": int(r["beneficiary_fund"]),
-        "beneficiary_net_estimated_cents": int(r["beneficiary_net"]) - int(r["reversed"]),
-        "confirmed_donations": int(donors or 0), "reconciled_donations": int(reconciled or 0),
+        "beneficiary_net_estimated_cents": int(r["beneficiary_net"]),
+        "expenses_declared_cents": int(sp["declared"]), "expenses_validated_cents": int(sp["validated"]),
+        "pledged_cents": int(pl["cents"]), "pledges": int(pl["n"]),
+        "external_declared_cents": int(ex["cents"]), "external_resources": int(ex["n"]),
+        "confirmed_donations": int(st["confirmed_n"]), "reconciled_donations": int(st["reconciled_n"]),
+        "reversed_donations": int(st["reversed_n"]), "partially_refunded_donations": int(st["partially_refunded_n"]),
         "basis": "pagamentos CONFIRMADOS pelo provedor; pode mudar por estorno ou chargeback",
+        "counting_policy": "uma doação conta uma vez (por cobrança do provedor); estornada total sai da contagem; parcial continua contada com o valor abatido",
+        "definitions": {
+            "gross_confirmed_cents": "soma do que os doadores pagaram em doações confirmadas pelo provedor",
+            "settled_cents": "parcela já LIQUIDADA (disponível ao beneficiário segundo o provedor), líquida de estornos",
+            "pending_cents": "cobranças iniciadas e ainda não pagas — NÃO é arrecadação",
+            "under_review_cents": "valores em análise (divergência ou risco) — NÃO entram na barra",
+            "beneficiary_net_estimated_cents": "bruto − tarifa do provedor − taxa calculada − fundo, abatidos os estornos; estimado até conciliar",
+            "platform_fee_accrued_cents": "taxa CALCULADA (hipótese); devida só por obrigação com gatilho — hoje R$ 0,00 devido",
+            "pledged_cents": "compromissos de doação futura — NÃO é dinheiro recebido",
+            "external_declared_cents": "recursos declarados pela organização fora da plataforma — não conferidos pelo provedor"},
         "label": "saldo contábil estimado (espelho de conciliação) — não é dinheiro guardado pela plataforma",
         "any_simulated": bool(r["any_simulated"]), "last_entry_at": r["last_entry_at"],
     }
 
 
 def public_campaign(c: Connection, slug: str) -> dict:
-    camp = c.one("SELECT c.id::text AS id, c.slug, c.title, c.summary, c.story, c.status, c.kind, c.target_cents, c.currency,"
+    camp = c.one("SELECT c.id::text AS id, c.slug, c.title, c.summary, c.story, c.status, c.kind, c.target_cents, c.currency, c.funding_source,"
                  " c.starts_on, c.ends_on, c.purpose, c.contingency_policy, c.refund_policy, c.published_at, c.show_backers,"
                  " c.min_donation_cents, c.allow_recurring, c.qr_version, c.project_id::text AS project_id, p.title AS project_title,"
                  " o.legal_name, o.trade_name, o.city, o.uf, o.kind AS org_kind, o.id::text AS beneficiary_org_id,"
@@ -246,6 +282,11 @@ def public_campaign(c: Connection, slug: str) -> dict:
         "beneficiary": {"name": camp["trade_name"] or camp["legal_name"], "city": camp["city"], "uf": camp["uf"], "kind": camp["org_kind"],
                         "verified": bool(camp["beneficiary_verified"])},
         "totals": totals, "backers": backers, "updates": updates, "expenses": expenses,
+        "external_resources": c.query("SELECT kind, source_name, funding_source, amount_cents, in_kind_description, received_on, status"
+                                      " FROM external_resources WHERE campaign_id = $1 ORDER BY received_on DESC LIMIT 100", camp["id"]),
+        "pledges": {"count": totals["pledges"], "cents": totals["pledged_cents"], "note": "compromissos de doação futura: NÃO é dinheiro recebido"},
+        "last_financial_update_at": totals["last_entry_at"],
+        "funding_source": camp.get("funding_source", "private"),
         "costs_disclosure": {
             "platform_fee_bps": fee_v["bps"] if fee_v else 0, "platform_fee_active": fee_active,
             "beneficiary_fund_max_bps": fund_v["bps"] if fund_v else 0,
@@ -268,15 +309,18 @@ def canonical_url(settings: Any, slug: str, qr_version: int) -> str:
 # ============================================================================ doações
 def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_cents: int, method: str, donor_user_id: str | None,
                    donor_display: str | None, donor_email: str | None, public_anonymous: bool, cover_costs: bool,
-                   idempotency_key: str | None, cipher: Any) -> dict:
+                   idempotency_key: str | None, cipher: Any, donor_org_id: str | None = None, funding_source: str | None = None) -> dict:
     """Cria a doação e a cobrança no provedor. Devolve o que o doador precisa (QR/copia e cola, total, parcelas) — e NUNCA marca pago."""
     if not getattr(settings, "donations_enabled", True):
         raise ApiError(503, "donations_disabled", "Doações desligadas nesta instalação")
     camp = c.one("SELECT id::text AS id, beneficiary_org_id::text AS beneficiary_org_id, status, min_donation_cents, qr_version,"
                  " coalesce((SELECT bps FROM fee_rule_versions WHERE rule_key = 'donation.beneficiary_fund' ORDER BY version DESC LIMIT 1), 0) AS fund_bps_max,"
-                 " title FROM campaigns WHERE slug = $1", campaign_slug)
+                 " title, funding_source FROM campaigns WHERE slug = $1", campaign_slug)
     if not camp or camp["status"] not in ("published", "target_reached"):
         raise not_found("Campanha aberta a doações")
+    if funding_source not in (None, "private", "public", "mixed"):
+        raise unprocessable("origem do recurso desconhecida", code="funding_source")
+    funding_source = funding_source or camp["funding_source"]
     if amount_cents < int(camp["min_donation_cents"]):
         raise unprocessable(f"doação mínima desta campanha: {camp['min_donation_cents']} centavos", code="below_minimum")
     if method not in ("pix", "card"):
@@ -293,12 +337,13 @@ def start_donation(c: Connection, *, settings: Any, campaign_slug: str, amount_c
     did = c.scalar(
         "INSERT INTO donations(campaign_id, beneficiary_org_id, donor_user_id, donor_display, donor_contact_enc, public_anonymous,"
         " amount_cents, method, provider, status, fee_rule_version_id, fund_rule_version_id, provider_fee_schedule_id,"
-        " platform_fee_cents, beneficiary_fund_cents, provider_fee_cents, cover_costs_opt_in, cover_costs_cents, qr_version, idempotency_key)"
-        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'created',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id::text",
+        " platform_fee_cents, beneficiary_fund_cents, provider_fee_cents, cover_costs_opt_in, cover_costs_cents, qr_version, idempotency_key,"
+        " donor_org_id, funding_source)"
+        " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'created',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING id::text",
         camp["id"], camp["beneficiary_org_id"], donor_user_id, (donor_display or None), (cipher.encrypt(donor_email) if donor_email else None),
         public_anonymous, amount_cents, method, prov.name, frozen["fee_rule_version_id"], frozen["fund_rule_version_id"],
         frozen["provider_fee_schedule_id"], b.platform_fee_cents, b.beneficiary_fund_cents, b.provider_fee_cents, cover_costs,
-        b.cover_costs_cents, camp["qr_version"], idempotency_key)
+        b.cover_costs_cents, camp["qr_version"], idempotency_key, donor_org_id, funding_source or "private")
     ch = prov.create_charge(donation_id=did, amount_cents=amount_cents + b.cover_costs_cents, method=method,
                             description=f"Doação — {camp['title'][:80]}", expires_in_minutes=30)
     c.run("UPDATE donations SET status = 'awaiting_payment', provider_charge_id = $2, expires_at = $3 WHERE id = $1", did, ch.provider_charge_id, ch.expires_at)
@@ -350,14 +395,47 @@ def apply_provider_event(c: Connection, *, provider: str, event: dict, signature
     row_id = rec["event_row_id"]
     et = event["event_type"]
     cid = event.get("provider_charge_id")
-    d = c.one("SELECT id::text AS id, campaign_id::text AS campaign_id, status, amount_cents, cover_costs_cents, provider_fee_cents,"
-              " platform_fee_cents, beneficiary_fund_cents, is_simulated, currency FROM donations WHERE provider = $1 AND provider_charge_id = $2"
+    d = c.one("SELECT id::text AS id, campaign_id::text AS campaign_id, beneficiary_org_id::text AS beneficiary_org_id, status, amount_cents,"
+              " cover_costs_cents, provider_fee_cents, platform_fee_cents, beneficiary_fund_cents, is_simulated, currency, settled_at, refunded_cents,"
+              " fee_rule_version_id, funding_source FROM donations WHERE provider = $1 AND provider_charge_id = $2"
               " FOR UPDATE", provider, cid) if cid else None
     if not d:
         c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = 'cobrança desconhecida', processed_at = now() WHERE id = $1", row_id)
         return rec | {"effect": "ignored", "note": "cobrança desconhecida"}
     c.run("UPDATE payment_provider_events SET donation_id = $2 WHERE id = $1", row_id, d["id"])
     expected_total = int(d["amount_cents"]) + int(d["cover_costs_cents"])
+    # Liquidação de doação já confirmada: marca `settled_at` (nunca "desliquida"); é o que a política "gratuito até gerar
+    # valor" mede. Um PAYMENT_RECEIVED numa doação ainda não confirmada cai no bloco de confirmação abaixo e liquida junto.
+    if et in SETTLE_EVENTS and d["status"] in ("confirmed", "reconciled", "partially_refunded"):
+        if d["settled_at"] is None:
+            c.run("UPDATE donations SET settled_at = now() WHERE id = $1", d["id"])
+            c.run("UPDATE payment_provider_events SET processing_status = 'applied', processing_note = 'liquidação', processed_at = now() WHERE id = $1", row_id)
+            return rec | {"effect": "settled", "donation_id": d["id"]}
+        c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = 'já liquidada', processed_at = now() WHERE id = $1", row_id)
+        return rec | {"effect": "already_settled"}
+    if et in PARTIAL_REFUND_EVENTS:
+        amt = int(event.get("amount_cents") or 0)
+        if d["status"] not in ("confirmed", "reconciled", "partially_refunded") or amt <= 0:
+            c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = 'estorno parcial sem confirmação ou sem valor', processed_at = now() WHERE id = $1", row_id)
+            return rec | {"effect": "ignored", "note": "estorno parcial sem confirmação ou sem valor"}
+        if int(d["refunded_cents"]) + amt > expected_total:
+            open_risk_case(c, campaign_id=d["campaign_id"], donation_id=d["id"], reason_codes=["refund_exceeds_payment"], level="high",
+                           explanation=f"estorno parcial acumulado ({d['refunded_cents']} + {amt}) maior que o pago ({expected_total})")
+            c.run("UPDATE payment_provider_events SET processing_status = 'applied', processing_note = 'estorno maior que o pago: caso de risco', processed_at = now() WHERE id = $1", row_id)
+            return rec | {"effect": "under_review"}
+        _post_partial_reversal(c, d, amount=amt, source_event_id=row_id)
+        new_total = int(d["refunded_cents"]) + amt
+        c.run("UPDATE donations SET refunded_cents = $2 WHERE id = $1", d["id"], new_total)
+        if new_total == expected_total:
+            c.run("UPDATE donations SET status = 'refunded' WHERE id = $1", d["id"])
+            c.run("UPDATE donation_receipts SET status = 'voided', voided_at = now() WHERE donation_id = $1 AND status = 'issued'", d["id"])
+            _obligations_on_reversal(c, d, note="estorno parcial acumulado até o total")
+            effect = "refunded"
+        else:
+            c.run("UPDATE donations SET status = 'partially_refunded' WHERE id = $1 AND status <> 'partially_refunded'", d["id"])
+            effect = "partially_refunded"
+        c.run("UPDATE payment_provider_events SET processing_status = 'applied', processed_at = now() WHERE id = $1", row_id)
+        return rec | {"effect": effect, "donation_id": d["id"], "refunded_cents": new_total}
     if et in CONFIRMING_EVENTS:
         if event.get("amount_cents") is not None and int(event["amount_cents"]) != expected_total or (event.get("currency") or "BRL") != d["currency"]:
             c.run("UPDATE donations SET status = 'under_review' WHERE id = $1 AND status = 'awaiting_payment'", d["id"])
@@ -372,7 +450,10 @@ def apply_provider_event(c: Connection, *, provider: str, event: dict, signature
             c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = $2, processed_at = now() WHERE id = $1", row_id, f"estado {d['status']}")
             return rec | {"effect": "ignored", "note": f"estado {d['status']}"}
         c.run("UPDATE donations SET status = 'confirmed' WHERE id = $1", d["id"])
+        if et in SETTLE_EVENTS:
+            c.run("UPDATE donations SET settled_at = now() WHERE id = $1", d["id"])
         _post_confirmation(c, d, source_event_id=row_id)
+        _register_obligations(c, d)
         issue_receipt(c, d["id"])
         c.run("UPDATE payment_provider_events SET processing_status = 'applied', processed_at = now() WHERE id = $1", row_id)
         _maybe_target_reached(c, d["campaign_id"])
@@ -381,19 +462,23 @@ def apply_provider_event(c: Connection, *, provider: str, event: dict, signature
         kind = "chargeback" if et in CHARGEBACK_EVENTS else "refund"
         # A reversal already posted in the ledger wins over the status gate:
         # a repeated refund/chargeback event must never post a second reversal.
-        already = c.scalar("SELECT 1 FROM donation_ledger_entries WHERE donation_id = $1 AND account IN ('refund','chargeback') LIMIT 1", d["id"])
-        if already:
+        if d["status"] in ("refunded", "chargeback") or int(d["refunded_cents"]) >= expected_total:
             c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = 'reversão já lançada', processed_at = now() WHERE id = $1", row_id)
             return rec | {"effect": "already_reversed"}
-        if d["status"] not in ("confirmed", "reconciled", "refund_pending"):
+        if d["status"] not in ("confirmed", "reconciled", "refund_pending", "partially_refunded"):
             c.run("UPDATE payment_provider_events SET processing_status = 'ignored', processing_note = 'reversão sem confirmação prévia', processed_at = now() WHERE id = $1", row_id)
             return rec | {"effect": "ignored", "note": "reversão sem confirmação prévia"}
-        _post_reversal(c, d, kind=kind, source_event_id=row_id)
+        if int(d["refunded_cents"]) > 0:
+            # já houve estorno parcial: a reversão total é o RESTANTE, como lançamento novo
+            _post_partial_reversal(c, d, amount=expected_total - int(d["refunded_cents"]), source_event_id=row_id)
+        else:
+            _post_reversal(c, d, kind=kind, source_event_id=row_id)
         target = "chargeback" if kind == "chargeback" else "refunded"
         if d["status"] in ("confirmed", "reconciled") and target == "refunded":
             c.run("UPDATE donations SET status = 'refund_pending' WHERE id = $1", d["id"])
-        c.run("UPDATE donations SET status = $2 WHERE id = $1", d["id"], target)
+        c.run("UPDATE donations SET status = $2, refunded_cents = $3 WHERE id = $1", d["id"], target, expected_total)
         c.run("UPDATE donation_receipts SET status = 'voided', voided_at = now() WHERE donation_id = $1 AND status = 'issued'", d["id"])
+        _obligations_on_reversal(c, d, note=kind)
         c.run("UPDATE payment_provider_events SET processing_status = 'applied', processed_at = now() WHERE id = $1", row_id)
         return rec | {"effect": target, "donation_id": d["id"]}
     if et in EXPIRE_EVENTS:
@@ -442,6 +527,32 @@ def _post_reversal(c: Connection, d: dict, *, kind: str, source_event_id: int) -
         else:
             _entry(c, donation=d, txn=txn, account=e["account"], side="C", amount=int(e["amount_cents"]), source_event_id=source_event_id, reversal_of=e["id"])
     return txn
+
+
+def _post_partial_reversal(c: Connection, d: dict, *, amount: int, source_event_id: int) -> str:
+    """Estorno PARCIAL: reverte `amount` do pagamento do doador contra o recebível do beneficiário. Tarifa, taxa e fundo
+    ficam como lançados — quem os reverte (e se) é o contrato do provedor, e a divergência aparece na conciliação."""
+    txn = str(uuid.uuid4())
+    orig = c.one("SELECT id FROM donation_ledger_entries WHERE donation_id = $1 AND account = 'donor_payment' AND reversal_of IS NULL ORDER BY id LIMIT 1", d["id"])
+    _entry(c, donation=d, txn=txn, account="refund", side="D", amount=amount, source_event_id=source_event_id, reversal_of=orig["id"] if orig else None,
+           note="estorno parcial")
+    _entry(c, donation=d, txn=txn, account="beneficiary_receivable", side="C", amount=amount, source_event_id=source_event_id,
+           note="estorno parcial: o provedor deixa de dever esta parcela ao beneficiário")
+    return txn
+
+
+def _register_obligations(c: Connection, d: dict) -> None:
+    """Toda taxa CALCULADA vira obrigação registrada (estado `calculated`/`exempt`), nunca devida por si (ADR-377/379)."""
+    from . import remuneration as REM
+    if int(d["platform_fee_cents"]) > 0:
+        REM.register(c, org_id=d["beneficiary_org_id"], source_kind="donation", source_id=d["id"], rule_key="donation.platform_fee",
+                     rule_version_id=d.get("fee_rule_version_id"), basis_cents=int(d["amount_cents"]), amount_cents=int(d["platform_fee_cents"]),
+                     funding_source=d.get("funding_source") or "private", campaign_id=d["campaign_id"])
+
+
+def _obligations_on_reversal(c: Connection, d: dict, *, note: str) -> None:
+    from . import remuneration as REM
+    REM.reverse_for_source(c, source_kind="donation", source_id=d["id"], note=note)
 
 
 def _maybe_target_reached(c: Connection, campaign_id: str) -> None:
@@ -616,9 +727,85 @@ def accountability(c: Connection, *, campaign_id: str, org_id: str) -> dict:
     updates = c.query("SELECT id::text AS id, title, body, is_public, created_at FROM campaign_updates WHERE campaign_id = $1 ORDER BY created_at DESC LIMIT 50", campaign_id)
     declared = sum(int(e["amount_cents"]) for e in expenses)
     validated = sum(int(e["amount_cents"]) for e in expenses if e["evidence_status"] == "validated")
+    external = c.query("SELECT id::text AS id, kind, source_name, funding_source, instrument_ref, amount_cents, in_kind_description, received_on, status, note"
+                       " FROM external_resources WHERE campaign_id = $1 ORDER BY received_on DESC", campaign_id)
+    pledges = c.query("SELECT id::text AS id, pledger_display, amount_cents, expected_on, status, fulfilled_donation_id::text AS fulfilled_donation_id, created_at"
+                      " FROM donation_pledges WHERE campaign_id = $1 ORDER BY created_at DESC", campaign_id)
+    obligations = c.query("SELECT id::text AS id, rule_key, basis_cents, amount_cents, state, funding_source, due_on FROM remuneration_obligations"
+                          " WHERE campaign_id = $1 ORDER BY created_at DESC", campaign_id)
+    exceptions = c.query("SELECT id::text AS id, kind, priority, status, detail, created_at FROM reconciliation_exceptions WHERE campaign_id = $1 AND status IN ('open','assigned')", campaign_id)
     return {"campaign": camp, "totals": totals, "expenses": expenses, "updates": updates, "donations": donations, "open_risk_cases": risk,
+            "external_resources": external, "pledges": pledges, "remuneration_obligations": obligations, "reconciliation_exceptions": exceptions,
             "expenses_declared_cents": declared, "expenses_validated_cents": validated,
             "definitions": {"gross_confirmed_cents": "soma das doações confirmadas pelo provedor",
                             "beneficiary_net_estimated_cents": "bruto − tarifa do provedor − taxa calculada − fundo − estornos; estimado até conciliar",
                             "platform_fee_accrued_cents": "taxa CALCULADA (hipótese 1 %); devida só com a regra ativa — hoje R$ 0,00 devido",
                             "expenses_declared_cents": "o que a organização declarou; 'validated' = com documento aceito"}}
+
+
+# ============================================================================ recursos externos, compromissos, financiador (v0.34.0, ADR-382)
+def declare_external_resource(c: Connection, *, campaign_id: str, org_id: str, user_id: str, kind: str, source_name: str, funding_source: str,
+                              instrument_ref: str | None, amount_cents: int | None, in_kind_description: str | None, received_on: str,
+                              evidence_document_id: str | None, note: str | None) -> str:
+    camp = require_campaign_owner(c, campaign_id, org_id)
+    if kind == "in_kind" and amount_cents is not None:
+        raise unprocessable("apoio não financeiro não tem valor em dinheiro", code="in_kind_amount")
+    if kind != "in_kind" and not amount_cents:
+        raise unprocessable("recurso financeiro exige valor", code="amount_required")
+    if funding_source in ("public", "mixed") and not instrument_ref:
+        raise unprocessable("recurso público exige o instrumento (termo, convênio, edital)", code="instrument_required")
+    return c.scalar("INSERT INTO external_resources(org_id, campaign_id, project_id, kind, source_name, funding_source, instrument_ref, amount_cents,"
+                    " in_kind_description, received_on, evidence_document_id, status, note, declared_by)"
+                    " VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id::text",
+                    org_id, campaign_id, camp.get("project_id"), kind, source_name, funding_source, instrument_ref, amount_cents, in_kind_description,
+                    received_on, evidence_document_id, "documented" if evidence_document_id else "declared", note, user_id)
+
+
+def make_pledge(c: Connection, *, campaign_slug: str, user_id: str, org_id: str | None, display: str | None, amount_cents: int,
+                expected_on: str | None, note: str | None) -> dict:
+    camp = c.one("SELECT id::text AS id, beneficiary_org_id::text AS beneficiary_org_id, status FROM campaigns WHERE slug = $1", campaign_slug)
+    if not camp or camp["status"] not in ("published", "target_reached"):
+        raise not_found("Campanha aberta a doações")
+    if amount_cents <= 0:
+        raise unprocessable("valor do compromisso deve ser positivo", code="amount")
+    pid = c.scalar("INSERT INTO donation_pledges(campaign_id, beneficiary_org_id, pledger_user_id, pledger_org_id, pledger_display, amount_cents, expected_on, note)"
+                   " VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id::text", camp["id"], camp["beneficiary_org_id"], user_id, org_id, display, amount_cents, expected_on, note)
+    return {"id": pid, "status": "pledged", "note": "compromisso registrado; NÃO é doação confirmada nem dinheiro recebido"}
+
+
+def fulfill_pledge(c: Connection, *, pledge_id: str, org_id: str, donation_id: str) -> dict:
+    p = c.one("SELECT id::text AS id, campaign_id::text AS campaign_id, beneficiary_org_id::text AS org, status, amount_cents FROM donation_pledges WHERE id = $1", pledge_id)
+    if not p or p["org"] != org_id:
+        raise not_found("Compromisso")
+    if p["status"] != "pledged":
+        raise unprocessable("compromisso não está aberto", code="pledge_state")
+    d = c.one("SELECT id::text AS id, campaign_id::text AS campaign_id, status FROM donations WHERE id = $1", donation_id)
+    if not d or d["campaign_id"] != p["campaign_id"] or d["status"] not in ("confirmed", "reconciled", "partially_refunded"):
+        raise unprocessable("só doação CONFIRMADA da mesma campanha cumpre um compromisso", code="donation_state")
+    c.run("UPDATE donation_pledges SET status = 'fulfilled', fulfilled_donation_id = $2 WHERE id = $1", pledge_id, donation_id)
+    return {"status": "fulfilled"}
+
+
+def cancel_pledge(c: Connection, *, pledge_id: str, user_id: str) -> dict:
+    if not c.run("UPDATE donation_pledges SET status = 'cancelled' WHERE id = $1 AND pledger_user_id = $2 AND status = 'pledged'", pledge_id, user_id):
+        raise not_found("Compromisso")
+    return {"status": "cancelled"}
+
+
+def funder_view(c: Connection, *, org_id: str) -> dict:
+    """Painel do financiador: o que a organização doou/comprometeu, com estado e comprovante — nunca dados de outros doadores."""
+    rows = c.query("SELECT d.id::text AS id, d.status, d.amount_cents, d.refunded_cents, d.confirmed_at, d.settled_at, d.created_at, d.is_simulated,"
+                   " c.slug, c.title AS campaign_title, o.legal_name AS beneficiary, r.number AS receipt_number"
+                   " FROM donations d JOIN campaigns c ON c.id = d.campaign_id JOIN organizations o ON o.id = d.beneficiary_org_id"
+                   " LEFT JOIN donation_receipts r ON r.donation_id = d.id WHERE d.donor_org_id = $1 ORDER BY d.created_at DESC LIMIT 200", org_id)
+    pledges = c.query("SELECT p.id::text AS id, p.amount_cents, p.expected_on, p.status, c.slug, c.title AS campaign_title FROM donation_pledges p"
+                      " JOIN campaigns c ON c.id = p.campaign_id WHERE p.pledger_org_id = $1 ORDER BY p.created_at DESC", org_id)
+    tot = {"confirmed_cents": sum(int(r["amount_cents"]) - int(r["refunded_cents"]) for r in rows if r["status"] in ("confirmed", "reconciled", "partially_refunded")),
+           "pending_cents": sum(int(r["amount_cents"]) for r in rows if r["status"] == "awaiting_payment"),
+           "reversed_cents": sum(int(r["refunded_cents"]) for r in rows),
+           "pledged_cents": sum(int(p["amount_cents"]) for p in pledges if p["status"] == "pledged")}
+    campaigns = sorted({r["slug"] for r in rows})
+    return {"donations": rows, "pledges": pledges, "totals": tot, "campaigns_supported": campaigns,
+            "definitions": {"confirmed_cents": "doações confirmadas pelo provedor, líquidas de estornos", "pending_cents": "cobranças não pagas — não é doação",
+                            "pledged_cents": "compromissos — não é dinheiro"},
+            "note": "Resultados das campanhas apoiadas são os declarados pelas organizações na prestação de contas; validação é indicada item a item."}

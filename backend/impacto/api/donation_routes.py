@@ -11,6 +11,8 @@ from starlette.responses import JSONResponse, Response
 
 from ..http import ApiError, Ctx, not_found, route
 from ..services import donations as DON
+from ..services import reconciliation as RECON
+from ..services import remuneration as REM
 from . import trust_schemas as TSch
 
 T = ("donations",)
@@ -45,11 +47,13 @@ def campaign_qr(ctx: Ctx):
        summary="Inicia uma doação: cria a cobrança no provedor e devolve o Pix copia-e-cola/checkout com o preço total — não confirma nada")
 def donate(ctx: Ctx, body: TSch.DonationStartIn):
     donor_user_id = ctx.principal.user_id if ctx.principal else None
+    donor_org_id = ctx.principal.org_id if (body.as_organization and ctx.principal) else None
     with ctx.system_tx() as c:
         out = DON.start_donation(c, settings=ctx.settings, campaign_slug=ctx.path["slug"], amount_cents=body.amount_cents,
                                  method=body.method, donor_user_id=donor_user_id, donor_display=body.donor_display,
                                  donor_email=body.donor_email, public_anonymous=body.public_anonymous, cover_costs=body.cover_costs,
-                                 idempotency_key=body.idempotency_key, cipher=ctx.app.cipher)
+                                 idempotency_key=body.idempotency_key, cipher=ctx.app.cipher, donor_org_id=donor_org_id,
+                                 funding_source=body.funding_source)
         ctx.audit(c, "donation.started", "donation", out["id"], {"amount_cents": body.amount_cents, "method": body.method,
                                                                   "provider": out["provider"], "simulated": out["is_simulated"]}, org_id=None)
     return out
@@ -270,3 +274,215 @@ def admin_ledger(ctx: Ctx):
         totals = DON.campaign_totals(c, ctx.path["campaign_id"])
     return {"entries": entries, "totals": totals}
 
+
+
+# ============================================================================ v0.34.0 — recursos externos, compromissos, financiador
+@route("POST", "/v1/campaigns/{campaign_id}/external-resources", body=TSch.ExternalResourceIn, min_role=WRITE, status=201, tags=T,
+       summary="Declara recurso recebido FORA da plataforma (entra na prestação de contas; nunca no razão nem na barra)")
+def external_resource_declare(ctx: Ctx, body: TSch.ExternalResourceIn):
+    with ctx.tx() as c:
+        rid = DON.declare_external_resource(c, campaign_id=ctx.path["campaign_id"], org_id=ctx.org_id, user_id=ctx.user_id, kind=body.kind,
+                                            source_name=body.source_name, funding_source=body.funding_source, instrument_ref=body.instrument_ref,
+                                            amount_cents=body.amount_cents, in_kind_description=body.in_kind_description,
+                                            received_on=body.received_on.isoformat(), evidence_document_id=str(body.evidence_document_id) if body.evidence_document_id else None,
+                                            note=body.note)
+        ctx.audit(c, "external_resource.declared", "external_resource", rid, {"kind": body.kind, "funding_source": body.funding_source, "amount_cents": body.amount_cents})
+    return {"id": rid}
+
+
+@route("POST", "/v1/public/donation-campaigns/{slug}/pledge", auth="user", body=TSch.DonationPledgeIn, status=201, rate=("pledge_user", 20, 3600), tags=T,
+       summary="Registra um compromisso de doação futura (não é doação, não é dinheiro)")
+def pledge(ctx: Ctx, body: TSch.DonationPledgeIn):
+    org = ctx.principal.org_id if body.as_organization else None
+    with ctx.system_tx() as c:
+        out = DON.make_pledge(c, campaign_slug=ctx.path["slug"], user_id=ctx.user_id, org_id=org, display=body.display,
+                              amount_cents=body.amount_cents, expected_on=body.expected_on.isoformat() if body.expected_on else None, note=body.note)
+        ctx.audit(c, "pledge.created", "donation_pledge", out["id"], {"amount_cents": body.amount_cents}, org_id=org)
+    return out
+
+
+@route("POST", "/v1/me/pledges/{pledge_id}/cancel", auth="user", tags=T, summary="Cancela o próprio compromisso")
+def pledge_cancel(ctx: Ctx):
+    with ctx.system_tx() as c:
+        out = DON.cancel_pledge(c, pledge_id=ctx.path["pledge_id"], user_id=ctx.user_id)
+        ctx.audit(c, "pledge.cancelled", "donation_pledge", ctx.path["pledge_id"], {}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/campaigns/{campaign_id}/pledges/{pledge_id}/fulfill", body=TSch.PledgeFulfillIn, min_role=WRITE, tags=T,
+       summary="Liga um compromisso à doação CONFIRMADA que o cumpriu")
+def pledge_fulfill(ctx: Ctx, body: TSch.PledgeFulfillIn):
+    with ctx.tx() as c:
+        DON.require_campaign_owner(c, ctx.path["campaign_id"], ctx.org_id)
+        out = DON.fulfill_pledge(c, pledge_id=ctx.path["pledge_id"], org_id=ctx.org_id, donation_id=str(body.donation_id))
+        ctx.audit(c, "pledge.fulfilled", "donation_pledge", ctx.path["pledge_id"], {"donation_id": str(body.donation_id)})
+    return out
+
+
+@route("GET", "/v1/org/contributions", min_role="viewer", tags=T, summary="Painel do financiador: doações e compromissos feitos em nome da organização")
+def org_contributions(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return DON.funder_view(c, org_id=ctx.org_id)
+
+
+# ============================================================================ v0.34.0 — remuneração: gratuito até gerar valor
+@route("GET", "/v1/org/remuneration", min_role="viewer", tags=T,
+       summary="Obrigações de remuneração da organização, política vigente, franquia e avisos — nada aqui bloqueia nada")
+def org_remuneration(ctx: Ctx):
+    with ctx.tx(readonly=True) as c:
+        return REM.org_view(c, ctx.org_id)
+
+
+@route("POST", "/v1/org/remuneration/{obligation_id}/dispute", body=TSch.ObligationDisputeIn, min_role=WRITE, tags=T,
+       summary="Contesta uma obrigação (fica em disputa até decisão registrada)")
+def org_remuneration_dispute(ctx: Ctx, body: TSch.ObligationDisputeIn):
+    with ctx.system_tx() as c:
+        out = REM.dispute(c, obligation_id=ctx.path["obligation_id"], org_id=ctx.org_id, actor=ctx.user_id, reason=body.reason)
+        ctx.audit(c, "remuneration.disputed", "remuneration_obligation", ctx.path["obligation_id"], {"reason": body.reason[:200]})
+    return out
+
+
+@route("POST", "/v1/org/remuneration/notices/{notice_id}/ack", min_role="viewer", tags=T, summary="Registra ciência de um aviso")
+def org_notice_ack(ctx: Ctx):
+    with ctx.tx() as c:
+        REM.ack_notice(c, notice_id=ctx.path["notice_id"], org_id=ctx.org_id, user_id=ctx.user_id)
+    return {"status": "acknowledged"}
+
+
+@route("GET", "/v1/admin/remuneration", auth="admin", permission="finance.read", tags=T,
+       summary="Obrigações por estado (previsto × devido × faturado × recebido × liquidado) — nunca somadas num número só")
+def admin_remuneration(ctx: Ctx):
+    with ctx.system_tx() as c:
+        state = ctx.request.query_params.get("state")
+        rows = c.query("SELECT o.id::text AS id, o.org_id::text AS org_id, org.legal_name AS org_name, o.source_kind, o.source_id, o.rule_key, o.basis_cents,"
+                       " o.amount_cents, o.funding_source, o.public_fee_authorized, o.state, o.trigger_code, o.due_on, o.received_cents,"
+                       " o.platform_charge_id::text AS platform_charge_id, o.created_at FROM remuneration_obligations o JOIN organizations org ON org.id = o.org_id"
+                       + (" WHERE o.state = $1" if state else "") + " ORDER BY o.created_at DESC LIMIT 500", *([state] if state else []))
+        return {"items": rows, "revenue": REM.platform_revenue_view(c), "policy": {k: v for k, v in REM.policy(c).items() if k != "id"}}
+
+
+@route("POST", "/v1/admin/remuneration/orgs/{org_id}/evaluate", auth="admin", permission="finance.write", tags=T,
+       summary="Aplica a política 'gratuito até gerar valor' à organização: o que virou devido e por que o resto não virou")
+def admin_remuneration_evaluate(ctx: Ctx):
+    with ctx.system_tx() as c:
+        out = REM.evaluate(c, org_id=ctx.path["org_id"], actor=ctx.user_id)
+        ctx.audit(c, "remuneration.evaluated", "organization", ctx.path["org_id"], {"became_due": len(out["became_due"]), "kept": len(out["kept"])}, org_id=ctx.path["org_id"])
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/orgs/{org_id}/notices", auth="admin", permission="finance.write", body=TSch.NoticeIn, tags=T,
+       summary="Envia (registra) um aviso prévio da política à organização")
+def admin_remuneration_notice(ctx: Ctx, body: TSch.NoticeIn):
+    with ctx.system_tx() as c:
+        nid = REM.send_notice(c, org_id=ctx.path["org_id"], kind=body.kind, created_by=ctx.user_id, body=body.body, channel=body.channel)
+        ctx.audit(c, "remuneration.notice_sent", "remuneration_notice", nid, {"kind": body.kind}, org_id=ctx.path["org_id"])
+    return {"id": nid}
+
+
+@route("POST", "/v1/admin/remuneration/invoice", auth="admin", permission="finance.write", body=TSch.ObligationInvoiceIn, tags=T,
+       summary="Fatura obrigações DEVIDAS numa cobrança própria da plataforma (nunca desconto de doação)")
+def admin_remuneration_invoice(ctx: Ctx, body: TSch.ObligationInvoiceIn):
+    with ctx.system_tx() as c:
+        out = REM.invoice(c, obligation_ids=[str(i) for i in body.obligation_ids], actor=ctx.user_id)
+        ctx.audit(c, "remuneration.invoiced", "platform_charge", out["platform_charge_id"], {"total_cents": out["total_cents"], "n": len(out["obligations"])}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/charged", auth="admin", permission="finance.write", tags=T, summary="Marca como cobrada (enviada ao pagador)")
+def admin_remuneration_charged(ctx: Ctx):
+    with ctx.system_tx() as c:
+        out = REM.mark_charged(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id)
+        ctx.audit(c, "remuneration.charged", "remuneration_obligation", ctx.path["obligation_id"], {}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/receipt", auth="admin", permission="finance.write", body=TSch.ObligationReceiptIn, tags=T,
+       summary="Registra pagamento RECEBIDO (parcial ou total) com referência")
+def admin_remuneration_receipt(ctx: Ctx, body: TSch.ObligationReceiptIn):
+    with ctx.system_tx() as c:
+        out = REM.register_receipt(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, received_cents=body.received_cents, reference=body.reference)
+        ctx.audit(c, "remuneration.received", "remuneration_obligation", ctx.path["obligation_id"], {"received_cents": body.received_cents}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/settle", auth="admin", permission="finance.approve", body=TSch.ObligationSettleIn, tags=T,
+       summary="Marca como LIQUIDADA (conciliada com extrato) — segregado: exige finance.approve")
+def admin_remuneration_settle(ctx: Ctx, body: TSch.ObligationSettleIn):
+    with ctx.system_tx() as c:
+        out = REM.mark_settled(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, note=body.note)
+        ctx.audit(c, "remuneration.settled", "remuneration_obligation", ctx.path["obligation_id"], {}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/decide", auth="admin", permission="finance.approve", body=TSch.ObligationDecisionIn, tags=T,
+       summary="Decide uma disputa (manter, dispensar, isentar) com justificativa")
+def admin_remuneration_decide(ctx: Ctx, body: TSch.ObligationDecisionIn):
+    with ctx.system_tx() as c:
+        out = REM.decide_dispute(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, outcome=body.outcome, note=body.note)
+        ctx.audit(c, "remuneration.dispute_decided", "remuneration_obligation", ctx.path["obligation_id"], {"outcome": body.outcome}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/waive", auth="admin", permission="finance.approve", body=TSch.ObligationWaiveIn, tags=T,
+       summary="Dispensa uma obrigação com justificativa registrada")
+def admin_remuneration_waive(ctx: Ctx, body: TSch.ObligationWaiveIn):
+    with ctx.system_tx() as c:
+        out = REM.waive(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, reason=body.reason)
+        ctx.audit(c, "remuneration.waived", "remuneration_obligation", ctx.path["obligation_id"], {"reason": body.reason[:200]}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/{obligation_id}/authorize-public", auth="admin", permission="finance.approve", body=TSch.PublicFeeAuthorizationIn, tags=T,
+       summary="Recurso público: registra instrumento e autorização que tornam a taxa elegível (ADR-379)")
+def admin_remuneration_authorize_public(ctx: Ctx, body: TSch.PublicFeeAuthorizationIn):
+    with ctx.system_tx() as c:
+        out = REM.authorize_public_fee(c, obligation_id=ctx.path["obligation_id"], actor=ctx.user_id, instrument_ref=body.instrument_ref, note=body.note)
+        ctx.audit(c, "remuneration.public_fee_authorized", "remuneration_obligation", ctx.path["obligation_id"], {"instrument_ref": body.instrument_ref}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/remuneration/mark-overdue", auth="admin", permission="finance.write", tags=T, summary="Marca vencidas as faturadas além do prazo (rotina)")
+def admin_remuneration_overdue(ctx: Ctx):
+    with ctx.system_tx() as c:
+        n = REM.mark_overdue(c)
+        ctx.audit(c, "remuneration.overdue_marked", "remuneration_obligation", "batch", {"n": n}, org_id=None)
+    return {"marked": n}
+
+
+# ============================================================================ v0.34.0 — conciliação com fila de exceções
+@route("POST", "/v1/admin/reconciliation/campaigns/{campaign_id}/run", auth="admin", permission="finance.write", body=TSch.ReconciliationSnapshotIn, tags=T,
+       summary="Executa a conciliação da campanha contra o snapshot do provedor (sandbox: derivado dos eventos assinados) e abre exceções")
+def admin_reconciliation_run(ctx: Ctx, body: TSch.ReconciliationSnapshotIn):
+    with ctx.system_tx() as c:
+        out = RECON.run_for_campaign(c, campaign_id=ctx.path["campaign_id"], provider_snapshot=body.charges or None, run_by=ctx.user_id)
+        ctx.audit(c, "reconciliation.run", "campaign", ctx.path["campaign_id"], {"opened": out["opened"], "reconciled": out["reconciled"]}, org_id=None)
+    return out
+
+
+@route("GET", "/v1/admin/reconciliation/exceptions", auth="admin", permission="finance.read", tags=T, summary="Fila de exceções de conciliação")
+def admin_reconciliation_exceptions(ctx: Ctx):
+    with ctx.system_tx() as c:
+        return {"items": RECON.list_exceptions(c, status=ctx.request.query_params.get("status") or None)}
+
+
+@route("POST", "/v1/admin/reconciliation/exceptions/{exception_id}/assign", auth="admin", permission="finance.write", tags=T, summary="Assume uma exceção")
+def admin_reconciliation_assign(ctx: Ctx):
+    with ctx.system_tx() as c:
+        out = RECON.assign(c, exception_id=ctx.path["exception_id"], user_id=ctx.user_id)
+        ctx.audit(c, "reconciliation.assigned", "reconciliation_exception", ctx.path["exception_id"], {}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/reconciliation/exceptions/{exception_id}/resolve", auth="admin", permission="finance.write", body=TSch.ReconciliationResolveIn, tags=T,
+       summary="Resolve ou descarta uma exceção com justificativa (fica no histórico)")
+def admin_reconciliation_resolve(ctx: Ctx, body: TSch.ReconciliationResolveIn):
+    with ctx.system_tx() as c:
+        out = RECON.resolve(c, exception_id=ctx.path["exception_id"], user_id=ctx.user_id, outcome=body.outcome, note=body.note)
+        ctx.audit(c, "reconciliation.resolved", "reconciliation_exception", ctx.path["exception_id"], {"outcome": body.outcome}, org_id=None)
+    return out
+
+
+@route("GET", "/v1/admin/reconciliation/exceptions/{exception_id}/history", auth="admin", permission="finance.read", tags=T, summary="Histórico de uma exceção")
+def admin_reconciliation_history(ctx: Ctx):
+    with ctx.system_tx() as c:
+        return {"items": RECON.history(c, ctx.path["exception_id"])}

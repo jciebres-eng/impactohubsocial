@@ -276,6 +276,8 @@ class DonationStartIn(In):
     public_anonymous: bool = False
     cover_costs: bool = False          # NUNCA pré-marcada no front
     idempotency_key: Annotated[str | None, Field(max_length=80, pattern=r"^[A-Za-z0-9_-]+$")] = None
+    as_organization: bool = False      # v0.34.0: doar em nome da organização ativa (painel do financiador)
+    funding_source: Literal["private", "public", "mixed"] | None = None   # v0.34.0: origem declarada pelo doador institucional
 
 
 class RiskDecisionIn(In):
@@ -366,3 +368,75 @@ class DirectoryQ(Pagination):
     uf: Annotated[str | None, Field(pattern=r"^[A-Z]{2}$")] = None
     council: Annotated[str | None, Field(pattern=r"^[A-Z]{2,10}$")] = None
     sdg: Annotated[str | None, Field(pattern=r"^ODS[0-9]{1,2}$")] = None
+
+
+# ---------------------------------------------------------------- v0.34.0 — ecossistema financeiro
+class ExternalResourceIn(In):
+    kind: Literal["public_transfer", "grant", "offline_donation", "sponsorship", "in_kind", "own_funds", "other"]
+    source_name: Annotated[str, Field(min_length=2, max_length=200)]
+    funding_source: Literal["private", "public", "mixed"]
+    instrument_ref: Annotated[str, Field(max_length=300)] | None = None
+    amount_cents: Annotated[int, Field(gt=0, le=100_000_000_000)] | None = None
+    in_kind_description: Annotated[str, Field(max_length=1000)] | None = None
+    received_on: date
+    evidence_document_id: Uuid | None = None
+    note: Annotated[str, Field(max_length=1000)] | None = None
+
+
+class DonationPledgeIn(In):
+    amount_cents: Annotated[int, Field(ge=100, le=100_000_000)]
+    display: Annotated[str, Field(max_length=120)] | None = None
+    expected_on: date | None = None
+    note: Annotated[str, Field(max_length=500)] | None = None
+    as_organization: bool = False
+
+
+class PledgeFulfillIn(In):
+    donation_id: Uuid
+
+
+class ObligationDisputeIn(In):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class ObligationDecisionIn(In):
+    outcome: Literal["uphold", "waive", "exempt"]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class ObligationWaiveIn(In):
+    reason: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class ObligationInvoiceIn(In):
+    obligation_ids: Annotated[list[Uuid], Field(min_length=1, max_length=200)]
+
+
+class ObligationReceiptIn(In):
+    received_cents: Annotated[int, Field(gt=0, le=100_000_000_000)]
+    reference: Annotated[str, Field(min_length=3, max_length=120)]
+
+
+class ObligationSettleIn(In):
+    note: Annotated[str, Field(min_length=3, max_length=2000)]
+
+
+class PublicFeeAuthorizationIn(In):
+    instrument_ref: Annotated[str, Field(min_length=5, max_length=300)]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class NoticeIn(In):
+    kind: Literal["free_until_value_intro", "allowance_approaching", "charging_starts"]
+    body: Annotated[str, Field(min_length=20, max_length=4000)] | None = None
+    channel: Literal["in_app", "email", "both"] = "in_app"
+
+
+class ReconciliationResolveIn(In):
+    outcome: Literal["resolved", "dismissed"]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
+class ReconciliationSnapshotIn(In):
+    """Snapshot do provedor enviado à mão (ferramenta de operação) quando o adaptador não consulta a API."""
+    charges: list[dict] = []

@@ -76,11 +76,11 @@ def identity_attach(ctx: Ctx, body: TSch.IdentityDocumentIn):
     return {**out, "note": "A plataforma guarda a referência do documento; não extrai nem armazena o número."}
 
 
-@route("GET", "/v1/admin/trust/identity/queue", auth="admin", query=TSch.Pagination, tags=("admin", "trust"),
-       summary="Fila de verificações de identidade aguardando conferência humana")
-def identity_queue(ctx: Ctx, q: TSch.Pagination):
+@route("GET", "/v1/admin/trust/identity/queue", auth="admin", query=TSch.IdentityQueueQ, tags=("admin", "trust"),
+       summary="Fila de verificações de identidade aguardando conferência humana (ou as já decididas, para suspender/revogar)")
+def identity_queue(ctx: Ctx, q: TSch.IdentityQueueQ):
     with ctx.system_tx() as c:
-        return {"items": IDENT.queue(c, q.limit, q.offset)}
+        return {"items": IDENT.queue(c, q.limit, q.offset, state=q.state)}
 
 
 @route("POST", "/v1/admin/trust/identity/{verification_id}/decide", auth="admin", body=TSch.DecisionIn, tags=("admin", "trust"),
@@ -93,6 +93,18 @@ def identity_decide(ctx: Ctx, body: TSch.DecisionIn):
             raise not_found("Verificação")
         ctx.audit(c, "identity.decided", "identity_verification", ctx.path["verification_id"],
                   {"approve": body.approve, "level": out["level"]})
+    return out
+
+
+@route("POST", "/v1/admin/trust/identity/{verification_id}/status", auth="admin", body=TSch.IdentityStatusIn, tags=("admin", "trust"),
+       summary="Suspende, revoga ou restabelece uma verificação de identidade já decidida (com motivo; nunca a própria)")
+def identity_change_status(ctx: Ctx, body: TSch.IdentityStatusIn):
+    with ctx.system_tx() as c:
+        out = IDENT.change_status(c, verification_id=ctx.path["verification_id"], to=body.status, decided_by=ctx.user_id, note=body.note)
+        if not out["found"]:
+            raise not_found("Verificação")
+        ctx.audit(c, "identity.status_changed", "identity_verification", ctx.path["verification_id"],
+                  {"from": out["from"], "to": out["status"], "level": out["level"]})
     return out
 
 

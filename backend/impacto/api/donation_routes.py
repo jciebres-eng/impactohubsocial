@@ -305,8 +305,10 @@ def admin_risk_cases(ctx: Ctx):
     with ctx.system_tx() as c:
         rows = c.query("SELECT r.id::text AS id, r.campaign_id::text AS campaign_id, r.donation_id::text AS donation_id, r.reason_codes, r.level, r.action,"
                        " r.rule_version, r.explanation, r.status, r.created_at, d.amount_cents, d.status AS donation_status, c.title AS campaign_title"
+                       ", r.assigned_to::text AS assigned_to, user_display_name(r.assigned_to) AS assigned_name, r.appeal_note, r.appealed_at,"
+                       " r.decided_by::text AS decided_by, r.evidence_refs"
                        " FROM donation_risk_cases r LEFT JOIN donations d ON d.id = r.donation_id LEFT JOIN campaigns c ON c.id = r.campaign_id"
-                       " WHERE r.status = 'open' ORDER BY r.level DESC, r.created_at")
+                       " WHERE r.status IN ('open', 'appealed') ORDER BY r.status = 'appealed' DESC, r.level DESC, r.created_at")
     return {"items": rows, "rules_version": DON.RISK_RULES_VERSION,
             "note": "Nenhum limiar aqui é obrigação legal; payout_hold não existe nesta versão (depende do contrato com o provedor)."}
 
@@ -315,14 +317,51 @@ def admin_risk_cases(ctx: Ctx):
        summary="Decide um caso de risco com justificativa; fica na trilha")
 def admin_risk_decide(ctx: Ctx, body: TSch.RiskDecisionIn):
     with ctx.system_tx() as c:
-        out = DON.decide_risk_case(c, case_id=ctx.path["case_id"], decided_by=ctx.user_id, action=body.action, note=body.note)
+        out = DON.decide_risk_case(c, case_id=ctx.path["case_id"], decided_by=ctx.user_id, action=body.action, note=body.note,
+                                   evidence=[e.model_dump() for e in body.evidence])
         if body.action == "reject":
             c.run("UPDATE donations SET status = 'cancelled' WHERE risk_case_id = $1 AND status IN ('awaiting_payment','under_review')", ctx.path["case_id"])
         if body.action == "allow":
             # v0.35.0 (auditoria, PAY-05): "permitir" confirma pelo caminho normal (razão, obrigações, comprovante);
             # antes era um UPDATE de estado sem lançamento.
             out = {**out, "released": DON.release_after_review(c, case_id=ctx.path["case_id"])}
-        ctx.audit(c, "donation.risk_decided", "donation_risk_case", ctx.path["case_id"], {"action": body.action}, org_id=None)
+        ctx.audit(c, "donation.risk_decided", "donation_risk_case", ctx.path["case_id"],
+                  {"action": body.action, "appeal": bool(out.get("appeal")), "evidence": len(body.evidence)}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/donation-risk-cases/{case_id}/assign", auth="admin", permission="compliance.write", tags=T,
+       summary="Assume a revisão de um caso de risco (revisor atribuído fica no caso)")
+def admin_risk_assign(ctx: Ctx):
+    with ctx.system_tx() as c:
+        if not c.run("UPDATE donation_risk_cases SET assigned_to = $2 WHERE id = $1 AND status IN ('open', 'appealed')",
+                     ctx.path["case_id"], ctx.user_id):
+            raise not_found("Caso de risco aberto ou em recurso")
+        ctx.audit(c, "donation.risk_assigned", "donation_risk_case", ctx.path["case_id"], {}, org_id=None)
+    return {"id": ctx.path["case_id"], "assigned_to": ctx.user_id}
+
+
+@route("GET", "/v1/campaigns/{campaign_id}/risk-cases", min_role=WRITE, tags=T,
+       summary="Decisões de revisão sobre doações desta campanha (o que foi decidido e por quê) — base para recurso")
+def campaign_risk_cases(ctx: Ctx):
+    with ctx.system_tx() as c:
+        if not c.scalar("SELECT 1 FROM campaigns WHERE id = $1 AND beneficiary_org_id = $2", ctx.path["campaign_id"], ctx.org_id):
+            raise not_found("Campanha")
+        # Caso ainda ABERTO não aparece (a revisão em andamento não é anunciada); decidido, em recurso e encerrado aparecem,
+        # com a decisão e a justificativa — sem as regras internas que o originaram.
+        rows = c.query("SELECT id::text AS id, donation_id::text AS donation_id, action, status, decision_note, decided_at, appeal_note,"
+                       " appealed_at, appeal_decision_note, closed_at FROM donation_risk_cases WHERE campaign_id = $1"
+                       " AND status IN ('decided', 'appealed', 'closed') ORDER BY created_at DESC LIMIT 200", ctx.path["campaign_id"])
+    return {"items": rows, "note": "Revisão não é acusação. Cabe um recurso contra decisão que restringiu algo; outra pessoa decide o recurso."}
+
+
+@route("POST", "/v1/campaigns/{campaign_id}/risk-cases/{case_id}/appeal", body=TSch.RiskAppealIn, min_role=WRITE, tags=T,
+       summary="Recurso da organização contra uma decisão de revisão (decidido por outra pessoa da equipe)")
+def campaign_risk_appeal(ctx: Ctx, body: TSch.RiskAppealIn):
+    with ctx.system_tx() as c:
+        out = DON.appeal_risk_case(c, case_id=ctx.path["case_id"], campaign_id=ctx.path["campaign_id"], org_id=ctx.org_id,
+                                   user_id=ctx.user_id, note=body.note)
+        ctx.audit(c, "donation.risk_appealed", "donation_risk_case", ctx.path["case_id"], {}, org_id=ctx.org_id)
     return out
 
 

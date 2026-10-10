@@ -294,10 +294,14 @@ def retention(app) -> dict:
 
 
 def risk_scan(app) -> dict:
-    """Sinais de risco/antifraude para revisão humana (services/risk.py). Não bloqueia ninguém automaticamente."""
+    """Sinais de risco/antifraude para revisão humana (services/risk.py). Não bloqueia ninguém automaticamente.
+    v0.35.0 (KYC-01): também marca como vencida a verificação de identidade cuja validade passou."""
     from .services import risk
+    from .trust import identity
     with app.pool.tx(DbContext(system=True)) as c:
-        return risk.scan(c)
+        out = risk.scan(c)
+        out["identity_expired"] = identity.expire_due(c)
+        return out
 
 
 def commercial_sweep(app) -> dict:

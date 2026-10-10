@@ -1,6 +1,6 @@
 {
-  "version": "donation-risk-2026-10.1",
-  "note": "Limiares de triagem do módulo de doações (v0.33.0). Nenhum é obrigação legal. A fonte executável é impacto/services/donations.py::_risk_screen; este arquivo espelha o código e test_v0330_donations confere a versão.",
+  "version": "donation-risk-2026-10.2",
+  "note": "Limiares de triagem do módulo de doações. Nenhum é obrigação legal. Desde a v0.35.0 (auditoria, FRAUD-02) ESTE ARQUIVO é a fonte: impacto/services/donations.py::_risk_screen lê os limiares daqui (antes eles estavam escritos no código e o arquivo só os espelhava). Mudar um limiar = mudar a versão. Resultado de regra = caso para revisão humana, nunca acusação nem retenção de dinheiro.",
   "rules": [
     {
       "code": "large_single_donation",
@@ -24,6 +24,16 @@
       "level": "medium",
       "action": "review",
       "explanation": "Campanha publicada há menos de 1 dia recebendo doação igual ou acima de R$ 2.000,00."
+    },
+    {
+      "code": "structuring",
+      "window_hours": 24,
+      "min_count": 3,
+      "sum_at_least_cents": 1000000,
+      "level": "high",
+      "action": "review",
+      "explanation": "Três ou mais doações da MESMA conta para a mesma campanha em 24 horas, cada uma abaixo do limite de doação grande e somando ao menos esse limite: possível fracionamento. Só alcança quem doa com conta (doação anônima não tem como ser ligada sem identificar a pessoa).",
+      "false_positive_note": "Pode ser legítimo (doação parcelada combinada com a organização). A revisão decide; nada é retido."
     }
   ],
   "actions_not_available": [

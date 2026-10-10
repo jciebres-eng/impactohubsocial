@@ -102,8 +102,10 @@ class CommercialActsNeedTheOwnerTests(unittest.TestCase):
     aceitavam qualquer membro da organização, até quem só tinha leitura."""
 
     def test_a_viewer_cannot_authorize_billing_revoke_or_change_the_spend_limit(self):
+        from tests import test_v0210_offer as OFF
         from tests.test_v0210_offer import _oferta
         server()
+        OFF._ADM.clear()   # a sessão administrativa guardada pelo outro módulo pode ter expirado por inatividade na suíte completa
         cli = new_account("osc")
         oferta = _oferta(cli)
         set_role(cli.user["id"], cli.org_id, "viewer")
@@ -576,16 +578,24 @@ class RemunerationFourEyesTests(unittest.TestCase):
         server()
         osc = new_account("osc")
         a, b = make_staff("controller"), make_staff("controller")
-        with db_system() as c:
-            oid = c.scalar("INSERT INTO remuneration_obligations(org_id, source_kind, source_id, rule_key, basis_cents, amount_cents, state,"
-                           " funding_source) VALUES ($1,'manual',$2,'donation.platform_fee',10000,300,'calculated','private') RETURNING id::text",
-                           osc.org_id, str(uuid.uuid4()))
-            REM._set(c, oid, "due", actor=None, trigger_code="manual_test")
-            REM._set(c, oid, "received", actor=a.user["id"], received_cents=300, received_reference="TESTE-1")
-            with self.assertRaises(ApiError) as err:
-                REM.mark_settled(c, obligation_id=oid, actor=a.user["id"], note="Conferido com o extrato do banco.")
-            self.assertEqual(err.exception.code, "four_eyes")
-            self.assertEqual(REM.mark_settled(c, obligation_id=oid, actor=b.user["id"], note="Conferido com o extrato do banco.")["state"], "settled")
+        class _Desfaz(Exception):
+            """Desfaz a transação no fim: a obrigação de teste não pode somar na receita que outros módulos conferem."""
+        try:
+            with db_system() as c:
+                oid = c.scalar("INSERT INTO remuneration_obligations(org_id, source_kind, source_id, rule_key, basis_cents, amount_cents, state,"
+                               " funding_source) VALUES ($1,'manual',$2,'donation.platform_fee',10000,300,'calculated','private') RETURNING id::text",
+                               osc.org_id, str(uuid.uuid4()))
+                REM._set(c, oid, "due", actor=None, trigger_code="manual_test")
+                REM._set(c, oid, "received", actor=a.user["id"], received_cents=300, received_reference="TESTE-1")
+                c.run("SAVEPOINT recusa")
+                with self.assertRaises(ApiError) as err:
+                    REM.mark_settled(c, obligation_id=oid, actor=a.user["id"], note="Conferido com o extrato do banco.")
+                c.run("ROLLBACK TO SAVEPOINT recusa")
+                self.assertEqual(err.exception.code, "four_eyes")
+                self.assertEqual(REM.mark_settled(c, obligation_id=oid, actor=b.user["id"], note="Conferido com o extrato do banco.")["state"], "settled")
+                raise _Desfaz
+        except _Desfaz:
+            pass
 
 
 class CreateAdminNeverSilentlyPromotesTests(unittest.TestCase):
@@ -1140,3 +1150,221 @@ class AiPolicyIsEnforcedAndWhatLeavesIsRedactedTests(unittest.TestCase):
         for s in ("maria@exemplo.org", "99999-8888", "123.456.789-09", "11.222.333/0001-81"):
             self.assertNotIn(s, enviado, s)
         self.assertIs(r.json.get("human_review_required"), True)
+
+
+# ================================================================================================ lote H
+class RiskRulesComeFromTheFileTests(unittest.TestCase):
+    """FRAUD-02/03 — antes: os limiares estavam no código e o arquivo só os espelhava; nenhum teste disparava as regras;
+    não havia regra de fracionamento."""
+
+    @classmethod
+    def setUpClass(cls):
+        _fin_setup(cls)
+
+    def _cases_for(self, donation_id: str) -> list[str]:
+        with db_system() as c:
+            return c.scalar("SELECT reason_codes FROM donation_risk_cases WHERE donation_id = $1", donation_id) or []
+
+    def test_the_large_donation_rule_fires_at_the_threshold_and_not_just_below(self):
+        from impacto.services import donations as DON
+        limite = DON.RISK_RULES["rules"]["large_single_donation"]["threshold_cents"]
+        self.assertIn("large_single_donation", self._cases_for(_donate(self.anon, self.slug, limite)["id"]))
+        self.assertNotIn("large_single_donation", self._cases_for(_donate(self.anon, self.slug, limite - 1)["id"]))
+
+    def test_thresholds_are_read_from_the_file(self):
+        import tempfile
+        from pathlib import Path
+
+        from impacto.services import donations as DON
+        original = json.loads(DON.RISK_RULES_FILE.read_text(encoding="utf-8"))
+        for r in original["rules"]:
+            if r["code"] == "large_single_donation":
+                r["threshold_cents"] = 1_000
+        original["version"] = "teste-limiar-baixo"
+        with tempfile.TemporaryDirectory() as d:
+            arq = Path(d) / "regras.json"
+            arq.write_text(json.dumps(original), encoding="utf-8")
+            regras = DON.load_risk_rules(arq)
+        d = _donate(self.anon, self.slug, 1_500)
+        with db_system() as c:
+            motivos = DON._risk_screen(c, donation_id=d["id"], campaign_id=self.campaign, amount_cents=1_500, donor_user_id=None, rules=regras)
+            versao = c.scalar("SELECT rule_version FROM donation_risk_cases WHERE donation_id = $1 ORDER BY created_at DESC LIMIT 1", d["id"])
+        self.assertIn("large_single_donation", motivos)
+        self.assertEqual(versao, "teste-limiar-baixo", "o caso não registrou a versão das regras que o abriu")
+
+    def test_structuring_by_the_same_account_is_flagged_and_two_donations_are_not(self):
+        doador = new_account("individual")
+        a = _donate(doador, self.slug, 3_400_00)
+        b = _donate(doador, self.slug, 3_400_00)
+        self.assertNotIn("structuring", self._cases_for(a["id"]) + self._cases_for(b["id"]), "duas doações não são fracionamento")
+        c3 = _donate(doador, self.slug, 3_400_00)
+        self.assertIn("structuring", self._cases_for(c3["id"]))
+        outra = new_account("individual")          # outra pessoa, mesmo valor: nada
+        self.assertNotIn("structuring", self._cases_for(_donate(outra, self.slug, 3_400_00)["id"]))
+
+
+class RiskCaseLifecycleTests(unittest.TestCase):
+    """FRAUD-05 — antes: o caso não tinha revisor atribuído, referência de evidência, recurso da organização nem encerramento;
+    a mesma pessoa poderia rever a própria decisão."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tests.support import make_staff
+        _fin_setup(cls)
+        cls.reviewer2 = make_staff("compliance")
+        reauth(cls.reviewer2)
+
+    def test_assign_decide_with_evidence_appeal_and_a_different_person_closes(self):
+        from impacto.services import donations as DON
+        d = _donate(self.anon, self.slug, DON.RISK_RULES["rules"]["large_single_donation"]["threshold_cents"])
+        with db_system() as c:
+            case = c.scalar("SELECT id::text FROM donation_risk_cases WHERE donation_id = $1", d["id"])
+        lista = self.osc.get(f"/v1/campaigns/{self.campaign}/risk-cases").json["items"]
+        self.assertNotIn(case, [x["id"] for x in lista], "caso ainda aberto foi anunciado à organização")
+        reauth(self.reviewer)
+        self.assertEqual(self.reviewer.post(f"/v1/admin/donation-risk-cases/{case}/assign").status, 200)
+        r = self.reviewer.post(f"/v1/admin/donation-risk-cases/{case}/decide",
+                               {"action": "request_information", "note": "Pedir origem dos recursos ao doador.",
+                                "evidence": [{"kind": "donation", "ref": d["id"]}]})
+        self.assertEqual((r.status, r.json["status"]), (200, "decided"), r)
+        visto = next(x for x in self.osc.get(f"/v1/campaigns/{self.campaign}/risk-cases").json["items"] if x["id"] == case)
+        self.assertNotIn("reason_codes", visto, "as regras internas não vão para a organização")
+        ap = self.osc.post(f"/v1/campaigns/{self.campaign}/risk-cases/{case}/appeal",
+                           {"note": "A doadora é conselheira da OSC e enviou o comprovante por e-mail."})
+        self.assertEqual((ap.status, ap.json["status"]), (200, "appealed"), ap)
+        mesmo = self.reviewer.post(f"/v1/admin/donation-risk-cases/{case}/decide", {"action": "allow", "note": "Revendo a própria decisão."})
+        self.assertEqual((mesmo.status, mesmo.json["code"]), (403, "four_eyes"), mesmo)
+        fim = self.reviewer2.post(f"/v1/admin/donation-risk-cases/{case}/decide", {"action": "allow", "note": "Origem comprovada pelo documento."})
+        self.assertEqual((fim.status, fim.json["status"]), (200, "closed"), fim)
+        with db_system() as c:
+            row = c.one("SELECT assigned_to::text AS a, closed_at, evidence_refs FROM donation_risk_cases WHERE id = $1", case)
+        self.assertEqual(row["a"], self.reviewer.user["id"])
+        self.assertIsNotNone(row["closed_at"])
+        self.assertEqual(row["evidence_refs"][0]["ref"], d["id"])
+        de_novo = self.osc.post(f"/v1/campaigns/{self.campaign}/risk-cases/{case}/appeal", {"note": "Mais um recurso sobre a mesma decisão."})
+        self.assertEqual(de_novo.status, 409)
+        with db_system() as c, self.assertRaises(Exception):    # o banco também recusa a mesma pessoa nas duas decisões
+            c.run("UPDATE donation_risk_cases SET appeal_decided_by = decided_by WHERE id = $1", case)
+
+
+class OrganizationBlockNeedsTwoPeopleTests(unittest.TestCase):
+    """FRAUD-04 — antes: uma pessoa só restringia uma organização inteira."""
+
+    def test_one_proposes_another_confirms(self):
+        from tests.support import make_staff
+        server()
+        a, b = make_staff("compliance"), make_staff("compliance")
+        for s in (a, b):
+            reauth(s)
+        osc = new_account("osc")
+        r = a.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Documento de despesa reaproveitado de outra OSC."})
+        self.assertEqual((r.status, r.json["status"]), (200, "awaiting_second_approval"), r)
+        r = a.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Confirmando a minha própria proposta."})
+        self.assertEqual((r.status, r.json["code"]), (403, "four_eyes"), r)
+        r = b.post(f"/v1/admin/risk/orgs/{osc.org_id}/block", {"note": "Confirmo após conferir os dois documentos."})
+        self.assertEqual(r.json["level"], "blocked", r)
+        with db_system() as c, self.assertRaises(Exception):
+            c.run("UPDATE risk_assessments SET decided_by = block_proposed_by WHERE org_id = $1", osc.org_id)
+
+
+class NewReviewSignalsTests(ECOT.EconomyBase):
+    """FRAUD-03 — sinais novos para revisão humana (nunca acusação): chave PIX de repasse repetida entre organizações e
+    destino de repasse mudado pouco antes do pagamento."""
+
+    def _signals(self, org_id: str, kind: str) -> list[dict]:
+        with db_system() as c:
+            return c.query("SELECT details, summary FROM risk_signals WHERE org_id = $1 AND signal_type = $2", org_id, kind)
+
+    def test_signals_for_a_recent_destination_and_none_once_it_is_old(self):
+        from impacto.services import risk
+        _, _, aid, _ = self._activate(with_proponent=False)
+        with db_system() as c:
+            risk.scan(c)
+        sinais = self._signals(self.osc.org_id, "payout_destination_changed_recently")
+        self.assertTrue(sinais, "repasse aberto com chave informada agora não gerou sinal")
+        self.assertNotIn("fraude", sinais[0]["summary"].lower(), "sinal é item de revisão, não acusação")
+        self.assertIn("chave PIX recente", sinais[0]["details"]["reasons"])
+        with db_system() as c:
+            c.run("UPDATE signed_agreement_parties SET pix_key_set_at = now() - interval '30 days' WHERE agreement_id = $1", aid)
+            c.run("UPDATE memberships SET created_at = now() - interval '30 days' WHERE org_id = $1", self.osc.org_id)
+            antes = c.scalar("SELECT count(*) FROM risk_signals WHERE signal_type = 'payout_destination_changed_recently' AND org_id = $1",
+                             self.osc.org_id)
+            risk.scan(c)
+            depois = c.scalar("SELECT count(*) FROM risk_signals WHERE signal_type = 'payout_destination_changed_recently' AND org_id = $1",
+                              self.osc.org_id)
+        self.assertEqual(antes, depois, "mudança antiga não é sinal novo")
+
+    def test_the_same_pix_key_on_two_organizations_is_a_signal_without_the_key(self):
+        from impacto.services import risk
+        aid1, _ = self._agreement(self._project(), with_proponent=False)
+        outra = new_account("osc", compliance="approved")
+        chave = f"repetida-{uuid.uuid4().hex[:6]}@exemplo.test"
+        for cli, aid in ((self.osc, aid1),):
+            reauth(cli)
+            party = next(p["id"] for p in cli.get(f"/v1/signed-agreements/{aid}").json["parties"] if p["org_id"] == cli.org_id)
+            self.assertEqual(cli.put(f"/v1/signed-agreements/{aid}/parties/{party}/pix", {"pix_key": chave, "pix_key_type": "email"}).status, 200)
+        # a outra organização faz o PRÓPRIO acordo e informa a MESMA chave, pelo caminho normal
+        pr = outra.post("/v1/projects", {"title": "Projeto da outra OSC", "summary": "Resumo do projeto da outra OSC.", "causes": ["educacao"],
+                                         "territory": "BR-MT", "ods": [4], "beneficiaries_count": 10, "budget_total_cents": 100_000})
+        doc = ECOT.upload(outra, name="acordo.txt", body=b"Acordo da outra OSC", doc_type="contrato")
+        ac = outra.post("/v1/signed-agreements", {"kind": "funding", "title": "Acordo da outra OSC", "document_id": doc,
+                                                  "project_id": pr.json["id"], "value_cents": 100_000, "review_days": 5,
+                                                  "calendar_type": "business"})
+        self.assertEqual(ac.status, 201, ac)
+        reauth(outra)
+        party = next(p["id"] for p in outra.get(f"/v1/signed-agreements/{ac.json['id']}").json["parties"] if p["org_id"] == outra.org_id)
+        self.assertEqual(outra.put(f"/v1/signed-agreements/{ac.json['id']}/parties/{party}/pix", {"pix_key": chave, "pix_key_type": "email"}).status, 200)
+        with db_system() as c:
+            risk.scan(c)
+        for org in (self.osc.org_id, outra.org_id):
+            sinais = self._signals(org, "pix_key_shared_across_orgs")
+            self.assertTrue(sinais, org)
+            self.assertNotIn(chave, json.dumps(sinais), "a chave não vai para o sinal")
+
+
+class IdentityVerificationStatesTests(unittest.TestCase):
+    """KYC-01 — antes: sem `suspended`; nada gravava `expired`/`revoked`; uma decisão podia ser reescrita por outra; nada
+    impedia a pessoa da equipe de decidir a própria verificação."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tests.support import make_admin
+        server()
+        cls.admin, _ = make_admin()
+
+    def _verified(self) -> tuple[Client, str]:
+        from tests.test_v0140_trust import upload
+        pessoa = new_account("osc")
+        vid = pessoa.post("/v1/trust/identity/verifications", {"level": "document"}).json["id"]
+        doc = upload(pessoa, name="rg.txt", body=b"Documento de identidade (exemplo)", doc_type="identidade")
+        self.assertEqual(pessoa.post(f"/v1/trust/identity/verifications/{vid}/documents", {"document_id": doc, "kind": "official_id"}).status, 201)
+        r = self.admin.post(f"/v1/admin/trust/identity/{vid}/decide", {"approve": True, "note": "Documento conferido."})
+        self.assertEqual(r.status, 200, r)
+        return pessoa, vid
+
+    def test_nobody_decides_their_own_verification(self):
+        vid = self.admin.post("/v1/trust/identity/verifications", {"level": "document"}).json["id"]
+        r = self.admin.post(f"/v1/admin/trust/identity/{vid}/decide", {"approve": True, "note": "Eu mesma me aprovo."})
+        self.assertEqual((r.status, r.json["code"]), (403, "self_decision"), r)
+
+    def test_a_decision_is_not_rewritten_and_suspension_is_reversible_but_revocation_is_not(self):
+        pessoa, vid = self._verified()
+        de_novo = self.admin.post(f"/v1/admin/trust/identity/{vid}/decide", {"approve": False, "note": "Mudei de ideia."})
+        self.assertEqual((de_novo.status, de_novo.json["code"]), (409, "already_decided"))
+        self.assertEqual(pessoa.get("/v1/trust/identity").json["level"], "document")
+        s = self.admin.post(f"/v1/admin/trust/identity/{vid}/status", {"status": "suspended", "note": "Denúncia de documento adulterado."})
+        self.assertEqual(s.status, 200, s)
+        self.assertEqual(pessoa.get("/v1/trust/identity").json["level"], "none", "suspensa continuou valendo")
+        self.assertEqual(self.admin.post(f"/v1/admin/trust/identity/{vid}/status", {"status": "verified", "note": "Denúncia improcedente."}).status, 200)
+        self.assertEqual(pessoa.get("/v1/trust/identity").json["level"], "document")
+        self.assertEqual(self.admin.post(f"/v1/admin/trust/identity/{vid}/status", {"status": "revoked", "note": "Documento falso confirmado."}).status, 200)
+        volta = self.admin.post(f"/v1/admin/trust/identity/{vid}/status", {"status": "verified", "note": "Tentativa de restabelecer."})
+        self.assertEqual((volta.status, volta.json["code"]), (409, "invalid_transition"))
+
+    def test_an_expired_verification_is_marked_expired(self):
+        from impacto.trust import identity
+        pessoa, vid = self._verified()
+        with db_system() as c:
+            c.run("UPDATE identity_verifications SET expires_at = now() - interval '1 day' WHERE id = $1", vid)
+            self.assertGreaterEqual(identity.expire_due(c), 1)
+            self.assertEqual(c.scalar("SELECT status FROM identity_verifications WHERE id = $1", vid), "expired")

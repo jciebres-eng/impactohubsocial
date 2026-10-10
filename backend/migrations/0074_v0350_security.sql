@@ -222,3 +222,44 @@ BEGIN
     EXECUTE format('CREATE TRIGGER trg_no_truncate BEFORE TRUNCATE ON %s FOR EACH STATEMENT EXECUTE FUNCTION forbid_truncate()', t.rel);
   END LOOP;
 END $$;
+
+-- ============================================================================ FRAUD-03 (lote H) — novos sinais de revisão
+-- Sinal é item de REVISÃO humana, nunca acusação nem bloqueio (services/risk.py).
+ALTER TABLE risk_signals DROP CONSTRAINT risk_signals_signal_type_check;
+ALTER TABLE risk_signals ADD CONSTRAINT risk_signals_signal_type_check CHECK (signal_type IN (
+  'duplicate_document_hash','duplicate_expense','expense_over_budget_item','price_outlier','related_accounts',
+  'supplier_is_party','evidence_reuse','quotes_below_policy',
+  'pix_key_shared_across_orgs',            -- a mesma chave PIX de repasse informada por organizações diferentes
+  'payout_destination_changed_recently'));  -- dona nova ou chave informada pouco antes de um repasse em aberto
+
+-- ============================================================================ FRAUD-04 (lote H) — restrição operacional com quatro olhos
+-- Antes uma pessoa só bloqueava uma organização. Agora uma pessoa PROPÕE e OUTRA confirma (conferido pelo banco para todo
+-- bloqueio novo; `NOT VALID` não reprova linhas antigas, se houver alguma na produção).
+ALTER TABLE risk_assessments
+  ADD COLUMN block_proposed_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN block_proposed_at timestamptz,
+  ADD COLUMN block_proposal_note text CHECK (length(block_proposal_note) <= 2000);
+ALTER TABLE risk_assessments ADD CONSTRAINT risk_block_four_eyes
+  CHECK (level <> 'blocked' OR (block_proposed_by IS NOT NULL AND block_proposed_by IS DISTINCT FROM decided_by)) NOT VALID;
+
+-- ============================================================================ FRAUD-05 (lote H) — caso de risco de doação completo
+-- Revisor atribuído, referências de evidência, recurso da organização e decisão do recurso por OUTRA pessoa, encerramento.
+ALTER TABLE donation_risk_cases
+  ADD COLUMN assigned_to uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN evidence_refs jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(evidence_refs) = 'array'),
+  ADD COLUMN appealed_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN appealed_at timestamptz,
+  ADD COLUMN appeal_decided_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  ADD COLUMN appeal_decision_note text CHECK (length(appeal_decision_note) <= 2000),
+  ADD COLUMN closed_at timestamptz,
+  ADD CONSTRAINT risk_case_appeal_four_eyes CHECK (appeal_decided_by IS NULL OR appeal_decided_by IS DISTINCT FROM decided_by),
+  ADD CONSTRAINT risk_case_closed_has_time CHECK (status <> 'closed' OR closed_at IS NOT NULL),
+  ADD CONSTRAINT risk_case_appealed_has_note CHECK (status <> 'appealed' OR (appeal_note IS NOT NULL AND appealed_at IS NOT NULL));
+
+-- ============================================================================ KYC-01 (lote H) — estados da verificação de identidade
+-- Novo estado `suspended` (reversível); quem decide nunca é a própria pessoa (conferido pelo banco).
+ALTER TABLE identity_verifications DROP CONSTRAINT identity_verifications_status_check;
+ALTER TABLE identity_verifications ADD CONSTRAINT identity_verifications_status_check
+  CHECK (status IN ('pending','under_review','verified','rejected','expired','revoked','suspended'));
+ALTER TABLE identity_verifications ADD CONSTRAINT identity_decider_is_not_the_subject
+  CHECK (decided_by IS NULL OR decided_by IS DISTINCT FROM user_id) NOT VALID;

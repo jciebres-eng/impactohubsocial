@@ -35,16 +35,18 @@ class RiskRulesFileTests(unittest.TestCase):
         src = (ROOT / "backend" / "impacto" / "services" / "donations.py").read_text(encoding="utf-8")
         for code in codes:
             self.assertIn(f'"{code}"', src, f"regra {code} do JSON não existe no serviço")
-        self.assertEqual(codes, {"large_single_donation", "burst_attempts", "new_campaign_large_inflow"})
+        # v0.35.0 (auditoria, FRAUD-02/03): o ARQUIVO passou a ser a fonte (antes o código era a fonte e o JSON, espelho —
+        # dava para mudar um sem o outro) e ganhou a regra de fracionamento. O que este teste protege continua: arquivo e
+        # serviço não divergem — agora porque o serviço LÊ o arquivo, e nenhum limiar ficou escrito no código.
+        self.assertEqual(codes, {"large_single_donation", "burst_attempts", "new_campaign_large_inflow", "structuring"})
         self.assertIn("payout_hold", d["actions_not_available"])
-        # limiares do JSON = limiares do código (o código é a fonte; o JSON é espelho legível)
         by = {r["code"]: r for r in d["rules"]}
+        self.assertEqual({k: v for k, v in DON.RISK_RULES["rules"].items()}, by)
         self.assertEqual(by["large_single_donation"]["threshold_cents"], 10_000_00)
-        self.assertIn("amount_cents >= 10_000_00", src)
         self.assertEqual(by["burst_attempts"]["threshold_count"], 20)
-        self.assertIn(">= 20", src)
         self.assertEqual(by["new_campaign_large_inflow"]["threshold_cents"], 2_000_00)
-        self.assertIn("amount_cents >= 2_000_00", src)
+        for literal in ("10_000_00", ">= 20", "2_000_00"):
+            self.assertNotIn(literal, src.split("def _risk_screen", 1)[1].split("def open_risk_case", 1)[0], f"limiar escrito no código: {literal}")
 
 
 class DeliverableDocsTests(unittest.TestCase):

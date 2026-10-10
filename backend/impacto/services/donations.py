@@ -34,6 +34,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_FLOOR, ROUND_HALF_EVEN, Decimal
+from pathlib import Path
 from typing import Any, Protocol
 
 from ..db.pq import Connection, UniqueViolation
@@ -971,43 +972,102 @@ def _maybe_target_reached(c: Connection, campaign_id: str) -> None:
 
 
 # ============================================================================ risco (graduado, explicável, humano)
-RISK_RULES_VERSION = "donation-risk-2026-10.1"   # ver config/donation_risk_rules.json
+RISK_RULES_FILE = Path(__file__).resolve().parents[3] / "config" / "donation_risk_rules.json"
 
 
-def _risk_screen(c: Connection, *, donation_id: str, campaign_id: str, amount_cents: int, donor_user_id: str | None) -> None:
-    """Regras simples e declaradas. Nenhuma é limite legal. Resultado: caso para revisão humana, nunca bloqueio de dinheiro."""
+def load_risk_rules(path: Path | None = None) -> dict:
+    """v0.35.0 (auditoria, FRAUD-02): os limiares vêm do arquivo versionado — antes estavam no código e o arquivo só os
+    espelhava (dava para mudar um sem o outro). Regra desconhecida no arquivo é ignorada; regra conhecida que falta no
+    arquivo fica DESLIGADA (e o teste de versão reprova a mudança sem nova versão)."""
+    data = json.loads((path or RISK_RULES_FILE).read_text(encoding="utf-8"))
+    return {"version": data["version"], "rules": {r["code"]: r for r in data["rules"]}}
+
+
+RISK_RULES = load_risk_rules()
+RISK_RULES_VERSION = RISK_RULES["version"]
+
+
+def _risk_screen(c: Connection, *, donation_id: str, campaign_id: str, amount_cents: int, donor_user_id: str | None,
+                 rules: dict | None = None) -> list[str]:
+    """Regras declaradas no arquivo de regras. Nenhuma é limite legal. Resultado: caso para revisão humana, nunca bloqueio
+    de dinheiro nem acusação."""
+    cfg = rules or RISK_RULES
+    r = cfg["rules"]
     reasons = []
-    if amount_cents >= 10_000_00:
+    big = r.get("large_single_donation")
+    if big and amount_cents >= int(big["threshold_cents"]):
         reasons.append("large_single_donation")
-    n_recent = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND created_at > now() - interval '10 minutes'", campaign_id)
-    if int(n_recent or 0) >= 20:
-        reasons.append("burst_attempts")
-    age_days = c.scalar("SELECT extract(epoch FROM now() - coalesce(published_at, created_at)) / 86400 FROM campaigns WHERE id = $1", campaign_id)
-    if age_days is not None and float(age_days) < 1 and amount_cents >= 2_000_00:
-        reasons.append("new_campaign_large_inflow")
+    burst = r.get("burst_attempts")
+    if burst:
+        n_recent = c.scalar("SELECT count(*) FROM donations WHERE campaign_id = $1 AND created_at > now() - make_interval(mins => $2)",
+                            campaign_id, int(burst["window_minutes"]))
+        if int(n_recent or 0) >= int(burst["threshold_count"]):
+            reasons.append("burst_attempts")
+    new = r.get("new_campaign_large_inflow")
+    if new:
+        age_days = c.scalar("SELECT extract(epoch FROM now() - coalesce(published_at, created_at)) / 86400 FROM campaigns WHERE id = $1", campaign_id)
+        if age_days is not None and float(age_days) < float(new["campaign_age_days_less_than"]) and amount_cents >= int(new["threshold_cents"]):
+            reasons.append("new_campaign_large_inflow")
+    st = r.get("structuring")
+    if st and donor_user_id and big and amount_cents < int(big["threshold_cents"]):
+        # FRAUD-03: várias doações da mesma conta, cada uma abaixo do limite de doação grande, que juntas o alcançam
+        agg = c.one("SELECT count(*) AS n, coalesce(sum(amount_cents), 0) AS total FROM donations WHERE campaign_id = $1 AND donor_user_id = $2"
+                    " AND amount_cents < $3 AND created_at > now() - make_interval(hours => $4) AND status NOT IN ('cancelled','failed','expired')",
+                    campaign_id, donor_user_id, int(big["threshold_cents"]), int(st["window_hours"]))
+        if int(agg["n"]) >= int(st["min_count"]) and int(agg["total"]) >= int(st["sum_at_least_cents"]):
+            reasons.append("structuring")
     if reasons:
-        level = "high" if "large_single_donation" in reasons else "medium"
+        level = "high" if any((r.get(x) or {}).get("level") == "high" for x in reasons) else "medium"
         open_risk_case(c, campaign_id=campaign_id, donation_id=donation_id, reason_codes=reasons, level=level,
-                       explanation="sinais de risco configurados (" + ", ".join(reasons) + "); revisão humana; nenhum valor é retido pela plataforma")
+                       explanation="sinais de risco configurados (" + ", ".join(reasons) + "); revisão humana; nenhum valor é retido pela plataforma",
+                       rule_version=cfg["version"])
+    return reasons
 
 
-def open_risk_case(c: Connection, *, campaign_id: str | None, donation_id: str | None, reason_codes: list[str], level: str, explanation: str) -> str:
+def open_risk_case(c: Connection, *, campaign_id: str | None, donation_id: str | None, reason_codes: list[str], level: str, explanation: str,
+                   rule_version: str | None = None) -> str:
     rid = c.scalar("INSERT INTO donation_risk_cases(campaign_id, donation_id, reason_codes, level, action, rule_version, explanation)"
-                   " VALUES ($1,$2,$3,$4,'review',$5,$6) RETURNING id::text", campaign_id, donation_id, reason_codes, level, RISK_RULES_VERSION, explanation)
+                   " VALUES ($1,$2,$3,$4,'review',$5,$6) RETURNING id::text", campaign_id, donation_id, reason_codes, level,
+                   rule_version or RISK_RULES_VERSION, explanation)
     if donation_id:
         c.run("UPDATE donations SET risk_case_id = $2 WHERE id = $1 AND risk_case_id IS NULL", donation_id, rid)
     return rid
 
 
-def decide_risk_case(c: Connection, *, case_id: str, decided_by: str, action: str, note: str) -> dict:
+def decide_risk_case(c: Connection, *, case_id: str, decided_by: str, action: str, note: str,
+                     evidence: list[dict] | None = None) -> dict:
+    """Primeira decisão (aberto → decidido) ou decisão do RECURSO (recorrido → encerrado). O recurso é decidido por OUTRA
+    pessoa — não por quem decidiu da primeira vez (v0.35.0, auditoria FRAUD-05; conferido também pelo banco)."""
     if action not in ("allow", "request_information", "reject", "report_to_provider"):
         raise unprocessable("ação não permitida nesta versão (payout_hold exige contrato com o provedor)", code="risk_action")
     if len(note or "") < 10:
         raise unprocessable("decisão exige justificativa", code="decision_note_required")
-    if not c.run("UPDATE donation_risk_cases SET status = 'decided', action = $2, decided_by = $3, decided_at = now(), decision_note = $4"
-                 " WHERE id = $1 AND status = 'open'", case_id, action, decided_by, note):
-        raise not_found("Caso de risco aberto")
-    return {"id": case_id, "action": action}
+    case = c.one("SELECT status, decided_by::text AS decided_by FROM donation_risk_cases WHERE id = $1 FOR UPDATE", case_id)
+    if not case or case["status"] not in ("open", "appealed"):
+        raise not_found("Caso de risco aberto ou em recurso")
+    refs = json.dumps(evidence or [])
+    if case["status"] == "open":
+        c.run("UPDATE donation_risk_cases SET status = 'decided', action = $2, decided_by = $3, decided_at = now(), decision_note = $4,"
+              " evidence_refs = evidence_refs || $5::jsonb WHERE id = $1", case_id, action, decided_by, note, refs)
+        return {"id": case_id, "action": action, "status": "decided"}
+    if case["decided_by"] == decided_by:
+        raise ApiError(403, "four_eyes", "O recurso é decidido por outra pessoa, não por quem tomou a primeira decisão")
+    c.run("UPDATE donation_risk_cases SET status = 'closed', action = $2, appeal_decided_by = $3, appeal_decision_note = $4, closed_at = now(),"
+          " evidence_refs = evidence_refs || $5::jsonb WHERE id = $1", case_id, action, decided_by, note, refs)
+    return {"id": case_id, "action": action, "status": "closed", "appeal": True}
+
+
+def appeal_risk_case(c: Connection, *, case_id: str, campaign_id: str, org_id: str, user_id: str, note: str) -> dict:
+    """Recurso da organização beneficiária contra a decisão (pedido de informação, recusa, comunicação ao provedor)."""
+    case = c.one("SELECT r.status, r.action FROM donation_risk_cases r JOIN campaigns k ON k.id = r.campaign_id"
+                 " WHERE r.id = $1 AND r.campaign_id = $2 AND k.beneficiary_org_id = $3 FOR UPDATE OF r", case_id, campaign_id, org_id)
+    if not case:
+        raise not_found("Caso desta campanha")
+    if case["status"] != "decided" or case["action"] == "allow":
+        raise ApiError(409, "not_appealable", "Só cabe recurso contra decisão que restringiu algo (e uma vez)")
+    c.run("UPDATE donation_risk_cases SET status = 'appealed', appeal_note = $2, appealed_by = $3, appealed_at = now() WHERE id = $1",
+          case_id, note, user_id)
+    return {"id": case_id, "status": "appealed"}
 
 
 # ============================================================================ comprovante

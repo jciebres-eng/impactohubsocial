@@ -113,10 +113,18 @@ def mark_under_review(conn: Connection, verification_id: str) -> None:
 def decide(conn: Connection, *, verification_id: str, approve: bool, decided_by: str, note: str,
            expires_at: str | None = None) -> dict:
     """Decisão HUMANA (administração). Roda em contexto privilegiado — ninguém promove a própria identidade."""
-    v = conn.one("SELECT id::text AS id, user_id::text AS user_id, level, status FROM identity_verifications WHERE id = $1",
+    v = conn.one("SELECT id::text AS id, user_id::text AS user_id, level, status FROM identity_verifications WHERE id = $1 FOR UPDATE",
                  verification_id)
     if not v:
         return {"found": False}
+    from ..http import ApiError
+    # v0.35.0 (auditoria, KYC-01): ninguém decide a própria verificação (também conferido pelo banco), e decisão tomada não
+    # é reescrita por outra decisão — mudar depois é suspender/revogar/restabelecer, com motivo (`change_status`).
+    if v["user_id"] == decided_by:
+        raise ApiError(403, "self_decision", "Ninguém decide a própria verificação de identidade")
+    if v["status"] not in ("pending", "under_review"):
+        raise ApiError(409, "already_decided", "Esta verificação já foi decidida; para mudar, suspenda ou revogue com motivo",
+                       {"status": v["status"]})
     status = "verified" if approve else "rejected"
     conn.run("UPDATE identity_verifications SET status = $2, decided_by = $3, decided_at = now(), decision_note = $4,"
              " expires_at = $5::timestamptz WHERE id = $1", verification_id, status, decided_by, note, expires_at)
@@ -127,10 +135,42 @@ def decide(conn: Connection, *, verification_id: str, approve: bool, decided_by:
     return {"found": True, "status": status, "level": v["level"], "user_id": v["user_id"]}
 
 
-def queue(conn: Connection, limit: int = 50, offset: int = 0) -> list[dict]:
+STATUS_CHANGES = {"suspended": ("verified",), "revoked": ("verified", "suspended"), "verified": ("suspended",)}
+
+
+def change_status(conn: Connection, *, verification_id: str, to: str, decided_by: str, note: str) -> dict:
+    """v0.35.0 (auditoria, KYC-01): estados depois da decisão — `suspended` (reversível: dúvida em apuração), `revoked`
+    (definitivo: documento falso, pedido da pessoa), e `verified` de novo só a partir de `suspended`. Contexto privilegiado."""
+    from ..http import ApiError
+    if to not in STATUS_CHANGES:
+        raise ApiError(422, "invalid_status", "Estado não permitido", {"possiveis": sorted(STATUS_CHANGES)})
+    v = conn.one("SELECT id::text AS id, user_id::text AS user_id, level, status FROM identity_verifications WHERE id = $1 FOR UPDATE",
+                 verification_id)
+    if not v:
+        return {"found": False}
+    if v["user_id"] == decided_by:
+        raise ApiError(403, "self_decision", "Ninguém muda o estado da própria verificação de identidade")
+    if v["status"] not in STATUS_CHANGES[to]:
+        raise ApiError(409, "invalid_transition", f"De '{v['status']}' não se vai para '{to}'", {"from": v["status"], "to": to})
+    conn.run("UPDATE identity_verifications SET status = $2, decided_by = $3, decided_at = now(), decision_note = $4 WHERE id = $1",
+             verification_id, to, decided_by, note)
+    custody.record(conn, subject_type="identity", subject_id=v["user_id"], event_type="identity_decided",
+                   actor_user_id=decided_by, payload={"level": v["level"], "from": v["status"], "status": to, "change": True})
+    return {"found": True, "status": to, "from": v["status"], "level": v["level"], "user_id": v["user_id"]}
+
+
+def expire_due(conn: Connection) -> int:
+    """Verificação com validade vencida passa a `expired` (antes nada gravava esse estado; `identity_level()` já ignorava
+    a vencida, mas a tela e a fila continuavam dizendo "verificado"). Contexto privilegiado (rotina diária)."""
+    return conn.run("UPDATE identity_verifications SET status = 'expired' WHERE status = 'verified' AND expires_at IS NOT NULL"
+                    " AND expires_at <= now()")
+
+
+def queue(conn: Connection, limit: int = 50, offset: int = 0, *, state: str = "open") -> list[dict]:
+    estados = ["pending", "under_review"] if state == "open" else ["verified", "suspended", "rejected", "revoked", "expired"]
     return conn.query(
-        "SELECT v.id::text AS id, v.level, v.status, v.method, v.created_at, v.user_id::text AS user_id,"
+        "SELECT v.id::text AS id, v.level, v.status, v.method, v.created_at, v.decided_at, v.expires_at, v.user_id::text AS user_id,"
         " user_display_name(v.user_id) AS user_name,"
         " (SELECT count(*) FROM identity_documents d WHERE d.verification_id = v.id) AS documents"
-        " FROM identity_verifications v WHERE v.status IN ('pending','under_review')"
-        " ORDER BY v.created_at LIMIT $1 OFFSET $2", limit, offset)
+        " FROM identity_verifications v WHERE v.status = ANY($3::text[])"
+        " ORDER BY coalesce(v.decided_at, v.created_at) DESC LIMIT $1 OFFSET $2", limit, offset, estados)

@@ -48,20 +48,37 @@ def review_signal(ctx: Ctx, body: S.RiskReviewIn):
 @route("GET", "/v1/admin/risk/assessments", auth="admin", permission="compliance.read", tags=T)
 def list_assessments(ctx: Ctx):
     with ctx.tx(readonly=True) as c:
-        rows = c.query("SELECT a.org_id::text AS org_id, o.legal_name AS org_name, a.level, a.rationale, a.open_signals, a.updated_at FROM risk_assessments a"
+        rows = c.query("SELECT a.org_id::text AS org_id, o.legal_name AS org_name, a.level, a.rationale, a.open_signals, a.updated_at,"
+                       " CASE WHEN a.block_proposed_at > now() - interval '72 hours' THEN a.block_proposed_at END AS block_proposed_at,"
+                       " user_display_name(a.block_proposed_by) AS block_proposed_by_name FROM risk_assessments a"
                        " JOIN organizations o ON o.id = a.org_id ORDER BY CASE a.level WHEN 'blocked' THEN 0 WHEN 'manual_review' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END, o.legal_name")
     return {"items": rows}
 
 
 @route("POST", "/v1/admin/risk/orgs/{org_id}/block", auth="admin", permission="compliance.write", body=S.RiskBlockIn, tags=T,
-       summary="Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA registrada; reversível")
+       summary="Restrição operacional (publicar, candidatar, aportar) por DECISÃO HUMANA de duas pessoas: uma propõe, outra confirma; reversível")
 def block_org(ctx: Ctx, body: S.RiskBlockIn):
+    """v0.35.0 (auditoria, FRAUD-04): uma pessoa só restringia uma organização inteira. Agora a primeira chamada PROPÕE
+    (fica registrada, a organização vai para revisão manual) e uma SEGUNDA pessoa confirma em até 72 horas."""
     with ctx.tx() as c:
         if not c.one("SELECT 1 FROM organizations WHERE id = $1", ctx.path["org_id"]):
             raise not_found("Organização")
-        c.run("INSERT INTO risk_assessments(org_id, level, rationale, decided_by) VALUES ($1,'blocked',$2,$3) ON CONFLICT (org_id)"
-              " DO UPDATE SET level = 'blocked', rationale = EXCLUDED.rationale, decided_by = EXCLUDED.decided_by, updated_at = now()",
-              ctx.path["org_id"], body.note, ctx.user_id)
+        cur = c.one("SELECT level, block_proposed_by::text AS proposer, block_proposed_at > now() - interval '72 hours' AS fresh,"
+                    " block_proposal_note FROM risk_assessments WHERE org_id = $1 FOR UPDATE", ctx.path["org_id"])
+        if cur and cur["level"] == "blocked":
+            raise ApiError(409, "already_blocked", "Organização já está com restrição operacional")
+        if not cur or not cur["proposer"] or not cur["fresh"]:
+            c.run("INSERT INTO risk_assessments(org_id, level, rationale, block_proposed_by, block_proposed_at, block_proposal_note)"
+                  " VALUES ($1,'manual_review',$2,$3,now(),$2) ON CONFLICT (org_id) DO UPDATE SET block_proposed_by = EXCLUDED.block_proposed_by,"
+                  " block_proposed_at = now(), block_proposal_note = EXCLUDED.block_proposal_note, updated_at = now()",
+                  ctx.path["org_id"], body.note, ctx.user_id)
+            ctx.audit(c, "risk.org_block_proposed", "organization", ctx.path["org_id"], {"note": body.note[:200]}, org_id=ctx.path["org_id"])
+            return {"org_id": ctx.path["org_id"], "level": cur["level"] if cur else "manual_review", "status": "awaiting_second_approval",
+                    "note": "Proposta registrada. Outra pessoa da equipe precisa confirmar a restrição em até 72 horas."}
+        if cur["proposer"] == ctx.user_id:
+            raise ApiError(403, "four_eyes", "Quem propôs a restrição não a confirma: outra pessoa da equipe precisa confirmar")
+        c.run("UPDATE risk_assessments SET level = 'blocked', rationale = $2, decided_by = $3, updated_at = now() WHERE org_id = $1",
+              ctx.path["org_id"], ((cur["block_proposal_note"] or "") + "\nConfirmação: " + body.note)[:2000], ctx.user_id)
         c.scalar("SELECT app_notify($1, NULL, 'compliance', 'Restrição operacional', $2, '/conformidade')", ctx.path["org_id"],
                  "Sua organização está com restrição operacional temporária enquanto a administração conclui uma revisão. Entre em contato com o suporte.")
         ctx.audit(c, "risk.org_blocked", "organization", ctx.path["org_id"], {"note": body.note[:200]}, org_id=ctx.path["org_id"])
@@ -71,8 +88,9 @@ def block_org(ctx: Ctx, body: S.RiskBlockIn):
 @route("POST", "/v1/admin/risk/orgs/{org_id}/unblock", auth="admin", permission="compliance.write", body=S.RiskBlockIn, tags=T)
 def unblock_org(ctx: Ctx, body: S.RiskBlockIn):
     with ctx.tx() as c:
-        if not c.run("DELETE FROM risk_assessments WHERE org_id = $1 AND level = 'blocked'", ctx.path["org_id"]):
-            raise ApiError(409, "not_blocked", "Organização não está bloqueada")
+        if not c.run("DELETE FROM risk_assessments WHERE org_id = $1 AND (level = 'blocked' OR block_proposed_by IS NOT NULL)",
+                     ctx.path["org_id"]):
+            raise ApiError(409, "not_blocked", "Organização não está bloqueada nem tem restrição proposta")
         risk.recompute(c, ctx.path["org_id"])
         ctx.audit(c, "risk.org_unblocked", "organization", ctx.path["org_id"], {"note": body.note[:200]}, org_id=ctx.path["org_id"])
     return {"org_id": ctx.path["org_id"], "level": "released"}

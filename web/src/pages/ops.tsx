@@ -18,14 +18,18 @@ export function Risk() {
         actions={<Button variant="ghost" busy={busy} onClick={() => run(() => api.post("/v1/admin/risk/scan", {}), "Varredura concluída").then(reload)}>Rodar varredura</Button>} />
       <StateView loading={sig.loading || ass.loading} error={sig.error || ass.error} onRetry={reload}>
         <div className="stack-lg">
-          <Panel title="Justificativa para a próxima ação"><Field label="Obrigatória (mín. 5 caracteres)" wide><Input value={note} onChange={setNote} /></Field></Panel>
+          <Panel title="Justificativa para a próxima ação"><Field label="Obrigatória (mín. 10 caracteres)" wide><Input value={note} onChange={setNote} /></Field>
+            <p className="muted small">Restrição operacional precisa de duas pessoas: uma propõe, outra confirma (em até 72 horas).</p></Panel>
           <Panel title="Organizações">
             {(ass.data?.items || []).length === 0 ? <p className="muted">Nenhuma avaliação.</p> : (
               <ul className="rows">{ass.data.items.map((a: any) => { const [t, tone] = LEVEL[a.level] || [a.level, "muted"]; return (
                 <li key={a.org_id}><span>{a.org_name || a.org_id}</span><span className="stack-row"><Pill tone={tone}>{t}</Pill>
                   {a.level === "blocked"
                     ? <Button variant="ghost" busy={busy} disabled={note.length < 5} onClick={() => run(() => api.post(`/v1/admin/risk/orgs/${a.org_id}/unblock`, { note }), "Desbloqueada").then(reload)}>Desbloquear</Button>
-                    : <Button variant="danger" busy={busy} disabled={note.length < 5} onClick={() => run(() => api.post(`/v1/admin/risk/orgs/${a.org_id}/block`, { note }), "Organização bloqueada").then(reload)}>Bloquear</Button>}</span></li>); })}</ul>
+                    : <Button variant="danger" busy={busy} disabled={note.length < 10} onClick={() => run(async () => {
+                        const r = await api.post(`/v1/admin/risk/orgs/${a.org_id}/block`, { note });
+                        return r?.status === "awaiting_second_approval" ? "Restrição proposta. Outra pessoa da equipe precisa confirmar em até 72 horas." : "Restrição confirmada.";
+                      }).then(reload)}>{a.block_proposed_at ? "Confirmar restrição proposta" : "Propor restrição"}</Button>}</span></li>); })}</ul>
             )}
           </Panel>
           <Panel title="Sinais abertos">

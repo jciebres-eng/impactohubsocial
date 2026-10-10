@@ -34,6 +34,15 @@ class DecisionIn(In):
     expires_at: datetime | None = None
 
 
+class IdentityQueueQ(Pagination):
+    state: Literal["open", "decided"] = "open"
+
+
+class IdentityStatusIn(In):
+    status: Literal["suspended", "revoked", "verified"]
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+
+
 class CredentialDecisionIn(In):
     approve: bool
     note: Annotated[str, Field(min_length=5, max_length=2000)]
@@ -290,9 +299,20 @@ class RecurringDonationIn(In):
     consent_text: Annotated[str, Field(min_length=40, max_length=2000)]
 
 
+class EvidenceRefIn(In):
+    """Referência ao que sustenta a decisão (v0.35.0, FRAUD-05): o identificador, nunca o conteúdo."""
+    kind: Literal["document", "donation", "provider_event", "reconciliation_run", "note"]
+    ref: Annotated[str, Field(min_length=1, max_length=300)]
+
+
 class RiskDecisionIn(In):
     action: Literal["allow", "request_information", "reject", "report_to_provider"]
     note: Annotated[str, Field(min_length=10, max_length=2000)]
+    evidence: Annotated[list[EvidenceRefIn], Field(max_length=20)] = []
+
+
+class RiskAppealIn(In):
+    note: Annotated[str, Field(min_length=20, max_length=2000)]
 
 
 class CampaignExpenseIn(In):

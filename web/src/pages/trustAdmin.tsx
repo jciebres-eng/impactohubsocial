@@ -7,9 +7,23 @@ const LEVEL_LABEL: Record<string, string> = { email: "E-mail", phone: "Telefone"
   professional: "Credencial profissional", biometric: "Biometria" };
 
 // ============================================================ fila de identidade
+const ID_STATUS: Record<string, string> = { verified: "verificada", suspended: "suspensa", rejected: "recusada", revoked: "revogada", expired: "vencida" };
+
 export function IdentityQueue() {
-  const { data, error, loading, reload } = useLoad<any>("/v1/admin/trust/identity/queue");
+  const [state, setState] = useState("open");
+  const { data, error, loading, reload } = useLoad<any>(`/v1/admin/trust/identity/queue?state=${state}`);
   const { busy, run } = useAction();
+  const [changing, setChanging] = useState<any>(null);
+  const [toStatus, setToStatus] = useState("suspended");
+  const [changeNote, setChangeNote] = useState("");
+
+  async function change() {
+    await run(async () => {
+      await api.post(`/v1/admin/trust/identity/${changing.id}/status`, { status: toStatus, note: changeNote });
+      setChanging(null); setChangeNote(""); reload();
+      return "Estado da verificação alterado.";
+    });
+  }
   const [deciding, setDeciding] = useState<any>(null);
   const [approve, setApprove] = useState(true);
   const [note, setNote] = useState("");
@@ -25,7 +39,8 @@ export function IdentityQueue() {
   return (
     <>
       <PageHead title="Identidade — conferência humana"
-                sub="A plataforma não faz biometria nem consulta base oficial: a decisão é de uma pessoa da equipe." />
+                sub="A plataforma não faz biometria nem consulta base oficial: a decisão é de uma pessoa da equipe. Ninguém decide a própria verificação."
+                actions={<Select value={state} onChange={setState} options={[["open", "Aguardando decisão"], ["decided", "Já decididas"]]} />} />
       <StateView loading={loading} error={error} onRetry={reload} empty={data && !data.items.length}>
         {data?.items?.length > 0 && (
           <ul className="rows">{data.items.map((v: any) => (
@@ -33,10 +48,17 @@ export function IdentityQueue() {
               <span>{v.user_name}<br /><span className="muted small">
                 {LEVEL_LABEL[v.level] || v.level} · {v.documents} documento(s) · pedido em {dateTime(v.created_at)}
               </span></span>
+              {state === "open" ? (
               <span>
                 <Pill tone="warn">{v.status === "pending" ? "aguardando documento" : "em análise"}</Pill>{" "}
                 <Button onClick={() => { setDeciding(v); setApprove(true); }}>Decidir</Button>
               </span>
+              ) : (
+              <span>
+                <Pill tone={v.status === "verified" ? "good" : "warn"}>{ID_STATUS[v.status] || v.status}</Pill>{" "}
+                {["verified", "suspended"].includes(v.status) && <Button onClick={() => { setChanging(v); setToStatus(v.status === "verified" ? "suspended" : "verified"); }}>Mudar estado</Button>}
+              </span>
+              )}
             </li>
           ))}</ul>
         )}
@@ -50,6 +72,18 @@ export function IdentityQueue() {
         </Field>
         <Field label="Justificativa" hint="Fica na trilha de auditoria e na cadeia de custódia.">
           <TextArea value={note} onChange={setNote} rows={3} />
+        </Field>
+      </Modal>
+      <Modal open={!!changing} title="Mudar o estado de uma verificação decidida" onClose={() => setChanging(null)}
+             footer={<><Button onClick={() => setChanging(null)}>Cancelar</Button>
+               <Button variant="primary" busy={busy} onClick={change} disabled={changeNote.trim().length < 10}>Registrar</Button></>}>
+        <Field label="Novo estado">
+          <Select value={toStatus} onChange={setToStatus}
+                  options={changing?.status === "suspended" ? [["verified", "Restabelecer (verificada)"], ["revoked", "Revogar (definitivo)"]]
+                                                             : [["suspended", "Suspender (em apuração, reversível)"], ["revoked", "Revogar (definitivo)"]]} />
+        </Field>
+        <Field label="Motivo (mínimo 10 caracteres)" hint="Fica na trilha de auditoria e na cadeia de custódia.">
+          <TextArea value={changeNote} onChange={setChangeNote} rows={3} />
         </Field>
       </Modal>
     </>

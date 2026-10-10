@@ -22,6 +22,11 @@ reter prestação de contas; reserva sem custódia) e o modelo "gratuito até ge
 - **Estados do dinheiro** separados (pendente, confirmado, liquidado, em análise, estornado total/parcial, compromisso, recurso
   declarado fora), política de contagem, data da última atualização válida; **painel do financiador**.
 - **Conciliação com fila de exceções** (9 tipos, prioridade, responsável, histórico; reexecutar não duplica); webhook ≠ conciliado.
+- **Etapa E6 — os 40 cenários do pacote com teste** (o pedido era não deixar nada sem resolver): cartão (que nunca tinha
+  funcionado no sandbox — achado do próprio teste), falha temporária do provedor, webhook em duas fases com reprocessamento,
+  liquidação parcial e falha de liquidação, contribuição voluntária do doador com split SIMULADO e cobrança sem split,
+  recorrência (autorização ≠ tentativa ≠ confirmado), reembolso do que a plataforma recebeu; rotina `financial_ops` no worker;
+  e uma brecha fechada: a organização podia marcar como paga ou devolvida a própria fatura da plataforma.
 - Documentos, matrizes, diagramas, modelo de 24 meses em 3 cenários e cobertura dos 40 cenários de teste em `docs/finance/`.
 
 **Decisão: GO WITH CONDITIONS** (§27) para o sandbox. **Qualquer cobrança real: NO-GO** até parecer, contrato e cartas verdes —
@@ -35,7 +40,8 @@ Documentos da v0.33.0 preservados em `history/v0.33.0/`; manifestos anteriores e
 ## 3. Commit
 
 Ramo `ecossistema-v0340` sobre `103c643` (v0.33.0). Commits por etapa: E1 backend (`47e2564`), E2 testes (`dfd3a54`), E3 telas
-(`761de0f`), E4 documentos (`696e220`), E5 portões (`d646a71`), e o commit final dos manifestos, para o qual a tag `v0.34.0` deve
+(`761de0f`), E4 documentos (`696e220`), E5 portões (`d646a71`), E6 cenários pendentes (`5e380b8`) e documentos/portões da E6
+(`b14c6e7`), e o commit final dos manifestos, para o qual a tag `v0.34.0` deve
 apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`). Nenhuma operação na produção. O CI do pull
 request é a evidência externa (ver `FINAL_EXECUTION_AUDIT.md` §6).
 
@@ -93,7 +99,9 @@ hipótese a validar comercial e juridicamente; liberação por entregável NÃO 
 
 ## 16. Payments
 
-Sandbox apenas. Novos estados: liquidação (`settled_at`), estorno parcial (`refunded_cents`), `partially_refunded`. Eventos
+Sandbox apenas. Novos estados: liquidação (`settled_at`) e liquidação ACUMULADA (`settled_cents`: parcial ≠ total), falha de
+liquidação (exceção), estorno parcial (`refunded_cents`), `partially_refunded`; cartão funcional no sandbox (E6); falha temporária
+do provedor responde 503 sem gravar nada; webhook em duas fases (evento nunca se perde; reprocessado pela rotina). Eventos
 reconhecidos em `docs/finance/DONATIONS_API.md`. `payment_records` da v0.28.0 intocado; `platform_charges` reutilizado para a fatura
 própria (kind `operation`, provedor manual, simulado por derivação).
 
@@ -103,7 +111,9 @@ PASS (inalterado).
 
 ## 18. Billing
 
-Sem assinatura (ADR-341). 15 regras no catálogo, **0 ativas**; política `free_until_value` v1 (hipótese).
+Sem assinatura de plano (ADR-341). 16 regras no catálogo, **0 ativas** (a 16ª, `donation.platform_contribution`, é a
+contribuição voluntária do doador, ADR-384); política `free_until_value` v1 (hipótese). Reembolso integral do recebido segregado
+(`finance.approve`); a organização não move a fatura da plataforma (403 `platform_invoice`).
 
 ## 19. Fiscal
 
@@ -119,7 +129,9 @@ PARTIAL (inalterado). KYB do beneficiário registrado; processo depende do prove
 
 ## 22. Security
 
-Modelo de ameaças da v0.33.0 (19 linhas) + matriz de riscos da v0.34.0 (23 linhas, `docs/finance/RISK_MATRIX.md`). Segregação:
+Modelo de ameaças da v0.33.0 (19 linhas) + matriz de riscos da v0.34.0 (28 linhas, `docs/finance/RISK_MATRIX.md`). Achado e
+corrigido na E6: a rota de cobranças deixava a organização mover a fatura de remuneração da plataforma (marcar paga/devolvida) —
+agora 403, com teste. Segregação:
 liquidar, decidir disputa, dispensar e autorizar recurso público exigem `finance.approve` com confirmação de identidade. Concorrência
 de webhooks provada (6 entregas simultâneas → 1 confirmação). Campo estranho no corpo → 422. Nenhum segredo em código, workflow,
 documento ou pacote (`secrets_scan.py`). **Nenhum sistema ligado à internet é invulnerável, e este não é exceção.**
@@ -133,12 +145,19 @@ doadora apenas quando ela escolhe doar em nome próprio; compromissos e recursos
 
 ```text
 REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.34.0.log):
-  {{TESTS_LINE}}
-MÓDULOS NOVOS: test_v0340_financial_ecosystem (13) · test_v0340_release_docs (6)
+  Ran 2478 tests in 2257.161s — 8 falhas, 1 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
+  → 6 de fechamento (manifesto, marcador e linha de testes deste relatório, notas/manifesto da versão, 2 matrizes geradas antes
+    da rodada, formato da tabela §7 da auditoria); 1 real: a regra da contribuição declarava preço fixado (corrigido: modo
+    `contract`, sem preço); 1 erro de navegador causado por eu reconstruir o front no meio da suíte (módulo reexecutado: verde).
+    Correções reexecutadas e portões de fechamento ao fim do mesmo log
+PRIMEIRA RODADA (E5, antes da E6): Ran 2470 tests — 9 falhas: 3 reais (retenção, catálogo polimórfico, função morta) + 6 de
+  fechamento; causas e correções em FINAL_EXECUTION_AUDIT.md §7
+MÓDULOS NOVOS: test_v0340_financial_ecosystem (13) · test_v0340_open_scenarios (8) · test_v0340_release_docs (6)
 PORTÕES PRÉ-REGRESSÃO (arquitetura, permissões, matriz de autorização, ícones, adversarial, conhecimento, jornadas): 241 testes OK
 LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok
 TELAS: capturas reais em docs/evidence/screens_v0340/ (6 telas, fluxo completo no servidor de teste, sandbox)
-COBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md (32 ✅ · 4 🟡 · 4 ⛔ com motivo)
+COBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md — 40 com teste (split e recorrência SIMULADOS no
+  teste, ditos como tal; nenhum finge provedor real). Primeira rodada: 32 ✅ · 4 🟡 · 4 ⛔ — fechados na E6
 ```
 
 ## 25. External Dependencies
@@ -149,17 +168,20 @@ COBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md (32
 | Contrato com provedor de pagamento; modelo de titularidade | responsável + provedor | só sandbox |
 | Termos (campanha, doador, política, contrato institucional, autorização de despesa pública) | jurídico | textos em rascunho |
 | NFS-e | contábil + integração | não implementada |
-| Rotina agendada de conciliação e de vencidas no worker | responsável (decisão) | à mão nesta versão |
+| Publicar o worker (`pleasing-trust`) junto | responsável | sem a publicação, a rotina `financial_ops` (reprocessamento, vencidas, conciliação periódica) não roda |
+| Instrumento recorrente homologado (Pix Automático/cartão) e split no provedor | responsável + provedor | recorrência e split ficam desligados pela configuração |
 | Juntar PRs #5, #6 e este ramo; publicar demo e produção | responsável | módulo fora do ar |
 | Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |
 | Tag v0.34.0 | o ambiente não envia tags | criar no GitHub |
 
 ## 26. Known Limitations
 
-- Obrigações só nascem de doações nesta versão; acordo, serviço e crédito de IA têm `source_kind` previsto mas não ligado.
-- Conciliação e marcação de vencidas são acionadas à mão (rotas de administração); não há job agendado.
+- Obrigações nascem de doações (taxa e contribuição voluntária); acordo, serviço e crédito de IA têm `source_kind` previsto mas
+  não ligado.
 - O snapshot do provedor no sandbox deriva dos próprios eventos — prova o mecanismo, não a API de um provedor real.
-- `settlement_partial` é tipo de exceção sem gerador automático (depende de relatório de liquidação do provedor).
+- Split e recorrência: caminhos testados com o provedor SIMULADO no teste; continuam recusados pela configuração até contrato e
+  homologação.
+- Reembolso parcial do que a plataforma recebeu é ajuste por decisão humana, não automático.
 - Modelo de 24 meses: premissas sem histórico; a taxa sobre doações não sustenta a operação em nenhum cenário.
 - Textos dos avisos e termos são rascunhos.
 
@@ -178,4 +200,4 @@ parecer, contrato, cartas verdes e ADR nova.
 1. Ordem dos merges (PR #5 → PR #6 → este ramo) ou um só sobre o PR #5.
 2. No demo: percorrer `docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md` (inclui o runbook da v0.33.0).
 3. Levar `docs/finance/LEGAL_FISCAL_MATRIX.md` e `docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md` ao jurídico/contábil; escolher
-   o provedor pela matriz. Decidir sobre a rotina agendada de conciliação. Nada disso é código.
+   o provedor pela matriz. Nada disso é código.

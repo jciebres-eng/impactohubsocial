@@ -491,7 +491,7 @@ INSERT INTO monetization_rules(
     pricing_mode, amount_cents, currency, hypothesis_min_cents, hypothesis_max_cents, hypothesis_note, problem_solved, substitution_answer)
 VALUES
  ('donation.platform_contribution', 'Contribuição voluntária do doador para a manutenção da plataforma (opcional, começa em zero)', 'enterprise', 3,
-  'individual', 'transaction', NULL, 'unit', 0, 'BRL', 0, 50000,
+  'individual', 'transaction', NULL, 'contract', NULL, 'BRL', 0, 50000,   -- sem preço fixado: o valor é o que o doador escolhe, nos termos da doação (0 a teto)
   'HIPÓTESE do pacote (10/10/2026, §7.1 "contribuição opcional sem indução enganosa"): o doador PODE somar um valor à doação, '
   'destinado à plataforma. Começa em R$ 0,00, nunca é sugerido nem pré-marcado, aparece separado no total e no comprovante. '
   'Teto por doação: o menor entre o valor doado e R$ 500,00. Com split homologado, o provedor divide direto; sem split, '

@@ -15,7 +15,7 @@ const D_STATUS: Record<string, string> = {
   refunding: "Em estorno", closed: "Fechada",
   pending: "Aguardando pagamento", confirmed: "Confirmada", reconciled: "Conciliada", refund_pending: "Estorno em curso",
   refunded: "Estornada", chargeback: "Contestada", expired: "Expirada", failed: "Falhou",
-  open: "Aberto", allowed: "Liberado", rejected_case: "Recusado", pledged: "compromisso aberto", fulfilled: "cumprido",
+  open: "Aberto", allowed: "Liberado", rejected_case: "Recusado", active: "Ativa", pledged: "compromisso aberto", fulfilled: "cumprido",
 };
 const st = (s?: string) => (s ? D_STATUS[s] || s : "—");
 const EVIDENCE: Record<string, string> = { declared: "declarado", documented: "com documento", validated: "validado", contested: "contestado" };
@@ -244,7 +244,7 @@ export function MyDonations() {
           <li key={x.id}><span><Link to={`/doacao/${x.id}`}>{x.title}</Link> — {money(x.amount_cents)} · {dateTime(x.created_at)}</span><Pill tone="muted">{st(x.status)}</Pill></li>
         ))}</ul>
         {data?.recurring?.length > 0 && (
-          <Panel title="Acordos recorrentes">
+          <Panel title="Doação mensal (autorizações)">
             <ul className="rows">{data.recurring.map((r: any) => (
               <li key={r.id}><span>{r.title} — {money(r.amount_cents)} por mês · autorizado em {date(r.consent_at)} · {r.attempts} tentativa(s), {r.confirmed_n} confirmada(s), {r.failed_n} falha(s) · recebido {money(r.received_cents)}</span>
                 {["active", "paused"].includes(r.status) && <Button onClick={() => run(async () => { await api.post(`/v1/me/recurring-donations/${r.id}/cancel`, {}); reload(); return "Autorização cancelada: nenhuma nova cobrança."; })}>Cancelar</Button>}

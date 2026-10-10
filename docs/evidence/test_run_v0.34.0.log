@@ -1,0 +1,355 @@
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  constraint "expense_approval_is_complete" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_state_needs_approval" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_paid_needs_date" of relation "platform_expenses" does not exist, skipping
+NOTICE:  trigger "trg_approval_applies" for relation "approval_requests" does not exist, skipping
+NOTICE:  trigger "trg_totp_counter" for relation "users" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_append_only" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_apply" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  constraint "indicator_source_kind_known" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_evidence_matches_source" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_validated_needs_evidence" of relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "trg_indicator_provenance" for relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "aa_trg_ledger_correction" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "aa_trg_chain_value_event" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_application_status_graph" for relation "applications" does not exist, skipping
+NOTICE:  constraint "audit_actor_type_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_severity_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_status_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_source_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_text_sizes" of relation "audit_events" does not exist, skipping
+NOTICE:  trigger "aa_trg_audit_parent" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "ab_trg_audit_chain_version" for relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_category_known" of relation "audit_action_categories" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_audit" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ledger" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_value" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_kill_switch" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_privileged" for relation "privileged_access_log" does not exist, skipping
+NOTICE:  trigger "trg_ai_prompt_frozen" for relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_prompt_tier_exists" of relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_usage_status_known" of relation "ai_usage" does not exist, skipping
+NOTICE:  trigger "trg_ai_credit_append_only" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ai_credit" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  constraint "ai_credit_bucket_known" of relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  policy "schema_migrations_read_app" for relation "schema_migrations" does not exist, skipping
+............{"ts": "2026-10-10T11:25:37.517+00:00", "level": "warning", "logger": "impacto.auth", "msg": "refresh_reuse_detected", "request_id": "4b28f44ab6564919", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "b413767bc272c48a176c24727e799bef", "user_id": "d92f85f0-f976-47ab-86a5-578ca4092fa0"}
+............................{"ts": "2026-10-10T11:25:54.837+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "14304429839d42df", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "5d5f5258febd9e025c63b79b2627b2c7", "route": "/v1/commitments/{commitment_id}/status", "error": "apenas o financiador informa desembolso/cancelamento", "user_id": "54ee9477-3513-40ab-81ff-236ea93040b7"}
+........................................................................................................{"ts": "2026-10-10T11:28:32.405+00:00", "level": "warning", "logger": "impacto.killswitch", "msg": "kill_switch", "request_id": "a56b0e9c0fe84705", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "b21428636a1c05a045afa1b306d278a6", "scope": "mutations", "action": "engage", "actor": "95c9e803-e704-4fa1-8a82-605248ed1c4f"}
+..................E......./usr/lib/python3.13/email/_policybase.py:301: ResourceWarning: unclosed <socket.socket [closed] fd=9, family=2, type=1, proto=6>
+  def header_source_parse(self, sourcelines):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......................................................../usr/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed <socket.socket fd=9, family=2, type=1, proto=0, laddr=('127.0.0.1', 41219)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......................................................................................................{"ts": "2026-10-10T11:31:38.695+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "0c1ff641fab84755", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "296b78e909c07fb58caefc056d58e596", "error_id": "34950211247e", "route": "/v1/admin/content/courses", "constraint": "courses_check2", "error": "new row for relation \"courses\" violates check constraint \"courses_check2\"", "user_id": "3b0e9791-2996-4a5e-9f5b-8c9cf093200f"}
+................................{"ts": "2026-10-10T11:31:57.173+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "952ff18693f6456f", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "dfaebca415fbe3fa1d8d0781b117afba", "error_id": "79c39ebebc84", "route": "/v1/admin/content/article-versions/{id}/transition", "constraint": "kb_article_versions_check2", "error": "new row for relation \"kb_article_versions\" violates check constraint \"kb_article_versions_check2\"", "user_id": "adb8a4ec-40bd-4a8b-ad6d-6701a07eff05"}
+.......................................................................................{"ts": "2026-10-10T11:32:13.736+00:00", "level": "warning", "logger": "impacto.integrations.jobs", "msg": "integration_circuit_open", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "connection_id": "96923240-1790-49e1-b247-206f6cfe76de", "failure_streak": 5}
+................{"ts": "2026-10-10T11:32:15.010+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "delivery_id": "123cd8ad-2729-4f37-9928-e8a58b2c4122", "event_type": "OPERATION.ACTIVATED", "attempts": 6, "code": "[REDACTED]"}
+....{"ts": "2026-10-10T11:32:15.439+00:00", "level": "warning", "logger": "impacto.integrations.events", "msg": "webhook_dead_letter", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "delivery_id": "73cd2b1c-90a3-41a5-9a02-bc5997e2729c", "event_type": "PAYMENT.FAILED", "attempts": 1, "code": "[REDACTED]"}
+...........................................{"ts": "2026-10-10T11:32:26.217+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "b512e7c1c9f44c93", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "22b726d24dc3001353768cb33f9e7f6a", "method": "POST", "route": "/v1/trust/identity/verifications", "status": 501, "ms": 9.9, "spans": {"db.tx": {"count": 3, "ms": 8.6}}, "user_id": "5372a629-5296-4f7e-91c9-001c15041a1f", "org_id": "f2bd8a56-ef1b-4505-9b23-813acbba10af"}
+....................................................{"ts": "2026-10-10T11:32:37.800+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "9a70f4e08a0547c1", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "730285977d20241754b6ecf3bc92aaf5", "method": "POST", "route": "/v1/signatures/challenge", "status": 501, "ms": 7.1, "spans": {"db.tx": {"count": 4, "ms": 6.3}}, "user_id": "b3b76bcc-5372-4a04-8bd6-e98faec45af8", "org_id": "282592d6-3300-43c7-99ac-c987cf25af28"}
+...............................................................sssssssssssssssss................NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+.NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  constraint "expense_approval_is_complete" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_state_needs_approval" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_paid_needs_date" of relation "platform_expenses" does not exist, skipping
+NOTICE:  trigger "trg_approval_applies" for relation "approval_requests" does not exist, skipping
+NOTICE:  trigger "trg_totp_counter" for relation "users" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_append_only" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_apply" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  constraint "indicator_source_kind_known" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_evidence_matches_source" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_validated_needs_evidence" of relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "trg_indicator_provenance" for relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "aa_trg_ledger_correction" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "aa_trg_chain_value_event" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_application_status_graph" for relation "applications" does not exist, skipping
+NOTICE:  constraint "audit_actor_type_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_severity_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_status_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_source_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_text_sizes" of relation "audit_events" does not exist, skipping
+NOTICE:  trigger "aa_trg_audit_parent" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "ab_trg_audit_chain_version" for relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_category_known" of relation "audit_action_categories" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_audit" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ledger" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_value" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_kill_switch" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_privileged" for relation "privileged_access_log" does not exist, skipping
+NOTICE:  trigger "trg_ai_prompt_frozen" for relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_prompt_tier_exists" of relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_usage_status_known" of relation "ai_usage" does not exist, skipping
+NOTICE:  trigger "trg_ai_credit_append_only" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ai_credit" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  constraint "ai_credit_bucket_known" of relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  policy "schema_migrations_read_app" for relation "schema_migrations" does not exist, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+.........NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  constraint "expense_approval_is_complete" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_state_needs_approval" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_paid_needs_date" of relation "platform_expenses" does not exist, skipping
+NOTICE:  trigger "trg_approval_applies" for relation "approval_requests" does not exist, skipping
+NOTICE:  trigger "trg_totp_counter" for relation "users" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_append_only" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_apply" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  constraint "indicator_source_kind_known" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_evidence_matches_source" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_validated_needs_evidence" of relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "trg_indicator_provenance" for relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "aa_trg_ledger_correction" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "aa_trg_chain_value_event" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_application_status_graph" for relation "applications" does not exist, skipping
+NOTICE:  constraint "audit_actor_type_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_severity_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_status_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_source_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_text_sizes" of relation "audit_events" does not exist, skipping
+NOTICE:  trigger "aa_trg_audit_parent" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "ab_trg_audit_chain_version" for relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_category_known" of relation "audit_action_categories" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_audit" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ledger" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_value" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_kill_switch" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_privileged" for relation "privileged_access_log" does not exist, skipping
+NOTICE:  trigger "trg_ai_prompt_frozen" for relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_prompt_tier_exists" of relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_usage_status_known" of relation "ai_usage" does not exist, skipping
+NOTICE:  trigger "trg_ai_credit_append_only" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ai_credit" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  constraint "ai_credit_bucket_known" of relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  policy "schema_migrations_read_app" for relation "schema_migrations" does not exist, skipping
+.....{"ts": "2026-10-10T11:33:03.604+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "b7a7666736e644f3", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "a26be48ba1732187385c96bd27457a0f", "route": "/v1/marketplace/listings/{listing_id}/transition", "error": "O projeto precisa estar publicado antes de o anúncio ir ao ar", "user_id": "65f15983-a438-4788-9f04-dc584a42cd67"}
+....................................{"ts": "2026-10-10T11:33:10.911+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "f0f7660ff50243d5", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "d5f31282d4bb6316cfb1a60dd25424fc", "route": "/v1/marketplace/listings/{listing_id}/transition", "error": "O projeto precisa estar publicado antes de o anúncio ir ao ar", "user_id": "481710e1-c539-47c1-9804-838241fc8f6b"}
+....{"ts": "2026-10-10T11:33:11.865+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "0d5750f31a564dd4", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "3f9201996c4c859a5c9e0c243b763997", "route": "/v1/conversations", "error": "new row violates row-level security policy for table \"conversations\"", "user_id": "4dc968f1-aedc-48c9-afc3-955e85974686"}
+.............................................................................................F........{"ts": "2026-10-10T11:33:26.202+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "ffe31049bd0c498a", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "7a0da8b184da50db08539fc80ae523f3", "error_id": "9075ffdd3b0e", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_needs_evidence", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_needs_evidence\"", "user_id": "75b8f82b-af48-42c8-8952-3c428640f7b4"}
+.{"ts": "2026-10-10T11:33:26.211+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "3282165379464cf0", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "acbdbc6d5c34a1235cdc1beb6e71b019", "error_id": "703fa27e834a", "route": "/v1/admin/monetization/legal-cards", "constraint": "green_has_no_open_questions", "error": "new row for relation \"monetization_legal_cards\" violates check constraint \"green_has_no_open_questions\"", "user_id": "75b8f82b-af48-42c8-8952-3c428640f7b4"}
+...............WARNING:  there is no transaction in progress
+...........................{"ts": "2026-10-10T11:33:35.803+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "8d7955050a614f2c", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "c6855e69b7ff33195bed435af4e98e92", "route": "/v1/programs/{program_id}/calls", "error": "o edital tem de ser da mesma organização do programa", "user_id": "fca2336a-a50a-4f9d-9d23-e3ac0c6227bd"}
+............................{"ts": "2026-10-10T11:33:43.927+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "f68dea6075554a81", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "9ee7d53381fea6603d3f4dc640f6ed49", "route": "/v1/programs/{program_id}/indicators", "error": "o vínculo tem de ser da organização dona do programa", "user_id": "d343ab26-dcd5-4b51-9d89-b09e937c7eaf"}
+...........................................................................................{"ts": "2026-10-10T11:33:59.254+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "7b95c81c4d2242f3", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "75909191771c6264c8761e17ff290a46", "error_id": "d4a1bc8b7b9e", "route": "/v1/projects/{project_id}/equity/barriers", "constraint": "barrier_documented_needs_basis", "error": "new row for relation \"project_barriers\" violates check constraint \"barrier_documented_needs_basis\"", "user_id": "3fb88dde-d1e4-4087-9268-10326a92e9a1"}
+.{"ts": "2026-10-10T11:33:59.286+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "b98bea29e6064ec2", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "aabd2d4ee379a78199ee16ba6c83feb3", "error_id": "29b046fc562c", "route": "/v1/projects/{project_id}/equity/barriers", "constraint": "barrier_evidenced_needs_evidence", "error": "new row for relation \"project_barriers\" violates check constraint \"barrier_evidenced_needs_evidence\"", "user_id": "3fb88dde-d1e4-4087-9268-10326a92e9a1"}
+.{"ts": "2026-10-10T11:33:59.304+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "a50e9ecabcf845bc", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "d2cd15c37afe2d45b8303814dcdecc25", "error_id": "07ba0a52a1c9", "route": "/v1/projects/{project_id}/equity/barriers", "constraint": "project_barriers_barrier_code_fkey", "error": "insert or update on table \"project_barriers\" violates foreign key constraint \"project_barriers_barrier_code_fkey\"", "user_id": "3fb88dde-d1e4-4087-9268-10326a92e9a1"}
+.............{"ts": "2026-10-10T11:34:04.154+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "8e99e5ad3e704f40", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "19e88803d2527cc25971b09a4682894b", "error_id": "92c2422393aa", "route": "/v1/projects/{project_id}/equity/context", "constraint": "additionality_documented_needs_counterfactual", "error": "new row for relation \"equity_contexts\" violates check constraint \"additionality_documented_needs_counterfactual\"", "user_id": "fcc5c706-e7eb-41c1-8b31-d9041ec33027"}
+..{"ts": "2026-10-10T11:34:04.194+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "6a396513b27f4abf", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "dc268c684223d0454cff5af816e26d30", "error_id": "f74cb4e86eef", "route": "/v1/projects/{project_id}/equity/context", "constraint": "additionality_evidenced_needs_evidence", "error": "new row for relation \"equity_contexts\" violates check constraint \"additionality_evidenced_needs_evidence\"", "user_id": "fcc5c706-e7eb-41c1-8b31-d9041ec33027"}
+.................................................sssssssss....................................................................................................................................................NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  extension "citext" already exists, skipping
+NOTICE:  relation "ix_documents_project" already exists, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+.NOTICE:  relation "schema_migrations" already exists, skipping
+NOTICE:  constraint "expense_approval_is_complete" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_state_needs_approval" of relation "platform_expenses" does not exist, skipping
+NOTICE:  constraint "expense_paid_needs_date" of relation "platform_expenses" does not exist, skipping
+NOTICE:  trigger "trg_approval_applies" for relation "approval_requests" does not exist, skipping
+NOTICE:  trigger "trg_totp_counter" for relation "users" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_append_only" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_kill_switch_apply" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  constraint "indicator_source_kind_known" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_evidence_matches_source" of relation "indicator_values" does not exist, skipping
+NOTICE:  constraint "indicator_validated_needs_evidence" of relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "trg_indicator_provenance" for relation "indicator_values" does not exist, skipping
+NOTICE:  trigger "aa_trg_ledger_correction" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "aa_trg_chain_value_event" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_application_status_graph" for relation "applications" does not exist, skipping
+NOTICE:  constraint "audit_actor_type_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_severity_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_status_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_source_known" of relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_text_sizes" of relation "audit_events" does not exist, skipping
+NOTICE:  trigger "aa_trg_audit_parent" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "ab_trg_audit_chain_version" for relation "audit_events" does not exist, skipping
+NOTICE:  constraint "audit_category_known" of relation "audit_action_categories" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_audit" for relation "audit_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ledger" for relation "ledger_entries" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_value" for relation "value_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_kill_switch" for relation "kill_switch_events" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_privileged" for relation "privileged_access_log" does not exist, skipping
+NOTICE:  trigger "trg_ai_prompt_frozen" for relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_prompt_tier_exists" of relation "ai_prompts" does not exist, skipping
+NOTICE:  constraint "ai_usage_status_known" of relation "ai_usage" does not exist, skipping
+NOTICE:  trigger "trg_ai_credit_append_only" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  trigger "trg_no_truncate_ai_credit" for relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  extension "pgcrypto" already exists, skipping
+NOTICE:  constraint "ai_credit_bucket_known" of relation "ai_credit_ledger" does not exist, skipping
+NOTICE:  policy "schema_migrations_read_app" for relation "schema_migrations" does not exist, skipping
+NOTICE:  relation "schema_migrations" already exists, skipping
+.....NOTICE:  relation "schema_migrations" already exists, skipping
+WARNING:  there is no transaction in progress
+NOTICE:  relation "schema_migrations" already exists, skipping
+..............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................{"ts": "2026-10-10T11:37:44.290+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "7329e655fac94b1b", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "91fb60d89962e8732467fcd5ea8dc266", "error_id": "bac682d1dc95", "route": "/v1/projects/{project_id}", "constraint": "ledger_entries_project_id_fkey", "error": "update or delete on table \"projects\" violates foreign key constraint \"ledger_entries_project_id_fkey\" on table \"ledger_entries\"", "user_id": "311811a2-6e02-4efa-b485-093da7260be6"}
+................................................./home/claude/impactohubsocial/backend/tests/test_v0230_authorization_matrix.py:57: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/claude/impactohubsocial/docs/execution/API_AUTHORIZATION_MATRIX.csv' mode='r' encoding='utf-8'>
+  cls.linhas = list(csv.DictReader(MATRIZ.open(encoding="utf-8"))) if MATRIZ.exists() else []
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+......................./home/claude/impactohubsocial/backend/tests/test_v0230_authorization_matrix.py:373: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/claude/impactohubsocial/docs/execution/API_AUTHORIZATION_MATRIX.csv' mode='r' encoding='utf-8'>
+  linhas = list(csv.DictReader(MATRIZ.open(encoding="utf-8")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+....{"ts": "2026-10-10T11:38:04.426+00:00", "level": "error", "logger": "impacto.app", "msg": "readiness_failed", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "error_type": "OSError"}
+...{"ts": "2026-10-10T11:38:04.518+00:00", "level": "error", "logger": "impacto.app", "msg": "readiness_failed", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "error_type": "OSError"}
+....................F............................s.................................................{"ts": "2026-10-10T11:38:36.643+00:00", "level": "warning", "logger": "impacto.killswitch", "msg": "kill_switch", "request_id": "18c7fcf0d74140b5", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "c9e93d56bad1975892708176e81e6033", "scope": "maintenance", "action": "release", "actor": "245e3dc8-8da6-47d1-81b3-f3b01b61417e"}
+.{"ts": "2026-10-10T11:38:36.971+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "db3429ea89d840c9", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "7a6ce2aa595b6bc8d76c41946aed2e0e", "method": "GET", "route": "/v1/me", "status": 503, "ms": 7.3, "spans": {"db.tx": {"count": 2, "ms": 6.6}}, "user_id": "8981920e-bb32-41d6-9023-f94ed556a382", "org_id": "33d05778-c678-47c5-840f-f7cbefb1318c"}
+.{"ts": "2026-10-10T11:38:37.302+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "ca5e7d944d9f4a5b", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "0c4e1429e23ffad372ca54ddf71a6e98", "method": "POST", "route": "/v1/projects", "status": 503, "ms": 4.8, "spans": {"db.tx": {"count": 2, "ms": 4.1}}, "user_id": "bdc37295-1a52-4b30-a886-ab27698fa097", "org_id": "397a6be0-61a6-4a19-9a2c-fe80f0090c5b"}
+.{"ts": "2026-10-10T11:38:37.634+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "9099856e7015451a", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "3ed77df33173598c2403dd02787e7958", "method": "POST", "route": "/v1/projects", "status": 503, "ms": 6.9, "spans": {"db.tx": {"count": 2, "ms": 6.0}}, "user_id": "7081074d-8dfe-44f2-aeb2-792fa2f0876f", "org_id": "e5c95069-1c80-4763-a9a4-e2f48c47c23e"}
+.{"ts": "2026-10-10T11:38:37.987+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "fbeac19a0d654eb1", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "2a5f69cf742ac216400930d6400acf55", "method": "POST", "route": "/v1/projects", "status": 503, "ms": 8.6, "spans": {"db.tx": {"count": 2, "ms": 6.6}}, "user_id": "b012cb60-f933-46d9-9054-8256ce3392d3", "org_id": "3db1f02a-d82d-4c7f-8bca-41e9fdab69c3"}
+..{"ts": "2026-10-10T11:38:39.168+00:00", "level": "warning", "logger": "impacto.killswitch", "msg": "kill_switch", "request_id": "2899da15b74b4c60", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "d46f3436e2cade3976e2ee64ccdb1102", "scope": "integrations", "action": "engage", "actor": "c7164e2b-d7a1-4f6d-ac16-9a15ff7409d4"}
+..{"ts": "2026-10-10T11:38:39.528+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "a34c95eb431146d9", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "6ea149eb9ec9761ffc43d577840681fe", "method": "POST", "route": "/v1/projects", "status": 503, "ms": 7.5, "spans": {"db.tx": {"count": 2, "ms": 6.1}}, "user_id": "e7eb72e0-a43e-4bab-aa01-694842f87a40", "org_id": "6034a738-5b06-4795-947d-aac4ad2313c9"}
+.{"ts": "2026-10-10T11:38:40.105+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "ec7ecd3a7c3f431b", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "3104e56ac3806f0768156894794ca8d2", "method": "POST", "route": "/v1/auth/login", "status": 503, "ms": 80.6, "spans": {"db.tx": {"count": 3, "ms": 81.3}}, "user_id": null, "org_id": null}
+..............................................................sssF...........................................................................................................................F.{"ts": "2026-10-10T11:45:04.194+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "bad57adcadad4a27", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "a4ecd0d295d1666cb34479d45af2c1d8", "route": "/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}", "error": "quem reportou a entrega não aceita a própria entrega", "user_id": "4324b673-80bc-4036-b294-cb38a2007d46"}
+................{"ts": "2026-10-10T12:00:59.154+00:00", "level": "warning", "logger": "impacto.http", "msg": "rls_denied", "request_id": "b4e7350ba6ee4519", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "7da32df476a589c05454a462a24177d4", "route": "/v1/signed-agreements/{agreement_id}/milestones/{milestone_id}", "error": "quem reportou a entrega não aceita a própria entrega", "user_id": "32b0301b-ffc8-4a63-a35f-62b08403ccf1"}
+..........................{"ts": "2026-10-10T12:01:23.146+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "0b3801e5fed24f6f", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "601f5c79b88029b0e4f84d23d4f50ffc", "error_id": "f67f367d2dfb", "route": "/v1/signed-agreements/{agreement_id}/parties/{party_id}/pix", "constraint": "pix_key_shape", "error": "new row for relation \"signed_agreement_parties\" violates check constraint \"pix_key_shape\"", "user_id": "0e7fc422-06e3-411e-8dc3-45bad9baf678"}
+..24_MONTH_FINANCIAL_MODEL.md: 184 linhas; cenários: Conservador paga R$ 43.356,25, Base paga R$ 369.140,63, Agressivo paga R$ 2.327.937,50
+................F.F..FF.MOTOR_COVERAGE_MATRIX.md: 50 motores · {'VERDE': 37, 'AMARELO': 13, 'VERMELHO': 0}
+...AI_COST_MODEL.md: 162 linhas; Conservador margem 12m R$ 400,28; Base margem 12m R$ 4.877,55; Agressivo margem 12m R$ 40.441,90
+....{"ts": "2026-10-10T12:01:31.040+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "9e0902f98da149c1", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "7d0f0f5ef4a87d065486e02d301b452c", "method": "POST", "route": "/v1/ai/preview", "status": 501, "ms": 12.5, "spans": {"db.tx": {"count": 3, "ms": 11.4}}, "user_id": "894a11f2-93de-4811-8f76-6051f2e9c7e8", "org_id": "97613c4d-c340-488e-8991-34f3fa2f7f77"}
+.................................................../home/claude/impactohubsocial/backend/tests/test_v0290_knowledge_base.py:49: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/claude/impactohubsocial/knowledge-base/LEGAL-APPLICABILITY-MATRIX.csv' mode='r' encoding='utf-8'>
+  rows = list(csv.DictReader((KB / "LEGAL-APPLICABILITY-MATRIX.csv").open(encoding="utf-8")))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./home/claude/impactohubsocial/backend/tests/test_v0290_knowledge_base.py:56: ResourceWarning: unclosed file <_io.TextIOWrapper name='/home/claude/impactohubsocial/knowledge-base/LEGAL-APPLICABILITY-MATRIX.csv' mode='r' encoding='utf-8'>
+  ids = {r["id"] for r in csv.DictReader((KB / "LEGAL-APPLICABILITY-MATRIX.csv").open(encoding="utf-8"))}
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+........................................{"ts": "2026-10-10T12:02:12.732+00:00", "level": "warning", "logger": "impacto.jobs", "msg": "pending_scan_unreadable", "request_id": "-", "service": "impacto-api", "version": "0.34.0", "env": "test", "document_id": "b", "error": "HTTP Error 404: Not Found"}
+....................s......................................{"ts": "2026-10-10T12:02:23.902+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "149b682a40064a52", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "985f4b608c013279feaaaec56aa21642", "method": "POST", "route": "/v1/public/donation-campaigns/{slug}/donate", "status": 503, "ms": 10.4, "spans": {"db.tx": {"count": 2, "ms": 9.4}}, "user_id": null, "org_id": null}
+...{"ts": "2026-10-10T12:02:24.340+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "c0cc84877c124eaa", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "e8edce3fd836f8e77d3c99a152b1a846", "method": "POST", "route": "/v1/public/donation-campaigns/{slug}/recurring", "status": 503, "ms": 7.8, "spans": {"db.tx": {"count": 3, "ms": 6.9}}, "user_id": "c436d109-1e01-4bc1-a3cc-15dd7f13247f", "org_id": "7775b626-9909-474d-89b6-7456d01b76ba"}
+.{"ts": "2026-10-10T12:02:24.913+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "51504c8d6df54d07", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "49c7dae477e131819f3268ba5568c24b", "method": "POST", "route": "/v1/webhooks/donations/{provider}", "status": 500, "ms": 11.0, "spans": {"db.tx": {"count": 4, "ms": 10.2}}, "user_id": null, "org_id": null}
+.{"ts": "2026-10-10T12:02:24.994+00:00", "level": "error", "logger": "impacto.http", "msg": "request", "request_id": "b84f0d70e9244b62", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "6395d21e5b9375ebd1461492c04efd90", "method": "POST", "route": "/v1/webhooks/donations/{provider}", "status": 500, "ms": 12.6, "spans": {"db.tx": {"count": 4, "ms": 11.7}}, "user_id": null, "org_id": null}
+..............{"ts": "2026-10-10T12:02:30.378+00:00", "level": "warning", "logger": "impacto.http", "msg": "integrity_error", "request_id": "2a150de740cb41f2", "service": "impacto-api", "version": "0.34.0", "env": "test", "trace_id": "66c7d0aae296e23382f7febd023629b2", "error_id": "cf8600865ea3", "route": "/v1/projects/{project_id}/graph/edges", "constraint": "impact_edges_check", "error": "new row for relation \"impact_edges\" violates check constraint \"impact_edges_check\"", "user_id": "2773474e-5206-46ab-8708-70b9a3edee84"}
+...........................................................
+======================================================================
+ERROR: test_company_feed_and_mobile_navigation (tests.test_e2e_web.WebE2E.test_company_feed_and_mobile_navigation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_e2e_web.py", line 86, in test_company_feed_and_mobile_navigation
+    p.get_by_label("E-mail").fill(co.email)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15919, in fill
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.fill(
+        ^^^^^^^^^^^^^^^^^^^^
+            value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 212, in fill
+    return await self._frame.fill(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 590, in fill
+    await self._fill(**locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 602, in _fill
+    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.fill: Timeout 30000ms exceeded.
+Call log:
+  - waiting for get_by_label("E-mail")
+
+
+======================================================================
+FAIL: test_institutional_prices_are_declared_as_hypothesis_not_as_price (tests.test_v0170_monetization.HierarchyTests.test_institutional_prices_are_declared_as_hypothesis_not_as_price)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0170_monetization.py", line 225, in test_institutional_prices_are_declared_as_hypothesis_not_as_price
+    self.assertIsNone(r["amount_cents"], f"{r['key']} não pode ter preço fixado")
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 is not None : donation.platform_contribution não pode ter preço fixado
+
+======================================================================
+FAIL: test_regenerating_each_matrix_reproduces_what_is_committed (tests.test_v0230_execution_matrices.TheMatricesStillAgreeWithTheCodeTests.test_regenerating_each_matrix_reproduces_what_is_committed) [API_AUTHORIZATION_MATRIX.csv]
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0230_execution_matrices.py", line 163, in test_regenerating_each_matrix_reproduces_what_is_committed
+    self.assertEqual(self._regera(gerador), versionado,
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     f"{nome} divergiu do código. Regere com: "
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     f"python3 scripts/{gerador}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'oper[64029 chars]riza,422 recusou o corpo incompleto,recusada p[259979 chars]md\n' != 'oper[64029 chars]riza,AUSENTE: operação não registrada pela var[260003 chars]md\n' : API_AUTHORIZATION_MATRIX.csv divergiu do código. Regere com: python3 scripts/make_authorization_matrix.py
+
+======================================================================
+FAIL: test_the_manifest_exists_for_this_version (tests.test_v0230_release_gate.TheManifestAndTheRepositoryAgreeTests.test_the_manifest_exists_for_this_version)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0230_release_gate.py", line 126, in test_the_manifest_exists_for_this_version
+    self.assertTrue(self.existe, "não há manifesto de rastreabilidade para a versão corrente")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : não há manifesto de rastreabilidade para a versão corrente
+
+======================================================================
+FAIL: test_the_committed_matrix_is_what_the_evidence_produces (tests.test_v0250_cobertura.TheCoverageMatrixMatchesTheEvidenceTests.test_the_committed_matrix_is_what_the_evidence_produces)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0250_cobertura.py", line 19, in test_the_committed_matrix_is_what_the_evidence_produces
+    self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : COVERAGE_MATRIX.md não corresponde às evidências: rode python3 scripts/make_coverage_matrix.py
+
+
+======================================================================
+FAIL: test_the_regression_section_names_a_cause_and_a_fix_for_every_failure (tests.test_v0270_release_docs.FinalExecutionAuditTests.test_the_regression_section_names_a_cause_and_a_fix_for_every_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0270_release_docs.py", line 107, in test_the_regression_section_names_a_cause_and_a_fix_for_every_failure
+    self.assertGreater(len(tabela), 5)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+AssertionError: 5 not greater than 5
+
+======================================================================
+FAIL: test_no_placeholder_was_left_behind_and_the_version_is_current (tests.test_v0270_release_docs.FinalExecutionReportTests.test_no_placeholder_was_left_behind_and_the_version_is_current)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0270_release_docs.py", line 75, in test_no_placeholder_was_left_behind_and_the_version_is_current
+    self.assertNotIn("{{", self.txt, "marcador de preenchimento esquecido")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '{{' unexpectedly found in '# Relatório final de execução — IMPACTO v0.34.0\n\n**Data:** 10/10/2026 · **Ramo:** `ecossistema-v0340` (sobre `doacoes-v0330` / PR #6; PR #5 da v0.32.0 ainda aberto) · **Tag:** `v0.34.0`\n(a criar no GitHub pelo responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**\n`IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·\n**Relatório técnico (DOCX):** `IMPACTO_v0.34.0_RELATORIO_TECNICO.docx`\n\n## 1. Executive Summary\n\nO PROMPT MASTER FULL pediu, sobre a base de doações da v0.33.0, a **base de um ecossistema financeiro confiável**: arrecadação\nrastreável, remuneração do SaaS calculável e cobrável, dados auditáveis, regras configuráveis, operações juridicamente compatíveis —\nsem transformar cada operação social em cobrança automática. O responsável acrescentou três correções (MROSC por instrumento; nunca\nreter prestação de contas; reserva sem custódia) e o modelo "gratuito até gerar valor" com gatilhos auditáveis. Entregue:\n\n- **Obrigações de remuneração** com a cadeia completa (calculada → devida → faturada → cobrada → recebida → liquidada; estornada,\n  vencida, em disputa, dispensada, isenta), valor congelado, histórico só-inserção, liquidação segregada (`finance.approve`).\n  Receita prevista × devida × recebida × liquidada **nunca somadas**.\n- **Gratuito até gerar valor** como política versionada (hipótese v1): nada é devido sem regra ativa, franquia de valor LIQUIDADO\n  ultrapassada, aviso prévio registrado dentro do prazo e teto — e a avaliação diz por que cada obrigação NÃO virou devida.\n- **Recurso público isento por padrão**, elegível só com instrumento e autorização registrada. **Reserva/fundo** do beneficiário no\n  motor que o banco recusa ativar: nunca receita da plataforma. **Nenhuma obrigação condiciona prestação de contas** (teste vigia).\n- **Estados do dinheiro** separados (pendente, confirmado, liquidado, em análise, estornado total/parcial, compromisso, recurso\n  declarado fora), política de contagem, data da última atualização válida; **painel do financiador**.\n- **Conciliação com fila de exceções** (9 tipos, prioridade, responsável, histórico; reexecutar não duplica); webhook ≠ conciliado.\n- Documentos, matrizes, diagramas, modelo de 24 meses em 3 cenários e cobertura dos 40 cenários de teste em `docs/finance/`.\n\n**Decisão: GO WITH CONDITIONS** (§27) para o sandbox. **Qualquer cobrança real: NO-GO** até parecer, contrato e cartas verdes —\no próprio banco recusa ativar as regras sem isso.\n\n## 2. Version\n\n0.34.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.\nDocumentos da v0.33.0 preservados em `history/v0.33.0/`; manifestos anteriores em `history/manifests/`.\n\n## 3. Commit\n\nRamo `ecossistema-v0340` sobre `103c643` (v0.33.0). Commits por etapa: E1 backend (`47e2564`), E2 testes (`dfd3a54`), E3 telas\n(`761de0f`), E4 documentos (`696e220`), E5 portões (`d646a71`), e o commit final dos manifestos, para o qual a tag `v0.34.0` deve\napontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`). Nenhuma operação na produção. O CI do pull\nrequest é a evidência externa (ver `FINAL_EXECUTION_AUDIT.md` §6).\n\n## 4. Architecture Status\n\nCamada financeira isolada sobre a v0.33.0: `remuneration.py` e `reconciliation.py` novos; `donations.py` estendido; nenhuma\ndependência circular (os serviços de doação importam remuneração só em funções, e remuneração não importa rotas). Diagramas em\n`docs/finance/diagramas/`. Operação inalterada (`CLAUDE.md`).\n\n## 5. Engines Status\n\n50 motores, inalterados; `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0.\n\n## 6. Contract Intelligence\n\nPASS (inalterado). A taxa de serviço do acordo (`contract.platform_service_fee`) continua INATIVA; o desenho de obrigações desta\nversão aceita `source_kind = agreement_allocation` para unificá-la numa versão futura (não ligado agora).\n\n## 7. Match\n\nPASS (inalterado); sem pay-to-rank; nenhuma regra comercial influencia o matching.\n\n## 8. Diagnostic\n\nPASS (inalterado).\n\n## 9. Equity\n\nPASS (inalterado). Franquia e isenção de recurso público protegem as organizações pequenas por desenho.\n\n## 10. Evidence\n\nPASS (inalterado). Recursos externos aceitam `evidence_document_id`; `status = documented` quando há documento.\n\n## 11. Responsibility\n\nPARTIAL (inalterado).\n\n## 12. Reputation\n\nPASS (inalterado). Doações, compromissos e obrigações não alimentam reputação.\n\n## 13. Seals\n\nPASS (inalterado).\n\n## 14. Government Data\n\nInalterado. Governos e empresas têm o painel de contribuições.\n\n## 15. Marketplace\n\nInalterado: `marketplace.take_rate` recusada pelo responsável; a matriz de monetização registra o exemplo 90/10 do pacote como\nhipótese a validar comercial e juridicamente; liberação por entregável NÃO (custódia).\n\n## 16. Payments\n\nSandbox apenas. Novos estados: liquidação (`settled_at`), estorno parcial (`refunded_cents`), `partially_refunded`. Eventos\nreconhecidos em `docs/finance/DONATIONS_API.md`. `payment_records` da v0.28.0 intocado; `platform_charges` reutilizado para a fatura\nprópria (kind `operation`, provedor manual, simulado por derivação).\n\n## 17. Distribution\n\nPASS (inalterado).\n\n## 18. Billing\n\nSem assinatura (ADR-341). 15 regras no catálogo, **0 ativas**; política `free_until_value` v1 (hipótese).\n\n## 19. Fiscal\n\nBLOCKED_EXTERNAL. `LEGAL_FISCAL_MATRIX.md` lista documento provável por tipo de receita; NFS-e não implementada.\n\n## 20. Vouchers\n\nInalterado.\n\n## 21. Identity\n\nPARTIAL (inalterado). KYB do beneficiário registrado; processo depende do provedor e do parecer.\n\n## 22. Security\n\nModelo de ameaças da v0.33.0 (19 linhas) + matriz de riscos da v0.34.0 (23 linhas, `docs/finance/RISK_MATRIX.md`). Segregação:\nliquidar, decidir disputa, dispensar e autorizar recurso público exigem `finance.approve` com confirmação de identidade. Concorrência\nde webhooks provada (6 entregas simultâneas → 1 confirmação). Campo estranho no corpo → 422. Nenhum segredo em código, workflow,\ndocumento ou pacote (`secrets_scan.py`). **Nenhum sistema ligado à internet é invulnerável, e este não é exceção.**\n\n## 23. LGPD\n\nInalterado em relação à v0.33.0 (e-mail cifrado, anônimo protegido, bruto redigido). Novo: `donor_org_id` identifica a organização\ndoadora apenas quando ela escolhe doar em nome próprio; compromissos e recursos externos não expõem dados pessoais em público.\n\n## 24. Tests\n\n```text\nREGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.34.0.log):\n  {{TESTS_LINE}}\nMÓDULOS NOVOS: test_v0340_financial_ecosystem (13) · test_v0340_release_docs (6)\nPORTÕES PRÉ-REGRESSÃO (arquitetura, permissões, matriz de autorização, ícones, adversarial, conhecimento, jornadas): 241 testes OK\nLINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok\nTELAS: capturas reais em docs/evidence/screens_v0340/ (6 telas, fluxo completo no servidor de teste, sandbox)\nCOBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md (32 ✅ · 4 🟡 · 4 ⛔ com motivo)\n```\n\n## 25. External Dependencies\n\n| Dependência | Exige | Efeito hoje |\n|---|---|---|\n| Parecer jurídico/contábil → cartas legais verdes → regras validadas | jurídico/contábil + responsável | nenhuma obrigação pode virar devida |\n| Contrato com provedor de pagamento; modelo de titularidade | responsável + provedor | só sandbox |\n| Termos (campanha, doador, política, contrato institucional, autorização de despesa pública) | jurídico | textos em rascunho |\n| NFS-e | contábil + integração | não implementada |\n| Rotina agendada de conciliação e de vencidas no worker | responsável (decisão) | à mão nesta versão |\n| Juntar PRs #5, #6 e este ramo; publicar demo e produção | responsável | módulo fora do ar |\n| Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |\n| Tag v0.34.0 | o ambiente não envia tags | criar no GitHub |\n\n## 26. Known Limitations\n\n- Obrigações só nascem de doações nesta versão; acordo, serviço e crédito de IA têm `source_kind` previsto mas não ligado.\n- Conciliação e marcação de vencidas são acionadas à mão (rotas de administração); não há job agendado.\n- O snapshot do provedor no sandbox deriva dos próprios eventos — prova o mecanismo, não a API de um provedor real.\n- `settlement_partial` é tipo de exceção sem gerador automático (depende de relatório de liquidação do provedor).\n- Modelo de 24 meses: premissas sem histórico; a taxa sobre doações não sustenta a operação em nenhum cenário.\n- Textos dos avisos e termos são rascunhos.\n\n## 27. GO / GO WITH CONDITIONS / NO-GO\n\n```text\nGO WITH CONDITIONS\n```\n\nPara juntar e publicar no demo e, depois de conferido, na produção — onde nenhuma cobrança é possível e nenhuma variável nova é\nobrigatória. Condições: as da v0.32.0 e v0.33.0 continuam. **Cobrança real, split, recorrência cobrada, regra ativa: NO-GO** até\nparecer, contrato, cartas verdes e ADR nova.\n\n## 28. Exact Next Step\n\n1. Ordem dos merges (PR #5 → PR #6 → este ramo) ou um só sobre o PR #5.\n2. No demo: percorrer `docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md` (inclui o runbook da v0.33.0).\n3. Levar `docs/finance/LEGAL_FISCAL_MATRIX.md` e `docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md` ao jurídico/contábil; escolher\n   o provedor pela matriz. Decidir sobre a rotina agendada de conciliação. Nada disso é código.\n' : marcador de preenchimento esquecido
+
+======================================================================
+FAIL: test_the_tests_section_reports_a_real_run_with_a_log (tests.test_v0270_release_docs.FinalExecutionReportTests.test_the_tests_section_reports_a_real_run_with_a_log)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0270_release_docs.py", line 82, in test_the_tests_section_reports_a_real_run_with_a_log
+    self.assertRegex(secao, r"Ran \d+ tests|\d\.\d{3} testes")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Regex didn't match: 'Ran \\d+ tests|\\d\\.\\d{3} testes' not found in '\n\n```text\nREGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.34.0.log):\n  {{TESTS_LINE}}\nMÓDULOS NOVOS: test_v0340_financial_ecosystem (13) · test_v0340_release_docs (6)\nPORTÕES PRÉ-REGRESSÃO (arquitetura, permissões, matriz de autorização, ícones, adversarial, conhecimento, jornadas): 241 testes OK\nLINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok\nTELAS: capturas reais em docs/evidence/screens_v0340/ (6 telas, fluxo completo no servidor de teste, sandbox)\nCOBERTURA DOS 40 CENÁRIOS DO PACOTE: docs/finance/TEST_SCENARIO_COVERAGE.md (32 ✅ · 4 🟡 · 4 ⛔ com motivo)\n```\n\n'
+
+======================================================================
+FAIL: test_the_release_manifest_and_the_notes_speak_of_this_version (tests.test_v0270_release_docs.ManifestAndNotesTests.test_the_release_manifest_and_the_notes_speak_of_this_version)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/impactohubsocial/backend/tests/test_v0270_release_docs.py", line 152, in test_the_release_manifest_and_the_notes_speak_of_this_version
+    self.assertEqual(m["version"], VERSION)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '0.33.0' != '0.34.0'
+- 0.33.0
+?    ^
++ 0.34.0
+?    ^
+
+
+----------------------------------------------------------------------
+Ran 2478 tests in 2257.161s
+
+FAILED (failures=8, errors=1, skipped=31)

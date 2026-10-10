@@ -201,7 +201,10 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "docs/finance/LEGAL_FISCAL_MATRIX.md", "docs/finance/DONATIONS_API.md", "docs/finance/TEST_SCENARIO_COVERAGE.md",
             "docs/finance/MODULE_INVENTORY.md", "docs/finance/PUBLICATION_ROLLBACK_CHECKLIST.md", "docs/finance/modelo_24m/MODELO_24M_v0340.md",
             "docs/finance/modelo_24m/IMPACTO_MODELO_24M_v0340.xlsx", "docs/finance/diagramas/arquitetura_financeira.svg",
-            "docs/finance/diagramas/fluxo_pagamento_conciliacao.svg", "docs/evidence/test_run_v0.34.0.log", "history/v0.33.0/VERSION"]
+            "docs/finance/diagramas/fluxo_pagamento_conciliacao.svg", "docs/evidence/test_run_v0.34.0.log", "history/v0.33.0/VERSION",
+            # v0.34.0 (E6) — os 40 cenários com teste
+            "backend/tests/test_v0340_open_scenarios.py", "scripts/make_donations_api_doc.py",
+            "docs/evidence/screens_v0340/07_doacao_mensal_doador.png"]
 
 
 def sha256(p: Path) -> str:

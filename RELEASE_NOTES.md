@@ -15,7 +15,18 @@ prestação de contas a pagamento. Nenhuma regra está ativa; nenhum real entra 
 7. **Conciliação** — fila de exceções tipada (só no provedor, só no sistema, valor/tarifa divergente, estorno sem lançamento,
    duplicidade, taxa errada, prazo), com responsável e histórico.
 8. **Painel do financiador** e doação em nome da organização.
-9. **Documentos** — arquitetura e fluxos (diagramas), razão e estados, política, matrizes de monetização e de riscos,
+9. **Os 40 cenários de teste do pacote têm teste** — inclusive os que dependem do provedor: falha temporária, evento que falha e
+   é reprocessado, liquidação parcial e falha de liquidação, split e doação mensal (estes dois simulados no teste, e ditos como tal).
+   O teste de cartão revelou que **doação por cartão nunca tinha funcionado no sandbox** — corrigido.
+10. **Contribuição voluntária do doador para a plataforma** — um valor A MAIS, que começa em zero e nunca é sugerido; não sai da
+    doação; é a única coisa que pode ser dividida direto pelo provedor (quando houver contrato). Desligada até parecer.
+11. **Doação mensal** — autorizar não é pagar: cada mês é uma tentativa; só o que o provedor confirma conta; três falhas seguidas
+    pausam; o doador cancela quando quiser. Desligada até o provedor oferecer o instrumento.
+12. **Rotina financeira no worker** — reprocessa eventos, marca vencidas e concilia sozinha. Por isso, **publique também o
+    `pleasing-trust`**.
+13. **Brecha fechada** — a organização conseguia, pela tela de cobranças, marcar como paga ou devolvida a fatura que ela deve à
+    plataforma. Agora só a administração ou o provedor mudam essa fatura.
+14. **Documentos** — arquitetura e fluxos (diagramas), razão e estados, política, matrizes de monetização e de riscos,
    jurídico/fiscal (com as três correções do responsável), API/webhooks, cobertura dos 40 cenários, modelo de 24 meses em 3 cenários.
 
 O que falta para ser real continua fora do código: contrato com provedor, parecer, cartas legais verdes, termos, NFS-e.

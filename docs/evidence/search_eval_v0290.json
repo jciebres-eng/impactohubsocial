@@ -32,7 +32,7 @@
   "unanswerable_with_results": 0,
   "latency_ms": {
    "p50": 19.2,
-   "p95": 26.0,
+   "p95": 27.9,
    "n": 35
   },
   "by_kind": {
@@ -100,8 +100,8 @@
   "correct_abstention_rate": 1.0,
   "unanswerable_with_results": 0,
   "latency_ms": {
-   "p50": 14.5,
-   "p95": 19.4,
+   "p50": 17.0,
+   "p95": 29.7,
    "n": 35
   },
   "by_kind": {
@@ -561,5 +561,5 @@
   "julgamento por mais de uma pessoa (rótulos feitos à mão por quem escreveu o conjunto)",
   "medida de embeddings ou de modelo (não existem; a busca é determinística)"
  ],
- "measured_at": "2026-10-10T10:48:59Z"
+ "measured_at": "2026-10-10T12:02:08Z"
 }

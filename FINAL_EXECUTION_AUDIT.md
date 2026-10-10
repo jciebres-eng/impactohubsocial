@@ -25,14 +25,21 @@ diagramas, modelo de 24 meses, 40 cenários de teste.
 | Estorno parcial / total após parcial / chargeback | PASS | `test_06`, `test_12` | razão fecha em zero; comprovante anulado; obrigação estornada | tarifa do provedor no parcial depende do contrato | — |
 | Compromissos e recursos externos fora da barra | PASS | `test_07` | nenhum lançamento; totais à parte; recurso público exige instrumento | — | — |
 | Painel do financiador | PASS | `funder_view` · `test_07` · captura `04_financiador_contribuicoes.png` | doações em nome da organização e compromissos | — | — |
-| Conciliação com fila de exceções | PASS | `reconciliation.py` · `test_08` | 9 tipos; não duplica; histórico; sandbox snapshot | rotina não agendada | agendar no worker (decisão) |
+| Conciliação com fila de exceções | PASS | `reconciliation.py` · `test_08` · rotina `financial_ops` (E6) | 11 tipos; não duplica; histórico; periódica no worker | — | publicar o worker junto |
 | Tarifa nova não altera operação antiga | PASS | `test_09` | versão congelada por obrigação | — | — |
 | Limites, adulteração pelo cliente, concorrência | PASS | `test_10` | 422 fora dos limites/campo extra; 6 entregas → 1 confirmação | — | — |
 | Meta atingida/ultrapassada | PASS | `test_13` | `target_reached` continua aceitando; contingência declarada | — | — |
 | Segregação de funções | PASS | rotas com `finance.approve` · `test_04/05` (403 para `finance`) | — | — | — |
 | Telas | PASS | 6 capturas em `docs/evidence/screens_v0340/`; `tsc` 0; build ok | — | — | conferir no demo |
 | Matrizes, diagramas, modelo 24m, cobertura dos 40 cenários | PASS | `docs/finance/*` · `test_v0340_release_docs` | — | premissas sem histórico | — |
-| Split, recorrência cobrada, cobrança real, NFS-e | BLOCKED_EXTERNAL | flags recusadas; regras inativas | — | — | contrato, parecer, ADR |
+| Cartão no sandbox (cenário 2) | PASS | `test_v0340_open_scenarios.test_02` | confirmado pelo mesmo evento assinado; **antes da E6 toda doação por cartão era recusada** (faltava a tabela de tarifa) | — | — |
+| Falha temporária do provedor (8) | PASS | `test_08` (falha injetada só no teste) | 503, nada gravado, a mesma chave repete | — | — |
+| Evento que falha ao aplicar (33) e reprocessamento (35) | PASS | `test_33_35`, `test_33b` | duas fases; `failed` + exceção + 500; rotina reaplica; reentrega `duplicate` | — | — |
+| Liquidação parcial (18) e falha de liquidação (17) | PASS | `test_17_18` | acumulada; exceções `settlement_partial`/`settlement_failed`; pagamento continua confirmado | — | — |
+| Split (14) e split indisponível (15) | PASS (simulado) | `test_14_15` (trava e provedor que divide ligados só no teste) | só a contribuição voluntária é dividida; sem split, fatura à organização; razão equilibrado | split real depende do provedor | contrato e homologação |
+| Recorrência (25) e cancelamento (38) | PASS (sandbox) | `test_25_38` | autorização ≠ tentativa ≠ confirmado; pausa após 3 falhas; cancelado/pausado não cobra | instrumento recorrente real | provedor |
+| Reembolso do recebido (39) e fatura protegida | PASS | `test_39` | integral segregado; devolução pelo provedor reverte; organização recebe 403 ao mover a fatura | — | — |
+| Split real, recorrência cobrada de verdade, cobrança real, NFS-e | BLOCKED_EXTERNAL | flags recusadas; regras inativas | — | — | contrato, parecer, ADR |
 
 ## 2. Motores
 
@@ -40,8 +47,8 @@ Inalterados (50; VERDE 37 · AMARELO 13 · VERMELHO 0).
 
 ## 3. Perfis, rotas e jornadas
 
-986 operações (+24: 1 pessoa, 6 organização, 17 equipe), 235 telas (+4), 60 rotas públicas (inalterado), 262 rotas de plataforma
-(+16), 118 permissões nomeadas (+16). Jornada "Captação" ganhou os passos do ecossistema (empresa doa em nome da organização,
+988 operações (+26: 2 pessoa, 6 organização, 18 equipe), 235 telas (+4), 60 rotas públicas (inalterado), 263 rotas de plataforma
+(+17), 119 permissões nomeadas (+17). Jornada "Captação" ganhou os passos do ecossistema (empresa doa em nome da organização,
 compromisso, recurso externo, painéis) — 269 passos, 0 falhas na ordem da suíte.
 
 ## 4. Banco de dados
@@ -49,12 +56,15 @@ compromisso, recurso externo, painéis) — 269 passos, 0 falhas na ordem da su�
 Migração `0073_v0340_financial_ecosystem.sql`: 9 tabelas novas (`monetization_policy_versions`, `remuneration_notices`,
 `remuneration_obligations`, `remuneration_obligation_events`, `external_resources`, `donation_pledges`, `reconciliation_exceptions`,
 `reconciliation_exception_events`, `reconciliation_runs`), 4 funções/gatilhos (máquina de estados e log da obrigação, log da exceção,
-guarda de doação com liquidação/estorno parcial), colunas em `campaigns` e `donations`, 2 regras + cartas, 4 categorias de auditoria,
+guarda de doação com liquidação/estorno parcial), colunas em `campaigns` e `donations` (E6: contribuição, liquidação acumulada, parte dividida), contas novas no razão (contribuição),
+colunas de tentativas na recorrência, tabela de tarifa do cartão no sandbox, 3 regras + cartas, 4 categorias de auditoria,
+`polymorphic_refs` da obrigação, retenção declarada (`config/data_retention.json`),
 GRANTs mínimos. Aplicada em banco novo (73 migrações) e pelo caminho de atualização. Só acrescenta.
 
 ## 5. Segurança e LGPD
 
-Matriz de riscos com 23 linhas (`docs/finance/RISK_MATRIX.md`). Contexto de sistema só nas rotas de equipe/pessoa/público (as de
+Matriz de riscos com 28 linhas (`docs/finance/RISK_MATRIX.md`); E6 achou e fechou uma brecha (fatura da plataforma movida pela
+própria organização). Contexto de sistema só nas rotas de equipe/pessoa/público (as de
 organização usam RLS). Nenhuma função de bloqueio no módulo de remuneração. `secrets_scan.py` limpo.
 
 ## 6. CI
@@ -75,6 +85,18 @@ O CI completo roda no pull request. Resultado da execução do PR deste ramo: a 
 | contagens fixadas (986/262/118/235), docs com números, matrizes | módulo novo | atualizadas com a razão; regeneradas |
 | `test_v0330_release_docs` pinava VERSION = 0.33.0 | pin de versão absoluta | passa a exigir ≥ 0.33.0 e a entrada no CHANGELOG |
 | `RISK_MATRIX.md` continha a frase proibida (negada) | o teste de documentos procura a afirmação | reescrita sem a frase |
+| `test_v0190_lgpd_deletion` (regressão da E5, 2.470 testes): retenção sem classe para `remuneration_obligations.org_id` e `reconciliation_exceptions.org_id` | colunas novas que não são cascata, sem decisão registrada | declaradas em `config/data_retention.json` (retida; anonimizável) com motivo |
+| `test_v0230_provenance` (idem): `remuneration_obligations.source_id` fora do catálogo polimórfico | coluna polimórfica nova | registrada em `polymorphic_refs` na 0073 |
+| `test_v0200_cleanup` (idem): `forbid_blocking_use` inalcançável | eu tinha escrito uma função "documentação viva" que só levantava erro — não era guarda | removida; a guarda real é `test_11` (varredura) e `never_blocks` |
+| `test_v0340_open_scenarios.test_02` (E6): doação por cartão → 422 `provider_fee_unknown` | o sandbox só tinha tabela de tarifa para Pix; **a nota da cobertura dizia "cartão aceito" sem teste** | tabela do cartão no sandbox; cenário 2 com teste |
+| `test_v0340_open_scenarios.test_25_38` (E6): recorrência não criava tentativa | consequência do cartão; depois, a chave por data colidia quando o teste repunha a data | tarifa do cartão; chave por número da tentativa (atômica com o contador) |
+| `test_v0340_financial_ecosystem.test_02` (E6): devido global ≠ 0 | a contribuição do cenário 15 fica legitimamente devida | o teste novo fecha o ciclo (dispensa com motivo); a asserção antiga não foi afrouxada |
+| `test_v0340_open_scenarios.test_39` (E6): organização movia a fatura da plataforma pela rota de cobranças | `PAY.transition` só conferia a aresta do grafo, não a origem | 403 `platform_invoice` para fatura ligada a obrigação; só administração/provedor |
+| `test_v0340_release_docs` (E6): `DONATIONS_API.md` com descrições deslocadas uma linha | tabela escrita à mão na E4 | gerador `scripts/make_donations_api_doc.py`; teste confere linha a linha |
+| `test_v0200_cleanup` (E6): `apply_provider_event` inalcançável | o webhook passou a usar as duas fases | removida |
+| `test_v0230_authorization_matrix` (E6): contagens (988/263/119/16) | duas rotas e uma regra novas | atualizadas com a razão |
+| `test_v0170_monetization` (regressão da E6, 2.478 testes): regra da contribuição com preço fixado (`amount_cents = 0`) | hipótese de motor de rank ≤ 3 não pode declarar preço; e `unit` exige preço para ativar | modo `contract` sem preço: o valor é o que o doador escolhe nos termos da doação |
+| `test_e2e_web` (regressão da E6): tempo esgotado ao preencher campo | eu reconstruí o pacote do front enquanto a suíte rodava (arquivos trocados no meio do teste de navegador) | módulo reexecutado com o front estável: verde; nenhum código mudou |
 
 ## 8. Build e pacote
 
@@ -87,7 +109,8 @@ O CI completo roda no pull request. Resultado da execução do PR deste ramo: a 
 
 ## 9. BLOCKED_EXTERNAL
 
-Parecer e cartas verdes; contrato com provedor; termos; NFS-e; rotina agendada; merges e publicação; pendências da v0.32.0; tag.
+Parecer e cartas verdes; contrato com provedor (split e instrumento recorrente); termos; NFS-e; merges e publicação (com o worker);
+pendências da v0.32.0; tag.
 
 ## 10. Veredito desta auditoria
 

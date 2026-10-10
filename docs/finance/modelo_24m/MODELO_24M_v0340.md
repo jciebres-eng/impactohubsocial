@@ -19,6 +19,10 @@
   (contrárias à ADR-341; só com decisão do responsável).
 - Tudo depende do mês de ativação (parecer + contrato): antes dele, a plataforma calcula e mostra, mas não recebe.
 
+- **Contribuição voluntária do doador à plataforma (E6, ADR-384): modelada em ZERO.** Não há dado sobre quantos doadores somariam
+  um valor por escolha, e o campo começa vazio e nunca é sugerido; estimar uma taxa de adesão seria inventar receita. Quando houver
+  três meses de doações reais com o campo ativo, a taxa observada entra aqui como premissa medida.
+
 ## Sensibilidade (cenário base, ±25 % em uma premissa por vez, recebido acumulado em 24 meses)
 
 | Premissa | Variação | Recebido 24m | Δ |

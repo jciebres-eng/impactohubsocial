@@ -14,7 +14,8 @@ que preserva o objetivo (regra 11 do kit). Nada aqui afirma conformidade regulat
   ~100 declarações `kinds=`, nos pacotes base, nas políticas `app_kind()` e nas regras de dinheiro público. (b) erra para a IES
   pública e para a privada com fins lucrativos.
 - **Impacto:** a natureza `academic_institution` do catálogo passa a aceitar os três tipos; ativação do perfil por pessoa da equipe
-  com permissão nova `academic.approve`, confirmação de identidade e trilha. Categoria administrativa (pública federal/estadual/
+  com a permissão que já existe para aprovar e verificar organizações (`admin.organizations.write`, da conformidade), confirmação
+  de identidade (já é permissão com step-up) e trilha. Nenhuma permissão nova. Categoria administrativa (pública federal/estadual/
   municipal; privada com/sem fins lucrativos) é **declarada** pela IES — a plataforma não a certifica.
 
 ## D-02 — Estudante e docente são pessoas (`users`), não membros da organização IES
@@ -40,7 +41,8 @@ que preserva o objetivo (regra 11 do kit). Nada aqui afirma conformidade regulat
 ## D-04 — Licença institucional sem assinatura (ADR-341) e sem preço inventado [RESPONSÁVEL]
 
 - **Decisão:** `academic_licenses`: instituição, assentos de estudante, validade, origem (`contract`, `convention`, `voucher`,
-  `courtesy`), referência do contrato, quem ativou. Assento é consumido quando o estudante ativa o vínculo. **Nenhum preço** no
+  `courtesy`), referência do contrato. **Quatro olhos** como nos convênios (ADR-063): uma pessoa da equipe com `billing.write`
+  (a permissão das concessões, com step-up) propõe; **outra** ativa. Assento é consumido quando o estudante ativa o vínculo. **Nenhum preço** no
   sistema, nenhuma cobrança, nenhuma recorrência. Contrato avulso/parcelado e concessões existentes continuam sendo o caminho
   comercial (ADR-341, ADR-342).
 - **Regras desta versão (a validar comercialmente):** sem assento livre, o estudante convidado fica "aguardando assento" (nada

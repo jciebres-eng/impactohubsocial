@@ -1,0 +1,19 @@
+recurso,acao,administracao_ies,gestao_academica,coordenacao_curso,docente_oferta,estudante_oferta,avaliador_externo,parceiro_osc_empresa_governo,equipe_plataforma,observacao
+perfil_ies,pedir,sim (dona),nao,nao,nao,nao,nao,nao,nao,só organizações osc/company/government
+perfil_ies,ativar_ou_recusar,nao,nao,nao,nao,nao,nao,nao,sim (admin.organizations.write + step-up),quem pediu nunca decide
+licenca,propor_ativar_ou_revogar,nao,nao,nao,nao,nao,nao,nao,sim (billing.write + step-up; quem propõe não ativa),sem preço nem cobrança (ADR-341)
+licenca,ver_situacao,sim,sim,nao,nao,só a própria (assento ativo ou aguardando),nao,nao,sim,
+fonte_de_verdade,definir,sim,sim,nao,nao,nao,nao,nao,nao,
+campus_curso_periodo_componente,ler,sim,sim,só o(s) curso(s) do escopo,só o necessário da própria oferta,só o necessário da própria oferta,leitura no escopo concedido,nao,suporte só com acesso excepcional registrado,
+campus_curso_periodo_componente,criar_ou_alterar,sim,sim,nao,nao,nao,nao,nao,nao,
+oferta_turma,criar_ou_alterar_estado,sim,sim,só ofertas do curso do escopo,nao,nao,nao,nao,nao,
+roteiro_pessoas,ler,sim,sim,pessoas com vínculo em ofertas do curso,pessoas da própria oferta,só a si mesmo,não lista pessoas (só agregados) nesta versão,nao,nao,mínimo: ID institucional; e-mail; nome de exibição
+roteiro_pessoas,incluir_ou_alterar_vinculo,sim,sim,docente e estudante nas ofertas do curso,nao,nao,nao,nao,nao,ninguém altera o próprio papel
+convite_academico,emitir_ou_revogar,sim,sim,para ofertas do curso,nao,nao,nao,nao,nao,token de uso único; 7 dias
+convite_academico,aceitar,—,—,—,—,—,—,—,—,qualquer conta logada com o MESMO e-mail confirmado
+avaliador_externo,conceder_ou_revogar,sim,sim,nao,nao,nao,nao,nao,nao,finalidade; escopo; validade ≤ 90 dias; nunca rótulo MEC
+avaliador_externo,aceitar,—,—,—,—,—,—,—,—,conta logada com o e-mail do convite
+importacao,enviar_e_ver_previa,sim,sim,nao,nao,nao,nao,nao,nao,prévia não grava nada
+importacao,aplicar_ou_descartar,sim,sim,nao,nao,nao,nao,nao,nao,transacional e idempotente
+exportacao,estrutura_e_roteiro,sim,sim,só o escopo,só a própria oferta (roteiro),nao,estrutura e agregados no escopo (registrado),nao,nao,neutralização de fórmula
+qualquer_dado_academico,ler_por_participar_do_ecossistema,—,—,—,—,—,—,NAO,NAO,D-15: nenhum acesso automático

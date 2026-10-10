@@ -185,7 +185,14 @@ REQUIRED = ["README.md", "FINAL_RELEASE_AUDIT.md", "RELEASE_NOTES.md", "CHANGELO
             "scripts/demo_accounts.py", "web/src/ui/demobanner.tsx", ".github/workflows/backup-supabase.yml",
             ".github/workflows/monitor.yml", "backend/tests/test_v0320_demo_accounts.py", "backend/tests/test_v0320_release_docs.py",
             "docs/evidence/test_run_v0.32.0.log", "docs/execution/PRODUCTION_CHECKLIST_v0300.md",
-            "docs/execution/ROLLBACK_v0300.md", "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md"]
+            "docs/execution/ROLLBACK_v0300.md", "docs/execution/ACCEPTANCE_CHECKLIST_v0300.md",
+            # v0.33.0 — doações como módulo isolado, sem custódia e sem provedor real
+            "backend/migrations/0072_v0330_donations.sql", "backend/impacto/services/donations.py", "backend/impacto/api/donation_routes.py",
+            "web/src/pages/donations.tsx", "backend/tests/test_v0330_donations.py", "backend/tests/test_v0330_release_docs.py",
+            "config/donation_risk_rules.json", "docs/donations/BASELINE_REPORT.md", "docs/donations/IMPLEMENTATION_REPORT.md",
+            "docs/donations/SECURITY_REVIEW.md", "docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md", "docs/donations/RUNBOOK.md",
+            "docs/donations/DONATIONS_PROVIDER_MATRIX.md", "docs/donations/24_MONTH_DONATIONS_NOTE.md",
+            "docs/evidence/test_run_v0.33.0.log", "history/v0.32.0/VERSION"]
 
 
 def sha256(p: Path) -> str:

@@ -305,8 +305,9 @@ def campaign_create(ctx: Ctx, body: TSch.CampaignIn):
 def campaign_list(ctx: Ctx, q: TSch.Pagination):
     with ctx.tx(readonly=True) as c:
         rows = c.query("SELECT c.id::text AS id, c.slug, c.title, c.summary, c.status, c.show_backers, c.published_at,"
+                       " c.kind, c.target_cents, c.qr_version, c.review_note, c.accepted_terms_at,"
                        " c.project_id::text AS project_id, p.title AS project_title FROM campaigns c"
-                       " JOIN projects p ON p.id = c.project_id WHERE c.org_id = $1 ORDER BY c.created_at DESC"
+                       " LEFT JOIN projects p ON p.id = c.project_id WHERE c.org_id = $1 ORDER BY c.created_at DESC"
                        " LIMIT $2 OFFSET $3", ctx.org_id, q.limit + 1, q.offset)
     for r in rows[:q.limit]:
         r["public_path"] = f"/campanha/{r['slug']}"

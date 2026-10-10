@@ -8,7 +8,8 @@ import { CampaignAccountability, PublicDonationCampaign, donationStatusLabel } f
 import { parseMoney } from "../format";
 
 const Q_STATUS: [string, string][] = [["draft", "Rascunho"], ["open", "Aberta"], ["paused", "Pausada"], ["closed", "Fechada"]];
-const C_STATUS: [string, string][] = [["draft", "Rascunho"], ["published", "Publicada"], ["closed", "Fechada"]];
+const C_STATUS: [string, string][] = [["published", "Publicada"], ["paused", "Pausada"]];
+const KIND_LABEL: Record<string, string> = { project_crowdfunding: "Vaquinha de projeto", emergency: "Emergência", institutional_fund: "Fundo institucional", recurring: "Apoio recorrente", organization: "Organização" };
 const EMPTY_Q = { project_id: "", label: "", description: "", quota: "", total: "", min: "1", max: "", deadline: "" };
 
 function QuotaProgress({ q }: { q: any }) {
@@ -103,7 +104,7 @@ export function QuotaPledges({ id }: { id: string }) {
   );
 }
 
-const EMPTY_C = { project_id: "", slug: "", title: "", summary: "", story: "", show_backers: false, kind: "donation", target: "", starts_on: "", ends_on: "",
+const EMPTY_C = { project_id: "", slug: "", title: "", summary: "", story: "", show_backers: false, kind: "project_crowdfunding", target: "", starts_on: "", ends_on: "",
   purpose: "", contingency_policy: "", refund_policy: "", min_donation: "5,00" };
 
 export function Campaigns() {
@@ -121,38 +122,35 @@ export function Campaigns() {
       const out = await api.post("/v1/campaigns", {
         ...(f.v.project_id ? { project_id: f.v.project_id } : {}), slug: f.v.slug, title: f.v.title, summary: f.v.summary,
         ...(f.v.story ? { story: f.v.story } : {}), show_backers: !!f.v.show_backers, kind: f.v.kind,
-        ...(f.v.kind === "donation" ? {
-          ...(parseMoney(f.v.target) ? { target_cents: parseMoney(f.v.target) } : {}),
-          ...(f.v.starts_on ? { starts_on: f.v.starts_on } : {}), ...(f.v.ends_on ? { ends_on: f.v.ends_on } : {}),
-          ...(f.v.purpose ? { purpose: f.v.purpose } : {}), ...(f.v.contingency_policy ? { contingency_policy: f.v.contingency_policy } : {}),
-          ...(f.v.refund_policy ? { refund_policy: f.v.refund_policy } : {}),
-          ...(parseMoney(f.v.min_donation) ? { min_donation_cents: parseMoney(f.v.min_donation) } : {}),
-        } : {}),
+        ...(parseMoney(f.v.target) ? { target_cents: parseMoney(f.v.target) } : {}),
+        ...(f.v.starts_on ? { starts_on: f.v.starts_on } : {}), ...(f.v.ends_on ? { ends_on: f.v.ends_on } : {}),
+        ...(f.v.purpose ? { purpose: f.v.purpose } : {}), ...(f.v.contingency_policy ? { contingency_policy: f.v.contingency_policy } : {}),
+        ...(f.v.refund_policy ? { refund_policy: f.v.refund_policy } : {}),
+        ...(parseMoney(f.v.min_donation) ? { min_donation_cents: parseMoney(f.v.min_donation) } : {}),
       });
-      setCreating(false); f.setV(EMPTY_C); setCampaign({ ...out, status: "draft", slug: f.v.slug, title: f.v.title, kind: f.v.kind, target_cents: parseMoney(f.v.target) });
+      setCreating(false); f.setV(EMPTY_C); setCampaign({ ...out, status: "draft", slug: f.v.slug, title: f.v.title, kind: f.v.kind, target_cents: parseMoney(f.v.target), qr_version: 1 });
       return "Campanha criada em rascunho.";
     });
   }
 
   return (
     <>
-      <PageHead title="Campanha de divulgação" sub="Dá publicidade ao projeto e mostra quantas cotas faltam."
+      <PageHead title="Campanha" sub="Doações confirmadas pelo provedor de pagamento, QR da página e prestação de contas. A plataforma não guarda dinheiro."
                 actions={<Button variant="primary" onClick={() => setCreating(true)}>Criar campanha</Button>} />
-      {campaign?.id && campaign.kind !== "donation" && (
-        <Panel title={campaign.title || "Campanha"} actions={
-          <Select aria-label="Situação da campanha" value={campaign.status || "draft"} options={C_STATUS}
-                  onChange={(v) => run(async () => {
-                    await api.patch(`/v1/campaigns/${campaign.id}`, { status: v });
-                    setCampaign({ ...campaign, status: v });
-                    return "Situação atualizada.";
-                  })} />}>
-          <KeyValue items={[["Endereço público", <Link key="l" to={`/campanha/${campaign.slug}`}>/campanha/{campaign.slug}</Link>],
-                            ["Situação", donationStatusLabel(campaign.status || "draft")]]} />
-          <p className="muted small">Publicar passa pela revisão da plataforma (envie para revisão na campanha de doação).</p>
-        </Panel>
-      )}
-      {campaign?.id && campaign.kind === "donation" && (
-        <CampaignAccountability campaign={campaign} onChange={setCampaign} />
+      {campaign?.id && (
+        <>
+          <Panel title={campaign.title || "Campanha"} actions={
+            ["published", "paused"].includes(campaign.status) && (
+              <Select aria-label="Pausar ou retomar" value={campaign.status} options={C_STATUS}
+                      onChange={(v) => run(async () => {
+                        await api.patch(`/v1/campaigns/${campaign.id}`, { status: v });
+                        setCampaign({ ...campaign, status: v });
+                        return "Situação atualizada.";
+                      })} />)}>
+            <KeyValue items={[["Tipo", KIND_LABEL[campaign.kind] || campaign.kind || "—"], ["Situação", donationStatusLabel(campaign.status || "draft")]]} />
+          </Panel>
+          <CampaignAccountability campaign={campaign} onChange={setCampaign} />
+        </>
       )}
       <StateView loading={loading} error={error} onRetry={reload}>
         {data?.items?.map((q: any) => <Panel key={q.id} title={q.label}><QuotaProgress q={q} /></Panel>)}
@@ -160,15 +158,14 @@ export function Campaigns() {
       <Modal open={creating} title="Criar campanha" onClose={() => setCreating(false)}
              footer={<><Button onClick={() => setCreating(false)}>Cancelar</Button>
                <Button variant="primary" busy={busy} onClick={create}
-                       disabled={(f.v.kind !== "donation" && !f.v.project_id) || !f.v.slug || !f.v.title || f.v.summary.length < 20}>Criar</Button></>}>
-        <Field label="Tipo"><Select value={f.v.kind} onChange={f.set("kind")} options={[["donation", "Doação (Pix pelo provedor)"], ["quota", "Divulgação de cotas"]]} /></Field>
-        <Field label="Projeto (identificador)" hint="Opcional para campanha de doação."><Input value={f.v.project_id} onChange={f.set("project_id")} /></Field>
+                       disabled={(["project_crowdfunding", "emergency"].includes(f.v.kind) && !f.v.project_id) || !f.v.slug || !f.v.title || f.v.summary.length < 20}>Criar</Button></>}>
+        <Field label="Tipo"><Select value={f.v.kind} onChange={f.set("kind")} options={Object.entries(KIND_LABEL)} /></Field>
+        <Field label="Projeto (identificador)" hint="Obrigatório para vaquinha de projeto e emergência."><Input value={f.v.project_id} onChange={f.set("project_id")} /></Field>
         <Field label="Endereço público" hint="Só letras minúsculas, números e hífen."><Input value={f.v.slug} onChange={f.set("slug")} placeholder="nossa-campanha-2026" /></Field>
         <Field label="Título"><Input value={f.v.title} onChange={f.set("title")} /></Field>
         <Field label="Resumo" wide hint="Entre 20 e 600 caracteres."><TextArea value={f.v.summary} onChange={f.set("summary")} rows={3} /></Field>
         <Field label="História do projeto" wide><TextArea value={f.v.story} onChange={f.set("story")} rows={6} /></Field>
-        {f.v.kind === "donation" && (
-          <>
+        <>
             <Field label="Meta (R$)" hint="Opcional. A barra pública usa só pagamentos confirmados."><Input value={f.v.target} onChange={f.set("target")} inputMode="decimal" /></Field>
             <Field label="Doação mínima (R$)"><Input value={f.v.min_donation} onChange={f.set("min_donation")} inputMode="decimal" /></Field>
             <Field label="Início"><Input value={f.v.starts_on} onChange={f.set("starts_on")} type="date" /></Field>
@@ -176,8 +173,7 @@ export function Campaigns() {
             <Field label="Para que serve o dinheiro" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.purpose} onChange={f.set("purpose")} rows={3} /></Field>
             <Field label="Se a meta não for atingida" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.contingency_policy} onChange={f.set("contingency_policy")} rows={2} /></Field>
             <Field label="Política de estorno" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.refund_policy} onChange={f.set("refund_policy")} rows={2} /></Field>
-          </>
-        )}
+        </>
         <Field label="Mostrar apoiadores publicamente">
           <Select value={f.v.show_backers ? "1" : "0"} onChange={(v) => f.set("show_backers")(v === "1")}
                   options={[["0", "Não"], ["1", "Sim"]]} />

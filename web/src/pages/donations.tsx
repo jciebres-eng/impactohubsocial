@@ -18,6 +18,7 @@ const D_STATUS: Record<string, string> = {
   open: "Aberto", allowed: "Liberado", rejected_case: "Recusado",
 };
 const st = (s?: string) => (s ? D_STATUS[s] || s : "—");
+const EVIDENCE: Record<string, string> = { declared: "declarado", documented: "com documento", validated: "validado", contested: "contestado" };
 
 function Progress({ totals, target }: { totals: any; target?: number | null }) {
   const raised = totals?.net_after_reversals_cents ?? 0;
@@ -126,7 +127,7 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
       {d.expenses?.length > 0 && (
         <Panel title="Prestação de contas (gastos declarados)">
           <ul className="rows">{d.expenses.map((x: any, i: number) => (
-            <li key={i}><span>{x.budget_line} — {money(x.amount_cents)} em {date(x.spent_on)}</span><Pill tone={x.evidence_status === "verified" ? "ok" : "muted"}>{x.evidence_status}</Pill></li>
+            <li key={i}><span>{x.budget_line} — {money(x.amount_cents)} em {date(x.spent_on)}</span><Pill tone={x.evidence_status === "validated" ? "ok" : "muted"}>{EVIDENCE[x.evidence_status] || x.evidence_status}</Pill></li>
           ))}</ul>
         </Panel>
       )}
@@ -241,7 +242,7 @@ export function CampaignAccountability({ campaign, onChange }: { campaign: any; 
               {data.open_risk_cases?.length > 0 && <p><Pill tone="warn">{data.open_risk_cases.length} caso(s) de risco aberto(s) em revisão humana</Pill></p>}
             </Panel>
             <Panel title="Gastos declarados" actions={<Button onClick={() => setModal("expense")}>Declarar gasto</Button>}>
-              <ul className="rows">{data.expenses?.map((x: any) => <li key={x.id}><span>{x.budget_line} — {money(x.amount_cents)} em {date(x.spent_on)}</span><Pill tone="muted">{x.evidence_status}</Pill></li>)}</ul>
+              <ul className="rows">{data.expenses?.map((x: any) => <li key={x.id}><span>{x.budget_line} — {money(x.amount_cents)} em {date(x.spent_on)}</span><Pill tone={x.evidence_status === "validated" ? "ok" : "muted"}>{EVIDENCE[x.evidence_status] || x.evidence_status}</Pill></li>)}</ul>
             </Panel>
             <Panel title="Atualizações" actions={<Button onClick={() => setModal("update")}>Publicar atualização</Button>}>
               <ul className="rows">{data.updates?.map((u: any) => <li key={u.id}><span><strong>{u.title}</strong> — {u.body}</span><Pill tone="muted">{u.is_public ? "pública" : "interna"}</Pill></li>)}</ul>

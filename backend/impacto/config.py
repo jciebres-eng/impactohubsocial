@@ -105,6 +105,13 @@ class Settings:
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
     payment_webhook_secret: str = ""      # v0.28.0: HMAC dos webhooks de pagamento em /v1/webhooks/payments/{provider}
+    # v0.33.0 — doações e campanhas: padrões SEGUROS. Nada de cobrança real, split, recorrência ou retenção sem decisão.
+    donations_enabled: bool = True                 # módulo ligado (só provedor sandbox existe)
+    campaign_publication_enabled: bool = True      # publicar campanhas (exige revisão + beneficiário verificado)
+    live_payment_provider_enabled: bool = False    # provedor real: NUNCA sem adaptador, credencial no cofre e ADR
+    split_enabled: bool = False                    # split no provedor: exige contrato e KYB de subconta
+    recurring_donations_enabled: bool = False      # recorrência: exige instrumento do provedor e consentimento
+    risk_hold_enabled: bool = False                # payout_hold: só se o contrato com o provedor permitir
     # v0.27.0 — chave PIX da própria plataforma para a linha "infraestrutura e inteligência" das instruções de repasse.
     # Vazia = "NÃO CONFIGURADA": a instrução sai sem chave e diz isso. Nunca é usada para mover dinheiro.
     platform_pix_key: str = ""
@@ -190,6 +197,12 @@ def load_settings() -> Settings:
         stripe_secret_key=_env("STRIPE_SECRET_KEY", "") or "",
         stripe_webhook_secret=_env("STRIPE_WEBHOOK_SECRET", "") or "",
         payment_webhook_secret=_env("PAYMENT_WEBHOOK_SECRET", "") or "",
+        donations_enabled=_bool("DONATIONS_ENABLED", True),
+        campaign_publication_enabled=_bool("CAMPAIGN_PUBLICATION_ENABLED", True),
+        live_payment_provider_enabled=_bool("LIVE_PAYMENT_PROVIDER_ENABLED", False),
+        split_enabled=_bool("SPLIT_ENABLED", False),
+        recurring_donations_enabled=_bool("RECURRING_DONATIONS_ENABLED", False),
+        risk_hold_enabled=_bool("RISK_HOLD_ENABLED", False),
         platform_pix_key=_env("PLATFORM_PIX_KEY", "") or "",
         platform_pix_key_type=_env("PLATFORM_PIX_KEY_TYPE", "") or "",
         ai_provider=_env("AI_PROVIDER", "local"),
@@ -272,5 +285,9 @@ def validate(s: Settings) -> None:
         errors.append("AI_PROVIDER externo exige AI_API_KEY e AI_MODEL")
     if s.mail_provider == "smtp" and not s.smtp_host:
         errors.append("MAIL_PROVIDER=smtp exige SMTP_HOST")
+    if s.live_payment_provider_enabled:
+        errors.append("LIVE_PAYMENT_PROVIDER_ENABLED=true sem adaptador real: nenhum provedor de doações existe nesta versão (ADR-375)")
+    if s.split_enabled or s.recurring_donations_enabled or s.risk_hold_enabled:
+        errors.append("SPLIT_ENABLED/RECURRING_DONATIONS_ENABLED/RISK_HOLD_ENABLED exigem provedor real, contrato e ADR (ADR-375)")
     if errors:
         raise ConfigError("Configuração inválida:\n- " + "\n- ".join(errors))

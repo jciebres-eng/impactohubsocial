@@ -277,20 +277,26 @@ def pledge_confirm(ctx: Ctx, body: TSch.RevokeIn):
 @route("POST", "/v1/campaigns", body=TSch.CampaignIn, min_role=WRITE, status=201, tags=("funding",),
        summary="Cria a campanha de divulgação do projeto (rascunho; publicar é um passo separado)")
 def campaign_create(ctx: Ctx, body: TSch.CampaignIn):
-    with ctx.tx(readonly=True) as c:
-        if not c.scalar("SELECT 1 FROM projects WHERE id = $1 AND org_id = $2", body.project_id, ctx.org_id):
-            raise not_found("Projeto")
+    if body.kind in ("project_crowdfunding", "emergency") and not body.project_id:
+        raise ApiError(422, "validation_error", "Campanha de projeto exige project_id")
+    if body.project_id:
+        with ctx.tx(readonly=True) as c:
+            if not c.scalar("SELECT 1 FROM projects WHERE id = $1 AND org_id = $2", body.project_id, ctx.org_id):
+                raise not_found("Projeto")
     with ctx.system_tx() as c:          # slug é namespace global: a checagem não pode depender da RLS
         if c.scalar("SELECT 1 FROM campaigns WHERE slug = $1", body.slug):
             raise ApiError(409, "slug_taken", "Este endereço de campanha já está em uso")
     with ctx.tx() as c:
-        if c.scalar("SELECT 1 FROM campaigns WHERE project_id = $1", body.project_id):
+        if body.project_id and c.scalar("SELECT 1 FROM campaigns WHERE project_id = $1", body.project_id):
             raise ApiError(409, "campaign_exists", "Este projeto já tem campanha")
-        cid = c.scalar("INSERT INTO campaigns(project_id, org_id, slug, title, summary, story, cover_document_id,"
-                       " show_backers, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id::text",
+        cid = c.scalar("INSERT INTO campaigns(project_id, org_id, beneficiary_org_id, slug, title, summary, story, cover_document_id,"
+                       " show_backers, created_by, kind, target_cents, starts_on, ends_on, purpose, contingency_policy, refund_policy,"
+                       " min_donation_cents, allow_recurring)"
+                       " VALUES ($1,$2,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id::text",
                        body.project_id, ctx.org_id, body.slug, body.title, body.summary, body.story,
-                       body.cover_document_id, body.show_backers, ctx.user_id)
-        ctx.audit(c, "campaign.created", "campaign", cid, {"slug": body.slug})
+                       body.cover_document_id, body.show_backers, ctx.user_id, body.kind, body.target_cents, body.starts_on,
+                       body.ends_on, body.purpose, body.contingency_policy, body.refund_policy, body.min_donation_cents, body.allow_recurring)
+        ctx.audit(c, "campaign.created", "campaign", cid, {"slug": body.slug, "kind": body.kind})
     return {"id": cid, "slug": body.slug, "status": "draft", "public_path": f"/campanha/{body.slug}"}
 
 
@@ -320,11 +326,14 @@ def campaign_patch(ctx: Ctx, body: TSch.CampaignPatch):
         if fields:
             sets = ", ".join(f"{k} = ${i + 2}" for i, k in enumerate(fields))
             c.run(f"UPDATE campaigns SET {sets} WHERE id = $1", ctx.path["campaign_id"], *fields.values())
+        # v0.33.0 (0072): publicar passou a exigir revisão de quatro olhos e beneficiário verificado — a máquina
+        # de estados está no banco (campaign_state_guard). Este PATCH legado só conhece draft/published/closed;
+        # `published` aqui atalha o fluxo (ADR-373) e é recusado com instrução; o fluxo é /submit → /review → /publish.
         if status == "published":
-            c.run("UPDATE campaigns SET status = 'published', published_at = coalesce(published_at, now()) WHERE id = $1",
-                  ctx.path["campaign_id"])
+            raise ApiError(409, "campaign_review_required",
+                           "Publicar uma campanha exige revisão (POST /v1/campaigns/{id}/submit → revisão → POST /v1/campaigns/{id}/publish)")
         elif status == "closed":
-            c.run("UPDATE campaigns SET status = 'closed', closed_at = now() WHERE id = $1", ctx.path["campaign_id"])
+            c.run("UPDATE campaigns SET status = 'closed' WHERE id = $1", ctx.path["campaign_id"])
         elif status == "draft":
             c.run("UPDATE campaigns SET status = 'draft' WHERE id = $1", ctx.path["campaign_id"])
         ctx.audit(c, "campaign.updated", "campaign", ctx.path["campaign_id"], {"status": status})

@@ -64,9 +64,22 @@ def delete_account(ctx: Ctx, body: DeleteIn):
             raise ApiError(409, "transfer_ownership_first", "Transfira a propriedade das organizações antes de excluir a conta",
                            {"organizations": blockers})
         anon = f"removido-{uuid.uuid4().hex[:12]}@anonimizado.invalid"
-        for o in owned:
-            if o["members"] == 1:
-                c.run("UPDATE organizations SET status = 'closed', contact_email = NULL, phone = NULL WHERE id = $1", o["org_id"])
+        closed = [o["org_id"] for o in owned if o["members"] == 1]
+        for oid in closed:
+            c.run("UPDATE organizations SET status = 'closed', contact_email = NULL, phone = NULL WHERE id = $1", oid)
+        # v0.35.0 (auditoria, FILE-09): os ARQUIVOS pessoais também saem — antes a conta era anonimizada e os documentos de
+        # identidade, o documento de dirigente enviado pela pessoa e as exportações de dados ficavam guardados para sempre.
+        # Saem: documento anexado a verificação de identidade da pessoa; `documento_dirigente` e `exportacao_dados` que ela
+        # enviou ou que foram gerados para a organização que fecha com ela. Ficam (guarda da organização, que é pessoa
+        # jurídica e cujos registros servem a terceiros): estatuto, certidões, prestação de contas… e documento ASSINADO.
+        personal = c.query(
+            "SELECT d.id::text AS id, d.storage_key FROM documents d WHERE d.deleted_at IS NULL"
+            " AND NOT EXISTS (SELECT 1 FROM signatures s WHERE s.subject_type = 'document' AND s.subject_id = d.id)"
+            " AND (d.id IN (SELECT document_id FROM identity_documents WHERE user_id = $1)"
+            "      OR (d.uploaded_by = $1 AND d.doc_type IN ('documento_dirigente', 'exportacao_dados'))"
+            "      OR (d.doc_type = 'exportacao_dados' AND d.org_id = ANY($2::uuid[])))", ctx.user_id, closed)
+        if personal:
+            c.run("UPDATE documents SET deleted_at = now(), extracted_text = NULL WHERE id = ANY($1::uuid[])", [p["id"] for p in personal])
         c.run("DELETE FROM memberships WHERE user_id = $1", ctx.user_id)
         c.run("UPDATE users SET email = $2, full_name = 'Titular removido', password_hash = NULL, mfa_secret_enc = NULL, mfa_enabled_at = NULL,"
               " mfa_recovery_hashes = '{}', oidc_subject = NULL, status = 'deleted' WHERE id = $1", ctx.user_id, anon)
@@ -77,7 +90,16 @@ def delete_account(ctx: Ctx, body: DeleteIn):
         c.run("UPDATE legal_acceptances SET ip = NULL, user_agent = NULL WHERE user_id = $1", ctx.user_id)
         c.run("INSERT INTO privacy_requests(user_id, kind, status, completed_at, notes) VALUES ($1,'deletion','completed', now(),"
               " 'Dados pessoais anonimizados; registros de auditoria e financeiros mantidos pseudonimizados')", ctx.user_id)
-        ctx.audit(c, "privacy.account_deleted", "user", ctx.user_id, {})
+        ctx.audit(c, "privacy.account_deleted", "user", ctx.user_id, {"personal_files_removed": len(personal)})
+    for p in personal:   # depois do COMMIT: o registro já diz "excluído"; um objeto que falhe fica no log para nova tentativa
+        try:
+            ctx.app.storage.delete(p["storage_key"])
+        except Exception as exc:  # noqa: BLE001
+            import logging
+
+            from ..observability import log
+            log(logging.getLogger("impacto.privacy"), logging.ERROR, "personal_file_delete_failed", document_id=p["id"],
+                error_type=type(exc).__name__)
     from ..services.auth import clear_session_cookies
     resp = json_response({"deleted": True})
     clear_session_cookies(ctx, resp)

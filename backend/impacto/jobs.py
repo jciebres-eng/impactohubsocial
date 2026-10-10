@@ -239,7 +239,12 @@ def pending_scans(app) -> dict:
             unreadable.append(d["id"])
             log(logger, logging.WARNING, "pending_scan_unreadable", document_id=d["id"], error=str(exc)[:200])
             continue
-        status, note = app.antivirus.scan(data)
+        try:
+            status, note = app.antivirus.scan(data)
+        except Exception as exc:  # noqa: BLE001 — v0.35.0 (auditoria, FILE-03): motor fora do ar não derruba a fila
+            unreadable.append(d["id"])
+            log(logger, logging.WARNING, "pending_scan_engine_error", document_id=d["id"], error_type=type(exc).__name__)
+            continue
         if status == "pending_scan":
             continue
         with app.pool.tx(DbContext(system=True)) as c:

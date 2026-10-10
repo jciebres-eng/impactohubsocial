@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from datetime import date, UTC
 from typing import Literal
 
@@ -12,10 +13,13 @@ from ..http import ApiError, Ctx, not_found, page, route
 from ..security.tokens import hmac_hex, sign_payload, verify_payload
 from ..services import documents as docsvc
 from ..network import notify as NT
+from ..observability import log
 from ..services.audit import ledger
 from ..services.entitlements import check_limit
 from ..services.validators import safe_filename
 from . import schemas as S
+
+logger = logging.getLogger("impacto.documents")
 
 T = ("documents",)
 DOC_COLS = ("d.id::text AS id, d.org_id::text AS org_id, d.project_id::text AS project_id, d.application_id::text AS application_id,"
@@ -89,7 +93,13 @@ def upload(ctx: Ctx, form):
                 col = "org_id" if tbl == "projects" else "osc_org_id"
                 if not c.one(f"SELECT 1 FROM {tbl} WHERE id = $1 AND {col} = $2", val, ctx.org_id):
                     raise not_found("Projeto/candidatura")
-    status, scan_note = ctx.app.antivirus.scan(data)
+    try:
+        status, scan_note = ctx.app.antivirus.scan(data)
+    except Exception as exc:  # noqa: BLE001 — v0.35.0 (auditoria, FILE-03): antivírus fora do ar não derruba o envio
+        # O arquivo entra em QUARENTENA (`pending_scan`: download bloqueado em produção) e a rotina `pending_scans`
+        # tenta de novo. Antes a falha de conexão com o clamd virava erro 500 e o envio se perdia.
+        status = "pending_scan"
+        log(logger, logging.WARNING, "antivirus_unavailable_on_upload", error_type=type(exc).__name__)
     key = docsvc.new_storage_key(ctx.org_id)
     if status == "infected":
         with ctx.tx() as c:

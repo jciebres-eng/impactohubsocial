@@ -863,3 +863,115 @@ class DatabaseCatalogHardeningTests(unittest.TestCase):
         self.assertFalse(self.own.scalar("SELECT has_schema_privilege('impacto_app', 'public', 'CREATE')"))
         self.assertEqual(self.own.query("SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace"
                                         " WHERE n.nspname = 'public' AND pg_get_userbyid(c.relowner) = 'impacto_app'"), [])
+
+
+# ================================================================================================ lote F
+class PdfActiveContentIsFoundByStructureTests(unittest.TestCase):
+    """FILE-02 — antes: a conferência procurava o TEXTO literal `/JavaScript` no arquivo; o mesmo nome escrito com escape
+    hexadecimal (`/J#61vaScript`) ou guardado num fluxo de objetos comprimido passava."""
+
+    @classmethod
+    def setUpClass(cls):
+        server()
+        cls.osc = new_account("osc")
+
+    def _objstm(self, inner: bytes, typ: bytes = b"/ObjStm", filt: bytes = b"/FlateDecode") -> bytes:
+        import zlib
+        comp = zlib.compress(inner)
+        return (b"%PDF-1.5\n5 0 obj\n<< /Type " + typ + b" /N 1 /First 4 /Filter " + filt + b" /Length "
+                + str(len(comp)).encode() + b" >>\nstream\n" + comp + b"\nendstream\nendobj\ntrailer<<>>\n%%EOF\n")
+
+    def _send(self, data: bytes):
+        return self.osc.upload("/v1/documents", "relatorio.pdf", data, {"doc_type": "relatorio_atividades", "title": "Relatório"})
+
+    def test_hex_escaped_names_are_decoded(self):
+        evil = b"%PDF-1.4\n1 0 obj<< /OpenAction << /S /J#61vaScript /J#53 (app.alert(1)) >> >>endobj\ntrailer<<>>\n%%EOF\n"
+        r = self._send(evil)
+        self.assertEqual((r.status, r.json.get("code")), (422, "active_content"), r)
+
+    def test_javascript_inside_a_compressed_object_stream_is_found(self):
+        inner = b"2 0 << /S /JavaScript /JS (app.alert(1)) >>"
+        for typ, filt in ((b"/ObjStm", b"/FlateDecode"), (b"/O#62jStm", b"/Fla#74eDecode")):
+            r = self._send(self._objstm(inner, typ, filt))
+            self.assertEqual((r.status, r.json.get("code")), (422, "active_content"), (typ, r))
+
+    def test_a_decompression_bomb_is_refused_instead_of_inflated(self):
+        from impacto.services.documents import pdf_active_content
+        self.assertIsNotNone(pdf_active_content(self._objstm(b"0" * (40 * 1024 * 1024))))
+
+    def test_an_ordinary_pdf_still_goes_in(self):
+        import io
+
+        from pypdf import PdfWriter
+        w = PdfWriter()
+        w.add_blank_page(width=200, height=200)
+        w.add_metadata({"/Title": "Relatório JSmith"})
+        buf = io.BytesIO()
+        w.write(buf)
+        self.assertEqual(self._send(buf.getvalue()).status, 201)
+        benign = self._objstm(b"2 0 << /Type /Page /Font << /JSmith 3 0 R >> >>")
+        self.assertEqual(self._send(benign).status, 201, "nome parecido (JSmith) não é conteúdo ativo")
+
+
+class AntivirusOutageQuarantinesInsteadOfFailingTests(unittest.TestCase):
+    """FILE-03 (parte autorizada) — antes: clamd fora do ar derrubava o envio (500) e a fila de varredura inteira; e não havia
+    teste do 409 `pending_scan`. A recusa de subir sem antivírus em produção NÃO foi feita (decisão sua nesta fase)."""
+
+    class _Down:
+        name = "clamd"
+
+        def scan(self, data):
+            raise ConnectionRefusedError("clamd fora do ar")
+
+    def test_upload_goes_to_quarantine_and_download_waits(self):
+        st = server()["state"]
+        osc = new_account("osc")
+        old_av, old_allow = st.antivirus, st.settings.allow_unscanned_downloads
+        st.antivirus, st.settings.allow_unscanned_downloads = self._Down(), False
+        try:
+            r = osc.upload("/v1/documents", "estatuto.pdf", PDF, {"doc_type": "estatuto_social", "title": "Estatuto"})
+            self.assertEqual(r.status, 201, r)
+            self.assertEqual(r.json["status"], "pending_scan")
+            d = osc.post(f"/v1/documents/{r.json['id']}/download-url")
+            self.assertEqual((d.status, d.json.get("code")), (409, "pending_scan"), d)
+        finally:
+            st.antivirus, st.settings.allow_unscanned_downloads = old_av, old_allow
+
+    def test_the_rescan_queue_survives_an_engine_error(self):
+        from tests.test_v0301_pending_scans import _App
+
+        from impacto import jobs
+        app = _App([{"id": "a", "storage_key": "k-a"}, {"id": "b", "storage_key": "k-b"}], missing=set())
+        app.antivirus = self._Down()
+        res = jobs.pending_scans(app)
+        self.assertEqual((res["scanned"], res["unreadable"]), (0, 2))
+        self.assertEqual(app.updates, [], "nada é marcado como limpo sem ter sido lido pelo antivírus")
+
+
+class AccountDeletionRemovesPersonalFilesTests(unittest.TestCase):
+    """FILE-09 — antes: excluir a conta anonimizava a pessoa e deixava os documentos de identidade guardados para sempre."""
+
+    def test_identity_and_personal_documents_go_institutional_ones_stay(self):
+        from tests.support import PASSWORD
+        st = server()["state"]
+        osc = new_account("osc")
+        req = osc.post("/v1/trust/identity/verifications", {"level": "document"})
+        self.assertEqual(req.status, 201, req)
+        ident = _upload(osc, "identidade", "RG da presidente")
+        self.assertEqual(osc.post(f"/v1/trust/identity/verifications/{req.json['id']}/documents",
+                                  {"document_id": ident, "kind": "official_id"}).status, 201)
+        dirigente = _upload(osc, "documento_dirigente", "CPF da presidente")
+        estatuto = _upload(osc, "estatuto_social", "Estatuto")
+        with db_system() as c:
+            keys = {r["id"]: r["storage_key"] for r in c.query("SELECT id::text AS id, storage_key FROM documents WHERE id = ANY($1::uuid[])",
+                                                                 [ident, dirigente, estatuto])}
+        r = osc.post("/v1/privacy/delete-account", {"password": PASSWORD, "confirm": True})
+        self.assertEqual(r.status, 200, r)
+        with db_system() as c:
+            apagados = {r["id"] for r in c.query("SELECT id::text AS id FROM documents WHERE id = ANY($1::uuid[]) AND deleted_at IS NOT NULL",
+                                                 [ident, dirigente, estatuto])}
+        self.assertEqual(apagados, {ident, dirigente})
+        for doc in (ident, dirigente):
+            with self.assertRaises(Exception, msg="o objeto do arquivo pessoal continuou no armazenamento"):
+                st.storage.get(keys[doc])
+        self.assertTrue(st.storage.get(keys[estatuto]), "documento institucional da organização não sai com a conta")

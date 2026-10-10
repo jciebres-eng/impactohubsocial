@@ -3,8 +3,10 @@ hash SHA-256, armazenamento privado com chave aleatória, antivírus, extração
 from __future__ import annotations
 
 import io
+import re
 import uuid
 import zipfile
+import zlib
 
 from ..http import ApiError
 
@@ -23,7 +25,52 @@ def usable_statuses() -> tuple[str, ...]:
     return ("clean", "pending_scan") if ACCEPT_UNSCANNED else ("clean",)
 
 
-_PDF_ACTIVE = (b"/JavaScript", b"/JS ", b"/JS(", b"/Launch", b"/EmbeddedFile", b"/RichMedia", b"/XFA")
+# v0.35.0 (auditoria, FILE-02): a conferência antiga procurava o TEXTO literal (`/JavaScript`, `/JS `…) no arquivo bruto. Um
+# PDF escreve o mesmo nome como `/J#61vaScript` (escape hexadecimal de nome, ISO 32000-1 §7.3.5) ou guarda o dicionário
+# dentro de um fluxo de objetos COMPRIMIDO (`/Type /ObjStm`, §7.5.7) — e passava. Agora os NOMES são decodificados e os
+# fluxos de objetos são descomprimidos (com teto, contra bomba de compressão) antes da conferência.
+_PDF_ACTIVE_NAMES = frozenset({"JavaScript", "JS", "Launch", "EmbeddedFile", "EmbeddedFiles", "RichMedia", "XFA"})
+_PDF_NAME = re.compile(rb"/((?:[^\x00\t\n\x0c\r ()<>\[\]{}/%#]|#[0-9A-Fa-f]{2})+)")
+_PDF_STREAM = re.compile(rb">>\s*stream(?:\r\n|\n|\r)")
+_PDF_INFLATE_CAP = 32 * 1024 * 1024
+
+
+def _pdf_names(blob: bytes) -> set[str]:
+    out = set()
+    for m in _PDF_NAME.finditer(blob):
+        raw = m.group(1)
+        if b"#" in raw:
+            raw = re.sub(rb"#([0-9A-Fa-f]{2})", lambda h: bytes([int(h.group(1), 16)]), raw)
+        out.add(raw.decode("latin-1"))
+    return out
+
+
+def pdf_active_content(data: bytes) -> str | None:
+    """Nome de conteúdo ativo encontrado no PDF (nos objetos soltos ou dentro de fluxos de objetos comprimidos), ou None."""
+    found = _pdf_names(data) & _PDF_ACTIVE_NAMES
+    if found:
+        return sorted(found)[0]
+    budget = _PDF_INFLATE_CAP
+    for m in _PDF_STREAM.finditer(data):
+        head = data[max(0, m.start() - 4096):m.start()]
+        head = head[head.rfind(b" obj") + 1:] if b" obj" in head else head
+        names = _pdf_names(head)
+        if "ObjStm" not in names or "FlateDecode" not in names:
+            continue
+        end = data.find(b"endstream", m.end())
+        body = data[m.end():end if end != -1 else len(data)]
+        z = zlib.decompressobj()
+        try:
+            plain = z.decompress(body, budget + 1)
+        except zlib.error:
+            continue   # fluxo corrompido: o leitor de PDF também não o usaria
+        if len(plain) > budget:
+            return "ObjStm (fluxo de objetos grande demais para conferir)"
+        budget -= len(plain)
+        found = _pdf_names(plain) & _PDF_ACTIVE_NAMES
+        if found:
+            return sorted(found)[0]
+    return None
 
 
 def sniff(filename: str, data: bytes) -> str:
@@ -37,7 +84,7 @@ def sniff(filename: str, data: bytes) -> str:
     ok = False
     if ext == ".pdf":
         ok = head.startswith(b"%PDF-")
-        if ok and any(tok in data for tok in _PDF_ACTIVE):
+        if ok and pdf_active_content(data):
             raise ApiError(422, "active_content", "PDF com conteúdo ativo (JavaScript/anexos/ações) não é aceito. Exporte novamente como PDF simples.")
     elif ext == ".png":
         ok = head.startswith(b"\x89PNG\r\n\x1a\n")

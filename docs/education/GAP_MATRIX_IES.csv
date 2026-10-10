@@ -1,0 +1,61 @@
+id,requisito,origem,estado_atual,evidencia,decisao,versao_alvo,prioridade
+G01,Login central único com encaminhamento por vínculo,adendo login §4,IMPLEMENTADO E TESTADO,auth_routes.py; access_routes.py::dashboard_for; portal.tsx,AMPLIAR: área acadêmica em dashboard_for e /portal,0.36.0,P0
+G02,Recuperação de acesso sem revelar conta,adendo login §8.2,IMPLEMENTADO PARCIALMENTE,services/auth.py forgot-password genérico; login 429 account_locked só para conta real,REUTILIZAR; registrar achado P2 (BASELINE §4),0.36.0 (teste),P1
+G03,Sessão com expiração e logout,adendo login §8.3,IMPLEMENTADO E TESTADO,config.py prazos; http.py::load_principal; test_v0230_session_hardening,REUTILIZAR,—,—
+G04,Uma pessoa com vários vínculos sem conta duplicada,mestre §5.1,IMPLEMENTADO PARCIALMENTE,memberships (user_id; org_id); só papel por organização,CRIAR vínculos acadêmicos com escopo (D-02),0.36.0,P0
+G05,Seleção de contexto ativo revalidada no servidor,adendo login §2/§4,IMPLEMENTADO PARCIALMENTE,/v1/me/switch-org revalida a cada requisição; sem contexto acadêmico,AMPLIAR: contexto acadêmico por instituição reconferido por requisição (D-03),0.36.0,P0
+G06,Usuário sem vínculo: onboarding sem privilégio,adendo login §4.8,IMPLEMENTADO PARCIALMENTE,app.tsx força CreateOrg,AMPLIAR: quem tem vínculo acadêmico usa o produto sem organização,0.36.0,P0
+G07,IES como organização/tenant isolado,kit P3.2; decisões login §3,IMPLEMENTADO PARCIALMENTE,IES cabe como osc via natureza academic_institution (0006),CRIAR perfil academic_institutions sobre osc/company/government (D-01),0.36.0,P0
+G08,Ativação da IES por pessoa autorizada da plataforma,kit P4 Fase A,AUSENTE,—,CRIAR ativação com permissão academic.approve + step-up + trilha,0.36.0,P0
+G09,Licença institucional; assentos; validade; sem cobrança surpresa,kit P2 visão; P4 Fase A,IMPLEMENTADO PARCIALMENTE,agreements (assento por organização); entitlement_grants; ADR-341,CRIAR academic_licenses com assento por estudante (D-04),0.36.0,P0
+G10,Experiência do estudante mostra licença e limites de IA,kit P4 Fase A,AUSENTE,—,CRIAR painel do estudante com situação da licença; IA: aviso de que não há operação acadêmica de IA (D-05),0.36.0,P1
+G11,Papel administrador da IES,adendo login §3.D,IMPLEMENTADO PARCIALMENTE,memberships owner/admin da organização,REUTILIZAR como administração da IES,0.36.0,P0
+G12,Papel coordenador de curso/extensão com escopo,adendo login §3.C,AUSENTE,—,CRIAR academic_roles (coordinator; escopo curso),0.36.0,P0
+G13,Papel professor/orientador com escopo de turma,adendo login §3.B,AUSENTE,—,CRIAR academic_roles (teacher; escopo oferta),0.36.0,P0
+G14,Papel estudante com escopo de turma,adendo login §3.A,AUSENTE,—,CRIAR academic_roles (student; escopo oferta) via matrícula,0.36.0,P0
+G15,Avaliador externo autorizado temporário e revogável (nunca MEC),adendo login §3.E/F; mestre §5.3,AUSENTE,verifiable_records e diligência são parciais e não genéricos,CRIAR academic_access_grants (D-08),0.36.0,P0
+G16,Convites acadêmicos (válido; expirado; revogado; reutilizado),adendo login §7/§8.5,IMPLEMENTADO PARCIALMENTE,invitations da organização; sem teste de reuso/expiração,CRIAR convite acadêmico no mesmo padrão + testes negativos,0.36.0,P0
+G17,Campus; curso; período letivo; componente curricular; oferta/turma,kit P4 Fase B,AUSENTE,nenhum conceito acadêmico no código,CRIAR estrutura acadêmica,0.36.0,P0
+G18,Carga horária do curso e mínimo de extensão configurável,Res. CNE/CES 7/2018 art. 4º; Parecer 576/2023 (não homologado),AUSENTE,—,CRIAR parâmetro por curso (padrão 10%; editável; com fonte),0.36.0,P1
+G19,Importação de cursos/turmas/alunos com prévia; erros por linha; idempotência,kit P4 Fase B; adendo ERP §5,IMPLEMENTADO PARCIALMENTE,integrations/files.py (prévia; só vincula IDs; ADR-093),CRIAR importação acadêmica de roteiro reaproveitando o leitor (D-06),0.36.0,P0
+G20,Importação inválida não grava parcialmente,kit P5 E2E-3,AUSENTE,—,CRIAR: prévia sem escrita; confirmação transacional,0.36.0,P0
+G21,Exportação acadêmica documentada e sem injeção de fórmula,kit P4 Fase F; mestre §10,IMPLEMENTADO PARCIALMENTE,3 implementações de neutralização; reports._safe incompleta,CRIAR função única testada; exportação CSV/JSON do roteiro e da estrutura,0.36.0,P1
+G22,Fonte de verdade por entidade e conflitos registrados,mestre §7.4,AUSENTE,links.detect_conflict existe mas não é chamado,CRIAR fonte declarada por entidade + conflito registrado (D-07),0.36.0,P1
+G23,Trancamento/cancelamento/transferência sem exclusão,adendo ERP §3,AUSENTE,—,CRIAR estados da matrícula,0.36.0,P1
+G24,Plano de ensino versionado com arquivo original,kit P4 Fase B,AUSENTE,documentos existentes (antivírus; versões),CRIAR plano de ensino ligado ao documento existente,0.37.0,P1
+G25,Rubricas; competências; entregas; cronograma,kit P4 Fase B/C,AUSENTE,—,CRIAR,0.37.0,P1
+G26,Ação de extensão nas modalidades do art. 8º; comunidade externa,Res. 7/2018 arts. 7º-8º; kit P4 Fase C,AUSENTE,programs/projects existem sem conceito acadêmico,CRIAR extension_activities ligada a programs/projects/demandas (D-10),0.37.0,P0
+G27,Equipe interdisciplinar com papéis e contribuição individual,kit P4 Fase C,AUSENTE,—,CRIAR,0.37.0,P1
+G28,Registro de horas submetido/revisado/aprovado; sem autoaprovação,kit P4 Fase C; adendo login §3.A,AUSENTE,catálogo activity_hours só como indicador,CRIAR (D-09),0.37.0,P0
+G29,Entrega com pedido de ajuste e versões,kit P5 E2E-7/8,IMPLEMENTADO PARCIALMENTE,impact_updates (changes_requested); marcos de acordo (sem ajuste),CRIAR entregas acadêmicas no padrão do relatório periódico,0.37.0,P0
+G30,Evidência com autoria; método; base; acesso aplicado; retenção,kit P4 Fase D,IMPLEMENTADO PARCIALMENTE,evidences (0070) com access_level não aplicado pela RLS,AMPLIAR: evidência acadêmica com acesso aplicado no banco,0.37.0,P0
+G31,Consentimento de participante e uso de imagem,kit P2; P4 Fase C/D,AUSENTE,consents só cobre termos da plataforma,CRIAR registro de consentimento/autorização por evidência,0.37.0,P1
+G32,Dossiê individual e de grupo com proveniência e pendências,kit P4 Fase D,IMPLEMENTADO PARCIALMENTE,services/dossier.py (projeto),AMPLIAR: dossiê do estudante e da equipe,0.37.0,P0
+G33,Retorno da comunidade por link/QR sem conta; coleta mínima; anti-spam,kit P4 Fase C; adendo login §3.G,AUSENTE,padrão anti-robô em knowledge_routes; QR em verifiable_records,CRIAR reaproveitando os padrões,0.37.0,P1
+G34,Triagem ética sem decisão automática,kit P2,AUSENTE,—,CRIAR checklist que encaminha à IES/comitê,0.37.0,P1
+G35,Ciclo semestral ligado a programa contínuo,kit P2 longitudinal,AUSENTE,—,CRIAR (D-11),0.38.0,P0
+G36,Passagem de bastão revisada e aceita pela nova equipe,kit P4 Fase E,AUSENTE,responsibility_assignments como base,CRIAR (D-11),0.38.0,P0
+G37,Quebra de comparabilidade por mudança de método,kit P2; P5 E2E-15,IMPLEMENTADO E TESTADO,indicator_method_changes; dossiê marca série,REUTILIZAR,0.38.0,—
+G38,Atividade × produto × resultado × impacto medido,kit P2; mestre §4,IMPLEMENTADO E TESTADO,result_kind output/outcome/impact; impact_nodes,REUTILIZAR no painel acadêmico,0.38.0,—
+G39,Painel institucional com indicadores definidos e k-anonimato,kit P4 Fase F,AUSENTE,torre do governo (k-anonimato) como padrão,CRIAR,0.38.0,P1
+G40,Catálogo de conectores com status honesto por fornecedor,adendo ERP; matriz inicial,AUSENTE,maturidade do hub (scaffolded…production_active),CRIAR catálogo acadêmico com os 6 status do adendo,0.39.0,P1
+G41,TOTVS Educacional; Lyceum; Sophia; SIGAA; Gennera; Unimestre; Jacad,mestre §7,AUSENTE,adapter totvs existente é CRM/RH/financeiro,NÃO AVALIADO: exige documentação; contrato e homologação por IES,0.39.0+,BLOQUEADO POR TERCEIRO
+G42,Moodle Web Services,mestre §7.2,AUSENTE,—,arquitetura preparada + mock rotulado simulado; real só com instalação autorizada,0.39.0+,BLOQUEADO POR TERCEIRO
+G43,LTI,mestre §7.2,AUSENTE,—,fora do escopo até caso de uso; não substitui sincronização,0.39.0+,P2
+G44,SSO institucional por IES (SAML/OIDC),mestre §7.2,IMPLEMENTADO PARCIALMENTE,OIDC com um provedor por instalação (contract test),AMPLIAR futuramente: provedor por IES; SAML não implementado,0.39.0+,P2
+G45,Painel de integrações: dry-run; jobs; conflitos; reprocessamento; agenda,mestre §9,IMPLEMENTADO PARCIALMENTE,hub por API; sem tela para organização,CRIAR tela acadêmica sobre o hub,0.39.0,P1
+G46,Migração com backup; mapeamento; dry-run; reconciliação; rollback,mestre §8,AUSENTE,—,CRIAR procedimento + ferramenta sobre a importação acadêmica,0.39.0,P1
+G47,Cursor/checkpoint e paginação na sincronização,adendo ERP §2,AUSENTE,hub sem cursor nem paginação,CRIAR no conector acadêmico,0.39.0,P1
+G48,Perfis de pesquisador; grupo; gestor de pesquisa; financiador científico,mestre §7A,AUSENTE,personas researcher/educator orientam a área,CRIAR (D-16),0.40.0,P1
+G49,Oportunidades de fomento com fonte; data de captura e aviso,mestre §7A,IMPLEMENTADO PARCIALMENTE,calls + call_sources (captura = verificação; sem histórico),AMPLIAR (D-16),0.40.0,P1
+G50,Revisor convidado com escopo; propostas confidenciais,mestre §7A,AUSENTE,—,REUTILIZAR mecanismo de D-08,0.40.0,P1
+G51,Governo/empresa/OSC sem acesso automático a dado acadêmico,mestre §5.2; adendo login §3.H,AUSENTE (não há dado acadêmico),—,CRIAR por desenho + testes negativos (D-15),0.36.0,P0
+G52,Teste: estudante tentando rota/API de professor,adendo login §8.8,AUSENTE,—,CRIAR teste,0.36.0,P0
+G53,Teste: professor em turma não atribuída; coordenador fora do curso,adendo login §8.9-10,AUSENTE,—,CRIAR teste,0.36.0,P0
+G54,Teste: administrador de uma IES em outra IES,adendo login §8.11; kit P5 E2E-18,AUSENTE,—,CRIAR teste (porta e muro),0.36.0,P0
+G55,Teste: avaliador após expiração/revogação,adendo login §8.12,AUSENTE,—,CRIAR teste,0.36.0,P0
+G56,Teste: alterar o próprio papel pelo corpo da requisição,adendo login §8.15,IMPLEMENTADO PARCIALMENTE,corpo com org_id recusado (test_v0230_authorization_matrix),CRIAR teste acadêmico,0.36.0,P0
+G57,Menores de idade: padrões protetivos,LGPD art. 14; Lei 15.211/2025,AUSENTE,—,CRIAR (D-14); validação jurídica pela IES,0.36.0,P1
+G58,Retenção e eliminação dos dados acadêmicos,kit P3.12; LGPD arts. 15-16,AUSENTE,config/data_retention.json (padrão da casa),CRIAR classes de retenção para as tabelas novas,0.36.0,P1
+G59,Acessibilidade WCAG 2.2 AA como meta; teclado; rótulos,kit P3.10,IMPLEMENTADO PARCIALMENTE,axe-core no CI com trava; verificações próprias A11Y_JS,REUTILIZAR nas telas novas,0.36.0,P0
+G60,IA assistiva no plano de ensino com revisão humana,kit P4 Fase B,AUSENTE,camada de IA sem provedor externo ligado,NÃO SIMULAR; planejada (D-05),após provedor autorizado,BLOQUEADO POR TERCEIRO

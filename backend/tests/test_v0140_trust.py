@@ -26,6 +26,20 @@ def sign_document(c: Client, doc_id: str, *, role: str = "legal_representative",
     return r.json
 
 
+
+def _publish_campaign(osc, campaign_id: str) -> None:
+    """v0.33.0 (ADR-374): publicar exige envio para revisão, aprovação por outra pessoa da equipe e beneficiário
+    verificado. O atalho `PATCH status=published` responde 409 de propósito; os testes antigos passam por aqui."""
+    from tests.support import make_staff
+    rev = make_staff("compliance")
+    assert osc.post(f"/v1/campaigns/{campaign_id}/submit").status == 200
+    r = rev.post(f"/v1/admin/donation-campaigns/{campaign_id}/review", {"approve": True, "note": "Revisão de teste: finalidade clara."})
+    assert r.status == 200, r
+    r = rev.post(f"/v1/admin/beneficiaries/{osc.org_id}/verification", {"status": "verified", "note": "Cadastro conferido no teste.", "account_holder_matches": True})
+    assert r.status == 200, r
+    r = osc.post(f"/v1/campaigns/{campaign_id}/publish")
+    assert r.status == 200, r
+
 class TwoLayerSignature(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -831,10 +845,13 @@ class FundingQuotas(unittest.TestCase):
         self.funder.post(f"/v1/funding-quotas/{qid}/pledges", {"quantity": 2})
         slug = f"campanha-{pid[:8]}"
         c = osc.post("/v1/campaigns", {"project_id": pid, "slug": slug, "title": "Ajude nosso projeto",
-                                       "summary": "Precisamos de apoio para concluir as atividades do ano."})
+                                       "summary": "Precisamos de apoio para concluir as atividades do ano.",
+                                       "purpose": "Atividades do ano.", "contingency_policy": "Sem a meta, o valor vai para as atividades.",
+                                       "refund_policy": "Estorno pelo provedor."})
         self.assertEqual(c.status, 201, c)
         self.assertEqual(self.anon.get(f"/v1/public/campaigns/{slug}").status, 404)   # rascunho não é público
-        osc.patch(f"/v1/campaigns/{c.json['id']}", {"status": "published"})
+        self.assertEqual(osc.patch(f"/v1/campaigns/{c.json['id']}", {"status": "published"}).status, 409)   # v0.33.0: sem atalho
+        _publish_campaign(osc, c.json["id"])
         pub = self.anon.get(f"/v1/public/campaigns/{slug}")
         self.assertEqual(pub.status, 200, pub)
         self.assertEqual(pub.json["remaining_quotas"], 6)

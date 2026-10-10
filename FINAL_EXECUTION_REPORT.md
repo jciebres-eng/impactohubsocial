@@ -1,55 +1,53 @@
-# Relatório final de execução — IMPACTO v0.32.0
+# Relatório final de execução — IMPACTO v0.33.0
 
-**Data:** 09/10/2026 · **Ramo:** `correcoes-auditoria` (PR #5 para a `main`) · **Tag:** `v0.32.0` (a criar no GitHub pelo
-responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**
-`IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·
-**Relatório técnico (DOCX):** `IMPACTO_v0.32.0_RELATORIO_TECNICO.docx`
+**Data:** 10/10/2026 · **Ramo:** `doacoes-v0330` (sobre `correcoes-auditoria`, PR #5 ainda aberto) · **Tag:** `v0.33.0` (a criar no
+GitHub pelo responsável no commit indicado em §3 — o ambiente das sessões não envia tags) · **Pacote:**
+`IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip` (SHA-256 no `.sha256` ao lado) · **Auditoria:** `FINAL_EXECUTION_AUDIT.md` ·
+**Relatório técnico (DOCX):** `IMPACTO_v0.33.0_RELATORIO_TECNICO.docx`
 
 ## 1. Executive Summary
 
-Depois da auditoria inicial (`docs/01`–`04`), o responsável decidiu: desativar as contas de demonstração da produção, deixar o
-demo aberto a quem tiver o link, tornar o código privado e trazer a branch `infra/v0.31.0` resolvendo os achados. Feito:
+O pacote `IMPACTO_TRUST_v0.31.0_MONETIZACAO_DOACOES_MASTER_FULL` pediu doações, vaquinha, QR Pix, recorrência, "carteira
+visual", PLD/KYC, comprovantes e prestação de contas — como módulo isolado, sem fintech dentro do SaaS, com provedor
+sandbox e taxas como hipótese. Feito, com estas fronteiras:
 
-- **Produção limpa (na própria produção, com autorização):** 15 contas `@demo.impacto.local` desativadas — as sessões abertas
-  caíram na hora —, 5 organizações fictícias suspensas, 11 itens públicos fictícios fora do ar (1 projeto, 7 soluções,
-  1 material, 2 editais). Nada apagado; reversível; tudo na trilha de auditoria.
-- **Backup que restaura:** o backup cifrado do R2 foi baixado, conferido, decifrado e restaurado num banco descartável com os
-  verificadores de integridade; o ensaio passa a rodar todo dia 1º; as instruções de restauração (que falhariam) foram corrigidas.
-- **Worker com menor privilégio:** início próprio (`start_worker.sh`) que usa o usuário limitado do banco — falta trocar o
-  comando no Railway.
-- **Demo com aviso** em toda tela; **CI de volta ao verde**; rotinas do GitHub ajustadas para o repositório privado.
-- Junta v0.30.1 (proteção 0071, backup diário, monitor — feitos em outra conversa e agora registrados no CHANGELOG), v0.31.0
-  (infraestrutura) e a auditoria inicial.
+- **Sem custódia, sem provedor real.** Nenhuma coluna de saldo em lugar algum; totais vêm de um razão em partidas dobradas
+  (só inserção, soma zero por transação) e são rotulados "saldo contábil estimado — não é dinheiro guardado". O único
+  provedor é o `SandboxProvider`; as travas `LIVE_PAYMENT_PROVIDER_ENABLED`, `SPLIT_ENABLED`,
+  `RECURRING_DONATIONS_ENABLED`, `RISK_HOLD_ENABLED` recusam subir com `true`.
+- **Confirmação só vem de fora.** Uma doação é confirmada exclusivamente por evento assinado do provedor no webhook —
+  idempotente por `provider+event_id`, valor conferido, reversão lançada uma única vez.
+- **Publicar passa por quatro olhos**: termos aceitos, aprovação por outra pessoa da equipe e beneficiário verificado; o
+  atalho `PATCH status=published` responde 409. O QR leva à própria página (versionada), nunca a uma chave Pix.
+- **Taxas inativas.** `donation.platform_fee` (1 %) e `donation.beneficiary_fund` (≤ 4 %) estão no catálogo como hipóteses
+  `review_required`; devido = R$ 0,00; versão congelada por doação; preço total mostrado antes de pagar.
+- **Risco proporcional**: três regras versionadas abrem casos para decisão humana justificada; `payout_hold` não existe.
+- **Provedores pesquisados** (Asaas e Mercado Pago) nas docs oficiais em 10/10/2026; nada contratado.
 
-**Decisão: GO WITH CONDITIONS** (§27) — para juntar na `main` e publicar a produção; as condições são cliques e decisões do
-responsável, não defeitos.
+**Decisão: GO WITH CONDITIONS** (§27) para o sandbox — juntar e publicar no demo; a produção recebe o módulo sem nenhuma
+doação real possível. **Provedor real: NO-GO** até o checklist jurídico/provedor (`docs/donations/LEGAL_AND_PROVIDER_CHECKLIST.md`).
 
 ## 2. Version
 
-0.32.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
-Documentos da v0.31.0 preservados em `history/v0.31.0/`; manifestos anteriores em `history/manifests/`.
+0.33.0 — `VERSION`, `backend/pyproject.toml`, `web/package.json`, `web/package-lock.json`, `README.md`, `docs/openapi.json`.
+Documentos da v0.32.0 preservados em `history/v0.32.0/`; manifestos anteriores em `history/manifests/`.
 
 ## 3. Commit
 
-Ramo `correcoes-auditoria` sobre `906d383` (main) + `auditoria-inicial` + merge da `infra/v0.31.0` (`dc03db1`). Commits: contas de
-demonstração (script, modos do workflow, testes), CI (RLS, matriz), backup (ensaio e instruções), faixa do demo, rotinas para
-repositório privado, versão e documentos, e o commit final dos manifestos, para o qual a tag `v0.32.0` deve apontar e do qual o
-pacote é construído byte a byte (`verify_package_against_git.py`). PR #5. Execuções na produção: 37996712177, 37997211737,
-37997481695 (contas e conteúdo), 37997867650 (ensaio de restauração).
-
-**CI do commit candidato à tag `8aec7d1` (execução 38002549412, no PR #5): `backend` (suíte completa), `pilha-do-zero`, `docker`,
-`auditoria` e `armazenamento` — os cinco verdes.** Pacote `IMPACTO_TRUST_FINAL_RELEASE_0.32.0.zip`, SHA-256
-`add013b96658348eff823e45108f4c39133667572fdf72461a64320eec9d866b`, byte a byte o commit `8aec7d1`. Este parágrafo foi
-acrescentado depois da execução, no commit seguinte; a tag `v0.32.0` aponta para `8aec7d1`.
+Ramo `doacoes-v0330` sobre `24793bb` (`correcoes-auditoria`, v0.32.0). Commits: módulo (migração 0072, serviço, rotas,
+flags, testes), interface e documentos, correções dos portões de fechamento, e o commit final dos manifestos, para o qual a
+tag `v0.33.0` deve apontar e do qual o pacote é construído byte a byte (`verify_package_against_git.py`). Nenhuma operação
+na produção nesta versão. O CI do pull request fica como evidência externa (ver `FINAL_EXECUTION_AUDIT.md` §6).
 
 ## 4. Architecture Status
 
-Inalterada no produto. Operação documentada no `CLAUDE.md`: Railway (`impactohubsocial`, `pleasing-trust`, `clamav`; demo
-`ideal-delight`), Supabase só como PostgreSQL, R2 para arquivos e backups, Cloudflare, Brevo.
+Módulo novo `donations` (serviço + rotas + migração), isolado: nenhum outro módulo depende dele; ele depende de
+`campaigns`, `monetization_rules`, `organizations`, cifra de campo e QR já existentes. Operação inalterada (`CLAUDE.md`).
 
 ## 5. Engines Status
 
-50 motores, inalterados; `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0.
+50 motores, inalterados; `MOTOR_COVERAGE_MATRIX.md` VERDE 37 · AMARELO 13 · VERMELHO 0. Doações não são "motor": são
+fluxo de arrecadação com conciliação.
 
 ## 6. Contract Intelligence
 
@@ -69,7 +67,8 @@ PASS (inalterado).
 
 ## 10. Evidence
 
-PASS (inalterado).
+PASS (inalterado). Gastos de campanha (`campaign_expenses`) reutilizam `document_id` para evidência; validação documental
+fica para quando houver revisor definido.
 
 ## 11. Responsibility
 
@@ -77,7 +76,7 @@ PARTIAL (inalterado).
 
 ## 12. Reputation
 
-PASS (inalterado).
+PASS (inalterado). Doações não alimentam reputação.
 
 ## 13. Seals
 
@@ -89,11 +88,12 @@ Inalterado.
 
 ## 15. Marketplace
 
-Inalterado (comissão recusada). Soluções fictícias fora do ar na produção.
+Inalterado (comissão recusada).
 
 ## 16. Payments
 
-Inalterado: nenhum pagamento real; nenhum provedor ligado.
+**Mudou, dentro da regra:** doações em sandbox, confirmadas só por webhook assinado; nenhum pagamento real; nenhum provedor
+ligado; `payment_records` da v0.28.0 intocado. `NON_CUSTODIAL_ARCHITECTURE.md` continua valendo (ADR-284, ADR-372).
 
 ## 17. Distribution
 
@@ -101,11 +101,11 @@ PASS (inalterado).
 
 ## 18. Billing
 
-Inalterado: sem assinatura (ADR-341); 0 regras ativas.
+Inalterado: sem assinatura (ADR-341); 0 regras ativas (13 no catálogo, as 2 de doação inativas).
 
 ## 19. Fiscal
 
-BLOCKED_EXTERNAL (inalterado).
+BLOCKED_EXTERNAL (inalterado). Comprovante de doação diz não ser recibo dedutível; parecer contábil pendente.
 
 ## 20. Vouchers
 
@@ -113,55 +113,56 @@ Inalterado.
 
 ## 21. Identity
 
-PARTIAL (inalterado). Contas de demonstração da produção desativadas pelo mesmo caminho da tela de administração.
+PARTIAL (inalterado). KYB do beneficiário: a plataforma registra o estado (`org_kyb_verifications`); quem verifica e com
+quais documentos depende do provedor e do parecer.
 
 ## 22. Security
 
-Nenhum segredo em código, workflow, documento ou pacote (`secrets_scan.py`, gitleaks no CI). Contas com senha conhecida (as de
-demonstração) sem acesso à produção. Backup e ensaio sem artefato publicado. Pendentes do responsável: trocar o token do backup
-exposto num chat; publicar a produção (aplica a 0071); trocar o comando do worker; tornar o repositório privado. **Nenhum sistema
-ligado à internet é "impossível de invadir", e este não é exceção.**
+Modelo de ameaças em `docs/donations/SECURITY_REVIEW.md` (19 ameaças, 15 cobertas por teste). Novas rotas públicas e o uso
+de contexto de sistema no módulo foram registrados nas listas revisadas de `test_architecture.py` com a razão de cada um.
+Nenhum segredo em código, workflow, documento ou pacote (`secrets_scan.py`). **Nenhum sistema ligado à internet é
+"impossível de invadir", e este não é exceção.**
 
 ## 23. LGPD
 
-Produção sem contas fictícias ativas e sem conteúdo fictício público; o backup tem dado pessoal e por isso é cifrado e nunca vira
-artefato. Revisão jurídica dos termos e da política e encarregado de dados continuam pendentes (bloqueiam dados reais).
+E-mail do doador cifrado em repouso e só se ele quiser comprovante; doador anônimo nunca aparece em público nem para a
+organização; bruto do webhook redigido (CPF, e-mail, telefone, IP, cartão, nome) antes de guardar. Base legal, aviso de
+privacidade e dados exigidos pelo provedor estão no checklist jurídico (item 7) — pendentes.
 
 ## 24. Tests
 
 ```text
-REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.32.0.log):
-  Ran 2434 tests in 1945.779s — 5 falhas, 0 erro, 31 pulados (dependem de credencial ou do servidor S3 do CI)
-  → mapa tela × API (regenerado), manifesto e 3 verificações deste relatório (completados no fechamento)
-CI DO PR #5 (execução 37998628082): Ran 2434 tests in 1797.986s — as mesmas falhas de fechamento + a auditoria ainda da v0.31.0
-MÓDULOS NOVOS: test_v0320_demo_accounts (2) · test_v0320_release_docs (5)
-PROVAS NA PRODUÇÃO: contas/conteúdo (37996712177, 37997211737, 37997481695) · ensaio de restauração (37997867650)
-LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok · IMAGEM: job docker verde
+REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.33.0.log):
+  {{TESTS_LINE}}
+MÓDULOS NOVOS: test_v0330_donations (11) · test_v0330_release_docs (6)
+PRIMEIRA RODADA (docs/evidence/test_run_v0330_full.raw, antes das correções): 2444 testes, 21 falhas + 1 erro — todas em
+  portões de fechamento (listas revisadas, contagens fixadas, matrizes, atalho legado de publicação) — causa e correção em
+  FINAL_EXECUTION_AUDIT.md §7. Nenhum teste removido ou enfraquecido.
+LINT: ruff 0 · TYPECHECK: tsc --noEmit 0 erros · BUILD: esbuild ok
+TELAS: capturas reais em docs/evidence/screens_v0330/ (fluxo completo no servidor de teste, sandbox)
 ```
-
-Portões de fechamento reexecutados após gerar os manifestos (fim do mesmo log). Nenhum teste removido ou enfraquecido; a
-exceção de RLS mudou com o motivo escrito ao lado (a 0071 protegeu a tabela).
 
 ## 25. External Dependencies
 
 | Dependência | Exige | Efeito hoje |
 |---|---|---|
-| Publicar a produção ("Deploy latest commit" no `impactohubsocial` e no `pleasing-trust`) | responsável | 0071 e worker novo fora da produção |
-| Start Command do `pleasing-trust` = `sh /app/start_worker.sh` | responsável | worker com conexão administrativa |
-| Token novo do backup (o antigo foi exposto num chat) | responsável (Cloudflare + GitHub) | risco sobre os backups |
-| Repositório privado | responsável (Settings) | código público |
-| Monitor externo (UptimeRobot/Better Stack) | responsável | só o monitor horário do GitHub |
-| Senha de `impacto_app` igual no GitHub | responsável | modo `aplicar` do workflow recusaria |
-| Domínio, e-mail autenticado, revisão jurídica, encarregado de dados | responsável e terceiros | sem domínio próprio; sem dados reais |
-| Tags v0.31.0 e v0.32.0 | o ambiente não envia tags | criar no GitHub |
+| Contrato com provedor de pagamento (Pix) e tarifa escrita | responsável | só sandbox |
+| Modelo de titularidade da cobrança (conta do beneficiário × plataforma com split) | responsável + jurídico | código só suporta conta do beneficiário |
+| Parecer sobre taxa de serviço, fundo, comprovante/dedutibilidade, termos | jurídico/contábil | taxas inativas; termos em rascunho |
+| LGPD do doador e dados exigidos pelo provedor | DPO/jurídico | anônimo pode não ser possível com certos provedores |
+| Processo de KYB do beneficiário | compliance | só o registro existe |
+| Juntar PR #5 (v0.32.0) e este ramo; publicar demo e produção | responsável | módulo fora do ar |
+| Pendências da v0.32.0 (worker, token do backup, repositório privado, monitor externo) | responsável | inalteradas |
+| Tag v0.33.0 | o ambiente não envia tags | criar no GitHub |
 
 ## 26. Known Limitations
 
-- Conteúdo de nível "rede" (visível só a membros logados) das organizações fictícias não foi alterado — o cadastro em produção
-  está bloqueado pela trava jurídica, então não há membros externos para vê-lo.
-- O plano do GitHub da conta não foi verificado (cota de minutos estimada pelo plano gratuito).
-- O monitor agendado do GitHub não disparou nas primeiras horas; por isso o externo é o principal.
-- RPO do banco depende do plano do Supabase e não foi conferido no painel.
+- Doação recorrente: só tabela e cancelamento; cobrança recorrente desligada.
+- Taxa institucional 3,5 %/1,5 % do pacote: sem definição de "institucional" nem de base — ficou como texto, não como regra.
+- E-mail ao doador não é enviado nesta versão (entra com o provedor real).
+- Validação documental de gastos (`evidence_status = validated`) sem rotina de revisão.
+- A assinatura do sandbox não tem carimbo de tempo; o adaptador real deve validar janela temporal (SECURITY_REVIEW #15).
+- Modelo de 24 meses sem linha de doações, de propósito (`docs/donations/24_MONTH_DONATIONS_NOTE.md`).
 
 ## 27. GO / GO WITH CONDITIONS / NO-GO
 
@@ -169,15 +170,14 @@ exceção de RLS mudou com o motivo escrito ao lado (a 0071 protegeu a tabela).
 GO WITH CONDITIONS
 ```
 
-Para juntar o PR #5 na `main` (o demo publica sozinho) e, depois de conferido o demo, publicar a produção. Os críticos internos
-da auditoria inicial estão resolvidos com prova na própria produção (contas e conteúdo fictícios; restauração do backup real).
-Condições: trocar o comando do worker na mesma publicação; trocar o token do backup; tornar o repositório privado; monitor
-externo. Dados reais continuam bloqueados até a revisão jurídica. Nenhuma falha crítica foi convertida em "condição".
+Para o módulo em sandbox: juntar na `main` (o demo publica sozinho), testar o fluxo do `RUNBOOK.md` §1 no demo e, depois
+de conferido, publicar a produção — onde nenhuma doação real é possível e nenhuma variável nova é obrigatória. Condições:
+as da v0.32.0 continuam; nenhuma falha crítica foi convertida em "condição". **Provedor real, split, recorrência cobrada e
+taxa ativa: NO-GO** até o checklist jurídico/provedor e uma ADR nova que remova a recusa em `config.validate()`.
 
 ## 28. Exact Next Step
 
-1. Juntar o PR #5 (eu faço com o seu "pode juntar", ou você clica em "Merge").
-2. Abrir o demo e conferir a faixa "Ambiente de demonstração" e o login.
-3. Railway → produção → `impactohubsocial` → Ctrl+K → "Deploy latest commit"; no `pleasing-trust`, trocar o Start Command para
-   `sh /app/start_worker.sh` e publicar. Depois eu rodo o diagnóstico ("0 pendentes") e confiro os logs do worker.
-4. Trocar o token do backup; tornar o repositório privado; criar o monitor externo.
+1. Decidir a ordem: juntar o PR #5 (v0.32.0) e depois este ramo, ou este ramo já sobre o PR #5 (ele contém a v0.32.0).
+2. Abrir o demo depois do merge e percorrer o `docs/donations/RUNBOOK.md` §1 (criar → revisar → verificar → publicar → doar).
+3. Escolher o provedor a partir de `docs/donations/DONATIONS_PROVIDER_MATRIX.md` e iniciar o contrato; levar o checklist ao
+   jurídico. Nada disso é código.

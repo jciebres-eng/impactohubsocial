@@ -7,7 +7,7 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 
 - **Campanhas de doação** (`campaigns.kind = 'donation'`): meta, período, finalidade, "se a meta não for atingida" e política de
   estorno; fluxo rascunho → revisão (quatro olhos: quem criou não aprova) → aprovada → publicada; publicar exige termos
-  aceitos e beneficiário verificado (`beneficiary_verifications`). O `PATCH status=published` legado responde 409.
+  aceitos e beneficiário verificado (`org_kyb_verifications`). O `PATCH status=published` legado responde 409.
 - **Página pública `/campanha/:slug`** com barra de arrecadação só de pagamentos confirmados, formulário Pix com "cobrir
   custos" desmarcado, preço total e aviso "taxa = hipótese INATIVA" antes de pagar, QR versionado que aponta para a
   própria página (nunca para chave Pix), atualizações, gastos declarados e "o que esta campanha NÃO é".

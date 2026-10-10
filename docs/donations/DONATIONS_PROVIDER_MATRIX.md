@@ -19,7 +19,7 @@ provedor está contratado nem ligado ao produto. O único provedor em código é
 | Recorrência | assinaturas (`/v3/subscriptions`) com eventos próprios | assinaturas (preapproval) — não verificado nesta rodada | `recurring_donations_enabled = false`; cancelamento pelo doador sempre disponível |
 | Sandbox | `https://api-sandbox.asaas.com` | credenciais de teste de usuário produtivo; URL de webhook separada para teste | sandbox interno sem rede |
 | Tarifa Pix | não está na documentação técnica (tabela comercial) | idem | `provider_fee_schedules` com 0 bps para o sandbox; tarifa real entra por contrato |
-| KYB do beneficiário | onboarding da conta Asaas (documentos da organização) | conta Mercado Pago da organização | `beneficiary_verifications` registra o estado; quem verifica e com quais documentos depende do provedor e do parecer |
+| KYB do beneficiário | onboarding da conta Asaas (documentos da organização) | conta Mercado Pago da organização | `org_kyb_verifications` registra o estado; quem verifica e com quais documentos depende do provedor e do parecer |
 
 ## O que ainda falta para ligar um provedor real (bloqueios)
 

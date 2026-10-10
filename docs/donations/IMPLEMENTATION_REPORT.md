@@ -15,7 +15,7 @@ canônico), ADR-375 (webhook assinado e idempotente), ADR-376 (PLD proporcional 
   `review_note/reviewed_by/reviewed_at`, `qr_version`, `min_donation_cents`, `allow_recurring`; `project_id` opcional;
   `status` com 12 estados (draft → pending_review → approved → published → paused/target_reached/ended/closed;
   under_review/rejected/cancelled/refunding).
-- 11 tabelas novas: `beneficiary_verifications`, `fee_rule_versions`, `provider_fee_schedules`, `donations`,
+- 11 tabelas novas: `org_kyb_verifications`, `fee_rule_versions`, `provider_fee_schedules`, `donations`,
   `recurring_donation_agreements`, `payment_provider_events` (UNIQUE `provider, event_id`), `donation_ledger_entries`,
   `donation_risk_cases`, `donation_receipts`, `campaign_updates`, `campaign_expenses`.
 - 5 funções/gatilhos: `beneficiary_verified(org)`, `campaign_state_guard` (transições permitidas; publicar exige revisor ≠

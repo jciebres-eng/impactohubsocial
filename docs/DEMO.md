@@ -90,7 +90,7 @@ dono do projeto (D-PUB1 em `execution/BLOCKERS.md`).
 
 ## 2. Por onde navegar
 
-São **227 telas** servidas pelo roteador (a v0.30.0 acrescentou `/projetos/:id/dossie`). O mapa delas — rota, componente, arquivo, quais tipos de
+São **231 telas** servidas pelo roteador (a v0.33.0 acrescentou `/doacao/:id`, `/minhas-doacoes`, `/admin/doacoes` e `/admin/doacoes/risco`; a v0.30.0, `/projetos/:id/dossie`). O mapa delas — rota, componente, arquivo, quais tipos de
 organização alcançam, se está em menu e quais operações de API cada uma chama — está em
 [`execution/screen_inventory.json`](execution/screen_inventory.json) e
 [`execution/screen_backend_map.json`](execution/screen_backend_map.json), e em forma navegável no
@@ -108,7 +108,7 @@ a tese do produto melhor que qualquer slide:
 | Apoiador | 21 | apoiar → carteira → prestação de contas recebida |
 | Administração | 32 | compliance, auditoria, integridade, interruptor |
 
-**85 das 227 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
+**85 das 231 telas não estão em menu nenhum** — abrem só por link direto (até a v0.24.2 o gerador do
 inventário lia só a primeira linha de cada menu e dizia 119; corrigido na v0.25.0). Em boa parte é correto
 (detalhe de item, formulário de edição), mas é a primeira pergunta que o Designer vai querer
 responder, e o painel permite marcá-las uma a uma.

@@ -178,7 +178,7 @@ def cancel_recurring(ctx: Ctx):
 
 
 # ============================================================================ revisão interna (quatro olhos) e risco
-@route("GET", "/v1/admin/donation-campaigns", auth="admin", permission="compliance.write", tags=T,
+@route("GET", "/v1/admin/donation-campaigns", auth="admin", permission="compliance.read", tags=T,
        summary="Campanhas aguardando revisão e campanhas publicadas")
 def admin_campaigns(ctx: Ctx):
     with ctx.system_tx() as c:
@@ -217,14 +217,14 @@ def admin_beneficiary_verification(ctx: Ctx, body: TSch.BeneficiaryVerificationI
     with ctx.system_tx() as c:
         if not c.scalar("SELECT 1 FROM organizations WHERE id = $1", ctx.path["org_id"]):
             raise not_found("Organização")
-        vid = c.scalar("INSERT INTO beneficiary_verifications(org_id, status, provider, evidence_document_ids, account_holder_matches, reviewed_by, reviewed_at, review_note, expires_at)"
+        vid = c.scalar("INSERT INTO org_kyb_verifications(org_id, status, provider, evidence_document_ids, account_holder_matches, reviewed_by, reviewed_at, review_note, expires_at)"
                        " VALUES ($1,$2,'manual',$3,$4,$5,now(),$6, CASE WHEN $2 = 'verified' THEN now() + interval '12 months' END) RETURNING id::text",
                        ctx.path["org_id"], body.status, [str(d) for d in body.evidence_document_ids], body.account_holder_matches, ctx.user_id, body.note)
         ctx.audit(c, "beneficiary.verification", "organization", ctx.path["org_id"], {"status": body.status}, org_id=ctx.path["org_id"])
     return {"id": vid, "status": body.status}
 
 
-@route("GET", "/v1/admin/donation-risk-cases", auth="admin", permission="compliance.write", tags=T, summary="Casos de risco abertos (revisão humana)")
+@route("GET", "/v1/admin/donation-risk-cases", auth="admin", permission="compliance.read", tags=T, summary="Casos de risco abertos (revisão humana)")
 def admin_risk_cases(ctx: Ctx):
     with ctx.system_tx() as c:
         rows = c.query("SELECT r.id::text AS id, r.campaign_id::text AS campaign_id, r.donation_id::text AS donation_id, r.reason_codes, r.level, r.action,"
@@ -250,7 +250,7 @@ def admin_risk_decide(ctx: Ctx, body: TSch.RiskDecisionIn):
     return out
 
 
-@route("POST", "/v1/admin/donation-campaigns/{campaign_id}/reconcile", auth="admin", permission="finance.read", tags=T,
+@route("POST", "/v1/admin/donation-campaigns/{campaign_id}/reconcile", auth="admin", permission="finance.write", tags=T,
        summary="Conciliação: marca como conciliadas as doações que o provedor confirma (sandbox: todas as confirmadas) e lista exceções")
 def admin_reconcile(ctx: Ctx):
     with ctx.system_tx() as c:

@@ -21,14 +21,14 @@ Você precisa de três coisas de quem te deu o acesso:
 ## 2. Os seis tipos, e por que isso importa mais que parece
 
 A mesma rota se comporta diferente conforme o tipo da sua organização. `/editais` é "Programas" para
-Empresa e "Editais" para Governo. 34 telas só existem para Administração. **Ver "não encontrado" não
+Empresa e "Editais" para Governo. 36 telas só existem para Administração. **Ver "não encontrado" não
 é necessariamente defeito** — pode ser a regra de tipo funcionando.
 
 Antes de relatar "tela sumiu", confirme no painel de telas se o seu tipo alcança aquela rota.
 
 ## 3. O painel de telas
 
-O painel navegável lista as **227 telas** que o roteador serve, com rota, componente, arquivo,
+O painel navegável lista as **231 telas** que o roteador serve, com rota, componente, arquivo,
 quais tipos alcançam, se está em algum menu e quais operações de API o componente chama. É gerado
 direto do código (`scripts/make_screen_inventory.py` e `scripts/make_screen_backend_map.py`), então
 não há tela esquecida nem tela inventada.
@@ -44,7 +44,7 @@ Use-o de três maneiras:
   (ajustar), **vermelho** (bloqueada) — e uma nota. Fica salvo para quem abrir depois, inclusive para
   quem for corrigir.
 
-**55 telas exigem um registro existente** (a rota tem `:id`). Elas não abrem sozinhas: chegue nelas
+**56 telas exigem um registro existente** (a rota tem `:id`). Elas não abrem sozinhas: chegue nelas
 clicando a partir da lista correspondente, não digitando a rota.
 
 ## 4. O que procurar, em ordem de utilidade
@@ -90,7 +90,7 @@ corrigir acha a requisição no log sem adivinhar.
 | SMS e WhatsApp não chegam | Nenhuma conta de envio ligada |
 | As 14 integrações aparecem como bloqueadas | Todas em `BLOCKED` por falta de credencial do fornecedor |
 | Botão de SSO não aparece na tela de entrar | Não há provedor OIDC configurado (`OIDC_ISSUER` vazio). `GET /v1/meta/config` responde `sso_enabled: false` e o botão fica oculto — comportamento correto. A v0.23.1 chamou isso de defeito; estava errada (a rota sempre existiu, em `app.py`) |
-| 256 operações de API não têm tela | Backend à frente da interface; está medido e documentado |
+| 259 operações de API não têm tela | Backend à frente da interface; está medido e documentado |
 | Administrador e equipe interna só entram com o aplicativo autenticador | Administração exige MFA verificado na sessão. O seed cadastra o segundo fator; peça o segredo TOTP a quem semeou (`DEMO_TOTP_SECRET`) |
 | Perfis internos recebem 403 em sub-chamadas de telas do menu (`/admin/risco`, `/admin/auditoria`, `/financeiro/despesas`) | Permissão granular por papel: a tela combina operações que o papel não tem inteiras. Achado da demo v0.24.0, registrado para o produto |
 | Leitor de tela e navegação por voz com falhas | Pendências declaradas em `ACCESSIBILITY_REPORT.md`; não se fecham por software |

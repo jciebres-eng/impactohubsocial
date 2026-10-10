@@ -42,6 +42,11 @@ class ArchitectureTests(unittest.TestCase):
                    # vem de a consulta exigir visibility='public' AND published_at IS NOT NULL.
                    "program_routes.py",
                    "lifecycle_routes.py", "assembly_routes.py",
+                   # v0.33.0: donation_routes — contexto de sistema só onde não há organização ativa: páginas
+                   # públicas (campanha publicada, QR, doação, situação, comprovante), webhook do provedor,
+                   # "minhas doações" (filtro por donor_user_id) e rotas de equipe (cross-org, com permissão
+                   # nomeada). As rotas da organização (/v1/campaigns/{id}/…) usam ctx.tx() com RLS.
+                   "donation_routes.py", "donations.py",
                    # v0.16.0 — camada de rede. Cada uso foi revisado e tem razão nomeada no próprio arquivo:
                    #   network_core_routes.py  → leitura de relações PÚBLICAS para quem não tem conta
                    #                             (passa por relationships.visible_to, que filtra por visibility)
@@ -200,7 +205,15 @@ class ArchitectureTests(unittest.TestCase):
                            # Devolve O QUE está suspenso e NUNCA o POR QUÊ — `platform_status()`
                            # monta a resposta a partir dos escopos ligados e não toca em `reason`,
                            # conferido por `test_the_public_status_route_does_not_leak_the_reason`.
-                           "/v1/meta/platform-status"}
+                           "/v1/meta/platform-status",
+                           # v0.33.0 — doações (ADR-372..375). Página pública da campanha e QR (só campanhas
+                           # publicadas; totais vêm do razão; doador anônimo nunca exposto); início de doação
+                           # (rate limit por IP, idempotência, provedor sandbox, NUNCA marca pago); situação e
+                           # comprovante por id UUID (sem e-mail nem nome do anônimo); webhook do provedor
+                           # (assinatura HMAC obrigatória, 404 sem segredo, idempotente por provider+event_id).
+                           "/v1/public/donation-campaigns/{slug}", "/v1/public/donation-campaigns/{slug}/qr.svg",
+                           "/v1/public/donation-campaigns/{slug}/donate", "/v1/public/donations/{donation_id}",
+                           "/v1/public/donations/{donation_id}/receipt", "/v1/webhooks/donations/{provider}"}
         self.assertEqual(public, expected_public, "Nova rota pública precisa de revisão de segurança")
         for r in ROUTES:
             if r.path.startswith("/v1/admin/"):

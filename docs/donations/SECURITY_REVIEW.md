@@ -25,7 +25,7 @@ continua em aberto. Semáforo: 🟢 coberto por teste · 🟡 coberto por desenh
 | 16 | Lavagem via muitas doações pequenas | regras `burst_attempts` e `new_campaign_large_inflow` abrem caso; nada bloqueia dinheiro (não há custódia) — a obrigação de PLD é do provedor | `_risk_screen`, decisão em `test_04` | 🟡 |
 | 17 | Comprovante adulterado | número sequencial + SHA-256 do conteúdo gravado; anulado em estorno | `test_03`, `test_06` | 🟢 |
 | 18 | Campanha fraudulenta descoberta depois de publicada | administração tira do ar com justificativa (`under_review` → página 404); a organização não republica sozinha | `test_11` | 🟢 |
-| 19 | Beneficiário "verificado" sem lastro | `beneficiary_verifications` registra quem verificou, com qual nota e validade de 12 meses; quem e com que documentos → pendente de provedor/parecer | `test_01` | 🟡 |
+| 19 | Beneficiário "verificado" sem lastro | `org_kyb_verifications` registra quem verificou, com qual nota e validade de 12 meses; quem e com que documentos → pendente de provedor/parecer | `test_01` | 🟡 |
 
 ## Verificações de código
 

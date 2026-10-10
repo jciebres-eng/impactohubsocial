@@ -192,7 +192,11 @@ export function PublicCampaign() {
   useEffect(() => {
     // Campanha de doação (v0.33.0) primeiro; se não houver, a página legada de cotas.
     api.get(`/v1/public/donation-campaigns/${encodeURIComponent(cleanSlug)}`)
-      .then((data) => setState({ data: { donation: data }, loading: false }))
+      .then(async (data) => {
+        // Campanha de projeto: as cotas do projeto continuam na página (endpoint legado), se existirem.
+        const legacy = await api.get(`/v1/public/campaigns/${encodeURIComponent(cleanSlug)}`).catch(() => null);
+        setState({ data: { donation: data, legacy }, loading: false });
+      })
       .catch(() => api.get(`/v1/public/campaigns/${encodeURIComponent(cleanSlug)}`)
         .then((data) => setState({ data, loading: false }))
         .catch((e) => setState({ error: describeError(e), loading: false })));
@@ -200,7 +204,22 @@ export function PublicCampaign() {
   const d = state.data;
   return (
     <StateView loading={state.loading} error={state.error}>
-      {d?.donation && <PublicDonationCampaign data={d.donation} slug={cleanSlug} />}
+      {d?.donation && (
+        <>
+          <PublicDonationCampaign data={d.donation} slug={cleanSlug} />
+          {d.legacy?.quotas?.length > 0 && (
+            <Panel title={`Faltam ${d.legacy.remaining_quotas} cota(s)`}>
+              {d.legacy.quotas.map((q: any) => (
+                <div key={q.id}>
+                  <h3>{q.label}</h3>
+                  {q.description && <p>{q.description}</p>}
+                  <QuotaProgress q={q} />
+                </div>
+              ))}
+            </Panel>
+          )}
+        </>
+      )}
       {d && !d.donation && (
         <>
           <h1>{d.campaign.title}</h1>

@@ -12,7 +12,7 @@
 --     adaptador, com credencial no cofre e feature flag `live_payment_provider_enabled`;
 --   * não cobra taxa: as regras `donation.platform_fee` (1 %) e `donation.beneficiary_fund` (até 4 %)
 --     entram no catálogo como HIPÓTESE, `review_required`, carta amarela, INATIVAS — como todas as outras;
---   * não decide quem pode receber: `beneficiary_verifications` guarda o estado da verificação, e uma
+--   * não decide quem pode receber: `org_kyb_verifications` guarda o estado da verificação, e uma
 --     campanha só é publicada com verificação `verified` (gatilho), mas QUEM verifica e COM QUE documentos
 --     depende do provedor e do parecer (BLOCKED_LEGAL / BLOCKED_PROVIDER).
 --
@@ -54,7 +54,7 @@ COMMENT ON COLUMN campaigns.status IS
   'são desvios. `published` (0004) continua sendo o estado público; a máquina está em campaign_state_guard().';
 
 -- ============================================================================ 2. verificação do beneficiário
-CREATE TABLE beneficiary_verifications (
+CREATE TABLE org_kyb_verifications (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id        uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   status        text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','documents_requested','under_review','verified','rejected','expired')),
@@ -71,14 +71,14 @@ CREATE TABLE beneficiary_verifications (
   updated_at    timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT verified_has_reviewer CHECK (status <> 'verified' OR reviewed_by IS NOT NULL)
 );
-CREATE INDEX ix_benef_verif_org ON beneficiary_verifications(org_id, status);
-CREATE TRIGGER trg_touch BEFORE UPDATE ON beneficiary_verifications FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
-ALTER TABLE beneficiary_verifications ENABLE ROW LEVEL SECURITY;
-CREATE POLICY benef_verif_read ON beneficiary_verifications FOR SELECT USING (org_id = app_org() OR app_priv());
-CREATE POLICY benef_verif_write ON beneficiary_verifications FOR ALL USING (app_priv()) WITH CHECK (app_priv());
+CREATE INDEX ix_benef_verif_org ON org_kyb_verifications(org_id, status);
+CREATE TRIGGER trg_touch BEFORE UPDATE ON org_kyb_verifications FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+ALTER TABLE org_kyb_verifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY benef_verif_read ON org_kyb_verifications FOR SELECT USING (org_id = app_org() OR app_priv());
+CREATE POLICY benef_verif_write ON org_kyb_verifications FOR ALL USING (app_priv()) WITH CHECK (app_priv());
 
 CREATE FUNCTION beneficiary_verified(p_org uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (SELECT 1 FROM beneficiary_verifications
+  SELECT EXISTS (SELECT 1 FROM org_kyb_verifications
                  WHERE org_id = p_org AND status = 'verified' AND (expires_at IS NULL OR expires_at > now()))
 $$;
 
@@ -519,7 +519,7 @@ CREATE POLICY cexp_write ON campaign_expenses FOR ALL USING (app_priv()
 -- ============================================================================ 13. privilégios mínimos (cada tabela declara os seus — ver 0052)
 -- Nada de DELETE em lugar nenhum: histórico financeiro e de revisão não se apaga. Razão, eventos do provedor,
 -- versões de regra e tarifas: só leitura e inserção (append-only também no privilégio).
-GRANT SELECT, INSERT, UPDATE ON beneficiary_verifications TO impacto_app;
+GRANT SELECT, INSERT, UPDATE ON org_kyb_verifications TO impacto_app;
 GRANT SELECT, INSERT ON fee_rule_versions TO impacto_app;
 GRANT USAGE ON SEQUENCE fee_rule_versions_id_seq TO impacto_app;
 GRANT SELECT, INSERT ON provider_fee_schedules TO impacto_app;
@@ -535,3 +535,10 @@ GRANT SELECT, INSERT, UPDATE ON donation_receipts TO impacto_app;
 GRANT SELECT, INSERT ON campaign_updates TO impacto_app;
 GRANT SELECT, INSERT, UPDATE ON campaign_expenses TO impacto_app;
 GRANT EXECUTE ON FUNCTION beneficiary_verified(uuid) TO impacto_app;
+
+-- ---------------------------------------------------------------------------------------------- 14. trilha
+-- Categorias de ação da auditoria (v0.23.0: todo prefixo novo precisa de categoria, senão cai em OTHER).
+INSERT INTO audit_action_categories (prefix, category, note) VALUES
+  ('donation','FINANCE','doação: início, decisão de risco, conciliação, cancelamento de recorrência (v0.33.0, sem custódia)'),
+  ('beneficiary','ORGS','verificação cadastral (KYB) da organização beneficiária de campanha (v0.33.0)')
+ON CONFLICT DO NOTHING;

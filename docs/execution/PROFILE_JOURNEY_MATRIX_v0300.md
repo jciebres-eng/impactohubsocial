@@ -5,7 +5,7 @@
 > Cada linha é um passo REALMENTE executado pela API na última regressão (status HTTP registrado), com o que a autorização exige
 > para aquele passo e as telas que o alcançam. 'sem tela' é fato medido, não falha.
 
-Jornadas: **16** · passos: **256** · falhas: **0**
+Jornadas: **16** · passos: **256** · falhas: **2**
 
 ## Perfis e o que cada um percorre
 
@@ -173,8 +173,8 @@ Jornadas: **16** · passos: **256** · falhas: **0**
 | 5 | Apoiador (pessoa física) | apoiadora declara interesse e causas | `PUT /v1/org/funder-profile` | 200 | organizacao_tipo_e_papel · papel ≥ manager · tipos: company|individual | — | /organizacao |
 | 6 | Apoiador (pessoa física) | apoiadora manifesta interesse no projeto da horta | `POST /v1/applications/interest` | 201 | organizacao_tipo_e_papel · papel ≥ analyst · tipos: company|individual | — | /projetos/:id |
 | 7 | OSC / executora | OSC cria campanha | `POST /v1/campaigns` | 201 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
-| 8 | OSC / executora | OSC publica a campanha | `PATCH /v1/campaigns/{id}` | 200 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
-| 9 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 200 | ? · papel ≥ — · tipos: todos | — | sem tela |
+| 8 | OSC / executora | OSC publica a campanha | `PATCH /v1/campaigns/{id}` | 409 | organizacao_por_papel · papel ≥ manager · tipos: todos | — | /campanha-gestao |
+| 9 | Visitante | visitante sem login abre a campanha | `GET /v1/public/campaigns/orquestra-comunitaria-{slug}` | 404 | ? · papel ≥ — · tipos: todos | — | sem tela |
 
 ## Documentos: montagem → acordo assinado → registro verificável
 

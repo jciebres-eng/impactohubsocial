@@ -125,3 +125,100 @@ END $$;
 REVOKE ALL ON FUNCTION signed_party_pix_lock() FROM PUBLIC;
 CREATE TRIGGER trg_party_pix_lock BEFORE UPDATE OF pix_key, pix_key_type ON signed_agreement_parties
   FOR EACH ROW EXECUTE FUNCTION signed_party_pix_lock();
+
+-- ============================================================================ DB-03 (lote E) — `search_path` das funções SECURITY DEFINER
+-- Uma função SECURITY DEFINER roda com o privilégio do DONO. Sem `search_path` fixo — ou fixo SEM `pg_temp` no fim, porque
+-- então o esquema temporário é procurado PRIMEIRO para tabelas — quem executa SQL como `impacto_app` (por exemplo, por uma
+-- injeção de SQL) cria uma tabela temporária com o nome de uma tabela da função e muda o resultado dela. Provado na fase 2:
+-- uma tabela temporária `identity_verifications` fazia `identity_level()` devolver 'biometric' para qualquer pessoa.
+-- Corrige TODAS as funções do esquema (laço no catálogo, não lista à mão); o teste de catálogo impede regressão.
+-- Quem já fixava um caminho (por exemplo `public, extensions` — onde fica o pgcrypto no Supabase, 0062) MANTÉM os esquemas
+-- e só ganha `pg_temp` no fim; quem não fixava nada passa a `public, pg_temp`.
+DO $$
+DECLARE
+  f record;
+  atual text;
+  novo text;
+BEGIN
+  FOR f IN SELECT p.oid::regprocedure AS sig,
+                  (SELECT substr(c, length('search_path=') + 1) FROM unnest(p.proconfig) c WHERE c LIKE 'search_path=%') AS caminho
+             FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname = 'public' AND p.prosecdef
+              AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')
+  LOOP
+    atual := f.caminho;
+    IF atual IS NULL THEN
+      novo := 'public, pg_temp';
+    ELSE
+      SELECT string_agg(e, ', ' ORDER BY i) INTO novo
+        FROM unnest(regexp_split_to_array(btrim(atual), '\s*,\s*')) WITH ORDINALITY AS x(e, i) WHERE e <> 'pg_temp' AND e <> '';
+      novo := coalesce(novo || ', ', '') || 'pg_temp';
+      IF novo = atual THEN
+        CONTINUE;
+      END IF;
+    END IF;
+    BEGIN
+      EXECUTE format('ALTER FUNCTION %s SET search_path = %s', f.sig, novo);
+    EXCEPTION WHEN insufficient_privilege THEN
+      RAISE WARNING 'search_path não fixado em % (a migração não é dona da função)', f.sig;
+    END;
+  END LOOP;
+END $$;
+
+-- ============================================================================ DB-05 (lote E) — EXECUTE só para quem usa
+-- Toda função nasce executável por PUBLIC no PostgreSQL. A 0071 revogou de `anon`/`authenticated`, mas esses papéis herdam
+-- de PUBLIC — 26 funções SECURITY DEFINER continuavam chamáveis pela API pública do Supabase (`/rest/v1/rpc/...`) se o
+-- esquema estivesse exposto. Agora: EXECUTE revogado de PUBLIC em toda função do esquema (menos as de extensões) e
+-- concedido explicitamente a `impacto_app` (que já executava por PUBLIC: o comportamento da aplicação não muda).
+-- Funções criadas por migrações FUTURAS: o teste de catálogo falha se alguma nascer executável por PUBLIC (não se mexe no
+-- privilégio padrão GLOBAL do papel administrativo, que no Supabase também cria objetos fora deste esquema).
+DO $$
+DECLARE f record;
+BEGIN
+  FOR f IN SELECT p.oid::regprocedure AS sig FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+            WHERE n.nspname = 'public'
+              AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')
+  LOOP
+    BEGIN
+      EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC', f.sig);
+      EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO impacto_app', f.sig);
+    EXCEPTION WHEN insufficient_privilege THEN
+      RAISE WARNING 'EXECUTE não revisado em % (a migração não é dona da função)', f.sig;
+    END;
+  END LOOP;
+END $$;
+
+-- Supabase: os papéis da API pública perdem também o USO do esquema (a plataforma não usa a API de dados; CLAUDE.md).
+-- Fora do Supabase os papéis não existem e o bloco não faz nada.
+DO $$
+DECLARE papel text;
+BEGIN
+  FOREACH papel IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = papel) THEN
+      EXECUTE format('REVOKE USAGE ON SCHEMA public FROM %I', papel);
+      EXECUTE format('REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM %I', papel);
+    END IF;
+  END LOOP;
+END $$;
+
+-- ============================================================================ DB-04 (lote E) — visão que não reaplicava a RLS
+-- `project_baselines_without_source` rodava como dona e mostrava linhas de base de TODAS as organizações a `impacto_app`.
+-- Com `security_invoker`, vale a RLS de `project_indicators` de quem consulta (a administração continua vendo tudo).
+-- `ai_prompt_public` continua como está DE PROPÓSITO: projeta só colunas não sensíveis de `ai_prompts` (sem o texto de
+-- sistema) — com `security_invoker` a aplicação precisaria ler a tabela inteira (0060).
+ALTER VIEW project_baselines_without_source SET (security_invoker = true);
+
+-- ============================================================================ DB-07 (lote E) — TRUNCATE nas tabelas só-inclusão
+-- Toda tabela protegida contra UPDATE/DELETE por `forbid_mutation` ganha também a trava de TRUNCATE (o razão das doações,
+-- os eventos econômicos de catálogo etc. não a tinham). Laço no catálogo; o teste confere que nenhuma ficou de fora.
+DO $$
+DECLARE t record;
+BEGIN
+  FOR t IN SELECT DISTINCT c.oid::regclass AS rel FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid
+             JOIN pg_namespace n ON n.oid = c.relnamespace JOIN pg_proc p ON p.oid = g.tgfoid
+            WHERE n.nspname = 'public' AND p.proname = 'forbid_mutation' AND NOT g.tgisinternal
+              AND NOT EXISTS (SELECT 1 FROM pg_trigger x WHERE x.tgrelid = c.oid AND (x.tgtype & 32) <> 0)   -- 32 = TRUNCATE
+  LOOP
+    EXECUTE format('CREATE TRIGGER trg_no_truncate BEFORE TRUNCATE ON %s FOR EACH STATEMENT EXECUTE FUNCTION forbid_truncate()', t.rel);
+  END LOOP;
+END $$;

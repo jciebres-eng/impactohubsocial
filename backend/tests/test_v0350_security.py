@@ -786,3 +786,80 @@ class PixKeyIsProtectedTests(ECOT.EconomyBase):
         self.assertTrue(visto["pix_key_masked"] and visto["pix_cooling_until"])
         dona = next(p for p in self.osc.get(f"/v1/signed-agreements/{aid}").json["parties"] if p["org_id"] == self.osc.org_id)
         self.assertEqual(dona["pix_key"], "12345678000195")
+
+
+# ================================================================================================ lote E
+class DatabaseCatalogHardeningTests(unittest.TestCase):
+    """DB-03/04/05/06/07 — o catálogo do PostgreSQL depois de TODAS as migrações (as futuras também passam por aqui no CI)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from tests.support import owner_conn
+        server()
+        cls.own = owner_conn()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.own.close()
+
+    NOT_EXTENSION = "NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')"
+
+    def test_every_security_definer_function_pins_the_search_path_with_pg_temp_last(self):
+        rows = self.own.query(
+            "SELECT p.oid::regprocedure::text AS f,"
+            " (SELECT substr(c, 13) FROM unnest(p.proconfig) c WHERE c LIKE 'search_path=%') AS caminho"
+            " FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace"
+            f" WHERE n.nspname = 'public' AND p.prosecdef AND {self.NOT_EXTENSION}")
+        self.assertGreater(len(rows), 50)
+        bad = [r for r in rows if not r["caminho"] or [e.strip() for e in r["caminho"].split(",")][-1] != "pg_temp"
+               or "public" not in [e.strip() for e in r["caminho"].split(",")]]
+        self.assertEqual(bad, [], "função SECURITY DEFINER sem `search_path` fixo terminando em pg_temp")
+
+    def test_a_temporary_table_cannot_change_what_a_definer_function_reads(self):
+        """Antes: `identity_level` fixava só `public`; o esquema temporário era procurado PRIMEIRO, e uma tabela temporária
+        criada pela conexão da aplicação fazia a função devolver 'biometric' para qualquer pessoa."""
+        from impacto.db.pq import Connection
+        from tests.support import APP_DSN
+        app = Connection(APP_DSN)
+        try:
+            app.run("CREATE TEMP TABLE identity_verifications(user_id uuid, level text, status text, expires_at timestamptz)")
+            app.run("INSERT INTO identity_verifications VALUES ('00000000-0000-0000-0000-000000000001','biometric','verified',NULL)")
+            app.run("GRANT SELECT ON identity_verifications TO PUBLIC")
+            self.assertEqual(app.scalar("SELECT identity_level('00000000-0000-0000-0000-000000000001')"), "none")
+        finally:
+            app.close()
+
+    def test_no_function_of_the_schema_is_executable_by_public(self):
+        bad = self.own.query("SELECT p.oid::regprocedure::text AS f FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace"
+                             f" WHERE n.nspname = 'public' AND {self.NOT_EXTENSION}"
+                             "   AND has_function_privilege('public', p.oid, 'EXECUTE') ORDER BY 1")
+        self.assertEqual(bad, [], "função executável por PUBLIC (no Supabase, pelos papéis da API pública)")
+        for f in ("app_org()", "app_priv()", "beneficiary_verified(uuid)", "identity_level(uuid)"):
+            self.assertTrue(self.own.scalar("SELECT has_function_privilege('impacto_app', $1::regprocedure, 'EXECUTE')", f), f)
+
+    def test_the_baselines_view_reapplies_row_level_security(self):
+        opts = self.own.scalar("SELECT reloptions FROM pg_class WHERE relname = 'project_baselines_without_source'")
+        self.assertIn("security_invoker=true", opts or [])
+
+    def test_every_append_only_table_also_refuses_truncate(self):
+        bad = self.own.query(
+            "SELECT DISTINCT c.relname FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid JOIN pg_proc p ON p.oid = g.tgfoid"
+            " WHERE p.proname = 'forbid_mutation' AND NOT g.tgisinternal"
+            "   AND NOT EXISTS (SELECT 1 FROM pg_trigger x WHERE x.tgrelid = c.oid AND (x.tgtype & 32) <> 0) ORDER BY 1")
+        self.assertEqual(bad, [], "tabela só-inclusão que ainda aceita TRUNCATE")
+        with self.assertRaises(Exception) as err:
+            self.own.run("TRUNCATE donation_ledger_entries")
+        self.assertIn("TRUNCATE", str(err.exception))
+
+    def test_global_grants_stay_minimal(self):
+        """DB-06 — inventário global: a aplicação não trunca, não cria gatilho, não referencia, não cria objeto no esquema,
+        não é dona de nada; PUBLIC não tem privilégio em tabela nenhuma."""
+        extra = self.own.query("SELECT table_name, privilege_type FROM information_schema.role_table_grants"
+                               " WHERE grantee = 'impacto_app' AND table_schema = 'public'"
+                               "   AND privilege_type IN ('TRUNCATE', 'REFERENCES', 'TRIGGER') ORDER BY 1, 2")
+        self.assertEqual(extra, [])
+        self.assertEqual(self.own.query("SELECT table_name FROM information_schema.role_table_grants"
+                                        " WHERE grantee = 'PUBLIC' AND table_schema = 'public'"), [])
+        self.assertFalse(self.own.scalar("SELECT has_schema_privilege('impacto_app', 'public', 'CREATE')"))
+        self.assertEqual(self.own.query("SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace"
+                                        " WHERE n.nspname = 'public' AND pg_get_userbyid(c.relowner) = 'impacto_app'"), [])

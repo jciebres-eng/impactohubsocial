@@ -76,6 +76,9 @@ PR; local: §7 e `docs/evidence/test_run_v0.33.0.log`.
 | contagens fixadas (962 operações, 246 plataforma, 102 permissões, 60 públicas, 968 no mapa, 231 telas) · `DEMO.md`, `TESTER_GUIDE.md`, `TROUBLESHOOTING.md` | números mudaram com o módulo | atualizados com a razão ao lado (ADR-340) |
 | `test_regenerating_each_matrix_reproduces_what_is_committed` · matriz de jornadas · manifesto · notas da versão | artefatos gerados antes das mudanças finais | regenerados no fechamento; manifesto da v0.33.0 |
 | campanha criada pela interface com `kind: "donation"` | eu inventei um valor que o esquema não aceita | tipos reais (`project_crowdfunding`, `emergency`, `institutional_fund`, `recurring`, `organization`) no formulário; lista de campanhas sem `JOIN` obrigatório em projeto |
+| CI do PR #6: matriz de jornadas (261 ≠ 267 passos) | o relatório das jornadas depende da ordem da suíte: `test_v0120_knowledge` semeia o curso em rascunho antes das jornadas e a jornada "Suporte" pula 6 passos — era assim na v0.32.0 (4 passos); eu havia regenerado a matriz de uma rodada isolada | matriz regenerada na ordem da suíte (261 passos, 0 falhas), igual ao CI; o teste passou a dizer qual jornada divergiu |
+| CI do PR #6: `pilha-do-zero` — `Select` sem nome acessível em `/admin/doacoes` | filtro de situação sem `aria-label` | `aria-label="Filtrar por situação"` |
+| CI do PR #6: manifesto cita bundle antigo | bundle reconstruído depois do manifesto | manifesto regerado no fechamento |
 | captura de tela: `POST …/donate` 403 | origem do navegador ≠ `PUBLIC_BASE_URL` do servidor de teste (proteção de origem) | base pública apontada para o servidor de teste só na captura; nada mudou no produto |
 
 ## 8. Build e pacote

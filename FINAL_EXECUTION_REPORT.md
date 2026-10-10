@@ -137,6 +137,10 @@ REGRESSÃO COMPLETA LOCAL (docs/evidence/test_run_v0.33.0.log):
   → as 8: manifesto da versão, marcador de preenchimento e linha de testes deste relatório, notas da versão lidas antes do bump,
     3 matrizes geradas antes da rodada, e /doacao/:id sem registro na demonstração (a jornada "Captação" ganhou a
     doação pública em sandbox); corrigidas no fechamento e reexecutadas ao fim do mesmo log
+CI DO PR #6 (execuções 38016538259 e 38016622673, antes do fechamento): 2451 testes; falhas só de fechamento — matriz de
+  jornadas (o relatório das jornadas depende da ordem da suíte: com test_v0120 antes, o curso seed fica em rascunho e a
+  jornada "Suporte" tem 4 passos, como na v0.32.0 — a matriz versionada passou a ser a da ordem da suíte completa),
+  manifesto (bundle reconstruído) e um nome acessível no filtro de /admin/doacoes (pilha-do-zero) — corrigidos
 PRIMEIRA RODADA (antes das correções dos portões): Ran 2444 tests — 21 falhas + 1 erro, todas em portões de fechamento
   (listas revisadas, contagens fixadas, matrizes, atalho legado de publicação) — causa e correção em
   FINAL_EXECUTION_AUDIT.md §7. Nenhum teste removido ou enfraquecido.

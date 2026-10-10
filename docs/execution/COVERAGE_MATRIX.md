@@ -4,7 +4,7 @@
 
 Três provas independentes, todas executadas (não planejadas):
 
-- **Jornadas pela API** — 267 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
+- **Jornadas pela API** — 261 passos em 16 jornadas, 0 falha(s). Fonte: `docs/evidence/jornadas_v0250/relatorio.json`.
 - **Telas no navegador (Chromium)** — 845 visitas às 231 rotas do roteador. Fonte: `docs/execution/ROUTE_RUNTIME_MATRIX.csv`.
 - **Telefone (390 px)** — 240 telas de menu, 0 falha(s). Fonte: `docs/evidence/responsivo_v0250/resumo.json`.
 
@@ -12,7 +12,7 @@ Três provas independentes, todas executadas (não planejadas):
 
 | Perfil | Jornadas | Passos de API | Falhas de API | Telas visitadas | Com dado | Vazias | Recusa correta | Sem registro próprio | Outras | Telefone: telas | Telefone: vazam |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| OSC | 15 | 161 | 0 | 158 | 139 | 10 | 6 | 3 | 0 | 50 | 0 |
+| OSC | 15 | 155 | 0 | 158 | 139 | 10 | 6 | 3 | 0 | 50 | 0 |
 | Empresa (financiador) | 8 | 47 | 0 | 105 | 80 | 19 | 0 | 6 | 0 | 38 | 0 |
 | Profissional | 4 | 12 | 0 | 99 | 62 | 25 | 1 | 11 | 0 | 33 | 0 |
 | Governo | 1 | 9 | 0 | 191 | 63 | 26 | 82 | 20 | 0 | 35 | 0 |
@@ -45,7 +45,7 @@ outro perfil que participa. *Outras*: qualquer outro estado é falha e derruba o
 | Marketplace, soluções e perfis públicos | 6 | 0 |
 | Caminho dourado: acordo → aporte direcionado → confirmação → entrega aceita → quitação → reconhecimento → torre | 28 | 0 |
 | Central de IA: cota → prévia → originalidade → patrocínio → pedido piloto → painel | 18 | 0 |
-| Suporte e Central de Conhecimento | 10 | 0 |
+| Suporte e Central de Conhecimento | 4 | 0 |
 | Banco de Ideias: ideia → amadurecimento → projeto | 5 | 0 |
 | Administração: visão geral → verificação → auditoria | 7 | 0 |
 | Pendências: o que espera decisão de alguém | 12 | 0 |

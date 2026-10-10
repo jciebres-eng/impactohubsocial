@@ -39807,7 +39807,7 @@
   },
   "/v1/webhooks/donations/{provider}": {
    "post": {
-    "summary": "Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação",
+    "summary": "Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada",
     "operationId": "post_donation_routes_donation_webhook",
     "tags": [
      "donations"
@@ -40091,6 +40091,52 @@
      },
      "4XX": {
       "description": "Erro (application/problem+json)"
+     }
+    }
+   }
+  },
+  "/v1/public/donation-campaigns/{slug}/recurring": {
+   "post": {
+    "summary": "Autoriza doação recorrente (consentimento guardado por hash). Desligada até instrumento homologado no provedor",
+    "operationId": "post_donation_routes_start_recurring",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Rate limit: 10/3600s por IP",
+    "parameters": [
+     {
+      "name": "slug",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecurringDonationIn"
+       }
+      }
      }
     }
    }
@@ -40973,6 +41019,52 @@
       "application/json": {
        "schema": {
         "$ref": "#/components/schemas/ObligationReceiptIn"
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/admin/remuneration/{obligation_id}/refund": {
+   "post": {
+    "summary": "Reembolso integral do que a plataforma recebeu (ex.: serviço cancelado) — a obrigação vira estornada; segregado",
+    "operationId": "post_donation_routes_admin_remuneration_refund",
+    "tags": [
+     "donations"
+    ],
+    "security": [
+     {
+      "bearer": []
+     },
+     {
+      "cookie": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK"
+     },
+     "4XX": {
+      "description": "Erro (application/problem+json)"
+     }
+    },
+    "description": "Administração da plataforma com MFA",
+    "parameters": [
+     {
+      "name": "obligation_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ObligationRefundIn"
        }
       }
      }
@@ -65042,6 +65134,13 @@
       ],
       "default": null,
       "title": "Funding Source"
+     },
+     "platform_contribution_cents": {
+      "default": 0,
+      "maximum": 50000,
+      "minimum": 0,
+      "title": "Platform Contribution Cents",
+      "type": "integer"
      }
     },
     "required": [
@@ -65139,6 +65238,39 @@
      "body"
     ],
     "title": "CampaignUpdateIn",
+    "type": "object"
+   },
+   "RecurringDonationIn": {
+    "additionalProperties": false,
+    "description": "Autorização de doação recorrente (v0.34.0). Autorizar não é pagar: cada ciclo é uma tentativa confirmada pelo provedor.",
+    "properties": {
+     "amount_cents": {
+      "maximum": 10000000,
+      "minimum": 100,
+      "title": "Amount Cents",
+      "type": "integer"
+     },
+     "method": {
+      "default": "card",
+      "enum": [
+       "card",
+       "pix_automatic"
+      ],
+      "title": "Method",
+      "type": "string"
+     },
+     "consent_text": {
+      "maxLength": 2000,
+      "minLength": 40,
+      "title": "Consent Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "amount_cents",
+     "consent_text"
+    ],
+    "title": "RecurringDonationIn",
     "type": "object"
    },
    "CampaignReviewIn": {
@@ -65545,6 +65677,36 @@
      "reference"
     ],
     "title": "ObligationReceiptIn",
+    "type": "object"
+   },
+   "ObligationRefundIn": {
+    "additionalProperties": false,
+    "properties": {
+     "refunded_cents": {
+      "exclusiveMinimum": 0,
+      "maximum": 100000000000,
+      "title": "Refunded Cents",
+      "type": "integer"
+     },
+     "reference": {
+      "maxLength": 120,
+      "minLength": 3,
+      "title": "Reference",
+      "type": "string"
+     },
+     "note": {
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Note",
+      "type": "string"
+     }
+    },
+    "required": [
+     "refunded_cents",
+     "reference",
+     "note"
+    ],
+    "title": "ObligationRefundIn",
     "type": "object"
    },
    "ObligationSettleIn": {

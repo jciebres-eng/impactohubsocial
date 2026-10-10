@@ -80,7 +80,7 @@ def donation_receipt(ctx: Ctx):
 
 # ============================================================================ webhook do provedor
 @route("POST", "/v1/webhooks/donations/{provider}", auth="none", raw=True, raw_body=True, rate=("don_webhook_ip", 600, 60), tags=("donations",),
-       summary="Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação")
+       summary="Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada")
 def donation_webhook(ctx: Ctx, payload: bytes):
     provider = ctx.path["provider"][:40]
     if not ctx.settings.payment_webhook_secret:

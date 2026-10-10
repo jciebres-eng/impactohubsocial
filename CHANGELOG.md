@@ -3,7 +3,7 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 
 ## [0.34.0] — 2026-10-10
 
-### Ecossistema financeiro: gratuito até gerar valor, obrigações de remuneração, recurso público, conciliação com exceções (ADR-377 a ADR-383)
+### Ecossistema financeiro: gratuito até gerar valor, obrigações de remuneração, recurso público, conciliação com exceções (ADR-377 a ADR-384)
 
 - **Obrigações de remuneração** (`remuneration_obligations`): uma por fato × regra, valor congelado, cadeia calculada → devida →
   faturada → cobrada → recebida → liquidada (desvios: estornada, vencida, em disputa, dispensada, isenta), histórico só-inserção;
@@ -28,10 +28,28 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
 - Documentos em `docs/finance/`: arquitetura (diagramas SVG/PNG), fluxos, razão e estados, política, matriz de monetização,
   matriz de riscos, jurídico/fiscal com as três correções do responsável, API/webhooks, cobertura dos 40 cenários, inventário,
   checklist de publicação/reversão, modelo de 24 meses em 3 cenários com sensibilidade (planilha + gráficos).
-- Migração `0073_v0340_financial_ecosystem.sql`; +24 operações (962 → 986); `test_v0340_financial_ecosystem` (13),
-  `test_v0340_release_docs`.
-- **Não feito, de propósito**: provedor real, split, recorrência cobrada, cobrança ativa, NFS-e, rotina agendada de conciliação
-  (à mão nesta versão), assinaturas (ADR-341), marketplace com take rate (recusado pelo responsável).
+- **Etapa E6 — os 40 cenários com teste** (ADR-384, `test_v0340_open_scenarios`, 8 testes):
+  - **cartão no sandbox**: faltava a tabela de tarifa do sandbox para cartão e toda doação por cartão era recusada
+    (`provider_fee_unknown`) — achado do próprio teste; corrigido;
+  - **falha temporária do provedor**: 503 `provider_unavailable`, nada gravado, a mesma chave repete com sucesso;
+  - **webhook em duas fases**: o evento é gravado antes de ser aplicado; erro interno deixa o evento `failed`, abre exceção
+    `event_processing_failed` e responde 500 (o provedor reenvia); a rotina reaplica; reentrega posterior é `duplicate`;
+  - **liquidação acumulada** (`settled_cents`): parcial ≠ total, com exceção `settlement_partial` (esperado × observado);
+    **falha de liquidação** vira exceção `settlement_failed` sem desconfirmar o pagamento;
+  - **contribuição voluntária do doador** (`donation.platform_contribution`, hipótese INATIVA): valor A MAIS, começa em zero,
+    separado no total e fora da arrecadação da campanha; é a única operação elegível a split (nada sai da doação); com split
+    confirmado no evento a obrigação nasce recebida; sem split vira obrigação devida da organização, faturada à parte;
+  - **recorrência**: autorização com consentimento por hash ≠ tentativa ≠ confirmado ≠ falha; pausa após 3 falhas seguidas;
+    cancelamento pelo doador; rota de autorização desligada pela configuração até instrumento homologado;
+  - **reembolso** do que a plataforma recebeu (integral, `finance.approve`; parcial é ajuste) e devolução da cobrança pelo
+    provedor revertem a obrigação; **a organização não move a fatura da plataforma** (403 `platform_invoice`) — antes ela
+    podia, pela rota de cobranças, marcar como paga ou devolvida a própria fatura;
+  - **rotina `financial_ops`** no worker: reprocessa eventos, marca vencidas, concilia campanhas com movimento recente e cria as
+    tentativas de recorrência (só com a recorrência ligada).
+- Migração `0073_v0340_financial_ecosystem.sql`; +26 operações (962 → 988); `test_v0340_financial_ecosystem` (13),
+  `test_v0340_open_scenarios` (8), `test_v0340_release_docs`.
+- **Não feito, de propósito**: provedor real, split real, recorrência cobrada de verdade, cobrança ativa, NFS-e, assinaturas de
+  plano (ADR-341), marketplace com take rate (recusado pelo responsável).
 
 ## [0.33.0] — 2026-10-10
 

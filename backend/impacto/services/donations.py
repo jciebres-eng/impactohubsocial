@@ -437,15 +437,6 @@ def record_provider_event(c: Connection, *, provider: str, event: dict, signatur
     return {"event_row_id": row_id, "duplicate": False, "applied": signature_verified, "status": status, "reapplicable": signature_verified}
 
 
-def apply_provider_event(c: Connection, *, provider: str, event: dict, signature_verified: bool, raw: bytes) -> dict:
-    """Gravar + aplicar NA MESMA transação (usado onde não há separação de fases). O webhook HTTP usa as duas fases
-    (`record_provider_event` e `apply_recorded_event`) para que uma falha interna não perca o evento (cenário 33)."""
-    rec = record_provider_event(c, provider=provider, event=event, signature_verified=signature_verified, raw=raw)
-    if not rec["reapplicable"]:
-        return rec | {"effect": "none"}
-    return apply_recorded_event(c, provider=provider, row_id=rec["event_row_id"], event=event) | {"duplicate": rec["duplicate"]}
-
-
 def event_from_row(row: dict) -> dict:
     """Reconstrói o evento a partir do que foi gravado (payload já sem dado pessoal) — é o que a rotina reprocessa."""
     payload = row["payload_redacted"] if isinstance(row["payload_redacted"], dict) else json.loads(row["payload_redacted"] or "{}")

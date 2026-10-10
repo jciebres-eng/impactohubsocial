@@ -1,34 +1,38 @@
-# Auditoria final de execução — IMPACTO v0.33.0
+# Auditoria final de execução — IMPACTO v0.34.0
 
-**Data:** 10/10/2026 · **Ramo:** `doacoes-v0330` · **Ponto de partida:** `24793bb` (`correcoes-auditoria`, v0.32.0) ·
-**Versão:** 0.33.0
+**Data:** 10/10/2026 · **Ramo:** `ecossistema-v0340` · **Ponto de partida:** `103c643` (v0.33.0, ramo `doacoes-v0330`) · **Versão:** 0.34.0
 
-Estados: **PASS** (feito e provado por execução nesta rodada) · **PARTIAL** (feito; o que falta está escrito) ·
-**BLOCKED_EXTERNAL** (depende de contrato, parecer, painel ou decisão do responsável; nada simulado) · **FAIL** (falhou e não
-foi corrigido — não há nenhum; os que apareceram estão em §7). Nada aqui afirma "100% impossível de invadir".
+Estados: **PASS** (feito e provado por execução nesta rodada) · **PARTIAL** (feito; o que falta está escrito) · **BLOCKED_EXTERNAL**
+(depende de contrato, parecer, painel ou decisão do responsável; nada simulado) · **FAIL** (falhou e não foi corrigido — não há nenhum;
+os que apareceram estão em §7). Nada aqui afirma invulnerabilidade.
 
 ## 1. O pedido → o que virou software e prova
 
-Pedido (pacote MASTER FULL, 09/10): doações/vaquinha/QR Pix/recorrência/carteira visual/PLD-KYC/comprovantes/prestação de
-contas como módulo isolado, sandbox apenas, taxas como hipótese inativa, sem fintech dentro do SaaS.
+Pedido (PROMPT MASTER FULL + complemento do responsável, 10/10): ecossistema financeiro com obrigações calculáveis e cobráveis,
+"gratuito até gerar valor" com gatilhos auditáveis, exceções para recurso público, comunicação prévia, regras para iniciar a cobrança,
+estado comercial separado da prestação de contas, reserva sem custódia, estados financeiros, conciliação com exceções, matrizes,
+diagramas, modelo de 24 meses, 40 cenários de teste.
 
 | Item | Estado | Evidência (arquivo · teste) | Resultado | Risco | Ação restante |
 |---|---|---|---|---|---|
-| Campanha de doação com revisão a quatro olhos e beneficiário verificado | PASS | `0072` `campaign_state_guard` · `test_v0330_donations.test_01` | criador não aprova; sem verificação não publica; `PATCH published` → 409 | — | processo de KYB (checklist 9) |
-| Página pública com QR canônico versionado | PASS | `donation_routes` · `test_02` · captura `01_campanha_publica.png` | QR aponta para `/campanha/{slug}?v={n}`; renovar invalida o anterior | — | — |
-| Doação confirmada só por webhook assinado, idempotente, valor conferido | PASS | `apply_provider_event` · `test_03`, `test_04` | assinatura inválida → 202 sem efeito; duplicado → `duplicate`; valor diferente → `under_review` | replay sem carimbo de tempo no sandbox | adaptador real valida `ts` |
-| Razão em partidas dobradas, só inserção | PASS | `donation_ledger_balanced` · `test_03`, `test_06`, `test_07` | soma zero por transação; estorno = lançamento novo; `already_reversed` na repetição | — | — |
-| Sem custódia: nenhuma coluna de saldo; `is_simulated` não gravável | PASS | `test_10` | 0 colunas `balance`; gatilho deriva do provedor | — | — |
-| Taxas inativas, congeladas por doação, devido R$ 0,00 | PASS | `platform_fee_due` · `test_03`, `test_10` · `MONETIZATION.md` | 13 regras no catálogo, 0 ativas | — | parecer (checklist 3) |
-| Doador anônimo nunca exposto; isolamento entre organizações | PASS | `test_05` | nome ausente em público e na gestão; outra organização → 404 | — | — |
-| Comprovante numerado com SHA-256, anulado em estorno, não dedutível | PASS | `issue_receipt` · `test_03`, `test_06` · captura `03_doacao_comprovante.png` | `IMP-DOA-…` | — | parecer contábil (checklist 6) |
-| Prestação de contas (gastos, atualizações) sem condição financeira | PASS | `test_08` · captura `04_gestao_prestacao_contas.png` | entram sempre | — | validação documental |
-| Travas de dinheiro real recusam subir | PASS | `config.validate()` · `test_09` · `.env.example` · `test_v0330_release_docs` | 4 flags `true` → erro de configuração | — | ADR nova quando houver provedor |
-| Risco proporcional, decisão humana, sem `payout_hold` | PASS | `_risk_screen` · `test_04` · `config/donation_risk_rules.json` · `RiskRulesFileTests` | JSON = código | limiares não são obrigação legal | revisar com jurídico (checklist 8) |
-| Suspensão administrativa de campanha publicada | PASS | `suspend` · `test_11` | `under_review` → página 404; organização não republica | — | — |
-| Recorrência | PARTIAL | tabela + cancelamento pelo doador | cobrança desligada | — | instrumento do provedor + consentimento |
-| Provedor real (≥ 2 avaliados) | BLOCKED_EXTERNAL | `docs/donations/DONATIONS_PROVIDER_MATRIX.md` (fontes datadas) | Asaas e Mercado Pago comparados | — | contrato |
-| Modelo de 24 meses | PASS (sem receita) | `docs/donations/24_MONTH_DONATIONS_NOTE.md` | só aritmética; nenhuma projeção | — | 3 meses de dados reais |
+| Obrigações com cadeia de estados, valor congelado, histórico | PASS | `0073` · `remuneration.py` · `test_v0340.test_02/04` | 11 estados; gatilho recusa mudar valor; eventos só-inserção | — | ligar acordo/serviço/IA como fontes (previsto) |
+| Gatilho auditável "gratuito até gerar valor" | PASS | `remuneration.evaluate` · `test_03` (passa pelo portão real: carta verde + regra validada) | nada devido sem as 5 condições; motivo registrado | parâmetros são hipótese | parecer; política v2 aprovada |
+| Comunicação prévia registrada | PASS | `remuneration_notices` · `test_03` | texto, canal, versão, ciência | textos em rascunho | revisão jurídica |
+| Recurso público isento salvo instrumento | PASS | `test_05` | `exempt` → autorização só com `finance.approve` + instrumento + justificativa | análise por instrumento | jurídico |
+| Reserva/fundo sem custódia nem receita | PASS | motor `success_fee` inativável (ADR-022) · `test_v0340_release_docs` | banco recusa ativar | — | redação dos termos |
+| Estado comercial separado da prestação de contas | PASS | `test_11` (varredura) · `test_04` (vencida não bloqueia) | nenhuma rota consulta o estado comercial | — | — |
+| Liquidado ≠ confirmado; pendente ≠ arrecadado | PASS | `test_01` | `settled_at` não se desfaz; totais separados | — | — |
+| Estorno parcial / total após parcial / chargeback | PASS | `test_06`, `test_12` | razão fecha em zero; comprovante anulado; obrigação estornada | tarifa do provedor no parcial depende do contrato | — |
+| Compromissos e recursos externos fora da barra | PASS | `test_07` | nenhum lançamento; totais à parte; recurso público exige instrumento | — | — |
+| Painel do financiador | PASS | `funder_view` · `test_07` · captura `04_financiador_contribuicoes.png` | doações em nome da organização e compromissos | — | — |
+| Conciliação com fila de exceções | PASS | `reconciliation.py` · `test_08` | 9 tipos; não duplica; histórico; sandbox snapshot | rotina não agendada | agendar no worker (decisão) |
+| Tarifa nova não altera operação antiga | PASS | `test_09` | versão congelada por obrigação | — | — |
+| Limites, adulteração pelo cliente, concorrência | PASS | `test_10` | 422 fora dos limites/campo extra; 6 entregas → 1 confirmação | — | — |
+| Meta atingida/ultrapassada | PASS | `test_13` | `target_reached` continua aceitando; contingência declarada | — | — |
+| Segregação de funções | PASS | rotas com `finance.approve` · `test_04/05` (403 para `finance`) | — | — | — |
+| Telas | PASS | 6 capturas em `docs/evidence/screens_v0340/`; `tsc` 0; build ok | — | — | conferir no demo |
+| Matrizes, diagramas, modelo 24m, cobertura dos 40 cenários | PASS | `docs/finance/*` · `test_v0340_release_docs` | — | premissas sem histórico | — |
+| Split, recorrência cobrada, cobrança real, NFS-e | BLOCKED_EXTERNAL | flags recusadas; regras inativas | — | — | contrato, parecer, ADR |
 
 ## 2. Motores
 
@@ -36,50 +40,41 @@ Inalterados (50; VERDE 37 · AMARELO 13 · VERMELHO 0).
 
 ## 3. Perfis, rotas e jornadas
 
-962 operações (+22), 231 telas (+4: `/doacao/:id`, `/minhas-doacoes`, `/admin/doacoes`, `/admin/doacoes/risco`); 60 rotas
-públicas (+6, todas na lista revisada de `test_architecture.py` com a razão); 246 rotas de plataforma (+8, com permissão
-nomeada: leitura `compliance.read`, escrita `compliance.write`/`finance.write`). Jornada "Captação: cotas → apoios →
-campanha pública" passa pela revisão a quatro olhos (`demo_journeys.py`).
+986 operações (+24: 1 pessoa, 6 organização, 17 equipe), 235 telas (+4), 60 rotas públicas (inalterado), 262 rotas de plataforma
+(+16), 118 permissões nomeadas (+16). Jornada "Captação" ganhou os passos do ecossistema (empresa doa em nome da organização,
+compromisso, recurso externo, painéis) — 269 passos, 0 falhas na ordem da suíte.
 
 ## 4. Banco de dados
 
-Migração `0072_v0330_donations.sql`: 11 tabelas (`org_kyb_verifications`, `fee_rule_versions`, `provider_fee_schedules`,
-`donations`, `recurring_donation_agreements`, `payment_provider_events`, `donation_ledger_entries`, `donation_risk_cases`,
-`donation_receipts`, `campaign_updates`, `campaign_expenses`), 5 funções/gatilhos, RLS em todas, GRANTs mínimos ao
-`impacto_app`, 2 regras no catálogo (inativas), 2 categorias de auditoria (`donation`, `beneficiary`). Aplicada em banco novo
-(72 migrações) e pelo caminho de atualização (`test_v0150_upgrade`). Só acrescenta; reversível por código.
+Migração `0073_v0340_financial_ecosystem.sql`: 9 tabelas novas (`monetization_policy_versions`, `remuneration_notices`,
+`remuneration_obligations`, `remuneration_obligation_events`, `external_resources`, `donation_pledges`, `reconciliation_exceptions`,
+`reconciliation_exception_events`, `reconciliation_runs`), 4 funções/gatilhos (máquina de estados e log da obrigação, log da exceção,
+guarda de doação com liquidação/estorno parcial), colunas em `campaigns` e `donations`, 2 regras + cartas, 4 categorias de auditoria,
+GRANTs mínimos. Aplicada em banco novo (73 migrações) e pelo caminho de atualização. Só acrescenta.
 
 ## 5. Segurança e LGPD
 
-Modelo de ameaças com 19 linhas em `docs/donations/SECURITY_REVIEW.md` (15 🟢 com teste, 3 🟡, 1 🔴 dependente do adaptador
-real). Contexto de sistema no módulo revisado linha a linha (público, webhook, pessoa, equipe); rotas da organização com RLS.
-Dados pessoais: e-mail cifrado, anônimo protegido, bruto do webhook redigido. `secrets_scan.py` limpo.
+Matriz de riscos com 23 linhas (`docs/finance/RISK_MATRIX.md`). Contexto de sistema só nas rotas de equipe/pessoa/público (as de
+organização usam RLS). Nenhuma função de bloqueio no módulo de remuneração. `secrets_scan.py` limpo.
 
 ## 6. CI
 
-O CI completo roda no pull request (repositório privado, ADR-371). Resultado da execução do PR deste ramo: a registrar no
-PR; local: §7 e `docs/evidence/test_run_v0.33.0.log`.
+O CI completo roda no pull request. Resultado da execução do PR deste ramo: a registrar no PR; local: §7 e
+`docs/evidence/test_run_v0.34.0.log`.
 
 ## 7. Regressão — o que esta rodada encontrou e o que foi feito
 
 | Falha | Causa real | Correção |
 |---|---|---|
-| `test_06_refund_is_a_new_reversing_entry_and_voids_the_receipt` (1ª versão) | o serviço checava o estado antes de olhar se já havia reversão no razão; a segunda reversão voltava `ignored` | ordem invertida em `apply_provider_event`: reversão já lançada → `already_reversed` (eu tinha afrouxado a asserção primeiro — desfeito; a regra é não enfraquecer teste) |
-| `test_handlers_declare_auth` | 6 rotas públicas novas fora da lista revisada | listadas com a razão de segurança de cada uma |
-| `test_system_context_only_in_allowed_modules` | `donation_routes.py` usa contexto de sistema | permitido com a razão escrita (público, webhook, pessoa, equipe; organização usa RLS) |
-| `test_no_read_route_requires_a_write_permission` ×2 · `test_the_write_routes_require_a_write_permission` | GETs com `compliance.write`; `reconcile` (escreve) com `finance.read` | `compliance.read` nas leituras; `finance.write` na conciliação |
-| `test_the_platform_does_not_store_individual_beneficiaries…` | tabela chamada `beneficiary_verifications` casava com o guarda de "beneficiário individual" — mas é KYB de organização | tabela renomeada `org_kyb_verifications`; o guarda continua intacto |
-| `test_every_action_prefix_in_the_codebase_has_a_category` | prefixos `donation.` e `beneficiary.` sem categoria | categorias na própria 0072 (FINANCE, ORGS) |
-| `test_09b_the_v0170_layer_arrived_with_its_seeds_and_its_refusals` · `test_the_table_in_the_document_has_one_line_per_rule` | 13 regras ≠ 11; `MONETIZATION.md` sem as duas linhas | contagem com a razão; duas linhas na tabela |
-| `test_public_campaign_shows_remaining_quotas` (API e E2E) · jornada "Captação" | os testes antigos publicavam pelo atalho `PATCH status=published`, fechado pela ADR-374 | passam pela revisão a quatro olhos (`_publish_campaign`), com a razão; a página pública mantém o painel de cotas do projeto |
-| `test_every_route_in_the_static_menus_has_an_icon` | 3 rotas de menu sem ícone | ícones oficiais mapeados |
-| contagens fixadas (962 operações, 246 plataforma, 102 permissões, 60 públicas, 968 no mapa, 231 telas) · `DEMO.md`, `TESTER_GUIDE.md`, `TROUBLESHOOTING.md` | números mudaram com o módulo | atualizados com a razão ao lado (ADR-340) |
-| `test_regenerating_each_matrix_reproduces_what_is_committed` · matriz de jornadas · manifesto · notas da versão | artefatos gerados antes das mudanças finais | regenerados no fechamento; manifesto da v0.33.0 |
-| campanha criada pela interface com `kind: "donation"` | eu inventei um valor que o esquema não aceita | tipos reais (`project_crowdfunding`, `emergency`, `institutional_fund`, `recurring`, `organization`) no formulário; lista de campanhas sem `JOIN` obrigatório em projeto |
-| CI do PR #6: matriz de jornadas (261 ≠ 267 passos) | o relatório das jornadas depende da ordem da suíte: `test_v0120_knowledge` semeia o curso em rascunho antes das jornadas e a jornada "Suporte" pula 6 passos — era assim na v0.32.0 (4 passos); eu havia regenerado a matriz de uma rodada isolada | matriz regenerada na ordem da suíte (261 passos, 0 falhas), igual ao CI; o teste passou a dizer qual jornada divergiu |
-| CI do PR #6: `pilha-do-zero` — `Select` sem nome acessível em `/admin/doacoes` | filtro de situação sem `aria-label` | `aria-label="Filtrar por situação"` |
-| CI do PR #6: manifesto cita bundle antigo | bundle reconstruído depois do manifesto | manifesto regerado no fechamento |
-| captura de tela: `POST …/donate` 403 | origem do navegador ≠ `PUBLIC_BASE_URL` do servidor de teste (proteção de origem) | base pública apontada para o servidor de teste só na captura; nada mudou no produto |
+| ativar `donation.platform_fee` no teste → `InsufficientPrivilege` ADR-022 | a regra estava no motor `success_fee`, que o banco recusa ativar por desenho | reclassificada para `enterprise` (fatura à parte sobre base registrada, como a taxa do acordo); fundo e reserva ficam no motor inativável de propósito (ADR-378/380) |
+| ativar regra no teste → carta legal não verde | cartas são append-only; não se "edita" para verde | o teste emite carta VERDE nova (como uma revisão real faria) e devolve a original no `finally` |
+| `finance.write` → 401 `step_up_required` | permissões de escrita financeira exigem confirmação de identidade | `reauth()` nos clientes de equipe do teste |
+| `CampaignIn` recusa `funding_source` | esquema não tinha o campo | campo + instrumento obrigatório para público na criação |
+| teste de recurso externo contava lançamentos "dos últimos 2 s" | asserção frouxa | compara a contagem antes/depois |
+| captura das telas de administração → "área não disponível" | a conta de administração do harness tem uma organização OSC como primeira associação | só na captura: associação removida; nada muda no produto |
+| contagens fixadas (986/262/118/235), docs com números, matrizes | módulo novo | atualizadas com a razão; regeneradas |
+| `test_v0330_release_docs` pinava VERSION = 0.33.0 | pin de versão absoluta | passa a exigir ≥ 0.33.0 e a entrada no CHANGELOG |
+| `RISK_MATRIX.md` continha a frase proibida (negada) | o teste de documentos procura a afirmação | reescrita sem a frase |
 
 ## 8. Build e pacote
 
@@ -88,14 +83,13 @@ PR; local: §7 e `docs/evidence/test_run_v0.33.0.log`.
 | `ruff check impacto tests` | 0 avisos |
 | `tsc --noEmit` (tipos oficiais do React, removidos após a checagem) | 0 erros |
 | `node build.mjs` | ok |
-| `IMPACTO_TRUST_FINAL_RELEASE_0.33.0.zip` | `make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; SHA-256 no `.sha256` |
+| `IMPACTO_TRUST_FINAL_RELEASE_0.34.0.zip` | `make_release.py`; `verify_package_against_git.py` byte a byte; `secrets_scan.py`; `unzip -t`; SHA-256 no `.sha256` |
 
 ## 9. BLOCKED_EXTERNAL
 
-Contrato com provedor; modelo de titularidade; parecer (taxas, comprovante, termos, LGPD); processo de KYB; merge e
-publicação (demo → produção); pendências da v0.32.0; tag v0.33.0.
+Parecer e cartas verdes; contrato com provedor; termos; NFS-e; rotina agendada; merges e publicação; pendências da v0.32.0; tag.
 
 ## 10. Veredito desta auditoria
 
-Nenhum FAIL em aberto. O módulo faz o que o pacote pediu dentro do que é permitido sem contrato e sem parecer — e recusa,
-por código, o que não é. Detalhado em `FINAL_EXECUTION_REPORT.md` §27.
+Nenhum FAIL em aberto. A camada faz o que o pacote e as correções do responsável pedem dentro do que é permitido sem contrato e sem
+parecer — e recusa, por código e por banco, o que não é. Detalhado em `FINAL_EXECUTION_REPORT.md` §27.

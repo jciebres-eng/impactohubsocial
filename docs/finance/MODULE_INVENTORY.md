@@ -6,10 +6,14 @@
 | `backend/impacto/services/remuneration.py` | **novo** | política, registro, gatilho (`evaluate`), avisos, fatura (`platform_charges`), cobrada/recebida/liquidada, vencidas, disputa/decisão/dispensa, autorização de recurso público, visões |
 | `backend/impacto/services/reconciliation.py` | **novo** | snapshot do sandbox, execução por campanha, 9 tipos de exceção, assumir/resolver/histórico |
 | `backend/impacto/services/donations.py` | alterado | liquidação, estorno parcial (e total após parcial), obrigações na confirmação/reversão, totais por estado, recursos externos, compromissos, painel do financiador, `donor_org_id`/`funding_source` |
-| `backend/impacto/api/donation_routes.py` | alterado | +24 operações (ver `DONATIONS_API.md`) |
+| `backend/impacto/api/donation_routes.py` | alterado | +26 operações (ver `DONATIONS_API.md`); webhook em duas fases (E6) |
 | `backend/impacto/api/trust_schemas.py` | alterado | esquemas novos; `CampaignIn` (+origem do recurso); `DonationStartIn` (+`as_organization`, `funding_source`) |
 | `backend/impacto/api/platform_routes.py` | alterado | criação de campanha grava origem do recurso; recurso público exige instrumento |
 | `backend/tests/test_v0340_financial_ecosystem.py` | **novo** | 13 cenários |
+| `backend/tests/test_v0340_open_scenarios.py` | **novo (E6)** | 8 testes: cartão, falha do provedor, evento falho e reprocessado, liquidação parcial/falha, contribuição com split simulado e sem split, recorrência, reembolso e fatura protegida |
+| `backend/impacto/jobs.py` | alterado (E6) | rotina `financial_ops`: reprocessa eventos, marca vencidas, concilia campanhas recentes, cria tentativas de recorrência (se ligada) |
+| `backend/impacto/economics/payments.py` | alterado (E6) | organização não move fatura de remuneração da plataforma; devolução por sistema/administração reverte a obrigação |
+| `config/data_retention.json` | alterado (E6) | `remuneration_obligations.org_id` (retida) e `reconciliation_exceptions.org_id` (anonimizável) declaradas |
 | `backend/tests/test_v0340_release_docs.py` | **novo** | documentos, política e contagens da versão |
 | `web/src/pages/donations.tsx` | alterado | remuneração (org), contribuições (financiador), obrigações e conciliação (admin), recursos externos/compromissos/estados na gestão e na página pública |
 | `web/src/app.tsx`, `web/src/ui/icon.tsx` | alterado | rotas `/remuneracao`, `/contribuicoes`, `/admin/remuneracao`, `/admin/conciliacao` |

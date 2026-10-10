@@ -45,6 +45,17 @@ transição vai para `remuneration_obligation_events` (só inserção).
 Depois disso: fatura só acima de `min_invoice_cents` (v1: R$ 20,00; abaixo acumula); vencimento em `due_days_after_invoice`
 (30); carência antes de "vencida" `overdue_grace_days` (15).
 
+**O que NÃO passa por este gatilho (E6, ADR-384): a contribuição voluntária do doador.** Ela não é taxa sobre a organização: é
+um valor que o DOADOR escolheu somar, para a plataforma, antes de pagar (começa em zero, nunca sugerido, separado no total).
+Por isso a obrigação correspondente nasce devida com o gatilho `donor_opt_in_contribution` — sem franquia, sem teto — e:
+
+- com split confirmado pelo provedor no evento, nasce **recebida** (referência `split:<evento>`), e a liquidação continua na
+  conciliação;
+- sem split, é a organização que recebeu o valor quem deve repassá-lo, por **fatura à parte** (nunca desconto de doação), com
+  disputa, dispensa e "vencida não bloqueia nada" valendo igual.
+
+A regra `donation.platform_contribution` está INATIVA: enquanto não houver carta verde, o campo nem aparece para o doador.
+
 ## 4. Comunicação prévia (registrada)
 
 Tipos de aviso: `free_until_value_intro` (ao entrar), `allowance_approaching`, `charging_starts` (o único que conta para o

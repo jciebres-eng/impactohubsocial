@@ -12,7 +12,7 @@ nas condições atuais).
 | Oportunidade | Pagador | Valor entregue | Evento de cobrança | Modelo de preço (hipótese) | Custo direto | Risco | Prioridade | Classificação | Estado no código |
 |---|---|---|---|---|---|---|---|---|---|
 | Taxa de serviço sobre doação comunitária | organização beneficiária (ou doador por contribuição voluntária explícita) | página pública, QR, confirmação, razão, comprovante, prestação de contas | doação LIQUIDADA acima da franquia, após aviso | 1 % (100 bps), `enterprise`, faturada à parte | tarifa do provedor é do beneficiário; suporte | tíquete baixo × tarifa fixa; parecer; LGPD do doador | média | **JURÍDICO** | implementado: cálculo, obrigação, gatilho, fatura própria — regra INATIVA |
-| Contribuição opcional do doador para a plataforma | doador | manutenção da plataforma | doação confirmada com opt-in explícito | "cobrir custos" desmarcado por padrão; valor exibido | — | indução enganosa (vedada) | baixa | **PREPARAR** | `cover_costs` existe (0 bps no sandbox); valor só com provedor |
+| Contribuição voluntária do doador para a plataforma (ADR-384) | doador, por escolha | manutenção da plataforma, sem tirar nada da causa | doação confirmada com contribuição informada antes de pagar | valor livre, começa em R$ 0, teto = menor entre o valor doado e R$ 500; separada no total | tarifa sobre o valor a mais | indução enganosa (vedada: nunca sugerida nem pré-marcada); natureza tributária | média | **PREPARAR + JURÍDICO** | implementado (E6): campo só com a regra ativa; obrigação devida; split SIMULADO testado; sem split, fatura à organização — regra `donation.platform_contribution` INATIVA |
 | Taxa sobre aporte institucional (campanha `institutional_fund`) | financiador institucional (empresa/fundação) por contrato | originação, triagem, due diligence documental, acompanhamento | aporte confirmado + gatilho | 3,5 % (350 bps), `enterprise`, faturada à parte | suporte, análise | enquadramento; recurso público isento salvo instrumento | alta | **JURÍDICO** | regra `donation.institutional_fee` INATIVA; obrigação por doação com `funding_source` |
 | Reserva institucional do beneficiário | — (não é receita da plataforma) | transparência da reserva ao financiador | — | 1,5 % destinação contábil | — | confundir com custódia (vedado) | — | **NÃO (como receita)** | regra no motor `success_fee`, inativável por desenho |
 | Taxa de serviço do acordo de financiamento | pagador definido no acordo | matriz de distribuição imutável, instrução de repasse, conciliação | acordo ativado e quitado | 3,5 %, `contract.platform_service_fee` | — | parecer | alta | **JURÍDICO** | implementado na v0.26/0.27, INATIVO |
@@ -34,14 +34,15 @@ nas condições atuais).
 | Identificadores exclusivos de transação/operação | ✅ `donations.id`, `provider_charge_id`, `event_id` único por provedor |
 | Contrato e versão de tarifa vinculados à operação | ✅ `fee_rule_version_id` congelado; `policy_version_id` na obrigação |
 | Cálculo determinístico | ✅ `apply_bps` (Decimal, arredondamento declarado); conciliação acusa `fee_miscalculated` |
-| Split automático | ⛔ `split_enabled = false`, recusado na configuração; depende de provedor e enquadramento |
+| Split automático | 🟡 só para a contribuição voluntária do doador (nada sai da doação, ADR-384); caminho testado com provedor SIMULADO (`test_v0340_open_scenarios.test_14_15`); `split_enabled = false` recusado na configuração até contrato e homologação |
 | Faturamento sem split | ✅ `invoice` → `platform_charges` (manual/sandbox) |
 | Registro de obrigações | ✅ `remuneration_obligations` + eventos |
-| Conciliação com o provedor | ✅ `run_for_campaign` com snapshot; sandbox deriva dos eventos assinados |
+| Conciliação com o provedor | ✅ `run_for_campaign` com snapshot; sandbox deriva dos eventos assinados; periódica pela rotina `financial_ops` (E6) |
 | Alertas de divergência | ✅ fila de exceções tipada com prioridade |
 | Recursos recebidos externamente | ✅ `external_resources` (nunca receita) |
 | Auditoria de operações e exceções | ✅ `audit_log` (categorias novas) + históricos só-inserção |
-| Inadimplência | ✅ `overdue` sem bloqueio; disputa; dispensa |
+| Inadimplência | ✅ `overdue` sem bloqueio; disputa; dispensa; rotina `financial_ops` marca vencidas a cada ciclo (E6) |
+| Reembolso do que a plataforma recebeu | ✅ integral com `finance.approve` (parcial é ajuste); devolução da cobrança pelo provedor reverte a obrigação; organização não move a própria fatura (E6) |
 | Indicadores prevista × faturada × recebida × líquida | ✅ `platform_revenue_view` (nunca somados) |
 | Isenções, descontos, ajustes | ✅ `exempt`, `waived`, autorização por instrumento; ajuste = obrigação nova |
 | Aprovação segregada | ✅ liquidar/decidir/dispensar/autorizar exigem `finance.approve` |

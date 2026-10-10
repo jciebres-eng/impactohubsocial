@@ -18,7 +18,7 @@
 | $2 | Financeiro | Estorno/chargeback depois de taxa recebida | média | médio | obrigação → `disputed` com motivo (`reverse_for_source`) | processo com o provedor (prazos, quem avisa) | operação |
 | $3 | Financeiro | Tíquete baixo × tarifa fixa do provedor torna a taxa negativa/irrelevante | alta | médio | tarifa por tabela congelada; modelo 24m mostra | contrato com o provedor; mínimo por doação | responsável |
 | $4 | Financeiro | Inadimplência das faturas próprias | média | médio | `overdue` sem bloqueio; disputa; dispensa; teto de 5 % do liquidado | política de cobrança | financeiro |
-| $5 | Financeiro | Divergência razão × provedor não vista | média | alto | fila de exceções tipada; índice único; `unreconciled_overdue` (`test_08`) | rotina periódica no worker (não agendada ainda) | operação |
+| $5 | Financeiro | Divergência razão × provedor não vista | média | alto | fila de exceções tipada; índice único; `unreconciled_overdue` (`test_08`); conciliação periódica na rotina `financial_ops` (E6) | — (até a E6 era pendência: a rotina não estava agendada) | — |
 | S1 | Segurança | Webhook forjado | baixa | alto | HMAC obrigatório; 404 sem segredo; 202 sem efeito (`test_v0330.test_03`) | validação temporal no adaptador real | engenharia |
 | S2 | Segurança | Replay/duplicidade de eventos | baixa | alto | UNIQUE `(provider,event_id)`; concorrência provada (`test_v0340.test_10`) | — | — |
 | S3 | Segurança | Cliente altera valor/estado/taxa | baixa | alto | esquema recusa campo extra (422); valor conferido no webhook (`test_10`, `test_v0330.test_04`) | — | — |
@@ -27,3 +27,8 @@
 | S6 | Segurança | Snapshot do provedor adulterado (ferramenta de operação) | média | médio | só `finance.write`; trilha por execução; exceções nunca "fecham" doação sem evento assinado | adaptador real consulta a API | engenharia |
 | O1 | Operacional | Fila de webhooks do provedor pausada (Asaas: 15 falhas) | média | alto | 200 em aplicado/duplicado; 202 em assinatura inválida | monitor do provedor | operação |
 | O2 | Operacional | Sandbox tomado por produção | baixa | alto | `is_simulated` derivado por gatilho; aviso na página; `LIVE_PAYMENT_PROVIDER_ENABLED` recusado | — | — |
+| $6 | Financeiro | Organização marcar como paga/devolvida a própria fatura da plataforma (achado da E6: a rota de cobranças permitia) | — (corrigido) | alto | `PAY.transition` recusa 403 `platform_invoice` para fatura ligada a obrigação; só administração ou provedor movem (`test_v0340_open_scenarios.test_39`) | — | — |
+| $7 | Financeiro | Contribuição voluntária confundida com taxa sobre a doação | média | médio | começa em zero, nunca sugerida, separada no total e fora da arrecadação; regra INATIVA (`test_14_15`) | parecer sobre natureza da receita e sobre repasse pela organização sem split | jurídico/contábil |
+| $8 | Financeiro | Liquidação parcial ou falha de repasse tomada como dinheiro disponível | média | alto | `settled_cents` acumulado; `settled_at` só no total; exceções `settlement_partial`/`settlement_failed` (`test_17_18`) | — | — |
+| O3 | Operacional | Evento aceito e perdido por erro interno ao aplicar | baixa | alto | duas fases: gravado antes; `failed` + exceção + 500 (provedor reenvia); rotina reaplica (`test_33_35`) | — | — |
+| O4 | Operacional | Recorrência cobrando após cancelamento ou em falhas seguidas | baixa | alto | cancelado/pausado não gera tentativa; pausa após 3 falhas; trava desligada (`test_25_38`) | instrumento homologado (Pix Automático/cartão) | responsável + provedor |

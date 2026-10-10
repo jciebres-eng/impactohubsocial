@@ -10,7 +10,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 - Paginação: `limit` (1–100) e `offset`; respostas trazem `has_more` e `next_offset`.
 - Dinheiro sempre em centavos (inteiro). Datas ISO 8601 (UTC).
 
-## Operações (986)
+## Operações (988)
 
 | Método | Caminho | Acesso | Restrições | Descrição |
 |---|---|---|---|---|
@@ -204,6 +204,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/admin/remuneration/{obligation_id}/charged` | admin da plataforma + MFA | — | Marca como cobrada (enviada ao pagador) |
 | POST | `/v1/admin/remuneration/{obligation_id}/decide` | admin da plataforma + MFA | — | Decide uma disputa (manter, dispensar, isentar) com justificativa |
 | POST | `/v1/admin/remuneration/{obligation_id}/receipt` | admin da plataforma + MFA | — | Registra pagamento RECEBIDO (parcial ou total) com referência |
+| POST | `/v1/admin/remuneration/{obligation_id}/refund` | admin da plataforma + MFA | — | Reembolso integral do que a plataforma recebeu (ex.: serviço cancelado) — a obrigação vira estornada; segregado |
 | POST | `/v1/admin/remuneration/{obligation_id}/settle` | admin da plataforma + MFA | — | Marca como LIQUIDADA (conciliada com extrato) — segregado: exige finance.approve |
 | POST | `/v1/admin/remuneration/{obligation_id}/waive` | admin da plataforma + MFA | — | Dispensa uma obrigação com justificativa registrada |
 | GET | `/v1/admin/reports` | admin da plataforma + MFA | — | reports |
@@ -832,6 +833,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/public/donation-campaigns/{slug}/donate` | pública | limite 30/3600s | Inicia uma doação: cria a cobrança no provedor e devolve o Pix copia-e-cola/checkout com o preço total — não confirma nada |
 | POST | `/v1/public/donation-campaigns/{slug}/pledge` | usuário autenticado | limite 20/3600s | Registra um compromisso de doação futura (não é doação, não é dinheiro) |
 | GET | `/v1/public/donation-campaigns/{slug}/qr.svg` | pública | limite 120/3600s | QR Code da campanha: aponta para a URL HTTPS canônica (nunca para um payload Pix estático) |
+| POST | `/v1/public/donation-campaigns/{slug}/recurring` | usuário autenticado | limite 10/3600s | Autoriza doação recorrente (consentimento guardado por hash). Desligada até instrumento homologado no provedor |
 | GET | `/v1/public/donations/{donation_id}` | pública | limite 600/3600s | Estado da doação (pendente/confirmada/expirada), como o provedor informou; nunca muda pelo navegador |
 | GET | `/v1/public/donations/{donation_id}/receipt` | pública | limite 120/3600s | Comprovante da doação confirmada (não é recibo dedutível nem nota fiscal) |
 | GET | `/v1/public/glossary` | pública | limite 120/3600s | Vocabulário oficial: termo da API, rótulo de tela e definição (origem: config/glossary.json) |
@@ -994,7 +996,7 @@ Gerado por `scripts/gen_api_docs.py`. Contrato completo (schemas de entrada): `d
 | POST | `/v1/verifiable-records/{record_id}/revoke` | membro da organização ativa | papel ≥ owner | Revoga o registro público (a página passa a dizer REVOGADO, com motivo e data) |
 | POST | `/v1/verifiable-records/{record_id}/timestamp` | membro da organização ativa | papel ≥ manager | Aplica carimbo de tempo interno (RFC 3161 exige ACT contratada e não está disponível) |
 | POST | `/v1/vouchers/redeem` | membro da organização ativa | papel ≥ admin; limite 10/3600s | Resgata voucher de concessão (transação atômica; resposta genérica para códigos inválidos; vouchers de desconto aposentados) |
-| POST | `/v1/webhooks/donations/{provider}` | pública | limite 600/60s | Webhook do provedor: assinatura conferida, evento gravado uma vez, estado e razão atualizados numa transação |
+| POST | `/v1/webhooks/donations/{provider}` | pública | limite 600/60s | Webhook do provedor: assinatura conferida; evento gravado uma vez (fase 1) e aplicado travando a linha do evento (fase 2); falha interna fica registrada e é reprocessada |
 | POST | `/v1/webhooks/payments/{provider}` | pública | limite 600/60s | Webhook do provedor de pagamento: assinatura HMAC conferida, evento deduplicado, pedido de crédito creditado uma vez |
 | GET | `/v1/workspace` | membro da organização ativa | papel ≥ viewer | WorkspaceContext: persona, capacidades, contadores, próximas ações e seções em ordem |
 | GET | `/v1/workspace/personas` | usuário autenticado | — | Personas disponíveis (persona orienta o workspace; permissão continua vindo de papel e plano) |

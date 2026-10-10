@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 992,
- "operacoes_registradas": 986,
+ "operacoes_no_backend": 994,
+ "operacoes_registradas": 988,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",

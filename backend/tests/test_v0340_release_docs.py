@@ -39,7 +39,10 @@ class PolicyAndRulesTests(unittest.TestCase):
     def test_rules_are_inactive_and_in_the_right_engines(self):
         with db_system() as c:
             rows = {r["key"]: r for r in c.query("SELECT key, active, revenue_engine FROM monetization_rules WHERE key LIKE 'donation.%'")}
-        self.assertEqual(set(rows), {"donation.platform_fee", "donation.beneficiary_fund", "donation.institutional_fee", "donation.institutional_reserve"})
+        # E6 (ADR-384): + contribuição voluntária do doador, também inativa e no motor faturável (não é destinação do beneficiário)
+        self.assertEqual(set(rows), {"donation.platform_fee", "donation.beneficiary_fund", "donation.institutional_fee", "donation.institutional_reserve",
+                                     "donation.platform_contribution"})
+        self.assertEqual(rows["donation.platform_contribution"]["revenue_engine"], "enterprise")
         self.assertFalse(any(r["active"] for r in rows.values()))
         self.assertEqual(rows["donation.platform_fee"]["revenue_engine"], "enterprise")
         self.assertEqual(rows["donation.institutional_fee"]["revenue_engine"], "enterprise")
@@ -64,11 +67,24 @@ class DeliverableDocsTests(unittest.TestCase):
         self.assertIn("não sustenta a operação", modelo)
         cov = (FIN / "TEST_SCENARIO_COVERAGE.md").read_text(encoding="utf-8")
         self.assertEqual(len(re.findall(r"(?m)^\| \d+ \|", cov)), 40, "os 40 cenários do pacote estão na tabela")
-        self.assertIn("⛔", cov, "o que não é coberto está dito")
+        # E6 (v0.34.0): os 40 cenários passaram a ter teste. A guarda antiga ("⛔ aparece em algum lugar") ficaria satisfeita
+        # só pela legenda — vazia. A nova é mais forte: toda linha cita um teste que existe no repositório, e toda linha
+        # cuja condição depende do provedor real diz que é simulada/sandbox ou explica o limite.
+        tests_dir = ROOT / "backend" / "tests"
+        for row in re.findall(r"(?m)^\| (\d+) \| [^|]+\| ([^|]+)\| (.+) \|$", cov):
+            n, estado, prova = row
+            self.assertTrue(estado.strip().startswith("✅"), f"cenário {n} sem teste: {estado}")
+            citados = re.findall(r"test_v0\d{3}(?:_[a-z_]+)?", prova)
+            if citados and not prova.startswith("job "):
+                for nome in {x for x in citados if x.count("_") > 1}:
+                    self.assertTrue((tests_dir / f"{nome}.py").exists(), f"cenário {n} cita {nome}.py, que não existe")
+        for n in ("14", "25"):
+            linha = re.search(rf"(?m)^\| {n} \|.*$", cov).group(0)
+            self.assertRegex(linha, r"simulado|sandbox|só no teste", f"cenário {n} depende do provedor real e tem de dizer que é simulado")
 
     def test_decisions_changelog_version(self):
         txt = (ROOT / "DECISIONS.md").read_text(encoding="utf-8")
-        for n in range(377, 384):
+        for n in range(377, 385):   # E6: + ADR-384 (contribuição voluntária, split, webhook em duas fases, recorrência)
             self.assertRegex(txt, rf"(?m)^\| {n} \|", f"ADR-{n} ausente")
         self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "0.34.0")
         ch = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
@@ -81,6 +97,14 @@ class DeliverableDocsTests(unittest.TestCase):
         doc = (FIN / "DONATIONS_API.md").read_text(encoding="utf-8")
         for m in re.finditer(r'@route\("([A-Z]+)", "([^"]+)"', src):
             self.assertIn(f"`{m.group(1)}` | `{m.group(2)}`", doc, f"rota {m.group(1)} {m.group(2)} fora do documento")
+        # E6: a tabela é gerada (scripts/make_donations_api_doc.py) — cada linha tem de ser a da própria rota: na versão
+        # escrita à mão, as descrições estavam deslocadas uma linha em relação aos caminhos.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("make_donations_api_doc", ROOT / "scripts" / "make_donations_api_doc.py")
+        gen = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gen)
+        for linha in gen.rows():
+            self.assertIn(linha, doc, "linha da tabela diverge da rota — regere com scripts/make_donations_api_doc.py")
 
     def test_no_blocking_helper_exists_in_remuneration(self):
         rem = (ROOT / "backend" / "impacto" / "services" / "remuneration.py").read_text(encoding="utf-8")

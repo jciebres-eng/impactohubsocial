@@ -52,3 +52,22 @@ class TheFromZeroStackIsShapedLikeSupabaseTests(unittest.TestCase):
         corpo = fonte[fonte.index("class Jornadas"):fonte.index("def run(base")]
         for proibido in ("db_system", "owner_conn", "INSERT INTO", "UPDATE "):
             self.assertNotIn(proibido, corpo)
+
+    def test_the_journeys_never_start_the_test_server(self):
+        """v0.34.0: `Client()` sem base sobe o servidor DE TESTE (banco descartável via psql). Na pilha Docker isso
+        quebrou a jornada "Captação" desde a v0.33.0 (pessoa anônima que doa) e deixou o job vermelho sem causa visível.
+        Toda conta das jornadas fala com a base recebida: `Http(self.base)`."""
+        import ast
+        fonte = (ROOT / "backend" / "tests" / "demo_journeys.py").read_text(encoding="utf-8")
+        arvore = ast.parse(fonte)
+        jornadas = next(n for n in arvore.body if isinstance(n, ast.ClassDef) and n.name == "Jornadas")
+        chamadas = [n.lineno for n in ast.walk(jornadas)
+                    if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "Client"]
+        self.assertEqual(chamadas, [], f"Client() dentro das jornadas (linhas {chamadas}); use Http(self.base)")
+
+    def test_the_stack_runner_puts_failures_in_the_job_annotations(self):
+        """O log do job não é legível pela API neste ambiente; sem anotação, o vermelho do `pilha-do-zero` não tem causa."""
+        fonte = (ROOT / "scripts" / "demo_stack.py").read_text(encoding="utf-8")
+        self.assertIn('os.getenv("GITHUB_ACTIONS") != "true"', fonte)
+        for chamada in ('anotar(f"jornada ', 'anotar(f"tela ', 'anotar("telas sem visita com dado real"'):
+            self.assertIn(chamada, fonte)

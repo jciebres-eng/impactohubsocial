@@ -410,7 +410,10 @@ class Jornadas:
             self.passo(J, "OSC publica a campanha", osc, "POST", f"/v1/campaigns/{cp['id']}/publish")
             # Doação pública em SANDBOX (v0.33.0): cria a cobrança de teste e NUNCA marca pago — a confirmação
             # só viria de um evento assinado do provedor, que a demonstração não forja.
-            anon = Client()
+            # Http(self.base), não Client(): Client() sobe o servidor DE TESTE (banco descartável via psql) e quebrava a
+            # jornada na pilha Docker do CI (pilha-do-zero vermelho desde a v0.33.0); aqui a pessoa anônima fala com a
+            # mesma base das outras contas.
+            anon = Http(self.base)
             d = self.passo(J, "pessoa anônima inicia uma doação Pix (sandbox, não pagável)", anon, "POST",
                            f"/v1/public/donation-campaigns/{slug}/donate",
                            {"amount_cents": 5000, "method": "pix", "donor_display": "Apoiadora (exemplo)",

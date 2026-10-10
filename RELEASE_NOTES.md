@@ -29,6 +29,10 @@ prestação de contas a pagamento. Nenhuma regra está ativa; nenhum real entra 
 14. **Documentos** — arquitetura e fluxos (diagramas), razão e estados, política, matrizes de monetização e de riscos,
    jurídico/fiscal (com as três correções do responsável), API/webhooks, cobertura dos 40 cenários, modelo de 24 meses em 3 cenários.
 
+15. **Teste de ponta a ponta do CI de volta ao trabalho** — o teste que sobe o sistema do zero e percorre as jornadas e as 218
+    telas estava falhando desde a v0.33.0 por um erro no próprio roteiro de teste (não no produto). Corrigido, com um teste que
+    impede a volta, e agora o GitHub mostra a causa de cada falha.
+
 O que falta para ser real continua fora do código: contrato com provedor, parecer, cartas legais verdes, termos, NFS-e.
 
 ---

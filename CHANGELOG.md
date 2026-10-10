@@ -46,6 +46,12 @@ Formato Keep a Changelog. Histórico anterior (v0.1–v0.6): `history/v0.6.0/CHA
     podia, pela rota de cobranças, marcar como paga ou devolvida a própria fatura;
   - **rotina `financial_ops`** no worker: reprocessa eventos, marca vencidas, concilia campanhas com movimento recente e cria as
     tentativas de recorrência (só com a recorrência ligada).
+- **Etapa E7 — CI do pull request** (depois da primeira entrega do pacote, antes da tag): o job `pilha-do-zero` (pilha Docker do
+  zero + jornadas + 218 telas + axe) estava **vermelho desde a v0.33.0** sem causa visível. Causa: na jornada "Captação" a
+  pessoa anônima que doa era `Client()` — o cliente que sobe o servidor DE TESTE —, que não existe na pilha; a jornada parava
+  no meio. Correção: `Http(self.base)`; teste-guarda (`test_the_journeys_never_start_the_test_server`, falha no código antigo);
+  `scripts/demo_stack.py` põe cada falha de jornada/tela nas anotações do job (o log do job não é legível pela API aqui).
+  Só código de teste/CI mudou; o produto é o mesmo. O pacote 0.34.0 foi refeito e o anterior está registrado como substituído.
 - Migração `0073_v0340_financial_ecosystem.sql`; +26 operações (962 → 988); `test_v0340_financial_ecosystem` (13),
   `test_v0340_open_scenarios` (8), `test_v0340_release_docs`.
 - **Não feito, de propósito**: provedor real, split real, recorrência cobrada de verdade, cobrança ativa, NFS-e, assinaturas de

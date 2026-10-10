@@ -69,8 +69,19 @@ organização usam RLS). Nenhuma função de bloqueio no módulo de remuneraçã
 
 ## 6. CI
 
-O CI completo roda no pull request. Resultado da execução do PR deste ramo: a registrar no PR; local: §7 e
-`docs/evidence/test_run_v0.34.0.log`.
+O CI completo roda no pull request (job a job; o log do job não é legível pela API neste ambiente — só as anotações).
+
+| Execução | Commit | Resultado |
+|---|---|---|
+| PR #6, `38021228652` (a última da v0.33.0) | `103c643` | auditoria, armazenamento e docker verdes; **backend vermelho** (1 falha: matriz de jornadas por perfil, dependente da ordem da suíte — verde no PR #7) e **pilha-do-zero vermelho**. O relatório da v0.33.0 dava as falhas do CI como corrigidas; esta execução, posterior ao fechamento, mostra que o `pilha-do-zero` não estava |
+| PR #7, `38051419136` | `c81c6b7` | cancelada (duplicada da seguinte; poupa a cota de minutos do repositório privado) |
+| PR #7, `38051432373` | `813a052` | auditoria, armazenamento, docker e **backend verdes** (suíte completa, E2E no navegador, backup e restauração); **pilha-do-zero vermelho** — mesma causa do PR #6 (§7, linha `pilha-do-zero`) |
+| PR #7, execução após a correção | commit da correção (E7) | em execução quando este commit foi feito — resultado registrado no commit seguinte |
+
+Reprodução local da pilha (sem Docker, que não alcança registro de imagens aqui, com o MESMO roteiro): banco novo com o desenho
+do Supabase (administrador sem superusuário, `pgcrypto` em `extensions`), migrações como administrador, aplicação como
+`impacto_app`, seed de demonstração, `scripts/demo_stack.py --telas`. Antes da correção: "Captação" interrompida por exceção.
+Depois: 16 jornadas, 275 passos, 0 falha; 235 rotas de tela, 857 visitas, todas as 235 abertas com dado real, 0 falha; persistência após reiniciar a aplicação: contagens iguais (`docs/evidence/pilha_local_v0340.txt`). O axe-core real não é baixável aqui (registro npm bloqueado); no CI ele roda com `--axe-trava`.
 
 ## 7. Regressão — o que esta rodada encontrou e o que foi feito
 
@@ -96,6 +107,7 @@ O CI completo roda no pull request. Resultado da execução do PR deste ramo: a 
 | `test_v0200_cleanup` (E6): `apply_provider_event` inalcançável | o webhook passou a usar as duas fases | removida |
 | `test_v0230_authorization_matrix` (E6): contagens (988/263/119/16) | duas rotas e uma regra novas | atualizadas com a razão |
 | `test_v0170_monetization` (regressão da E6, 2.478 testes): regra da contribuição com preço fixado (`amount_cents = 0`) | hipótese de motor de rank ≤ 3 não pode declarar preço; e `unit` exige preço para ativar | modo `contract` sem preço: o valor é o que o doador escolhe nos termos da doação |
+| `pilha-do-zero` (CI do PR #6 e do PR #7): jornada "Captação" interrompida por `CalledProcessError` em `psql … naousado` | na v0.33.0 a pessoa anônima que doa virou `Client()` — o cliente que sobe o servidor DE TESTE (banco descartável); na pilha Docker não há servidor de teste. Passava na suíte local, que tem esse servidor, e o job só dizia "exit code 1" | `Http(self.base)`; teste-guarda `test_the_journeys_never_start_the_test_server` (falha no código antigo, linha 413); `scripts/demo_stack.py` põe cada falha de jornada/tela nas anotações do job; reproduzido e conferido localmente numa pilha montada como a do CI (§6) |
 | `test_e2e_web` (regressão da E6): tempo esgotado ao preencher campo | eu reconstruí o pacote do front enquanto a suíte rodava (arquivos trocados no meio do teste de navegador) | módulo reexecutado com o front estável: verde; nenhum código mudou |
 
 ## 8. Build e pacote

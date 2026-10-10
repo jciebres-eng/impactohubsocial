@@ -63,7 +63,10 @@ def create_offer(ctx: Ctx, body: S.CommercialOfferIn):
     return out
 
 
-@route("POST", "/v1/commercial/offers/{offer_id}/accept", body=S.CommercialAcceptIn, tags=T,
+# v0.35.0 (auditoria, AUTHZ-02): aceitar com autorização de cobrança, revogar a autorização e mudar o teto de gasto são
+# atos financeiros da ORGANIZAÇÃO — só a pessoa dona (owner), como as demais rotas de dinheiro. Antes: qualquer membro,
+# até quem só tinha leitura.
+@route("POST", "/v1/commercial/offers/{offer_id}/accept", body=S.CommercialAcceptIn, min_role="owner", tags=T,
        rate=("commercial_accept", 60, 3600), summary="Aceita a oferta — acesso gratuito OU autorização de cobrança")
 def accept_offer(ctx: Ctx, body: S.CommercialAcceptIn):
     with ctx.tx() as c:
@@ -79,7 +82,7 @@ def accept_offer(ctx: Ctx, body: S.CommercialAcceptIn):
     return out
 
 
-@route("POST", "/v1/commercial/consent/revoke", body=S.ConsentRevokeIn, tags=T,
+@route("POST", "/v1/commercial/consent/revoke", body=S.ConsentRevokeIn, min_role="owner", tags=T,
        summary="Revoga a autorização de cobrança (o aceite permanece registrado)")
 def revoke_consent(ctx: Ctx, body: S.ConsentRevokeIn):
     with ctx.tx() as c:
@@ -176,7 +179,7 @@ def usage(ctx: Ctx):
                               "e sem autorização."}
 
 
-@route("PUT", "/v1/commercial/spend-limit", body=S.SpendLimitIn, tags=T,
+@route("PUT", "/v1/commercial/spend-limit", body=S.SpendLimitIn, min_role="owner", tags=T,
        summary="Define o teto de gasto mensal e o que fazer ao atingi-lo (avisar ou parar)")
 def set_spend_limit(ctx: Ctx, body: S.SpendLimitIn):
     from ..services import usage as U

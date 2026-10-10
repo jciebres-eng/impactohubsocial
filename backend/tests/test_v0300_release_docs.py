@@ -86,7 +86,15 @@ class GeneratedMatricesTests(unittest.TestCase):
         before = path.read_text(encoding="utf-8")
         r = subprocess.run([sys.executable, str(ROOT / "scripts" / "make_profile_journey_matrix.py")], capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(path.read_text(encoding="utf-8"), before, "regere com scripts/make_profile_journey_matrix.py")
+        depois = path.read_text(encoding="utf-8")
+        if depois != before:
+            # Diagnóstico (v0.33.0): a matriz vem do relatório das jornadas; quando o CI diverge do local, a diferença
+            # útil é QUAL jornada mudou de tamanho — o diff de 60 mil caracteres não cabe na anotação.
+            import json
+            rel = json.loads((ROOT / "docs" / "evidence" / "jornadas_v0250" / "relatorio.json").read_text(encoding="utf-8"))
+            resumo = {j: v for j, v in (rel.get("por_jornada") or {}).items()}
+            self.fail("regere com scripts/make_profile_journey_matrix.py — passos por jornada no relatório atual: "
+                      + json.dumps(resumo, ensure_ascii=False) + " — falhas: " + json.dumps(rel.get("falhas"), ensure_ascii=False)[:1500])
         self.assertIn("Jornadas: **16**", before)
 
     def test_the_baseline_classifies_in_four_states_and_names_the_conflicts(self):

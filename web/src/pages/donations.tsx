@@ -298,7 +298,7 @@ export function DonationReview() {
   return (
     <>
       <PageHead title="Revisão de campanhas de doação" sub="Quatro olhos: quem criou não aprova. Publicar ainda exige beneficiário verificado."
-                actions={<Select value={status} onChange={setStatus} options={[["pending_review", "Em revisão"], ["approved", "Aprovadas"], ["published", "Publicadas"], ["rejected", "Recusadas"], ["under_review", "Em análise"]]} />} />
+                actions={<Select aria-label="Filtrar por situação" value={status} onChange={setStatus} options={[["pending_review", "Em revisão"], ["approved", "Aprovadas"], ["published", "Publicadas"], ["rejected", "Recusadas"], ["under_review", "Em análise"]]} />} />
       <StateView loading={loading} error={error} onRetry={reload} empty={!data?.items?.length}>
         {data?.items?.map((c: any) => (
           <Panel key={c.id} title={`${c.title} — ${c.org}`}>

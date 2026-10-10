@@ -263,6 +263,11 @@ class CampaignReviewIn(In):
     note: Annotated[str, Field(min_length=10, max_length=2000)]
 
 
+class CampaignSuspendIn(In):
+    note: Annotated[str, Field(min_length=10, max_length=2000)]
+    reinstate: bool = False
+
+
 class DonationStartIn(In):
     amount_cents: Annotated[int, Field(ge=100, le=100_000_000)]
     method: Literal["pix", "card"] = "pix"

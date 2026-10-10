@@ -1,8 +1,8 @@
 {
  "o_que_e": "cruzamento das telas com as operações do backend — as registradas por impacto.http.ROUTES mais as rotas Starlette cruas de app.py (_infra_routes); as chamadas vêm da leitura do corpo de cada componente exportado",
  "o_que_nao_prova": "'backend presente' quer dizer que a operação existe e está registrada. Não quer dizer que a tela funciona: só execução contra banco com dados prova isso.",
- "operacoes_no_backend": 946,
- "operacoes_registradas": 940,
+ "operacoes_no_backend": 968,
+ "operacoes_registradas": 962,
  "rotas_cruas_de_app_py": [
   "GET /healthz",
   "GET /metrics",
@@ -11,16 +11,16 @@
   "GET /v1/meta/taxonomy",
   "GET /v1/openapi.json"
  ],
- "telas": 227,
+ "telas": 231,
  "estados": {
-  "backend presente": 163,
+  "backend presente": 167,
   "endpoint ausente": 0,
   "chamada dinâmica": 0,
   "sem chamada direta": 64
  },
  "interface_sem_backend": {},
- "arquivos_do_front_varridos": 65,
- "operacoes_que_nenhuma_tela_chama": 256,
+ "arquivos_do_front_varridos": 66,
+ "operacoes_que_nenhuma_tela_chama": 259,
  "orfas_backend": [
   "DELETE /v1/frameworks/mappings/{}",
   "DELETE /v1/integrations/connections/{}",
@@ -42,6 +42,7 @@
   "GET /v1/admin/ai/cost",
   "GET /v1/admin/ai/prompts/{}",
   "GET /v1/admin/content/citations/{}/{}",
+  "GET /v1/admin/donation-ledger/{}",
   "GET /v1/admin/flags",
   "GET /v1/admin/integrations/overview",
   "GET /v1/admin/jobs",
@@ -176,6 +177,7 @@
   "POST /v1/admin/content/work-items/{}",
   "POST /v1/admin/content/{}/{}/retract",
   "POST /v1/admin/datasets",
+  "POST /v1/admin/donation-campaigns/{}/reconcile",
   "POST /v1/admin/equity/denominators",
   "POST /v1/admin/funding-quotas/pledges/{}/confirm",
   "POST /v1/admin/hub/certificates/{}/revoke",
@@ -260,6 +262,7 @@
   "POST /v1/solutions/{}/reviews",
   "POST /v1/statements/reconcile",
   "POST /v1/verifiable-records/{}/timestamp",
+  "POST /v1/webhooks/donations/{}",
   "POST /v1/webhooks/payments/{}",
   "POST /v1/workspace/personas",
   "PUT /v1/admin/ai/quota-policies/{}",
@@ -721,7 +724,18 @@
    "componente": "Funding.PublicCampaign",
    "arquivo": "web/src/pages/funding.tsx",
    "operacoes": [
-    "GET /v1/public/campaigns/{}"
+    "GET /v1/public/campaigns/{}",
+    "GET /v1/public/donation-campaigns/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/doacao/:id",
+   "componente": "Don.DonationStatus",
+   "arquivo": "web/src/pages/donations.tsx",
+   "operacoes": [
+    "GET /v1/public/donations/{}/receipt"
    ],
    "ausentes": [],
    "estado": "backend presente"
@@ -1018,6 +1032,28 @@
    "arquivo": "web/src/pages/admin.tsx",
    "operacoes": [
     "POST /v1/admin/reports/{}/{}"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/doacoes",
+   "componente": "Don.DonationReview",
+   "arquivo": "web/src/pages/donations.tsx",
+   "operacoes": [
+    "POST /v1/admin/beneficiaries/{}/verification",
+    "POST /v1/admin/donation-campaigns/{}/review",
+    "POST /v1/admin/donation-campaigns/{}/suspend"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/admin/doacoes/risco",
+   "componente": "Don.DonationRiskCases",
+   "arquivo": "web/src/pages/donations.tsx",
+   "operacoes": [
+    "POST /v1/admin/donation-risk-cases/{}/decide"
    ],
    "ausentes": [],
    "estado": "backend presente"
@@ -1917,6 +1953,16 @@
    "operacoes": [
     "PATCH /v1/professional-services/{}",
     "POST /v1/professional-services"
+   ],
+   "ausentes": [],
+   "estado": "backend presente"
+  },
+  {
+   "rota": "/minhas-doacoes",
+   "componente": "Don.MyDonations",
+   "arquivo": "web/src/pages/donations.tsx",
+   "operacoes": [
+    "POST /v1/me/recurring-donations/{}/cancel"
    ],
    "ausentes": [],
    "estado": "backend presente"

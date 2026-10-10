@@ -567,6 +567,25 @@ def review(c: Connection, *, campaign_id: str, reviewer: str, approve: bool, not
     return {"status": "approved" if approve else "rejected"}
 
 
+def suspend(c: Connection, *, campaign_id: str, reviewer: str, note: str, reinstate: bool = False) -> dict:
+    """Administração tira uma campanha publicada do ar (`under_review`) ou a devolve ao ar. Sempre com justificativa."""
+    if len(note or "") < 10:
+        raise unprocessable("suspensão exige justificativa", code="review_note_required")
+    camp = c.one("SELECT status FROM campaigns WHERE id = $1", campaign_id)
+    if not camp:
+        raise not_found("Campanha")
+    if reinstate:
+        if camp["status"] != "under_review":
+            raise unprocessable("só campanha em análise volta ao ar", code="campaign_state")
+        target = "published"
+    else:
+        if camp["status"] not in ("published", "paused", "target_reached"):
+            raise unprocessable("só campanha no ar é suspensa", code="campaign_state")
+        target = "under_review"
+    c.run("UPDATE campaigns SET status = $2, reviewed_by = $3, reviewed_at = now(), review_note = $4 WHERE id = $1", campaign_id, target, reviewer, note)
+    return {"status": target}
+
+
 def publish(c: Connection, *, settings: Any, campaign_id: str, org_id: str) -> dict:
     camp = require_campaign_owner(c, campaign_id, org_id)
     if not getattr(settings, "campaign_publication_enabled", True):
@@ -594,9 +613,10 @@ def accountability(c: Connection, *, campaign_id: str, org_id: str) -> dict:
                         " CASE WHEN public_anonymous THEN NULL ELSE donor_display END AS donor_display"
                         " FROM donations WHERE campaign_id = $1 ORDER BY created_at DESC LIMIT 200", campaign_id)
     risk = c.query("SELECT id::text AS id, level, action, status, reason_codes, created_at FROM donation_risk_cases WHERE campaign_id = $1 AND status = 'open'", campaign_id)
+    updates = c.query("SELECT id::text AS id, title, body, is_public, created_at FROM campaign_updates WHERE campaign_id = $1 ORDER BY created_at DESC LIMIT 50", campaign_id)
     declared = sum(int(e["amount_cents"]) for e in expenses)
     validated = sum(int(e["amount_cents"]) for e in expenses if e["evidence_status"] == "validated")
-    return {"campaign": camp, "totals": totals, "expenses": expenses, "donations": donations, "open_risk_cases": risk,
+    return {"campaign": camp, "totals": totals, "expenses": expenses, "updates": updates, "donations": donations, "open_risk_cases": risk,
             "expenses_declared_cents": declared, "expenses_validated_cents": validated,
             "definitions": {"gross_confirmed_cents": "soma das doações confirmadas pelo provedor",
                             "beneficiary_net_estimated_cents": "bruto − tarifa do provedor − taxa calculada − fundo − estornos; estimado até conciliar",

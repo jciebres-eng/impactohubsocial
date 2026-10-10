@@ -182,10 +182,14 @@ def cancel_recurring(ctx: Ctx):
        summary="Campanhas aguardando revisão e campanhas publicadas")
 def admin_campaigns(ctx: Ctx):
     with ctx.system_tx() as c:
-        rows = c.query("SELECT c.id::text AS id, c.slug, c.title, c.kind, c.status, c.target_cents, c.created_at, o.legal_name AS org,"
+        wanted = ctx.request.query_params.get("status") or ""
+        allowed = ("pending_review", "approved", "published", "under_review", "paused", "rejected")
+        statuses = [wanted] if wanted in allowed else list(allowed[:-1])
+        rows = c.query("SELECT c.id::text AS id, c.slug, c.title, c.kind, c.status, c.target_cents, c.created_at, c.purpose, c.accepted_terms_at,"
+                       " c.created_by::text AS created_by, c.beneficiary_org_id::text AS beneficiary_org_id, o.legal_name AS org,"
                        " beneficiary_verified(c.beneficiary_org_id) AS beneficiary_verified"
                        " FROM campaigns c JOIN organizations o ON o.id = c.beneficiary_org_id"
-                       " WHERE c.status IN ('pending_review','approved','published','under_review','paused') ORDER BY c.status, c.created_at")
+                       " WHERE c.status = ANY($1) ORDER BY c.status, c.created_at", statuses)
     return {"items": rows}
 
 
@@ -195,6 +199,15 @@ def admin_review(ctx: Ctx, body: TSch.CampaignReviewIn):
     with ctx.system_tx() as c:
         out = DON.review(c, campaign_id=ctx.path["campaign_id"], reviewer=ctx.user_id, approve=body.approve, note=body.note)
         ctx.audit(c, "campaign.reviewed", "campaign", ctx.path["campaign_id"], {"approve": body.approve}, org_id=None)
+    return out
+
+
+@route("POST", "/v1/admin/donation-campaigns/{campaign_id}/suspend", auth="admin", permission="compliance.write", body=TSch.CampaignSuspendIn, tags=T,
+       summary="Tira do ar (em análise) ou devolve ao ar uma campanha publicada, com justificativa")
+def admin_suspend(ctx: Ctx, body: TSch.CampaignSuspendIn):
+    with ctx.system_tx() as c:
+        out = DON.suspend(c, campaign_id=ctx.path["campaign_id"], reviewer=ctx.user_id, note=body.note, reinstate=body.reinstate)
+        ctx.audit(c, "campaign.suspended" if not body.reinstate else "campaign.reinstated", "campaign", ctx.path["campaign_id"], {"note": body.note}, org_id=None)
     return out
 
 
@@ -214,8 +227,10 @@ def admin_beneficiary_verification(ctx: Ctx, body: TSch.BeneficiaryVerificationI
 @route("GET", "/v1/admin/donation-risk-cases", auth="admin", permission="compliance.write", tags=T, summary="Casos de risco abertos (revisão humana)")
 def admin_risk_cases(ctx: Ctx):
     with ctx.system_tx() as c:
-        rows = c.query("SELECT id::text AS id, campaign_id::text AS campaign_id, donation_id::text AS donation_id, reason_codes, level, action,"
-                       " rule_version, explanation, status, created_at FROM donation_risk_cases WHERE status = 'open' ORDER BY level DESC, created_at")
+        rows = c.query("SELECT r.id::text AS id, r.campaign_id::text AS campaign_id, r.donation_id::text AS donation_id, r.reason_codes, r.level, r.action,"
+                       " r.rule_version, r.explanation, r.status, r.created_at, d.amount_cents, d.status AS donation_status, c.title AS campaign_title"
+                       " FROM donation_risk_cases r LEFT JOIN donations d ON d.id = r.donation_id LEFT JOIN campaigns c ON c.id = r.campaign_id"
+                       " WHERE r.status = 'open' ORDER BY r.level DESC, r.created_at")
     return {"items": rows, "rules_version": DON.RISK_RULES_VERSION,
             "note": "Nenhum limiar aqui é obrigação legal; payout_hold não existe nesta versão (depende do contrato com o provedor)."}
 

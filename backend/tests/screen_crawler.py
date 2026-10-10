@@ -53,6 +53,7 @@ RESOLVE: dict[str, str] = {
     "/ajuda/faq/:id": "SELECT id::text FROM kb_faqs WHERE published_at IS NOT NULL ORDER BY created_at LIMIT 1",
     "/ajuda/suporte/:id": "SELECT id::text FROM support_tickets WHERE org_id = {org} ORDER BY created_at LIMIT 1",
     "/campanha/:slug": "SELECT slug FROM campaigns WHERE published_at IS NOT NULL ORDER BY created_at LIMIT 1",
+    "/doacao/:id": "SELECT id::text FROM donations ORDER BY created_at LIMIT 1",
     "/verificar/:code": "SELECT code FROM verifiable_records ORDER BY created_at LIMIT 1",
     "/ia/analises/:id": "SELECT id::text FROM similarity_analyses WHERE org_id = {org} ORDER BY created_at LIMIT 1",
     "/ia/patrocinios/:id": "SELECT id::text FROM ai_sponsorships WHERE sponsor_org_id = {org} ORDER BY created_at LIMIT 1",

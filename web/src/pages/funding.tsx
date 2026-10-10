@@ -4,6 +4,8 @@ import { date, dateTime, money } from "../format";
 import { Link, useLocation } from "../router";
 import { Button, Field, Input, KeyValue, Modal, PageHead, Panel, Pill, Select, StateView, TextArea, useAction, useForm, useLoad } from "../ui/kit";
 import { ContextualHelp } from "../ui/help";
+import { CampaignAccountability, PublicDonationCampaign, donationStatusLabel } from "./donations";
+import { parseMoney } from "../format";
 
 const Q_STATUS: [string, string][] = [["draft", "Rascunho"], ["open", "Aberta"], ["paused", "Pausada"], ["closed", "Fechada"]];
 const C_STATUS: [string, string][] = [["draft", "Rascunho"], ["published", "Publicada"], ["closed", "Fechada"]];
@@ -101,7 +103,8 @@ export function QuotaPledges({ id }: { id: string }) {
   );
 }
 
-const EMPTY_C = { project_id: "", slug: "", title: "", summary: "", story: "", show_backers: false };
+const EMPTY_C = { project_id: "", slug: "", title: "", summary: "", story: "", show_backers: false, kind: "donation", target: "", starts_on: "", ends_on: "",
+  purpose: "", contingency_policy: "", refund_policy: "", min_donation: "5,00" };
 
 export function Campaigns() {
   const { data, error, loading, reload } = useLoad<any>("/v1/funding-quotas");
@@ -116,10 +119,17 @@ export function Campaigns() {
     e.preventDefault();
     await run(async () => {
       const out = await api.post("/v1/campaigns", {
-        project_id: f.v.project_id, slug: f.v.slug, title: f.v.title, summary: f.v.summary,
-        ...(f.v.story ? { story: f.v.story } : {}), show_backers: !!f.v.show_backers,
+        ...(f.v.project_id ? { project_id: f.v.project_id } : {}), slug: f.v.slug, title: f.v.title, summary: f.v.summary,
+        ...(f.v.story ? { story: f.v.story } : {}), show_backers: !!f.v.show_backers, kind: f.v.kind,
+        ...(f.v.kind === "donation" ? {
+          ...(parseMoney(f.v.target) ? { target_cents: parseMoney(f.v.target) } : {}),
+          ...(f.v.starts_on ? { starts_on: f.v.starts_on } : {}), ...(f.v.ends_on ? { ends_on: f.v.ends_on } : {}),
+          ...(f.v.purpose ? { purpose: f.v.purpose } : {}), ...(f.v.contingency_policy ? { contingency_policy: f.v.contingency_policy } : {}),
+          ...(f.v.refund_policy ? { refund_policy: f.v.refund_policy } : {}),
+          ...(parseMoney(f.v.min_donation) ? { min_donation_cents: parseMoney(f.v.min_donation) } : {}),
+        } : {}),
       });
-      setCreating(false); f.setV(EMPTY_C); setCampaign({ ...out, status: "draft" });
+      setCreating(false); f.setV(EMPTY_C); setCampaign({ ...out, status: "draft", slug: f.v.slug, title: f.v.title, kind: f.v.kind, target_cents: parseMoney(f.v.target) });
       return "Campanha criada em rascunho.";
     });
   }
@@ -128,17 +138,21 @@ export function Campaigns() {
     <>
       <PageHead title="Campanha de divulgação" sub="Dá publicidade ao projeto e mostra quantas cotas faltam."
                 actions={<Button variant="primary" onClick={() => setCreating(true)}>Criar campanha</Button>} />
-      {campaign?.id && (
+      {campaign?.id && campaign.kind !== "donation" && (
         <Panel title={campaign.title || "Campanha"} actions={
           <Select aria-label="Situação da campanha" value={campaign.status || "draft"} options={C_STATUS}
                   onChange={(v) => run(async () => {
                     await api.patch(`/v1/campaigns/${campaign.id}`, { status: v });
                     setCampaign({ ...campaign, status: v });
-                    return v === "published" ? "Campanha publicada." : "Situação atualizada.";
+                    return "Situação atualizada.";
                   })} />}>
           <KeyValue items={[["Endereço público", <Link key="l" to={`/campanha/${campaign.slug}`}>/campanha/{campaign.slug}</Link>],
-                            ["Situação", campaign.status || "draft"]]} />
+                            ["Situação", donationStatusLabel(campaign.status || "draft")]]} />
+          <p className="muted small">Publicar passa pela revisão da plataforma (envie para revisão na campanha de doação).</p>
         </Panel>
+      )}
+      {campaign?.id && campaign.kind === "donation" && (
+        <CampaignAccountability campaign={campaign} onChange={setCampaign} />
       )}
       <StateView loading={loading} error={error} onRetry={reload}>
         {data?.items?.map((q: any) => <Panel key={q.id} title={q.label}><QuotaProgress q={q} /></Panel>)}
@@ -146,12 +160,24 @@ export function Campaigns() {
       <Modal open={creating} title="Criar campanha" onClose={() => setCreating(false)}
              footer={<><Button onClick={() => setCreating(false)}>Cancelar</Button>
                <Button variant="primary" busy={busy} onClick={create}
-                       disabled={!f.v.project_id || !f.v.slug || !f.v.title || f.v.summary.length < 20}>Criar</Button></>}>
-        <Field label="Projeto (identificador)"><Input value={f.v.project_id} onChange={f.set("project_id")} /></Field>
+                       disabled={(f.v.kind !== "donation" && !f.v.project_id) || !f.v.slug || !f.v.title || f.v.summary.length < 20}>Criar</Button></>}>
+        <Field label="Tipo"><Select value={f.v.kind} onChange={f.set("kind")} options={[["donation", "Doação (Pix pelo provedor)"], ["quota", "Divulgação de cotas"]]} /></Field>
+        <Field label="Projeto (identificador)" hint="Opcional para campanha de doação."><Input value={f.v.project_id} onChange={f.set("project_id")} /></Field>
         <Field label="Endereço público" hint="Só letras minúsculas, números e hífen."><Input value={f.v.slug} onChange={f.set("slug")} placeholder="nossa-campanha-2026" /></Field>
         <Field label="Título"><Input value={f.v.title} onChange={f.set("title")} /></Field>
         <Field label="Resumo" wide hint="Entre 20 e 600 caracteres."><TextArea value={f.v.summary} onChange={f.set("summary")} rows={3} /></Field>
         <Field label="História do projeto" wide><TextArea value={f.v.story} onChange={f.set("story")} rows={6} /></Field>
+        {f.v.kind === "donation" && (
+          <>
+            <Field label="Meta (R$)" hint="Opcional. A barra pública usa só pagamentos confirmados."><Input value={f.v.target} onChange={f.set("target")} inputMode="decimal" /></Field>
+            <Field label="Doação mínima (R$)"><Input value={f.v.min_donation} onChange={f.set("min_donation")} inputMode="decimal" /></Field>
+            <Field label="Início"><Input value={f.v.starts_on} onChange={f.set("starts_on")} type="date" /></Field>
+            <Field label="Fim"><Input value={f.v.ends_on} onChange={f.set("ends_on")} type="date" /></Field>
+            <Field label="Para que serve o dinheiro" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.purpose} onChange={f.set("purpose")} rows={3} /></Field>
+            <Field label="Se a meta não for atingida" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.contingency_policy} onChange={f.set("contingency_policy")} rows={2} /></Field>
+            <Field label="Política de estorno" wide hint="Obrigatório para enviar à revisão."><TextArea value={f.v.refund_policy} onChange={f.set("refund_policy")} rows={2} /></Field>
+          </>
+        )}
         <Field label="Mostrar apoiadores publicamente">
           <Select value={f.v.show_backers ? "1" : "0"} onChange={(v) => f.set("show_backers")(v === "1")}
                   options={[["0", "Não"], ["1", "Sim"]]} />
@@ -166,15 +192,20 @@ export function PublicCampaign() {
   const { path } = useLocation();
   const slug = path.replace(/^\/campanha\/?/, "");
   const [state, setState] = useState<{ data?: any; error?: string; loading: boolean }>({ loading: true });
+  const cleanSlug = slug.split("?")[0];
   useEffect(() => {
-    api.get(`/v1/public/campaigns/${encodeURIComponent(slug)}`)
-      .then((data) => setState({ data, loading: false }))
-      .catch((e) => setState({ error: describeError(e), loading: false }));
-  }, [slug]);
+    // Campanha de doação (v0.33.0) primeiro; se não houver, a página legada de cotas.
+    api.get(`/v1/public/donation-campaigns/${encodeURIComponent(cleanSlug)}`)
+      .then((data) => setState({ data: { donation: data }, loading: false }))
+      .catch(() => api.get(`/v1/public/campaigns/${encodeURIComponent(cleanSlug)}`)
+        .then((data) => setState({ data, loading: false }))
+        .catch((e) => setState({ error: describeError(e), loading: false })));
+  }, [cleanSlug]);
   const d = state.data;
   return (
     <StateView loading={state.loading} error={state.error}>
-      {d && (
+      {d?.donation && <PublicDonationCampaign data={d.donation} slug={cleanSlug} />}
+      {d && !d.donation && (
         <>
           <h1>{d.campaign.title}</h1>
           <p>{d.campaign.summary}</p>

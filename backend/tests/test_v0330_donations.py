@@ -241,6 +241,20 @@ class DonationsEndToEndTests(unittest.TestCase):
             with self.assertRaises(C.ConfigError, msg=flag):
                 C.validate(replace(s, **{flag: True}))
 
+    def test_11_admin_can_take_a_published_campaign_off_the_air_and_back_with_a_reason(self):
+        anon = Client()
+        r = self.reviewer.post(f"/v1/admin/donation-campaigns/{self.campaign}/suspend", {"note": "curto"})
+        self.assertEqual(r.status, 422, "suspender sem justificativa não passa")
+        r = self.reviewer.post(f"/v1/admin/donation-campaigns/{self.campaign}/suspend", {"note": "denúncia recebida; apurando a titularidade"})
+        self.assertEqual(r.status, 200, r.body)
+        self.assertEqual(r.json["status"], "under_review")
+        self.assertEqual(anon.get(f"/v1/public/donation-campaigns/{self.slug}").status, 404, "em análise a página pública some")
+        r = self.osc.post(f"/v1/campaigns/{self.campaign}/publish")
+        self.assertEqual(r.status, 422, "a organização não devolve ao ar sozinha")
+        r = self.reviewer.post(f"/v1/admin/donation-campaigns/{self.campaign}/suspend", {"note": "apuração encerrada sem achado", "reinstate": True})
+        self.assertEqual(r.json["status"], "published")
+        self.assertEqual(anon.get(f"/v1/public/donation-campaigns/{self.slug}").status, 200)
+
     def test_10_no_custody_no_balance_column_and_rules_inactive(self):
         with db_system() as c:
             cols = {r["column_name"] for r in c.query("SELECT column_name FROM information_schema.columns WHERE table_name IN ('campaigns','donations','organizations')")}

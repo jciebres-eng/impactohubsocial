@@ -37,6 +37,7 @@ import * as Mkt from "./pages/market";
 import * as Talk from "./pages/talk";
 import * as IR from "./pages/impactreport";
 import * as PP from "./pages/publicprofile";
+import * as Don from "./pages/donations";
 import * as Terr from "./pages/territory";
 import * as Tower from "./pages/tower";
 import * as Part from "./pages/participations";
@@ -173,6 +174,8 @@ const ROUTES: R[] = [
   ["/admin/institucional", () => <Inst.InstitutionAdmin />, ["platform"]],
   ["/admin/solucoes", () => <SolM.AdminSolutions />, ["platform"]],
   ["/admin/risco", () => <Ops.Risk />, ["platform"]],
+  ["/admin/doacoes", () => <Don.DonationReview />, ["platform"]],
+  ["/admin/doacoes/risco", () => <Don.DonationRiskCases />, ["platform"]],
   ["/admin/erros", () => <Ops.Errors />, ["platform"]],
   ["/admin/contribuicao", () => <Ops.ContributionReview />, ["platform"]],
   ["/admin/central", () => <HelpA.Overview />, ["platform"]],
@@ -222,6 +225,7 @@ const ROUTES: R[] = [
   ["/relatorios-impacto/:id", (p) => <IR.ImpactReportDetail id={p.id} />],
   ["/prontidao/finalidades", () => <IR.ReadinessPurposes />],
   ["/perfil-publico", () => <PP.MyPublicProfile />],
+  ["/minhas-doacoes", () => <Don.MyDonations />],
   ["/perfil-publico/experiencias", () => <PP.Experiences />],
   ["/perfil-publico/:id/identificadores", (p) => <PP.HandleHistory id={p.id} />],
   ["/rede/experiencias", () => <PP.ExperienceRequests />],
@@ -276,6 +280,7 @@ const HELP: HR[] = [
   ["/verificar", () => <Verify.VerifyPage />],
   ["/verificar/:code", () => <Verify.VerifyPage />],
   ["/campanha/:slug", () => <Funding.PublicCampaign />],
+  ["/doacao/:id", () => <Don.DonationStatus />],
   // Perfil público: o endereço que a pessoa compartilha. Abre SEM login (é o ponto de ser público) e também
   // dentro do app. A página lê só a projeção curada que o servidor monta.
   ["/@:handle", (p) => <PP.PublicProfilePage handle={p.handle} />],
@@ -315,7 +320,7 @@ const PUBLIC: [string, () => ReactNode][] = [
 
 const NAV: Record<string, [string, string][]> = {
   osc: [["/", "Início"], ["/area", "Área de trabalho"], ["/reputacao", "Reputação"], ["/selos", "Selos"], ["/afirmacoes", "Afirmações de impacto"], ["/responsabilidade", "Responsabilidade"], ["/propostas", "Propostas"], ["/marketplace/meus", "Meus anúncios"], ["/marketplace", "Marketplace"], ["/rede/relacoes", "Relações"], ["/conversas", "Conversas"], ["/perfil-publico", "Perfil público"], ["/prontidao/finalidades", "Prontidão por finalidade"], ["/rede/experiencias", "Experiências declaradas"], ["/rede/atividade", "Atividade da rede"], ["/vocabulario", "Vocabulário"], ["/oportunidades", "Oportunidades"], ["/ideias", "Ideias"], ["/projetos", "Projetos"], ["/candidaturas", "Candidaturas"],
-    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/participacoes", "Participação de autoria"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
+    ["/instituicao", "Instituição"], ["/diagnosticos", "Diagnóstico"], ["/prontidao", "Prontidão"], ["/pagamentos", "Pagamentos"], ["/cotas", "Cotas"], ["/campanha-gestao", "Campanha"], ["/minhas-doacoes", "Minhas doações"], ["/documentos", "Documentos"], ["/documentos/montagens", "Montagem de documentos"], ["/documentos/modelos", "Modelos de documento"], ["/rascunhos", "Rascunhos"], ["/acordos", "Acordos"], ["/participacoes", "Participação de autoria"], ["/verificacoes", "Verificação pública"], ["/profissionais", "Profissionais parceiros"],
     ["/solucoes", "Biblioteca de soluções"], ["/solucoes/minhas", "Minhas soluções"], ["/solucoes/replicacao", "Replicação"],
     ["/relatorios", "Relatórios"], ["/mapa", "Mapa"], ["/mensagens", "Mensagens"], ["/conquistas", "Conquistas"], ["/materiais", "Materiais"],
     ["/ia", "Central de IA"], ["/conta/seguranca", "Segurança da conta"]],
@@ -333,7 +338,7 @@ const NAV: Record<string, [string, string][]> = {
     ["/ia", "Central de IA"], ["/conta/seguranca", "Segurança da conta"]],
   platform: [["/admin", "Visão geral"], ["/area", "Área de trabalho"], ["/vocabulario", "Vocabulário"], ["/admin/compliance", "Compliance"], ["/admin/identidade", "Identidade"], ["/admin/credenciais", "Credenciais"], ["/admin/credenciais-profissionais", "Credenciais profissionais"], ["/admin/honorarios", "Honorários"], ["/admin/editais", "Editais curados"],
     ["/admin/fiscal", "Regras fiscais"], ["/admin/institucional", "Institucional"], ["/admin/vouchers", "Vouchers"], ["/admin/convenios", "Convênios"], ["/admin/cobranca", "Cobrança por organização"], ["/admin/organizacoes", "Organizações"], ["/admin/usuarios", "Usuários"],
-    ["/admin/denuncias", "Denúncias"], ["/admin/medidas", "Medidas de moderação"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/chaves", "Chaves de cifragem"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"],
+    ["/admin/denuncias", "Denúncias"], ["/admin/medidas", "Medidas de moderação"], ["/admin/solucoes", "Soluções (verificação)"], ["/solucoes", "Biblioteca de soluções"], ["/admin/risco", "Sinais de risco"], ["/admin/doacoes", "Campanhas de doação"], ["/admin/doacoes/risco", "Risco em doações"], ["/admin/contribuicao", "Modelos de contribuição"], ["/admin/erros", "Erros"], ["/admin/central", "Central de Conhecimento"], ["/admin/chaves", "Chaves de cifragem"], ["/admin/auditoria", "Auditoria"], ["/dados-territoriais", "Dados do território"],
     ["/admin/linha-do-tempo", "Linha do tempo"], ["/admin/rastro", "Cadeia de causa"], ["/admin/proveniencia", "Proveniência"], ["/admin/integridade", "Integridade dos dados"], ["/admin/interruptor", "Interruptor de emergência"]],
 };
 const KIND_LABEL: Record<string, string> = { osc: "OSC", company: "Empresa", individual: "Apoiador", provider: "Profissional", government: "Governo", platform: "Administração" };

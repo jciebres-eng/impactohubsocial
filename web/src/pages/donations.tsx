@@ -15,7 +15,7 @@ const D_STATUS: Record<string, string> = {
   refunding: "Em estorno", closed: "Fechada",
   pending: "Aguardando pagamento", confirmed: "Confirmada", reconciled: "Conciliada", refund_pending: "Estorno em curso",
   refunded: "Estornada", chargeback: "Contestada", expired: "Expirada", failed: "Falhou",
-  open: "Aberto", allowed: "Liberado", rejected_case: "Recusado",
+  open: "Aberto", allowed: "Liberado", rejected_case: "Recusado", pledged: "compromisso aberto", fulfilled: "cumprido",
 };
 const st = (s?: string) => (s ? D_STATUS[s] || s : "—");
 const EVIDENCE: Record<string, string> = { declared: "declarado", documented: "com documento", validated: "validado", contested: "contestado" };
@@ -42,6 +42,7 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
   const f = useForm<any>({ amount: "", donor_display: "", donor_email: "", public_anonymous: false, cover_costs: false });
   const { busy, run } = useAction();
   const [result, setResult] = useState<any>(null);
+  const [pledge, setPledge] = useState("");
   const qrUrl = `/v1/public/donation-campaigns/${encodeURIComponent(slug)}/qr.svg`;
   const open = c.status === "published";
   const minCents = c.min_donation_cents || 100;
@@ -75,7 +76,11 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
       </p>
       <Panel title="Arrecadação">
         <Progress totals={d.totals} target={c.target_cents} />
+        <KeyValue items={[["Confirmado pelo provedor", money(d.totals?.gross_confirmed_cents)], ["Já liquidado ao beneficiário", money(d.totals?.settled_cents)],
+                          ["Estornado", money(d.totals?.reversed_cents)], ["Falta para a meta", c.target_cents ? money(Math.max(0, c.target_cents - (d.totals?.net_after_reversals_cents || 0))) : "—"],
+                          ["Compromissos (não é dinheiro)", money(d.totals?.pledged_cents)], ["Recursos declarados fora da plataforma", money(d.totals?.external_declared_cents)]]} />
         {(c.starts_on || c.ends_on) && <p className="muted small">Período: {date(c.starts_on)} a {date(c.ends_on)}</p>}
+        <p className="muted small">{d.totals?.counting_policy}. Última atualização financeira válida: {dateTime(d.last_financial_update_at) || "nenhuma ainda"}.{d.funding_source !== "private" ? ` Campanha com recurso ${d.funding_source === "public" ? "público" : "misto"}.` : ""}</p>
       </Panel>
       <Panel title="Doar por Pix">
         {!open && <p className="muted">Esta campanha não está recebendo doações no momento.</p>}
@@ -107,6 +112,13 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
           </>
         )}
       </Panel>
+      {open && (
+        <Panel title="Compromisso de doação futura" quiet>
+          <p className="muted small">Quem tem conta pode registrar um compromisso de doar depois. Não é doação nem dinheiro: aparece à parte e só vira arrecadação quando a doação for confirmada pelo provedor.</p>
+          <Field label="Valor do compromisso (R$)"><Input value={pledge} onChange={setPledge} inputMode="decimal" /></Field>
+          <Button busy={busy} disabled={!parseMoney(pledge)} onClick={() => run(async () => { await api.post(`/v1/public/donation-campaigns/${encodeURIComponent(slug)}/pledge`, { amount_cents: parseMoney(pledge) }); setPledge(""); return "Compromisso registrado (não é dinheiro recebido)."; })}>Registrar compromisso</Button>
+        </Panel>
+      )}
       <Panel title="QR da campanha">
         <img src={qrUrl} alt={`QR que leva a ${d.canonical_url || `/campanha/${slug}`}`} width={180} height={180} />
         <p className="muted small">O QR aponta para esta página (versão {c.qr_version}); nunca para uma chave Pix fixa. Confira o endereço antes de doar.</p>
@@ -122,6 +134,13 @@ export function PublicDonationCampaign({ data, slug }: { data: any; slug: string
       {d.updates?.length > 0 && (
         <Panel title="Atualizações">
           <ul className="rows">{d.updates.map((u: any) => <li key={u.id}><span><strong>{u.title}</strong> — {u.body}</span><Pill tone="muted">{date(u.created_at)}</Pill></li>)}</ul>
+        </Panel>
+      )}
+      {d.external_resources?.length > 0 && (
+        <Panel title="Recursos declarados fora da plataforma (não conferidos pelo provedor)">
+          <ul className="rows">{d.external_resources.map((x: any, i: number) => (
+            <li key={i}><span>{EXT_KIND[x.kind] || x.kind} — {x.source_name} — {x.amount_cents ? money(x.amount_cents) : x.in_kind_description} em {date(x.received_on)}</span><Pill tone="muted">{FUNDING[x.funding_source] || x.funding_source}</Pill></li>
+          ))}</ul>
         </Panel>
       )}
       {d.expenses?.length > 0 && (
@@ -208,6 +227,10 @@ export function MyDonations() {
 // ------------------------------------------------------------------ gestão da campanha (organização)
 const EMPTY_X = { budget_line: "", amount: "", spent_on: "", note: "" };
 const EMPTY_U = { title: "", body: "", is_public: true };
+const EMPTY_E = { kind: "offline_donation", funding_source: "private", source_name: "", instrument_ref: "", amount: "", in_kind_description: "", received_on: "", note: "" };
+const EXT_KIND: Record<string, string> = { public_transfer: "Repasse público", grant: "Edital / fomento", offline_donation: "Doação fora da plataforma", sponsorship: "Patrocínio", in_kind: "Apoio não financeiro", own_funds: "Recursos próprios", other: "Outro" };
+const FUNDING: Record<string, string> = { private: "privado", public: "público", mixed: "misto" };
+const OBL: Record<string, string> = { calculated: "calculada (não devida)", exempt: "isenta", due: "devida", invoiced: "faturada", charged: "cobrada", received: "recebida", settled: "liquidada", reversed: "estornada", overdue: "vencida", disputed: "em disputa", waived: "dispensada" };
 
 export function CampaignAccountability({ campaign, onChange }: { campaign: any; onChange: (c: any) => void }) {
   const id = campaign.id;
@@ -215,7 +238,8 @@ export function CampaignAccountability({ campaign, onChange }: { campaign: any; 
   const { busy, run } = useAction();
   const fx = useForm<any>(EMPTY_X);
   const fu = useForm<any>(EMPTY_U);
-  const [modal, setModal] = useState<"" | "expense" | "update">("");
+  const fe = useForm<any>(EMPTY_E);
+  const [modal, setModal] = useState<"" | "expense" | "update" | "external">("");
   const act = (what: string, msg: string) => run(async () => { const out = await api.post(`/v1/campaigns/${id}/${what}`, {}); onChange({ ...campaign, ...out }); reload(); return msg; });
   const s = campaign.status;
   return (
@@ -234,13 +258,39 @@ export function CampaignAccountability({ campaign, onChange }: { campaign: any; 
           <>
             <Panel title="Arrecadação (saldo contábil, não custódia)">
               <Progress totals={data.totals} target={campaign.target_cents} />
-              <KeyValue items={[["Bruto confirmado", money(data.totals?.gross_confirmed_cents)], ["Estornado", money(data.totals?.reversed_cents)],
+              <KeyValue items={[["Pendente (iniciado, não pago)", money(data.totals?.pending_cents)], ["Bruto confirmado", money(data.totals?.gross_confirmed_cents)],
+                                ["Liquidado (disponível segundo o provedor)", money(data.totals?.settled_cents)], ["Em análise", money(data.totals?.under_review_cents)],
+                                ["Estornado", money(data.totals?.reversed_cents)],
                                 ["Tarifa do provedor", money(data.totals?.provider_fees_cents)], ["Taxa da plataforma (calculada, devida R$ 0,00)", money(data.totals?.platform_fee_accrued_cents)],
                                 ["Líquido estimado ao beneficiário", money(data.totals?.beneficiary_net_estimated_cents)],
-                                ["Gastos declarados / validados", `${money(data.expenses_declared_cents)} / ${money(data.expenses_validated_cents)}`]]} />
-              <p className="muted small">{data.totals?.basis}</p>
+                                ["Gastos declarados / validados", `${money(data.expenses_declared_cents)} / ${money(data.expenses_validated_cents)}`],
+                                ["Compromissos (não é dinheiro)", money(data.totals?.pledged_cents)], ["Recursos declarados fora da plataforma", money(data.totals?.external_declared_cents)]]} />
+              <p className="muted small">{data.totals?.basis} · {data.totals?.counting_policy}</p>
               {data.open_risk_cases?.length > 0 && <p><Pill tone="warn">{data.open_risk_cases.length} caso(s) de risco aberto(s) em revisão humana</Pill></p>}
+              {data.reconciliation_exceptions?.length > 0 && <p><Pill tone="warn">{data.reconciliation_exceptions.length} divergência(s) de conciliação em aberto</Pill></p>}
             </Panel>
+            <Panel title="Recursos declarados fora da plataforma" actions={<Button onClick={() => setModal("external")}>Declarar recurso</Button>}>
+              <p className="muted small">Entram na prestação de contas rotulados como declarados; nunca na barra nem no razão. Recurso público exige o instrumento.</p>
+              <ul className="rows">{data.external_resources?.map((x: any) => (
+                <li key={x.id}><span>{EXT_KIND[x.kind] || x.kind} — {x.source_name}{x.instrument_ref ? ` (${x.instrument_ref})` : ""} — {x.amount_cents ? money(x.amount_cents) : x.in_kind_description} em {date(x.received_on)}</span>
+                  <Pill tone={x.funding_source === "public" ? "warn" : "muted"}>{FUNDING[x.funding_source] || x.funding_source}</Pill></li>
+              ))}</ul>
+            </Panel>
+            {data.pledges?.length > 0 && (
+              <Panel title="Compromissos de doação (não é dinheiro recebido)">
+                <ul className="rows">{data.pledges.map((p: any) => (
+                  <li key={p.id}><span>{p.pledger_display || "Compromisso"} — {money(p.amount_cents)}{p.expected_on ? ` até ${date(p.expected_on)}` : ""}</span><Pill tone={p.status === "fulfilled" ? "ok" : "muted"}>{st(p.status)}</Pill></li>
+                ))}</ul>
+              </Panel>
+            )}
+            {data.remuneration_obligations?.length > 0 && (
+              <Panel title="Taxa de serviço desta campanha (obrigações)" quiet>
+                <ul className="rows">{data.remuneration_obligations.map((o: any) => (
+                  <li key={o.id}><span>{money(o.amount_cents)} sobre {money(o.basis_cents)}{o.funding_source !== "private" ? ` · recurso ${FUNDING[o.funding_source]}` : ""}</span><Pill tone={o.state === "due" || o.state === "overdue" ? "warn" : "muted"}>{OBL[o.state] || o.state}</Pill></li>
+                ))}</ul>
+                <p className="muted small">Ver <Link to="/remuneracao">Remuneração da plataforma</Link> para a política vigente, a franquia e os avisos. Nada aqui bloqueia a prestação de contas.</p>
+              </Panel>
+            )}
             <Panel title="Gastos declarados" actions={<Button onClick={() => setModal("expense")}>Declarar gasto</Button>}>
               <ul className="rows">{data.expenses?.map((x: any) => <li key={x.id}><span>{x.budget_line} — {money(x.amount_cents)} em {date(x.spent_on)}</span><Pill tone={x.evidence_status === "validated" ? "ok" : "muted"}>{EVIDENCE[x.evidence_status] || x.evidence_status}</Pill></li>)}</ul>
             </Panel>
@@ -261,6 +311,28 @@ export function CampaignAccountability({ campaign, onChange }: { campaign: any; 
         <Field label="Valor (R$)"><Input value={fx.v.amount} onChange={fx.set("amount")} inputMode="decimal" /></Field>
         <Field label="Data"><Input value={fx.v.spent_on} onChange={fx.set("spent_on")} type="date" /></Field>
         <Field label="Descrição" wide><TextArea value={fx.v.note} onChange={fx.set("note")} rows={2} /></Field>
+      </Modal>
+      <Modal open={modal === "external"} title="Declarar recurso recebido fora da plataforma" onClose={() => setModal("")}
+             footer={<><Button onClick={() => setModal("")}>Cancelar</Button>
+               <Button variant="primary" busy={busy} disabled={!fe.v.source_name || !fe.v.received_on || (fe.v.kind !== "in_kind" && !parseMoney(fe.v.amount)) || (fe.v.funding_source !== "private" && !fe.v.instrument_ref)}
+                       onClick={() => run(async () => {
+                         await api.post(`/v1/campaigns/${id}/external-resources`, {
+                           kind: fe.v.kind, source_name: fe.v.source_name, funding_source: fe.v.funding_source, received_on: fe.v.received_on,
+                           ...(fe.v.instrument_ref ? { instrument_ref: fe.v.instrument_ref } : {}),
+                           ...(fe.v.kind === "in_kind" ? { in_kind_description: fe.v.in_kind_description } : { amount_cents: parseMoney(fe.v.amount) }),
+                           ...(fe.v.note ? { note: fe.v.note } : {}),
+                         });
+                         setModal(""); fe.setV(EMPTY_E); reload(); return "Recurso declarado (não entra na barra).";
+                       })}>Declarar</Button></>}>
+        <Field label="Tipo"><Select value={fe.v.kind} onChange={fe.set("kind")} options={Object.entries(EXT_KIND)} /></Field>
+        <Field label="Origem do recurso"><Select value={fe.v.funding_source} onChange={fe.set("funding_source")} options={Object.entries(FUNDING)} /></Field>
+        <Field label="Fonte (quem pagou)"><Input value={fe.v.source_name} onChange={fe.set("source_name")} /></Field>
+        <Field label="Instrumento" hint="Obrigatório para recurso público: termo, convênio, edital."><Input value={fe.v.instrument_ref} onChange={fe.set("instrument_ref")} /></Field>
+        {fe.v.kind === "in_kind"
+          ? <Field label="Descrição do apoio" wide><TextArea value={fe.v.in_kind_description} onChange={fe.set("in_kind_description")} rows={2} /></Field>
+          : <Field label="Valor (R$)"><Input value={fe.v.amount} onChange={fe.set("amount")} inputMode="decimal" /></Field>}
+        <Field label="Recebido em"><Input value={fe.v.received_on} onChange={fe.set("received_on")} type="date" /></Field>
+        <Field label="Observação" wide><TextArea value={fe.v.note} onChange={fe.set("note")} rows={2} /></Field>
       </Modal>
       <Modal open={modal === "update"} title="Publicar atualização" onClose={() => setModal("")}
              footer={<><Button onClick={() => setModal("")}>Cancelar</Button>
@@ -350,3 +422,171 @@ export const donationFormDefaults = {
   kind: "donation", target: "", starts_on: "", ends_on: "", purpose: "", contingency_policy: "", refund_policy: "", min_donation: centsToInput(500),
 };
 export { st as donationStatusLabel };
+
+// ------------------------------------------------------------------ v0.34.0: remuneração da plataforma (organização)
+export function OrgRemuneration() {
+  const { data, error, loading, reload } = useLoad<any>("/v1/org/remuneration");
+  const { busy, run } = useAction();
+  const [reason, setReason] = useState<Record<string, string>>({});
+  const pol = data?.policy || {};
+  return (
+    <>
+      <PageHead title="Remuneração da plataforma" sub="Gratuito até gerar valor: a taxa é calculada e mostrada, mas só fica devida com regra ativa, franquia ultrapassada e aviso prévio. Nada aqui bloqueia a sua prestação de contas." />
+      <StateView loading={loading} error={error} onRetry={reload}>
+        {data && (
+          <>
+            <Panel title="Política vigente (hipótese registrada)">
+              <KeyValue items={[["Versão", `${pol.version} · ${pol.legal_status}`], ["Franquia (liquidado em 12 meses)", money(pol.allowance_settled_cents_12m)],
+                                ["Liquidado ao seu favor nos últimos 12 meses", money(data.settled_12m_cents)], ["Franquia restante", money(data.allowance_remaining_cents)],
+                                ["Aviso prévio mínimo", `${pol.notice_days} dias`], ["Mínimo para faturar", money(pol.min_invoice_cents)],
+                                ["Teto das obrigações", `${bps(pol.max_fee_share_of_settled_bps)} do liquidado`], ["Recurso público", pol.public_funding_default === "exempt" ? "isento salvo instrumento autorizado" : pol.public_funding_default]]} />
+              <p className="muted small">Nunca bloqueia: {(data.never_blocks || []).map((k: string) => NEVER_BLOCKS[k] || k).join(", ")}.</p>
+            </Panel>
+            <Panel title="Totais por estado (nunca somados num número só)">
+              <KeyValue items={Object.entries(OBL).map(([k, v]) => [v, money(data.totals_by_state?.[k] || 0)] as [string, any])} />
+            </Panel>
+            <Panel title="Obrigações">
+              {!data.obligations?.length && <p className="muted">Nenhuma obrigação registrada.</p>}
+              <ul className="rows">{data.obligations?.map((o: any) => (
+                <li key={o.id}>
+                  <span>{money(o.amount_cents)} sobre {money(o.basis_cents)} · {o.rule_key} · {dateTime(o.created_at)}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}{o.received_cents ? ` · recebido ${money(o.received_cents)}` : ""}
+                    {["due", "invoiced", "charged", "overdue", "received", "settled"].includes(o.state) && (
+                      <> <Input value={reason[o.id] || ""} onChange={(v) => setReason({ ...reason, [o.id]: v })} placeholder="Motivo da contestação (mín. 10 caracteres)" />
+                        <Button busy={busy} disabled={(reason[o.id] || "").length < 10} onClick={() => run(async () => { await api.post(`/v1/org/remuneration/${o.id}/dispute`, { reason: reason[o.id] }); reload(); return "Contestação registrada."; })}>Contestar</Button></>
+                    )}
+                  </span>
+                  <Pill tone={o.state === "due" || o.state === "overdue" ? "warn" : o.state === "settled" ? "ok" : "muted"}>{OBL[o.state] || o.state}</Pill>
+                </li>
+              ))}</ul>
+            </Panel>
+            <Panel title="Avisos recebidos">
+              {!data.notices?.length && <p className="muted">Nenhum aviso.</p>}
+              <ul className="rows">{data.notices?.map((n: any) => (
+                <li key={n.id}><span><strong>{dateTime(n.sent_at)}</strong> — {n.body}<br />
+                  {n.acknowledged_at ? <Pill tone="ok">ciente em {dateTime(n.acknowledged_at)}</Pill> : <Button onClick={() => run(async () => { await api.post(`/v1/org/remuneration/notices/${n.id}/ack`, {}); reload(); return "Ciência registrada."; })}>Registrar ciência</Button>}</span></li>
+              ))}</ul>
+            </Panel>
+          </>
+        )}
+      </StateView>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------ v0.34.0: painel do financiador
+export function OrgContributions() {
+  const { data, error, loading, reload } = useLoad<any>("/v1/org/contributions");
+  return (
+    <>
+      <PageHead title="Contribuições da organização" sub="Doações e compromissos feitos em nome da organização, com estado e comprovante. Resultados são os declarados pelas organizações apoiadas." />
+      <StateView loading={loading} error={error} onRetry={reload} empty={!data?.donations?.length && !data?.pledges?.length}>
+        {data && (
+          <>
+            <Panel title="Totais">
+              <KeyValue items={[["Confirmado (líquido de estornos)", money(data.totals?.confirmed_cents)], ["Pendente (não é doação)", money(data.totals?.pending_cents)],
+                                ["Estornado", money(data.totals?.reversed_cents)], ["Compromissos em aberto (não é dinheiro)", money(data.totals?.pledged_cents)],
+                                ["Campanhas apoiadas", data.campaigns_supported?.length || 0]]} />
+            </Panel>
+            <Panel title="Doações">
+              <ul className="rows">{data.donations?.map((d: any) => (
+                <li key={d.id}><span><Link to={`/campanha/${d.slug}`}>{d.campaign_title}</Link> — {d.beneficiary} — {money(d.amount_cents)} · {dateTime(d.created_at)}{d.settled_at ? " · liquidada" : ""}{d.receipt_number ? ` · comprovante ${d.receipt_number}` : ""}{d.is_simulated ? " · simulada" : ""}</span>
+                  <Pill tone={["confirmed", "reconciled"].includes(d.status) ? "ok" : "muted"}>{st(d.status)}</Pill></li>
+              ))}</ul>
+            </Panel>
+            {data.pledges?.length > 0 && (
+              <Panel title="Compromissos">
+                <ul className="rows">{data.pledges.map((p: any) => <li key={p.id}><span>{p.campaign_title} — {money(p.amount_cents)}{p.expected_on ? ` até ${date(p.expected_on)}` : ""}</span><Pill tone="muted">{st(p.status)}</Pill></li>)}</ul>
+              </Panel>
+            )}
+            <p className="muted small">{data.note}</p>
+          </>
+        )}
+      </StateView>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------ v0.34.0: administração — obrigações e conciliação
+export function AdminRemuneration() {
+  const [state, setState] = useState("");
+  const { data, error, loading, reload } = useLoad<any>(`/v1/admin/remuneration${state ? `?state=${state}` : ""}`, [state]);
+  const { busy, run } = useAction();
+  const [note, setNote] = useState<Record<string, string>>({});
+  const [sel, setSel] = useState<string[]>([]);
+  const rev = data?.revenue;
+  const act = (path: string, body: any, msg: string) => run(async () => { await api.post(path, body); reload(); return msg; });
+  return (
+    <>
+      <PageHead title="Remuneração: previsto × devido × recebido" sub="Nenhum destes números é receita reconhecida: só 'liquidada' é dinheiro conciliado na conta da plataforma."
+                actions={<Select aria-label="Filtrar por estado" value={state} onChange={setState} options={[["", "Todos"], ...Object.entries(OBL)]} />} />
+      <StateView loading={loading} error={error} onRetry={reload}>
+        {data && (
+          <>
+            <Panel title="Visão de receita (por estado)">
+              <KeyValue items={[["Calculada, não devida", money(rev?.calculated_not_due_cents)], ["Devida / faturada / cobrada / vencida", money(rev?.due_cents)],
+                                ["Recebida", money(rev?.received_cents)], ["Liquidada (conciliada)", money(rev?.settled_cents)]]} />
+              <p className="muted small">{rev?.note}</p>
+            </Panel>
+            <Panel title="Obrigações" actions={<Button variant="primary" busy={busy} disabled={!sel.length} onClick={() => act("/v1/admin/remuneration/invoice", { obligation_ids: sel }, "Fatura própria emitida.")}>Faturar selecionadas ({sel.length})</Button>}>
+              <ul className="rows">{data.items?.map((o: any) => (
+                <li key={o.id}>
+                  <span>
+                    {o.state === "due" && <input type="checkbox" aria-label="Selecionar para faturar" checked={sel.includes(o.id)} onChange={(e) => setSel(e.target.checked ? [...sel, o.id] : sel.filter((x) => x !== o.id))} />}
+                    {" "}{o.org_name} — {money(o.amount_cents)} sobre {money(o.basis_cents)} · {o.rule_key} · {FUNDING[o.funding_source]}{o.public_fee_authorized ? " (autorizado)" : ""}{o.trigger_code ? ` · gatilho ${o.trigger_code}` : ""}{o.due_on ? ` · vence ${date(o.due_on)}` : ""}
+                    {" "}<Input value={note[o.id] || ""} onChange={(v) => setNote({ ...note, [o.id]: v })} placeholder="Justificativa / referência" />
+                    {" "}<Button busy={busy} onClick={() => act(`/v1/admin/remuneration/orgs/${o.org_id}/evaluate`, {}, "Política aplicada à organização.")}>Avaliar política</Button>
+                    {o.state === "invoiced" && <> <Button busy={busy} onClick={() => act(`/v1/admin/remuneration/${o.id}/charged`, {}, "Marcada como cobrada.")}>Cobrada</Button></>}
+                    {["invoiced", "charged", "overdue", "disputed"].includes(o.state) && <> <Button busy={busy} disabled={(note[o.id] || "").length < 3} onClick={() => act(`/v1/admin/remuneration/${o.id}/receipt`, { received_cents: o.amount_cents - (o.received_cents || 0), reference: note[o.id] }, "Recebimento registrado.")}>Recebida (restante)</Button></>}
+                    {o.state === "received" && <> <Button busy={busy} disabled={(note[o.id] || "").length < 3} onClick={() => act(`/v1/admin/remuneration/${o.id}/settle`, { note: note[o.id] }, "Liquidada.")}>Liquidar</Button></>}
+                    {o.state === "disputed" && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/decide`, { outcome: "uphold", note: note[o.id] }, "Disputa decidida: mantida.")}>Manter</Button> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/decide`, { outcome: "waive", note: note[o.id] }, "Disputa decidida: dispensada.")}>Dispensar</Button></>}
+                    {["calculated", "exempt", "due", "invoiced", "charged", "overdue"].includes(o.state) && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/waive`, { reason: note[o.id] }, "Obrigação dispensada.")}>Dispensar</Button></>}
+                    {o.funding_source !== "private" && !o.public_fee_authorized && <> <Button busy={busy} disabled={(note[o.id] || "").length < 10} onClick={() => act(`/v1/admin/remuneration/${o.id}/authorize-public`, { instrument_ref: note[o.id].slice(0, 300), note: note[o.id] }, "Instrumento e autorização registrados.")}>Autorizar por instrumento</Button></>}
+                  </span>
+                  <Pill tone={o.state === "due" || o.state === "overdue" ? "warn" : o.state === "settled" ? "ok" : "muted"}>{OBL[o.state] || o.state}</Pill>
+                </li>
+              ))}</ul>
+              <p className="muted small"><Button busy={busy} onClick={() => act("/v1/admin/remuneration/mark-overdue", {}, "Vencidas marcadas.")}>Marcar vencidas</Button> · Liquidar, decidir disputa, dispensar e autorizar recurso público exigem <code>finance.approve</code> (segregação).</p>
+            </Panel>
+          </>
+        )}
+      </StateView>
+    </>
+  );
+}
+
+export function AdminReconciliation() {
+  const [status, setStatus] = useState("open");
+  const { data, error, loading, reload } = useLoad<any>(`/v1/admin/reconciliation/exceptions?status=${status}`, [status]);
+  const { busy, run } = useAction();
+  const [note, setNote] = useState<Record<string, string>>({});
+  const [camp, setCamp] = useState("");
+  return (
+    <>
+      <PageHead title="Conciliação: fila de exceções" sub="Webhook recebido não é conciliação. Só a doação cujo evento assinado bate com o snapshot do provedor vira conciliada; o resto vira exceção tipada, com responsável e histórico."
+                actions={<Select aria-label="Filtrar por situação" value={status} onChange={setStatus} options={[["open", "Abertas"], ["assigned", "Assumidas"], ["resolved", "Resolvidas"], ["dismissed", "Descartadas"]]} />} />
+      <Panel title="Executar conciliação de uma campanha">
+        <Field label="Identificador da campanha"><Input value={camp} onChange={setCamp} /></Field>
+        <Button variant="primary" busy={busy} disabled={!camp} onClick={() => run(async () => { const r = await api.post(`/v1/admin/reconciliation/campaigns/${camp}/run`, {}); reload(); return `Conferidas ${r.checked}, conciliadas ${r.reconciled}, exceções abertas ${r.opened}.`; })}>Executar (snapshot do provedor)</Button>
+      </Panel>
+      <StateView loading={loading} error={error} onRetry={reload} empty={!data?.items?.length}>
+        <ul className="rows">{data?.items?.map((e: any) => (
+          <li key={e.id}>
+            <span><strong>{RECON_KIND[e.kind] || e.kind}</strong> · {e.campaign_title || e.campaign_id} · {e.provider_ref || "—"}{e.expected_cents != null ? ` · esperado ${money(e.expected_cents)}` : ""}{e.observed_cents != null ? ` · observado ${money(e.observed_cents)}` : ""} · {dateTime(e.created_at)}
+              <br /><small>{e.detail}</small>
+              {["open", "assigned"].includes(e.status) && (
+                <> <Input value={note[e.id] || ""} onChange={(v) => setNote({ ...note, [e.id]: v })} placeholder="Resolução (mín. 10 caracteres)" />
+                  {e.status === "open" && <Button busy={busy} onClick={() => run(async () => { await api.post(`/v1/admin/reconciliation/exceptions/${e.id}/assign`, {}); reload(); return "Assumida."; })}>Assumir</Button>}
+                  {" "}<Button busy={busy} disabled={(note[e.id] || "").length < 10} onClick={() => run(async () => { await api.post(`/v1/admin/reconciliation/exceptions/${e.id}/resolve`, { outcome: "resolved", note: note[e.id] }); reload(); return "Resolvida."; })}>Resolver</Button>
+                  {" "}<Button busy={busy} disabled={(note[e.id] || "").length < 10} onClick={() => run(async () => { await api.post(`/v1/admin/reconciliation/exceptions/${e.id}/resolve`, { outcome: "dismissed", note: note[e.id] }); reload(); return "Descartada."; })}>Descartar</Button></>
+              )}
+              {e.resolution_note && <><br /><small>Resolução: {e.resolution_note}</small></>}
+            </span>
+            <Pill tone={e.priority === "high" ? "warn" : "muted"}>{e.priority} · {e.status}</Pill>
+          </li>
+        ))}</ul>
+      </StateView>
+    </>
+  );
+}
+const NEVER_BLOCKS: Record<string, string> = { accountability: "prestação de contas", exports: "exportações", public_page: "página pública", evidence: "evidências", reports: "relatórios" };
+const RECON_KIND: Record<string, string> = { provider_only: "Só no provedor", system_only: "Só no sistema", amount_mismatch: "Valor divergente", fee_mismatch: "Tarifa divergente", reversal_missing: "Estorno sem reversão", duplicate_entry: "Lançamento duplicado", fee_miscalculated: "Taxa calculada errada", settlement_partial: "Liquidação parcial/atrasada", unreconciled_overdue: "Sem conciliação no prazo" };
